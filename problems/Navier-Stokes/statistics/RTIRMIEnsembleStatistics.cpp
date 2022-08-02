@@ -20,9 +20,15 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         
         void setVariablesNotComputed()
         {
+            X_0_avg_computed      = false;
+            X_0_sq_avg_computed   = false;
+            X_0_X_1_avg_computed  = false;
             Y_0_avg_computed      = false;
             Y_0_sq_avg_computed   = false;
             Y_0_Y_1_avg_computed  = false;
+            Z_0_avg_computed      = false;
+            Z_0_sq_avg_computed   = false;
+            Z_0_Z_1_avg_computed  = false;
             rho_avg_computed      = false;
             rho_sq_avg_computed   = false;
             rho_inv_avg_computed  = false;
@@ -95,9 +101,15 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         
         void clearAllData()
         {
+            X_0_avg_realizations.clear();
+            X_0_sq_avg_realizations.clear();
+            X_0_X_1_avg_realizations.clear();
             Y_0_avg_realizations.clear();
             Y_0_sq_avg_realizations.clear();
             Y_0_Y_1_avg_realizations.clear();
+            Z_0_avg_realizations.clear();
+            Z_0_sq_avg_realizations.clear();
+            Z_0_Z_1_avg_realizations.clear();
             rho_avg_realizations.clear();
             rho_sq_avg_realizations.clear();
             rho_inv_avg_realizations.clear();
@@ -170,9 +182,15 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         
         // Scratch arrays.
         // Number of realizalizations; number of cells.
+        std::vector<std::vector<double> > X_0_avg_realizations;
+        std::vector<std::vector<double> > X_0_sq_avg_realizations;
+        std::vector<std::vector<double> > X_0_X_1_avg_realizations;
         std::vector<std::vector<double> > Y_0_avg_realizations;
         std::vector<std::vector<double> > Y_0_sq_avg_realizations;
         std::vector<std::vector<double> > Y_0_Y_1_avg_realizations;
+        std::vector<std::vector<double> > Z_0_avg_realizations;
+        std::vector<std::vector<double> > Z_0_sq_avg_realizations;
+        std::vector<std::vector<double> > Z_0_Z_1_avg_realizations;
         std::vector<std::vector<double> > rho_avg_realizations;
         std::vector<std::vector<double> > rho_sq_avg_realizations;
         std::vector<std::vector<double> > rho_inv_avg_realizations;
@@ -242,9 +260,15 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         
         // Whether the scratch arrays are filled.
         
+        bool X_0_avg_computed;
+        bool X_0_sq_avg_computed;
+        bool X_0_X_1_avg_computed;
         bool Y_0_avg_computed;
         bool Y_0_sq_avg_computed;
         bool Y_0_Y_1_avg_computed;
+        bool Z_0_avg_computed;
+        bool Z_0_sq_avg_computed;
+        bool Z_0_Z_1_avg_computed;
         bool rho_avg_computed;
         bool rho_sq_avg_computed;
         bool rho_inv_avg_computed;
@@ -334,6 +358,7 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
             const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules,
             const HAMERS_SHARED_PTR<EnsembleStatisticsRTIRMI> ensemble_statistics):
+                d_ensemble_statistics(ensemble_statistics),
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
@@ -344,8 +369,7 @@ class RTIRMIStatisticsUtilities
                 d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
                 d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
                 d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules),
-                d_num_ghosts_derivative(3),
-                d_ensemble_statistics(ensemble_statistics)
+                d_num_ghosts_derivative(3)
         {}
         
         /*
@@ -353,6 +377,22 @@ class RTIRMIStatisticsUtilities
          */
         void
         computeAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute averaged mole fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute averaged volume fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
@@ -365,10 +405,42 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
+         * Compute mole fraction variance with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute volume fraction variance with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeVolumeFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
          * Compute mass fraction product with assumed homogeneity in y-direction (2D) or yz-plane (3D).
          */
         void
         computeMassFractionProductWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute mole fraction product with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeMoleFractionProductWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute volume fraction product with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeVolumeFractionProductWithHomogeneityInYDirectionOrInYZPlane(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
@@ -618,11 +690,55 @@ class RTIRMIStatisticsUtilities
             const double output_time) const;
         
         /*
+         * Output spatial profile of ensemble averaged mole fraction with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble averaged volume fraction with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
          * Output spatial profile of ensemble variance of mass fraction with assumed homogeneity in y-direction (2D) or
          * yz-plane (3D) to a file.
          */
         void
         outputSpatialProfileEnsembleMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble variance of mole fraction with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble variance of volume fraction with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleVolumeFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -860,10 +976,46 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
+         * Output ensemble mixing width in x-direction using mole fractions to a file.
+         */
+        void
+        outputEnsembleMixingWidthInXDirectionWithMoleFractions(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output ensemble mixing width in x-direction using volume fractions to a file.
+         */
+        void
+        outputEnsembleMixingWidthInXDirectionWithVolumeFractions(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
          * Output ensemble minimum interface location in x-direction to a file.
          */
         void
         outputEnsembleInterfaceMinInXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output ensemble minimum interface location in x-direction using mole fractions to a file.
+         */
+        void
+        outputEnsembleInterfaceMinInXDirectionWithMoleFractions(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output ensemble minimum interface location in x-direction using volume fractions to a file.
+         */
+        void
+        outputEnsembleInterfaceMinInXDirectionWithVolumeFractions(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
@@ -878,10 +1030,46 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
+         * Output ensemble maximum interface location in x-direction using mole fractions to a file.
+         */
+        void
+        outputEnsembleInterfaceMaxInXDirectionWithMoleFractions(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output ensemble maximum interface location in x-direction using volume fractions to a file.
+         */
+        void
+        outputEnsembleInterfaceMaxInXDirectionWithVolumeFractions(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
          * Output ensemble mixedness in x-direction to a file.
          */
         void
         outputEnsembleMixednessInXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output ensemble mixedness in x-direction using mole fractions to a file.
+         */
+        void
+        outputEnsembleMixednessInXDirectionWithMoleFractions(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output ensemble mixedness in x-direction using volume fractions to a file.
+         */
+        void
+        outputEnsembleMixednessInXDirectionWithVolumeFractions(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
@@ -1376,6 +1564,96 @@ RTIRMIStatisticsUtilities::computeAveragedMassFractionWithHomogeneityInYDirectio
 
 
 /*
+ * Compute averaged mole fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIStatisticsUtilities::computeAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'MOLE_FRACTION_AVG_SP' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<double> X_0_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "MOLE_FRACTIONS",
+        0,
+        data_context);
+    
+    std::vector<std::vector<double> >& X_0_avg_realizations = d_ensemble_statistics->X_0_avg_realizations;
+    X_0_avg_realizations.push_back(X_0_avg_global);
+    
+    d_ensemble_statistics->X_0_avg_computed = true;
+}
+
+
+/*
+ * Compute averaged volume fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIStatisticsUtilities::computeAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'VOLUME_FRACTION_AVG_SP' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<double> Z_0_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "VOLUME_FRACTIONS",
+        0,
+        data_context);
+    
+    std::vector<std::vector<double> >& Z_0_avg_realizations = d_ensemble_statistics->Z_0_avg_realizations;
+    Z_0_avg_realizations.push_back(Z_0_avg_global);
+    
+    d_ensemble_statistics->Z_0_avg_computed = true;
+}
+
+
+/*
  * Compute mass fraction variance with assumed homogeneity in y-direction (2D) or yz-plane (3D).
  */
 void
@@ -1433,6 +1711,120 @@ RTIRMIStatisticsUtilities::computeMassFractionVarianceWithHomogeneityInYDirectio
 
 
 /*
+ * Compute mole fraction variance with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIStatisticsUtilities::computeMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'MOLE_FRACTION_VAR_SP' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    
+    quantity_names.push_back("MOLE_FRACTIONS");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("MOLE_FRACTIONS");
+    component_indices.push_back(0);
+    
+    std::vector<double> X_0_sq_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<std::vector<double> >& X_0_sq_avg_realizations = d_ensemble_statistics->X_0_sq_avg_realizations;
+    X_0_sq_avg_realizations.push_back(X_0_sq_avg_global);
+    
+    d_ensemble_statistics->X_0_sq_avg_computed = true;
+}
+
+
+/*
+ * Compute volume fraction variance with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIStatisticsUtilities::computeVolumeFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'VOLUME_FRACTION_VAR_SP' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    
+    quantity_names.push_back("VOLUME_FRACTIONS");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VOLUME_FRACTIONS");
+    component_indices.push_back(0);
+    
+    std::vector<double> Z_0_sq_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<std::vector<double> >& Z_0_sq_avg_realizations = d_ensemble_statistics->Z_0_sq_avg_realizations;
+    Z_0_sq_avg_realizations.push_back(Z_0_sq_avg_global);
+    
+    d_ensemble_statistics->Z_0_sq_avg_computed = true;
+}
+
+
+/*
  * Compute mass fraction product with assumed homogeneity in y-direction (2D) or yz-plane (3D).
  */
 void
@@ -1486,6 +1878,120 @@ RTIRMIStatisticsUtilities::computeMassFractionProductWithHomogeneityInYDirection
     Y_0_Y_1_avg_realizations.push_back(Y_0_Y_1_avg_global);
     
     d_ensemble_statistics->Y_0_Y_1_avg_computed = true;
+}
+
+
+/*
+ * Compute mole fraction product with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIStatisticsUtilities::computeMoleFractionProductWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'MOLE_FRACTION_PROD_SP' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    
+    quantity_names.push_back("MOLE_FRACTIONS");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("MOLE_FRACTIONS");
+    component_indices.push_back(1);
+    
+    std::vector<double> X_0_X_1_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<std::vector<double> >& X_0_X_1_avg_realizations = d_ensemble_statistics->X_0_X_1_avg_realizations;
+    X_0_X_1_avg_realizations.push_back(X_0_X_1_avg_global);
+    
+    d_ensemble_statistics->X_0_X_1_avg_computed = true;
+}
+
+
+/*
+ * Compute volume fraction product with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIStatisticsUtilities::computeVolumeFractionProductWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'VOLUME_FRACTION_PROD_SP' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    
+    quantity_names.push_back("VOLUME_FRACTIONS");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VOLUME_FRACTIONS");
+    component_indices.push_back(1);
+    
+    std::vector<double> Z_0_Z_1_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<std::vector<double> >& Z_0_Z_1_avg_realizations = d_ensemble_statistics->Z_0_Z_1_avg_realizations;
+    Z_0_Z_1_avg_realizations.push_back(Z_0_Z_1_avg_global);
+    
+    d_ensemble_statistics->Z_0_Z_1_avg_computed = true;
 }
 
 
@@ -2749,8 +3255,6 @@ RTIRMIStatisticsUtilities::computeAveragedShearViscosityWithHomogeneityInYDirect
         flow_model_tmp,
         true);
     
-    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
-    
     std::vector<std::vector<double> >& mu_avg_realizations = d_ensemble_statistics->mu_avg_realizations;
     
     std::vector<double> shear_viscosity = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
@@ -2797,8 +3301,6 @@ RTIRMIStatisticsUtilities::computeAveragedMassDiffusivityWithHomogeneityInYDirec
         patch_hierarchy,
         flow_model_tmp,
         true);
-    
-    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
     
     std::vector<std::vector<double> >& D_avg_realizations = d_ensemble_statistics->D_avg_realizations;
     
@@ -2932,8 +3434,6 @@ RTIRMIStatisticsUtilities::computeAveragedYDerivativeOfPressureWithHomogeneityIn
         patch_hierarchy,
         flow_model_tmp);
     
-    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
-    
     std::vector<std::vector<double> >& ddy_p_avg_realizations = d_ensemble_statistics->ddy_p_avg_realizations;
     
     std::vector<std::string> quantity_names;
@@ -2997,8 +3497,6 @@ RTIRMIStatisticsUtilities::computeAveragedZDerivativeOfPressureWithHomogeneityIn
         d_grid_geometry,
         patch_hierarchy,
         flow_model_tmp);
-    
-    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
     
     std::vector<std::vector<double> >& ddz_p_avg_realizations = d_ensemble_statistics->ddz_p_avg_realizations;
     
@@ -3787,8 +4285,6 @@ RTIRMIStatisticsUtilities::computeAveragedQuantiitesForTKEDissipationWithHomogen
         patch_hierarchy,
         flow_model_tmp);
     
-    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
-    
     std::vector<std::string> quantity_names;
     std::vector<int> component_indices;
     std::vector<bool> use_derivative;
@@ -4475,6 +4971,132 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMassFractionWithH
 
 
 /*
+ * Output spatial profile of ensemble averaged mole fraction with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& X_0_avg_realizations =
+            d_ensemble_statistics->X_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(X_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(X_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> X_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                X_0_avg_global[i] += weight*X_0_avg_realizations[ri][i];
+            }
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&X_0_avg_global[0], sizeof(double)*X_0_avg_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output spatial profile of ensemble averaged volume fraction with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Z_0_avg_realizations =
+            d_ensemble_statistics->Z_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(Z_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(Z_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Z_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Z_0_avg_global[i] += weight*Z_0_avg_realizations[ri][i];
+            }
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&Z_0_avg_global[0], sizeof(double)*Z_0_avg_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output spatial profile of ensemble variance of mass fraction with assumed homogeneity in y-direction (2D) or
  * yz-plane (3D) to a file.
  */
@@ -4543,6 +5165,156 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleMassFractionVarianceWithH
         
         f_out.write((char*)&output_time, sizeof(double));
         f_out.write((char*)&Y_0_var_global[0], sizeof(double)*Y_0_var_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output spatial profile of ensemble variance of mole fraction with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& X_0_avg_realizations =
+            d_ensemble_statistics->X_0_avg_realizations;
+        
+        const std::vector<std::vector<double> >& X_0_sq_avg_realizations = 
+            d_ensemble_statistics->X_0_sq_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(X_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(X_0_sq_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(X_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> X_0_avg_global(num_cells, double(0));
+        std::vector<double> X_0_sq_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                X_0_avg_global[i]    += weight*X_0_avg_realizations[ri][i];
+                X_0_sq_avg_global[i] += weight*X_0_sq_avg_realizations[ri][i];
+            }
+        }
+        
+        std::vector<double> X_0_var_global(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            X_0_var_global[i] = X_0_sq_avg_global[i] - X_0_avg_global[i]*X_0_avg_global[i];
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&X_0_var_global[0], sizeof(double)*X_0_var_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output spatial profile of ensemble variance of volume fraction with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleVolumeFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Z_0_avg_realizations =
+            d_ensemble_statistics->Z_0_avg_realizations;
+        
+        const std::vector<std::vector<double> >& Z_0_sq_avg_realizations = 
+            d_ensemble_statistics->Z_0_sq_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(Z_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(Z_0_sq_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(Z_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Z_0_avg_global(num_cells, double(0));
+        std::vector<double> Z_0_sq_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Z_0_avg_global[i]    += weight*Z_0_avg_realizations[ri][i];
+                Z_0_sq_avg_global[i] += weight*Z_0_sq_avg_realizations[ri][i];
+            }
+        }
+        
+        std::vector<double> Z_0_var_global(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            Z_0_var_global[i] = Z_0_sq_avg_global[i] - Z_0_avg_global[i]*Z_0_avg_global[i];
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&Z_0_var_global[0], sizeof(double)*Z_0_var_global.size());
         
         f_out.close();
     }
@@ -6016,6 +6788,178 @@ RTIRMIStatisticsUtilities::outputEnsembleMixingWidthInXDirection(
 
 
 /*
+ * Output ensemble mixing width in x-direction using mole fractions to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleMixingWidthInXDirectionWithMoleFractions(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'MIXING_WIDTH_X_MOL_F' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& X_0_avg_realizations =
+            d_ensemble_statistics->X_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(X_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(X_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> X_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                X_0_avg_global[i] += weight*X_0_avg_realizations[ri][i];
+            }
+        }
+        
+        double W = double(0);
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            W += X_0_avg_global[i]*(double(1) - X_0_avg_global[i]);
+        }
+        
+        W = double(4)*W*dx_finest[0];
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << W;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble mixing width in x-direction using volume fractions to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleMixingWidthInXDirectionWithVolumeFractions(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'MIXING_WIDTH_X_VOL_F' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Z_0_avg_realizations =
+            d_ensemble_statistics->Z_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(Z_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(Z_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Z_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Z_0_avg_global[i] += weight*Z_0_avg_realizations[ri][i];
+            }
+        }
+        
+        double W = double(0);
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            W += Z_0_avg_global[i]*(double(1) - Z_0_avg_global[i]);
+        }
+        
+        W = double(4)*W*dx_finest[0];
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << W;
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output ensemble minimum interface location in x-direction to a file.
  */
 void
@@ -6109,6 +7053,192 @@ RTIRMIStatisticsUtilities::outputEnsembleInterfaceMinInXDirection(
 
 
 /*
+ * Output ensemble minimum interface location in x-direction using mole fractions to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleInterfaceMinInXDirectionWithMoleFractions(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_MIN_X_MOL_F' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& X_0_avg_realizations =
+            d_ensemble_statistics->X_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(X_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(X_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> X_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                X_0_avg_global[i] += weight*X_0_avg_realizations[ri][i];
+            }
+        }
+        
+        const double* x_lo = d_grid_geometry->getXLower();
+        const double* x_hi = d_grid_geometry->getXUpper();
+        double interface_min = x_hi[0];
+        
+        for (int i = num_cells - 1; i >= 0;  i--)
+        {
+            if (X_0_avg_global[i] > 0.01 && X_0_avg_global[i] < 0.99)
+            {
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc < interface_min)
+                {
+                   interface_min = x_loc;
+                }
+            }
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_min;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble minimum interface location in x-direction using volume fractions to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleInterfaceMinInXDirectionWithVolumeFractions(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_MIN_X_VOL_F' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Z_0_avg_realizations =
+            d_ensemble_statistics->Z_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(Z_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(Z_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Z_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Z_0_avg_global[i] += weight*Z_0_avg_realizations[ri][i];
+            }
+        }
+        
+        const double* x_lo = d_grid_geometry->getXLower();
+        const double* x_hi = d_grid_geometry->getXUpper();
+        double interface_min = x_hi[0];
+        
+        for (int i = num_cells - 1; i >= 0;  i--)
+        {
+            if (Z_0_avg_global[i] > 0.01 && Z_0_avg_global[i] < 0.99)
+            {
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc < interface_min)
+                {
+                   interface_min = x_loc;
+                }
+            }
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_min;
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output ensemble maximum interface location in x-direction to a file.
  */
 void
@@ -6125,7 +7255,7 @@ RTIRMIStatisticsUtilities::outputEnsembleInterfaceMaxInXDirection(
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "'INTERFACE_MIN_X' can be computed with two species only."
+            << "'INTERFACE_MAX_X' can be computed with two species only."
             << std::endl);
     }
     
@@ -6184,6 +7314,192 @@ RTIRMIStatisticsUtilities::outputEnsembleInterfaceMaxInXDirection(
         for (int i = 0; i < num_cells; i++)
         {
             if (Y_0_avg_global[i] > 0.01 && Y_0_avg_global[i] < 0.99)
+            {
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc > interface_max)
+                {
+                   interface_max = x_loc;
+                }
+            }
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_max;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble maximum interface location in x-direction using mole fractions to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleInterfaceMaxInXDirectionWithMoleFractions(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_MAX_X_MOL_F' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& X_0_avg_realizations =
+            d_ensemble_statistics->X_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(X_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(X_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> X_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                X_0_avg_global[i] += weight*X_0_avg_realizations[ri][i];
+            }
+        }
+        
+        const double* x_lo = d_grid_geometry->getXLower();
+        // const double* x_hi = d_grid_geometry->getXUpper();
+        double interface_max = x_lo[0];
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            if (X_0_avg_global[i] > 0.01 && X_0_avg_global[i] < 0.99)
+            {
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc > interface_max)
+                {
+                   interface_max = x_loc;
+                }
+            }
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_max;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble maximum interface location in x-direction using volume fractions to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleInterfaceMaxInXDirectionWithVolumeFractions(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_MAX_X_VOL_F' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Z_0_avg_realizations =
+            d_ensemble_statistics->Z_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(Z_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(Z_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Z_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Z_0_avg_global[i] += weight*Z_0_avg_realizations[ri][i];
+            }
+        }
+        
+        const double* x_lo = d_grid_geometry->getXLower();
+        // const double* x_hi = d_grid_geometry->getXUpper();
+        double interface_max = x_lo[0];
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            if (Z_0_avg_global[i] > 0.01 && Z_0_avg_global[i] < 0.99)
             {
                 const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
                 if (x_loc > interface_max)
@@ -6275,6 +7591,178 @@ RTIRMIStatisticsUtilities::outputEnsembleMixednessInXDirection(
         {
             num += Y_0_Y_1_avg_global[i];
             den += Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
+        }
+        
+        const double Theta = num/den;
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << Theta;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble mixedness in x-direction using mole fractions to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleMixednessInXDirectionWithMoleFractions(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'MIXEDNESS_X_MOL_F' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& X_0_avg_realizations =
+            d_ensemble_statistics->X_0_avg_realizations;
+        
+        const std::vector<std::vector<double> >& X_0_X_1_avg_realizations =
+            d_ensemble_statistics->X_0_X_1_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(X_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(X_0_X_1_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(X_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> X_0_avg_global(num_cells, double(0));
+        std::vector<double> X_0_X_1_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                X_0_avg_global[i]     += weight*X_0_avg_realizations[ri][i];
+                X_0_X_1_avg_global[i] += weight*X_0_X_1_avg_realizations[ri][i];
+            }
+        }
+        
+        double num = double(0);
+        double den = double(0);
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            num += X_0_X_1_avg_global[i];
+            den += X_0_avg_global[i]*(double(1) - X_0_avg_global[i]);
+        }
+        
+        const double Theta = num/den;
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << Theta;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble mixedness in x-direction using volume fractions to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleMixednessInXDirectionWithVolumeFractions(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'MIXEDNESS_X_VOL_F' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Z_0_avg_realizations =
+            d_ensemble_statistics->Z_0_avg_realizations;
+        
+        const std::vector<std::vector<double> >& Z_0_Z_1_avg_realizations =
+            d_ensemble_statistics->Z_0_Z_1_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(Z_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(Z_0_Z_1_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(Z_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Z_0_avg_global(num_cells, double(0));
+        std::vector<double> Z_0_Z_1_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Z_0_avg_global[i]     += weight*Z_0_avg_realizations[ri][i];
+                Z_0_Z_1_avg_global[i] += weight*Z_0_Z_1_avg_realizations[ri][i];
+            }
+        }
+        
+        double num = double(0);
+        double den = double(0);
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            num += Z_0_Z_1_avg_global[i];
+            den += Z_0_avg_global[i]*(double(1) - Z_0_avg_global[i]);
         }
         
         const double Theta = num/den;
@@ -17029,17 +18517,49 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             {
                 f_out << "\t" << "MIXING_WIDTH_X       ";
             }
+            else if (statistical_quantity_key == "MIXING_WIDTH_X_MOL_F")
+            {
+                f_out << "\t" << "MIXING_WIDTH_X_MOL_F ";
+            }
+            else if (statistical_quantity_key == "MIXING_WIDTH_X_VOL_F")
+            {
+                f_out << "\t" << "MIXING_WIDTH_X_VOL_F ";
+            }
             else if (statistical_quantity_key == "INTERFACE_MIN_X")
             {
                 f_out << "\t" << "INTERFACE_MIN_X      ";
+            }
+            else if (statistical_quantity_key == "INTERFACE_MIN_X_MOL_F")
+            {
+                f_out << "\t" << "INTERFACE_MIN_X_MOL_F";
+            }
+            else if (statistical_quantity_key == "INTERFACE_MIN_X_VOL_F")
+            {
+                f_out << "\t" << "INTERFACE_MIN_X_VOL_F";
             }
             else if (statistical_quantity_key == "INTERFACE_MAX_X")
             {
                 f_out << "\t" << "INTERFACE_MAX_X      ";
             }
+            else if (statistical_quantity_key == "INTERFACE_MAX_X_MOL_F")
+            {
+                f_out << "\t" << "INTERFACE_MAX_X_MOL_F";
+            }
+            else if (statistical_quantity_key == "INTERFACE_MAX_X_VOL_F")
+            {
+                f_out << "\t" << "INTERFACE_MAX_X_VOL_F";
+            }
             else if (statistical_quantity_key == "MIXEDNESS_X")
             {
                 f_out << "\t" << "MIXEDNESS_X          ";
+            }
+            else if (statistical_quantity_key == "MIXEDNESS_X_MOL_F")
+            {
+                f_out << "\t" << "MIXEDNESS_X_MOL_F    ";
+            }
+            else if (statistical_quantity_key == "MIXEDNESS_X_VOL_F")
+            {
+                f_out << "\t" << "MIXEDNESS_X_VOL_F    ";
             }
             else if (statistical_quantity_key == "DENSITY_MEAN_INHOMO_X")
             {
@@ -17227,6 +18747,26 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                         data_context);
             }
         }
+        else if (statistical_quantity_key == "MOLE_FRACTION_AVG_SP")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->X_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "VOLUME_FRACTION_AVG_SP")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Z_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
         else if (statistical_quantity_key == "MASS_FRACTION_VAR_SP")
         {
             if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Y_0_avg_computed))
@@ -17241,6 +18781,42 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
             {
                 rti_rmi_statistics_utilities->
                     computeMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "MOLE_FRACTION_VAR_SP")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->X_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->X_0_sq_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "VOLUME_FRACTION_VAR_SP")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Z_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Z_0_sq_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeVolumeFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
@@ -17527,6 +19103,26 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                         data_context);
             }
         }
+        else if (statistical_quantity_key == "MIXING_WIDTH_X_MOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->X_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "MIXING_WIDTH_X_VOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Z_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
         else if (statistical_quantity_key == "INTERFACE_MIN_X")
         {
             if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Y_0_avg_computed))
@@ -17537,12 +19133,52 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                         data_context);
             }
         }
+        else if (statistical_quantity_key == "INTERFACE_MIN_X_MOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->X_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "INTERFACE_MIN_X_VOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Z_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
         else if (statistical_quantity_key == "INTERFACE_MAX_X")
         {
             if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Y_0_avg_computed))
             {
                 rti_rmi_statistics_utilities->
                     computeAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "INTERFACE_MAX_X_MOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->X_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "INTERFACE_MAX_X_VOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Z_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
@@ -17561,6 +19197,42 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
             {
                 rti_rmi_statistics_utilities->
                     computeMassFractionProductWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "MIXEDNESS_X_MOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->X_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->X_0_X_1_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeMoleFractionProductWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "MIXEDNESS_X_VOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Z_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Z_0_Z_1_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeVolumeFractionProductWithHomogeneityInYDirectionOrInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
@@ -18668,6 +20340,24 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     data_context,
                     output_time);
         }
+        else if (statistical_quantity_key == "VOLUME_FRACTION_AVG_SP")
+        {
+            rti_rmi_statistics_utilities->
+                outputSpatialProfileEnsembleAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+                    "Z_avg.dat",
+                    patch_hierarchy,
+                    data_context,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "VOLUME_FRACTION_VAR_SP")
+        {
+            rti_rmi_statistics_utilities->
+                outputSpatialProfileEnsembleVolumeFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                    "Z_var.dat",
+                    patch_hierarchy,
+                    data_context,
+                    output_time);
+        }
         else if (statistical_quantity_key == "DENSITY_AVG_SP")
         {
             rti_rmi_statistics_utilities->
@@ -18857,10 +20547,42 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     patch_hierarchy,
                     data_context);
         }
+        else if (statistical_quantity_key == "MIXING_WIDTH_X_MOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleMixingWidthInXDirectionWithMoleFractions(
+                    stat_dump_filename,
+                    patch_hierarchy,
+                    data_context);
+        }
+        else if (statistical_quantity_key == "MIXING_WIDTH_X_VOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleMixingWidthInXDirectionWithVolumeFractions(
+                    stat_dump_filename,
+                    patch_hierarchy,
+                    data_context);
+        }
         else if (statistical_quantity_key == "INTERFACE_MIN_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleInterfaceMinInXDirection(
+                    stat_dump_filename,
+                    patch_hierarchy,
+                    data_context);
+        }
+        else if (statistical_quantity_key == "INTERFACE_MIN_X_MOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleInterfaceMinInXDirectionWithMoleFractions(
+                    stat_dump_filename,
+                    patch_hierarchy,
+                    data_context);
+        }
+        else if (statistical_quantity_key == "INTERFACE_MIN_X_VOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleInterfaceMinInXDirectionWithVolumeFractions(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
@@ -18873,10 +20595,42 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     patch_hierarchy,
                     data_context);
         }
+        else if (statistical_quantity_key == "INTERFACE_MAX_X_MOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleInterfaceMaxInXDirectionWithMoleFractions(
+                    stat_dump_filename,
+                    patch_hierarchy,
+                    data_context);
+        }
+        else if (statistical_quantity_key == "INTERFACE_MAX_X_VOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleInterfaceMaxInXDirectionWithVolumeFractions(
+                    stat_dump_filename,
+                    patch_hierarchy,
+                    data_context);
+        }
         else if (statistical_quantity_key == "MIXEDNESS_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleMixednessInXDirection(
+                    stat_dump_filename,
+                    patch_hierarchy,
+                    data_context);
+        }
+        else if (statistical_quantity_key == "MIXEDNESS_X_MOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleMixednessInXDirectionWithMoleFractions(
+                    stat_dump_filename,
+                    patch_hierarchy,
+                    data_context);
+        }
+        else if (statistical_quantity_key == "MIXEDNESS_X_VOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleMixednessInXDirectionWithVolumeFractions(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
