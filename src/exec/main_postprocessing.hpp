@@ -346,6 +346,9 @@ void runPostProcessing(
      * Then, close restart file and write initial state for visualization.
      */
     
+    double dt_now = time_integrator->initializeHierarchy();
+    NULL_USE(dt_now);
+    
     restart_manager->closeRestartFile();
     
     /*
