@@ -7,6 +7,600 @@
 #include <limits>
 
 /*
+ * Compute maximum value over the entire domain.
+ */
+double
+MPIHelperMaxMin::getMaxQuantity(
+    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    const int component_idx,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+    double u_max_local  = std::numeric_limits<double>::min();
+    double u_max_global = std::numeric_limits<double>::min();
+    
+    const int num_levels = d_patch_hierarchy->getNumberOfLevels();
+    
+    /*
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
+     */
+    
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *d_patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                d_patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower indices.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch->getPatchData(variable_quantity, data_context)));
+                
+                double* u = data_quantity->getPointer(component_idx);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
+                
+                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        /*
+                         * Compute the linear index and update the max.
+                         */
+                        
+                        const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
+                        
+                        u_max_local = fmax(u_max_local, u[idx]);
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Reduction to get the global max.
+         */
+        
+        d_mpi.Allreduce(
+            &u_max_local,
+            &u_max_global,
+            1,
+            MPI_DOUBLE,
+            MPI_MAX);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                d_patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower indices.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch->getPatchData(variable_quantity, data_context)));
+                
+                double* u = data_quantity->getPointer(component_idx);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_quantity = data_quantity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
+                const int num_ghosts_1_quantity = num_ghosts_quantity[1];
+                const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            /*
+                             * Compute the linear index and update the max.
+                             */
+                            
+                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
+                            
+                            u_max_local = fmax(u_max_local, u[idx]);
+                        }
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Reduction to get the global max.
+         */
+        
+        d_mpi.Allreduce(
+            &u_max_local,
+            &u_max_global,
+            1,
+            MPI_DOUBLE,
+            MPI_MAX);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                d_patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower indices.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch->getPatchData(variable_quantity, data_context)));
+                
+                double* u = data_quantity->getPointer(component_idx);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_quantity = data_quantity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
+                const int num_ghosts_1_quantity = num_ghosts_quantity[1];
+                const int num_ghosts_2_quantity = num_ghosts_quantity[2];
+                const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
+                const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the linear index and update the max.
+                                 */
+                                
+                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
+                                        ghostcell_dim_1_quantity;
+                                
+                                u_max_local = fmax(u_max_local, u[idx]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Reduction to get the global max.
+         */
+        
+        d_mpi.Allreduce(
+            &u_max_local,
+            &u_max_global,
+            1,
+            MPI_DOUBLE,
+            MPI_MAX);
+    }
+    
+    return u_max_global;
+}
+
+
+/*
+ * Compute minimum value over the entire domain.
+ */
+double
+MPIHelperMaxMin::getMinQuantity(
+    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    const int component_idx,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+    double u_min_local  = std::numeric_limits<double>::max();
+    double u_min_global = std::numeric_limits<double>::max();
+    
+    const int num_levels = d_patch_hierarchy->getNumberOfLevels();
+    
+    /*
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
+     */
+    
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *d_patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                d_patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower indices.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch->getPatchData(variable_quantity, data_context)));
+                
+                double* u = data_quantity->getPointer(component_idx);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
+                
+                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        /*
+                         * Compute the linear index and update the min.
+                         */
+                        
+                        const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
+                        
+                        u_min_local = fmin(u_min_local, u[idx]);
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Reduction to get the global min.
+         */
+        
+        d_mpi.Allreduce(
+            &u_min_local,
+            &u_min_global,
+            1,
+            MPI_DOUBLE,
+            MPI_MIN);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                d_patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower indices.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch->getPatchData(variable_quantity, data_context)));
+                
+                double* u = data_quantity->getPointer(component_idx);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_quantity = data_quantity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
+                const int num_ghosts_1_quantity = num_ghosts_quantity[1];
+                const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            /*
+                             * Compute the linear index and update the min.
+                             */
+                            
+                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
+                            
+                            u_min_local = fmin(u_min_local, u[idx]);
+                        }
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Reduction to get the global min.
+         */
+        
+        d_mpi.Allreduce(
+            &u_min_local,
+            &u_min_global,
+            1,
+            MPI_DOUBLE,
+            MPI_MIN);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                d_patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower indices.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch->getPatchData(variable_quantity, data_context)));
+                
+                double* u = data_quantity->getPointer(component_idx);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_quantity = data_quantity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
+                const int num_ghosts_1_quantity = num_ghosts_quantity[1];
+                const int num_ghosts_2_quantity = num_ghosts_quantity[2];
+                const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
+                const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the linear index and update the min.
+                                 */
+                                
+                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
+                                        ghostcell_dim_1_quantity;
+                                
+                                u_min_local = fmin(u_min_local, u[idx]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Reduction to get the global min.
+         */
+        
+        d_mpi.Allreduce(
+            &u_min_local,
+            &u_min_global,
+            1,
+            MPI_DOUBLE,
+            MPI_MIN);
+    }
+    
+    return u_min_global;
+}
+
+
+/*
  * Compute maximum value with only x-direction as inhomogeneous direction.
  */
 std::vector<double>

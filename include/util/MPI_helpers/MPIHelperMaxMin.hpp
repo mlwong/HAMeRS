@@ -21,6 +21,22 @@ class MPIHelperMaxMin: public MPIHelper
         {}
         
         /*
+         * Compute maximum value over the entire domain.
+         */
+        double getMaxQuantity(
+            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute minimum value over the entire domain.
+         */
+        double getMinQuantity(
+            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
          * Compute maximum value with only x-direction as inhomogeneous direction.
          */
         std::vector<double> getMaxQuantityWithInhomogeneousXDirection(
