@@ -39,6 +39,7 @@ class FlowModelMonitoringStatisticsUtilitiesSingleSpecies: public FlowModelMonit
          */
          
         double d_kinetic_energy_avg;
+        double d_Mach_num_max;
         
 };
 
