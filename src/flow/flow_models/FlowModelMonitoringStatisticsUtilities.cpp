@@ -18,11 +18,11 @@ FlowModelMonitoringStatisticsUtilities::FlowModelMonitoringStatisticsUtilities(
     
     if (flow_model_db->keyExists("monitoring_statistics"))
     {
-        d_monitoring_statistics = flow_model_db->getStringVector("monitoring_statistics");
+        d_monitoring_statistics_names = flow_model_db->getStringVector("monitoring_statistics");
     }
-    else if (flow_model_db->keyExists("d_monitoring_statistics"))
+    else if (flow_model_db->keyExists("d_monitoring_statistics_names"))
     {
-        d_monitoring_statistics = flow_model_db->getStringVector("d_monitoring_statistics");
+        d_monitoring_statistics_names = flow_model_db->getStringVector("d_monitoring_statistics_names");
     }
     
     /*
@@ -47,9 +47,9 @@ void
 FlowModelMonitoringStatisticsUtilities::putToRestart(
     const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
-    if (!d_monitoring_statistics.empty())
+    if (!d_monitoring_statistics_names.empty())
     {
-        restart_db->putStringVector("d_monitoring_statistics", d_monitoring_statistics);
+        restart_db->putStringVector("d_monitoring_statistics_names", d_monitoring_statistics_names);
     }
     
     restart_db->putInteger("d_monitoring_time_step_interval", d_monitoring_time_step_interval);

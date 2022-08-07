@@ -18,10 +18,10 @@ FlowModelMonitoringStatisticsUtilitiesSingleSpecies::FlowModelMonitoringStatisti
         d_kinetic_energy_avg(double(0)),
         d_Mach_num_max(double(0))
 {
-    for (int si = 0; si < static_cast<int>(d_monitoring_statistics.size()); si++)
+    for (int si = 0; si < static_cast<int>(d_monitoring_statistics_names.size()); si++)
     {
         // Get the key of the current variable.
-        std::string statistical_quantity_key = d_monitoring_statistics[si];
+        std::string statistical_quantity_key = d_monitoring_statistics_names[si];
         
         if ((statistical_quantity_key != "KINETIC_ENERGY_AVG") &&
             (statistical_quantity_key != "MACH_NUM_MAX"))
@@ -67,10 +67,10 @@ FlowModelMonitoringStatisticsUtilitiesSingleSpecies::computeMonitoringStatistics
             patch_hierarchy,
             flow_model_tmp);
         
-        for (int si = 0; si < static_cast<int>(d_monitoring_statistics.size()); si++)
+        for (int si = 0; si < static_cast<int>(d_monitoring_statistics_names.size()); si++)
         {
             // Get the key of the current variable.
-            std::string statistical_quantity_key = d_monitoring_statistics[si];
+            std::string statistical_quantity_key = d_monitoring_statistics_names[si];
             
             if (statistical_quantity_key == "KINETIC_ENERGY_AVG")
             {
@@ -236,10 +236,10 @@ FlowModelMonitoringStatisticsUtilitiesSingleSpecies::outputMonitoringStatistics(
 {
     NULL_USE(time);
     
-    for (int si = 0; si < static_cast<int>(d_monitoring_statistics.size()); si++)
+    for (int si = 0; si < static_cast<int>(d_monitoring_statistics_names.size()); si++)
     {
         // Get the key of the current variable.
-        std::string statistical_quantity_key = d_monitoring_statistics[si];
+        std::string statistical_quantity_key = d_monitoring_statistics_names[si];
         
         if (statistical_quantity_key == "KINETIC_ENERGY_AVG")
         {
@@ -250,4 +250,33 @@ FlowModelMonitoringStatisticsUtilitiesSingleSpecies::outputMonitoringStatistics(
             os << "Max Mach number: " << d_Mach_num_max << std::endl;
         }
     }
+}
+
+/*
+ * Get monitoring statistical quantities.
+ */
+double
+FlowModelMonitoringStatisticsUtilitiesSingleSpecies::getMonitoringStatistics(
+    std::string statistics_name) const
+{
+    double statistical_quantity = 0;
+    
+    for (int si = 0; si < static_cast<int>(d_monitoring_statistics_names.size()); si++)
+    {
+        // Get the key of the current variable.
+        std::string statistical_quantity_key = d_monitoring_statistics_names[si];
+        
+        if (statistics_name == "KINETIC_ENERGY_AVG")
+        {
+            statistical_quantity = d_kinetic_energy_avg;
+            break;
+        }
+        else if (statistics_name == "MACH_NUM_MAX")
+        {
+            statistical_quantity = d_Mach_num_max;
+            break;
+        }
+    }
+    
+    return statistical_quantity;
 }

@@ -33,6 +33,12 @@ class FlowModelMonitoringStatisticsUtilitiesFourEqnConservative: public FlowMode
             std::ostream& os,
             const double time);
         
+        /*
+         * Get monitoring statistical quantities.
+         */
+        double getMonitoringStatistics(
+            std::string statistics_name) const;
+        
     private:
         /*
          * Monitoring statistical quantities.

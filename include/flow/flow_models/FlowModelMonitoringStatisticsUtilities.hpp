@@ -61,9 +61,9 @@ class FlowModelMonitoringStatisticsUtilities
         /*
          * Get names of monitoring statistical quantities to output.
          */
-        const std::vector<std::string>& getMonitoringStatistics() const
+        const std::vector<std::string>& getMonitoringStatisticsNames() const
         {
-            return d_monitoring_statistics;
+            return d_monitoring_statistics_names;
         }
         
         /*
@@ -73,6 +73,12 @@ class FlowModelMonitoringStatisticsUtilities
         {
             return d_monitoring_time_step_interval;
         }
+        
+        /*
+         * Get monitoring statistical quantities.
+         */
+        virtual double getMonitoringStatistics(
+            std::string statistics_name) const = 0;
         
     protected:
         /*
@@ -103,7 +109,7 @@ class FlowModelMonitoringStatisticsUtilities
         /*
          * Names of monitoring statistical quantities to output.
          */
-        std::vector<std::string> d_monitoring_statistics;
+        std::vector<std::string> d_monitoring_statistics_names;
         
         /*
          * The monitoring time step interval.
