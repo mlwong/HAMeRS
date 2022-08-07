@@ -20331,11 +20331,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     data_context,
                     output_time);
         }
-        else if (statistical_quantity_key == "MASS_FRACTION_VAR_SP")
+        else if (statistical_quantity_key == "MOLE_FRACTION_AVG_SP")
         {
             rti_rmi_statistics_utilities->
-                outputSpatialProfileEnsembleMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
-                    "Y_var.dat",
+                outputSpatialProfileEnsembleAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+                    "X_avg.dat",
                     patch_hierarchy,
                     data_context,
                     output_time);
@@ -20345,6 +20345,24 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             rti_rmi_statistics_utilities->
                 outputSpatialProfileEnsembleAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
                     "Z_avg.dat",
+                    patch_hierarchy,
+                    data_context,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "MASS_FRACTION_VAR_SP")
+        {
+            rti_rmi_statistics_utilities->
+                outputSpatialProfileEnsembleMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                    "Y_var.dat",
+                    patch_hierarchy,
+                    data_context,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "MOLE_FRACTION_VAR_SP")
+        {
+            rti_rmi_statistics_utilities->
+                outputSpatialProfileEnsembleMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                    "X_var.dat",
                     patch_hierarchy,
                     data_context,
                     output_time);
