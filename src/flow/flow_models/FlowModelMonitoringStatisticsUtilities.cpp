@@ -16,9 +16,9 @@ FlowModelMonitoringStatisticsUtilities::FlowModelMonitoringStatisticsUtilities(
      * Get the monitoring statistics database.
      */
     
-    if (flow_model_db->keyExists("monitoring_statistics"))
+    if (flow_model_db->keyExists("monitoring_statistics_names"))
     {
-        d_monitoring_statistics_names = flow_model_db->getStringVector("monitoring_statistics");
+        d_monitoring_statistics_names = flow_model_db->getStringVector("monitoring_statistics_names");
     }
     else if (flow_model_db->keyExists("d_monitoring_statistics_names"))
     {
