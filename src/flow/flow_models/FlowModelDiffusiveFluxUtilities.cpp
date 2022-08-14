@@ -15,7 +15,9 @@ FlowModelDiffusiveFluxUtilities::FlowModelDiffusiveFluxUtilities(
         d_num_subghosts_diffusivities(-hier::IntVector::getOne(d_dim)),
         d_subghost_box_diffusivities(hier::Box::getEmptyBox(dim)),
         d_subghostcell_dims_diffusivities(hier::IntVector::getZero(d_dim)),
-        d_cell_data_computed_diffusivities(false)
+        d_cell_data_computed_diffusivities(false),
+        d_side_data_computed_diffusivities(false),
+        d_need_side_diffusivities(false)
 {}
 
 
@@ -42,9 +44,11 @@ FlowModelDiffusiveFluxUtilities::registerDerivedVariables(
  */
 void
 FlowModelDiffusiveFluxUtilities::registerDerivedVariablesForDiffusiveFluxes(
-    const hier::IntVector& num_subghosts)
+    const hier::IntVector& num_subghosts,
+    const bool need_side_diffusivities)
 {
     NULL_USE(num_subghosts);
+    NULL_USE(need_side_diffusivities);
     
     TBOX_ERROR(d_object_name
         << ": FlowModelDiffusiveFluxUtilities::registerDerivedVariablesForDiffusiveFluxes()\n"

@@ -153,7 +153,8 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDerivedVariables(
  */
 void
 FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDerivedVariablesForDiffusiveFluxes(
-    const hier::IntVector& num_subghosts)
+    const hier::IntVector& num_subghosts,
+    const bool need_side_diffusivities)
 {
     if (d_flow_model.expired())
     {
@@ -214,6 +215,8 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDerivedVariablesForDiffusi
         num_subghosts,
         "DIFFUSIVITIES",
         "DIFFUSIVITIES");
+    
+    d_need_side_diffusivities = need_side_diffusivities;
 }
 
 
@@ -297,34 +300,98 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()
         }
     }
     
+    if (!d_need_side_diffusivities)
+    {
+        if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
+        {
+            if (!d_cell_data_computed_diffusivities)
+            {
+                if (!d_data_diffusivities)
+                {
+                    if (d_dim == tbox::Dimension(1))
+                    {
+                        d_data_diffusivities.reset(new pdat::CellData<double>(
+                            interior_box, 3, d_num_subghosts_diffusivities));
+                    }
+                    else if (d_dim == tbox::Dimension(2))
+                    {
+                        d_data_diffusivities.reset(new pdat::CellData<double>(
+                            interior_box, 10, d_num_subghosts_diffusivities));
+                    }
+                    else if (d_dim == tbox::Dimension(3))
+                    {
+                        d_data_diffusivities.reset(new pdat::CellData<double>(
+                            interior_box, 13, d_num_subghosts_diffusivities));
+                    }
+                }
+            }
+            else
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()\n"
+                    << "Cell data of 'DIFFUSIVITIES' is aleady computed."
+                    << std::endl);
+            }
+        }
+    }
+}
+
+
+/*
+ * Allocate memory for side data of the diffusivities.
+ */
+void
+FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForSideDataOfDiffusiveFluxDiffusivities()
+{
+    if (!d_need_side_diffusivities)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForSideDataOfDiffusiveFluxDiffusivities()\n"
+            << "Side data of 'DIFFUSIVITIES' is not needed."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
+    const hier::Box interior_box = patch.getBox();
+    
     if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_computed_diffusivities)
+        if (!d_side_data_computed_diffusivities)
         {
-            if (!d_data_diffusivities)
+            if (!d_side_data_diffusivities)
             {
                 if (d_dim == tbox::Dimension(1))
                 {
-                    d_data_diffusivities.reset(new pdat::CellData<double>(
+                    d_side_data_diffusivities.reset(new pdat::SideData<double>(
                         interior_box, 3, d_num_subghosts_diffusivities));
                 }
                 else if (d_dim == tbox::Dimension(2))
                 {
-                    d_data_diffusivities.reset(new pdat::CellData<double>(
-                        interior_box, 10, d_num_subghosts_diffusivities));
+                    d_side_data_diffusivities.reset(new pdat::SideData<double>(
+                        interior_box, 8, d_num_subghosts_diffusivities));
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
-                    d_data_diffusivities.reset(new pdat::CellData<double>(
-                        interior_box, 13, d_num_subghosts_diffusivities));
+                    d_side_data_diffusivities.reset(new pdat::SideData<double>(
+                        interior_box, 10, d_num_subghosts_diffusivities));
                 }
             }
         }
         else
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()\n"
-                << "Cell data of 'DIFFUSIVITIES' is aleady computed."
+                << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForSideDataOfDiffusiveFluxDiffusivities()\n"
+                << "Side data of 'DIFFUSIVITIES' is aleady computed."
                 << std::endl);
         }
     }
@@ -357,12 +424,16 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::clearCellData()
     d_data_bulk_viscosity.reset();
     d_data_thermal_conductivity.reset();
     
+    d_side_data_diffusivities.reset();
+    
     d_cell_data_computed_diffusivities        = false;
     d_cell_data_computed_shear_viscosity      = false;
     d_cell_data_computed_bulk_viscosity       = false;
     d_cell_data_computed_thermal_conductivity = false;
     
     d_derived_cell_data_computed = false;
+    
+    d_side_data_computed_diffusivities = false;
 }
 
 
@@ -1409,6 +1480,14 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusiv
             << std::endl);
     }
     
+    if (!d_cell_data_computed_diffusivities)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities()\n"
+            << "Cell data of 'DIFFUSIVITIES' is not registered/computed yet."
+            << std::endl);
+    }
+    
     diffusivities_data.resize(d_num_eqn);
     diffusivities_component_idx.resize(d_num_eqn);
     
@@ -2009,7 +2088,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusiv
                         diffusivities_data[2].resize(1);
                         diffusivities_component_idx[2].resize(1);
                         
-                        // 2/3*(mu - mu_v).
+                        // 2/3*mu - mu_v.
                         diffusivities_data[2][0] = d_data_diffusivities;
                         diffusivities_component_idx[2][0] = 1;
                         
@@ -2222,6 +2301,1301 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusiv
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities()\n"
+                    << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
+                    << std::endl);
+            }
+        }
+    }
+}
+
+
+/*
+ * Get the cell data that needs interpolation to midpoints for computing side data of diffusivities in the
+ * diffusive flux.
+ */
+void
+FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities(
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& var_data_for_diffusivities,
+    std::vector<int>& var_data_for_diffusivities_component_idx)
+{
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    // Check whether a patch is already registered.
+    if (!flow_model_tmp->hasRegisteredPatch())
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::"
+            << "getCellDataOfDiffusiveFluxDiffusivities()\n"
+            << "No patch is registered yet."
+            << std::endl);
+    }
+    
+    if (!d_cell_data_computed_shear_viscosity)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities()\n"
+            << "Cell data of 'SHEAR_VISCOSITY' is not registered/computed yet."
+            << std::endl);
+    }
+    
+    if (!d_cell_data_computed_bulk_viscosity)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities()\n"
+            << "Cell data of 'BULK_VISCOSITY' is not registered/computed yet."
+            << std::endl);
+    }
+    
+    if (!d_cell_data_computed_thermal_conductivity)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities()\n"
+            << "Cell data of 'THERMAL_CONDUCTIVITY' is not registered/computed yet."
+            << std::endl);
+    }
+    
+    var_data_for_diffusivities.resize(3 + d_dim.getValue());
+    var_data_for_diffusivities_component_idx.resize(3 + d_dim.getValue());
+    
+    var_data_for_diffusivities[0] = d_data_shear_viscosity;
+    var_data_for_diffusivities_component_idx[0] = 0;
+    var_data_for_diffusivities[1] = d_data_bulk_viscosity;
+    var_data_for_diffusivities_component_idx[1] = 0;
+    var_data_for_diffusivities[2] = d_data_thermal_conductivity;
+    var_data_for_diffusivities_component_idx[2] = 0;
+    
+    // Get the cell data of velocity.
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
+        flow_model_tmp->getCellData("VELOCITY");
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        var_data_for_diffusivities[3] = data_velocity;
+        var_data_for_diffusivities_component_idx[3] = 0;
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        var_data_for_diffusivities[3] = data_velocity;
+        var_data_for_diffusivities_component_idx[3] = 0;
+        var_data_for_diffusivities[4] = data_velocity;
+        var_data_for_diffusivities_component_idx[4] = 1;
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        var_data_for_diffusivities[3] = data_velocity;
+        var_data_for_diffusivities_component_idx[3] = 0;
+        var_data_for_diffusivities[4] = data_velocity;
+        var_data_for_diffusivities_component_idx[4] = 1;
+        var_data_for_diffusivities[5] = data_velocity;
+        var_data_for_diffusivities_component_idx[5] = 2;
+    }
+}
+
+
+/*
+ * Compute the side data of the diffusivities in the diffusive flux with the interpolated side data.
+ */
+void
+FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiffusivities(
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_data_for_diffusivities)
+{
+    if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_side_data_computed_diffusivities)
+        {
+            if (d_flow_model.expired())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "The object is not setup yet!"
+                    << std::endl);
+            }
+            
+            HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+            const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
+            
+            /*
+             * Get the dimension of the interior box.
+             */
+            
+            const hier::Box interior_box = patch.getBox();
+            const hier::IntVector interior_dims = interior_box.numberCells();
+            
+            const hier::IntVector num_ghosts = var_data_for_diffusivities[0]->getGhostCellWidth();
+            const hier::IntVector ghostcell_dims = var_data_for_diffusivities[0]->getGhostBox().numberCells();
+            
+        #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(static_cast<int>(var_data_for_diffusivities.size()) == 3 + d_dim.getValue());
+            TBOX_ASSERT(num_ghosts <= d_num_subghosts_diffusivities);
+            
+            for (int vi = 0; vi < static_cast<int>(var_data_for_diffusivities.size()); vi++)
+            {
+                TBOX_ASSERT(var_data_for_diffusivities[vi] == num_ghosts);
+                TBOX_ASSERT(var_data_for_diffusivities[vi]->getGhostBox().contains(interior_box));
+            }
+        #endif
+            
+            /*
+             * Get the pointers to the cell data of shear viscosity, bulk viscosity and thermal conductivity.
+             */
+            
+            if (d_dim == tbox::Dimension(1))
+            {
+                double* mu_x    = var_data_for_diffusivities[0]->getPointer(0, 0);
+                double* mu_v_x  = var_data_for_diffusivities[1]->getPointer(0, 0);
+                double* kappa_x = var_data_for_diffusivities[2]->getPointer(0, 0);
+                double* u_x     = var_data_for_diffusivities[3]->getPointer(0, 0);
+                
+                /*
+                 * Compute the diffusivities for the x-direction derivatives.
+                 */
+                
+                double* D_00 = d_side_data_diffusivities->getPointer(0, 0);
+                double* D_01 = d_side_data_diffusivities->getPointer(0, 1);
+                double* D_02 = d_side_data_diffusivities->getPointer(0, 2);
+                
+                for (int i = -num_ghosts[0]; i < interior_dims[0] + num_ghosts[0] + 1; i++)
+                {
+                    const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
+                    const int idx_var_data      = i + num_ghosts[0];
+                    
+                    D_00[idx_diffusivities] = -(double(4)/double(3)*mu_x[idx_var_data] + mu_v_x[idx_var_data]);
+                    D_01[idx_diffusivities] = -u_x[idx_var_data]*(double(4)/double(3)*mu_x[idx_var_data] +
+                        mu_v_x[idx_var_data]);
+                    D_02[idx_diffusivities] = -kappa_x[idx_var_data];
+                }
+            }
+            else if (d_dim == tbox::Dimension(2))
+            {
+                double* mu_x    = var_data_for_diffusivities[0]->getPointer(0, 0);
+                double* mu_v_x  = var_data_for_diffusivities[1]->getPointer(0, 0);
+                double* kappa_x = var_data_for_diffusivities[2]->getPointer(0, 0);
+                
+                double* mu_y    = var_data_for_diffusivities[0]->getPointer(1, 0);
+                double* mu_v_y  = var_data_for_diffusivities[1]->getPointer(1, 0);
+                double* kappa_y = var_data_for_diffusivities[2]->getPointer(1, 0);
+                
+                double* u_x = var_data_for_diffusivities[3]->getPointer(0, 0);
+                double* v_x = var_data_for_diffusivities[4]->getPointer(0, 0);
+                
+                double* u_y = var_data_for_diffusivities[3]->getPointer(1, 0);
+                double* v_y = var_data_for_diffusivities[4]->getPointer(1, 0);
+                
+                /*
+                 * Compute the diffusivities for the x-direction derivatives.
+                 */
+                
+                double* D_00 = d_side_data_diffusivities->getPointer(0, 0);
+                double* D_01 = d_side_data_diffusivities->getPointer(0, 1);
+                double* D_02 = d_side_data_diffusivities->getPointer(0, 2);
+                double* D_03 = d_side_data_diffusivities->getPointer(0, 3);
+                double* D_04 = d_side_data_diffusivities->getPointer(0, 4);
+                double* D_05 = d_side_data_diffusivities->getPointer(0, 5);
+                double* D_06 = d_side_data_diffusivities->getPointer(0, 6);
+                double* D_07 = d_side_data_diffusivities->getPointer(0, 7);
+                
+                for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
+                {
+                    for (int i = -num_ghosts[0]; i < interior_dims[0] + num_ghosts[0] + 1; i++)
+                    {
+                        const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
+                            (j + d_num_subghosts_diffusivities[1])*(d_subghostcell_dims_diffusivities[0] + 1);
+                        
+                        const int idx_var_data = (i + num_ghosts[0]) +
+                            (j + num_ghosts[1])*(ghostcell_dims[0] + 1);
+                        
+                        D_00[idx_diffusivities] = -(double(4)/double(3)*mu_x[idx_var_data] + mu_v_x[idx_var_data]);
+                        D_01[idx_diffusivities] = double(2)/double(3)*mu_x[idx_var_data] - mu_v_x[idx_var_data];
+                        D_02[idx_diffusivities] = -mu_x[idx_var_data];
+                        D_03[idx_diffusivities] = -u_x[idx_var_data]*(double(4)/double(3)*mu_x[idx_var_data] +
+                            mu_v_x[idx_var_data]);
+                        D_04[idx_diffusivities] = v_x[idx_var_data]*(double(2)/double(3)*mu_x[idx_var_data] -
+                            mu_v_x[idx_var_data]);
+                        D_05[idx_diffusivities] = -u_x[idx_var_data]*mu_x[idx_var_data];
+                        D_06[idx_diffusivities] = -v_x[idx_var_data]*mu_x[idx_var_data];
+                        D_07[idx_diffusivities] = -kappa_x[idx_var_data];
+                    }
+                }
+                
+                /*
+                 * Compute the diffusivities for the y-direction derivatives.
+                 */
+                
+                D_00 = d_side_data_diffusivities->getPointer(1, 0);
+                D_01 = d_side_data_diffusivities->getPointer(1, 1);
+                D_02 = d_side_data_diffusivities->getPointer(1, 2);
+                D_03 = d_side_data_diffusivities->getPointer(1, 3);
+                D_04 = d_side_data_diffusivities->getPointer(1, 4);
+                D_05 = d_side_data_diffusivities->getPointer(1, 5);
+                D_06 = d_side_data_diffusivities->getPointer(1, 6);
+                D_07 = d_side_data_diffusivities->getPointer(1, 7);
+                
+                for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1] + 1; j++)
+                {
+                    for (int i = -num_ghosts[0]; i < interior_dims[0] + num_ghosts[0]; i++)
+                    {
+                        const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
+                            (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
+                        
+                        const int idx_var_data = (i + num_ghosts[0]) +
+                            (j + num_ghosts[1])*ghostcell_dims[0];;
+                        
+                        D_00[idx_diffusivities] = -(double(4)/double(3)*mu_y[idx_var_data] + mu_v_y[idx_var_data]);
+                        D_01[idx_diffusivities] = double(2)/double(3)*mu_y[idx_var_data] - mu_v_y[idx_var_data];
+                        D_02[idx_diffusivities] = -mu_y[idx_var_data];
+                        D_03[idx_diffusivities] = -v_y[idx_var_data]*(double(4)/double(3)*mu_y[idx_var_data] +
+                            mu_v_y[idx_var_data]);
+                        D_04[idx_diffusivities] = u_y[idx_var_data]*(double(2)/double(3)*mu_y[idx_var_data] -
+                            mu_v_y[idx_var_data]);
+                        D_05[idx_diffusivities] = -u_y[idx_var_data]*mu_y[idx_var_data];
+                        D_06[idx_diffusivities] = -v_y[idx_var_data]*mu_y[idx_var_data];
+                        D_07[idx_diffusivities] = -kappa_y[idx_var_data];
+                    }
+                }
+            }
+            else if (d_dim == tbox::Dimension(3))
+            {
+                double* mu_x    = var_data_for_diffusivities[0]->getPointer(0, 0);
+                double* mu_v_x  = var_data_for_diffusivities[1]->getPointer(0, 0);
+                double* kappa_x = var_data_for_diffusivities[2]->getPointer(0, 0);
+                
+                double* mu_y    = var_data_for_diffusivities[0]->getPointer(1, 0);
+                double* mu_v_y  = var_data_for_diffusivities[1]->getPointer(1, 0);
+                double* kappa_y = var_data_for_diffusivities[2]->getPointer(1, 0);
+                
+                double* mu_z    = var_data_for_diffusivities[0]->getPointer(2, 0);
+                double* mu_v_z  = var_data_for_diffusivities[1]->getPointer(2, 0);
+                double* kappa_z = var_data_for_diffusivities[2]->getPointer(2, 0);
+                
+                double* u_x = var_data_for_diffusivities[3]->getPointer(0, 0);
+                double* v_x = var_data_for_diffusivities[4]->getPointer(0, 0);
+                double* w_x = var_data_for_diffusivities[5]->getPointer(0, 0);
+                
+                double* u_y = var_data_for_diffusivities[3]->getPointer(1, 0);
+                double* v_y = var_data_for_diffusivities[4]->getPointer(1, 0);
+                double* w_y = var_data_for_diffusivities[5]->getPointer(1, 0);
+                
+                double* u_z = var_data_for_diffusivities[3]->getPointer(2, 0);
+                double* v_z = var_data_for_diffusivities[4]->getPointer(2, 0);
+                double* w_z = var_data_for_diffusivities[5]->getPointer(2, 0);
+                
+                /*
+                 * Compute the diffusivities for the x-direction derivatives.
+                 */
+                
+                double* D_00 = d_side_data_diffusivities->getPointer(0, 0);
+                double* D_01 = d_side_data_diffusivities->getPointer(0, 1);
+                double* D_02 = d_side_data_diffusivities->getPointer(0, 2);
+                double* D_03 = d_side_data_diffusivities->getPointer(0, 3);
+                double* D_04 = d_side_data_diffusivities->getPointer(0, 4);
+                double* D_05 = d_side_data_diffusivities->getPointer(0, 5);
+                double* D_06 = d_side_data_diffusivities->getPointer(0, 6);
+                double* D_07 = d_side_data_diffusivities->getPointer(0, 7);
+                double* D_08 = d_side_data_diffusivities->getPointer(0, 8);
+                double* D_09 = d_side_data_diffusivities->getPointer(0, 9);
+                
+                for (int k = -num_ghosts[2]; k < interior_dims[2] + num_ghosts[2]; k++)
+                {
+                    for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
+                    {
+                        for (int i = -num_ghosts[0]; i < interior_dims[0] + num_ghosts[0] + 1; i++)
+                        {
+                            const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
+                                (j + d_num_subghosts_diffusivities[1])*(d_subghostcell_dims_diffusivities[0] + 1) +
+                                (k + d_num_subghosts_diffusivities[2])*(d_subghostcell_dims_diffusivities[0] + 1)*
+                                    d_subghostcell_dims_diffusivities[1];
+                            
+                            const int idx_var_data = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*(ghostcell_dims[0] + 1) +
+                                (k + num_ghosts[2])*(ghostcell_dims[0] + 1)*
+                                    ghostcell_dims[1];
+                            
+                            D_00[idx_diffusivities] = -(double(4)/double(3)*mu_x[idx_var_data] + mu_v_x[idx_var_data]);
+                            D_01[idx_diffusivities] = double(2)/double(3)*mu_x[idx_var_data] - mu_v_x[idx_var_data];
+                            D_02[idx_diffusivities] = -mu_x[idx_var_data];
+                            D_03[idx_diffusivities] = -u_x[idx_var_data]*(double(4)/double(3)*mu_x[idx_var_data] +
+                                mu_v_x[idx_var_data]);
+                            D_04[idx_diffusivities] = v_x[idx_var_data]*(double(2)/double(3)*mu_x[idx_var_data] -
+                                mu_v_x[idx_var_data]);
+                            D_05[idx_diffusivities] = w_x[idx_var_data]*(double(2)/double(3)*mu_x[idx_var_data] -
+                                mu_v_x[idx_var_data]);
+                            D_06[idx_diffusivities] = -u_x[idx_var_data]*mu_x[idx_var_data];
+                            D_07[idx_diffusivities] = -v_x[idx_var_data]*mu_x[idx_var_data];
+                            D_08[idx_diffusivities] = -w_x[idx_var_data]*mu_x[idx_var_data];
+                            D_09[idx_diffusivities] = -kappa_x[idx_var_data];
+                        }
+                    }
+                }
+                
+                /*
+                 * Compute the diffusivities for the y-direction derivatives.
+                 */
+                
+                D_00 = d_side_data_diffusivities->getPointer(1, 0);
+                D_01 = d_side_data_diffusivities->getPointer(1, 1);
+                D_02 = d_side_data_diffusivities->getPointer(1, 2);
+                D_03 = d_side_data_diffusivities->getPointer(1, 3);
+                D_04 = d_side_data_diffusivities->getPointer(1, 4);
+                D_05 = d_side_data_diffusivities->getPointer(1, 5);
+                D_06 = d_side_data_diffusivities->getPointer(1, 6);
+                D_07 = d_side_data_diffusivities->getPointer(1, 7);
+                D_08 = d_side_data_diffusivities->getPointer(1, 8);
+                D_09 = d_side_data_diffusivities->getPointer(1, 9);
+                
+                for (int k = -num_ghosts[2]; k < interior_dims[2] + num_ghosts[2]; k++)
+                {
+                    for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1] + 1; j++)
+                    {
+                        for (int i = -num_ghosts[0]; i < interior_dims[0] + num_ghosts[0]; i++)
+                        {
+                            const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
+                                (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
+                                (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
+                                    (d_subghostcell_dims_diffusivities[1] + 1);
+                            
+                            const int idx_var_data = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
+                                (k + num_ghosts[2])*ghostcell_dims[0]*
+                                    (ghostcell_dims[1] + 1);
+                            
+                            D_00[idx_diffusivities] = -(double(4)/double(3)*mu_y[idx_var_data] + mu_v_y[idx_var_data]);
+                            D_01[idx_diffusivities] = double(2)/double(3)*mu_y[idx_var_data] - mu_v_y[idx_var_data];
+                            D_02[idx_diffusivities] = -mu_y[idx_var_data];
+                            D_03[idx_diffusivities] = -v_y[idx_var_data]*(double(4)/double(3)*mu_y[idx_var_data] +
+                                mu_v_y[idx_var_data]);
+                            D_04[idx_diffusivities] = u_y[idx_var_data]*(double(2)/double(3)*mu_y[idx_var_data] -
+                                mu_v_y[idx_var_data]);
+                            D_05[idx_diffusivities] = w_y[idx_var_data]*(double(2)/double(3)*mu_y[idx_var_data] -
+                                mu_v_y[idx_var_data]);
+                            D_06[idx_diffusivities] = -u_y[idx_var_data]*mu_y[idx_var_data];
+                            D_07[idx_diffusivities] = -v_y[idx_var_data]*mu_y[idx_var_data];
+                            D_08[idx_diffusivities] = -w_y[idx_var_data]*mu_y[idx_var_data];
+                            D_09[idx_diffusivities] = -kappa_y[idx_var_data];
+                        }
+                    }
+                }
+                
+                /*
+                 * Compute the diffusivities for the z-direction derivatives.
+                 */
+                
+                D_00 = d_side_data_diffusivities->getPointer(2, 0);
+                D_01 = d_side_data_diffusivities->getPointer(2, 1);
+                D_02 = d_side_data_diffusivities->getPointer(2, 2);
+                D_03 = d_side_data_diffusivities->getPointer(2, 3);
+                D_04 = d_side_data_diffusivities->getPointer(2, 4);
+                D_05 = d_side_data_diffusivities->getPointer(2, 5);
+                D_06 = d_side_data_diffusivities->getPointer(2, 6);
+                D_07 = d_side_data_diffusivities->getPointer(2, 7);
+                D_08 = d_side_data_diffusivities->getPointer(2, 8);
+                D_09 = d_side_data_diffusivities->getPointer(2, 9);
+                
+                for (int k = -num_ghosts[2]; k < interior_dims[2] + num_ghosts[2] + 1; k++)
+                {
+                    for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
+                    {
+                        for (int i = -num_ghosts[0]; i < interior_dims[0] + num_ghosts[0]; i++)
+                        {
+                            const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
+                                (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
+                                (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
+                                    d_subghostcell_dims_diffusivities[1];
+                            
+                            const int idx_var_data = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
+                                (k + num_ghosts[2])*ghostcell_dims[0]*
+                                    ghostcell_dims[1];
+                            
+                            D_00[idx_diffusivities] = -(double(4)/double(3)*mu_z[idx_var_data] + mu_v_z[idx_var_data]);
+                            D_01[idx_diffusivities] = double(2)/double(3)*mu_z[idx_var_data] - mu_v_z[idx_var_data];
+                            D_02[idx_diffusivities] = -mu_z[idx_var_data];
+                            D_03[idx_diffusivities] = -w_z[idx_var_data]*(double(4)/double(3)*mu_z[idx_var_data] +
+                                mu_v_z[idx_var_data]);
+                            D_04[idx_diffusivities] = u_z[idx_var_data]*(double(2)/double(3)*mu_z[idx_var_data] -
+                                mu_v_z[idx_var_data]);
+                            D_05[idx_diffusivities] = v_z[idx_var_data]*(double(2)/double(3)*mu_z[idx_var_data] -
+                                mu_v_z[idx_var_data]);
+                            D_06[idx_diffusivities] = -u_z[idx_var_data]*mu_z[idx_var_data];
+                            D_07[idx_diffusivities] = -v_z[idx_var_data]*mu_z[idx_var_data];
+                            D_08[idx_diffusivities] = -w_z[idx_var_data]*mu_z[idx_var_data];
+                            D_09[idx_diffusivities] = -kappa_z[idx_var_data];
+                        }
+                    }
+                }
+            }
+            
+            d_side_data_computed_diffusivities = true;
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiffusivities()\n"
+            << "Cell data of 'DIFFUSIVITIES' is not yet registered."
+            << std::endl);
+    }
+}
+
+
+/*
+ * Get the side data of the diffusivities in the diffusive fluxa.
+ */
+void
+FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusivities(
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& diffusivities_data,
+    std::vector<std::vector<int> >& diffusivities_component_idx,
+    const DIRECTION::TYPE& flux_direction,
+    const DIRECTION::TYPE& derivative_direction)
+{
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    // Check whether a patch is already registered.
+    if (!flow_model_tmp->hasRegisteredPatch())
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::"
+            << "getSideDataOfDiffusiveFluxDiffusivities()\n"
+            << "No patch is registered yet."
+            << std::endl);
+    }
+    
+    if (!d_cell_data_computed_diffusivities)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusivities()\n"
+            << "Cell data of 'DIFFUSIVITIES' is not registered/computed yet."
+            << std::endl);
+    }
+    
+    diffusivities_data.resize(d_num_eqn);
+    diffusivities_component_idx.resize(d_num_eqn);
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        switch (flux_direction)
+        {
+            case DIRECTION::X_DIRECTION:
+            {
+                switch (derivative_direction)
+                {
+                    case DIRECTION::X_DIRECTION:
+                    {
+                        /*
+                         * Mass equation.
+                         */
+                        
+                        diffusivities_data[0].resize(0);
+                        diffusivities_component_idx[0].resize(0);
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[1].resize(1);
+                        diffusivities_component_idx[1].resize(1);
+                        
+                        // -(4/3*mu + mu_v).
+                        diffusivities_data[1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[1][0] = 0;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[2].resize(2);
+                        diffusivities_component_idx[2].resize(2);
+                        
+                        // -u*(4/3*mu + mu_v).
+                        diffusivities_data[2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[2][0] = 1;
+                        
+                        // -kappa.
+                        diffusivities_data[2][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[2][1] = 2;
+                        
+                        break;
+                    }
+                    default:
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::"
+                            << "getSideDataOfDiffusiveFluxDiffusivities()\n"
+                            << "There are only x-direction for one-dimensional problem."
+                            << std::endl);
+                    }
+                }
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusivities()\n"
+                    << "There are only x-direction for one-dimensional problem."
+                    << std::endl);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        switch (flux_direction)
+        {
+            case DIRECTION::X_DIRECTION:
+            {
+                switch (derivative_direction)
+                {
+                    case DIRECTION::X_DIRECTION:
+                    {
+                        /*
+                         * Mass equation.
+                         */
+                        
+                        diffusivities_data[0].resize(0);
+                        diffusivities_component_idx[0].resize(0);
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[1].resize(1);
+                        diffusivities_component_idx[1].resize(1);
+                        
+                        // -(4/3*mu + mu_v).
+                        diffusivities_data[1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[1][0] = 0;
+                        
+                        diffusivities_data[2].resize(1);
+                        diffusivities_component_idx[2].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[2][0] = 2;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[3].resize(3);
+                        diffusivities_component_idx[3].resize(3);
+                        
+                        // -u*(4/3*mu + mu_v).
+                        diffusivities_data[3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[3][0] = 3;
+                        
+                        // -v*mu.
+                        diffusivities_data[3][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[3][1] = 6;
+                        
+                        // -kappa.
+                        diffusivities_data[3][2] = d_side_data_diffusivities;
+                        diffusivities_component_idx[3][2] = 7;
+                        
+                        break;
+                    }
+                    case DIRECTION::Y_DIRECTION:
+                    {
+                        /*
+                         * Mass equation.
+                         */
+                        
+                        diffusivities_data[0].resize(0);
+                        diffusivities_component_idx[0].resize(0);
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[1].resize(1);
+                        diffusivities_component_idx[1].resize(1);
+                        
+                        // 2/3*mu - mu_v.
+                        diffusivities_data[1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[1][0] = 1;
+                        
+                        diffusivities_data[2].resize(1);
+                        diffusivities_component_idx[2].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[2][0] = 2;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[3].resize(2);
+                        diffusivities_component_idx[3].resize(2);
+                        
+                        // -v*mu.
+                        diffusivities_data[3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[3][0] = 6;
+                        
+                        // u*(2/3*mu - mu_v).
+                        diffusivities_data[3][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[3][1] = 4;
+                        
+                        break;
+                    }
+                    default:
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::"
+                            << "getSideDataOfDiffusiveFluxDiffusivities()\n"
+                            << "There are only x-direction and y-direction for two-dimensional problem."
+                            << std::endl);
+                    }
+                }
+                
+                break;
+            }
+            case DIRECTION::Y_DIRECTION:
+            {
+                switch (derivative_direction)
+                {
+                    case DIRECTION::X_DIRECTION:
+                    {
+                        /*
+                         * Mass equation.
+                         */
+                        
+                        diffusivities_data[0].resize(0);
+                        diffusivities_component_idx[0].resize(0);
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[1].resize(1);
+                        diffusivities_component_idx[1].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[1][0] = 2;
+                        
+                        diffusivities_data[2].resize(1);
+                        diffusivities_component_idx[2].resize(1);
+                        
+                        // 2/3*mu - mu_v.
+                        diffusivities_data[2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[2][0] = 1;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[3].resize(2);
+                        diffusivities_component_idx[3].resize(2);
+                        
+                        // v*(2/3*mu - mu_v).
+                        diffusivities_data[3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[3][0] = 4;
+                        
+                        // -u*mu.
+                        diffusivities_data[3][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[3][1] = 5;
+                        
+                        break;
+                    }
+                    case DIRECTION::Y_DIRECTION:
+                    {
+                        /*
+                         * Mass equation.
+                         */
+                        
+                        diffusivities_data[0].resize(0);
+                        diffusivities_component_idx[0].resize(0);
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[1].resize(1);
+                        diffusivities_component_idx[1].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[1][0] = 2;
+                        
+                        diffusivities_data[2].resize(1);
+                        diffusivities_component_idx[2].resize(1);
+                        
+                        // -(4/3*mu + mu_v).
+                        diffusivities_data[2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[2][0] = 0;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[3].resize(3);
+                        diffusivities_component_idx[3].resize(3);
+                        
+                        // -u*mu.
+                        diffusivities_data[3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[3][0] = 5;
+                        
+                        // -v*(4/3*mu + mu_v).
+                        diffusivities_data[3][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[3][1] = 3;
+                        
+                        // -kappa.
+                        diffusivities_data[3][2] = d_side_data_diffusivities;
+                        diffusivities_component_idx[3][2] = 7;
+                        
+                        break;
+                    }
+                    default:
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::"
+                            << "getSideDataOfDiffusiveFluxDiffusivities()\n"
+                            << "There are only x-direction and y-direction for two-dimensional problem."
+                            << std::endl);
+                    }
+                }
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusivities()\n"
+                    << "There are only x-direction and y-direction for two-dimensional problem."
+                    << std::endl);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        switch (flux_direction)
+        {
+            case DIRECTION::X_DIRECTION:
+            {
+                switch (derivative_direction)
+                {
+                    case DIRECTION::X_DIRECTION:
+                    {
+                        /*
+                         * Mass equation.
+                         */
+                        
+                        diffusivities_data[0].resize(0);
+                        diffusivities_component_idx[0].resize(0);
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[1].resize(1);
+                        diffusivities_component_idx[1].resize(1);
+                        
+                        // -(4/3*mu + mu_v).
+                        diffusivities_data[1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[1][0] = 0;
+                        
+                        diffusivities_data[2].resize(1);
+                        diffusivities_component_idx[2].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[2][0] = 2;
+                        
+                        diffusivities_data[3].resize(1);
+                        diffusivities_component_idx[3].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[3][0] = 2;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[4].resize(4);
+                        diffusivities_component_idx[4].resize(4);
+                        
+                        // -u*(4/3*mu + mu_v).
+                        diffusivities_data[4][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][0] = 3;
+                        
+                        // -v*mu.
+                        diffusivities_data[4][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][1] = 7;
+                        
+                        // -w*mu.
+                        diffusivities_data[4][2] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][2] = 8;
+                        
+                        // -kappa.
+                        diffusivities_data[4][3] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][3] = 9;
+                        
+                        break;
+                    }
+                    case DIRECTION::Y_DIRECTION:
+                    {
+                        /*
+                         * Mass equation.
+                         */
+                        
+                        diffusivities_data[0].resize(0);
+                        diffusivities_component_idx[0].resize(0);
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[1].resize(1);
+                        diffusivities_component_idx[1].resize(1);
+                        
+                        // 2/3*mu - mu_v.
+                        diffusivities_data[1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[1][0] = 1;
+                        
+                        diffusivities_data[2].resize(1);
+                        diffusivities_component_idx[2].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[2][0] = 2;
+                        
+                        diffusivities_data[3].resize(0);
+                        diffusivities_component_idx[3].resize(0);
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[4].resize(2);
+                        diffusivities_component_idx[4].resize(2);
+                        
+                        // -v*mu.
+                        diffusivities_data[4][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][0] = 7;
+                        
+                        // u*(2/3*mu - mu_v).
+                        diffusivities_data[4][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][1] = 4;
+                        
+                        break;
+                    }
+                    case DIRECTION::Z_DIRECTION:
+                    {
+                        /*
+                         * Mass equation.
+                         */
+                        
+                        diffusivities_data[0].resize(0);
+                        diffusivities_component_idx[0].resize(0);
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[1].resize(1);
+                        diffusivities_component_idx[1].resize(1);
+                        
+                        // 2/3*mu - mu_v.
+                        diffusivities_data[1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[1][0] = 1;
+                        
+                        diffusivities_data[2].resize(0);
+                        diffusivities_component_idx[2].resize(0);
+                        
+                        diffusivities_data[3].resize(1);
+                        diffusivities_component_idx[3].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[3][0] = 2;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[4].resize(2);
+                        diffusivities_component_idx[4].resize(2);
+                        
+                        // -w*mu.
+                        diffusivities_data[4][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][0] = 8;
+                        
+                        // u*(2/3*mu - mu_v).
+                        diffusivities_data[4][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][1] = 4;
+                        
+                        break;
+                    }
+                    default:
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::"
+                            << "getSideDataOfDiffusiveFluxDiffusivities()\n"
+                            << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
+                            << std::endl);
+                    }
+                }
+                
+                break;
+            }
+            case DIRECTION::Y_DIRECTION:
+            {
+                switch (derivative_direction)
+                {
+                    case DIRECTION::X_DIRECTION:
+                    {
+                        /*
+                         * Mass equation.
+                         */
+                        
+                        diffusivities_data[0].resize(0);
+                        diffusivities_component_idx[0].resize(0);
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[1].resize(1);
+                        diffusivities_component_idx[1].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[1][0] = 2;
+                        
+                        diffusivities_data[2].resize(1);
+                        diffusivities_component_idx[2].resize(1);
+                        
+                        // 2/3*mu - mu_v.
+                        diffusivities_data[2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[2][0] = 1;
+                        
+                        diffusivities_data[3].resize(0);
+                        diffusivities_component_idx[3].resize(0);
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[4].resize(2);
+                        diffusivities_component_idx[4].resize(2);
+                        
+                        // v*(2/3*mu - mu_v).
+                        diffusivities_data[4][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][0] = 4;
+                        
+                        // -u*mu.
+                        diffusivities_data[4][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][1] = 6;
+                        
+                        break;
+                    }
+                    case DIRECTION::Y_DIRECTION:
+                    {
+                        /*
+                         * Mass equation.
+                         */
+                        
+                        diffusivities_data[0].resize(0);
+                        diffusivities_component_idx[0].resize(0);
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[1].resize(1);
+                        diffusivities_component_idx[1].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[1][0] = 2;
+                        
+                        diffusivities_data[2].resize(1);
+                        diffusivities_component_idx[2].resize(1);
+                        
+                        // -(4/3*mu + mu_v).
+                        diffusivities_data[2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[2][0] = 0;
+                        
+                        diffusivities_data[3].resize(1);
+                        diffusivities_component_idx[3].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[3][0] = 2;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[4].resize(4);
+                        diffusivities_component_idx[4].resize(4);
+                        
+                        // -u*mu.
+                        diffusivities_data[4][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][0] = 6;
+                        
+                        // -v*(4/3*mu + mu_v).
+                        diffusivities_data[4][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][1] = 3;
+                        
+                        // -w*mu.
+                        diffusivities_data[4][2] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][2] = 8;
+                        
+                        // -kappa.
+                        diffusivities_data[4][3] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][3] = 9;
+                        
+                        break;
+                    }
+                    case DIRECTION::Z_DIRECTION:
+                    {
+                        /*
+                         * Mass equation.
+                         */
+                        
+                        diffusivities_data[0].resize(0);
+                        diffusivities_component_idx[0].resize(0);
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[1].resize(0);
+                        diffusivities_component_idx[1].resize(0);
+                        
+                        diffusivities_data[2].resize(1);
+                        diffusivities_component_idx[2].resize(1);
+                        
+                        // 2/3*mu - mu_v.
+                        diffusivities_data[2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[2][0] = 1;
+                        
+                        diffusivities_data[3].resize(1);
+                        diffusivities_component_idx[3].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[3][0] = 2;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[4].resize(2);
+                        diffusivities_component_idx[4].resize(2);
+                        
+                        // -w*u.
+                        diffusivities_data[4][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][0] = 8;
+                        
+                        // v*(2/3*mu - mu_v).
+                        diffusivities_data[4][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][1] = 5;
+                        
+                        break;
+                    }
+                    default:
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::"
+                            << "getSideDataOfDiffusiveFluxDiffusivities()\n"
+                            << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
+                            << std::endl);
+                    }
+                }
+                
+                break;
+            }
+            case DIRECTION::Z_DIRECTION:
+            {
+                switch (derivative_direction)
+                {
+                    case DIRECTION::X_DIRECTION:
+                    {
+                        /*
+                         * Mass equation.
+                         */
+                        
+                        diffusivities_data[0].resize(0);
+                        diffusivities_component_idx[0].resize(0);
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[1].resize(1);
+                        diffusivities_component_idx[1].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[1][0] = 2;
+                        
+                        diffusivities_data[2].resize(0);
+                        diffusivities_component_idx[2].resize(0);
+                        
+                        diffusivities_data[3].resize(1);
+                        diffusivities_component_idx[3].resize(1);
+                        
+                        // 2/3*mu - mu_v.
+                        diffusivities_data[3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[3][0] = 1;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[4].resize(2);
+                        diffusivities_component_idx[4].resize(2);
+                        
+                        // w*(2/3*mu - mu_v).
+                        diffusivities_data[4][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][0] = 5;
+                        
+                        // -u*mu.
+                        diffusivities_data[4][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][1] = 6;
+                        
+                        break;
+                    }
+                    case DIRECTION::Y_DIRECTION:
+                    {
+                        /*
+                         * Mass equation.
+                         */
+                        
+                        diffusivities_data[0].resize(0);
+                        diffusivities_component_idx[0].resize(0);
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[1].resize(0);
+                        diffusivities_component_idx[1].resize(0);
+                        
+                        diffusivities_data[2].resize(1);
+                        diffusivities_component_idx[2].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[2][0] = 2;
+                        
+                        diffusivities_data[3].resize(1);
+                        diffusivities_component_idx[3].resize(1);
+                        
+                        // 2/3*mu - mu_v.
+                        diffusivities_data[3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[3][0] = 1;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[4].resize(2);
+                        diffusivities_component_idx[4].resize(2);
+                        
+                        // w*(2/3*mu - mu_v).
+                        diffusivities_data[4][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][0] = 5;
+                        
+                        // -v*mu.
+                        diffusivities_data[4][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][1] = 7;
+                        
+                        break;
+                    }
+                    case DIRECTION::Z_DIRECTION:
+                    {
+                        /*
+                         * Mass equation.
+                         */
+                        
+                        diffusivities_data[0].resize(0);
+                        diffusivities_component_idx[0].resize(0);
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[1].resize(1);
+                        diffusivities_component_idx[1].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[1][0] = 2;
+                        
+                        diffusivities_data[2].resize(1);
+                        diffusivities_component_idx[2].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[2][0] = 2;
+                        
+                        diffusivities_data[3].resize(1);
+                        diffusivities_component_idx[3].resize(1);
+                        
+                        // -(4/3*mu + mu_v).
+                        diffusivities_data[3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[3][0] = 0;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[4].resize(4);
+                        diffusivities_component_idx[4].resize(4);
+                        
+                        // -u*mu.
+                        diffusivities_data[4][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][0] = 6;
+                        
+                        // -v*mu.
+                        diffusivities_data[4][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][1] = 7;
+                        
+                        // -w*(4/3*mu + mu_v).
+                        diffusivities_data[4][2] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][2] = 3;
+                        
+                        // -kappa.
+                        diffusivities_data[4][3] = d_side_data_diffusivities;
+                        diffusivities_component_idx[4][3] = 9;
+                        
+                        break;
+                    }
+                    default:
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::"
+                            << "getSideDataOfDiffusiveFluxDiffusivities()\n"
+                            << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
+                            << std::endl);
+                    }
+                }
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusivities()\n"
                     << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                     << std::endl);
             }

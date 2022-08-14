@@ -52,7 +52,8 @@ class FlowModelDiffusiveFluxUtilities
          */
         virtual void
         registerDerivedVariablesForDiffusiveFluxes(
-            const hier::IntVector& num_subghosts);
+            const hier::IntVector& num_subghosts,
+            const bool need_side_diffusivities = false);
         
         /*
          * Allocate memory for cell data of different registered derived variables related to this
@@ -160,10 +161,24 @@ protected:
         bool d_cell_data_computed_diffusivities;
         
         /*
+         * HAMERS_SHARED_PTR to side data of diffusivities.
+         */
+        HAMERS_SHARED_PTR<pdat::SideData<double> > d_side_data_diffusivities;
+        
+        /*
+         * Whether side data of diffusivities is computed.
+         */
+        bool d_side_data_computed_diffusivities;
+        
+        /*
          * HAMERS_WEAK_PTR to FlowModel.
          */
         HAMERS_WEAK_PTR<FlowModel> d_flow_model;
         
+        /*
+         * Whether side data of diffusivities is needed.
+         */
+        bool d_need_side_diffusivities;
 };
 
 #endif /* FLOW_MODEL_DIFFUSIVE_FLUX_UTILITIES_HPP */

@@ -135,7 +135,8 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::registerDerivedVariables(
  */
 void
 FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::registerDerivedVariablesForDiffusiveFluxes(
-    const hier::IntVector& num_subghosts)
+    const hier::IntVector& num_subghosts,
+    const bool need_side_diffusivities)
 {
     if (d_flow_model.expired())
     {
@@ -199,6 +200,8 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::registerDerivedVariablesForDiffus
         num_subghosts,
         "DIFFUSIVITIES",
         "DIFFUSIVITIES");
+    
+    d_need_side_diffusivities = need_side_diffusivities;
 }
 
 
@@ -264,42 +267,69 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::allocateMemoryForDerivedCellData(
         }
     }
     
-    if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
+    if (!d_need_side_diffusivities)
     {
-        if (!d_cell_data_computed_diffusivities)
+        if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
         {
-            if (!d_data_diffusivities)
+            if (!d_cell_data_computed_diffusivities)
             {
-                if (d_dim == tbox::Dimension(1))
+                if (!d_data_diffusivities)
                 {
-                    d_data_diffusivities.reset(new pdat::CellData<double>(
-                        interior_box,
-                        2,
-                        d_num_subghosts_diffusivities));
-                }
-                else if (d_dim == tbox::Dimension(2))
-                {
-                    d_data_diffusivities.reset(new pdat::CellData<double>(
-                        interior_box,
-                        9,
-                        d_num_subghosts_diffusivities));
-                }
-                else if (d_dim == tbox::Dimension(3))
-                {
-                    d_data_diffusivities.reset(new pdat::CellData<double>(
-                        interior_box,
-                        12,
-                        d_num_subghosts_diffusivities));
+                    if (d_dim == tbox::Dimension(1))
+                    {
+                        d_data_diffusivities.reset(new pdat::CellData<double>(
+                            interior_box,
+                            2,
+                            d_num_subghosts_diffusivities));
+                    }
+                    else if (d_dim == tbox::Dimension(2))
+                    {
+                        d_data_diffusivities.reset(new pdat::CellData<double>(
+                            interior_box,
+                            9,
+                            d_num_subghosts_diffusivities));
+                    }
+                    else if (d_dim == tbox::Dimension(3))
+                    {
+                        d_data_diffusivities.reset(new pdat::CellData<double>(
+                            interior_box,
+                            12,
+                            d_num_subghosts_diffusivities));
+                    }
                 }
             }
+            else
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::allocateMemoryForDerivedCellData()\n"
+                    << "Cell data of 'DIFFUSIVITIES' is aleady computed."
+                    << std::endl);
+            }
         }
-        else
-        {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::allocateMemoryForDerivedCellData()\n"
-                << "Cell data of 'DIFFUSIVITIES' is aleady computed."
-                << std::endl);
-        }
+    }
+}
+
+
+/*
+ * Allocate memory for side data of the diffusivities.
+ */
+void
+FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::allocateMemoryForSideDataOfDiffusiveFluxDiffusivities()
+{
+    if (!d_need_side_diffusivities)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::allocateMemoryForSideDataOfDiffusiveFluxDiffusivities()\n"
+            << "Side data of 'DIFFUSIVITIES' is not needed."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
     }
 }
 
@@ -326,11 +356,15 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::clearCellData()
     d_data_shear_viscosity.reset();
     d_data_bulk_viscosity.reset();
     
+    d_side_data_diffusivities.reset();
+    
     d_cell_data_computed_diffusivities   = false;
     d_cell_data_computed_shear_viscosity = false;
     d_cell_data_computed_bulk_viscosity  = false;
     
     d_derived_cell_data_computed = false;
+    
+    d_side_data_computed_diffusivities = false;
 }
 
 
@@ -1371,6 +1405,14 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusi
             << std::endl);
     }
     
+    if (!d_cell_data_computed_diffusivities)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusivities()\n"
+            << "Cell data of 'DIFFUSIVITIES' is not registered/computed yet."
+            << std::endl);
+    }
+    
     diffusivities_data.resize(d_num_eqn);
     diffusivities_component_idx.resize(d_num_eqn);
     
@@ -2202,6 +2244,322 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusi
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusivities()\n"
+                    << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
+                    << std::endl);
+            }
+        }
+    }
+}
+
+
+/*
+ * Get the cell data that needs interpolation to midpoints for computing side data of diffusivities in the
+ * diffusive flux.
+ */
+void
+FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities(
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& var_data_for_diffusivities,
+    std::vector<int>& var_data_for_diffusivities_component_idx)
+{
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    // Check whether a patch is already registered.
+    if (!flow_model_tmp->hasRegisteredPatch())
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::"
+            << "getCellDataOfDiffusiveFluxDiffusivities()\n"
+            << "No patch is registered yet."
+            << std::endl);
+    }
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+    }
+}
+
+
+/*
+ * Compute the side data of the diffusivities in the diffusive flux with the interpolated side data.
+ */
+void
+FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::computeSideDataOfDiffusiveFluxDiffusivities(
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_data_for_diffusivities)
+{
+    if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_side_data_computed_diffusivities)
+        {
+            if (d_flow_model.expired())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "The object is not setup yet!"
+                    << std::endl);
+            }
+            
+            if (d_dim == tbox::Dimension(1))
+            {
+            }
+            else if (d_dim == tbox::Dimension(2))
+            {
+            }
+            else if (d_dim == tbox::Dimension(3))
+            {
+            }
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::computeSideDataOfDiffusiveFluxDiffusivities()\n"
+            << "Cell data of 'DIFFUSIVITIES' is not yet registered."
+            << std::endl);
+    }
+}
+
+
+/*
+ * Get the side data of the diffusivities in the diffusive fluxa.
+ */
+void
+FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getSideDataOfDiffusiveFluxDiffusivities(
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& diffusivities_data,
+    std::vector<std::vector<int> >& diffusivities_component_idx,
+    const DIRECTION::TYPE& flux_direction,
+    const DIRECTION::TYPE& derivative_direction)
+{
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    // Check whether a patch is already registered.
+    if (!flow_model_tmp->hasRegisteredPatch())
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::"
+            << "getSideDataOfDiffusiveFluxDiffusivities()\n"
+            << "No patch is registered yet."
+            << std::endl);
+    }
+    
+    if (!d_cell_data_computed_diffusivities)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getSideDataOfDiffusiveFluxDiffusivities()\n"
+            << "Cell data of 'DIFFUSIVITIES' is not registered/computed yet."
+            << std::endl);
+    }
+    
+    diffusivities_data.resize(d_num_eqn);
+    diffusivities_component_idx.resize(d_num_eqn);
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        switch (flux_direction)
+        {
+            case DIRECTION::X_DIRECTION:
+            {
+                switch (derivative_direction)
+                {
+                    case DIRECTION::X_DIRECTION:
+                    {
+                        break;
+                    }
+                    default:
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::"
+                            << "getSideDataOfDiffusiveFluxDiffusivities()\n"
+                            << "There are only x-direction for one-dimensional problem."
+                            << std::endl);
+                    }
+                }
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getSideDataOfDiffusiveFluxDiffusivities()\n"
+                    << "There are only x-direction for one-dimensional problem."
+                    << std::endl);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        switch (flux_direction)
+        {
+            case DIRECTION::X_DIRECTION:
+            {
+                switch (derivative_direction)
+                {
+                    case DIRECTION::X_DIRECTION:
+                    {
+                        break;
+                    }
+                    case DIRECTION::Y_DIRECTION:
+                    {
+                        break;
+                    }
+                    default:
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::"
+                            << "getSideDataOfDiffusiveFluxDiffusivities()\n"
+                            << "There are only x-direction and y-direction for two-dimensional problem."
+                            << std::endl);
+                    }
+                }
+                
+                break;
+            }
+            case DIRECTION::Y_DIRECTION:
+            {
+                switch (derivative_direction)
+                {
+                    case DIRECTION::X_DIRECTION:
+                    {
+                        break;
+                    }
+                    case DIRECTION::Y_DIRECTION:
+                    {
+                        break;
+                    }
+                    default:
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::"
+                            << "getSideDataOfDiffusiveFluxDiffusivities()\n"
+                            << "There are only x-direction and y-direction for two-dimensional problem."
+                            << std::endl);
+                    }
+                }
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getSideDataOfDiffusiveFluxDiffusivities()\n"
+                    << "There are only x-direction and y-direction for two-dimensional problem."
+                    << std::endl);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        switch (flux_direction)
+        {
+            case DIRECTION::X_DIRECTION:
+            {
+                switch (derivative_direction)
+                {
+                    case DIRECTION::X_DIRECTION:
+                    {
+                        break;
+                    }
+                    case DIRECTION::Y_DIRECTION:
+                    {
+                        break;
+                    }
+                    case DIRECTION::Z_DIRECTION:
+                    {
+                        break;
+                    }
+                    default:
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::"
+                            << "getSideDataOfDiffusiveFluxDiffusivities()\n"
+                            << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
+                            << std::endl);
+                    }
+                }
+                
+                break;
+            }
+            case DIRECTION::Y_DIRECTION:
+            {
+                switch (derivative_direction)
+                {
+                    case DIRECTION::X_DIRECTION:
+                    {
+                        break;
+                    }
+                    case DIRECTION::Y_DIRECTION:
+                    {
+                        break;
+                    }
+                    case DIRECTION::Z_DIRECTION:
+                    {
+                        break;
+                    }
+                    default:
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::"
+                            << "getSideDataOfDiffusiveFluxDiffusivities()\n"
+                            << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
+                            << std::endl);
+                    }
+                }
+                
+                break;
+            }
+            case DIRECTION::Z_DIRECTION:
+            {
+                switch (derivative_direction)
+                {
+                    case DIRECTION::X_DIRECTION:
+                    {
+                        break;
+                    }
+                    case DIRECTION::Y_DIRECTION:
+                    {
+                        break;
+                    }
+                    case DIRECTION::Z_DIRECTION:
+                    {
+                        break;
+                    }
+                    default:
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::"
+                            << "getSideDataOfDiffusiveFluxDiffusivities()\n"
+                            << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
+                            << std::endl);
+                    }
+                }
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getSideDataOfDiffusiveFluxDiffusivities()\n"
                     << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                     << std::endl);
             }
