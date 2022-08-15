@@ -22,7 +22,7 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
         
         /*
          * Register different derived variables related to this class in the registered patch. The
-         * derived variables to be registered are given as entires in a map of the variable name to
+         * derived variables to be registered are given as entries in a map of the variable name to
          * the number of sub-ghost cells required.
          */
         void
