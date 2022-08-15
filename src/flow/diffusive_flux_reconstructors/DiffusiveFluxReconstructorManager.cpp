@@ -10,7 +10,19 @@ DiffusiveFluxReconstructorManager::DiffusiveFluxReconstructorManager(
     const std::string& diffusive_flux_reconstructor_str):
         d_object_name(object_name)
 {
-    if (diffusive_flux_reconstructor_str == "SIXTH_ORDER")
+    if (diffusive_flux_reconstructor_str == "MIDPOINT_SIXTH_ORDER")
+    {
+        d_diffusive_flux_reconstructor_type = DIFFUSIVE_FLUX_RECONSTRUCTOR::MIDPOINT_SIXTH_ORDER;
+        
+        d_diff_flux_reconstructor.reset(new DiffusiveFluxReconstructorMidpointSixthOrder(
+            "d_diffusive_flux_reconstructor",
+            dim,
+            grid_geometry,
+            flow_model->getNumberOfEquations(),
+            flow_model,
+            diffusive_flux_reconstructor_db));
+    }
+    else if (diffusive_flux_reconstructor_str == "SIXTH_ORDER")
     {
         d_diffusive_flux_reconstructor_type = DIFFUSIVE_FLUX_RECONSTRUCTOR::SIXTH_ORDER;
         
