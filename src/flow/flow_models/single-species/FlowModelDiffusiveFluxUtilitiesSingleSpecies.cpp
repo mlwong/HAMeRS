@@ -366,7 +366,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForSideDataOfDiffusi
     
     if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_side_data_computed_diffusivities)
+        if (!d_side_data_diffusivities_computed)
         {
             if (!d_side_data_diffusivities)
             {
@@ -399,10 +399,10 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForSideDataOfDiffusi
 
 
 /*
- * Clear cell data of different derived variables related to this class in the registered patch.
+ * Clear cell and side data of different derived variables related to this class in the registered patch.
  */
 void
-FlowModelDiffusiveFluxUtilitiesSingleSpecies::clearCellData()
+FlowModelDiffusiveFluxUtilitiesSingleSpecies::clearCellAndSideData()
 {
     d_num_subghosts_diffusivities        = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_shear_viscosity      = -hier::IntVector::getOne(d_dim);
@@ -433,7 +433,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::clearCellData()
     
     d_derived_cell_data_computed = false;
     
-    d_side_data_computed_diffusivities = false;
+    d_side_data_diffusivities_computed = false;
 }
 
 
@@ -2409,7 +2409,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
 {
     if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_side_data_computed_diffusivities)
+        if (!d_side_data_diffusivities_computed)
         {
             if (d_flow_model.expired())
             {
@@ -2432,7 +2432,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
             const hier::IntVector num_ghosts = var_data_for_diffusivities[0]->getGhostCellWidth();
             const hier::IntVector ghostcell_dims = var_data_for_diffusivities[0]->getGhostBox().numberCells();
             
-        #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(static_cast<int>(var_data_for_diffusivities.size()) == 3 + d_dim.getValue());
             TBOX_ASSERT(num_ghosts <= d_num_subghosts_diffusivities);
             
@@ -2441,7 +2441,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                 TBOX_ASSERT(var_data_for_diffusivities[vi] == num_ghosts);
                 TBOX_ASSERT(var_data_for_diffusivities[vi]->getGhostBox().contains(interior_box));
             }
-        #endif
+#endif
             
             /*
              * Get the pointers to the cell data of shear viscosity, bulk viscosity and thermal conductivity.
@@ -2732,7 +2732,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                 }
             }
             
-            d_side_data_computed_diffusivities = true;
+            d_side_data_diffusivities_computed = true;
         }
     }
     else

@@ -969,7 +969,7 @@ FlowModelSingleSpecies::unregisterPatch()
     d_cell_data_computed_max_wave_speed_z  = false;
     d_cell_data_computed_max_diffusivity   = false;
     
-    d_flow_model_diffusive_flux_utilities->clearCellData();
+    d_flow_model_diffusive_flux_utilities->clearCellAndSideData();
     d_flow_model_source_utilities->clearCellData();
     
     d_derived_cell_data_computed = false;

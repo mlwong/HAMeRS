@@ -335,10 +335,10 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::allocateMemoryForSideDataOfDiffus
 
 
 /*
- * Clear cell data of different derived variables related to this class in the registered patch.
+ * Clear cell and side data of different derived variables related to this class in the registered patch.
  */
 void
-FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::clearCellData()
+FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::clearCellAndSideData()
 {
     d_num_subghosts_diffusivities   = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_shear_viscosity = -hier::IntVector::getOne(d_dim);
@@ -364,7 +364,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::clearCellData()
     
     d_derived_cell_data_computed = false;
     
-    d_side_data_computed_diffusivities = false;
+    d_side_data_diffusivities_computed = false;
 }
 
 
@@ -2302,7 +2302,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::computeSideDataOfDiffusiveFluxDif
 {
     if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_side_data_computed_diffusivities)
+        if (!d_side_data_diffusivities_computed)
         {
             if (d_flow_model.expired())
             {

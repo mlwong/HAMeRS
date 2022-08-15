@@ -441,10 +441,10 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::allocateMemoryForSideDataOfD
 
 
 /*
- * Clear cell data of different derived variables related to this class in the registered patch.
+ * Clear cell and side data of different derived variables related to this class in the registered patch.
  */
 void
-FlowModelDiffusiveFluxUtilitiesFourEqnConservative::clearCellData()
+FlowModelDiffusiveFluxUtilitiesFourEqnConservative::clearCellAndSideData()
 {
     d_num_subghosts_diffusivities        = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_mass_diffusivities   = -hier::IntVector::getOne(d_dim);
@@ -480,7 +480,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::clearCellData()
     
     d_derived_cell_data_computed = false;
     
-    d_side_data_computed_diffusivities = false;
+    d_side_data_diffusivities_computed = false;
 }
 
 
@@ -2907,7 +2907,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
 {
     if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_side_data_computed_diffusivities)
+        if (!d_side_data_diffusivities_computed)
         {
             if (d_flow_model.expired())
             {

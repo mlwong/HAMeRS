@@ -41,7 +41,7 @@ DiffusiveFluxReconstructorManager::DiffusiveFluxReconstructorManager(
             << "Unknown diffusive_flux_reconstructor string = '"
             << diffusive_flux_reconstructor_str
             << "' found in input."
-            << std::endl);        
+            << std::endl);
     }
 }
 

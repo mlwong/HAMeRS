@@ -49,9 +49,9 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
         void allocateMemoryForSideDataOfDiffusiveFluxDiffusivities();
         
         /*
-         * Clear cell data of different derived variables related to this class in the registered patch.
+         * Clear cell and side data of different derived variables related to this class in the registered patch.
          */
-        void clearCellData();
+        void clearCellAndSideData();
         
         /*
          * Compute cell data of different registered derived variables related to this class.
