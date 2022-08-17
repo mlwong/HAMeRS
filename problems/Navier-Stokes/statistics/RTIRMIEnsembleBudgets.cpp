@@ -38,6 +38,8 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
             rho_u_v_avg_computed = false;
             rho_u_w_avg_computed = false;
             
+            u_p_avg_computed = false;
+            
             ddx_rho_avg_computed       = false;
             ddx_p_avg_computed         = false;
             ddx_u_avg_computed         = false;
@@ -126,7 +128,9 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
             
             rho_u_v_avg_realizations.clear();
             rho_u_w_avg_realizations.clear();
-        
+            
+            u_p_avg_realizations.clear();
+            
             ddx_rho_avg_realizations.clear();
             ddx_p_avg_realizations.clear();
             ddx_u_avg_realizations.clear();
@@ -218,6 +222,8 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         std::vector<std::vector<double> > rho_u_v_avg_realizations;
         std::vector<std::vector<double> > rho_u_w_avg_realizations;
         
+        std::vector<std::vector<double> > u_p_avg_realizations;
+        
         std::vector<std::vector<double> > ddx_rho_avg_realizations;
         std::vector<std::vector<double> > ddx_p_avg_realizations;
         std::vector<std::vector<double> > ddx_u_avg_realizations;
@@ -305,6 +311,8 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         
         bool rho_u_v_avg_computed;
         bool rho_u_w_avg_computed;
+        
+        bool u_p_avg_computed;
         
         bool ddx_rho_avg_computed;
         bool ddx_p_avg_computed;
@@ -1000,6 +1008,27 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
         
         d_ensemble_statistics->rho_u_w_avg_computed = true;
     }
+    
+    // Compute u_p_avg.
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    
+    std::vector<double> u_p_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<std::vector<double> >& u_p_avg_realizations = d_ensemble_statistics->u_p_avg_realizations;
+    u_p_avg_realizations.push_back(u_p_avg_global);
+    
+    d_ensemble_statistics->u_p_avg_computed = true;
     
     // Compute ddx_rho_avg.
     
@@ -3832,6 +3861,8 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
         const std::vector<std::vector<double> >& rho_u_avg_realizations   = d_ensemble_statistics->rho_u_avg_realizations;
         const std::vector<std::vector<double> >& rho_u_u_avg_realizations = d_ensemble_statistics->rho_u_u_avg_realizations;
         
+        const std::vector<std::vector<double> >& u_p_avg_realizations = d_ensemble_statistics->u_p_avg_realizations;
+        
         const std::vector<std::vector<double> >& ddx_rho_avg_realizations       = d_ensemble_statistics->ddx_rho_avg_realizations;
         const std::vector<std::vector<double> >& ddx_p_avg_realizations         = d_ensemble_statistics->ddx_p_avg_realizations;
         const std::vector<std::vector<double> >& ddx_u_avg_realizations         = d_ensemble_statistics->ddx_u_avg_realizations;
@@ -3874,6 +3905,8 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
         std::vector<double> rho_u_avg_global(num_cells, double(0));
         std::vector<double> rho_u_u_avg_global(num_cells, double(0));
         
+        std::vector<double> u_p_avg_global(num_cells, double(0));
+        
         std::vector<double> ddx_rho_avg_global(num_cells, double(0));
         std::vector<double> ddx_p_avg_global(num_cells, double(0));
         std::vector<double> ddx_u_avg_global(num_cells, double(0));
@@ -3911,6 +3944,8 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
                 u_avg_global[i]       += weight*u_avg_realizations[ri][i];
                 rho_u_avg_global[i]   += weight*rho_u_avg_realizations[ri][i];
                 rho_u_u_avg_global[i] += weight*rho_u_u_avg_realizations[ri][i];
+                
+                u_p_avg_global[i] += weight*u_p_avg_realizations[ri][i];
                 
                 ddx_rho_avg_global[i]       += weight*ddx_rho_avg_realizations[ri][i];
                 ddx_p_avg_global[i]         += weight*ddx_p_avg_realizations[ri][i];
@@ -4089,11 +4124,26 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
          * Compute term IV(2).
          */
         
-        std::vector<double> m_2ddx_u_p_p_p(num_cells, double(0));
+        // std::vector<double> m_2ddx_u_p_p_p(num_cells, double(0));
+        // for (int i = 0; i < num_cells; i++)
+        // {
+        //     m_2ddx_u_p_p_p[i] = -double(2)*(ddx_u_p_avg_global[i] - u_avg_global[i]*ddx_p_avg_global[i] -
+        //         p_avg_global[i]*ddx_u_avg_global[i]);
+        // }
+        
+        std::vector<double> u_p_p_p(num_cells, double(0));
         for (int i = 0; i < num_cells; i++)
         {
-            m_2ddx_u_p_p_p[i] = -double(2)*(ddx_u_p_avg_global[i] - u_avg_global[i]*ddx_p_avg_global[i] -
-                p_avg_global[i]*ddx_u_avg_global[i]);
+            u_p_p_p[i] = u_p_avg_global[i] - u_avg_global[i]*p_avg_global[i];
+        }
+        
+        std::vector<double> m_2ddx_u_p_p_p = computeDerivativeOfVector1D(
+            u_p_p_p,
+            dx);
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            m_2ddx_u_p_p_p[i] *= (-double(2));
         }
         
         /*
