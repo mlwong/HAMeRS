@@ -2765,15 +2765,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -2909,15 +2909,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -3063,15 +3063,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -3256,15 +3256,15 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -3400,15 +3400,15 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -3554,15 +3554,15 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -3776,15 +3776,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -3977,15 +3977,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -4193,15 +4193,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -4452,15 +4452,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -4596,15 +4596,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -4750,15 +4750,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -4943,15 +4943,15 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -5087,15 +5087,15 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -5241,15 +5241,15 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -5463,15 +5463,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -5664,15 +5664,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -5880,15 +5880,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -6147,15 +6147,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_1 = ratio_to_finest_level[1];
             
@@ -6301,15 +6301,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_1 = ratio_to_finest_level[1];
             
@@ -6502,15 +6502,15 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousYDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_1 = ratio_to_finest_level[1];
             
@@ -6656,15 +6656,15 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousYDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_1 = ratio_to_finest_level[1];
             
@@ -6886,15 +6886,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_1 = ratio_to_finest_level[1];
             
@@ -7102,15 +7102,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_1 = ratio_to_finest_level[1];
             
@@ -7369,15 +7369,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_1 = ratio_to_finest_level[1];
             
@@ -7523,15 +7523,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_1 = ratio_to_finest_level[1];
             
@@ -7724,15 +7724,15 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousYDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_1 = ratio_to_finest_level[1];
             
@@ -7878,15 +7878,15 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousYDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_1 = ratio_to_finest_level[1];
             
@@ -8108,15 +8108,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_1 = ratio_to_finest_level[1];
             
@@ -8324,15 +8324,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_1 = ratio_to_finest_level[1];
             
@@ -8599,15 +8599,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_2 = ratio_to_finest_level[2];
             
@@ -8808,15 +8808,15 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousZDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_2 = ratio_to_finest_level[2];
             
@@ -9046,15 +9046,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_2 = ratio_to_finest_level[2];
             
@@ -9321,15 +9321,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_2 = ratio_to_finest_level[2];
             
@@ -9530,15 +9530,15 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousZDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_2 = ratio_to_finest_level[2];
             
@@ -9768,15 +9768,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_2 = ratio_to_finest_level[2];
             
@@ -12008,15 +12008,15 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -12185,15 +12185,15 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -12389,15 +12389,15 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -12631,15 +12631,15 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -12807,15 +12807,15 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -13009,15 +13009,15 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             

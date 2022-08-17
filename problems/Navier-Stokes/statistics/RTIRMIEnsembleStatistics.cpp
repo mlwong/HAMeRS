@@ -11944,16 +11944,16 @@ RTIRMIStatisticsUtilities::getAveragedShearStressComponentWithInhomogeneousXDire
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratio_finest_level_to_coarest_level =
+    hier::IntVector ratio_finest_level_to_coarsest_level =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratio_finest_level_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratio_finest_level_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -11974,7 +11974,7 @@ RTIRMIStatisticsUtilities::getAveragedShearStressComponentWithInhomogeneousXDire
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarest_level;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarsest_level;
     
     /*
      * Get the indices of the physical domain.
@@ -12013,15 +12013,15 @@ RTIRMIStatisticsUtilities::getAveragedShearStressComponentWithInhomogeneousXDire
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -12279,15 +12279,15 @@ RTIRMIStatisticsUtilities::getAveragedShearStressComponentWithInhomogeneousXDire
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -12666,15 +12666,15 @@ RTIRMIStatisticsUtilities::getAveragedShearStressComponentWithInhomogeneousXDire
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -13575,16 +13575,16 @@ RTIRMIStatisticsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomo
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratio_finest_level_to_coarest_level =
+    hier::IntVector ratio_finest_level_to_coarsest_level =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratio_finest_level_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratio_finest_level_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -13605,7 +13605,7 @@ RTIRMIStatisticsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomo
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarest_level;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarsest_level;
     
     /*
      * Get the indices of the physical domain.
@@ -13644,15 +13644,15 @@ RTIRMIStatisticsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomo
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -13932,15 +13932,15 @@ RTIRMIStatisticsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomo
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -14610,15 +14610,15 @@ RTIRMIStatisticsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomo
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -16292,16 +16292,16 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratio_finest_level_to_coarest_level =
+    hier::IntVector ratio_finest_level_to_coarsest_level =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratio_finest_level_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratio_finest_level_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -16322,7 +16322,7 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarest_level;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarsest_level;
     
     /*
      * Get the indices of the physical domain.
@@ -16368,15 +16368,15 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -16756,15 +16756,15 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -17298,15 +17298,15 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             

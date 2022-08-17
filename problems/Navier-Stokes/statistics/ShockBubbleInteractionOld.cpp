@@ -261,16 +261,16 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -291,7 +291,7 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -332,15 +332,15 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -534,15 +534,15 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -755,15 +755,15 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -6317,19 +6317,19 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
         for (int li = 0; li < num_levels; li++)
         {
             /*
-             * Get the refinement ratio from the current level to the coarest level.
+             * Get the refinement ratio from the current level to the coarsest level.
              */
             
-            hier::IntVector ratioCurrentLevelToCoarestLevel =
+            hier::IntVector ratioCurrentLevelToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioCurrentLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioCurrentLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
             if (li == 0)
             {
-                ratioCurrentLevelToCoarestLevel = hier::IntVector::getOne(d_dim);
+                ratioCurrentLevelToCoarsestLevel = hier::IntVector::getOne(d_dim);
             }
             
             /*
@@ -6353,7 +6353,7 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                weighted_num_cells_local += double(interior_dims[0])*double(ratioCurrentLevelToCoarestLevel[0]);
+                weighted_num_cells_local += double(interior_dims[0])*double(ratioCurrentLevelToCoarsestLevel[0]);
             }
         }
         
@@ -6387,19 +6387,19 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
         for (int li = 0; li < num_levels; li++)
         {
             /*
-             * Get the refinement ratio from the current level to the coarest level.
+             * Get the refinement ratio from the current level to the coarsest level.
              */
             
-            hier::IntVector ratioCurrentLevelToCoarestLevel =
+            hier::IntVector ratioCurrentLevelToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioCurrentLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioCurrentLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
             if (li == 0)
             {
-                ratioCurrentLevelToCoarestLevel = hier::IntVector::getOne(d_dim);
+                ratioCurrentLevelToCoarsestLevel = hier::IntVector::getOne(d_dim);
             }
             
             /*
@@ -6424,7 +6424,7 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
                 weighted_num_cells_local += double(interior_dims[0])*double(interior_dims[1])*
-                    double(ratioCurrentLevelToCoarestLevel[0]);
+                    double(ratioCurrentLevelToCoarsestLevel[0]);
             }
         }
         
@@ -6458,19 +6458,19 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
         for (int li = 0; li < num_levels; li++)
         {
             /*
-             * Get the refinement ratio from the current level to the coarest level.
+             * Get the refinement ratio from the current level to the coarsest level.
              */
             
-            hier::IntVector ratioCurrentLevelToCoarestLevel =
+            hier::IntVector ratioCurrentLevelToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioCurrentLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioCurrentLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
             if (li == 0)
             {
-                ratioCurrentLevelToCoarestLevel = hier::IntVector::getOne(d_dim);
+                ratioCurrentLevelToCoarsestLevel = hier::IntVector::getOne(d_dim);
             }
             
             /*
@@ -6495,7 +6495,7 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
                 weighted_num_cells_local += double(interior_dims[0])*double(interior_dims[1])*double(interior_dims[2])*
-                    double(ratioCurrentLevelToCoarestLevel[0]);
+                    double(ratioCurrentLevelToCoarsestLevel[0]);
             }
         }
         
