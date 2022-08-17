@@ -164,19 +164,19 @@ MPIHelperNumberOfCells::getWeightedNumberOfCells() const
         for (int li = 0; li < num_levels; li++)
         {
             /*
-             * Get the refinement ratio from the current level to the coarest level.
+             * Get the refinement ratio from the current level to the coarsest level.
              */
             
-            hier::IntVector ratioCurrentLevelToCoarestLevel =
+            hier::IntVector ratioCurrentLevelToCoarsestLevel =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioCurrentLevelToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioCurrentLevelToCoarsestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
             if (li == 0)
             {
-                ratioCurrentLevelToCoarestLevel = hier::IntVector::getOne(d_dim);
+                ratioCurrentLevelToCoarsestLevel = hier::IntVector::getOne(d_dim);
             }
             
             /*
@@ -200,7 +200,7 @@ MPIHelperNumberOfCells::getWeightedNumberOfCells() const
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                weighted_num_cells_local += double(interior_dims[0])*double(ratioCurrentLevelToCoarestLevel[0]);
+                weighted_num_cells_local += double(interior_dims[0])*double(ratioCurrentLevelToCoarsestLevel[0]);
             }
         }
         
@@ -223,19 +223,19 @@ MPIHelperNumberOfCells::getWeightedNumberOfCells() const
         for (int li = 0; li < num_levels; li++)
         {
             /*
-             * Get the refinement ratio from the current level to the coarest level.
+             * Get the refinement ratio from the current level to the coarsest level.
              */
             
-            hier::IntVector ratioCurrentLevelToCoarestLevel =
+            hier::IntVector ratioCurrentLevelToCoarsestLevel =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioCurrentLevelToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioCurrentLevelToCoarsestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
             if (li == 0)
             {
-                ratioCurrentLevelToCoarestLevel = hier::IntVector::getOne(d_dim);
+                ratioCurrentLevelToCoarsestLevel = hier::IntVector::getOne(d_dim);
             }
             
             /*
@@ -260,7 +260,7 @@ MPIHelperNumberOfCells::getWeightedNumberOfCells() const
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
                 weighted_num_cells_local += double(interior_dims[0])*double(interior_dims[1])*
-                    double(ratioCurrentLevelToCoarestLevel[0]);
+                    double(ratioCurrentLevelToCoarsestLevel[0]);
             }
         }
         
@@ -283,19 +283,19 @@ MPIHelperNumberOfCells::getWeightedNumberOfCells() const
         for (int li = 0; li < num_levels; li++)
         {
             /*
-             * Get the refinement ratio from the current level to the coarest level.
+             * Get the refinement ratio from the current level to the coarsest level.
              */
             
-            hier::IntVector ratioCurrentLevelToCoarestLevel =
+            hier::IntVector ratioCurrentLevelToCoarsestLevel =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioCurrentLevelToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioCurrentLevelToCoarsestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
             if (li == 0)
             {
-                ratioCurrentLevelToCoarestLevel = hier::IntVector::getOne(d_dim);
+                ratioCurrentLevelToCoarsestLevel = hier::IntVector::getOne(d_dim);
             }
             
             /*
@@ -320,7 +320,7 @@ MPIHelperNumberOfCells::getWeightedNumberOfCells() const
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
                 weighted_num_cells_local += double(interior_dims[0])*double(interior_dims[1])*
-                    double(ratioCurrentLevelToCoarestLevel[0]);
+                    double(ratioCurrentLevelToCoarsestLevel[0]);
             }
         }
         

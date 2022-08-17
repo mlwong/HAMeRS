@@ -26,9 +26,27 @@ class MPIHelper
          * Get refinement ratio from the finest level to the coarsest level.
          */
         const hier::IntVector&
-        getRatioFinestLevelToCoarestLevel() const
+        getRatioFinestLevelToCoarsestLevel() const
         {
-            return d_ratio_finest_level_to_coarest_level;
+            return d_ratio_finest_level_to_coarsest_level;
+        }
+        
+        /*
+         * Get number of points in the coarsest domain.
+         */
+        const hier::IntVector&
+        getCoarsestDomainNumberOfPoints() const
+        {
+            return d_coarsest_level_dims;
+        }
+        
+        /*
+         * Get grid spacing of the coarsest domain.
+         */
+        const std::vector<double>&
+        getCoarsestDomainGridSpacing() const
+        {
+            return d_dx_coarsest_level_dims;
         }
         
         /*
@@ -46,7 +64,7 @@ class MPIHelper
         const std::vector<double>&
         getFinestRefinedDomainGridSpacing() const
         {
-            return dx_finest_level_dims;
+            return d_dx_finest_level_dims;
         }
         
     protected:
@@ -78,7 +96,17 @@ class MPIHelper
         /*
          * Refinement ratio from the finest level to the coarsest level.
          */
-        hier::IntVector d_ratio_finest_level_to_coarest_level;
+        hier::IntVector d_ratio_finest_level_to_coarsest_level;
+        
+        /*
+         * Number of points in the coarsest domain.
+         */
+        hier::IntVector d_coarsest_level_dims;
+        
+        /*
+         * Grid spacing of the coarsest domain.
+         */
+        std::vector<double> d_dx_coarsest_level_dims;
         
         /*
          * Number of points in the finest refined domain.
@@ -88,7 +116,7 @@ class MPIHelper
         /*
          * Grid spacing of the finest refined domain.
          */
-        std::vector<double> dx_finest_level_dims;
+        std::vector<double> d_dx_finest_level_dims;
         
 };
 
