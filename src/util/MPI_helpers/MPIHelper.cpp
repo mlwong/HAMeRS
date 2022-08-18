@@ -10,21 +10,23 @@ MPIHelper::MPIHelper(
         d_grid_geometry(grid_geometry),
         d_patch_hierarchy(patch_hierarchy),
         d_mpi(tbox::SAMRAI_MPI::getSAMRAIWorld()),
-        d_ratio_finest_level_to_coarest_level(dim),
+        d_ratio_finest_level_to_coarsest_level(dim),
+        d_coarsest_level_dims(dim),
+        d_dx_coarsest_level_dims(dim.getValue()),
         d_finest_level_dims(dim),
-        dx_finest_level_dims(dim.getValue())
+        d_dx_finest_level_dims(dim.getValue())
 {
     /*
-     * Compute the refinement ratio from the finest level to the coarest level.
+     * Compute the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
-    d_ratio_finest_level_to_coarest_level =
+    d_ratio_finest_level_to_coarsest_level =
         d_patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        d_ratio_finest_level_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(li);
+        d_ratio_finest_level_to_coarsest_level *= d_patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -34,7 +36,9 @@ MPIHelper::MPIHelper(
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    d_finest_level_dims = physical_domain_dims*d_ratio_finest_level_to_coarest_level;
+    
+    d_coarsest_level_dims = physical_domain_dims;
+    d_finest_level_dims   = physical_domain_dims*d_ratio_finest_level_to_coarsest_level;
     
     /*
      * Compute grid spacing of the finest refined domain.
@@ -44,6 +48,7 @@ MPIHelper::MPIHelper(
     
     for (int di = 0; di < d_dim.getValue(); di++)
     {
-        dx_finest_level_dims[di] = dx_tmp[di]/d_ratio_finest_level_to_coarest_level[di];
+        d_dx_coarsest_level_dims[di] = dx_tmp[di];
+        d_dx_finest_level_dims[di]   = dx_tmp[di]/d_ratio_finest_level_to_coarsest_level[di];
     }
 }

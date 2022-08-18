@@ -94,6 +94,33 @@ class FlowModelMPIHelperAverage: public FlowModelMPIHelper
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
+         * Compute averaged value with only x-direction as inhomogeneous direction on the coarsest level.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
+            const std::string quantity_name,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute averaged value (on product of variables) with only x-direction as inhomogeneous direction on
+         * the coarsest level.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute averaged value (on product of variables) with only x-direction as inhomogeneous direction on
+         * the coarsest level.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_reciprocal,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
          * Compute averaged value with only x-direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
