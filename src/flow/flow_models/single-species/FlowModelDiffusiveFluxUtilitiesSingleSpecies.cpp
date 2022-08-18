@@ -2333,7 +2333,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataForInterpolationToSideD
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::"
-            << "getCellDataOfDiffusiveFluxDiffusivities()\n"
+            << "getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities()\n"
             << "No patch is registered yet."
             << std::endl);
     }
@@ -2341,7 +2341,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataForInterpolationToSideD
     if (!d_cell_data_computed_shear_viscosity)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities()\n"
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities()\n"
             << "Cell data of 'SHEAR_VISCOSITY' is not registered/computed yet."
             << std::endl);
     }
@@ -2349,7 +2349,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataForInterpolationToSideD
     if (!d_cell_data_computed_bulk_viscosity)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities()\n"
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities()\n"
             << "Cell data of 'BULK_VISCOSITY' is not registered/computed yet."
             << std::endl);
     }
@@ -2357,7 +2357,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataForInterpolationToSideD
     if (!d_cell_data_computed_thermal_conductivity)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities()\n"
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities()\n"
             << "Cell data of 'THERMAL_CONDUCTIVITY' is not registered/computed yet."
             << std::endl);
     }
@@ -2442,10 +2442,6 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                 TBOX_ASSERT(var_data_for_diffusivities[vi]->getGhostBox().contains(interior_box));
             }
 #endif
-            
-            /*
-             * Get the pointers to the cell data of shear viscosity, bulk viscosity and thermal conductivity.
-             */
             
             if (d_dim == tbox::Dimension(1))
             {
@@ -2546,7 +2542,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                             (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
                         
                         const int idx_var_data = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0];;
+                            (j + num_ghosts[1])*ghostcell_dims[0];
                         
                         D_00[idx_diffusivities] = -(double(4)/double(3)*mu_y[idx_var_data] + mu_v_y[idx_var_data]);
                         D_01[idx_diffusivities] = double(2)/double(3)*mu_y[idx_var_data] - mu_v_y[idx_var_data];

@@ -2276,7 +2276,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataForInterpolationToSide
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::"
-            << "getCellDataOfDiffusiveFluxDiffusivities()\n"
+            << "getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities()\n"
             << "No patch is registered yet."
             << std::endl);
     }
