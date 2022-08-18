@@ -150,8 +150,8 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     
     const double gamma = double(7)/double(5); // assume both gases have the same ratio of specific heat ratios
     
-    const double W_0 = 0.0480; // molecular weight of heavier gas
-    const double W_1 = 0.0160; // molecular weight of lighter gas
+    const double W_0 = 0.0290; // molecular weight of heavier gas
+    const double W_1 = 0.0290; // molecular weight of lighter gas
     
     const double p_ref = 100000.0; // interface pressure
     const double T_ref = 300.0;    // background temperature
@@ -197,6 +197,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     const double R_1 = R_u/W_1;          // gas constant of lighter gas
 
     const double* const domain_xlo = d_grid_geometry->getXLower();
+    const double* const domain_xhi = d_grid_geometry->getXUpper();
     
     if (d_project_name == "2D jet")
     {
@@ -239,6 +240,108 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     const double E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
 
                     const double xi_b      = (1.0-(x[0]-domain_xlo[0])/(d_special_source_box_lo[0]-domain_xlo[0]))*sponge_rate; // mask value needs to be improved 
+
+                    //sponge_rate_tot = (pow((p_ref/rho_ref),0.5))*sponge_rate;
+                    //xi_b            = -(x[0])/(701.0-600.0); // mask value needs to be improved 
+                    
+                    const double rho_Y_0_p = rho_Y_0[idx_cons_var] - rho_Y_0_ref;
+                    const double rho_Y_1_p = rho_Y_1[idx_cons_var] - rho_Y_1_ref;
+                    const double rho_u_p   = rho_u[idx_cons_var]   - rho_u_ref;
+                    const double rho_v_p   = rho_v[idx_cons_var]   - rho_v_ref;
+                    const double E_p       = E[idx_cons_var]       - E_ref;
+                    
+                    S[0][idx_source] -= dt*xi_b*rho_Y_0_p;
+                    S[1][idx_source] -= dt*xi_b*rho_Y_1_p;
+                    S[2][idx_source] -= dt*xi_b*rho_u_p;
+                    S[3][idx_source] -= dt*xi_b*rho_v_p;
+                    S[4][idx_source] -= dt*xi_b*E_p;
+                }
+                if (x[0] >= d_special_source_box_hi[0])
+                {                    
+                    const double u_ref = 0.0;
+                    const double v_ref = 0.0;
+                    const double Z_ref = 0.0;
+                    
+                    const double rho0_ref = p_ref/(R_0*T_ref);
+                    const double rho1_ref = p_ref/(R_1*T_ref);
+
+                    const double rho_Y_0_ref = rho0_ref*Z_ref;
+                    const double rho_Y_1_ref = rho1_ref*(1.0-Z_ref);
+                    const double rho_ref     = rho_Y_0_ref + rho_Y_1_ref;
+
+                    const double rho_u_ref = rho_ref * u_ref;
+                    const double rho_v_ref = rho_ref * v_ref;
+                    const double E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
+
+                    const double xi_b      = (x[0]-d_special_source_box_hi[0])/(domain_xhi[0]-d_special_source_box_hi[0])*sponge_rate/1.0; // mask value needs to be improved 
+
+                    //sponge_rate_tot = (pow((p_ref/rho_ref),0.5))*sponge_rate;
+                    //xi_b            = -(x[0])/(701.0-600.0); // mask value needs to be improved 
+                    
+                    const double rho_Y_0_p = rho_Y_0[idx_cons_var] - rho_Y_0_ref;
+                    const double rho_Y_1_p = rho_Y_1[idx_cons_var] - rho_Y_1_ref;
+                    const double rho_u_p   = rho_u[idx_cons_var]   - rho_u_ref;
+                    const double rho_v_p   = rho_v[idx_cons_var]   - rho_v_ref;
+                    const double E_p       = E[idx_cons_var]       - E_ref;
+                    
+                    S[0][idx_source] -= dt*xi_b*rho_Y_0_p;
+                    S[1][idx_source] -= dt*xi_b*rho_Y_1_p;
+                    S[2][idx_source] -= dt*xi_b*rho_u_p;
+                    S[3][idx_source] -= dt*xi_b*rho_v_p;
+                    S[4][idx_source] -= dt*xi_b*E_p;
+                }
+                if (x[1] <= d_special_source_box_lo[1])
+                {                    
+                    const double u_ref = 0.0;
+                    const double v_ref = 0.0;
+                    const double Z_ref = 0.0;
+                    
+                    const double rho0_ref = p_ref/(R_0*T_ref);
+                    const double rho1_ref = p_ref/(R_1*T_ref);
+
+                    const double rho_Y_0_ref = rho0_ref*Z_ref;
+                    const double rho_Y_1_ref = rho1_ref*(1.0-Z_ref);
+                    const double rho_ref     = rho_Y_0_ref + rho_Y_1_ref;
+
+                    const double rho_u_ref = rho_ref * u_ref;
+                    const double rho_v_ref = rho_ref * v_ref;
+                    const double E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
+
+                    const double xi_b      = (1.0-(x[1]-domain_xlo[1])/(d_special_source_box_lo[1]-domain_xlo[1]))*sponge_rate/1.0; // mask value needs to be improved 
+
+                    //sponge_rate_tot = (pow((p_ref/rho_ref),0.5))*sponge_rate;
+                    //xi_b            = -(x[0])/(701.0-600.0); // mask value needs to be improved 
+                    
+                    const double rho_Y_0_p = rho_Y_0[idx_cons_var] - rho_Y_0_ref;
+                    const double rho_Y_1_p = rho_Y_1[idx_cons_var] - rho_Y_1_ref;
+                    const double rho_u_p   = rho_u[idx_cons_var]   - rho_u_ref;
+                    const double rho_v_p   = rho_v[idx_cons_var]   - rho_v_ref;
+                    const double E_p       = E[idx_cons_var]       - E_ref;
+                    
+                    S[0][idx_source] -= dt*xi_b*rho_Y_0_p;
+                    S[1][idx_source] -= dt*xi_b*rho_Y_1_p;
+                    S[2][idx_source] -= dt*xi_b*rho_u_p;
+                    S[3][idx_source] -= dt*xi_b*rho_v_p;
+                    S[4][idx_source] -= dt*xi_b*E_p;
+                }
+                if (x[1] >= d_special_source_box_hi[1])
+                {                    
+                    const double u_ref = 0.0;
+                    const double v_ref = 0.0;
+                    const double Z_ref = 0.0;
+                    
+                    const double rho0_ref = p_ref/(R_0*T_ref);
+                    const double rho1_ref = p_ref/(R_1*T_ref);
+
+                    const double rho_Y_0_ref = rho0_ref*Z_ref;
+                    const double rho_Y_1_ref = rho1_ref*(1.0-Z_ref);
+                    const double rho_ref     = rho_Y_0_ref + rho_Y_1_ref;
+
+                    const double rho_u_ref = rho_ref * u_ref;
+                    const double rho_v_ref = rho_ref * v_ref;
+                    const double E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
+
+                    const double xi_b      = (x[1]-d_special_source_box_hi[1])/(domain_xhi[1]-d_special_source_box_hi[1])*sponge_rate/1.0; // mask value needs to be improved
 
                     //sponge_rate_tot = (pow((p_ref/rho_ref),0.5))*sponge_rate;
                     //xi_b            = -(x[0])/(701.0-600.0); // mask value needs to be improved 
