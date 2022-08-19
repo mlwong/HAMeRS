@@ -4,7 +4,7 @@
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperAverage.hpp"
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperCentroid.hpp"
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperMaxMin.hpp"
-#include "util/MPI_helpers/MPIHelperNumberOfCells.hpp"
+#include "util/MPI_helpers/MPIHelperGrid.hpp"
 
 #include <fstream>
 
@@ -2181,7 +2181,7 @@ SBIStatisticsUtilities::outputNumberOfCells(
         }
     }
     
-    MPIHelperNumberOfCells MPI_helper_num_cells = MPIHelperNumberOfCells(
+    MPIHelperGrid MPI_helper_num_cells = MPIHelperGrid(
         "MPI_helper_num_cells",
         d_dim,
         d_grid_geometry,
@@ -2232,7 +2232,7 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
         }
     }
     
-    MPIHelperNumberOfCells MPI_helper_num_cells = MPIHelperNumberOfCells(
+    MPIHelperGrid MPI_helper_num_cells = MPIHelperGrid(
         "MPI_helper_num_cells",
         d_dim,
         d_grid_geometry,

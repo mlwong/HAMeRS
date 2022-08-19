@@ -4,7 +4,7 @@
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperAverage.hpp"
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperCorrelation.hpp"
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperMaxMin.hpp"
-#include "util/MPI_helpers/MPIHelperNumberOfCells.hpp"
+#include "util/MPI_helpers/MPIHelperGrid.hpp"
 
 #include <fstream>
 
