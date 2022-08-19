@@ -4,7 +4,7 @@
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperAverage.hpp"
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperCorrelation.hpp"
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperMaxMin.hpp"
-#include "util/MPI_helpers/MPIHelperNumberOfCells.hpp"
+#include "util/MPI_helpers/MPIHelperGrid.hpp"
 
 #include <fstream>
 
@@ -1699,7 +1699,7 @@ RTIRMISingleModeStatisticsUtilities::outputNumberOfCells(
         }
     }
     
-    MPIHelperNumberOfCells MPI_helper_num_cells = MPIHelperNumberOfCells(
+    MPIHelperGrid MPI_helper_num_cells = MPIHelperGrid(
         "MPI_helper_num_cells",
         d_dim,
         d_grid_geometry,
@@ -1750,7 +1750,7 @@ RTIRMISingleModeStatisticsUtilities::outputWeightedNumberOfCells(
         }
     }
     
-    MPIHelperNumberOfCells MPI_helper_num_cells = MPIHelperNumberOfCells(
+    MPIHelperGrid MPI_helper_num_cells = MPIHelperGrid(
         "MPI_helper_num_cells",
         d_dim,
         d_grid_geometry,
