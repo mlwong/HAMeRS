@@ -4030,6 +4030,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
                 
                 D_ptr.clear();
             }
+            
+            d_side_data_diffusivities_computed = true;
         }
     }
     else
