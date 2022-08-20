@@ -686,7 +686,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -697,7 +696,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -708,7 +706,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -719,7 +716,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -730,7 +726,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -741,7 +736,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleVolumeFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -752,7 +746,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -763,7 +756,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -774,7 +766,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedSpecificVolumeWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -785,7 +776,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedDensitySpecificVolumeCovarianceWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -796,7 +786,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedPressureWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -807,7 +796,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -818,7 +806,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedVelocityYWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -829,7 +816,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedVelocityZWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -840,7 +826,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -851,7 +836,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -862,7 +846,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedMomentumZWithHomogeneitynYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -873,7 +856,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleTurbulentMassFluxXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -884,7 +866,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleReynoldsNormalStressXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -895,7 +876,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleReynoldsNormalStressYWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -906,7 +886,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleReynoldsNormalStressZWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -917,7 +896,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedEnstrophyWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -928,7 +906,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -939,7 +916,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleRMSBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -950,7 +926,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleRMSBaroclinicTorqueXWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -961,7 +936,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleRMSBaroclinicTorqueYWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /// Non-spatial profiles.
@@ -972,8 +946,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleMixingWidthInXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble mixing width in x-direction using mole fractions to a file.
@@ -981,8 +954,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleMixingWidthInXDirectionWithMoleFractions(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble mixing width in x-direction using volume fractions to a file.
@@ -990,8 +962,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleMixingWidthInXDirectionWithVolumeFractions(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble minimum interface location in x-direction to a file.
@@ -999,8 +970,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleInterfaceMinInXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble minimum interface location in x-direction using mole fractions to a file.
@@ -1008,8 +978,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleInterfaceMinInXDirectionWithMoleFractions(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble minimum interface location in x-direction using volume fractions to a file.
@@ -1017,8 +986,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleInterfaceMinInXDirectionWithVolumeFractions(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble maximum interface location in x-direction to a file.
@@ -1026,8 +994,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleInterfaceMaxInXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble maximum interface location in x-direction using mole fractions to a file.
@@ -1035,8 +1002,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleInterfaceMaxInXDirectionWithMoleFractions(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble maximum interface location in x-direction using volume fractions to a file.
@@ -1044,8 +1010,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleInterfaceMaxInXDirectionWithVolumeFractions(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble mixedness in x-direction to a file.
@@ -1053,8 +1018,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleMixednessInXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble mixedness in x-direction using mole fractions to a file.
@@ -1062,8 +1026,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleMixednessInXDirectionWithMoleFractions(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble mixedness in x-direction using volume fractions to a file.
@@ -1071,8 +1034,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleMixednessInXDirectionWithVolumeFractions(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble density mean in mixing layer with with assumed homogeneity in y-direction (2D) or
@@ -1081,8 +1043,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleDensityMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble specific volume mean in mixing layer with with assumed homogeneity in
@@ -1091,8 +1052,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleSpecificVolumeMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble pressure mean in mixing layer with with assumed homogeneity in y-direction (2D) or
@@ -1101,8 +1061,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsemblePressureMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble velocity associated with turbulent mass flux component in x-direction in
@@ -1111,8 +1070,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTurbulentMassFluxVelocityXMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble density-specific-volume covariance in mixing layer with assumed homogeneity in
@@ -1121,8 +1079,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleDensitySpecificVolumeCovarianceMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble TKE integrated with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
@@ -1130,8 +1087,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEIntegrateWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble Reynolds normal stress component in x-direction in mixing layer with assumed
@@ -1140,8 +1096,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleReynoldsNormalStressXMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble Reynolds normal stress component in y-direction in mixing layer with assumed
@@ -1150,8 +1105,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleReynoldsNormalStressYMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble Reynolds normal stress component in z-direction in mixing layer with assumed
@@ -1160,8 +1114,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleReynoldsNormalStressZMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble enstrophy integrated to a file.
@@ -1169,8 +1122,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleEnstrophyIntegrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble enstrophy in mixing layer with assumed homogeneity in y-direction (2D) or yz-plane (3D)
@@ -1179,8 +1131,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleEnstrophyMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble scalar dissipation rate of first species integrated to a file.
@@ -1188,8 +1139,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleScalarDissipationRateIntegrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble scalar dissipation rate of first species in mixing layer with assumed homogeneity in
@@ -1198,8 +1148,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleScalarDissipationRateMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output turbulent Reynolds number based on mixing width with assumed homogeneity in y-direction (2D)
@@ -1208,8 +1157,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleMixingWidthReynoldsNumberWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output turbulent Mach number with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
@@ -1217,8 +1165,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTurbulentMachNumberWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output effective Atwood number with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
@@ -1226,8 +1173,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleEffectiveAtwoodNumberWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble RMS of baroclinic torque in z-direction integrated to a file.
@@ -1235,8 +1181,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleRMSBaroclinicTorqueZIntegrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble RMS of baroclinic torque in z-direction in mixing layer with assumed homogeneity in
@@ -1245,8 +1190,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleRMSBaroclinicTorqueZMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble RMS of baroclinic torque in x-direction integrated to a file.
@@ -1254,8 +1198,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleRMSBaroclinicTorqueXIntegrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble RMS of baroclinic torque in x-direction in mixing layer with assumed homogeneity in
@@ -1264,8 +1207,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleRMSBaroclinicTorqueXMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble RMS of baroclinic torque in y-direction integrated to a file.
@@ -1273,8 +1215,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleRMSBaroclinicTorqueYIntegrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble RMS of baroclinic torque in y-direction in mixing layer with assumed homogeneity in
@@ -1283,8 +1224,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleRMSBaroclinicTorqueYMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble TKE production term 1 integrated to a file.
@@ -1292,8 +1232,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEProduction1Integrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble TKE production term 1 in mixing layer with assumed homogeneity in y-direction (2D) or
@@ -1302,8 +1241,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEProduction1MeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble TKE production term 2 integrated to a file.
@@ -1311,8 +1249,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEProduction2Integrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble TKE production term 2 in mixing layer with assumed homogeneity in y-direction (2D) or
@@ -1321,8 +1258,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEProduction2MeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble TKE production term 3 integrated to a file.
@@ -1330,8 +1266,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEProduction3Integrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble TKE production term 3 in mixing layer with assumed homogeneity in y-direction (2D) or
@@ -1340,8 +1275,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEProduction3MeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble TKE dissipation integrated to a file.
@@ -1349,8 +1283,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEDissipationIntegrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble TKE dissipation in mixing layer with assumed homogeneity in y-direction (2D) or
@@ -1359,8 +1292,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEDissipationMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble dynamic shear viscosity in mixing layer with assumed homogeneity in y-direction (2D)
@@ -1369,8 +1301,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleShearViscosityMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble mass diffusivity in mixing layer with assumed homogeneity in y-direction (2D) or
@@ -1379,8 +1310,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleMassDiffusivityMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Compute averaged shear stress component with only x direction as inhomogeneous direction.
@@ -4915,7 +4845,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -4978,7 +4907,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5041,7 +4969,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5104,7 +5031,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5179,7 +5105,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5254,7 +5179,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleVolumeFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5329,7 +5253,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5392,7 +5315,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5467,7 +5389,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedSpecificVolumeWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5530,7 +5451,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedDensitySpecificVolumeCovarianceWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5605,7 +5525,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedPressureWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5668,7 +5587,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5731,7 +5649,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedVelocityYWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5794,7 +5711,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedVelocityZWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5857,7 +5773,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5920,7 +5835,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5983,7 +5897,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMomentumZWithHomogeneitynYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -6046,7 +5959,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleTurbulentMassFluxXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -6127,7 +6039,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleReynoldsNormalStressXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -6211,7 +6122,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleReynoldsNormalStressYWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -6295,7 +6205,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleReynoldsNormalStressZWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -6379,7 +6288,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedEnstrophyWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -6442,7 +6350,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -6505,7 +6412,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleRMSBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -6573,7 +6479,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleRMSBaroclinicTorqueXWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -6641,7 +6546,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleRMSBaroclinicTorqueYWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -6707,8 +6611,7 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleRMSBaroclinicTorqueYWithH
 void
 RTIRMIStatisticsUtilities::outputEnsembleMixingWidthInXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -6793,8 +6696,7 @@ RTIRMIStatisticsUtilities::outputEnsembleMixingWidthInXDirection(
 void
 RTIRMIStatisticsUtilities::outputEnsembleMixingWidthInXDirectionWithMoleFractions(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -6879,8 +6781,7 @@ RTIRMIStatisticsUtilities::outputEnsembleMixingWidthInXDirectionWithMoleFraction
 void
 RTIRMIStatisticsUtilities::outputEnsembleMixingWidthInXDirectionWithVolumeFractions(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -6965,8 +6866,7 @@ RTIRMIStatisticsUtilities::outputEnsembleMixingWidthInXDirectionWithVolumeFracti
 void
 RTIRMIStatisticsUtilities::outputEnsembleInterfaceMinInXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7058,8 +6958,7 @@ RTIRMIStatisticsUtilities::outputEnsembleInterfaceMinInXDirection(
 void
 RTIRMIStatisticsUtilities::outputEnsembleInterfaceMinInXDirectionWithMoleFractions(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7151,8 +7050,7 @@ RTIRMIStatisticsUtilities::outputEnsembleInterfaceMinInXDirectionWithMoleFractio
 void
 RTIRMIStatisticsUtilities::outputEnsembleInterfaceMinInXDirectionWithVolumeFractions(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7244,8 +7142,7 @@ RTIRMIStatisticsUtilities::outputEnsembleInterfaceMinInXDirectionWithVolumeFract
 void
 RTIRMIStatisticsUtilities::outputEnsembleInterfaceMaxInXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7337,8 +7234,7 @@ RTIRMIStatisticsUtilities::outputEnsembleInterfaceMaxInXDirection(
 void
 RTIRMIStatisticsUtilities::outputEnsembleInterfaceMaxInXDirectionWithMoleFractions(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7430,8 +7326,7 @@ RTIRMIStatisticsUtilities::outputEnsembleInterfaceMaxInXDirectionWithMoleFractio
 void
 RTIRMIStatisticsUtilities::outputEnsembleInterfaceMaxInXDirectionWithVolumeFractions(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7523,8 +7418,7 @@ RTIRMIStatisticsUtilities::outputEnsembleInterfaceMaxInXDirectionWithVolumeFract
 void
 RTIRMIStatisticsUtilities::outputEnsembleMixednessInXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7609,8 +7503,7 @@ RTIRMIStatisticsUtilities::outputEnsembleMixednessInXDirection(
 void
 RTIRMIStatisticsUtilities::outputEnsembleMixednessInXDirectionWithMoleFractions(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7695,8 +7588,7 @@ RTIRMIStatisticsUtilities::outputEnsembleMixednessInXDirectionWithMoleFractions(
 void
 RTIRMIStatisticsUtilities::outputEnsembleMixednessInXDirectionWithVolumeFractions(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7782,8 +7674,7 @@ RTIRMIStatisticsUtilities::outputEnsembleMixednessInXDirectionWithVolumeFraction
 void
 RTIRMIStatisticsUtilities::outputEnsembleDensityMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7865,8 +7756,7 @@ RTIRMIStatisticsUtilities::outputEnsembleDensityMeanWithInhomogeneousXDirection(
 void
 RTIRMIStatisticsUtilities::outputEnsembleSpecificVolumeMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7948,8 +7838,7 @@ RTIRMIStatisticsUtilities::outputEnsembleSpecificVolumeMeanWithInhomogeneousXDir
 void
 RTIRMIStatisticsUtilities::outputEnsemblePressureMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8031,8 +7920,7 @@ RTIRMIStatisticsUtilities::outputEnsemblePressureMeanWithInhomogeneousXDirection
 void
 RTIRMIStatisticsUtilities::outputEnsembleTurbulentMassFluxVelocityXMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8132,8 +8020,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTurbulentMassFluxVelocityXMeanWithInhom
 void
 RTIRMIStatisticsUtilities::outputEnsembleDensitySpecificVolumeCovarianceMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8226,8 +8113,7 @@ RTIRMIStatisticsUtilities::outputEnsembleDensitySpecificVolumeCovarianceMeanWith
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEIntegrateWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8472,8 +8358,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEIntegrateWithInhomogeneousXDirection
 void
 RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressXMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8584,8 +8469,7 @@ RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressXMeanWithInhomogene
 void
 RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressYMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8696,8 +8580,7 @@ RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressYMeanWithInhomogene
 void
 RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressZMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8807,8 +8690,7 @@ RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressZMeanWithInhomogene
 void
 RTIRMIStatisticsUtilities::outputEnsembleEnstrophyIntegrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8905,8 +8787,7 @@ RTIRMIStatisticsUtilities::outputEnsembleEnstrophyIntegrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleEnstrophyMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8995,8 +8876,7 @@ RTIRMIStatisticsUtilities::outputEnsembleEnstrophyMeanWithInhomogeneousXDirectio
 void
 RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateIntegrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -9093,8 +8973,7 @@ RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateIntegrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -9184,8 +9063,7 @@ RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateMeanWithInhomogene
 void
 RTIRMIStatisticsUtilities::outputEnsembleMixingWidthReynoldsNumberWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -9432,8 +9310,7 @@ RTIRMIStatisticsUtilities::outputEnsembleMixingWidthReynoldsNumberWithInhomogene
 void
 RTIRMIStatisticsUtilities::outputEnsembleTurbulentMachNumberWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -9645,8 +9522,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTurbulentMachNumberWithInhomogeneousXDi
 void
 RTIRMIStatisticsUtilities::outputEnsembleEffectiveAtwoodNumberWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -9740,8 +9616,7 @@ RTIRMIStatisticsUtilities::outputEnsembleEffectiveAtwoodNumberWithInhomogeneousX
 void
 RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueZIntegrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -9830,8 +9705,7 @@ RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueZIntegrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueZMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -9911,8 +9785,7 @@ RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueZMeanWithInhomogeneo
 void
 RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueXIntegrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -10001,8 +9874,7 @@ RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueXIntegrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueXMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -10082,8 +9954,7 @@ RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueXMeanWithInhomogeneo
 void
 RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueYIntegrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -10172,8 +10043,7 @@ RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueYIntegrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueYMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -10253,8 +10123,7 @@ RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueYMeanWithInhomogeneo
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEProduction1Integrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -10459,8 +10328,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEProduction1Integrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEProduction1MeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -10667,8 +10535,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEProduction1MeanWithInhomogeneousXDir
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEProduction2Integrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -10782,8 +10649,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEProduction2Integrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEProduction2MeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -10889,8 +10755,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEProduction2MeanWithInhomogeneousXDir
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEProduction3Integrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -11007,8 +10872,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEProduction3Integrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEProduction3MeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -11125,8 +10989,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEProduction3MeanWithInhomogeneousXDir
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEDissipationIntegrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -11434,8 +11297,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEDissipationIntegrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEDissipationMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -11744,8 +11606,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEDissipationMeanWithInhomogeneousXDir
 void
 RTIRMIStatisticsUtilities::outputEnsembleShearViscosityMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -11835,8 +11696,7 @@ RTIRMIStatisticsUtilities::outputEnsembleShearViscosityMeanWithInhomogeneousXDir
 void
 RTIRMIStatisticsUtilities::outputEnsembleMassDiffusivityMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -20328,7 +20188,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
                     "Y_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "MOLE_FRACTION_AVG_SP")
@@ -20337,7 +20196,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
                     "X_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "VOLUME_FRACTION_AVG_SP")
@@ -20346,7 +20204,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
                     "Z_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "MASS_FRACTION_VAR_SP")
@@ -20355,7 +20212,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
                     "Y_var.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "MOLE_FRACTION_VAR_SP")
@@ -20364,7 +20220,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
                     "X_var.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "VOLUME_FRACTION_VAR_SP")
@@ -20373,7 +20228,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleVolumeFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
                     "Z_var.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "DENSITY_AVG_SP")
@@ -20382,7 +20236,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "DENSITY_VAR_SP")
@@ -20391,7 +20244,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_var.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "SPECIFIC_VOLUME_AVG_SP")
@@ -20400,7 +20252,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedSpecificVolumeWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_inv_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "DENSITY_SPEC_VOL_COV_SP")
@@ -20409,7 +20260,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedDensitySpecificVolumeCovarianceWithHomogeneityInYDirectionOrInYZPlane(
                     "b.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "PRESSURE_AVG_SP")
@@ -20418,7 +20268,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedPressureWithHomogeneityInYDirectionOrInYZPlane(
                     "p_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "VELOCITY_X_AVG_SP")
@@ -20427,7 +20276,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
                     "u_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "VELOCITY_Y_AVG_SP")
@@ -20436,7 +20284,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedVelocityYWithHomogeneityInYDirectionOrInYZPlane(
                     "v_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "VELOCITY_Z_AVG_SP")
@@ -20445,7 +20292,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedVelocityZWithHomogeneityInYZPlane(
                     "w_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "MOMENTUM_X_AVG_SP")
@@ -20454,7 +20300,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_u_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "MOMENTUM_Y_AVG_SP")
@@ -20463,7 +20308,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_v_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "MOMENTUM_Z_AVG_SP")
@@ -20472,7 +20316,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedMomentumZWithHomogeneitynYZPlane(
                     "rho_w_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "TURB_MASS_FLUX_X_SP")
@@ -20481,7 +20324,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleTurbulentMassFluxXWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_a1.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "R11_SP")
@@ -20490,7 +20332,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleReynoldsNormalStressXWithHomogeneityInYDirectionOrInYZPlane(
                     "R11.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "R22_SP")
@@ -20499,7 +20340,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleReynoldsNormalStressYWithHomogeneityInYDirectionOrInYZPlane(
                     "R22.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "R33_SP")
@@ -20508,7 +20348,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleReynoldsNormalStressZWithHomogeneityInYZPlane(
                     "R33.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "ENSTROPHY_AVG_SP")
@@ -20517,7 +20356,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedEnstrophyWithHomogeneityInYDirectionOrInYZPlane(
                     "Omega_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "SCAL_DISS_RAT_AVG_SP")
@@ -20526,7 +20364,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
                     "chi_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "BARO_TQ_Z_RMS_SP")
@@ -20535,7 +20372,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleRMSBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
                     "B3_rms.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "BARO_TQ_X_RMS_SP")
@@ -20544,7 +20380,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleRMSBaroclinicTorqueXWithHomogeneityInYZPlane(
                     "B1_rms.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "BARO_TQ_Y_RMS_SP")
@@ -20553,7 +20388,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleRMSBaroclinicTorqueYWithHomogeneityInYZPlane(
                     "B2_rms.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         // Non-spatial profiles.
@@ -20562,352 +20396,308 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             rti_rmi_statistics_utilities->
                 outputEnsembleMixingWidthInXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "MIXING_WIDTH_X_MOL_F")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleMixingWidthInXDirectionWithMoleFractions(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "MIXING_WIDTH_X_VOL_F")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleMixingWidthInXDirectionWithVolumeFractions(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "INTERFACE_MIN_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleInterfaceMinInXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "INTERFACE_MIN_X_MOL_F")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleInterfaceMinInXDirectionWithMoleFractions(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "INTERFACE_MIN_X_VOL_F")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleInterfaceMinInXDirectionWithVolumeFractions(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "INTERFACE_MAX_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleInterfaceMaxInXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "INTERFACE_MAX_X_MOL_F")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleInterfaceMaxInXDirectionWithMoleFractions(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "INTERFACE_MAX_X_VOL_F")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleInterfaceMaxInXDirectionWithVolumeFractions(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "MIXEDNESS_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleMixednessInXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "MIXEDNESS_X_MOL_F")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleMixednessInXDirectionWithMoleFractions(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "MIXEDNESS_X_VOL_F")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleMixednessInXDirectionWithVolumeFractions(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "DENSITY_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleDensityMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "SP_VOL_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleSpecificVolumeMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "PRESS_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsemblePressureMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEIntegrateWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "a1_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTurbulentMassFluxVelocityXMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "b_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleDensitySpecificVolumeCovarianceMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "R11_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleReynoldsNormalStressXMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "R22_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleReynoldsNormalStressYMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "R33_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleReynoldsNormalStressZMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "ENSTROPHY_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleEnstrophyIntegrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "ENSTROPHY_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleEnstrophyMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "S_DIS_RAT_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleScalarDissipationRateIntegrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "S_DIS_RAT_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleScalarDissipationRateMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "RE_W_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleMixingWidthReynoldsNumberWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "MA_T_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTurbulentMachNumberWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "EFF_AT_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleEffectiveAtwoodNumberWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "BARO_TQ_Z_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleRMSBaroclinicTorqueZIntegrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "BARO_TQ_Z_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleRMSBaroclinicTorqueZMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "BARO_TQ_X_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleRMSBaroclinicTorqueXIntegrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "BARO_TQ_X_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleRMSBaroclinicTorqueXMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "BARO_TQ_Y_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleRMSBaroclinicTorqueYIntegrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "BARO_TQ_Y_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleRMSBaroclinicTorqueYMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_PROD1_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEProduction1Integrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_PROD1_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEProduction1MeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_PROD2_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEProduction2Integrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_PROD2_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEProduction2MeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_PROD3_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEProduction3Integrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_PROD3_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEProduction3MeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_DISS_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEDissipationIntegrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_DISS_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEDissipationMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "SHEAR_VIS_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleShearViscosityMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "MASS_DIFF_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleMassDiffusivityMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else
         {

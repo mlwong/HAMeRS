@@ -20,6 +20,8 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         
         void setVariablesNotComputed()
         {
+            grid_level_num_avg_computed = false;
+            
             p_avg_coarsest_computed   = false;
             u_avg_coarsest_computed   = false;
             p_u_avg_coarsest_computed = false;
@@ -115,6 +117,8 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         
         void clearAllData()
         {
+            grid_level_num_avg_realizations.clear();
+            
             p_avg_coarsest_realizations.clear();
             u_avg_coarsest_realizations.clear();
             p_u_avg_coarsest_realizations.clear();
@@ -213,6 +217,8 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         // Scratch arrays.
         // Number of realizalizations; number of cells.
         
+        std::vector<std::vector<double> > grid_level_num_avg_realizations;
+        
         std::vector<std::vector<double> > p_avg_coarsest_realizations;
         std::vector<std::vector<double> > u_avg_coarsest_realizations;
         std::vector<std::vector<double> > p_u_avg_coarsest_realizations;
@@ -306,6 +312,8 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         std::vector<std::vector<double> > rho_inv_ddz_tau13_avg_realizations;
         
         // Whether the scratch arrays are filled.
+        
+        bool grid_level_num_avg_computed;
         
         bool p_avg_coarsest_computed;
         bool u_avg_coarsest_computed;
@@ -434,6 +442,13 @@ class RTIRMIBudgetsUtilities
         {}
         
         /*
+         * Compute averaged grid level number with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeAveragedGridLevelNumberWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy);
+        
+        /*
          * Compute averaged quantities with assumed homogeneity in y-direction (2D) or yz-plane (3D).
          */
         void
@@ -442,14 +457,21 @@ class RTIRMIBudgetsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
+         * Output spatial profile of ensemble averaged grid level number with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedGridLevelNumberWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const double output_time) const;
+        
+        /*
          * Output spatial profile of ensemble averaged mass fraction with assumed homogeneity in y-direction (2D) or
          * yz-plane (3D) to a file.
          */
         void
         outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -459,8 +481,6 @@ class RTIRMIBudgetsUtilities
         void
         outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -470,8 +490,6 @@ class RTIRMIBudgetsUtilities
         void
         outputSpatialProfileEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -481,8 +499,6 @@ class RTIRMIBudgetsUtilities
         void
         outputSpatialProfileEnsembleFavreAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -492,8 +508,6 @@ class RTIRMIBudgetsUtilities
         void
         outputSpatialProfileEnsembleTurbulentMassFluxVelocityXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -503,8 +517,6 @@ class RTIRMIBudgetsUtilities
         void
         outputSpatialProfileEnsembleAveragedPressureGradientXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -514,7 +526,6 @@ class RTIRMIBudgetsUtilities
         outputBudgetFavreMeanTKEWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -524,7 +535,6 @@ class RTIRMIBudgetsUtilities
         outputBudgetTurbMassFluxXWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -534,7 +544,6 @@ class RTIRMIBudgetsUtilities
         outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -544,7 +553,6 @@ class RTIRMIBudgetsUtilities
         outputBudgetReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -554,7 +562,6 @@ class RTIRMIBudgetsUtilities
         outputBudgetReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -714,6 +721,30 @@ class RTIRMIBudgetsUtilities
         const int d_num_ghosts_derivative;
         
 };
+
+
+/*
+ * Compute averaged grid level number with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIBudgetsUtilities::computeAveragedGridLevelNumberWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy)
+{
+    MPIHelperGrid MPI_helper_grid = MPIHelperGrid(
+        "MPI_helper_grid",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const double num_cells_global = MPI_helper_grid.getNumberOfCells();
+    
+    std::vector<double> grid_level_num_avg = MPI_helper_grid.getAveragedGridLevelNumberWithInhomogeneousXDirection();
+    
+    std::vector<std::vector<double> >& grid_level_num_avg_realizations = d_ensemble_statistics->grid_level_num_avg_realizations;
+    grid_level_num_avg_realizations.push_back(grid_level_num_avg);
+    
+    d_ensemble_statistics->grid_level_num_avg_computed = true;
+}
 
 
 /*
@@ -2580,14 +2611,73 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
 
 
 /*
+ * Output spatial profile of ensemble averaged grid level number with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
+ */
+void
+RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedGridLevelNumberWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& grid_level_num_avg_realizations =
+            d_ensemble_statistics->grid_level_num_avg_realizations;
+        
+        const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
+        
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(grid_level_num_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(grid_level_num_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> grid_level_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                grid_level_avg_global[i] += weight*grid_level_num_avg_realizations[ri][i];
+            }
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&grid_level_avg_global[0], sizeof(double)*grid_level_avg_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output spatial profile of ensemble averaged mass fraction with assumed homogeneity in y-direction (2D) or
  * yz-plane (3D) to a file.
  */
 void
 RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2649,8 +2739,6 @@ RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedMassFractionWithHomo
 void
 RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2712,8 +2800,6 @@ RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedDensityWithHomogenei
 void
 RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2775,8 +2861,6 @@ RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedVelocityXWithHomogen
 void
 RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleFavreAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2850,8 +2934,6 @@ RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleFavreAveragedVelocityXWithHo
 void
 RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleTurbulentMassFluxVelocityXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2937,8 +3019,6 @@ RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleTurbulentMassFluxVelocityXWi
 void
 RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedPressureGradientXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3000,7 +3080,6 @@ void
 RTIRMIBudgetsUtilities::outputBudgetFavreMeanTKEWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3413,7 +3492,6 @@ void
 RTIRMIBudgetsUtilities::outputBudgetTurbMassFluxXWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3891,7 +3969,6 @@ void
 RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -4176,6 +4253,27 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
             two_a1_ddx_p[i] *= (double(2)*a1[i]);
         }
         
+        std::vector<double> ddx_p_coarsest = computeDerivativeOfVector1D(
+            p_avg_coarsest_global,
+            dx_coarsest);
+        
+        std::vector<double> ddx_p_coarsest_refined(num_cells, double(0));
+        for (int i = 0; i < num_cells_coarsest; i++)
+        {
+            for (int ii = 0; ii < ratio_finest_level_to_coarsest_level[0]; ii++)
+            {
+                const int idx_fine = i*ratio_finest_level_to_coarsest_level[0] + ii;
+                
+                ddx_p_coarsest_refined[idx_fine] = ddx_p_coarsest[i];
+            }
+        }
+        
+        std::vector<double> two_a1_ddx_p_coarsest_refined(ddx_p_coarsest_refined);
+        for (int i = 0; i < num_cells; i++)
+        {
+            two_a1_ddx_p_coarsest_refined[i] *= (double(2)*a1[i]);
+        }
+        
         /*
          * Compute term III(2).
          */
@@ -4373,6 +4471,9 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
         // Term II in moving frame of mixing layer.
         f_out.write((char*)&ddx_rho_a1_R11[0], sizeof(double)*ddx_rho_a1_R11.size());
         
+        // Term III(1).
+        f_out.write((char*)&two_a1_ddx_p_coarsest_refined[0], sizeof(double)*two_a1_ddx_p_coarsest_refined.size());
+        
         // Term IV(2) on the coarsest level.
         f_out.write((char*)&m_2ddx_u_p_p_p_coarsest_refined[0], sizeof(double)*m_2ddx_u_p_p_p_coarsest_refined.size());
         
@@ -4388,7 +4489,6 @@ void
 RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -4767,7 +4867,6 @@ void
 RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -14855,6 +14954,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
     // Statistics are not computed for this realization yet.
     rti_rmi_budgets_utilities->d_ensemble_statistics->setVariablesNotComputed();
     
+    // Compute the averaged grid level number no matter what.
+    rti_rmi_budgets_utilities->
+        computeAveragedGridLevelNumberWithHomogeneityInYDirectionOrInYZPlane(
+            patch_hierarchy);
+    
     // Loop over statistical quantities.
     for (int qi = 0; qi < static_cast<int>(d_statistical_quantities.size()); qi++)
     {
@@ -14923,6 +15027,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             d_equation_of_thermal_conductivity_mixing_rules,
             HAMERS_DYNAMIC_POINTER_CAST<EnsembleBudgetsRTIRMI>(d_ensemble_statistics)));
     
+    // Output the averaged grid level number no matter what.
+    rti_rmi_budgets_utilities->outputSpatialProfileEnsembleAveragedGridLevelNumberWithHomogeneityInYDirectionOrInYZPlane(
+        "grid_level_num_avg.dat",
+        output_time);
+            
     // Loop over statistical quantities.
     for (int qi = 0; qi < static_cast<int>(d_statistical_quantities.size()); qi++)
     {
@@ -14935,8 +15044,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             rti_rmi_budgets_utilities->
                 outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
                     "Y_avg.dat",
-                    patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "DENSITY_AVG_SP")
@@ -14944,8 +15051,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             rti_rmi_budgets_utilities->
                 outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_avg.dat",
-                    patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "VELOCITY_X_AVG_SP")
@@ -14953,8 +15058,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             rti_rmi_budgets_utilities->
                 outputSpatialProfileEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
                     "u_avg.dat",
-                    patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "VELOCITY_X_FAVRE_AVG_SP")
@@ -14962,8 +15065,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             rti_rmi_budgets_utilities->
                 outputSpatialProfileEnsembleFavreAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
                     "u_tilde.dat",
-                    patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "TURB_MASS_FLUX_VEL_X_SP")
@@ -14971,8 +15072,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             rti_rmi_budgets_utilities->
                 outputSpatialProfileEnsembleTurbulentMassFluxVelocityXWithHomogeneityInYDirectionOrInYZPlane(
                     "a1.dat",
-                    patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "PRESSURE_GRADIENT_X_AVG_SP")
@@ -14980,8 +15079,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             rti_rmi_budgets_utilities->
                 outputSpatialProfileEnsembleAveragedPressureGradientXWithHomogeneityInYDirectionOrInYZPlane(
                     "ddx_p_avg.dat",
-                    patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "rho_a1_budget_SP")
@@ -14990,7 +15087,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputBudgetTurbMassFluxXWithInhomogeneousXDirection(
                     "rho_a1_budget.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "rho_K_budget_SP")
@@ -14999,7 +15095,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputBudgetFavreMeanTKEWithInhomogeneousXDirection(
                     "rho_K_budget.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "rho_R11_budget_SP")
@@ -15008,7 +15103,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
                     "rho_R11_budget.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "rho_R22_budget_SP")
@@ -15017,7 +15111,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputBudgetReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
                     "rho_R22_budget.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "rho_R33_budget_SP")
@@ -15026,7 +15119,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputBudgetReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
                     "rho_R33_budget.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else
