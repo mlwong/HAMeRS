@@ -22,9 +22,11 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         {
             grid_level_num_avg_computed = false;
             
-            p_avg_coarsest_computed   = false;
-            u_avg_coarsest_computed   = false;
-            p_u_avg_coarsest_computed = false;
+            rho_avg_coarsest_computed   = false;
+            p_avg_coarsest_computed     = false;
+            u_avg_coarsest_computed     = false;
+            rho_u_avg_coarsest_computed = false;
+            p_u_avg_coarsest_computed   = false;
             
             Y_0_avg_computed     = false;
             rho_avg_computed     = false;
@@ -119,8 +121,10 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         {
             grid_level_num_avg_realizations.clear();
             
+            rho_avg_coarsest_realizations.clear();
             p_avg_coarsest_realizations.clear();
             u_avg_coarsest_realizations.clear();
+            rho_u_avg_coarsest_realizations.clear();
             p_u_avg_coarsest_realizations.clear();
             
             Y_0_avg_realizations.clear();
@@ -219,8 +223,10 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         
         std::vector<std::vector<double> > grid_level_num_avg_realizations;
         
+        std::vector<std::vector<double> > rho_avg_coarsest_realizations;
         std::vector<std::vector<double> > p_avg_coarsest_realizations;
         std::vector<std::vector<double> > u_avg_coarsest_realizations;
+        std::vector<std::vector<double> > rho_u_avg_coarsest_realizations;
         std::vector<std::vector<double> > p_u_avg_coarsest_realizations;
         
         std::vector<std::vector<double> > Y_0_avg_realizations;
@@ -315,8 +321,10 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         
         bool grid_level_num_avg_computed;
         
+        bool rho_avg_coarsest_computed;
         bool p_avg_coarsest_computed;
         bool u_avg_coarsest_computed;
+        bool rho_u_avg_coarsest_computed;
         bool p_u_avg_coarsest_computed;
         
         bool Y_0_avg_computed;
@@ -772,6 +780,18 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
     std::vector<bool> use_reciprocal;
     std::vector<bool> use_derivative;
     
+    // Compute rho_avg_coarsest.
+    
+    std::vector<double> rho_avg_coarsest_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
+        "DENSITY",
+        0,
+        data_context);
+    
+    std::vector<std::vector<double> >& rho_avg_coarsest_realizations = d_ensemble_statistics->rho_avg_coarsest_realizations;
+    rho_avg_coarsest_realizations.push_back(rho_avg_coarsest_global);
+    
+    d_ensemble_statistics->rho_avg_coarsest_computed = true;
+    
     // Compute p_avg_coarsest.
     
     std::vector<double> p_avg_coarsest_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
@@ -796,12 +816,33 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
     
     d_ensemble_statistics->u_avg_coarsest_computed = true;
     
-    // Compute p_u_avg_coarsest.
+    // Compute rho_u_avg_coarsest.
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
     
     quantity_names.push_back("VELOCITY");
     component_indices.push_back(0);
     
+    std::vector<double> rho_u_avg_coarsest_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
+        quantity_names,
+        component_indices,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<std::vector<double> >& rho_u_avg_coarsest_realizations = d_ensemble_statistics->rho_u_avg_coarsest_realizations;
+    rho_u_avg_coarsest_realizations.push_back(rho_u_avg_coarsest_global);
+    
+    d_ensemble_statistics->rho_u_avg_coarsest_computed = true;
+    
+    // Compute p_u_avg_coarsest.
+    
     quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
     component_indices.push_back(0);
     
     std::vector<double> p_u_avg_coarsest_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
@@ -4010,9 +4051,11 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
     
     if (mpi.getRank() == 0)
     {
-        const std::vector<std::vector<double> >& p_avg_coarsest_realizations   = d_ensemble_statistics->p_avg_coarsest_realizations;
-        const std::vector<std::vector<double> >& u_avg_coarsest_realizations   = d_ensemble_statistics->u_avg_coarsest_realizations;
-        const std::vector<std::vector<double> >& p_u_avg_coarsest_realizations = d_ensemble_statistics->p_u_avg_coarsest_realizations;
+        const std::vector<std::vector<double> >& rho_avg_coarsest_realizations   = d_ensemble_statistics->rho_avg_coarsest_realizations;
+        const std::vector<std::vector<double> >& p_avg_coarsest_realizations     = d_ensemble_statistics->p_avg_coarsest_realizations;
+        const std::vector<std::vector<double> >& u_avg_coarsest_realizations     = d_ensemble_statistics->u_avg_coarsest_realizations;
+        const std::vector<std::vector<double> >& rho_u_avg_coarsest_realizations = d_ensemble_statistics->rho_u_avg_coarsest_realizations;
+        const std::vector<std::vector<double> >& p_u_avg_coarsest_realizations   = d_ensemble_statistics->p_u_avg_coarsest_realizations;
         
         const std::vector<std::vector<double> >& rho_avg_realizations     = d_ensemble_statistics->rho_avg_realizations;
         const std::vector<std::vector<double> >& p_avg_realizations       = d_ensemble_statistics->p_avg_realizations;
@@ -4060,8 +4103,10 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
         const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
         
+        std::vector<double> rho_avg_coarsest_global(num_cells_coarsest, double(0));
         std::vector<double> p_avg_coarsest_global(num_cells_coarsest, double(0));
         std::vector<double> u_avg_coarsest_global(num_cells_coarsest, double(0));
+        std::vector<double> rho_u_avg_coarsest_global(num_cells_coarsest, double(0));
         std::vector<double> p_u_avg_coarsest_global(num_cells_coarsest, double(0));
         
         std::vector<double> rho_avg_global(num_cells, double(0));
@@ -4104,9 +4149,11 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
         {
             for (int i = 0; i < num_cells_coarsest; i++)
             {
-                p_avg_coarsest_global[i]   += weight*p_avg_coarsest_realizations[ri][i];
-                u_avg_coarsest_global[i]   += weight*u_avg_coarsest_realizations[ri][i];
-                p_u_avg_coarsest_global[i] += weight*p_u_avg_coarsest_realizations[ri][i];
+                rho_avg_coarsest_global[i]   += weight*rho_avg_coarsest_realizations[ri][i];
+                p_avg_coarsest_global[i]     += weight*p_avg_coarsest_realizations[ri][i];
+                u_avg_coarsest_global[i]     += weight*u_avg_coarsest_realizations[ri][i];
+                rho_u_avg_coarsest_global[i] += weight*rho_u_avg_coarsest_realizations[ri][i];
+                p_u_avg_coarsest_global[i]   += weight*p_u_avg_coarsest_realizations[ri][i];
             }
             
             for (int i = 0; i < num_cells; i++)
@@ -4200,6 +4247,18 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
             a1[i] /= rho_avg_global[i];
         }
         
+        std::vector<double> rho_p_u_p_coarsest(num_cells_coarsest, double(0));
+        for (int i = 0; i < num_cells_coarsest; i++)
+        {
+            rho_p_u_p_coarsest[i] = rho_u_avg_coarsest_global[i] - rho_avg_coarsest_global[i]*u_avg_coarsest_global[i];
+        }
+        
+        std::vector<double> a1_coarsest(rho_p_u_p_coarsest);
+        for (int i = 0; i < num_cells_coarsest; i++)
+        {
+            a1_coarsest[i] /= rho_avg_coarsest_global[i];
+        }
+        
         /*
          * Compute R11.
          */
@@ -4257,21 +4316,15 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
             p_avg_coarsest_global,
             dx_coarsest);
         
-        std::vector<double> ddx_p_coarsest_refined(num_cells, double(0));
+        std::vector<double> two_a1_ddx_p_coarsest_refined(num_cells, double(0));
         for (int i = 0; i < num_cells_coarsest; i++)
         {
             for (int ii = 0; ii < ratio_finest_level_to_coarsest_level[0]; ii++)
             {
                 const int idx_fine = i*ratio_finest_level_to_coarsest_level[0] + ii;
                 
-                ddx_p_coarsest_refined[idx_fine] = ddx_p_coarsest[i];
+                two_a1_ddx_p_coarsest_refined[idx_fine] = double(2)*a1_coarsest[i]*ddx_p_coarsest[i];
             }
-        }
-        
-        std::vector<double> two_a1_ddx_p_coarsest_refined(ddx_p_coarsest_refined);
-        for (int i = 0; i < num_cells; i++)
-        {
-            two_a1_ddx_p_coarsest_refined[i] *= (double(2)*a1[i]);
         }
         
         /*
