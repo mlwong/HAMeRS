@@ -4,7 +4,7 @@
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperAverage.hpp"
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperCentroid.hpp"
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperMaxMin.hpp"
-#include "util/MPI_helpers/MPIHelperNumberOfCells.hpp"
+#include "util/MPI_helpers/MPIHelperGrid.hpp"
 
 #include <fstream>
 
@@ -2181,13 +2181,13 @@ SBIStatisticsUtilities::outputNumberOfCells(
         }
     }
     
-    MPIHelperNumberOfCells MPI_helper_num_cells = MPIHelperNumberOfCells(
-        "MPI_helper_num_cells",
+    MPIHelperGrid MPI_helper_grid = MPIHelperGrid(
+        "MPI_helper_grid",
         d_dim,
         d_grid_geometry,
         patch_hierarchy);
     
-    const double num_cells_global = MPI_helper_num_cells.getNumberOfCells();
+    const double num_cells_global = MPI_helper_grid.getNumberOfCells();
     
     /*
      * Output the number of cells (only done by process 0).
@@ -2232,13 +2232,13 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
         }
     }
     
-    MPIHelperNumberOfCells MPI_helper_num_cells = MPIHelperNumberOfCells(
-        "MPI_helper_num_cells",
+    MPIHelperGrid MPI_helper_grid = MPIHelperGrid(
+        "MPI_helper_grid",
         d_dim,
         d_grid_geometry,
         patch_hierarchy);
     
-    const double weighted_num_cells_global = MPI_helper_num_cells.getWeightedNumberOfCells();
+    const double weighted_num_cells_global = MPI_helper_grid.getWeightedNumberOfCells();
     
     /*
      * Output the number of cells (only done by process 0).

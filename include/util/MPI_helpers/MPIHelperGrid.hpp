@@ -5,10 +5,10 @@
 
 #include "SAMRAI/pdat/CellVariable.h"
 
-class MPIHelperNumberOfCells: public MPIHelper
+class MPIHelperGrid: public MPIHelper
 {
     public:
-        MPIHelperNumberOfCells(
+        MPIHelperGrid(
             const std::string& object_name,
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
@@ -29,6 +29,24 @@ class MPIHelperNumberOfCells: public MPIHelper
          * Compute weighted number of cells.
          */
         double getWeightedNumberOfCells() const;
+        
+        /*
+         * Compute averaged grid level number with only x-direction as inhomogeneous direction.
+         */
+        std::vector<double>
+        getAveragedGridLevelNumberWithInhomogeneousXDirection() const;
+        
+        /*
+         * Compute averaged grid level number with only y-direction as inhomogeneous direction.
+         */
+        std::vector<double>
+        getAveragedGridLevelNumberWithInhomogeneousYDirection() const;
+        
+        /*
+         * Compute averaged grid level number with only z-direction as inhomogeneous direction.
+         */
+        std::vector<double>
+        getAveragedGridLevelNumberWithInhomogeneousZDirection() const;
         
     private:
         
