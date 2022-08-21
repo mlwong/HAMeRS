@@ -15554,6 +15554,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
         
         // Spatial profiles.
         if (statistical_quantity_key == "MASS_FRACTION_AVG_SP" ||
+            statistical_quantity_key == "MOLE_FRACTION_AVG_SP" ||
+            statistical_quantity_key == "VOLUME_FRACTION_AVG_SP" ||
             statistical_quantity_key == "DENSITY_AVG_SP" ||
             statistical_quantity_key == "VELOCITY_X_AVG_SP" ||
             statistical_quantity_key == "VELOCITY_X_FAVRE_AVG_SP" ||
