@@ -39,6 +39,11 @@ class FlowModelMonitoringStatisticsUtilitiesFiveEqnAllaire: public FlowModelMoni
         double getMonitoringStatistics(
             std::string statistics_name) const;
         
+        /*
+         * Get map of monitoring statistical quantities.
+         */
+        std::unordered_map<std::string, double> getMonitoringStatisticsMap() const;
+        
     private:
         /*
          * Monitoring statistical quantities.

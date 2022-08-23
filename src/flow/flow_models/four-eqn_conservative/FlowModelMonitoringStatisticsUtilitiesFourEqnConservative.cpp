@@ -281,3 +281,18 @@ FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::getMonitoringStatisti
     
     return statistical_quantity;
 }
+
+
+/*
+ * Get map of monitoring statistical quantities.
+ */
+std::unordered_map<std::string, double>
+FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::getMonitoringStatisticsMap() const
+{
+    std::unordered_map<std::string, double> monitoring_statistics_map;
+    
+    monitoring_statistics_map.insert(std::pair<std::string, double>("KINETIC_ENERGY_AVG", d_kinetic_energy_avg));
+    monitoring_statistics_map.insert(std::pair<std::string, double>("MACH_NUM_MAX", d_Mach_num_max));
+    
+    return monitoring_statistics_map;
+}

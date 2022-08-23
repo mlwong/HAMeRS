@@ -193,10 +193,20 @@ FlowModelSourceUtilities::computeSpecialSourceTermsOnPatch(
             HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(variable_source, data_context)));
         
+        
+        flow_model_tmp->setupMonitoringStatisticsUtilities();
+        
+        HAMERS_SHARED_PTR<FlowModelMonitoringStatisticsUtilities> monitoring_statistics_utilities =
+            flow_model_tmp->getFlowModelMonitoringStatisticsUtilities();
+        
+        const std::unordered_map<std::string, double>& monitoring_statistics_map = monitoring_statistics_utilities->
+            getMonitoringStatisticsMap();
+        
         d_special_source_terms->computeSpecialSourceTermsOnPatch(
             source,
             patch,
             conservative_var_data,
+            monitoring_statistics_map,
             time,
             dt,
             RK_step_number);

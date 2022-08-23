@@ -80,6 +80,11 @@ class FlowModelMonitoringStatisticsUtilities
         virtual double getMonitoringStatistics(
             std::string statistics_name) const = 0;
         
+        /*
+         * Get map of monitoring statistical quantities.
+         */
+        virtual std::unordered_map<std::string, double> getMonitoringStatisticsMap() const = 0;
+        
     protected:
         /*
          * The object name is used for error/warning reporting.
