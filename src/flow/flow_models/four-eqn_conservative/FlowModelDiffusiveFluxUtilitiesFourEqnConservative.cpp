@@ -437,6 +437,49 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::allocateMemoryForSideDataOfD
             << "The object is not setup yet!"
             << std::endl);
     }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
+    const hier::Box interior_box = patch.getBox();
+    
+    if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_side_data_diffusivities_computed)
+        {
+            if (!d_side_data_diffusivities)
+            {
+                if (d_dim == tbox::Dimension(1))
+                {
+                    d_side_data_diffusivities.reset(new pdat::SideData<double>(
+                        interior_box,
+                        2*d_num_species*(d_num_species + 1) + 3,
+                        d_num_subghosts_diffusivities));
+                }
+                else if (d_dim == tbox::Dimension(2))
+                {
+                    d_side_data_diffusivities.reset(new pdat::SideData<double>(
+                        interior_box,
+                        2*d_num_species*(d_num_species + 1) + 7,
+                        d_num_subghosts_diffusivities));
+                }
+                else if (d_dim == tbox::Dimension(3))
+                {
+                    d_side_data_diffusivities.reset(new pdat::SideData<double>(
+                        interior_box,
+                        2*d_num_species*(d_num_species + 1) + 8,
+                        d_num_subghosts_diffusivities));
+                }
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForSideDataOfDiffusiveFluxDiffusivities()\n"
+                << "Side data of 'DIFFUSIVITIES' is aleady computed."
+                << std::endl);
+        }
+    }
 }
 
 
@@ -3278,11 +3321,10 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
                         D_ptr[d_num_species*(d_num_species + 1) + 2][idx_diffusivities] = -mu_x[idx_var_data];
                         D_ptr[d_num_species*(d_num_species + 1) + 3][idx_diffusivities] = -u_x[idx_var_data]*(double(4)/double(3)*mu_x[idx_var_data] +
                             mu_v_x[idx_var_data]);
-                        D_ptr[d_num_species*(d_num_species + 1) + 4][idx_diffusivities] = v_x[idx_var_data]*(double(2)/double(3)*mu_x[idx_var_data] -
+                        D_ptr[d_num_species*(d_num_species + 1) + 4][idx_diffusivities] = u_x[idx_var_data]*(double(2)/double(3)*mu_x[idx_var_data] -
                             mu_v_x[idx_var_data]);
-                        D_ptr[d_num_species*(d_num_species + 1) + 5][idx_diffusivities] = -u_x[idx_var_data]*mu_x[idx_var_data];
-                        D_ptr[d_num_species*(d_num_species + 1) + 6][idx_diffusivities] = -v_x[idx_var_data]*mu_x[idx_var_data];
-                        D_ptr[d_num_species*(d_num_species + 1) + 7][idx_diffusivities] = -kappa_x[idx_var_data];
+                        D_ptr[d_num_species*(d_num_species + 1) + 5][idx_diffusivities] = -v_x[idx_var_data]*mu_x[idx_var_data];
+                        D_ptr[d_num_species*(d_num_species + 1) + 6][idx_diffusivities] = -kappa_x[idx_var_data];
                     }
                 }
                 
@@ -3290,7 +3332,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
                 for (int si = 0; si < d_num_species; si++)
                 {
                     const int component_idx =
-                        d_num_species*(d_num_species + 1) + 8 + si*(d_num_species + 1);
+                        d_num_species*(d_num_species + 1) + 7 + si*(d_num_species + 1);
                     
                     for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
                     {
@@ -3314,7 +3356,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
                     for (int sj = 0; sj < d_num_species; sj++)
                     {
                         const int component_idx =
-                            d_num_species*(d_num_species + 1) + 9 + si*(d_num_species + 1) + sj;
+                            d_num_species*(d_num_species + 1) + 8 + si*(d_num_species + 1) + sj;
                         
                         for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
                         {
@@ -3405,11 +3447,10 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
                         D_ptr[d_num_species*(d_num_species + 1) + 2][idx_diffusivities] = -mu_y[idx_var_data];
                         D_ptr[d_num_species*(d_num_species + 1) + 3][idx_diffusivities] = -v_y[idx_var_data]*(double(4)/double(3)*mu_y[idx_var_data] +
                             mu_v_y[idx_var_data]);
-                        D_ptr[d_num_species*(d_num_species + 1) + 4][idx_diffusivities] = u_y[idx_var_data]*(double(2)/double(3)*mu_y[idx_var_data] -
+                        D_ptr[d_num_species*(d_num_species + 1) + 4][idx_diffusivities] = v_y[idx_var_data]*(double(2)/double(3)*mu_y[idx_var_data] -
                             mu_v_y[idx_var_data]);
                         D_ptr[d_num_species*(d_num_species + 1) + 5][idx_diffusivities] = -u_y[idx_var_data]*mu_y[idx_var_data];
-                        D_ptr[d_num_species*(d_num_species + 1) + 6][idx_diffusivities] = -v_y[idx_var_data]*mu_y[idx_var_data];
-                        D_ptr[d_num_species*(d_num_species + 1) + 7][idx_diffusivities] = -kappa_y[idx_var_data];
+                        D_ptr[d_num_species*(d_num_species + 1) + 6][idx_diffusivities] = -kappa_y[idx_var_data];
                     }
                 }
                 
@@ -3417,7 +3458,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
                 for (int si = 0; si < d_num_species; si++)
                 {
                     const int component_idx =
-                        d_num_species*(d_num_species + 1) + 8 + si*(d_num_species + 1);
+                        d_num_species*(d_num_species + 1) + 7 + si*(d_num_species + 1);
                     
                     for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1] + 1; j++)
                     {
@@ -3441,7 +3482,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
                     for (int sj = 0; sj < d_num_species; sj++)
                     {
                         const int component_idx =
-                            d_num_species*(d_num_species + 1) + 9 + si*(d_num_species + 1) + sj;
+                            d_num_species*(d_num_species + 1) + 8 + si*(d_num_species + 1) + sj;
                         
                         for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1] + 1; j++)
                         {
@@ -3625,14 +3666,11 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
                             D_ptr[d_num_species*(d_num_species + 1) + 2][idx_diffusivities] = -mu_x[idx_var_data];
                             D_ptr[d_num_species*(d_num_species + 1) + 3][idx_diffusivities] = -u_x[idx_var_data]*(double(4)/double(3)*mu_x[idx_var_data] +
                                 mu_v_x[idx_var_data]);
-                            D_ptr[d_num_species*(d_num_species + 1) + 4][idx_diffusivities] = v_x[idx_var_data]*(double(2)/double(3)*mu_x[idx_var_data] -
+                            D_ptr[d_num_species*(d_num_species + 1) + 4][idx_diffusivities] = u_x[idx_var_data]*(double(2)/double(3)*mu_x[idx_var_data] -
                                 mu_v_x[idx_var_data]);
-                            D_ptr[d_num_species*(d_num_species + 1) + 5][idx_diffusivities] = w_x[idx_var_data]*(double(2)/double(3)*mu_x[idx_var_data] -
-                                mu_v_x[idx_var_data]);
-                            D_ptr[d_num_species*(d_num_species + 1) + 6][idx_diffusivities] = -u_x[idx_var_data]*mu_x[idx_var_data];
-                            D_ptr[d_num_species*(d_num_species + 1) + 7][idx_diffusivities] = -v_x[idx_var_data]*mu_x[idx_var_data];
-                            D_ptr[d_num_species*(d_num_species + 1) + 8][idx_diffusivities] = -w_x[idx_var_data]*mu_x[idx_var_data];
-                            D_ptr[d_num_species*(d_num_species + 1) + 9][idx_diffusivities] = -kappa_x[idx_var_data];
+                            D_ptr[d_num_species*(d_num_species + 1) + 5][idx_diffusivities] = -v_x[idx_var_data]*mu_x[idx_var_data];
+                            D_ptr[d_num_species*(d_num_species + 1) + 6][idx_diffusivities] = -w_x[idx_var_data]*mu_x[idx_var_data];
+                            D_ptr[d_num_species*(d_num_species + 1) + 7][idx_diffusivities] = -kappa_x[idx_var_data];
                         }
                     }
                 }
@@ -3641,7 +3679,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
                 for (int si = 0; si < d_num_species; si++)
                 {
                     const int component_idx =
-                        d_num_species*(d_num_species + 1) + 10 + si*(d_num_species + 1);
+                        d_num_species*(d_num_species + 1) + 8 + si*(d_num_species + 1);
                     
                     for (int k = -num_ghosts[2]; k < interior_dims[2] + num_ghosts[2]; k++)
                     {
@@ -3672,7 +3710,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
                     for (int sj = 0; sj < d_num_species; sj++)
                     {
                         const int component_idx =
-                            d_num_species*(d_num_species + 1) + 11 + si*(d_num_species + 1) + sj;
+                            d_num_species*(d_num_species + 1) + 9 + si*(d_num_species + 1) + sj;
                         
                         for (int k = -num_ghosts[2]; k < interior_dims[2] + num_ghosts[2]; k++)
                         {
@@ -3790,14 +3828,11 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
                             D_ptr[d_num_species*(d_num_species + 1) + 2][idx_diffusivities] = -mu_y[idx_var_data];
                             D_ptr[d_num_species*(d_num_species + 1) + 3][idx_diffusivities] = -v_y[idx_var_data]*(double(4)/double(3)*mu_y[idx_var_data] +
                                 mu_v_y[idx_var_data]);
-                            D_ptr[d_num_species*(d_num_species + 1) + 4][idx_diffusivities] = u_y[idx_var_data]*(double(2)/double(3)*mu_y[idx_var_data] -
+                            D_ptr[d_num_species*(d_num_species + 1) + 4][idx_diffusivities] = v_y[idx_var_data]*(double(2)/double(3)*mu_y[idx_var_data] -
                                 mu_v_y[idx_var_data]);
-                            D_ptr[d_num_species*(d_num_species + 1) + 5][idx_diffusivities] = w_y[idx_var_data]*(double(2)/double(3)*mu_y[idx_var_data] -
-                                mu_v_y[idx_var_data]);
-                            D_ptr[d_num_species*(d_num_species + 1) + 6][idx_diffusivities] = -u_y[idx_var_data]*mu_y[idx_var_data];
-                            D_ptr[d_num_species*(d_num_species + 1) + 7][idx_diffusivities] = -v_y[idx_var_data]*mu_y[idx_var_data];
-                            D_ptr[d_num_species*(d_num_species + 1) + 8][idx_diffusivities] = -w_y[idx_var_data]*mu_y[idx_var_data];
-                            D_ptr[d_num_species*(d_num_species + 1) + 9][idx_diffusivities] = -kappa_y[idx_var_data];
+                            D_ptr[d_num_species*(d_num_species + 1) + 5][idx_diffusivities] = -u_y[idx_var_data]*mu_y[idx_var_data];
+                            D_ptr[d_num_species*(d_num_species + 1) + 6][idx_diffusivities] = -w_y[idx_var_data]*mu_y[idx_var_data];
+                            D_ptr[d_num_species*(d_num_species + 1) + 7][idx_diffusivities] = -kappa_y[idx_var_data];
                         }
                     }
                 }
@@ -3806,7 +3841,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
                 for (int si = 0; si < d_num_species; si++)
                 {
                     const int component_idx =
-                        d_num_species*(d_num_species + 1) + 10 + si*(d_num_species + 1);
+                        d_num_species*(d_num_species + 1) + 8 + si*(d_num_species + 1);
                     
                     for (int k = -num_ghosts[2]; k < interior_dims[2] + num_ghosts[2]; k++)
                     {
@@ -3837,7 +3872,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
                     for (int sj = 0; sj < d_num_species; sj++)
                     {
                         const int component_idx =
-                            d_num_species*(d_num_species + 1) + 11 + si*(d_num_species + 1) + sj;
+                            d_num_species*(d_num_species + 1) + 9 + si*(d_num_species + 1) + sj;
                         
                         for (int k = -num_ghosts[2]; k < interior_dims[2] + num_ghosts[2]; k++)
                         {
@@ -3954,14 +3989,11 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
                             D_ptr[d_num_species*(d_num_species + 1) + 2][idx_diffusivities] = -mu_z[idx_var_data];
                             D_ptr[d_num_species*(d_num_species + 1) + 3][idx_diffusivities] = -w_z[idx_var_data]*(double(4)/double(3)*mu_z[idx_var_data] +
                                 mu_v_z[idx_var_data]);
-                            D_ptr[d_num_species*(d_num_species + 1) + 4][idx_diffusivities] = u_z[idx_var_data]*(double(2)/double(3)*mu_z[idx_var_data] -
+                            D_ptr[d_num_species*(d_num_species + 1) + 4][idx_diffusivities] = w_z[idx_var_data]*(double(2)/double(3)*mu_z[idx_var_data] -
                                 mu_v_z[idx_var_data]);
-                            D_ptr[d_num_species*(d_num_species + 1) + 5][idx_diffusivities] = v_z[idx_var_data]*(double(2)/double(3)*mu_z[idx_var_data] -
-                                mu_v_z[idx_var_data]);
-                            D_ptr[d_num_species*(d_num_species + 1) + 6][idx_diffusivities] = -u_z[idx_var_data]*mu_z[idx_var_data];
-                            D_ptr[d_num_species*(d_num_species + 1) + 7][idx_diffusivities] = -v_z[idx_var_data]*mu_z[idx_var_data];
-                            D_ptr[d_num_species*(d_num_species + 1) + 8][idx_diffusivities] = -w_z[idx_var_data]*mu_z[idx_var_data];
-                            D_ptr[d_num_species*(d_num_species + 1) + 9][idx_diffusivities] = -kappa_z[idx_var_data];
+                            D_ptr[d_num_species*(d_num_species + 1) + 5][idx_diffusivities] = -u_z[idx_var_data]*mu_z[idx_var_data];
+                            D_ptr[d_num_species*(d_num_species + 1) + 6][idx_diffusivities] = -v_z[idx_var_data]*mu_z[idx_var_data];
+                            D_ptr[d_num_species*(d_num_species + 1) + 7][idx_diffusivities] = -kappa_z[idx_var_data];
                         }
                     }
                 }
@@ -3970,7 +4002,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
                 for (int si = 0; si < d_num_species; si++)
                 {
                     const int component_idx =
-                        d_num_species*(d_num_species + 1) + 10 + si*(d_num_species + 1);
+                        d_num_species*(d_num_species + 1) + 8 + si*(d_num_species + 1);
                     
                     for (int k = -num_ghosts[2]; k < interior_dims[2] + num_ghosts[2] + 1; k++)
                     {
@@ -4001,7 +4033,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
                     for (int sj = 0; sj < d_num_species; sj++)
                     {
                         const int component_idx =
-                            d_num_species*(d_num_species + 1) + 11 + si*(d_num_species + 1) + sj;
+                            d_num_species*(d_num_species + 1) + 9 + si*(d_num_species + 1) + sj;
                         
                         for (int k = -num_ghosts[2]; k < interior_dims[2] + num_ghosts[2] + 1; k++)
                         {
@@ -4250,26 +4282,26 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getSideDataOfDiffusiveFluxDi
                         // -v*mu.
                         diffusivities_data[d_num_species + 2][1] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 2][1] =
-                            d_num_species*(d_num_species + 1) + 6;
+                            d_num_species*(d_num_species + 1) + 5;
                         
                         // -kappa.
                         diffusivities_data[d_num_species + 2][2] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 2][2] =
-                            d_num_species*(d_num_species + 1) + 7;
+                            d_num_species*(d_num_species + 1) + 6;
                         
                         for (int si = 0; si < d_num_species; si++)
                         {
                             diffusivities_data[d_num_species + 2][3 + si*(d_num_species + 1)] =
                                 d_side_data_diffusivities;
                             diffusivities_component_idx[d_num_species + 2][3 + si*(d_num_species + 1)] =
-                                d_num_species*(d_num_species + 1) + 8 + si*(d_num_species + 1);
+                                d_num_species*(d_num_species + 1) + 7 + si*(d_num_species + 1);
                             
                             for (int sj = 0; sj < d_num_species; sj++)
                             {
                                 diffusivities_data[d_num_species + 2][4 + si*(d_num_species + 1) + sj] =
                                     d_side_data_diffusivities;
                                 diffusivities_component_idx[d_num_species + 2][4 + si*(d_num_species + 1) + sj] =
-                                    d_num_species*(d_num_species + 1) + 9 + si*(d_num_species + 1) + sj;
+                                    d_num_species*(d_num_species + 1) + 8 + si*(d_num_species + 1) + sj;
                             }
                         }
                         
@@ -4317,7 +4349,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getSideDataOfDiffusiveFluxDi
                         // -v*mu.
                         diffusivities_data[d_num_species + 2][0] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 2][0] =
-                            d_num_species*(d_num_species + 1) + 6;
+                            d_num_species*(d_num_species + 1) + 5;
                         
                         // u*(2/3*mu - mu_v).
                         diffusivities_data[d_num_species + 2][1] = d_side_data_diffusivities;
@@ -4456,21 +4488,21 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getSideDataOfDiffusiveFluxDi
                         // -kappa.
                         diffusivities_data[d_num_species + 2][2] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 2][2] =
-                            d_num_species*(d_num_species + 1) + 7;
+                            d_num_species*(d_num_species + 1) + 6;
                         
                         for (int si = 0; si < d_num_species; si++)
                         {
                             diffusivities_data[d_num_species + 2][3 + si*(d_num_species + 1)] =
                                 d_side_data_diffusivities;
                             diffusivities_component_idx[d_num_species + 2][3 + si*(d_num_species + 1)] =
-                                d_num_species*(d_num_species + 1) + 8 + si*(d_num_species + 1);
+                                d_num_species*(d_num_species + 1) + 7 + si*(d_num_species + 1);
                             
                             for (int sj = 0; sj < d_num_species; sj++)
                             {
                                 diffusivities_data[d_num_species + 2][4 + si*(d_num_species + 1) + sj] =
                                     d_side_data_diffusivities;
                                 diffusivities_component_idx[d_num_species + 2][4 + si*(d_num_species + 1) + sj] =
-                                    d_num_species*(d_num_species + 1) + 9 + si*(d_num_species + 1) + sj;
+                                    d_num_species*(d_num_species + 1) + 8 + si*(d_num_species + 1) + sj;
                             }
                         }
                         
@@ -4571,31 +4603,31 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getSideDataOfDiffusiveFluxDi
                         // -v*mu.
                         diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][1] =
-                            d_num_species*(d_num_species + 1) + 7;
+                            d_num_species*(d_num_species + 1) + 5;
                         
                         // -w*mu.
                         diffusivities_data[d_num_species + 3][2] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][2] =
-                            d_num_species*(d_num_species + 1) + 8;
+                            d_num_species*(d_num_species + 1) + 6;
                         
                         // -kappa.
                         diffusivities_data[d_num_species + 3][3] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][3] =
-                            d_num_species*(d_num_species + 1) + 9;
+                            d_num_species*(d_num_species + 1) + 7;
                         
                         for (int si = 0; si < d_num_species; si++)
                         {
                             diffusivities_data[d_num_species + 3][4 + si*(d_num_species + 1)] =
                                 d_side_data_diffusivities;
                             diffusivities_component_idx[d_num_species + 3][4 + si*(d_num_species + 1)] =
-                                d_num_species*(d_num_species + 1) + 10 + si*(d_num_species + 1);
+                                d_num_species*(d_num_species + 1) + 8 + si*(d_num_species + 1);
                             
                             for (int sj = 0; sj < d_num_species; sj++)
                             {
                                 diffusivities_data[d_num_species + 3][5 + si*(d_num_species + 1) + sj] =
                                     d_side_data_diffusivities;
                                 diffusivities_component_idx[d_num_species + 3][5 + si*(d_num_species + 1) + sj] =
-                                    d_num_species*(d_num_species + 1) + 11 + si*(d_num_species + 1) + sj;
+                                    d_num_species*(d_num_species + 1) + 9 + si*(d_num_species + 1) + sj;
                             }
                         }
                         
@@ -4646,7 +4678,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getSideDataOfDiffusiveFluxDi
                         // -v*mu.
                         diffusivities_data[d_num_species + 3][0] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][0] =
-                            d_num_species*(d_num_species + 1) + 7;
+                            d_num_species*(d_num_species + 1) + 5;
                         
                         // u*(2/3*mu - mu_v).
                         diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
@@ -4700,7 +4732,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getSideDataOfDiffusiveFluxDi
                         // -w*mu.
                         diffusivities_data[d_num_species + 3][0] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][0] =
-                            d_num_species*(d_num_species + 1) + 8;
+                            d_num_species*(d_num_species + 1) + 6;
                         
                         // u*(2/3*mu - mu_v).
                         diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
@@ -4775,7 +4807,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getSideDataOfDiffusiveFluxDi
                         // -u*mu.
                         diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][1] =
-                            d_num_species*(d_num_species + 1) + 6;
+                            d_num_species*(d_num_species + 1) + 5;
                         
                         break;
                     }
@@ -4840,7 +4872,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getSideDataOfDiffusiveFluxDi
                         // -u*mu.
                         diffusivities_data[d_num_species + 3][0] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][0] =
-                            d_num_species*(d_num_species + 1) + 6;
+                            d_num_species*(d_num_species + 1) + 5;
                         
                         // -v*(4/3*mu + mu_v).
                         diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
@@ -4850,26 +4882,26 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getSideDataOfDiffusiveFluxDi
                         // -w*mu.
                         diffusivities_data[d_num_species + 3][2] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][2] =
-                            d_num_species*(d_num_species + 1) + 8;
+                            d_num_species*(d_num_species + 1) + 6;
                         
                         // -kappa.
                         diffusivities_data[d_num_species + 3][3] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][3] =
-                            d_num_species*(d_num_species + 1) + 9;
+                            d_num_species*(d_num_species + 1) + 7;
                         
                         for (int si = 0; si < d_num_species; si++)
                         {
                             diffusivities_data[d_num_species + 3][4 + si*(d_num_species + 1)] =
                                 d_side_data_diffusivities;
                             diffusivities_component_idx[d_num_species + 3][4 + si*(d_num_species + 1)] =
-                                d_num_species*(d_num_species + 1) + 10 + si*(d_num_species + 1);
+                                d_num_species*(d_num_species + 1) + 8 + si*(d_num_species + 1);
                             
                             for (int sj = 0; sj < d_num_species; sj++)
                             {
                                 diffusivities_data[d_num_species + 3][5 + si*(d_num_species + 1) + sj] =
                                     d_side_data_diffusivities;
                                 diffusivities_component_idx[d_num_species + 3][5 + si*(d_num_species + 1) + sj] =
-                                    d_num_species*(d_num_species + 1) + 11 + si*(d_num_species + 1) + sj;
+                                    d_num_species*(d_num_species + 1) + 9 + si*(d_num_species + 1) + sj;
                             }
                         }
                         
@@ -4920,12 +4952,12 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getSideDataOfDiffusiveFluxDi
                         // -w*mu.
                         diffusivities_data[d_num_species + 3][0] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][0] =
-                            d_num_species*(d_num_species + 1) + 8;
+                            d_num_species*(d_num_species + 1) + 6;
                         
                         // v*(2/3*mu - mu_v).
                         diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][1] =
-                            d_num_species*(d_num_species + 1) + 5;
+                            d_num_species*(d_num_species + 1) + 4;
                         
                         break;
                     }
@@ -4990,12 +5022,12 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getSideDataOfDiffusiveFluxDi
                         // w*(2/3*mu - mu_v).
                         diffusivities_data[d_num_species + 3][0] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][0] =
-                            d_num_species*(d_num_species + 1) + 5;
+                            d_num_species*(d_num_species + 1) + 4;
                         
                         // -u*mu.
                         diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][1] =
-                            d_num_species*(d_num_species + 1) + 6;
+                            d_num_species*(d_num_species + 1) + 5;
                         
                         break;
                     }
@@ -5044,12 +5076,12 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getSideDataOfDiffusiveFluxDi
                         // w*(2/3*mu - mu_v).
                         diffusivities_data[d_num_species + 3][0] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][0] =
-                            d_num_species*(d_num_species + 1) + 5;
+                            d_num_species*(d_num_species + 1) + 4;
                         
                         // -v*mu.
                         diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][1] =
-                            d_num_species*(d_num_species + 1) + 7;
+                            d_num_species*(d_num_species + 1) + 6;
                         
                         break;
                     }
@@ -5114,12 +5146,12 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getSideDataOfDiffusiveFluxDi
                         // -u*mu.
                         diffusivities_data[d_num_species + 3][0] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][0] =
-                            d_num_species*(d_num_species + 1) + 6;
+                            d_num_species*(d_num_species + 1) + 5;
                         
                         // -v*mu.
                         diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][1] =
-                            d_num_species*(d_num_species + 1) + 7;
+                            d_num_species*(d_num_species + 1) + 6;
                         
                         // -w*(4/3*mu + mu_v).
                         diffusivities_data[d_num_species + 3][2] = d_side_data_diffusivities;
@@ -5129,21 +5161,21 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getSideDataOfDiffusiveFluxDi
                         // -kappa.
                         diffusivities_data[d_num_species + 3][3] = d_side_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][3] =
-                            d_num_species*(d_num_species + 1) + 9;
+                            d_num_species*(d_num_species + 1) + 7;
                         
                         for (int si = 0; si < d_num_species; si++)
                         {
                             diffusivities_data[d_num_species + 3][4 + si*(d_num_species + 1)] =
                                 d_side_data_diffusivities;
                             diffusivities_component_idx[d_num_species + 3][4 + si*(d_num_species + 1)] =
-                                d_num_species*(d_num_species + 1) + 10 + si*(d_num_species + 1);
+                                d_num_species*(d_num_species + 1) + 8 + si*(d_num_species + 1);
                             
                             for (int sj = 0; sj < d_num_species; sj++)
                             {
                                 diffusivities_data[d_num_species + 3][5 + si*(d_num_species + 1) + sj] =
                                     d_side_data_diffusivities;
                                 diffusivities_component_idx[d_num_species + 3][5 + si*(d_num_species + 1) + sj] =
-                                    d_num_species*(d_num_species + 1) + 11 + si*(d_num_species + 1) + sj;
+                                    d_num_species*(d_num_species + 1) + 9 + si*(d_num_species + 1) + sj;
                             }
                         }
                         

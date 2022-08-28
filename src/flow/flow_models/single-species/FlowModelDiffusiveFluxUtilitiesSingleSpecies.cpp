@@ -378,12 +378,12 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForSideDataOfDiffusi
                 else if (d_dim == tbox::Dimension(2))
                 {
                     d_side_data_diffusivities.reset(new pdat::SideData<double>(
-                        interior_box, 8, d_num_subghosts_diffusivities));
+                        interior_box, 7, d_num_subghosts_diffusivities));
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
                     d_side_data_diffusivities.reset(new pdat::SideData<double>(
-                        interior_box, 10, d_num_subghosts_diffusivities));
+                        interior_box, 8, d_num_subghosts_diffusivities));
                 }
             }
         }
@@ -2106,7 +2106,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusiv
                         diffusivities_data[4].resize(2);
                         diffusivities_component_idx[4].resize(2);
                         
-                        // -w*u.
+                        // -w*mu.
                         diffusivities_data[4][0] = d_data_diffusivities;
                         diffusivities_component_idx[4][0] = 11;
                         
@@ -2496,7 +2496,6 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                 double* D_04 = d_side_data_diffusivities->getPointer(0, 4);
                 double* D_05 = d_side_data_diffusivities->getPointer(0, 5);
                 double* D_06 = d_side_data_diffusivities->getPointer(0, 6);
-                double* D_07 = d_side_data_diffusivities->getPointer(0, 7);
                 
                 for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
                 {
@@ -2513,11 +2512,10 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                         D_02[idx_diffusivities] = -mu_x[idx_var_data];
                         D_03[idx_diffusivities] = -u_x[idx_var_data]*(double(4)/double(3)*mu_x[idx_var_data] +
                             mu_v_x[idx_var_data]);
-                        D_04[idx_diffusivities] = v_x[idx_var_data]*(double(2)/double(3)*mu_x[idx_var_data] -
+                        D_04[idx_diffusivities] = u_x[idx_var_data]*(double(2)/double(3)*mu_x[idx_var_data] -
                             mu_v_x[idx_var_data]);
-                        D_05[idx_diffusivities] = -u_x[idx_var_data]*mu_x[idx_var_data];
-                        D_06[idx_diffusivities] = -v_x[idx_var_data]*mu_x[idx_var_data];
-                        D_07[idx_diffusivities] = -kappa_x[idx_var_data];
+                        D_05[idx_diffusivities] = -v_x[idx_var_data]*mu_x[idx_var_data];
+                        D_06[idx_diffusivities] = -kappa_x[idx_var_data];
                     }
                 }
                 
@@ -2532,7 +2530,6 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                 D_04 = d_side_data_diffusivities->getPointer(1, 4);
                 D_05 = d_side_data_diffusivities->getPointer(1, 5);
                 D_06 = d_side_data_diffusivities->getPointer(1, 6);
-                D_07 = d_side_data_diffusivities->getPointer(1, 7);
                 
                 for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1] + 1; j++)
                 {
@@ -2549,11 +2546,10 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                         D_02[idx_diffusivities] = -mu_y[idx_var_data];
                         D_03[idx_diffusivities] = -v_y[idx_var_data]*(double(4)/double(3)*mu_y[idx_var_data] +
                             mu_v_y[idx_var_data]);
-                        D_04[idx_diffusivities] = u_y[idx_var_data]*(double(2)/double(3)*mu_y[idx_var_data] -
+                        D_04[idx_diffusivities] = v_y[idx_var_data]*(double(2)/double(3)*mu_y[idx_var_data] -
                             mu_v_y[idx_var_data]);
                         D_05[idx_diffusivities] = -u_y[idx_var_data]*mu_y[idx_var_data];
-                        D_06[idx_diffusivities] = -v_y[idx_var_data]*mu_y[idx_var_data];
-                        D_07[idx_diffusivities] = -kappa_y[idx_var_data];
+                        D_06[idx_diffusivities] = -kappa_y[idx_var_data];
                     }
                 }
             }
@@ -2595,8 +2591,6 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                 double* D_05 = d_side_data_diffusivities->getPointer(0, 5);
                 double* D_06 = d_side_data_diffusivities->getPointer(0, 6);
                 double* D_07 = d_side_data_diffusivities->getPointer(0, 7);
-                double* D_08 = d_side_data_diffusivities->getPointer(0, 8);
-                double* D_09 = d_side_data_diffusivities->getPointer(0, 9);
                 
                 for (int k = -num_ghosts[2]; k < interior_dims[2] + num_ghosts[2]; k++)
                 {
@@ -2619,14 +2613,11 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                             D_02[idx_diffusivities] = -mu_x[idx_var_data];
                             D_03[idx_diffusivities] = -u_x[idx_var_data]*(double(4)/double(3)*mu_x[idx_var_data] +
                                 mu_v_x[idx_var_data]);
-                            D_04[idx_diffusivities] = v_x[idx_var_data]*(double(2)/double(3)*mu_x[idx_var_data] -
+                            D_04[idx_diffusivities] = u_x[idx_var_data]*(double(2)/double(3)*mu_x[idx_var_data] -
                                 mu_v_x[idx_var_data]);
-                            D_05[idx_diffusivities] = w_x[idx_var_data]*(double(2)/double(3)*mu_x[idx_var_data] -
-                                mu_v_x[idx_var_data]);
-                            D_06[idx_diffusivities] = -u_x[idx_var_data]*mu_x[idx_var_data];
-                            D_07[idx_diffusivities] = -v_x[idx_var_data]*mu_x[idx_var_data];
-                            D_08[idx_diffusivities] = -w_x[idx_var_data]*mu_x[idx_var_data];
-                            D_09[idx_diffusivities] = -kappa_x[idx_var_data];
+                            D_05[idx_diffusivities] = -v_x[idx_var_data]*mu_x[idx_var_data];
+                            D_06[idx_diffusivities] = -w_x[idx_var_data]*mu_x[idx_var_data];
+                            D_07[idx_diffusivities] = -kappa_x[idx_var_data];
                         }
                     }
                 }
@@ -2643,8 +2634,6 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                 D_05 = d_side_data_diffusivities->getPointer(1, 5);
                 D_06 = d_side_data_diffusivities->getPointer(1, 6);
                 D_07 = d_side_data_diffusivities->getPointer(1, 7);
-                D_08 = d_side_data_diffusivities->getPointer(1, 8);
-                D_09 = d_side_data_diffusivities->getPointer(1, 9);
                 
                 for (int k = -num_ghosts[2]; k < interior_dims[2] + num_ghosts[2]; k++)
                 {
@@ -2667,14 +2656,11 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                             D_02[idx_diffusivities] = -mu_y[idx_var_data];
                             D_03[idx_diffusivities] = -v_y[idx_var_data]*(double(4)/double(3)*mu_y[idx_var_data] +
                                 mu_v_y[idx_var_data]);
-                            D_04[idx_diffusivities] = u_y[idx_var_data]*(double(2)/double(3)*mu_y[idx_var_data] -
+                            D_04[idx_diffusivities] = v_y[idx_var_data]*(double(2)/double(3)*mu_y[idx_var_data] -
                                 mu_v_y[idx_var_data]);
-                            D_05[idx_diffusivities] = w_y[idx_var_data]*(double(2)/double(3)*mu_y[idx_var_data] -
-                                mu_v_y[idx_var_data]);
-                            D_06[idx_diffusivities] = -u_y[idx_var_data]*mu_y[idx_var_data];
-                            D_07[idx_diffusivities] = -v_y[idx_var_data]*mu_y[idx_var_data];
-                            D_08[idx_diffusivities] = -w_y[idx_var_data]*mu_y[idx_var_data];
-                            D_09[idx_diffusivities] = -kappa_y[idx_var_data];
+                            D_05[idx_diffusivities] = -u_y[idx_var_data]*mu_y[idx_var_data];
+                            D_06[idx_diffusivities] = -w_y[idx_var_data]*mu_y[idx_var_data];
+                            D_07[idx_diffusivities] = -kappa_y[idx_var_data];
                         }
                     }
                 }
@@ -2691,8 +2677,6 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                 D_05 = d_side_data_diffusivities->getPointer(2, 5);
                 D_06 = d_side_data_diffusivities->getPointer(2, 6);
                 D_07 = d_side_data_diffusivities->getPointer(2, 7);
-                D_08 = d_side_data_diffusivities->getPointer(2, 8);
-                D_09 = d_side_data_diffusivities->getPointer(2, 9);
                 
                 for (int k = -num_ghosts[2]; k < interior_dims[2] + num_ghosts[2] + 1; k++)
                 {
@@ -2715,14 +2699,11 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                             D_02[idx_diffusivities] = -mu_z[idx_var_data];
                             D_03[idx_diffusivities] = -w_z[idx_var_data]*(double(4)/double(3)*mu_z[idx_var_data] +
                                 mu_v_z[idx_var_data]);
-                            D_04[idx_diffusivities] = u_z[idx_var_data]*(double(2)/double(3)*mu_z[idx_var_data] -
+                            D_04[idx_diffusivities] = w_z[idx_var_data]*(double(2)/double(3)*mu_z[idx_var_data] -
                                 mu_v_z[idx_var_data]);
-                            D_05[idx_diffusivities] = v_z[idx_var_data]*(double(2)/double(3)*mu_z[idx_var_data] -
-                                mu_v_z[idx_var_data]);
-                            D_06[idx_diffusivities] = -u_z[idx_var_data]*mu_z[idx_var_data];
-                            D_07[idx_diffusivities] = -v_z[idx_var_data]*mu_z[idx_var_data];
-                            D_08[idx_diffusivities] = -w_z[idx_var_data]*mu_z[idx_var_data];
-                            D_09[idx_diffusivities] = -kappa_z[idx_var_data];
+                            D_05[idx_diffusivities] = -u_z[idx_var_data]*mu_z[idx_var_data];
+                            D_06[idx_diffusivities] = -v_z[idx_var_data]*mu_z[idx_var_data];
+                            D_07[idx_diffusivities] = -kappa_z[idx_var_data];
                         }
                     }
                 }
@@ -2896,11 +2877,11 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusiv
                         
                         // -v*mu.
                         diffusivities_data[3][1] = d_side_data_diffusivities;
-                        diffusivities_component_idx[3][1] = 6;
+                        diffusivities_component_idx[3][1] = 5;
                         
                         // -kappa.
                         diffusivities_data[3][2] = d_side_data_diffusivities;
-                        diffusivities_component_idx[3][2] = 7;
+                        diffusivities_component_idx[3][2] = 6;
                         
                         break;
                     }
@@ -2940,7 +2921,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusiv
                         
                         // -v*mu.
                         diffusivities_data[3][0] = d_side_data_diffusivities;
-                        diffusivities_component_idx[3][0] = 6;
+                        diffusivities_component_idx[3][0] = 5;
                         
                         // u*(2/3*mu - mu_v).
                         diffusivities_data[3][1] = d_side_data_diffusivities;
@@ -3052,7 +3033,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusiv
                         
                         // -kappa.
                         diffusivities_data[3][2] = d_side_data_diffusivities;
-                        diffusivities_component_idx[3][2] = 7;
+                        diffusivities_component_idx[3][2] = 6;
                         
                         break;
                     }
@@ -3132,15 +3113,15 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusiv
                         
                         // -v*mu.
                         diffusivities_data[4][1] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][1] = 7;
+                        diffusivities_component_idx[4][1] = 5;
                         
                         // -w*mu.
                         diffusivities_data[4][2] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][2] = 8;
+                        diffusivities_component_idx[4][2] = 6;
                         
                         // -kappa.
                         diffusivities_data[4][3] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][3] = 9;
+                        diffusivities_component_idx[4][3] = 7;
                         
                         break;
                     }
@@ -3183,7 +3164,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusiv
                         
                         // -v*mu.
                         diffusivities_data[4][0] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][0] = 7;
+                        diffusivities_component_idx[4][0] = 5;
                         
                         // u*(2/3*mu - mu_v).
                         diffusivities_data[4][1] = d_side_data_diffusivities;
@@ -3230,7 +3211,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusiv
                         
                         // -w*mu.
                         diffusivities_data[4][0] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][0] = 8;
+                        diffusivities_component_idx[4][0] = 6;
                         
                         // u*(2/3*mu - mu_v).
                         diffusivities_data[4][1] = d_side_data_diffusivities;
@@ -3297,7 +3278,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusiv
                         
                         // -u*mu.
                         diffusivities_data[4][1] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][1] = 6;
+                        diffusivities_component_idx[4][1] = 5;
                         
                         break;
                     }
@@ -3344,7 +3325,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusiv
                         
                         // -u*mu.
                         diffusivities_data[4][0] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][0] = 6;
+                        diffusivities_component_idx[4][0] = 5;
                         
                         // -v*(4/3*mu + mu_v).
                         diffusivities_data[4][1] = d_side_data_diffusivities;
@@ -3352,11 +3333,11 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusiv
                         
                         // -w*mu.
                         diffusivities_data[4][2] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][2] = 8;
+                        diffusivities_component_idx[4][2] = 6;
                         
                         // -kappa.
                         diffusivities_data[4][3] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][3] = 9;
+                        diffusivities_component_idx[4][3] = 7;
                         
                         break;
                     }
@@ -3397,13 +3378,13 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusiv
                         diffusivities_data[4].resize(2);
                         diffusivities_component_idx[4].resize(2);
                         
-                        // -w*u.
+                        // -w*mu.
                         diffusivities_data[4][0] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][0] = 8;
+                        diffusivities_component_idx[4][0] = 6;
                         
                         // v*(2/3*mu - mu_v).
                         diffusivities_data[4][1] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][1] = 5;
+                        diffusivities_component_idx[4][1] = 4;
                         
                         break;
                     }
@@ -3462,11 +3443,11 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusiv
                         
                         // w*(2/3*mu - mu_v).
                         diffusivities_data[4][0] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][0] = 5;
+                        diffusivities_component_idx[4][0] = 4;
                         
                         // -u*mu.
                         diffusivities_data[4][1] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][1] = 6;
+                        diffusivities_component_idx[4][1] = 5;
                         
                         break;
                     }
@@ -3509,11 +3490,11 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusiv
                         
                         // w*(2/3*mu - mu_v).
                         diffusivities_data[4][0] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][0] = 5;
+                        diffusivities_component_idx[4][0] = 4;
                         
                         // -v*mu.
                         diffusivities_data[4][1] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][1] = 7;
+                        diffusivities_component_idx[4][1] = 6;
                         
                         break;
                     }
@@ -3560,11 +3541,11 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusiv
                         
                         // -u*mu.
                         diffusivities_data[4][0] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][0] = 6;
+                        diffusivities_component_idx[4][0] = 5;
                         
                         // -v*mu.
                         diffusivities_data[4][1] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][1] = 7;
+                        diffusivities_component_idx[4][1] = 6;
                         
                         // -w*(4/3*mu + mu_v).
                         diffusivities_data[4][2] = d_side_data_diffusivities;
@@ -3572,7 +3553,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusiv
                         
                         // -kappa.
                         diffusivities_data[4][3] = d_side_data_diffusivities;
-                        diffusivities_component_idx[4][3] = 9;
+                        diffusivities_component_idx[4][3] = 7;
                         
                         break;
                     }
