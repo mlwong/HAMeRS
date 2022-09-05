@@ -106,6 +106,16 @@ class DiffusiveFluxReconstructorMidpointSixthOrder: public DiffusiveFluxReconstr
             const bool allocate_scratch_derivatives_node = true);
         
         /*
+         * Interpolate the diffusivities from nodes to midpoints.
+         */
+        void interpolateDiffusivitiesFromNodeToMidpoint(
+            hier::Patch& patch,
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > var_side_data_for_diffusivities,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& var_cell_data_for_diffusivities,
+            const std::vector<int>& var_cell_data_for_diffusivities_component_idx,
+            const bool allocate_scratch_diffusivities_midpoint = true);
+        
+        /*
          * Interpolate the derivatives from nodes to midpoints in x-direction.
          */
         void interpolateDerivativesFromNodeToMidpointX(
@@ -132,15 +142,49 @@ class DiffusiveFluxReconstructorMidpointSixthOrder: public DiffusiveFluxReconstr
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_node,
             const bool allocate_scratch_derivatives_midpoint = true);
         
+        /*
+         * Reconstruct the flux using flux at midpoints in x-direction.
+         */
+        void reconstructFluxX(
+            hier::Patch& patch,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux_midpoint,
+            const double dt);
+        
+        /*
+         * Reconstruct the flux using flux at midpoints in y-direction.
+         */
+        void reconstructFluxY(
+            hier::Patch& patch,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux_midpoint,
+            const double dt);
+        
+        /*
+         * Reconstruct the flux using flux at midpoints in z-direction.
+         */
+        void reconstructFluxZ(
+            hier::Patch& patch,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux_midpoint,
+            const double dt);
+        
+        hier::IntVector d_num_der_midpoint_ghosts;
+        hier::IntVector d_num_der_node_ghosts;
+        hier::IntVector d_num_interp_midpoint_ghosts;
+        hier::IntVector d_num_flux_reconstruct_ghosts;
+        
         int d_num_scratch_derivatives_node_used;
         int d_num_scratch_derivatives_midpoint_x_used;
         int d_num_scratch_derivatives_midpoint_y_used;
         int d_num_scratch_derivatives_midpoint_z_used;
+        int d_num_scratch_diffusivities_midpoint_used;
         
         std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > d_scratch_derivatives_node;
         std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > d_scratch_derivatives_midpoint_x;
         std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > d_scratch_derivatives_midpoint_y;
         std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > d_scratch_derivatives_midpoint_z;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > d_scratch_diffusivities_midpoint;
         
 };
 
