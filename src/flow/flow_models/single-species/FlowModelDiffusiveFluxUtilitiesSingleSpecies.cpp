@@ -500,12 +500,15 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeDerivedCellData()
         }
     }
     
-    // Compute the diffusivities cell data.
-    if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
+    if (!d_need_side_diffusivities)
     {
-        if (!d_cell_data_computed_diffusivities)
+        // Compute the diffusivities cell data.
+        if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
         {
-            computeCellDataOfDiffusivities();
+            if (!d_cell_data_computed_diffusivities)
+            {
+                computeCellDataOfDiffusivities();
+            }
         }
     }
     
@@ -2752,11 +2755,11 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusiv
             << std::endl);
     }
     
-    if (!d_cell_data_computed_diffusivities)
+    if (!d_side_data_diffusivities_computed)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusivities()\n"
-            << "Cell data of 'DIFFUSIVITIES' is not registered/computed yet."
+            << "Side data of 'DIFFUSIVITIES' is not registered/computed yet."
             << std::endl);
     }
     

@@ -136,7 +136,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
         
-        diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts);
+        diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts, true);
         
         diffusive_flux_utilities->allocateMemoryForDerivedCellData();
         
@@ -161,6 +161,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             var_side_data_for_diffusivities,
             var_cell_data_for_diffusivities,
             var_cell_data_for_diffusivities_component_idx);
+        
+        diffusive_flux_utilities->allocateMemoryForSideDataOfDiffusiveFluxDiffusivities();
         
         diffusive_flux_utilities->computeSideDataOfDiffusiveFluxDiffusivities(
             var_side_data_for_diffusivities);
@@ -321,7 +323,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
         
-        diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts);
+        diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts, true);
         
         diffusive_flux_utilities->allocateMemoryForDerivedCellData();
         
@@ -346,6 +348,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             var_side_data_for_diffusivities,
             var_cell_data_for_diffusivities,
             var_cell_data_for_diffusivities_component_idx);
+        
+        diffusive_flux_utilities->allocateMemoryForSideDataOfDiffusiveFluxDiffusivities();
         
         diffusive_flux_utilities->computeSideDataOfDiffusiveFluxDiffusivities(
             var_side_data_for_diffusivities);
@@ -829,7 +833,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
         
-        diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts);
+        diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts, true);
         
         diffusive_flux_utilities->allocateMemoryForDerivedCellData();
         
@@ -854,6 +858,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             var_side_data_for_diffusivities,
             var_cell_data_for_diffusivities,
             var_cell_data_for_diffusivities_component_idx);
+        
+        diffusive_flux_utilities->allocateMemoryForSideDataOfDiffusiveFluxDiffusivities();
         
         diffusive_flux_utilities->computeSideDataOfDiffusiveFluxDiffusivities(
             var_side_data_for_diffusivities);
@@ -2249,7 +2255,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpoi
 #endif
             
             // Get the pointer to the derivative at midpoint.
-            double* der_midpoint_y = d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]->getPointer(0, 0);
+            double* der_midpoint_y = d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]->getPointer(1, 0);
             
             /*
              * Get the sub-ghost cell width and ghost box dimensions of the variable.
@@ -2499,7 +2505,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpoi
 #endif
             
             // Get the pointer to the derivative at midpoint.
-            double* der_midpoint_z = d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]->getPointer(0, 0);
+            double* der_midpoint_z = d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]->getPointer(2, 0);
             
             /*
              * Get the sub-ghost cell width and ghost box dimensions of the variable.
@@ -3332,13 +3338,14 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDiffusivitiesFromNodeToMidpoint(
     hier::Patch& patch,
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > var_side_data_for_diffusivities,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_side_data_for_diffusivities,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& var_cell_data_for_diffusivities,
     const std::vector<int>& var_cell_data_for_diffusivities_component_idx,
     const bool allocate_scratch_diffusivities_midpoint)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(var_cell_data_for_diffusivities.size()) == static_cast<int>(var_cell_data_for_diffusivities_component_idx.size()));
+    TBOX_ASSERT(static_cast<int>(var_cell_data_for_diffusivities.size()) ==
+        static_cast<int>(var_cell_data_for_diffusivities_component_idx.size()));
 #endif
     
     const double a_n =  double(75)/double(128);
@@ -4068,7 +4075,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
 #endif
             
             // Get the pointer to the derivative at midpoint.
-            double* der_midpoint_y = d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]->getPointer(0, 0);
+            double* der_midpoint_y = d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]->getPointer(1, 0);
             
             if (d_dim == tbox::Dimension(2))
             {
@@ -4291,7 +4298,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
 #endif
             
             // Get the pointer to the derivative at midpoint.
-            double* der_midpoint_z = d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]->getPointer(0, 0);
+            double* der_midpoint_z = d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]->getPointer(2, 0);
             
             /*
              * Get the dimensions and number of ghost cells.

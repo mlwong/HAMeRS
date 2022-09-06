@@ -110,7 +110,7 @@ class DiffusiveFluxReconstructorMidpointSixthOrder: public DiffusiveFluxReconstr
          */
         void interpolateDiffusivitiesFromNodeToMidpoint(
             hier::Patch& patch,
-            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > var_side_data_for_diffusivities,
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_side_data_for_diffusivities,
             const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& var_cell_data_for_diffusivities,
             const std::vector<int>& var_cell_data_for_diffusivities_component_idx,
             const bool allocate_scratch_diffusivities_midpoint = true);
