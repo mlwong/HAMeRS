@@ -169,17 +169,26 @@ class DiffusiveFluxReconstructorMidpointSixthOrder: public DiffusiveFluxReconstr
             const HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux_midpoint,
             const double dt);
         
+        /*
+         * Numbers of ghost cells needed for the stencil operations.
+         */
         hier::IntVector d_num_der_midpoint_ghosts;
         hier::IntVector d_num_der_node_ghosts;
         hier::IntVector d_num_interp_midpoint_ghosts;
         hier::IntVector d_num_flux_reconstruct_ghosts;
         
+        /*
+         * Numbers of scratch data containers used.
+         */
         int d_num_scratch_derivatives_node_used;
         int d_num_scratch_derivatives_midpoint_x_used;
         int d_num_scratch_derivatives_midpoint_y_used;
         int d_num_scratch_derivatives_midpoint_z_used;
         int d_num_scratch_diffusivities_midpoint_used;
         
+        /*
+         * Scratch data containers.
+         */
         std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > d_scratch_derivatives_node;
         std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > d_scratch_derivatives_midpoint_x;
         std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > d_scratch_derivatives_midpoint_y;

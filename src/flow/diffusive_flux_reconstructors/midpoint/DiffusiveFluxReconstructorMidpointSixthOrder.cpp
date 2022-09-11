@@ -1940,7 +1940,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpoi
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_0 = dx[0];
+    const double inv_dx_0 = double(1)/dx[0];
     
     hier::IntVector direction = hier::IntVector::getZero(d_dim);
     direction[0] = 1;
@@ -2022,7 +2022,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpoi
                     der_midpoint_x[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
                                            b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
                                            c_n*(u[idx_data_RRR] - u[idx_data_LLL])
-                                          )/dx_0;
+                                          )*inv_dx_0;
                 }
             }
             else if (d_dim == tbox::Dimension(2))
@@ -2078,7 +2078,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpoi
                         der_midpoint_x[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
                                                b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
                                                c_n*(u[idx_data_RRR] - u[idx_data_LLL])
-                                              )/dx_0;
+                                              )*inv_dx_0;
                     }
                 }
             }
@@ -2156,7 +2156,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpoi
                             der_midpoint_x[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
                                                    b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
                                                    c_n*(u[idx_data_RRR] - u[idx_data_LLL])
-                                                  )/dx_0;
+                                                  )*inv_dx_0;
                         }
                     }
                 }
@@ -2219,7 +2219,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpoi
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_1 = dx[1];
+    const double inv_dx_1 = double(1)/dx[1];
     
     hier::IntVector direction = hier::IntVector::getZero(d_dim);
     direction[1] = 1;
@@ -2320,7 +2320,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpoi
                         der_midpoint_y[idx] = (a_n*(u[idx_data_T]   - u[idx_data_B]) +
                                                b_n*(u[idx_data_TT]  - u[idx_data_BB]) +
                                                c_n*(u[idx_data_TTT] - u[idx_data_BBB])
-                                              )/dx_1;
+                                              )*inv_dx_1;
                     }
                 }
             }
@@ -2398,7 +2398,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpoi
                             der_midpoint_y[idx] = (a_n*(u[idx_data_T]   - u[idx_data_B]) +
                                                    b_n*(u[idx_data_TT]  - u[idx_data_BB]) +
                                                    c_n*(u[idx_data_TTT] - u[idx_data_BBB])
-                                                  )/dx_1;
+                                                  )*inv_dx_1;
                         }
                     }
                 }
@@ -2469,7 +2469,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpoi
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_2 = dx[2];
+    const double inv_dx_2 = double(1)/dx[2];
     
     hier::IntVector direction = hier::IntVector::getZero(d_dim);
     direction[2] = 1;
@@ -2589,7 +2589,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpoi
                         der_midpoint_z[idx] = (a_n*(u[idx_data_F]   - u[idx_data_B]) +
                                                b_n*(u[idx_data_FF]  - u[idx_data_BB]) +
                                                c_n*(u[idx_data_FFF] - u[idx_data_BBB])
-                                              )/dx_2;
+                                              )*inv_dx_2;
                     }
                 }
             }
@@ -2643,7 +2643,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_0 = dx[0];
+    const double inv_dx_0 = double(1)/dx[0];
     
     for (int ei = 0; ei < d_num_eqn; ei++)
     {
@@ -2725,7 +2725,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
                         dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
                                      b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
                                      c_n*(u[idx_data_RRR] - u[idx_data_LLL])
-                                    )/dx_0;
+                                    )*inv_dx_0;
                     }
                 }
                 else if (d_dim == tbox::Dimension(2))
@@ -2781,7 +2781,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
                             dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
                                          b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
                                          c_n*(u[idx_data_RRR] - u[idx_data_LLL])
-                                        )/dx_0;
+                                        )*inv_dx_0;
                         }
                     }
                 }
@@ -2859,7 +2859,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
                                 dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
                                              b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
                                              c_n*(u[idx_data_RRR] - u[idx_data_LLL])
-                                            )/dx_0;
+                                            )*inv_dx_0;
                             }
                         }
                     }
@@ -2932,7 +2932,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_1 = dx[1];
+    const double inv_dx_1 = double(1)/dx[1];
     
     for (int ei = 0; ei < d_num_eqn; ei++)
     {
@@ -3033,7 +3033,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
                             dudy[idx] = (a_n*(u[idx_data_T]   - u[idx_data_B]) +
                                          b_n*(u[idx_data_TT]  - u[idx_data_BB]) +
                                          c_n*(u[idx_data_TTT] - u[idx_data_BBB])
-                                        )/dx_1;
+                                        )*inv_dx_1;
                         }
                     }
                 }
@@ -3111,7 +3111,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
                                 dudy[idx] = (a_n*(u[idx_data_T]   - u[idx_data_B]) +
                                              b_n*(u[idx_data_TT]  - u[idx_data_BB]) +
                                              c_n*(u[idx_data_TTT] - u[idx_data_BBB])
-                                            )/dx_1;
+                                            )*inv_dx_1;
                             }
                         }
                     }
@@ -3192,7 +3192,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_2 = dx[2];
+    const double inv_dx_2 = double(1)/dx[2];
     
     for (int ei = 0; ei < d_num_eqn; ei++)
     {
@@ -3312,7 +3312,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
                             dudz[idx] = (a_n*(u[idx_data_F]   - u[idx_data_B]) +
                                          b_n*(u[idx_data_FF]  - u[idx_data_BB]) +
                                          c_n*(u[idx_data_FFF] - u[idx_data_BBB])
-                                        )/dx_2;
+                                        )*inv_dx_2;
                         }
                     }
                 }
