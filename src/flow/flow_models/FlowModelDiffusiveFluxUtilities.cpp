@@ -15,13 +15,15 @@ FlowModelDiffusiveFluxUtilities::FlowModelDiffusiveFluxUtilities(
         d_num_subghosts_diffusivities(-hier::IntVector::getOne(d_dim)),
         d_subghost_box_diffusivities(hier::Box::getEmptyBox(dim)),
         d_subghostcell_dims_diffusivities(hier::IntVector::getZero(d_dim)),
-        d_cell_data_computed_diffusivities(false)
+        d_cell_data_computed_diffusivities(false),
+        d_side_data_diffusivities_computed(false),
+        d_need_side_diffusivities(false)
 {}
 
 
 /*
  * Register different derived variables related to this class in the registered patch. The
- * derived variables to be registered are given as entires in a map of the variable name to
+ * derived variables to be registered are given as entries in a map of the variable name to
  * the number of sub-ghost cells required.
  */
 void
@@ -42,9 +44,11 @@ FlowModelDiffusiveFluxUtilities::registerDerivedVariables(
  */
 void
 FlowModelDiffusiveFluxUtilities::registerDerivedVariablesForDiffusiveFluxes(
-    const hier::IntVector& num_subghosts)
+    const hier::IntVector& num_subghosts,
+    const bool need_side_diffusivities)
 {
     NULL_USE(num_subghosts);
+    NULL_USE(need_side_diffusivities);
     
     TBOX_ERROR(d_object_name
         << ": FlowModelDiffusiveFluxUtilities::registerDerivedVariablesForDiffusiveFluxes()\n"
@@ -68,10 +72,23 @@ FlowModelDiffusiveFluxUtilities::allocateMemoryForDerivedCellData()
 
 
 /*
- * Clear cell data of different derived variables related to this class in the registered patch.
+ * Allocate memory for side data of the diffusivities.
  */
 void
-FlowModelDiffusiveFluxUtilities::clearCellData()
+FlowModelDiffusiveFluxUtilities::allocateMemoryForSideDataOfDiffusiveFluxDiffusivities()
+{
+    TBOX_ERROR(d_object_name
+        << ": FlowModelDiffusiveFluxUtilities::allocateMemoryForSideDataOfDiffusiveFluxDiffusivities()\n"
+        << "Function is not yet implemented!"
+        << std::endl);
+}
+
+
+/*
+ * Clear cell and side data of different derived variables related to this class in the registered patch.
+ */
+void
+FlowModelDiffusiveFluxUtilities::clearCellAndSideData()
 {
 }
 
@@ -166,6 +183,63 @@ FlowModelDiffusiveFluxUtilities::getCellDataOfDiffusiveFluxDiffusivities(
     
     TBOX_ERROR(d_object_name
         << ": FlowModelDiffusiveFluxUtilities::getCellDataOfDiffusiveFluxDiffusivities()\n"
+        << "Function is not yet implemented!"
+        << std::endl);
+}
+
+
+/*
+ * Get the cell data that needs interpolation to midpoints for computing side data of diffusivities in the
+ * diffusive flux.
+ */
+void
+FlowModelDiffusiveFluxUtilities::getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities(
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& var_data_for_diffusivities,
+    std::vector<int>& var_data_for_diffusivities_component_idx)
+{
+    NULL_USE(var_data_for_diffusivities);
+    NULL_USE(var_data_for_diffusivities_component_idx);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelDiffusiveFluxUtilities::getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities()\n"
+        << "Function is not yet implemented!"
+        << std::endl);
+}
+
+
+/*
+ * Compute the side data of the diffusivities in the diffusive flux with the interpolated side data.
+ */
+void
+FlowModelDiffusiveFluxUtilities::computeSideDataOfDiffusiveFluxDiffusivities(
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_data_for_diffusivities)
+{
+    NULL_USE(var_data_for_diffusivities);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelDiffusiveFluxUtilities::computeSideDataOfDiffusiveFluxDiffusivities()\n"
+        << "Function is not yet implemented!"
+        << std::endl);
+}
+
+
+/*
+ * Get the side data of the diffusivities in the diffusive fluxa.
+ */
+void
+FlowModelDiffusiveFluxUtilities::getSideDataOfDiffusiveFluxDiffusivities(
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& diffusivities_data,
+    std::vector<std::vector<int> >& diffusivities_component_idx,
+    const DIRECTION::TYPE& flux_direction,
+    const DIRECTION::TYPE& derivative_direction)
+{
+    NULL_USE(diffusivities_data);
+    NULL_USE(diffusivities_component_idx);
+    NULL_USE(flux_direction);
+    NULL_USE(derivative_direction);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelDiffusiveFluxUtilities::getSideDataOfDiffusiveFluxDiffusivities()\n"
         << "Function is not yet implemented!"
         << std::endl);
 }
