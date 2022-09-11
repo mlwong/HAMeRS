@@ -24,7 +24,7 @@ class FlowModelDiffusiveFluxUtilitiesFourEqnConservative: public FlowModelDiffus
         
         /*
          * Register different derived variables related to this class in the registered patch. The
-         * derived variables to be registered are given as entires in a map of the variable name to
+         * derived variables to be registered are given as entries in a map of the variable name to
          * the number of sub-ghost cells required.
          */
         void
@@ -36,7 +36,8 @@ class FlowModelDiffusiveFluxUtilitiesFourEqnConservative: public FlowModelDiffus
          */
         void
         registerDerivedVariablesForDiffusiveFluxes(
-            const hier::IntVector& num_subghosts);
+            const hier::IntVector& num_subghosts,
+            const bool need_side_diffusivities = false);
         
         /*
          * Allocate memory for cell data of different registered derived variables related to this
@@ -45,9 +46,14 @@ class FlowModelDiffusiveFluxUtilitiesFourEqnConservative: public FlowModelDiffus
         void allocateMemoryForDerivedCellData();
         
         /*
-         * Clear cell data of different derived variables related to this class in the registered patch.
+         * Allocate memory for side data of the diffusivities.
          */
-        void clearCellData();
+        void allocateMemoryForSideDataOfDiffusiveFluxDiffusivities();
+        
+        /*
+         * Clear cell and side data of different derived variables related to this class in the registered patch.
+         */
+        void clearCellAndSideData();
         
         /*
          * Compute cell data of different registered derived variables related to this class.
@@ -83,6 +89,32 @@ class FlowModelDiffusiveFluxUtilitiesFourEqnConservative: public FlowModelDiffus
         void
         getCellDataOfDiffusiveFluxDiffusivities(
             std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& diffusivities_data,
+            std::vector<std::vector<int> >& diffusivities_component_idx,
+            const DIRECTION::TYPE& flux_direction,
+            const DIRECTION::TYPE& derivative_direction);
+        
+        /*
+         * Get the cell data that needs interpolation to midpoints for computing side data of diffusivities in the
+         * diffusive flux.
+         */
+        void
+        getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities(
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& var_data_for_diffusivities,
+            std::vector<int>& var_data_for_diffusivities_component_idx);
+        
+        /*
+         * Compute the side data of the diffusivities in the diffusive flux with the interpolated side data.
+         */
+        void
+        computeSideDataOfDiffusiveFluxDiffusivities(
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_data_for_diffusivities);
+        
+        /*
+         * Get the side data of the diffusivities in the diffusive fluxa.
+         */
+        void
+        getSideDataOfDiffusiveFluxDiffusivities(
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& diffusivities_data,
             std::vector<std::vector<int> >& diffusivities_component_idx,
             const DIRECTION::TYPE& flux_direction,
             const DIRECTION::TYPE& derivative_direction);

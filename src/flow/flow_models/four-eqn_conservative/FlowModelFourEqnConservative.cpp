@@ -781,7 +781,7 @@ FlowModelFourEqnConservative::registerPatchWithDataContext(
 
 /*
  * Register different derived variables in the registered patch. The derived variables to be registered
- * are given as entires in a map of the variable name to the number of sub-ghost cells required.
+ * are given as entries in a map of the variable name to the number of sub-ghost cells required.
  * If the variable to be registered is one of the conservative variable, the corresponding entry
  * in the map is ignored.
  */
@@ -1094,7 +1094,7 @@ FlowModelFourEqnConservative::unregisterPatch()
     d_cell_data_computed_species_densities  = false;
     d_cell_data_computed_species_enthalpies = false;
     
-    d_flow_model_diffusive_flux_utilities->clearCellData();
+    d_flow_model_diffusive_flux_utilities->clearCellAndSideData();
     d_flow_model_source_utilities->clearCellData();
     
     d_derived_cell_data_computed = false;

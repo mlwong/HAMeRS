@@ -50,7 +50,8 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
             std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_x,
             std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_x_computed,
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
-            const std::vector<std::vector<int> >& data_component_idx_x);
+            const std::vector<std::vector<int> >& data_component_idx_x,
+            const bool allocate_scratch_derivatives_node = true);
         
         /*
          * Compute the first derivatives in the y-direction.
@@ -60,7 +61,8 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
             std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_y,
             std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_y_computed,
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
-            const std::vector<std::vector<int> >& data_component_idx_y);
+            const std::vector<std::vector<int> >& data_component_idx_y,
+            const bool allocate_scratch_derivatives_node = true);
         
         /*
          * Compute the first derivatives in the z-direction.
@@ -70,7 +72,51 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
             std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_z,
             std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_z_computed,
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
-            const std::vector<std::vector<int> >& data_component_idx_z);
+            const std::vector<std::vector<int> >& data_component_idx_z,
+            const bool allocate_scratch_derivatives_node = true);
+        
+        /*
+         * Reconstruct the flux using flux at nodes in x-direction.
+         */
+        void reconstructFluxX(
+            hier::Patch& patch,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& diffusive_flux_node,
+            const double dt);
+        
+        /*
+         * Reconstruct the flux using flux at nodes in y-direction.
+         */
+        void reconstructFluxY(
+            hier::Patch& patch,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& diffusive_flux_node,
+            const double dt);
+        
+        /*
+         * Reconstruct the flux using flux at nodes in z-direction.
+         */
+        void reconstructFluxZ(
+            hier::Patch& patch,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& diffusive_flux_node,
+            const double dt);
+        
+        /*
+         * Numbers of ghost cells needed for the stencil operations.
+         */
+        hier::IntVector d_num_der_node_ghosts;
+        hier::IntVector d_num_flux_reconstruct_ghosts;
+        
+        /*
+         * Number of scratch data containers used.
+         */
+        int d_num_scratch_derivatives_node_used;
+        
+        /*
+         * Scratch data containers.
+         */
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > d_scratch_derivatives_node;
         
 };
 
