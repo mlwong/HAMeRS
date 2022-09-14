@@ -331,6 +331,43 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::allocateMemoryForSideDataOfDiffus
             << "The object is not setup yet!"
             << std::endl);
     }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
+    const hier::Box interior_box = patch.getBox();
+    
+    if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_side_data_diffusivities_computed)
+        {
+            if (!d_side_data_diffusivities)
+            {
+                if (d_dim == tbox::Dimension(1))
+                {
+                    d_side_data_diffusivities.reset(new pdat::SideData<double>(
+                        interior_box, 2, d_num_subghosts_diffusivities));
+                }
+                else if (d_dim == tbox::Dimension(2))
+                {
+                    d_side_data_diffusivities.reset(new pdat::SideData<double>(
+                        interior_box, 6, d_num_subghosts_diffusivities));
+                }
+                else if (d_dim == tbox::Dimension(3))
+                {
+                    d_side_data_diffusivities.reset(new pdat::SideData<double>(
+                        interior_box, 7, d_num_subghosts_diffusivities));
+                }
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::allocateMemoryForSideDataOfDiffusiveFluxDiffusivities()\n"
+                << "Side data of 'DIFFUSIVITIES' is aleady computed."
+                << std::endl);
+        }
+    }
 }
 
 
@@ -2284,14 +2321,54 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataForInterpolationToSide
             << std::endl);
     }
     
+    if (!d_cell_data_computed_shear_viscosity)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities()\n"
+            << "Cell data of 'SHEAR_VISCOSITY' is not registered/computed yet."
+            << std::endl);
+    }
+    
+    if (!d_cell_data_computed_bulk_viscosity)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities()\n"
+            << "Cell data of 'BULK_VISCOSITY' is not registered/computed yet."
+            << std::endl);
+    }
+    
+    var_data_for_diffusivities.resize(2 + d_dim.getValue());
+    var_data_for_diffusivities_component_idx.resize(2 + d_dim.getValue());
+    
+    var_data_for_diffusivities[0] = d_data_shear_viscosity;
+    var_data_for_diffusivities_component_idx[0] = 0;
+    var_data_for_diffusivities[1] = d_data_bulk_viscosity;
+    var_data_for_diffusivities_component_idx[1] = 0;
+    
+    // Get the cell data of velocity.
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
+        flow_model_tmp->getCellData("VELOCITY");
+    
     if (d_dim == tbox::Dimension(1))
     {
+        var_data_for_diffusivities[2] = data_velocity;
+        var_data_for_diffusivities_component_idx[2] = 0;
     }
     else if (d_dim == tbox::Dimension(2))
     {
+        var_data_for_diffusivities[2] = data_velocity;
+        var_data_for_diffusivities_component_idx[2] = 0;
+        var_data_for_diffusivities[3] = data_velocity;
+        var_data_for_diffusivities_component_idx[3] = 1;
     }
     else if (d_dim == tbox::Dimension(3))
     {
+        var_data_for_diffusivities[2] = data_velocity;
+        var_data_for_diffusivities_component_idx[2] = 0;
+        var_data_for_diffusivities[3] = data_velocity;
+        var_data_for_diffusivities_component_idx[3] = 1;
+        var_data_for_diffusivities[4] = data_velocity;
+        var_data_for_diffusivities_component_idx[4] = 2;
     }
 }
 
@@ -2315,15 +2392,294 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::computeSideDataOfDiffusiveFluxDif
                     << std::endl);
             }
             
+            HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+            const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
+            
+            /*
+             * Get the dimension of the interior box.
+             */
+            
+            const hier::Box interior_box = patch.getBox();
+            const hier::IntVector interior_dims = interior_box.numberCells();
+            
+            const hier::IntVector num_ghosts = var_data_for_diffusivities[0]->getGhostCellWidth();
+            const hier::IntVector ghostcell_dims = var_data_for_diffusivities[0]->getGhostBox().numberCells();
+            
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(static_cast<int>(var_data_for_diffusivities.size()) == 2 + d_dim.getValue());
+            TBOX_ASSERT(num_ghosts <= d_num_subghosts_diffusivities);
+            
+            for (int vi = 0; vi < static_cast<int>(var_data_for_diffusivities.size()); vi++)
+            {
+                TBOX_ASSERT(var_data_for_diffusivities[vi] == num_ghosts);
+                TBOX_ASSERT(var_data_for_diffusivities[vi]->getGhostBox().contains(interior_box));
+            }
+#endif
+            
             if (d_dim == tbox::Dimension(1))
             {
+                double* mu_x   = var_data_for_diffusivities[0]->getPointer(0, 0);
+                double* mu_v_x = var_data_for_diffusivities[1]->getPointer(0, 0);
+                double* u_x    = var_data_for_diffusivities[2]->getPointer(0, 0);
+                
+                std::vector<double*> D_ptr;
+                D_ptr.reserve(2);
+                
+                /*
+                 * Compute the diffusivities for the x-direction derivatives.
+                 */
+                
+                for (int i = 0; i < 2; i++)
+                {
+                    D_ptr.push_back(d_side_data_diffusivities->getPointer(0, i));
+                }
+                
+                // Momentum equations.
+                for (int i = -num_ghosts[0]; i < interior_dims[0] + num_ghosts[0] + 1; i++)
+                {
+                    const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
+                    const int idx_var_data      = i + num_ghosts[0];
+                    
+                    D_ptr[0][idx_diffusivities] = -(double(4)/double(3)*mu_x[idx_var_data] + mu_v_x[idx_var_data]);
+                    D_ptr[1][idx_diffusivities] = -u_x[idx_var_data]*(double(4)/double(3)*mu_x[idx_var_data] +
+                        mu_v_x[idx_var_data]);
+                }
+                
+                D_ptr.clear();
             }
             else if (d_dim == tbox::Dimension(2))
             {
+                double* mu_x   = var_data_for_diffusivities[0]->getPointer(0, 0);
+                double* mu_v_x = var_data_for_diffusivities[1]->getPointer(0, 0);
+                
+                double* mu_y   = var_data_for_diffusivities[0]->getPointer(1, 0);
+                double* mu_v_y = var_data_for_diffusivities[1]->getPointer(1, 0);
+                
+                double* u_x = var_data_for_diffusivities[2]->getPointer(0, 0);
+                double* v_x = var_data_for_diffusivities[3]->getPointer(0, 0);
+                
+                double* u_y = var_data_for_diffusivities[2]->getPointer(1, 0);
+                double* v_y = var_data_for_diffusivities[3]->getPointer(1, 0);
+                
+                std::vector<double*> D_ptr;
+                D_ptr.reserve(6);
+                
+                /*
+                 * Compute the diffusivities for the x-direction derivatives.
+                 */
+                
+                for (int i = 0; i < 6; i++)
+                {
+                    D_ptr.push_back(d_side_data_diffusivities->getPointer(0, i));
+                }
+                
+                // Momentum equations.
+                for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
+                {
+                    for (int i = -num_ghosts[0]; i < interior_dims[0] + num_ghosts[0] + 1; i++)
+                    {
+                        const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
+                            (j + d_num_subghosts_diffusivities[1])*(d_subghostcell_dims_diffusivities[0] + 1);
+                        
+                        const int idx_var_data = (i + num_ghosts[0]) +
+                            (j + num_ghosts[1])*(ghostcell_dims[0] + 1);
+                        
+                        D_ptr[0][idx_diffusivities] = -(double(4)/double(3)*mu_x[idx_var_data] + mu_v_x[idx_var_data]);
+                        D_ptr[1][idx_diffusivities] = double(2)/double(3)*mu_x[idx_var_data] - mu_v_x[idx_var_data];
+                        D_ptr[2][idx_diffusivities] = -mu_x[idx_var_data];
+                        D_ptr[3][idx_diffusivities] = -u_x[idx_var_data]*(double(4)/double(3)*mu_x[idx_var_data] +
+                            mu_v_x[idx_var_data]);
+                        D_ptr[4][idx_diffusivities] = u_x[idx_var_data]*(double(2)/double(3)*mu_x[idx_var_data] -
+                            mu_v_x[idx_var_data]);
+                        D_ptr[5][idx_diffusivities] = -v_x[idx_var_data]*mu_x[idx_var_data];
+                    }
+                }
+                
+                D_ptr.clear();
+                
+                /*
+                 * Compute the diffusivities for the y-direction derivatives.
+                 */
+                
+                for (int i = 0; i < 6; i++)
+                {
+                    D_ptr.push_back(d_side_data_diffusivities->getPointer(1, i));
+                }
+                
+                // Momentum and energy equations.
+                for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1] + 1; j++)
+                {
+                    for (int i = -num_ghosts[0]; i < interior_dims[0] + num_ghosts[0]; i++)
+                    {
+                        const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
+                            (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
+                        
+                        const int idx_var_data = (i + num_ghosts[0]) +
+                            (j + num_ghosts[1])*ghostcell_dims[0];
+                        
+                        D_ptr[0][idx_diffusivities] = -(double(4)/double(3)*mu_y[idx_var_data] + mu_v_y[idx_var_data]);
+                        D_ptr[1][idx_diffusivities] = double(2)/double(3)*mu_y[idx_var_data] - mu_v_y[idx_var_data];
+                        D_ptr[2][idx_diffusivities] = -mu_y[idx_var_data];
+                        D_ptr[3][idx_diffusivities] = -v_y[idx_var_data]*(double(4)/double(3)*mu_y[idx_var_data] +
+                            mu_v_y[idx_var_data]);
+                        D_ptr[4][idx_diffusivities] = v_y[idx_var_data]*(double(2)/double(3)*mu_y[idx_var_data] -
+                            mu_v_y[idx_var_data]);
+                        D_ptr[5][idx_diffusivities] = -u_y[idx_var_data]*mu_y[idx_var_data];
+                    }
+                }
+                
+                D_ptr.clear();
             }
             else if (d_dim == tbox::Dimension(3))
             {
+                double* mu_x   = var_data_for_diffusivities[0]->getPointer(0, 0);
+                double* mu_v_x = var_data_for_diffusivities[1]->getPointer(0, 0);
+                
+                double* mu_y   = var_data_for_diffusivities[0]->getPointer(1, 0);
+                double* mu_v_y = var_data_for_diffusivities[1]->getPointer(1, 0);
+                
+                double* mu_z   = var_data_for_diffusivities[0]->getPointer(2, 0);
+                double* mu_v_z = var_data_for_diffusivities[1]->getPointer(2, 0);
+                
+                double* u_x = var_data_for_diffusivities[2]->getPointer(0, 0);
+                double* v_x = var_data_for_diffusivities[3]->getPointer(0, 0);
+                double* w_x = var_data_for_diffusivities[4]->getPointer(0, 0);
+                
+                double* u_y = var_data_for_diffusivities[2]->getPointer(1, 0);
+                double* v_y = var_data_for_diffusivities[3]->getPointer(1, 0);
+                double* w_y = var_data_for_diffusivities[4]->getPointer(1, 0);
+                
+                double* u_z = var_data_for_diffusivities[2]->getPointer(2, 0);
+                double* v_z = var_data_for_diffusivities[3]->getPointer(2, 0);
+                double* w_z = var_data_for_diffusivities[4]->getPointer(2, 0);
+                
+                std::vector<double*> D_ptr;
+                D_ptr.reserve(7);
+                
+                /*
+                 * Compute the diffusivities for the x-direction derivatives.
+                 */
+                
+                for (int i = 0; i < 7; i++)
+                {
+                    D_ptr.push_back(d_side_data_diffusivities->getPointer(0, i));
+                }
+                
+                // Momentum equations.
+                for (int k = -num_ghosts[2]; k < interior_dims[2] + num_ghosts[2]; k++)
+                {
+                    for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
+                    {
+                        for (int i = -num_ghosts[0]; i < interior_dims[0] + num_ghosts[0] + 1; i++)
+                        {
+                            const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
+                                (j + d_num_subghosts_diffusivities[1])*(d_subghostcell_dims_diffusivities[0] + 1) +
+                                (k + d_num_subghosts_diffusivities[2])*(d_subghostcell_dims_diffusivities[0] + 1)*
+                                    d_subghostcell_dims_diffusivities[1];
+                            
+                            const int idx_var_data = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*(ghostcell_dims[0] + 1) +
+                                (k + num_ghosts[2])*(ghostcell_dims[0] + 1)*
+                                    ghostcell_dims[1];
+                            
+                            D_ptr[0][idx_diffusivities] = -(double(4)/double(3)*mu_x[idx_var_data] + mu_v_x[idx_var_data]);
+                            D_ptr[1][idx_diffusivities] = double(2)/double(3)*mu_x[idx_var_data] - mu_v_x[idx_var_data];
+                            D_ptr[2][idx_diffusivities] = -mu_x[idx_var_data];
+                            D_ptr[3][idx_diffusivities] = -u_x[idx_var_data]*(double(4)/double(3)*mu_x[idx_var_data] +
+                                mu_v_x[idx_var_data]);
+                            D_ptr[4][idx_diffusivities] = u_x[idx_var_data]*(double(2)/double(3)*mu_x[idx_var_data] -
+                                mu_v_x[idx_var_data]);
+                            D_ptr[5][idx_diffusivities] = -v_x[idx_var_data]*mu_x[idx_var_data];
+                            D_ptr[6][idx_diffusivities] = -w_x[idx_var_data]*mu_x[idx_var_data];
+                        }
+                    }
+                }
+                
+                D_ptr.clear();
+                
+                /*
+                 * Compute the diffusivities for the y-direction derivatives.
+                 */
+                
+                for (int i = 0; i < 7; i++)
+                {
+                    D_ptr.push_back(d_side_data_diffusivities->getPointer(1, i));
+                }
+                
+                // Momentum equations.
+                for (int k = -num_ghosts[2]; k < interior_dims[2] + num_ghosts[2]; k++)
+                {
+                    for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1] + 1; j++)
+                    {
+                        for (int i = -num_ghosts[0]; i < interior_dims[0] + num_ghosts[0]; i++)
+                        {
+                            const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
+                                (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
+                                (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
+                                    (d_subghostcell_dims_diffusivities[1] + 1);
+                            
+                            const int idx_var_data = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
+                                (k + num_ghosts[2])*ghostcell_dims[0]*
+                                    (ghostcell_dims[1] + 1);
+                            
+                            D_ptr[0][idx_diffusivities] = -(double(4)/double(3)*mu_y[idx_var_data] + mu_v_y[idx_var_data]);
+                            D_ptr[1][idx_diffusivities] = double(2)/double(3)*mu_y[idx_var_data] - mu_v_y[idx_var_data];
+                            D_ptr[2][idx_diffusivities] = -mu_y[idx_var_data];
+                            D_ptr[3][idx_diffusivities] = -v_y[idx_var_data]*(double(4)/double(3)*mu_y[idx_var_data] +
+                                mu_v_y[idx_var_data]);
+                            D_ptr[4][idx_diffusivities] = v_y[idx_var_data]*(double(2)/double(3)*mu_y[idx_var_data] -
+                                mu_v_y[idx_var_data]);
+                            D_ptr[5][idx_diffusivities] = -u_y[idx_var_data]*mu_y[idx_var_data];
+                            D_ptr[6][idx_diffusivities] = -w_y[idx_var_data]*mu_y[idx_var_data];
+                        }
+                    }
+                }
+                
+                D_ptr.clear();
+                
+                /*
+                 * Compute the diffusivities for the z-direction derivatives.
+                 */
+                
+                for (int i = 0; i < 7; i++)
+                {
+                    D_ptr.push_back(d_side_data_diffusivities->getPointer(2, i));
+                }
+                
+                for (int k = -num_ghosts[2]; k < interior_dims[2] + num_ghosts[2] + 1; k++)
+                {
+                    for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
+                    {
+                        for (int i = -num_ghosts[0]; i < interior_dims[0] + num_ghosts[0]; i++)
+                        {
+                            const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
+                                (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
+                                (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
+                                    d_subghostcell_dims_diffusivities[1];
+                            
+                            const int idx_var_data = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
+                                (k + num_ghosts[2])*ghostcell_dims[0]*
+                                    ghostcell_dims[1];
+                            
+                            D_ptr[0][idx_diffusivities] = -(double(4)/double(3)*mu_z[idx_var_data] + mu_v_z[idx_var_data]);
+                            D_ptr[1][idx_diffusivities] = double(2)/double(3)*mu_z[idx_var_data] - mu_v_z[idx_var_data];
+                            D_ptr[2][idx_diffusivities] = -mu_z[idx_var_data];
+                            D_ptr[3][idx_diffusivities] = -w_z[idx_var_data]*(double(4)/double(3)*mu_z[idx_var_data] +
+                                mu_v_z[idx_var_data]);
+                            D_ptr[4][idx_diffusivities] = w_z[idx_var_data]*(double(2)/double(3)*mu_z[idx_var_data] -
+                                mu_v_z[idx_var_data]);
+                            D_ptr[5][idx_diffusivities] = -u_z[idx_var_data]*mu_z[idx_var_data];
+                            D_ptr[6][idx_diffusivities] = -v_z[idx_var_data]*mu_z[idx_var_data];
+                        }
+                    }
+                }
+                
+                D_ptr.clear();
             }
+            
+            d_side_data_diffusivities_computed = true;
         }
     }
     else
