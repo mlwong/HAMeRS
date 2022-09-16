@@ -618,6 +618,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariabl
                         derivative_var_data[d_num_species + 1][0] = data_velocity;
                         derivative_var_component_idx[d_num_species + 1][0] = 0;
                         
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            derivative_var_data[d_num_species + 2 + si].resize(0);
+                            derivative_var_component_idx[d_num_species + 2 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     default:
@@ -695,6 +705,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariabl
                         derivative_var_data[d_num_species + 2][1] = data_velocity;
                         derivative_var_component_idx[d_num_species + 2][1] = 1;
                         
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            derivative_var_data[d_num_species + 3 + si].resize(0);
+                            derivative_var_component_idx[d_num_species + 3 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Y_DIRECTION:
@@ -741,6 +761,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariabl
                         // Variable v.
                         derivative_var_data[d_num_species + 2][1] = data_velocity;
                         derivative_var_component_idx[d_num_species + 2][1] = 1;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            derivative_var_data[d_num_species + 3 + si].resize(0);
+                            derivative_var_component_idx[d_num_species + 3 + si].resize(0);
+                        }
                         
                         break;
                     }
@@ -805,6 +835,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariabl
                         derivative_var_data[d_num_species + 2][1] = data_velocity;
                         derivative_var_component_idx[d_num_species + 2][1] = 1;
                         
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            derivative_var_data[d_num_species + 3 + si].resize(0);
+                            derivative_var_component_idx[d_num_species + 3 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Y_DIRECTION:
@@ -851,6 +891,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariabl
                         // Variable v.
                         derivative_var_data[d_num_species + 2][1] = data_velocity;
                         derivative_var_component_idx[d_num_species + 2][1] = 1;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            derivative_var_data[d_num_species + 3 + si].resize(0);
+                            derivative_var_component_idx[d_num_species + 3 + si].resize(0);
+                        }
                         
                         break;
                     }
@@ -940,6 +990,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariabl
                         derivative_var_data[d_num_species + 3][2] = data_velocity;
                         derivative_var_component_idx[d_num_species + 3][2] = 2;
                         
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            derivative_var_data[d_num_species + 4 + si].resize(0);
+                            derivative_var_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Y_DIRECTION:
@@ -990,6 +1050,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariabl
                         derivative_var_data[d_num_species + 3][1] = data_velocity;
                         derivative_var_component_idx[d_num_species + 3][1] = 1;
                         
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            derivative_var_data[d_num_species + 4 + si].resize(0);
+                            derivative_var_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Z_DIRECTION:
@@ -1039,6 +1109,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariabl
                         // Variable w.
                         derivative_var_data[d_num_species + 3][1] = data_velocity;
                         derivative_var_component_idx[d_num_species + 3][1] = 2;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            derivative_var_data[d_num_species + 4 + si].resize(0);
+                            derivative_var_component_idx[d_num_species + 4 + si].resize(0);
+                        }
                         
                         break;
                     }
@@ -1106,6 +1186,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariabl
                         derivative_var_data[d_num_species + 3][1] = data_velocity;
                         derivative_var_component_idx[d_num_species + 3][1] = 1;
                         
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            derivative_var_data[d_num_species + 4 + si].resize(0);
+                            derivative_var_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Y_DIRECTION:
@@ -1164,6 +1254,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariabl
                         derivative_var_data[d_num_species + 3][2] = data_velocity;
                         derivative_var_component_idx[d_num_species + 3][2] = 2;
                         
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            derivative_var_data[d_num_species + 4 + si].resize(0);
+                            derivative_var_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Z_DIRECTION:
@@ -1213,6 +1313,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariabl
                         // Variable w.
                         derivative_var_data[d_num_species + 3][1] = data_velocity;
                         derivative_var_component_idx[d_num_species + 3][1] = 2;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            derivative_var_data[d_num_species + 4 + si].resize(0);
+                            derivative_var_component_idx[d_num_species + 4 + si].resize(0);
+                        }
                         
                         break;
                     }
@@ -1280,6 +1390,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariabl
                         derivative_var_data[d_num_species + 3][1] = data_velocity;
                         derivative_var_component_idx[d_num_species + 3][1] = 2;
                         
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            derivative_var_data[d_num_species + 4 + si].resize(0);
+                            derivative_var_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Y_DIRECTION:
@@ -1329,6 +1449,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariabl
                         // Variable w.
                         derivative_var_data[d_num_species + 3][1] = data_velocity;
                         derivative_var_component_idx[d_num_species + 3][1] = 2;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            derivative_var_data[d_num_species + 4 + si].resize(0);
+                            derivative_var_component_idx[d_num_species + 4 + si].resize(0);
+                        }
                         
                         break;
                     }
@@ -1387,6 +1517,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariabl
                         // Variable w.
                         derivative_var_data[d_num_species + 3][2] = data_velocity;
                         derivative_var_component_idx[d_num_species + 3][2] = 2;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            derivative_var_data[d_num_species + 4 + si].resize(0);
+                            derivative_var_component_idx[d_num_species + 4 + si].resize(0);
+                        }
                         
                         break;
                     }
@@ -1498,6 +1638,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusi
                         diffusivities_data[d_num_species + 1][0] = d_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 1][0] = 1;
                         
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 2 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 2 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     default:
@@ -1574,6 +1724,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusi
                         diffusivities_data[d_num_species + 2][1] = d_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 2][1] = 8;
                         
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 3 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 3 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Y_DIRECTION:
@@ -1620,6 +1780,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusi
                         // u*(2/3*mu - mu_v).
                         diffusivities_data[d_num_species + 2][1] = d_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 2][1] = 5;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 3 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 3 + si].resize(0);
+                        }
                         
                         break;
                     }
@@ -1684,6 +1854,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusi
                         diffusivities_data[d_num_species + 2][1] = d_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 2][1] = 7;
                         
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 3 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 3 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Y_DIRECTION:
@@ -1730,6 +1910,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusi
                         // -v*(4/3*mu + mu_v).
                         diffusivities_data[d_num_species + 2][1] = d_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 2][1] = 4;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 3 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 3 + si].resize(0);
+                        }
                         
                         break;
                     }
@@ -1818,6 +2008,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusi
                         diffusivities_data[d_num_species + 3][2] = d_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][2] = 11;
                         
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Y_DIRECTION:
@@ -1868,6 +2068,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusi
                         diffusivities_data[d_num_species + 3][1] = d_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][1] = 6;
                         
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Z_DIRECTION:
@@ -1917,6 +2127,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusi
                         // u*(2/3*mu - mu_v).
                         diffusivities_data[d_num_species + 3][1] = d_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][1] = 6;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
                         
                         break;
                     }
@@ -1984,6 +2204,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusi
                         diffusivities_data[d_num_species + 3][1] = d_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][1] = 9;
                         
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Y_DIRECTION:
@@ -2042,6 +2272,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusi
                         diffusivities_data[d_num_species + 3][2] = d_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][2] = 11;
                         
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Z_DIRECTION:
@@ -2084,13 +2324,23 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusi
                         diffusivities_data[d_num_species + 3].resize(2);
                         diffusivities_component_idx[d_num_species + 3].resize(2);
                         
-                        // -w*u.
+                        // -w*mu.
                         diffusivities_data[d_num_species + 3][0] = d_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][0] = 11;
                         
                         // v*(2/3*mu - mu_v).
                         diffusivities_data[d_num_species + 3][1] = d_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][1] = 7;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
                         
                         break;
                     }
@@ -2158,6 +2408,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusi
                         diffusivities_data[d_num_species + 3][1] = d_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][1] = 9;
                         
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Y_DIRECTION:
@@ -2207,6 +2467,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusi
                         // -v*mu.
                         diffusivities_data[d_num_species + 3][1] = d_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][1] = 10;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
                         
                         break;
                     }
@@ -2265,6 +2535,16 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusi
                         // -w*(4/3*mu + mu_v).
                         diffusivities_data[d_num_species + 3][2] = d_data_diffusivities;
                         diffusivities_component_idx[d_num_species + 3][2] = 5;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
                         
                         break;
                     }
@@ -2743,6 +3023,48 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getSideDataOfDiffusiveFluxDiffusi
                 {
                     case DIRECTION::X_DIRECTION:
                     {
+                        /*
+                         * Mass equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            diffusivities_data[si].resize(0);
+                            diffusivities_component_idx[si].resize(0);
+                        }
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[d_num_species].resize(1);
+                        diffusivities_component_idx[d_num_species].resize(1);
+                        
+                        // -(4/3*mu + mu_v).
+                        diffusivities_data[d_num_species][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species][0] = 0;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[d_num_species + 1].resize(1);
+                        diffusivities_component_idx[d_num_species + 1].resize(1);
+                        
+                        // -u*(4/3*mu + mu_v).
+                        diffusivities_data[d_num_species + 1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 1][0] = 1;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 2 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 2 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     default:
@@ -2776,10 +3098,116 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getSideDataOfDiffusiveFluxDiffusi
                 {
                     case DIRECTION::X_DIRECTION:
                     {
+                        /*
+                         * Mass equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            diffusivities_data[si].resize(0);
+                            diffusivities_component_idx[si].resize(0);
+                        }
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[d_num_species].resize(1);
+                        diffusivities_component_idx[d_num_species].resize(1);
+                        
+                        // -(4/3*mu + mu_v).
+                        diffusivities_data[d_num_species][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species][0] = 0;
+                        
+                        diffusivities_data[d_num_species + 1].resize(1);
+                        diffusivities_component_idx[d_num_species + 1].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[d_num_species + 1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 1][0] = 2;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[d_num_species + 2].resize(2);
+                        diffusivities_component_idx[d_num_species + 2].resize(2);
+                        
+                        // -u*(4/3*mu + mu_v).
+                        diffusivities_data[d_num_species + 2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 2][0] = 3;
+                        
+                        // -v*mu.
+                        diffusivities_data[d_num_species + 2][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 2][1] = 5;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 3 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 3 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Y_DIRECTION:
                     {
+                        /*
+                         * Mass equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            diffusivities_data[si].resize(0);
+                            diffusivities_component_idx[si].resize(0);
+                        }
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[d_num_species].resize(1);
+                        diffusivities_component_idx[d_num_species].resize(1);
+                        
+                        // 2/3*mu - mu_v.
+                        diffusivities_data[d_num_species][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species][0] = 1;
+                        
+                        diffusivities_data[d_num_species + 1].resize(1);
+                        diffusivities_component_idx[d_num_species + 1].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[d_num_species + 1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 1][0] = 2;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[d_num_species + 2].resize(2);
+                        diffusivities_component_idx[d_num_species + 2].resize(2);
+                        
+                        // -v*mu.
+                        diffusivities_data[d_num_species + 2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 2][0] = 5;
+                        
+                        // u*(2/3*mu - mu_v).
+                        diffusivities_data[d_num_species + 2][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 2][1] = 4;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 3 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 3 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     default:
@@ -2800,10 +3228,116 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getSideDataOfDiffusiveFluxDiffusi
                 {
                     case DIRECTION::X_DIRECTION:
                     {
+                        /*
+                         * Mass equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            diffusivities_data[si].resize(0);
+                            diffusivities_component_idx[si].resize(0);
+                        }
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[d_num_species].resize(1);
+                        diffusivities_component_idx[d_num_species].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[d_num_species][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species][0] = 2;
+                        
+                        diffusivities_data[d_num_species + 1].resize(1);
+                        diffusivities_component_idx[d_num_species + 1].resize(1);
+                        
+                        // 2/3*mu - mu_v.
+                        diffusivities_data[d_num_species + 1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 1][0] = 1;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[d_num_species + 2].resize(2);
+                        diffusivities_component_idx[d_num_species + 2].resize(2);
+                        
+                        // v*(2/3*mu - mu_v).
+                        diffusivities_data[d_num_species + 2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 2][0] = 4;
+                        
+                        // -u*mu.
+                        diffusivities_data[d_num_species + 2][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 2][1] = 5;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 3 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 3 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Y_DIRECTION:
                     {
+                        /*
+                         * Mass equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            diffusivities_data[si].resize(0);
+                            diffusivities_component_idx[si].resize(0);
+                        }
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[d_num_species].resize(1);
+                        diffusivities_component_idx[d_num_species].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[d_num_species][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species][0] = 2;
+                        
+                        diffusivities_data[d_num_species + 1].resize(1);
+                        diffusivities_component_idx[d_num_species + 1].resize(1);
+                        
+                        // -(4/3*mu + mu_v).
+                        diffusivities_data[d_num_species + 1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 1][0] = 0;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[d_num_species + 2].resize(2);
+                        diffusivities_component_idx[d_num_species + 2].resize(2);
+                        
+                        // -u*mu.
+                        diffusivities_data[d_num_species + 2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 2][0] = 5;
+                        
+                        // -v*(4/3*mu + mu_v).
+                        diffusivities_data[d_num_species + 2][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 2][1] = 3;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 3 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 3 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     default:
@@ -2837,14 +3371,190 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getSideDataOfDiffusiveFluxDiffusi
                 {
                     case DIRECTION::X_DIRECTION:
                     {
+                        /*
+                         * Mass equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            diffusivities_data[si].resize(0);
+                            diffusivities_component_idx[si].resize(0);
+                        }
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[d_num_species].resize(1);
+                        diffusivities_component_idx[d_num_species].resize(1);
+                        
+                        // -(4/3*mu + mu_v).
+                        diffusivities_data[d_num_species][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species][0] = 0;
+                        
+                        diffusivities_data[d_num_species + 1].resize(1);
+                        diffusivities_component_idx[d_num_species + 1].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[d_num_species + 1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 1][0] = 2;
+                        
+                        diffusivities_data[d_num_species + 2].resize(1);
+                        diffusivities_component_idx[d_num_species + 2].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[d_num_species + 2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 2][0] = 2;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[d_num_species + 3].resize(3);
+                        diffusivities_component_idx[d_num_species + 3].resize(3);
+                        
+                        // -u*(4/3*mu + mu_v).
+                        diffusivities_data[d_num_species + 3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][0] = 3;
+                        
+                        // -v*mu.
+                        diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][1] = 5;
+                        
+                        // -w*mu.
+                        diffusivities_data[d_num_species + 3][2] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][2] = 6;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Y_DIRECTION:
                     {
+                        /*
+                         * Mass equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            diffusivities_data[si].resize(0);
+                            diffusivities_component_idx[si].resize(0);
+                        }
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[d_num_species].resize(1);
+                        diffusivities_component_idx[d_num_species].resize(1);
+                        
+                        // 2/3*mu - mu_v.
+                        diffusivities_data[d_num_species][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species][0] = 1;
+                        
+                        diffusivities_data[d_num_species + 1].resize(1);
+                        diffusivities_component_idx[d_num_species + 1].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[d_num_species + 1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 1][0] = 2;
+                        
+                        diffusivities_data[d_num_species + 2].resize(0);
+                        diffusivities_component_idx[d_num_species + 2].resize(0);
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[d_num_species + 3].resize(2);
+                        diffusivities_component_idx[d_num_species + 3].resize(2);
+                        
+                        // -v*mu.
+                        diffusivities_data[d_num_species + 3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][0] = 5;
+                        
+                        // u*(2/3*mu - mu_v).
+                        diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][1] = 4;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Z_DIRECTION:
                     {
+                        /*
+                         * Mass equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            diffusivities_data[si].resize(0);
+                            diffusivities_component_idx[si].resize(0);
+                        }
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[d_num_species].resize(1);
+                        diffusivities_component_idx[d_num_species].resize(1);
+                        
+                        // 2/3*mu - mu_v.
+                        diffusivities_data[d_num_species][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species][0] = 1;
+                        
+                        diffusivities_data[d_num_species + 1].resize(0);
+                        diffusivities_component_idx[d_num_species + 1].resize(0);
+                        
+                        diffusivities_data[d_num_species + 2].resize(1);
+                        diffusivities_component_idx[d_num_species + 2].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[d_num_species + 2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 2][0] = 2;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[d_num_species + 3].resize(2);
+                        diffusivities_component_idx[d_num_species + 3].resize(2);
+                        
+                        // -w*mu.
+                        diffusivities_data[d_num_species + 3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][0] = 6;
+                        
+                        // u*(2/3*mu - mu_v).
+                        diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][1] = 4;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     default:
@@ -2865,14 +3575,190 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getSideDataOfDiffusiveFluxDiffusi
                 {
                     case DIRECTION::X_DIRECTION:
                     {
+                        /*
+                         * Mass equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            diffusivities_data[si].resize(0);
+                            diffusivities_component_idx[si].resize(0);
+                        }
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[d_num_species].resize(1);
+                        diffusivities_component_idx[d_num_species].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[d_num_species][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species][0] = 2;
+                        
+                        diffusivities_data[d_num_species + 1].resize(1);
+                        diffusivities_component_idx[d_num_species + 1].resize(1);
+                        
+                        // 2/3*mu - mu_v.
+                        diffusivities_data[d_num_species + 1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 1][0] = 1;
+                        
+                        diffusivities_data[d_num_species + 2].resize(0);
+                        diffusivities_component_idx[d_num_species + 2].resize(0);
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[d_num_species + 3].resize(2);
+                        diffusivities_component_idx[d_num_species + 3].resize(2);
+                        
+                        // v*(2/3*mu - mu_v).
+                        diffusivities_data[d_num_species + 3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][0] = 4;
+                        
+                        // -u*mu.
+                        diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][1] = 5;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Y_DIRECTION:
                     {
+                        /*
+                         * Mass equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            diffusivities_data[si].resize(0);
+                            diffusivities_component_idx[si].resize(0);
+                        }
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[d_num_species].resize(1);
+                        diffusivities_component_idx[d_num_species].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[d_num_species][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species][0] = 2;
+                        
+                        diffusivities_data[d_num_species + 1].resize(1);
+                        diffusivities_component_idx[d_num_species + 1].resize(1);
+                        
+                        // -(4/3*mu + mu_v).
+                        diffusivities_data[d_num_species + 1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 1][0] = 0;
+                        
+                        diffusivities_data[d_num_species + 2].resize(1);
+                        diffusivities_component_idx[d_num_species + 2].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[d_num_species + 2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 2][0] = 2;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[d_num_species + 3].resize(3);
+                        diffusivities_component_idx[d_num_species + 3].resize(3);
+                        
+                        // -u*mu.
+                        diffusivities_data[d_num_species + 3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][0] = 5;
+                        
+                        // -v*(4/3*mu + mu_v).
+                        diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][1] = 3;
+                        
+                        // -w*mu.
+                        diffusivities_data[d_num_species + 3][2] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][2] = 6;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Z_DIRECTION:
                     {
+                        /*
+                         * Mass equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            diffusivities_data[si].resize(0);
+                            diffusivities_component_idx[si].resize(0);
+                        }
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[d_num_species].resize(0);
+                        diffusivities_component_idx[d_num_species].resize(0);
+                        
+                        diffusivities_data[d_num_species + 1].resize(1);
+                        diffusivities_component_idx[d_num_species + 1].resize(1);
+                        
+                        // 2/3*(mu - mu_v).
+                        diffusivities_data[d_num_species + 1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 1][0] = 1;
+                        
+                        diffusivities_data[d_num_species + 2].resize(1);
+                        diffusivities_component_idx[d_num_species + 2].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[d_num_species + 2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 2][0] = 2;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[d_num_species + 3].resize(2);
+                        diffusivities_component_idx[d_num_species + 3].resize(2);
+                        
+                        // -w*mu.
+                        diffusivities_data[d_num_species + 3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][0] = 6;
+                        
+                        // v*(2/3*mu - mu_v).
+                        diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][1] = 4;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     default:
@@ -2893,14 +3779,190 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getSideDataOfDiffusiveFluxDiffusi
                 {
                     case DIRECTION::X_DIRECTION:
                     {
+                        /*
+                         * Mass equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            diffusivities_data[si].resize(0);
+                            diffusivities_component_idx[si].resize(0);
+                        }
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[d_num_species].resize(1);
+                        diffusivities_component_idx[d_num_species].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[d_num_species][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species][0] = 2;
+                        
+                        diffusivities_data[d_num_species + 1].resize(0);
+                        diffusivities_component_idx[d_num_species + 1].resize(0);
+                        
+                        diffusivities_data[d_num_species + 2].resize(1);
+                        diffusivities_component_idx[d_num_species + 2].resize(1);
+                        
+                        // 2/3*mu - mu_v.
+                        diffusivities_data[d_num_species + 2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 2][0] = 1;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[d_num_species + 3].resize(2);
+                        diffusivities_component_idx[d_num_species + 3].resize(2);
+                        
+                        // w*(2/3*mu - mu_v).
+                        diffusivities_data[d_num_species + 3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][0] = 4;
+                        
+                        // -u*mu.
+                        diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][1] = 5;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Y_DIRECTION:
                     {
+                        /*
+                         * Mass equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            diffusivities_data[si].resize(0);
+                            diffusivities_component_idx[si].resize(0);
+                        }
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[d_num_species].resize(0);
+                        diffusivities_component_idx[d_num_species].resize(0);
+                        
+                        diffusivities_data[d_num_species + 1].resize(1);
+                        diffusivities_component_idx[d_num_species + 1].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[d_num_species + 1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 1][0] = 2;
+                        
+                        diffusivities_data[d_num_species + 2].resize(1);
+                        diffusivities_component_idx[d_num_species + 2].resize(1);
+                        
+                        // 2/3*mu - mu_v.
+                        diffusivities_data[d_num_species + 2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 2][0] = 1;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[d_num_species + 3].resize(2);
+                        diffusivities_component_idx[d_num_species + 3].resize(2);
+                        
+                        // w*(2/3*mu - mu_v).
+                        diffusivities_data[d_num_species + 3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][0] = 4;
+                        
+                        // -v*mu.
+                        diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][1] = 6;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     case DIRECTION::Z_DIRECTION:
                     {
+                        /*
+                         * Mass equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            diffusivities_data[si].resize(0);
+                            diffusivities_component_idx[si].resize(0);
+                        }
+                        
+                        /*
+                         * Momentum equation.
+                         */
+                        
+                        diffusivities_data[d_num_species].resize(1);
+                        diffusivities_component_idx[d_num_species].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[d_num_species][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species][0] = 2;
+                        
+                        diffusivities_data[d_num_species + 1].resize(1);
+                        diffusivities_component_idx[d_num_species + 1].resize(1);
+                        
+                        // -mu.
+                        diffusivities_data[d_num_species + 1][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 1][0] = 2;
+                        
+                        diffusivities_data[d_num_species + 2].resize(1);
+                        diffusivities_component_idx[d_num_species + 2].resize(1);
+                        
+                        // -(4/3*mu + mu_v).
+                        diffusivities_data[d_num_species + 2][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 2][0] = 0;
+                        
+                        /*
+                         * Energy equation.
+                         */
+                        
+                        diffusivities_data[d_num_species + 3].resize(3);
+                        diffusivities_component_idx[d_num_species + 3].resize(3);
+                        
+                        // -u*mu.
+                        diffusivities_data[d_num_species + 3][0] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][0] = 5;
+                        
+                        // -v*mu.
+                        diffusivities_data[d_num_species + 3][1] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][1] = 6;
+                        
+                        // -w*(4/3*mu + mu_v).
+                        diffusivities_data[d_num_species + 3][2] = d_side_data_diffusivities;
+                        diffusivities_component_idx[d_num_species + 3][2] = 3;
+                        
+                        /*
+                         * Volume fraction equations.
+                         */
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            diffusivities_data[d_num_species + 4 + si].resize(0);
+                            diffusivities_component_idx[d_num_species + 4 + si].resize(0);
+                        }
+                        
                         break;
                     }
                     default:
