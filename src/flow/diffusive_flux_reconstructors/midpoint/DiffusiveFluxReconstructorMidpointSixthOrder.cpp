@@ -90,6 +90,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
     TBOX_ASSERT(variable_diffusive_flux);
 #endif
     
+    const bool allocate_scratch_data_containers = true;
+    
     d_flow_model->setupDiffusiveFluxUtilities();
     
     HAMERS_SHARED_PTR<FlowModelDiffusiveFluxUtilities> diffusive_flux_utilities =
@@ -160,7 +162,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             patch,
             var_side_data_for_diffusivities,
             var_cell_data_for_diffusivities,
-            var_cell_data_for_diffusivities_component_idx);
+            var_cell_data_for_diffusivities_component_idx,
+            allocate_scratch_data_containers);
         
         diffusive_flux_utilities->allocateMemoryForSideDataOfDiffusiveFluxDiffusivities();
         
@@ -231,7 +234,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_x_midpoint_x,
             derivatives_x_midpoint_x_computed,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            allocate_scratch_data_containers);
         
         /*
          * Compute diffusive flux in x-direction at midpoints.
@@ -350,7 +354,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             patch,
             var_side_data_for_diffusivities,
             var_cell_data_for_diffusivities,
-            var_cell_data_for_diffusivities_component_idx);
+            var_cell_data_for_diffusivities_component_idx,
+            allocate_scratch_data_containers);
         
         diffusive_flux_utilities->allocateMemoryForSideDataOfDiffusiveFluxDiffusivities();
         
@@ -454,7 +459,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_x_midpoint_x,
             derivatives_x_midpoint_x_computed,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            allocate_scratch_data_containers);
         
         /*
          * Compute the derivatives in y-direction for diffusive flux in x-direction.
@@ -465,7 +471,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_y_node,
             derivatives_y_node_computed,
             var_data_y,
-            var_component_idx_y);
+            var_component_idx_y,
+            allocate_scratch_data_containers);
         
         interpolateDerivativesFromNodeToMidpointX(
             patch,
@@ -473,7 +480,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_y_midpoint_x_computed,
             derivatives_y_node,
             var_data_y,
-            var_component_idx_y);
+            var_component_idx_y,
+            allocate_scratch_data_containers);
         
         /*
          * Compute diffusive flux in x-direction at midpoints.
@@ -661,7 +669,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_x_node,
             derivatives_x_node_computed,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            allocate_scratch_data_containers);
         
         interpolateDerivativesFromNodeToMidpointY(
             patch,
@@ -669,7 +678,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_x_midpoint_y_computed,
             derivatives_x_node,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            allocate_scratch_data_containers);
         
         /*
          * Compute the derivatives in y-direction for diffusive flux in y-direction.
@@ -680,7 +690,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_y_midpoint_y,
             derivatives_y_midpoint_y_computed,
             var_data_y,
-            var_component_idx_y);
+            var_component_idx_y,
+            allocate_scratch_data_containers);
         
         /*
          * Compute diffusive flux in y-direction at midpoints.
@@ -877,7 +888,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             patch,
             var_side_data_for_diffusivities,
             var_cell_data_for_diffusivities,
-            var_cell_data_for_diffusivities_component_idx);
+            var_cell_data_for_diffusivities_component_idx,
+            allocate_scratch_data_containers);
         
         diffusive_flux_utilities->allocateMemoryForSideDataOfDiffusiveFluxDiffusivities();
         
@@ -1018,7 +1030,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_x_midpoint_x,
             derivatives_x_midpoint_x_computed,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            allocate_scratch_data_containers);
         
         /*
          * Compute the derivatives in y-direction for diffusive flux in x-direction.
@@ -1029,7 +1042,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_y_node,
             derivatives_y_node_computed,
             var_data_y,
-            var_component_idx_y);
+            var_component_idx_y,
+            allocate_scratch_data_containers);
         
         interpolateDerivativesFromNodeToMidpointX(
             patch,
@@ -1037,7 +1051,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_y_midpoint_x_computed,
             derivatives_y_node,
             var_data_y,
-            var_component_idx_y);
+            var_component_idx_y,
+            allocate_scratch_data_containers);
         
         /*
          * Compute the derivatives in z-direction for diffusive flux in x-direction.
@@ -1048,7 +1063,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_z_node,
             derivatives_z_node_computed,
             var_data_z,
-            var_component_idx_z);
+            var_component_idx_z,
+            allocate_scratch_data_containers);
         
         interpolateDerivativesFromNodeToMidpointX(
             patch,
@@ -1056,7 +1072,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_z_midpoint_x_computed,
             derivatives_z_node,
             var_data_z,
-            var_component_idx_z);
+            var_component_idx_z,
+            allocate_scratch_data_containers);
         
         /*
          * Compute diffusive flux in x-direction at midpoints.
@@ -1345,7 +1362,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_x_node,
             derivatives_x_node_computed,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            allocate_scratch_data_containers);
         
         interpolateDerivativesFromNodeToMidpointY(
             patch,
@@ -1353,7 +1371,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_x_midpoint_y_computed,
             derivatives_x_node,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            allocate_scratch_data_containers);
         
         /*
          * Compute the derivatives in y-direction for diffusive flux in y-direction.
@@ -1364,7 +1383,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_y_midpoint_y,
             derivatives_y_midpoint_y_computed,
             var_data_y,
-            var_component_idx_y);
+            var_component_idx_y,
+            allocate_scratch_data_containers);
         
         /*
          * Compute the derivatives in z-direction for diffusive flux in y-direction.
@@ -1375,7 +1395,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_z_node,
             derivatives_z_node_computed,
             var_data_z,
-            var_component_idx_z);
+            var_component_idx_z,
+            allocate_scratch_data_containers);
         
         interpolateDerivativesFromNodeToMidpointY(
             patch,
@@ -1383,7 +1404,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_z_midpoint_y_computed,
             derivatives_z_node,
             var_data_z,
-            var_component_idx_z);
+            var_component_idx_z,
+            allocate_scratch_data_containers);
         
         /*
          * Compute diffusive flux in y-direction at midpoints.
@@ -1672,7 +1694,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_x_node,
             derivatives_x_node_computed,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            allocate_scratch_data_containers);
         
         interpolateDerivativesFromNodeToMidpointZ(
             patch,
@@ -1680,7 +1703,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_x_midpoint_z_computed,
             derivatives_x_node,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            allocate_scratch_data_containers);
         
         /*
          * Compute the derivatives in y-direction for diffusive flux in z-direction.
@@ -1691,7 +1715,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_y_node,
             derivatives_y_node_computed,
             var_data_y,
-            var_component_idx_y);
+            var_component_idx_y,
+            allocate_scratch_data_containers);
         
         interpolateDerivativesFromNodeToMidpointZ(
             patch,
@@ -1699,7 +1724,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_y_midpoint_z_computed,
             derivatives_y_node,
             var_data_y,
-            var_component_idx_y);
+            var_component_idx_y,
+            allocate_scratch_data_containers);
         
         /*
          * Compute the derivatives in z-direction for diffusive flux in z-direction.
@@ -1710,7 +1736,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             derivatives_z_midpoint_z,
             derivatives_z_midpoint_z_computed,
             var_data_z,
-            var_component_idx_z);
+            var_component_idx_z,
+            allocate_scratch_data_containers);
         
         /*
          * Compute diffusive flux in z-direction at midpoints.

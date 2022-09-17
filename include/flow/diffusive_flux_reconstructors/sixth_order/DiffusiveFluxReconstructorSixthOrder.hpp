@@ -51,7 +51,7 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
             std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x_computed,
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
             const std::vector<std::vector<int> >& data_component_idx_x,
-            const bool allocate_scratch_derivatives_node = true);
+            const bool allocate_scratch_derivatives_node);
         
         /*
          * Compute the first derivatives in the y-direction.
@@ -62,7 +62,7 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
             std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y_computed,
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
             const std::vector<std::vector<int> >& data_component_idx_y,
-            const bool allocate_scratch_derivatives_node = true);
+            const bool allocate_scratch_derivatives_node);
         
         /*
          * Compute the first derivatives in the z-direction.
@@ -73,7 +73,7 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
             std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z_computed,
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
             const std::vector<std::vector<int> >& data_component_idx_z,
-            const bool allocate_scratch_derivatives_node = true);
+            const bool allocate_scratch_derivatives_node);
         
         /*
          * Reconstruct the flux using flux at nodes in x-direction.
