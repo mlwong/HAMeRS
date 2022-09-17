@@ -3971,6 +3971,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
                     }
                 }
                 
+                // Momentum and energy equations.
                 for (int k = -num_ghosts[2]; k < interior_dims[2] + num_ghosts[2] + 1; k++)
                 {
                     for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)

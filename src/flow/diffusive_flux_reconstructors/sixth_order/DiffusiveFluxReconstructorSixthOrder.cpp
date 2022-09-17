@@ -145,9 +145,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         std::vector<std::vector<int> > diffusivities_component_idx_x;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivative_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivatives_x;
         
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_x_computed;
+        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_x_computed;
         
         std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > diffusive_flux_node(1);
         diffusive_flux_node[0].reset(new pdat::CellData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
@@ -188,8 +188,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         computeFirstDerivativesInX(
             patch,
-            derivative_x,
-            derivative_x_computed,
+            derivatives_x,
+            derivatives_x_computed,
             var_data_x,
             var_component_idx_x);
         
@@ -201,7 +201,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            TBOX_ASSERT(static_cast<int>(derivative_x[ei].size()) ==
+            TBOX_ASSERT(static_cast<int>(derivatives_x[ei].size()) ==
                         static_cast<int>(diffusivities_data_x[ei].size()));
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
@@ -216,7 +216,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 double* mu = diffusivities_data_x[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudx = derivative_x[ei][vi]->getPointer(0);
+                double* dudx = derivatives_x[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width of the diffusivity.
@@ -257,7 +257,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         diffusivities_data_x.clear();
         var_component_idx_x.clear();
         diffusivities_component_idx_x.clear();
-        derivative_x.clear();
+        derivatives_x.clear();
         
         /*
          * Unregister the patch and data of all registered derived cell variables in the flow model.
@@ -311,11 +311,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         std::vector<std::vector<int> > diffusivities_component_idx_x;
         std::vector<std::vector<int> > diffusivities_component_idx_y;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivative_x;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivative_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivatives_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivatives_y;
         
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_x_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_y_computed;
+        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_x_computed;
+        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_y_computed;
         
         std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > diffusive_flux_node(2);
         diffusive_flux_node[0].reset(new pdat::CellData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
@@ -376,8 +376,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         computeFirstDerivativesInX(
             patch,
-            derivative_x,
-            derivative_x_computed,
+            derivatives_x,
+            derivatives_x_computed,
             var_data_x,
             var_component_idx_x);
         
@@ -387,8 +387,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         computeFirstDerivativesInY(
             patch,
-            derivative_y,
-            derivative_y_computed,
+            derivatives_y,
+            derivatives_y_computed,
             var_data_y,
             var_component_idx_y);
         
@@ -400,7 +400,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            TBOX_ASSERT(static_cast<int>(derivative_x[ei].size()) ==
+            TBOX_ASSERT(static_cast<int>(derivatives_x[ei].size()) ==
                         static_cast<int>(diffusivities_data_x[ei].size()));
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
@@ -415,7 +415,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 double* mu = diffusivities_data_x[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudx = derivative_x[ei][vi]->getPointer(0);
+                double* dudx = derivatives_x[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -450,7 +450,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 }
             }
             
-            TBOX_ASSERT(static_cast<int>(derivative_y[ei].size()) ==
+            TBOX_ASSERT(static_cast<int>(derivatives_y[ei].size()) ==
                         static_cast<int>(diffusivities_data_y[ei].size()));
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_y[ei].size()) ==
@@ -465,7 +465,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 double* mu = diffusivities_data_y[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudy = derivative_y[ei][vi]->getPointer(0);
+                double* dudy = derivatives_y[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -525,8 +525,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         diffusivities_component_idx_x.clear();
         diffusivities_component_idx_y.clear();
         
-        derivative_x.clear();
-        derivative_y.clear();
+        derivatives_x.clear();
+        derivatives_y.clear();
         
         /*
          * (2) Compute the flux in the y-direction.
@@ -573,8 +573,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         computeFirstDerivativesInX(
             patch,
-            derivative_x,
-            derivative_x_computed,
+            derivatives_x,
+            derivatives_x_computed,
             var_data_x,
             var_component_idx_x);
         
@@ -584,8 +584,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         computeFirstDerivativesInY(
             patch,
-            derivative_y,
-            derivative_y_computed,
+            derivatives_y,
+            derivatives_y_computed,
             var_data_y,
             var_component_idx_y);
         
@@ -597,7 +597,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            TBOX_ASSERT(static_cast<int>(derivative_x[ei].size()) ==
+            TBOX_ASSERT(static_cast<int>(derivatives_x[ei].size()) ==
                         static_cast<int>(diffusivities_data_x[ei].size()));
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
@@ -612,7 +612,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 double* mu = diffusivities_data_x[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudx = derivative_x[ei][vi]->getPointer(0);
+                double* dudx = derivatives_x[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -647,7 +647,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 }
             }
             
-            TBOX_ASSERT(static_cast<int>(derivative_y[ei].size()) ==
+            TBOX_ASSERT(static_cast<int>(derivatives_y[ei].size()) ==
                         static_cast<int>(diffusivities_data_y[ei].size()));
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_y[ei].size()) ==
@@ -662,7 +662,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 double* mu = diffusivities_data_y[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudy = derivative_y[ei][vi]->getPointer(0);
+                double* dudy = derivatives_y[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -722,8 +722,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         diffusivities_component_idx_x.clear();
         diffusivities_component_idx_y.clear();
         
-        derivative_x.clear();
-        derivative_y.clear();
+        derivatives_x.clear();
+        derivatives_y.clear();
         
         /*
          * Unregister the patch and data of all registered derived cell variables in the flow model.
@@ -785,13 +785,13 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         std::vector<std::vector<int> > diffusivities_component_idx_y;
         std::vector<std::vector<int> > diffusivities_component_idx_z;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivative_x;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivative_y;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivative_z;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivatives_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivatives_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivatives_z;
         
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_x_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_y_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_z_computed;
+        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_x_computed;
+        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_y_computed;
+        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_z_computed;
         
         std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > diffusive_flux_node(3);
         diffusive_flux_node[0].reset(new pdat::CellData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
@@ -872,8 +872,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         computeFirstDerivativesInX(
             patch,
-            derivative_x,
-            derivative_x_computed,
+            derivatives_x,
+            derivatives_x_computed,
             var_data_x,
             var_component_idx_x);
         
@@ -883,8 +883,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         computeFirstDerivativesInY(
             patch,
-            derivative_y,
-            derivative_y_computed,
+            derivatives_y,
+            derivatives_y_computed,
             var_data_y,
             var_component_idx_y);
         
@@ -894,8 +894,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         computeFirstDerivativesInZ(
             patch,
-            derivative_z,
-            derivative_z_computed,
+            derivatives_z,
+            derivatives_z_computed,
             var_data_z,
             var_component_idx_z);
         
@@ -907,7 +907,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            TBOX_ASSERT(static_cast<int>(derivative_x[ei].size()) ==
+            TBOX_ASSERT(static_cast<int>(derivatives_x[ei].size()) ==
                         static_cast<int>(diffusivities_data_x[ei].size()));
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
@@ -922,7 +922,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 double* mu = diffusivities_data_x[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudx = derivative_x[ei][vi]->getPointer(0);
+                double* dudx = derivatives_x[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -966,7 +966,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 }
             }
             
-            TBOX_ASSERT(static_cast<int>(derivative_y[ei].size()) ==
+            TBOX_ASSERT(static_cast<int>(derivatives_y[ei].size()) ==
                         static_cast<int>(diffusivities_data_y[ei].size()));
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_y[ei].size()) ==
@@ -981,7 +981,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 double* mu = diffusivities_data_y[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudy = derivative_y[ei][vi]->getPointer(0);
+                double* dudy = derivatives_y[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -1025,7 +1025,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 }
             }
             
-            TBOX_ASSERT(static_cast<int>(derivative_z[ei].size()) ==
+            TBOX_ASSERT(static_cast<int>(derivatives_z[ei].size()) ==
                         static_cast<int>(diffusivities_data_z[ei].size()));
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_z[ei].size()) ==
@@ -1040,7 +1040,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 double* mu = diffusivities_data_z[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudz = derivative_z[ei][vi]->getPointer(0);
+                double* dudz = derivatives_z[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -1113,9 +1113,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         diffusivities_component_idx_y.clear();
         diffusivities_component_idx_z.clear();
         
-        derivative_x.clear();
-        derivative_y.clear();
-        derivative_z.clear();
+        derivatives_x.clear();
+        derivatives_y.clear();
+        derivatives_z.clear();
         
         /*
          * (2) Compute the flux in the y-direction.
@@ -1178,8 +1178,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         computeFirstDerivativesInX(
             patch,
-            derivative_x,
-            derivative_x_computed,
+            derivatives_x,
+            derivatives_x_computed,
             var_data_x,
             var_component_idx_x);
         
@@ -1189,8 +1189,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         computeFirstDerivativesInY(
             patch,
-            derivative_y,
-            derivative_y_computed,
+            derivatives_y,
+            derivatives_y_computed,
             var_data_y,
             var_component_idx_y);
         
@@ -1200,8 +1200,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         computeFirstDerivativesInZ(
             patch,
-            derivative_z,
-            derivative_z_computed,
+            derivatives_z,
+            derivatives_z_computed,
             var_data_z,
             var_component_idx_z);
         
@@ -1213,7 +1213,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            TBOX_ASSERT(static_cast<int>(derivative_x[ei].size()) ==
+            TBOX_ASSERT(static_cast<int>(derivatives_x[ei].size()) ==
                         static_cast<int>(diffusivities_data_x[ei].size()));
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
@@ -1228,7 +1228,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 double* mu = diffusivities_data_x[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudx = derivative_x[ei][vi]->getPointer(0);
+                double* dudx = derivatives_x[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -1272,7 +1272,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 }
             }
             
-            TBOX_ASSERT(static_cast<int>(derivative_y[ei].size()) ==
+            TBOX_ASSERT(static_cast<int>(derivatives_y[ei].size()) ==
                         static_cast<int>(diffusivities_data_y[ei].size()));
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_y[ei].size()) ==
@@ -1287,7 +1287,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 double* mu = diffusivities_data_y[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudy = derivative_y[ei][vi]->getPointer(0);
+                double* dudy = derivatives_y[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -1331,7 +1331,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 }
             }
             
-            TBOX_ASSERT(static_cast<int>(derivative_z[ei].size()) ==
+            TBOX_ASSERT(static_cast<int>(derivatives_z[ei].size()) ==
                         static_cast<int>(diffusivities_data_z[ei].size()));
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_z[ei].size()) ==
@@ -1346,7 +1346,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 double* mu = diffusivities_data_z[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudz = derivative_z[ei][vi]->getPointer(0);
+                double* dudz = derivatives_z[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -1419,9 +1419,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         diffusivities_component_idx_y.clear();
         diffusivities_component_idx_z.clear();
         
-        derivative_x.clear();
-        derivative_y.clear();
-        derivative_z.clear();
+        derivatives_x.clear();
+        derivatives_y.clear();
+        derivatives_z.clear();
         
         /*
          * (3) Compute the flux in the z-direction.
@@ -1484,8 +1484,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         computeFirstDerivativesInX(
             patch,
-            derivative_x,
-            derivative_x_computed,
+            derivatives_x,
+            derivatives_x_computed,
             var_data_x,
             var_component_idx_x);
         
@@ -1495,8 +1495,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         computeFirstDerivativesInY(
             patch,
-            derivative_y,
-            derivative_y_computed,
+            derivatives_y,
+            derivatives_y_computed,
             var_data_y,
             var_component_idx_y);
         
@@ -1506,8 +1506,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         computeFirstDerivativesInZ(
             patch,
-            derivative_z,
-            derivative_z_computed,
+            derivatives_z,
+            derivatives_z_computed,
             var_data_z,
             var_component_idx_z);
         
@@ -1519,7 +1519,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            TBOX_ASSERT(static_cast<int>(derivative_x[ei].size()) ==
+            TBOX_ASSERT(static_cast<int>(derivatives_x[ei].size()) ==
                         static_cast<int>(diffusivities_data_x[ei].size()));
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
@@ -1534,7 +1534,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 double* mu = diffusivities_data_x[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudx = derivative_x[ei][vi]->getPointer(0);
+                double* dudx = derivatives_x[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -1578,7 +1578,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 }
             }
             
-            TBOX_ASSERT(static_cast<int>(derivative_y[ei].size()) ==
+            TBOX_ASSERT(static_cast<int>(derivatives_y[ei].size()) ==
                         static_cast<int>(diffusivities_data_y[ei].size()));
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_y[ei].size()) ==
@@ -1593,7 +1593,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 double* mu = diffusivities_data_y[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudy = derivative_y[ei][vi]->getPointer(0);
+                double* dudy = derivatives_y[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -1637,7 +1637,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 }
             }
             
-            TBOX_ASSERT(static_cast<int>(derivative_z[ei].size()) ==
+            TBOX_ASSERT(static_cast<int>(derivatives_z[ei].size()) ==
                         static_cast<int>(diffusivities_data_z[ei].size()));
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_z[ei].size()) ==
@@ -1652,7 +1652,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 double* mu = diffusivities_data_z[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudz = derivative_z[ei][vi]->getPointer(0);
+                double* dudz = derivatives_z[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -1725,9 +1725,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         diffusivities_component_idx_y.clear();
         diffusivities_component_idx_z.clear();
         
-        derivative_x.clear();
-        derivative_y.clear();
-        derivative_z.clear();
+        derivatives_x.clear();
+        derivatives_y.clear();
+        derivatives_z.clear();
         
         /*
          * Unregister the patch and data of all registered derived cell variables in the flow model.
@@ -1750,8 +1750,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
 void
 DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
     hier::Patch& patch,
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_x,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_x_computed,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_x,
+    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
     const std::vector<std::vector<int> >& data_component_idx_x,
     const bool allocate_scratch_derivatives_node)
@@ -1768,7 +1768,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
     const double b_n = -double(3)/double(20);
     const double c_n =  double(1)/double(60);
     
-    derivative_x.resize(d_num_eqn);
+    derivatives_x.resize(d_num_eqn);
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -1791,15 +1791,15 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
     
     for (int ei = 0; ei < d_num_eqn; ei++)
     {
-        derivative_x[ei].reserve(static_cast<int>(data_x[ei].size()));
+        derivatives_x[ei].reserve(static_cast<int>(data_x[ei].size()));
         
         for (int vi = 0; vi < static_cast<int>(data_x[ei].size()); vi++)
         {
             // Get the index of variable for derivative.
             const int u_idx = data_component_idx_x[ei][vi];
             
-            if (derivative_x_computed.find(data_x[ei][vi]->getPointer(u_idx))
-                == derivative_x_computed.end())
+            if (derivatives_x_computed.find(data_x[ei][vi]->getPointer(u_idx))
+                == derivatives_x_computed.end())
             {
                 // Get the pointer to variable for derivative.
                 double* u = data_x[ei][vi]->getPointer(u_idx);
@@ -2013,11 +2013,11 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
                     u,
                     d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]);
                 
-                derivative_x_computed.insert(derivative_pair);
+                derivatives_x_computed.insert(derivative_pair);
             }
             
-            derivative_x[ei].push_back(
-                derivative_x_computed.find(data_x[ei][vi]->getPointer(u_idx))->
+            derivatives_x[ei].push_back(
+                derivatives_x_computed.find(data_x[ei][vi]->getPointer(u_idx))->
                     second);
         }
     }
@@ -2030,8 +2030,8 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
 void
 DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
     hier::Patch& patch,
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_y,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_y_computed,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_y,
+    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
     const std::vector<std::vector<int> >& data_component_idx_y,
     const bool allocate_scratch_derivatives_node)
@@ -2057,7 +2057,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
     const double b_n = -double(3)/double(20);
     const double c_n =  double(1)/double(60);
     
-    derivative_y.resize(d_num_eqn);
+    derivatives_y.resize(d_num_eqn);
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -2076,19 +2076,19 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
     
     const double* const dx = patch_geom->getDx();
     
-    const double inv_dx_1 = double(1)/dx[1];
+    const double dx_1_inv = double(1)/dx[1];
     
     for (int ei = 0; ei < d_num_eqn; ei++)
     {
-        derivative_y[ei].reserve(static_cast<int>(data_y[ei].size()));
+        derivatives_y[ei].reserve(static_cast<int>(data_y[ei].size()));
         
         for (int vi = 0; vi < static_cast<int>(data_y[ei].size()); vi++)
         {
             // Get the index of variable for derivative.
             const int u_idx = data_component_idx_y[ei][vi];
             
-            if (derivative_y_computed.find(data_y[ei][vi]->getPointer(u_idx))
-                == derivative_y_computed.end())
+            if (derivatives_y_computed.find(data_y[ei][vi]->getPointer(u_idx))
+                == derivatives_y_computed.end())
             {
                 // Get the pointer to variable for derivative.
                 double* u = data_y[ei][vi]->getPointer(u_idx);
@@ -2178,7 +2178,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
                             dudy[idx] = (a_n*(u[idx_data_T]   - u[idx_data_B]) +
                                          b_n*(u[idx_data_TT]  - u[idx_data_BB]) +
                                          c_n*(u[idx_data_TTT] - u[idx_data_BBB])
-                                        )*inv_dx_1;
+                                        )*dx_1_inv;
                         }
                     }
                 }
@@ -2256,7 +2256,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
                                 dudy[idx] = (a_n*(u[idx_data_T]   - u[idx_data_B]) +
                                              b_n*(u[idx_data_TT]  - u[idx_data_BB]) +
                                              c_n*(u[idx_data_TTT] - u[idx_data_BBB])
-                                            )*inv_dx_1;
+                                            )*dx_1_inv;
                             }
                         }
                     }
@@ -2266,11 +2266,11 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
                     u,
                     d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]);
                 
-                derivative_y_computed.insert(derivative_pair);
+                derivatives_y_computed.insert(derivative_pair);
             }
             
-            derivative_y[ei].push_back(
-                derivative_y_computed.find(data_y[ei][vi]->getPointer(u_idx))->
+            derivatives_y[ei].push_back(
+                derivatives_y_computed.find(data_y[ei][vi]->getPointer(u_idx))->
                     second);
         }
     }
@@ -2283,8 +2283,8 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
 void
 DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
     hier::Patch& patch,
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_z,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_z_computed,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_z,
+    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
     const std::vector<std::vector<int> >& data_component_idx_z,
     const bool allocate_scratch_derivatives_node)
@@ -2318,7 +2318,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
     const double b_n = -double(3)/double(20);
     const double c_n =  double(1)/double(60);
     
-    derivative_z.resize(d_num_eqn);
+    derivatives_z.resize(d_num_eqn);
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -2337,19 +2337,19 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
     
     const double* const dx = patch_geom->getDx();
     
-    const double inv_dx_2 = double(1)/dx[2];
+    const double dx_2_inv = double(1)/dx[2];
     
     for (int ei = 0; ei < d_num_eqn; ei++)
     {
-        derivative_z[ei].reserve(static_cast<int>(data_z[ei].size()));
+        derivatives_z[ei].reserve(static_cast<int>(data_z[ei].size()));
         
         for (int vi = 0; vi < static_cast<int>(data_z[ei].size()); vi++)
         {
             // Get the index of variable for derivative.
             const int u_idx = data_component_idx_z[ei][vi];
             
-            if (derivative_z_computed.find(data_z[ei][vi]->getPointer(u_idx))
-                == derivative_z_computed.end())
+            if (derivatives_z_computed.find(data_z[ei][vi]->getPointer(u_idx))
+                == derivatives_z_computed.end())
             {
                 // Get the pointer to variable for derivative.
                 double* u = data_z[ei][vi]->getPointer(u_idx);
@@ -2458,7 +2458,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
                             dudz[idx] = (a_n*(u[idx_data_F]   - u[idx_data_B]) +
                                          b_n*(u[idx_data_FF]  - u[idx_data_BB]) +
                                          c_n*(u[idx_data_FFF] - u[idx_data_BBB])
-                                        )*inv_dx_2;
+                                        )*dx_2_inv;
                         }
                     }
                 }
@@ -2467,11 +2467,11 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
                     u,
                     d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]);
                 
-                derivative_z_computed.insert(derivative_pair);
+                derivatives_z_computed.insert(derivative_pair);
             }
             
-            derivative_z[ei].push_back(
-                derivative_z_computed.find(data_z[ei][vi]->getPointer(u_idx))->
+            derivatives_z[ei].push_back(
+                derivatives_z_computed.find(data_z[ei][vi]->getPointer(u_idx))->
                     second);
         }
     }
