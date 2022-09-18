@@ -35,14 +35,6 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << std::endl);
     }
     
-    if (d_special_source_exterior == false)
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "The 'special_source_exterior' option should be true!"
-            << std::endl);
-    }
-    
     TBOX_ASSERT(d_source_terms_db->keyExists("forcing_rate"));
     
     double eps_0 = double(0);
