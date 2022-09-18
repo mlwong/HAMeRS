@@ -1780,10 +1780,6 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
     }
 #endif
     
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
-    
     derivatives_x.resize(d_num_eqn);
     
     // Get the dimensions of box that covers the interior of patch.
@@ -1803,7 +1799,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
     
     const double* const dx = patch_geom->getDx();
     
-    const double inv_dx_0 = double(1)/dx[0];
+    const double dx_0_inv = double(1)/dx[0];
     
     for (int ei = 0; ei < d_num_eqn; ei++)
     {
@@ -1842,188 +1838,38 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
                 double* dudx = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
                 
                 /*
-                 * Get the sub-ghost cell width and ghost box dimensions of the variable.
+                 * Get the ghost cell width and ghost box dimensions of the variable.
                  */
                 
-                hier::IntVector num_subghosts_data =
+                const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
+                
+                const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
+                
+                const hier::IntVector& num_ghosts_data_node =
                     data_x[ei][vi]->getGhostCellWidth();
                 
-                hier::IntVector subghostcell_dims_data =
+                const hier::IntVector& ghostcell_dims_data_node =
                     data_x[ei][vi]->getGhostBox().numberCells();
                 
-                if (d_dim == tbox::Dimension(1))
-                {
-                    /*
-                     * Get the dimensions and number of ghost cells.
-                     */
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    
-                    const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-                    
-                    const int num_subghosts_0_data = num_subghosts_data[0];
-                    
-                    const int num_der_node_ghosts_0 = d_num_der_node_ghosts[0];
-                    
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = -num_diff_ghosts_0 + num_der_node_ghosts_0;
-                        i < interior_dim_0 + num_diff_ghosts_0 - num_der_node_ghosts_0;
-                        i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx = i + num_diff_ghosts_0;
-                        
-                        const int idx_data_LLL = i - 3 + num_subghosts_0_data;
-                        const int idx_data_LL  = i - 2 + num_subghosts_0_data;
-                        const int idx_data_L   = i - 1 + num_subghosts_0_data;
-                        const int idx_data_R   = i + 1 + num_subghosts_0_data;
-                        const int idx_data_RR  = i + 2 + num_subghosts_0_data;
-                        const int idx_data_RRR = i + 3 + num_subghosts_0_data;
-                        
-                        dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
-                                     b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
-                                     c_n*(u[idx_data_RRR] - u[idx_data_LLL])
-                                    )*inv_dx_0;
-                    }
-                }
-                else if (d_dim == tbox::Dimension(2))
-                {
-                    /*
-                     * Get the dimensions and number of ghost cells.
-                     */
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    
-                    const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-                    const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-                    const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-                    
-                    const int num_subghosts_0_data = num_subghosts_data[0];
-                    const int num_subghosts_1_data = num_subghosts_data[1];
-                    const int subghostcell_dim_0_data = subghostcell_dims_data[0];
-                    
-                    const int num_der_node_ghosts_0 = d_num_der_node_ghosts[0];
-                    
-                    for (int j = -num_diff_ghosts_1; j < interior_dim_1 + num_diff_ghosts_1; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = -num_diff_ghosts_0 + num_der_node_ghosts_0;
-                            i < interior_dim_0 + num_diff_ghosts_0 - num_der_node_ghosts_0;
-                            i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            const int idx_data_LLL = (i - 3 + num_subghosts_0_data) +
-                                (j + num_subghosts_1_data)*subghostcell_dim_0_data;
-                            
-                            const int idx_data_LL = (i - 2 + num_subghosts_0_data) +
-                                (j + num_subghosts_1_data)*subghostcell_dim_0_data;
-                            
-                            const int idx_data_L = (i - 1 + num_subghosts_0_data) +
-                                (j + num_subghosts_1_data)*subghostcell_dim_0_data;
-                            
-                            const int idx_data_R = (i + 1 + num_subghosts_0_data) +
-                                (j + num_subghosts_1_data)*subghostcell_dim_0_data;
-                            
-                            const int idx_data_RR = (i + 2 + num_subghosts_0_data) +
-                                (j + num_subghosts_1_data)*subghostcell_dim_0_data;
-                            
-                            const int idx_data_RRR = (i + 3 + num_subghosts_0_data) +
-                                (j + num_subghosts_1_data)*subghostcell_dim_0_data;
-                            
-                            dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
-                                         b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
-                                         c_n*(u[idx_data_RRR] - u[idx_data_LLL])
-                                        )*inv_dx_0;
-                        }
-                    }
-                }
-                else if (d_dim == tbox::Dimension(3))
-                {
-                    /*
-                     * Get the dimensions and number of ghost cells.
-                     */
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    const int interior_dim_2 = interior_dims[2];
-                    
-                    const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-                    const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-                    const int num_diff_ghosts_2 = d_num_diff_ghosts[2];
-                    const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-                    const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
-                    
-                    const int num_subghosts_0_data = num_subghosts_data[0];
-                    const int num_subghosts_1_data = num_subghosts_data[1];
-                    const int num_subghosts_2_data = num_subghosts_data[2];
-                    const int subghostcell_dim_0_data = subghostcell_dims_data[0];
-                    const int subghostcell_dim_1_data = subghostcell_dims_data[1];
-                    
-                    const int num_der_node_ghosts_0 = d_num_der_node_ghosts[0];
-                    
-                    for (int k = -num_diff_ghosts_2; k < interior_dim_2 + num_diff_ghosts_2; k++)
-                    {
-                        for (int j = -num_diff_ghosts_1; j < interior_dim_1 + num_diff_ghosts_1; j++)
-                        {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = -num_diff_ghosts_0 + num_der_node_ghosts_0;
-                                i < interior_dim_0 + num_diff_ghosts_0 - num_der_node_ghosts_0;
-                                i++)
-                            {
-                                // Compute the linear indices.
-                                const int idx = (i + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_data_LLL = (i - 3 + num_subghosts_0_data) +
-                                    (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                    (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                        subghostcell_dim_1_data;
-                                
-                                const int idx_data_LL = (i - 2 + num_subghosts_0_data) +
-                                    (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                    (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                        subghostcell_dim_1_data;
-                                
-                                const int idx_data_L = (i - 1 + num_subghosts_0_data) +
-                                    (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                    (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                        subghostcell_dim_1_data;
-                                
-                                const int idx_data_R = (i + 1 + num_subghosts_0_data) +
-                                    (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                    (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                        subghostcell_dim_1_data;
-                                
-                                const int idx_data_RR = (i + 2 + num_subghosts_0_data) +
-                                    (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                    (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                        subghostcell_dim_1_data;
-                                
-                                const int idx_data_RRR = (i + 3 + num_subghosts_0_data) +
-                                    (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                    (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                        subghostcell_dim_1_data;
-                                
-                                dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
-                                             b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
-                                             c_n*(u[idx_data_RRR] - u[idx_data_LLL])
-                                            )*inv_dx_0;
-                            }
-                        }
-                    }
-                }
+                hier::IntVector domain_lo(d_dim);
+                hier::IntVector domain_dims(d_dim);
+                
+                domain_lo = -d_num_diff_ghosts;
+                domain_dims = interior_dims + d_num_diff_ghosts*2;
+                
+                domain_lo[0] += d_num_der_node_ghosts[0];
+                domain_dims[0] -= 2*d_num_der_node_ghosts[0];
+                
+                computeFirstDerivativesInX(
+                    dudx,
+                    u,
+                    num_ghosts_derivative_node,
+                    num_ghosts_data_node,
+                    ghostcell_dims_derivative_node,
+                    ghostcell_dims_data_node,
+                    domain_lo,
+                    domain_dims,
+                    dx_0_inv);
                 
                 std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
                     u,
@@ -2068,10 +1914,6 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
             << std::endl);
     }
 #endif
-    
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
     
     derivatives_y.resize(d_num_eqn);
     
@@ -2131,152 +1973,38 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
                 double* dudy = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
                 
                 /*
-                 * Get the sub-ghost cell width and ghost box dimensions of the variable.
+                 * Get the ghost cell width and ghost box dimensions of the variable.
                  */
                 
-                hier::IntVector num_subghosts_data =
+                const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
+                
+                const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
+                
+                const hier::IntVector& num_ghosts_data_node =
                     data_y[ei][vi]->getGhostCellWidth();
                 
-                hier::IntVector subghostcell_dims_data =
+                const hier::IntVector& ghostcell_dims_data_node =
                     data_y[ei][vi]->getGhostBox().numberCells();
                 
-                if (d_dim == tbox::Dimension(2))
-                {
-                    /*
-                     * Get the dimensions and number of ghost cells.
-                     */
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    
-                    const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-                    const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-                    
-                    const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-                    
-                    const int num_subghosts_0_data = num_subghosts_data[0];
-                    const int num_subghosts_1_data = num_subghosts_data[1];
-                    const int subghostcell_dim_0_data = subghostcell_dims_data[0];
-                    
-                    const int num_der_node_ghosts_1 = d_num_der_node_ghosts[1];
-                    
-                    for (int j = -num_diff_ghosts_1 + num_der_node_ghosts_1;
-                        j < interior_dim_1 + num_diff_ghosts_1 - num_der_node_ghosts_1;
-                        j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = -num_diff_ghosts_0; i < interior_dim_0 + num_diff_ghosts_0; i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            const int idx_data_BBB = (i + num_subghosts_0_data) +
-                                (j - 3 + num_subghosts_1_data)*subghostcell_dim_0_data;
-                            
-                            const int idx_data_BB = (i + num_subghosts_0_data) +
-                                (j - 2 + num_subghosts_1_data)*subghostcell_dim_0_data;
-                            
-                            const int idx_data_B = (i + num_subghosts_0_data) +
-                                (j - 1 + num_subghosts_1_data)*subghostcell_dim_0_data;
-                            
-                            const int idx_data_T = (i + num_subghosts_0_data) +
-                                (j + 1 + num_subghosts_1_data)*subghostcell_dim_0_data;
-                            
-                            const int idx_data_TT = (i + num_subghosts_0_data) +
-                                (j + 2 + num_subghosts_1_data)*subghostcell_dim_0_data;
-                            
-                            const int idx_data_TTT = (i + num_subghosts_0_data) +
-                                (j + 3 + num_subghosts_1_data)*subghostcell_dim_0_data;
-                            
-                            dudy[idx] = (a_n*(u[idx_data_T]   - u[idx_data_B]) +
-                                         b_n*(u[idx_data_TT]  - u[idx_data_BB]) +
-                                         c_n*(u[idx_data_TTT] - u[idx_data_BBB])
-                                        )*dx_1_inv;
-                        }
-                    }
-                }
-                else if (d_dim == tbox::Dimension(3))
-                {
-                    /*
-                     * Get the dimensions and number of ghost cells.
-                     */
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    const int interior_dim_2 = interior_dims[2];
-                    
-                    const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-                    const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-                    const int num_diff_ghosts_2 = d_num_diff_ghosts[2];
-                    const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-                    const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
-                    
-                    const int num_subghosts_0_data = num_subghosts_data[0];
-                    const int num_subghosts_1_data = num_subghosts_data[1];
-                    const int num_subghosts_2_data = num_subghosts_data[2];
-                    const int subghostcell_dim_0_data = subghostcell_dims_data[0];
-                    const int subghostcell_dim_1_data = subghostcell_dims_data[1];
-                    
-                    const int num_der_node_ghosts_1 = d_num_der_node_ghosts[1];
-                    
-                    for (int k = -num_diff_ghosts_2; k < interior_dim_2 + num_diff_ghosts_2; k++)
-                    {
-                        for (int j = -num_diff_ghosts_1 + num_der_node_ghosts_1;
-                            j < interior_dim_1 + num_diff_ghosts_1 - num_der_node_ghosts_1;
-                            j++)
-                        {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = -num_diff_ghosts_0; i < interior_dim_0 + num_diff_ghosts_0; i++)
-                            {
-                                // Compute the linear indices.
-                                const int idx = (i + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_data_BBB = (i + num_subghosts_0_data) +
-                                    (j - 3 + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                    (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                        subghostcell_dim_1_data;
-                                
-                                const int idx_data_BB = (i + num_subghosts_0_data) +
-                                    (j - 2 + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                    (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                        subghostcell_dim_1_data;
-                                
-                                const int idx_data_B = (i + num_subghosts_0_data) +
-                                    (j - 1 + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                    (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                        subghostcell_dim_1_data;
-                                
-                                const int idx_data_T = (i + num_subghosts_0_data) +
-                                    (j + 1 + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                    (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                        subghostcell_dim_1_data;
-                                
-                                const int idx_data_TT = (i + num_subghosts_0_data) +
-                                    (j + 2 + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                    (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                        subghostcell_dim_1_data;
-                                
-                                const int idx_data_TTT = (i + num_subghosts_0_data) +
-                                    (j + 3 + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                    (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                        subghostcell_dim_1_data;
-                                
-                                dudy[idx] = (a_n*(u[idx_data_T]   - u[idx_data_B]) +
-                                             b_n*(u[idx_data_TT]  - u[idx_data_BB]) +
-                                             c_n*(u[idx_data_TTT] - u[idx_data_BBB])
-                                            )*dx_1_inv;
-                            }
-                        }
-                    }
-                }
+                hier::IntVector domain_lo(d_dim);
+                hier::IntVector domain_dims(d_dim);
+                
+                domain_lo = -d_num_diff_ghosts;
+                domain_dims = interior_dims + d_num_diff_ghosts*2;
+                
+                domain_lo[1] += d_num_der_node_ghosts[1];
+                domain_dims[1] -= 2*d_num_der_node_ghosts[1];
+                
+                computeFirstDerivativesInY(
+                    dudy,
+                    u,
+                    num_ghosts_derivative_node,
+                    num_ghosts_data_node,
+                    ghostcell_dims_derivative_node,
+                    ghostcell_dims_data_node,
+                    domain_lo,
+                    domain_dims,
+                    dx_1_inv);
                 
                 std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
                     u,
@@ -2329,10 +2057,6 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
             << std::endl);
     }
 #endif
-    
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
     
     derivatives_z.resize(d_num_eqn);
     
@@ -2392,92 +2116,38 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
                 double* dudz = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
                 
                 /*
-                 * Get the sub-ghost cell width and ghost box dimensions of the variable.
+                 * Get the ghost cell width and ghost box dimensions of the variable.
                  */
                 
-                hier::IntVector num_subghosts_data =
+                const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
+                
+                const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
+                
+                const hier::IntVector& num_ghosts_data_node =
                     data_z[ei][vi]->getGhostCellWidth();
                 
-                hier::IntVector subghostcell_dims_data =
+                const hier::IntVector& ghostcell_dims_data_node =
                     data_z[ei][vi]->getGhostBox().numberCells();
                 
-                /*
-                 * Get the dimensions and number of ghost cells.
-                 */
+                hier::IntVector domain_lo(d_dim);
+                hier::IntVector domain_dims(d_dim);
                 
-                const int interior_dim_0 = interior_dims[0];
-                const int interior_dim_1 = interior_dims[1];
-                const int interior_dim_2 = interior_dims[2];
+                domain_lo = -d_num_diff_ghosts;
+                domain_dims = interior_dims + d_num_diff_ghosts*2;
                 
-                const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-                const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-                const int num_diff_ghosts_2 = d_num_diff_ghosts[2];
+                domain_lo[2] += d_num_der_node_ghosts[2];
+                domain_dims[2] -= 2*d_num_der_node_ghosts[2];
                 
-                const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-                const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
-                
-                const int num_subghosts_0_data = num_subghosts_data[0];
-                const int num_subghosts_1_data = num_subghosts_data[1];
-                const int num_subghosts_2_data = num_subghosts_data[2];
-                const int subghostcell_dim_0_data = subghostcell_dims_data[0];
-                const int subghostcell_dim_1_data = subghostcell_dims_data[1];
-                
-                const int num_der_node_ghosts_2 = d_num_der_node_ghosts[2];
-                
-                for (int k = -num_diff_ghosts_2 + num_der_node_ghosts_2;
-                    k < interior_dim_2 + num_diff_ghosts_2 - num_der_node_ghosts_2;
-                    k++)
-                {
-                    for (int j = -num_diff_ghosts_1; j < interior_dim_1 + num_diff_ghosts_1; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = -num_diff_ghosts_0; i < interior_dim_0 + num_diff_ghosts_0; i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_data_BBB = (i + num_subghosts_0_data) +
-                                (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                (k - 3 + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                    subghostcell_dim_1_data;
-                            
-                            const int idx_data_BB = (i + num_subghosts_0_data) +
-                                (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                (k - 2 + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                    subghostcell_dim_1_data;
-                            
-                            const int idx_data_B = (i + num_subghosts_0_data) +
-                                (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                (k - 1 + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                    subghostcell_dim_1_data;
-                            
-                            const int idx_data_F = (i + num_subghosts_0_data) +
-                                (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                (k + 1 + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                    subghostcell_dim_1_data;
-                            
-                            const int idx_data_FF = (i + num_subghosts_0_data) +
-                                (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                (k + 2 + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                    subghostcell_dim_1_data;
-                            
-                            const int idx_data_FFF = (i + num_subghosts_0_data) +
-                                (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                                (k + 3 + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                    subghostcell_dim_1_data;
-                            
-                            dudz[idx] = (a_n*(u[idx_data_F]   - u[idx_data_B]) +
-                                         b_n*(u[idx_data_FF]  - u[idx_data_BB]) +
-                                         c_n*(u[idx_data_FFF] - u[idx_data_BBB])
-                                        )*dx_2_inv;
-                        }
-                    }
-                }
+                computeFirstDerivativesInZ(
+                    dudz,
+                    u,
+                    num_ghosts_derivative_node,
+                    num_ghosts_data_node,
+                    ghostcell_dims_derivative_node,
+                    ghostcell_dims_data_node,
+                    domain_lo,
+                    domain_dims,
+                    dx_2_inv);
                 
                 std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
                     u,
@@ -2509,14 +2179,6 @@ DiffusiveFluxReconstructorSixthOrder::reconstructFluxX(
     TBOX_ASSERT(diffusive_flux_node.getDepth() == d_num_eqn);
 #endif
     
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
-    
-    const double a_r = a_n + b_n + c_n;
-    const double b_r = b_n + c_n;
-    const double c_r = c_n;
-    
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
@@ -2525,163 +2187,31 @@ DiffusiveFluxReconstructorSixthOrder::reconstructFluxX(
     // diffusive ghost cells.
     hier::Box diff_ghost_box = interior_box;
     diff_ghost_box.grow(d_num_diff_ghosts);
-    const hier::IntVector diff_ghostcell_dims = diff_ghost_box.numberCells();
+    const hier::IntVector ghostcell_dims_flux_node = diff_ghost_box.numberCells();
+    
+    const hier::IntVector& num_ghosts_flux_node = d_num_diff_ghosts;
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    domain_lo = hier::IntVector::getZero(d_dim);
+    domain_dims = interior_dims;
+    domain_dims[0]++;
     
     for (int ei = 0; ei < d_num_eqn; ei++)
     {
         double* F_face_x = diffusive_flux->getPointer(0, ei);
         double* F_node_x = diffusive_flux_node->getPointer(ei);
         
-        if (d_dim == tbox::Dimension(1))
-        {
-            /*
-             * Get the dimensions and number of ghost cells.
-             */
-            
-            const int interior_dim_0 = interior_dims[0];
-            
-            const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
-            for (int i = 0; i < interior_dim_0 + 1; i++)
-            {
-                // Compute the linear indices.
-                const int idx_face_x = i;
-                
-                const int idx_node_LLL = i - 3 + num_diff_ghosts_0;
-                const int idx_node_LL  = i - 2 + num_diff_ghosts_0;
-                const int idx_node_L   = i - 1 + num_diff_ghosts_0;
-                const int idx_node_R   = i + 0 + num_diff_ghosts_0;
-                const int idx_node_RR  = i + 1 + num_diff_ghosts_0;
-                const int idx_node_RRR = i + 2 + num_diff_ghosts_0;
-                
-                F_face_x[idx_face_x] += dt*(
-                    a_r*(F_node_x[idx_node_L]   + F_node_x[idx_node_R]) +
-                    b_r*(F_node_x[idx_node_LL]  + F_node_x[idx_node_RR]) +
-                    c_r*(F_node_x[idx_node_LLL] + F_node_x[idx_node_RRR])
-                    );
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            /*
-             * Get the dimensions and number of ghost cells.
-             */
-            
-            const int interior_dim_0 = interior_dims[0];
-            const int interior_dim_1 = interior_dims[1];
-            
-            const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-            const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-            const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-            
-            for (int j = 0; j < interior_dim_1; j++)
-            {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = 0; i < interior_dim_0 + 1; i++)
-                {
-                    // Compute the linear indices.
-                    const int idx_face_x = i +
-                        j*(interior_dim_0 + 1);
-                    
-                    const int idx_node_LLL = (i - 3 + num_diff_ghosts_0) +
-                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                    
-                    const int idx_node_LL = (i - 2 + num_diff_ghosts_0) +
-                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                    
-                    const int idx_node_L = (i - 1 + num_diff_ghosts_0) +
-                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                    
-                    const int idx_node_R = (i + num_diff_ghosts_0) +
-                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                    
-                    const int idx_node_RR = (i + 1 + num_diff_ghosts_0) +
-                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                    
-                    const int idx_node_RRR = (i + 2 + num_diff_ghosts_0) +
-                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                    
-                    F_face_x[idx_face_x] += dt*(
-                        a_r*(F_node_x[idx_node_L]   + F_node_x[idx_node_R]) +
-                        b_r*(F_node_x[idx_node_LL]  + F_node_x[idx_node_RR]) +
-                        c_r*(F_node_x[idx_node_LLL] + F_node_x[idx_node_RRR])
-                        );
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            /*
-             * Get the dimensions and number of ghost cells.
-             */
-            
-            const int interior_dim_0 = interior_dims[0];
-            const int interior_dim_1 = interior_dims[1];
-            const int interior_dim_2 = interior_dims[2];
-            
-            const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-            const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-            const int num_diff_ghosts_2 = d_num_diff_ghosts[2];
-            const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-            const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
-            
-            for (int k = 0; k < interior_dim_2; k++)
-            {
-                for (int j = 0; j < interior_dim_1; j++)
-                {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0 + 1; i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx_face_x = i +
-                            j*(interior_dim_0 + 1) +
-                            k*(interior_dim_0 + 1)*interior_dim_1;
-                        
-                        const int idx_node_LLL = (i - 3 + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                diff_ghostcell_dim_1;
-                        
-                        const int idx_node_LL = (i - 2 + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                diff_ghostcell_dim_1;
-                        
-                        const int idx_node_L = (i - 1 + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                diff_ghostcell_dim_1;
-                        
-                        const int idx_node_R = (i + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                diff_ghostcell_dim_1;
-                        
-                        const int idx_node_RR = (i + 1 + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                diff_ghostcell_dim_1;
-                        
-                        const int idx_node_RRR = (i + 2 + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                diff_ghostcell_dim_1;
-                        
-                        F_face_x[idx_face_x] += dt*(
-                            a_r*(F_node_x[idx_node_L]   + F_node_x[idx_node_R]) +
-                            b_r*(F_node_x[idx_node_LL]  + F_node_x[idx_node_RR]) +
-                            c_r*(F_node_x[idx_node_LLL] + F_node_x[idx_node_RRR])
-                            );
-                    }
-                }
-            }
-        }
+        reconstructFluxX(
+            F_face_x,
+            F_node_x,
+            num_ghosts_flux_node,
+            ghostcell_dims_flux_node,
+            domain_lo,
+            domain_dims,
+            interior_dims,
+            dt);
     }
 }
 
@@ -2710,14 +2240,6 @@ DiffusiveFluxReconstructorSixthOrder::reconstructFluxY(
     }
 #endif
     
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
-    
-    const double a_r = a_n + b_n + c_n;
-    const double b_r = b_n + c_n;
-    const double c_r = c_n;
-    
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
@@ -2726,132 +2248,31 @@ DiffusiveFluxReconstructorSixthOrder::reconstructFluxY(
     // diffusive ghost cells.
     hier::Box diff_ghost_box = interior_box;
     diff_ghost_box.grow(d_num_diff_ghosts);
-    const hier::IntVector diff_ghostcell_dims = diff_ghost_box.numberCells();
+    const hier::IntVector ghostcell_dims_flux_node = diff_ghost_box.numberCells();
+    
+    const hier::IntVector& num_ghosts_flux_node = d_num_diff_ghosts;
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    domain_lo = hier::IntVector::getZero(d_dim);
+    domain_dims = interior_dims;
+    domain_dims[1]++;
     
     for (int ei = 0; ei < d_num_eqn; ei++)
     {
         double* F_face_y = diffusive_flux->getPointer(1, ei);
         double* F_node_y = diffusive_flux_node->getPointer(ei);
         
-        if (d_dim == tbox::Dimension(2))
-        {
-            /*
-             * Get the dimensions and number of ghost cells.
-             */
-            
-            const int interior_dim_0 = interior_dims[0];
-            const int interior_dim_1 = interior_dims[1];
-            
-            const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-            const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-            const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-            
-            for (int j = 0; j < interior_dim_1 + 1; j++)
-            {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = 0; i < interior_dim_0; i++)
-                {
-                    // Compute the linear indices.
-                    const int idx_face_y = i +
-                        j*interior_dim_0;
-                    
-                    const int idx_node_BBB = (i + num_diff_ghosts_0) +
-                        (j - 3 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                    
-                    const int idx_node_BB = (i + num_diff_ghosts_0) +
-                        (j - 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                    
-                    const int idx_node_B = (i + num_diff_ghosts_0) +
-                        (j - 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                    
-                    const int idx_node_T = (i + num_diff_ghosts_0) +
-                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                    
-                    const int idx_node_TT = (i + num_diff_ghosts_0) +
-                        (j + 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                    
-                    const int idx_node_TTT = (i + num_diff_ghosts_0) +
-                        (j + 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                    
-                    F_face_y[idx_face_y] += dt*(
-                        a_r*(F_node_y[idx_node_B]   + F_node_y[idx_node_T]) +
-                        b_r*(F_node_y[idx_node_BB]  + F_node_y[idx_node_TT]) +
-                        c_r*(F_node_y[idx_node_BBB] + F_node_y[idx_node_TTT])
-                        );
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            /*
-             * Get the dimensions and number of ghost cells.
-             */
-            
-            const int interior_dim_0 = interior_dims[0];
-            const int interior_dim_1 = interior_dims[1];
-            const int interior_dim_2 = interior_dims[2];
-            
-            const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-            const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-            const int num_diff_ghosts_2 = d_num_diff_ghosts[2];
-            const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-            const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
-            
-            for (int k = 0; k < interior_dim_2; k++)
-            {
-                for (int j = 0; j < interior_dim_1 + 1; j++)
-                {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0; i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx_face_y = i +
-                            j*interior_dim_0 +
-                            k*interior_dim_0*(interior_dim_1 + 1);
-                        
-                        const int idx_node_BBB = (i + num_diff_ghosts_0) +
-                            (j - 3 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                diff_ghostcell_dim_1;
-                        
-                        const int idx_node_BB = (i + num_diff_ghosts_0) +
-                            (j - 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                diff_ghostcell_dim_1;
-                        
-                        const int idx_node_B = (i + num_diff_ghosts_0) +
-                            (j - 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                diff_ghostcell_dim_1;
-                        
-                        const int idx_node_T = (i + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                diff_ghostcell_dim_1;
-                        
-                        const int idx_node_TT = (i + num_diff_ghosts_0) +
-                            (j + 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                diff_ghostcell_dim_1;
-                        
-                        const int idx_node_TTT = (i + num_diff_ghosts_0) +
-                            (j + 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                diff_ghostcell_dim_1;
-                        
-                        F_face_y[idx_face_y] += dt*(
-                            a_r*(F_node_y[idx_node_B]   + F_node_y[idx_node_T]) +
-                            b_r*(F_node_y[idx_node_BB]  + F_node_y[idx_node_TT]) +
-                            c_r*(F_node_y[idx_node_BBB] + F_node_y[idx_node_TTT])
-                            );
-                    }
-                }
-            }
-        }
+        reconstructFluxY(
+            F_face_y,
+            F_node_y,
+            num_ghosts_flux_node,
+            ghostcell_dims_flux_node,
+            domain_lo,
+            domain_dims,
+            interior_dims,
+            dt);
     }
 }
 
@@ -2888,14 +2309,6 @@ DiffusiveFluxReconstructorSixthOrder::reconstructFluxZ(
     }
 #endif
     
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
-    
-    const double a_r = a_n + b_n + c_n;
-    const double b_r = b_n + c_n;
-    const double c_r = c_n;
-    
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
@@ -2904,77 +2317,913 @@ DiffusiveFluxReconstructorSixthOrder::reconstructFluxZ(
     // diffusive ghost cells.
     hier::Box diff_ghost_box = interior_box;
     diff_ghost_box.grow(d_num_diff_ghosts);
-    const hier::IntVector diff_ghostcell_dims = diff_ghost_box.numberCells();
+    const hier::IntVector ghostcell_dims_flux_node = diff_ghost_box.numberCells();
+    
+    const hier::IntVector& num_ghosts_flux_node = d_num_diff_ghosts;
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    domain_lo = hier::IntVector::getZero(d_dim);
+    domain_dims = interior_dims;
+    domain_dims[2]++;
     
     for (int ei = 0; ei < d_num_eqn; ei++)
     {
         double* F_face_z = diffusive_flux->getPointer(2, ei);
         double* F_node_z = diffusive_flux_node->getPointer(ei);
         
+        reconstructFluxZ(
+            F_face_z,
+            F_node_z,
+            num_ghosts_flux_node,
+            ghostcell_dims_flux_node,
+            domain_lo,
+            domain_dims,
+            interior_dims,
+            dt);
+    }
+}
+
+
+///
+
+
+/*
+ * Kernel to compute the first derivatives in the x-direction.
+ */
+void
+DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
+    double* dudx,
+    const double* const u,
+    const hier::IntVector& num_ghosts_derivative_node,
+    const hier::IntVector& num_ghosts_data_node,
+    const hier::IntVector& ghostcell_dims_derivative_node,
+    const hier::IntVector& ghostcell_dims_data_node,
+    const hier::IntVector& domain_lo,
+    const hier::IntVector& domain_dims,
+    const double& dx_0_inv)
+{
+    const double a_n =  double(3)/double(4);
+    const double b_n = -double(3)/double(20);
+    const double c_n =  double(1)/double(60);
+    
+    if (d_dim == tbox::Dimension(1))
+    {
         /*
-         * Get the dimensions and number of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
          */
         
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
-        const int interior_dim_2 = interior_dims[2];
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_dim_0 = domain_dims[0];
         
-        const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-        const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-        const int num_diff_ghosts_2 = d_num_diff_ghosts[2];
-        const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-        const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
+        const int num_ghosts_0_derivative_node = num_ghosts_derivative_node[0];
         
-        for (int k = 0; k < interior_dim_2 + 1; k++)
+        const int num_ghosts_0_data = num_ghosts_data_node[0];
+        
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            // Compute the linear indices.
+            const int idx = i + num_ghosts_0_derivative_node;
+            
+            const int idx_data_LLL = i - 3 + num_ghosts_0_data;
+            const int idx_data_LL  = i - 2 + num_ghosts_0_data;
+            const int idx_data_L   = i - 1 + num_ghosts_0_data;
+            const int idx_data_R   = i + 1 + num_ghosts_0_data;
+            const int idx_data_RR  = i + 2 + num_ghosts_0_data;
+            const int idx_data_RRR = i + 3 + num_ghosts_0_data;
+            
+            dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
+                         b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
+                         c_n*(u[idx_data_RRR] - u[idx_data_LLL])
+                        )*dx_0_inv;
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        
+        const int num_ghosts_0_derivative_node = num_ghosts_derivative_node[0];
+        const int num_ghosts_1_derivative_node = num_ghosts_derivative_node[1];
+        const int ghostcell_dim_0_derivative_node = ghostcell_dims_derivative_node[0];
+        
+        const int num_ghosts_0_data = num_ghosts_data_node[0];
+        const int num_ghosts_1_data = num_ghosts_data_node[1];
+        const int ghostcell_dim_0_data = ghostcell_dims_data_node[0];
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx = (i + num_ghosts_0_derivative_node) +
+                    (j + num_ghosts_1_derivative_node)*ghostcell_dim_0_derivative_node;
+                
+                const int idx_data_LLL = (i - 3 + num_ghosts_0_data) +
+                    (j + num_ghosts_1_data)*ghostcell_dim_0_data;
+                
+                const int idx_data_LL = (i - 2 + num_ghosts_0_data) +
+                    (j + num_ghosts_1_data)*ghostcell_dim_0_data;
+                
+                const int idx_data_L = (i - 1 + num_ghosts_0_data) +
+                    (j + num_ghosts_1_data)*ghostcell_dim_0_data;
+                
+                const int idx_data_R = (i + 1 + num_ghosts_0_data) +
+                    (j + num_ghosts_1_data)*ghostcell_dim_0_data;
+                
+                const int idx_data_RR = (i + 2 + num_ghosts_0_data) +
+                    (j + num_ghosts_1_data)*ghostcell_dim_0_data;
+                
+                const int idx_data_RRR = (i + 3 + num_ghosts_0_data) +
+                    (j + num_ghosts_1_data)*ghostcell_dim_0_data;
+                
+                dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
+                             b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
+                             c_n*(u[idx_data_RRR] - u[idx_data_LLL])
+                            )*dx_0_inv;
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_lo_2 = domain_lo[2];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        const int domain_dim_2 = domain_dims[2];
+        
+        const int num_ghosts_0_derivative_node = num_ghosts_derivative_node[0];
+        const int num_ghosts_1_derivative_node = num_ghosts_derivative_node[1];
+        const int num_ghosts_2_derivative_node = num_ghosts_derivative_node[2];
+        const int ghostcell_dim_0_derivative_node = ghostcell_dims_derivative_node[0];
+        const int ghostcell_dim_1_derivative_node = ghostcell_dims_derivative_node[1];
+        
+        const int num_ghosts_0_data = num_ghosts_data_node[0];
+        const int num_ghosts_1_data = num_ghosts_data_node[1];
+        const int num_ghosts_2_data = num_ghosts_data_node[2];
+        const int ghostcell_dim_0_data = ghostcell_dims_data_node[0];
+        const int ghostcell_dim_1_data = ghostcell_dims_data_node[1];
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_face_z = i +
-                        j*interior_dim_0 +
-                        k*interior_dim_0*interior_dim_1;
+                    const int idx = (i + num_ghosts_0_derivative_node) +
+                        (j + num_ghosts_1_derivative_node)*ghostcell_dim_0_derivative_node +
+                        (k + num_ghosts_2_derivative_node)*ghostcell_dim_0_derivative_node*
+                            ghostcell_dim_1_derivative_node;
                     
-                    const int idx_node_BBB = (i + num_diff_ghosts_0) +
-                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                        (k - 3 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                            diff_ghostcell_dim_1;
+                    const int idx_data_LLL = (i - 3 + num_ghosts_0_data) +
+                        (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                            ghostcell_dim_1_data;
                     
-                    const int idx_node_BB = (i + num_diff_ghosts_0) +
-                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                        (k - 2 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                            diff_ghostcell_dim_1;
+                    const int idx_data_LL = (i - 2 + num_ghosts_0_data) +
+                        (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                            ghostcell_dim_1_data;
                     
-                    const int idx_node_B = (i + num_diff_ghosts_0) +
-                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                        (k - 1 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                            diff_ghostcell_dim_1;
+                    const int idx_data_L = (i - 1 + num_ghosts_0_data) +
+                        (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                            ghostcell_dim_1_data;
                     
-                    const int idx_node_F = (i + num_diff_ghosts_0) +
-                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                        (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                            diff_ghostcell_dim_1;
+                    const int idx_data_R = (i + 1 + num_ghosts_0_data) +
+                        (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                            ghostcell_dim_1_data;
                     
-                    const int idx_node_FF = (i + num_diff_ghosts_0) +
-                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                        (k + 1 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                            diff_ghostcell_dim_1;
+                    const int idx_data_RR = (i + 2 + num_ghosts_0_data) +
+                        (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                            ghostcell_dim_1_data;
                     
-                    const int idx_node_FFF = (i + num_diff_ghosts_0) +
-                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                        (k + 2 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                            diff_ghostcell_dim_1;
+                    const int idx_data_RRR = (i + 3 + num_ghosts_0_data) +
+                        (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                            ghostcell_dim_1_data;
                     
-                    F_face_z[idx_face_z] += dt*(
-                        a_r*(F_node_z[idx_node_B]   + F_node_z[idx_node_F]) +
-                        b_r*(F_node_z[idx_node_BB]  + F_node_z[idx_node_FF]) +
-                        c_r*(F_node_z[idx_node_BBB] + F_node_z[idx_node_FFF])
+                    dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
+                                 b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
+                                 c_n*(u[idx_data_RRR] - u[idx_data_LLL])
+                                )*dx_0_inv;
+                }
+            }
+        }
+    }
+}
+
+
+/*
+ * Kernel to compute the first derivatives in the y-direction.
+ */
+void
+DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
+    double* dudy,
+    const double* const u,
+    const hier::IntVector& num_ghosts_derivative_node,
+    const hier::IntVector& num_ghosts_data_node,
+    const hier::IntVector& ghostcell_dims_derivative_node,
+    const hier::IntVector& ghostcell_dims_data_node,
+    const hier::IntVector& domain_lo,
+    const hier::IntVector& domain_dims,
+    const double& dx_1_inv)
+{
+    const double a_n =  double(3)/double(4);
+    const double b_n = -double(3)/double(20);
+    const double c_n =  double(1)/double(60);
+    
+    if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        
+        const int num_ghosts_0_derivative_node = num_ghosts_derivative_node[0];
+        const int num_ghosts_1_derivative_node = num_ghosts_derivative_node[1];
+        const int ghostcell_dim_0_derivative_node = ghostcell_dims_derivative_node[0];
+        
+        const int num_ghosts_0_data = num_ghosts_data_node[0];
+        const int num_ghosts_1_data = num_ghosts_data_node[1];
+        const int ghostcell_dim_0_data = ghostcell_dims_data_node[0];
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx = (i + num_ghosts_0_derivative_node) +
+                    (j + num_ghosts_1_derivative_node)*ghostcell_dim_0_derivative_node;
+                
+                const int idx_data_BBB = (i + num_ghosts_0_data) +
+                    (j - 3 + num_ghosts_1_data)*ghostcell_dim_0_data;
+                
+                const int idx_data_BB = (i + num_ghosts_0_data) +
+                    (j - 2 + num_ghosts_1_data)*ghostcell_dim_0_data;
+                
+                const int idx_data_B = (i + num_ghosts_0_data) +
+                    (j - 1 + num_ghosts_1_data)*ghostcell_dim_0_data;
+                
+                const int idx_data_T = (i + num_ghosts_0_data) +
+                    (j + 1 + num_ghosts_1_data)*ghostcell_dim_0_data;
+                
+                const int idx_data_TT = (i + num_ghosts_0_data) +
+                    (j + 2 + num_ghosts_1_data)*ghostcell_dim_0_data;
+                
+                const int idx_data_TTT = (i + num_ghosts_0_data) +
+                    (j + 3 + num_ghosts_1_data)*ghostcell_dim_0_data;
+                
+                dudy[idx] = (a_n*(u[idx_data_T]   - u[idx_data_B]) +
+                             b_n*(u[idx_data_TT]  - u[idx_data_BB]) +
+                             c_n*(u[idx_data_TTT] - u[idx_data_BBB])
+                            )*dx_1_inv;
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_lo_2 = domain_lo[2];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        const int domain_dim_2 = domain_dims[2];
+        
+        const int num_ghosts_0_derivative_node = num_ghosts_derivative_node[0];
+        const int num_ghosts_1_derivative_node = num_ghosts_derivative_node[1];
+        const int num_ghosts_2_derivative_node = num_ghosts_derivative_node[2];
+        const int ghostcell_dim_0_derivative_node = ghostcell_dims_derivative_node[0];
+        const int ghostcell_dim_1_derivative_node = ghostcell_dims_derivative_node[1];
+        
+        const int num_ghosts_0_data = num_ghosts_data_node[0];
+        const int num_ghosts_1_data = num_ghosts_data_node[1];
+        const int num_ghosts_2_data = num_ghosts_data_node[2];
+        const int ghostcell_dim_0_data = ghostcell_dims_data_node[0];
+        const int ghostcell_dim_1_data = ghostcell_dims_data_node[1];
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx = (i + num_ghosts_0_derivative_node) +
+                        (j + num_ghosts_1_derivative_node)*ghostcell_dim_0_derivative_node +
+                        (k + num_ghosts_2_derivative_node)*ghostcell_dim_0_derivative_node*
+                            ghostcell_dim_1_derivative_node;
+                    
+                    const int idx_data_BBB = (i + num_ghosts_0_data) +
+                        (j - 3 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                            ghostcell_dim_1_data;
+                    
+                    const int idx_data_BB = (i + num_ghosts_0_data) +
+                        (j - 2 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                            ghostcell_dim_1_data;
+                    
+                    const int idx_data_B = (i + num_ghosts_0_data) +
+                        (j - 1 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                            ghostcell_dim_1_data;
+                    
+                    const int idx_data_T = (i + num_ghosts_0_data) +
+                        (j + 1 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                            ghostcell_dim_1_data;
+                    
+                    const int idx_data_TT = (i + num_ghosts_0_data) +
+                        (j + 2 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                            ghostcell_dim_1_data;
+                    
+                    const int idx_data_TTT = (i + num_ghosts_0_data) +
+                        (j + 3 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                            ghostcell_dim_1_data;
+                    
+                    dudy[idx] = (a_n*(u[idx_data_T]   - u[idx_data_B]) +
+                                 b_n*(u[idx_data_TT]  - u[idx_data_BB]) +
+                                 c_n*(u[idx_data_TTT] - u[idx_data_BBB])
+                                )*dx_1_inv;
+                }
+            }
+        }
+    }
+}
+
+
+/*
+ * Kernel to compute the first derivatives in the z-direction.
+ */
+void
+DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
+    double* dudz,
+    const double* const u,
+    const hier::IntVector& num_ghosts_derivative_node,
+    const hier::IntVector& num_ghosts_data_node,
+    const hier::IntVector& ghostcell_dims_derivative_node,
+    const hier::IntVector& ghostcell_dims_data_node,
+    const hier::IntVector& domain_lo,
+    const hier::IntVector& domain_dims,
+    const double& dx_2_inv)
+{
+    const double a_n =  double(3)/double(4);
+    const double b_n = -double(3)/double(20);
+    const double c_n =  double(1)/double(60);
+    
+    /*
+     * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+     */
+    
+    const int domain_lo_0 = domain_lo[0];
+    const int domain_lo_1 = domain_lo[1];
+    const int domain_lo_2 = domain_lo[2];
+    const int domain_dim_0 = domain_dims[0];
+    const int domain_dim_1 = domain_dims[1];
+    const int domain_dim_2 = domain_dims[2];
+    
+    const int num_ghosts_0_derivative_node = num_ghosts_derivative_node[0];
+    const int num_ghosts_1_derivative_node = num_ghosts_derivative_node[1];
+    const int num_ghosts_2_derivative_node = num_ghosts_derivative_node[2];
+    const int ghostcell_dim_0_derivative_node = ghostcell_dims_derivative_node[0];
+    const int ghostcell_dim_1_derivative_node = ghostcell_dims_derivative_node[1];
+    
+    const int num_ghosts_0_data = num_ghosts_data_node[0];
+    const int num_ghosts_1_data = num_ghosts_data_node[1];
+    const int num_ghosts_2_data = num_ghosts_data_node[2];
+    const int ghostcell_dim_0_data = ghostcell_dims_data_node[0];
+    const int ghostcell_dim_1_data = ghostcell_dims_data_node[1];
+    
+    for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+    {
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx = (i + num_ghosts_0_derivative_node) +
+                    (j + num_ghosts_1_derivative_node)*ghostcell_dim_0_derivative_node +
+                    (k + num_ghosts_2_derivative_node)*ghostcell_dim_0_derivative_node*
+                        ghostcell_dim_1_derivative_node;
+                
+                const int idx_data_BBB = (i + num_ghosts_0_data) +
+                    (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                    (k - 3 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                        ghostcell_dim_1_data;
+                
+                const int idx_data_BB = (i + num_ghosts_0_data) +
+                    (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                    (k - 2 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                        ghostcell_dim_1_data;
+                
+                const int idx_data_B = (i + num_ghosts_0_data) +
+                    (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                    (k - 1 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                        ghostcell_dim_1_data;
+                
+                const int idx_data_F = (i + num_ghosts_0_data) +
+                    (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                    (k + 1 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                        ghostcell_dim_1_data;
+                
+                const int idx_data_FF = (i + num_ghosts_0_data) +
+                    (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                    (k + 2 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                        ghostcell_dim_1_data;
+                
+                const int idx_data_FFF = (i + num_ghosts_0_data) +
+                    (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                    (k + 3 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                        ghostcell_dim_1_data;
+                
+                dudz[idx] = (a_n*(u[idx_data_F]   - u[idx_data_B]) +
+                             b_n*(u[idx_data_FF]  - u[idx_data_BB]) +
+                             c_n*(u[idx_data_FFF] - u[idx_data_BBB])
+                            )*dx_2_inv;
+            }
+        }
+    }
+    
+}
+
+
+/*
+ * Kernel to reconstruct the flux using flux at nodes in x-direction.
+ */
+void
+DiffusiveFluxReconstructorSixthOrder::reconstructFluxX(
+    double* F_face_x,
+    const double* const F_node_x,
+    const hier::IntVector& num_ghosts_flux_node,
+    const hier::IntVector& ghostcell_dims_flux_node,
+    const hier::IntVector& domain_lo,
+    const hier::IntVector& domain_dims,
+    const hier::IntVector& interior_dims,
+    const double& dt)
+{
+    const double a_n =  double(3)/double(4);
+    const double b_n = -double(3)/double(20);
+    const double c_n =  double(1)/double(60);
+    
+    const double a_r = a_n + b_n + c_n;
+    const double b_r = b_n + c_n;
+    const double c_r = c_n;
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_dim_0 = domain_dims[0];
+        
+        const int num_ghosts_0_flux_node = num_ghosts_flux_node[0];
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+        {
+            // Compute the linear indices.
+            const int idx_face_x = i;
+            
+            const int idx_node_LLL = i - 3 + num_ghosts_0_flux_node;
+            const int idx_node_LL  = i - 2 + num_ghosts_0_flux_node;
+            const int idx_node_L   = i - 1 + num_ghosts_0_flux_node;
+            const int idx_node_R   = i + 0 + num_ghosts_0_flux_node;
+            const int idx_node_RR  = i + 1 + num_ghosts_0_flux_node;
+            const int idx_node_RRR = i + 2 + num_ghosts_0_flux_node;
+            
+            F_face_x[idx_face_x] += dt*(
+                a_r*(F_node_x[idx_node_L]   + F_node_x[idx_node_R]) +
+                b_r*(F_node_x[idx_node_LL]  + F_node_x[idx_node_RR]) +
+                c_r*(F_node_x[idx_node_LLL] + F_node_x[idx_node_RRR])
+                );
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        
+        const int interior_dim_0 = interior_dims[0];
+        
+        const int num_ghosts_0_flux_node = num_ghosts_flux_node[0];
+        const int num_ghosts_1_flux_node = num_ghosts_flux_node[1];
+        const int ghostcell_dim_0_flux_node = ghostcell_dims_flux_node[0];
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_face_x = i +
+                    j*(interior_dim_0 + 1);
+                
+                const int idx_node_LLL = (i - 3 + num_ghosts_0_flux_node) +
+                    (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
+                
+                const int idx_node_LL = (i - 2 + num_ghosts_0_flux_node) +
+                    (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
+                
+                const int idx_node_L = (i - 1 + num_ghosts_0_flux_node) +
+                    (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
+                
+                const int idx_node_R = (i + num_ghosts_0_flux_node) +
+                    (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
+                
+                const int idx_node_RR = (i + 1 + num_ghosts_0_flux_node) +
+                    (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
+                
+                const int idx_node_RRR = (i + 2 + num_ghosts_0_flux_node) +
+                    (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
+                
+                F_face_x[idx_face_x] += dt*(
+                    a_r*(F_node_x[idx_node_L]   + F_node_x[idx_node_R]) +
+                    b_r*(F_node_x[idx_node_LL]  + F_node_x[idx_node_RR]) +
+                    c_r*(F_node_x[idx_node_LLL] + F_node_x[idx_node_RRR])
+                    );
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_lo_2 = domain_lo[2];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        const int domain_dim_2 = domain_dims[2];
+        
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        
+        const int num_ghosts_0_flux_node = num_ghosts_flux_node[0];
+        const int num_ghosts_1_flux_node = num_ghosts_flux_node[1];
+        const int num_ghosts_2_flux_node = num_ghosts_flux_node[2];
+        const int ghostcell_dim_0_flux_node = ghostcell_dims_flux_node[0];
+        const int ghostcell_dim_1_flux_node = ghostcell_dims_flux_node[1];
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face_x = i +
+                        j*(interior_dim_0 + 1) +
+                        k*(interior_dim_0 + 1)*interior_dim_1;
+                    
+                    const int idx_node_LLL = (i - 3 + num_ghosts_0_flux_node) +
+                        (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                        (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                            ghostcell_dim_1_flux_node;
+                    
+                    const int idx_node_LL = (i - 2 + num_ghosts_0_flux_node) +
+                        (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                        (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                            ghostcell_dim_1_flux_node;
+                    
+                    const int idx_node_L = (i - 1 + num_ghosts_0_flux_node) +
+                        (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                        (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                            ghostcell_dim_1_flux_node;
+                    
+                    const int idx_node_R = (i + num_ghosts_0_flux_node) +
+                        (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                        (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                            ghostcell_dim_1_flux_node;
+                    
+                    const int idx_node_RR = (i + 1 + num_ghosts_0_flux_node) +
+                        (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                        (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                            ghostcell_dim_1_flux_node;
+                    
+                    const int idx_node_RRR = (i + 2 + num_ghosts_0_flux_node) +
+                        (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                        (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                            ghostcell_dim_1_flux_node;
+                    
+                    F_face_x[idx_face_x] += dt*(
+                        a_r*(F_node_x[idx_node_L]   + F_node_x[idx_node_R]) +
+                        b_r*(F_node_x[idx_node_LL]  + F_node_x[idx_node_RR]) +
+                        c_r*(F_node_x[idx_node_LLL] + F_node_x[idx_node_RRR])
                         );
                 }
+            }
+        }
+    }
+}
+
+
+/*
+ * Kernel to reconstruct the flux using flux at nodes in y-direction.
+ */
+void
+DiffusiveFluxReconstructorSixthOrder::reconstructFluxY(
+    double* F_face_y,
+    const double* const F_node_y,
+    const hier::IntVector& num_ghosts_flux_node,
+    const hier::IntVector& ghostcell_dims_flux_node,
+    const hier::IntVector& domain_lo,
+    const hier::IntVector& domain_dims,
+    const hier::IntVector& interior_dims,
+    const double& dt)
+{
+    const double a_n =  double(3)/double(4);
+    const double b_n = -double(3)/double(20);
+    const double c_n =  double(1)/double(60);
+    
+    const double a_r = a_n + b_n + c_n;
+    const double b_r = b_n + c_n;
+    const double c_r = c_n;
+    
+    if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        
+        const int interior_dim_0 = interior_dims[0];
+        
+        const int num_ghosts_0_flux_node = num_ghosts_flux_node[0];
+        const int num_ghosts_1_flux_node = num_ghosts_flux_node[1];
+        const int ghostcell_dim_0_flux_node = ghostcell_dims_flux_node[0];
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_face_y = i +
+                    j*interior_dim_0;
+                
+                const int idx_node_BBB = (i + num_ghosts_0_flux_node) +
+                    (j - 3 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
+                
+                const int idx_node_BB = (i + num_ghosts_0_flux_node) +
+                    (j - 2 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
+                
+                const int idx_node_B = (i + num_ghosts_0_flux_node) +
+                    (j - 1 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
+                
+                const int idx_node_T = (i + num_ghosts_0_flux_node) +
+                    (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
+                
+                const int idx_node_TT = (i + num_ghosts_0_flux_node) +
+                    (j + 1 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
+                
+                const int idx_node_TTT = (i + num_ghosts_0_flux_node) +
+                    (j + 2 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
+                
+                F_face_y[idx_face_y] += dt*(
+                    a_r*(F_node_y[idx_node_B]   + F_node_y[idx_node_T]) +
+                    b_r*(F_node_y[idx_node_BB]  + F_node_y[idx_node_TT]) +
+                    c_r*(F_node_y[idx_node_BBB] + F_node_y[idx_node_TTT])
+                    );
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_lo_2 = domain_lo[2];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        const int domain_dim_2 = domain_dims[2];
+        
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        
+        const int num_ghosts_0_flux_node = num_ghosts_flux_node[0];
+        const int num_ghosts_1_flux_node = num_ghosts_flux_node[1];
+        const int num_ghosts_2_flux_node = num_ghosts_flux_node[2];
+        const int ghostcell_dim_0_flux_node = ghostcell_dims_flux_node[0];
+        const int ghostcell_dim_1_flux_node = ghostcell_dims_flux_node[1];
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face_y = i +
+                        j*interior_dim_0 +
+                        k*interior_dim_0*(interior_dim_1 + 1);
+                    
+                    const int idx_node_BBB = (i + num_ghosts_0_flux_node) +
+                        (j - 3 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                        (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                            ghostcell_dim_1_flux_node;
+                    
+                    const int idx_node_BB = (i + num_ghosts_0_flux_node) +
+                        (j - 2 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                        (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                            ghostcell_dim_1_flux_node;
+                    
+                    const int idx_node_B = (i + num_ghosts_0_flux_node) +
+                        (j - 1 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                        (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                            ghostcell_dim_1_flux_node;
+                    
+                    const int idx_node_T = (i + num_ghosts_0_flux_node) +
+                        (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                        (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                            ghostcell_dim_1_flux_node;
+                    
+                    const int idx_node_TT = (i + num_ghosts_0_flux_node) +
+                        (j + 1 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                        (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                            ghostcell_dim_1_flux_node;
+                    
+                    const int idx_node_TTT = (i + num_ghosts_0_flux_node) +
+                        (j + 2 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                        (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                            ghostcell_dim_1_flux_node;
+                    
+                    F_face_y[idx_face_y] += dt*(
+                        a_r*(F_node_y[idx_node_B]   + F_node_y[idx_node_T]) +
+                        b_r*(F_node_y[idx_node_BB]  + F_node_y[idx_node_TT]) +
+                        c_r*(F_node_y[idx_node_BBB] + F_node_y[idx_node_TTT])
+                        );
+                }
+            }
+        }
+    }
+}
+
+
+/*
+ * Kernel to reconstruct the flux using flux at nodes in z-direction.
+ */
+void
+DiffusiveFluxReconstructorSixthOrder::reconstructFluxZ(
+    double* F_face_z,
+    const double* const F_node_z,
+    const hier::IntVector& num_ghosts_flux_node,
+    const hier::IntVector& ghostcell_dims_flux_node,
+    const hier::IntVector& domain_lo,
+    const hier::IntVector& domain_dims,
+    const hier::IntVector& interior_dims,
+    const double& dt)
+{
+    const double a_n =  double(3)/double(4);
+    const double b_n = -double(3)/double(20);
+    const double c_n =  double(1)/double(60);
+    
+    const double a_r = a_n + b_n + c_n;
+    const double b_r = b_n + c_n;
+    const double c_r = c_n;
+    
+    /*
+     * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+     */
+    
+    const int domain_lo_0 = domain_lo[0];
+    const int domain_lo_1 = domain_lo[1];
+    const int domain_lo_2 = domain_lo[2];
+    const int domain_dim_0 = domain_dims[0];
+    const int domain_dim_1 = domain_dims[1];
+    const int domain_dim_2 = domain_dims[2];
+    
+    const int interior_dim_0 = interior_dims[0];
+    const int interior_dim_1 = interior_dims[1];
+    
+    const int num_ghosts_0_flux_node = num_ghosts_flux_node[0];
+    const int num_ghosts_1_flux_node = num_ghosts_flux_node[1];
+    const int num_ghosts_2_flux_node = num_ghosts_flux_node[2];
+    const int ghostcell_dim_0_flux_node = ghostcell_dims_flux_node[0];
+    const int ghostcell_dim_1_flux_node = ghostcell_dims_flux_node[1];
+    
+    for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+    {
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_face_z = i +
+                    j*interior_dim_0 +
+                    k*interior_dim_0*interior_dim_1;
+                
+                const int idx_node_BBB = (i + num_ghosts_0_flux_node) +
+                    (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                    (k - 3 + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                        ghostcell_dim_1_flux_node;
+                
+                const int idx_node_BB = (i + num_ghosts_0_flux_node) +
+                    (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                    (k - 2 + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                        ghostcell_dim_1_flux_node;
+                
+                const int idx_node_B = (i + num_ghosts_0_flux_node) +
+                    (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                    (k - 1 + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                        ghostcell_dim_1_flux_node;
+                
+                const int idx_node_F = (i + num_ghosts_0_flux_node) +
+                    (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                    (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                        ghostcell_dim_1_flux_node;
+                
+                const int idx_node_FF = (i + num_ghosts_0_flux_node) +
+                    (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                    (k + 1 + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                        ghostcell_dim_1_flux_node;
+                
+                const int idx_node_FFF = (i + num_ghosts_0_flux_node) +
+                    (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
+                    (k + 2 + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
+                        ghostcell_dim_1_flux_node;
+                
+                F_face_z[idx_face_z] += dt*(
+                    a_r*(F_node_z[idx_node_B]   + F_node_z[idx_node_F]) +
+                    b_r*(F_node_z[idx_node_BB]  + F_node_z[idx_node_FF]) +
+                    c_r*(F_node_z[idx_node_BBB] + F_node_z[idx_node_FFF])
+                    );
             }
         }
     }
