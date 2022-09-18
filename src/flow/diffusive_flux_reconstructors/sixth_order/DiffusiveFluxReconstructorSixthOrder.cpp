@@ -1838,7 +1838,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
                 double* dudx = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
                 
                 /*
-                 * Get the ghost cell width and ghost box dimensions of the variable.
+                 * Get the ghost cell widths and ghost box dimensions of the variables.
                  */
                 
                 const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
@@ -1973,7 +1973,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
                 double* dudy = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
                 
                 /*
-                 * Get the ghost cell width and ghost box dimensions of the variable.
+                 * Get the ghost cell widths and ghost box dimensions of the variables.
                  */
                 
                 const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
@@ -2116,7 +2116,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
                 double* dudz = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
                 
                 /*
-                 * Get the ghost cell width and ghost box dimensions of the variable.
+                 * Get the ghost cell widths and ghost box dimensions of the variables.
                  */
                 
                 const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
@@ -2788,7 +2788,6 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
             }
         }
     }
-    
 }
 
 
