@@ -268,6 +268,45 @@ class DiffusiveFluxReconstructorMidpointSixthOrder: public DiffusiveFluxReconstr
             const double& dx_2_inv);
         
         /*
+         * Kernel to interpolate the data from nodes to midpoints in x-direction.
+         */
+        void interpolateDataFromNodeToMidpointX(
+            double* u_midpoint_x,
+            const double* const u_node,
+            const hier::IntVector& num_ghosts_data_midpoint,
+            const hier::IntVector& num_ghosts_data_node,
+            const hier::IntVector& ghostcell_dims_data_midpoint,
+            const hier::IntVector& ghostcell_dims_data_node,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims);
+        
+        /*
+         * Kernel to interpolate the data from nodes to midpoints in y-direction.
+         */
+        void interpolateDataFromNodeToMidpointY(
+            double* u_midpoint_y,
+            const double* const u_node,
+            const hier::IntVector& num_ghosts_data_midpoint,
+            const hier::IntVector& num_ghosts_data_node,
+            const hier::IntVector& ghostcell_dims_data_midpoint,
+            const hier::IntVector& ghostcell_dims_data_node,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims);
+        
+        /*
+         * Kernel to interpolate the data from nodes to midpoints in z-direction.
+         */
+        void interpolateDataFromNodeToMidpointZ(
+            double* u_midpoint_z,
+            const double* const u_node,
+            const hier::IntVector& num_ghosts_derivative_midpoint,
+            const hier::IntVector& num_ghosts_derivative_node,
+            const hier::IntVector& ghostcell_dims_data_midpoint,
+            const hier::IntVector& ghostcell_dims_data_node,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims);
+        
+        /*
          * Kernel to reconstruct the flux using flux at midpoints in x-direction.
          */
         void

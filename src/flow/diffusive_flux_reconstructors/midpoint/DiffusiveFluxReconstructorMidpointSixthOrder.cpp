@@ -2485,6 +2485,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
                 const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
                 
                 const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
+                
                 const hier::IntVector& num_ghosts_data_node =
                     data_x[ei][vi]->getGhostCellWidth();
                 
@@ -2820,10 +2821,6 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDiffusivitiesFromNodeTo
         static_cast<int>(var_cell_data_for_diffusivities_component_idx.size()));
 #endif
     
-    const double a_n =  double(75)/double(128);
-    const double b_n = -double(25)/double(256);
-    const double c_n =  double(3)/double(256);
-    
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
@@ -2843,7 +2840,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDiffusivitiesFromNodeTo
 #endif
         
         // Get the pointer to variable for interpoation.
-        double* u = var_cell_data_for_diffusivities[vi]->getPointer(var_cell_data_for_diffusivities_component_idx[vi]);
+        double* u_node = var_cell_data_for_diffusivities[vi]->getPointer(var_cell_data_for_diffusivities_component_idx[vi]);
         
         d_num_scratch_diffusivities_midpoint_used++;
         // Declare container to store the diffusivities.
@@ -2864,363 +2861,159 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDiffusivitiesFromNodeTo
 #endif
         
         /*
-         * Get the sub-ghost cell width of the variable.
+         * Get the ghost cell widths and ghost box dimensions of the variables.
          */
         
-        hier::IntVector num_subghosts_data =
+        const hier::IntVector& num_ghosts_data_midpoint = d_num_diff_ghosts;
+        
+        const hier::IntVector& ghostcell_dims_data_midpoint = diff_ghostcell_dims;
+        
+        const hier::IntVector& num_ghosts_data_node =
             var_cell_data_for_diffusivities[vi]->getGhostCellWidth();
         
-        hier::IntVector subghostcell_dims_data =
+        const hier::IntVector& ghostcell_dims_data_node =
             var_cell_data_for_diffusivities[vi]->getGhostBox().numberCells();
-            
+        
+        hier::IntVector domain_lo(d_dim);
+        hier::IntVector domain_dims(d_dim);
+        
         if (d_dim == tbox::Dimension(1))
         {
             // Get the pointer to the diffusivity at midpoint.
-            double* diffus_midpoint_x =
+            double* u_midpoint_x =
                 d_scratch_diffusivities_midpoint[d_num_scratch_diffusivities_midpoint_used - 1]->getPointer(0, 0);
             
-            /*
-             * Get the dimensions and number of ghost cells.
-             */
-            
-            const int interior_dim_0 = interior_dims[0];
-            
-            const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-            
-            const int num_subghosts_0_data = num_subghosts_data[0];
-            
-            const int num_interp_midpoint_ghosts_0 = d_num_interp_midpoint_ghosts[0];
-            
             // Interpolation in x-direction.
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
-            for (int i = -num_diff_ghosts_0 + num_interp_midpoint_ghosts_0;
-                i < (interior_dim_0 + 1) + num_diff_ghosts_0 - num_interp_midpoint_ghosts_0;
-                i++)
-            {
-                // Compute the linear indices.
-                const int idx = i + num_diff_ghosts_0;
-                
-                const int idx_data_LLL = i - 3 + num_subghosts_0_data;
-                const int idx_data_LL  = i - 2 + num_subghosts_0_data;
-                const int idx_data_L   = i - 1 + num_subghosts_0_data;
-                const int idx_data_R   = i + 0 + num_subghosts_0_data;
-                const int idx_data_RR  = i + 1 + num_subghosts_0_data;
-                const int idx_data_RRR = i + 2 + num_subghosts_0_data;
-                
-                diffus_midpoint_x[idx] = (a_n*(u[idx_data_R]   + u[idx_data_L]) +
-                                          b_n*(u[idx_data_RR]  + u[idx_data_LL]) +
-                                          c_n*(u[idx_data_RRR] + u[idx_data_LLL])
-                                         );
-            }
             
+            domain_lo = hier::IntVector::getZero(d_dim);
+            domain_dims = interior_dims;
+            
+            domain_lo[0] += (-d_num_diff_ghosts[0] + d_num_interp_midpoint_ghosts[0]);
+            domain_dims[0] += 1;
+            domain_dims[0] += 2*(d_num_diff_ghosts[0] - d_num_interp_midpoint_ghosts[0]);
+            
+            interpolateDataFromNodeToMidpointX(
+                u_midpoint_x,
+                u_node,
+                num_ghosts_data_midpoint,
+                num_ghosts_data_node,
+                ghostcell_dims_data_midpoint,
+                ghostcell_dims_data_node,
+                domain_lo,
+                domain_dims);
         }
         else if (d_dim == tbox::Dimension(2))
         {
             // Get the pointers to the diffusivities at midpoints.
-            double* diffus_midpoint_x =
+            double* u_midpoint_x =
                 d_scratch_diffusivities_midpoint[d_num_scratch_diffusivities_midpoint_used - 1]->getPointer(0, 0);
-            double* diffus_midpoint_y =
+            double* u_midpoint_y =
                 d_scratch_diffusivities_midpoint[d_num_scratch_diffusivities_midpoint_used - 1]->getPointer(1, 0);
             
-            /*
-             * Get the dimensions and number of ghost cells.
-             */
-            
-            const int interior_dim_0 = interior_dims[0];
-            const int interior_dim_1 = interior_dims[1];
-            
-            const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-            const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-            const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-            
-            const int num_subghosts_0_data = num_subghosts_data[0];
-            const int num_subghosts_1_data = num_subghosts_data[1];
-            const int subghostcell_dim_0_data = subghostcell_dims_data[0];
-            
-            const int num_interp_midpoint_ghosts_0 = d_num_interp_midpoint_ghosts[0];
-            const int num_interp_midpoint_ghosts_1 = d_num_interp_midpoint_ghosts[1];
-            
             // Interpolation in x-direction.
-            for (int j = 0; j < interior_dim_1; j++)
-            {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = -num_diff_ghosts_0 + num_interp_midpoint_ghosts_0;
-                    i < (interior_dim_0 + 1) + num_diff_ghosts_0 - num_interp_midpoint_ghosts_0;
-                    i++)
-                {
-                    // Compute the linear indices.
-                    const int idx = (i + num_diff_ghosts_0) +
-                        (j + num_diff_ghosts_1)*(diff_ghostcell_dim_0 + 1);
-                    
-                    const int idx_data_LLL = (i - 3 + num_subghosts_0_data) +
-                        (j + num_subghosts_1_data)*subghostcell_dim_0_data;
-                    
-                    const int idx_data_LL = (i - 2 + num_subghosts_0_data) +
-                        (j + num_subghosts_1_data)*subghostcell_dim_0_data;
-                    
-                    const int idx_data_L = (i - 1 + num_subghosts_0_data) +
-                        (j + num_subghosts_1_data)*subghostcell_dim_0_data;
-                    
-                    const int idx_data_R = (i + num_subghosts_0_data) +
-                        (j + num_subghosts_1_data)*subghostcell_dim_0_data;
-                    
-                    const int idx_data_RR = (i + 1 + num_subghosts_0_data) +
-                        (j + num_subghosts_1_data)*subghostcell_dim_0_data;
-                    
-                    const int idx_data_RRR = (i + 2 + num_subghosts_0_data) +
-                        (j + num_subghosts_1_data)*subghostcell_dim_0_data;
-                    
-                    diffus_midpoint_x[idx] = (a_n*(u[idx_data_R]   + u[idx_data_L]) +
-                                              b_n*(u[idx_data_RR]  + u[idx_data_LL]) +
-                                              c_n*(u[idx_data_RRR] + u[idx_data_LLL])
-                                             );
-                }
-            }
+            
+            domain_lo = hier::IntVector::getZero(d_dim);
+            domain_dims = interior_dims;
+            
+            domain_lo[0] += (-d_num_diff_ghosts[0] + d_num_interp_midpoint_ghosts[0]);
+            domain_dims[0] += 1;
+            domain_dims[0] += 2*(d_num_diff_ghosts[0] - d_num_interp_midpoint_ghosts[0]);
+            
+            interpolateDataFromNodeToMidpointX(
+                u_midpoint_x,
+                u_node,
+                num_ghosts_data_midpoint,
+                num_ghosts_data_node,
+                ghostcell_dims_data_midpoint,
+                ghostcell_dims_data_node,
+                domain_lo,
+                domain_dims);
             
             // Interpolation in y-direction.
-            for (int j = -num_diff_ghosts_1 + num_interp_midpoint_ghosts_1;
-                j < (interior_dim_1 + 1) + num_diff_ghosts_1 - num_interp_midpoint_ghosts_1;
-                j++)
-            {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = 0; i < interior_dim_0; i++)
-                {
-                    // Compute the linear indices.
-                    const int idx = (i + num_diff_ghosts_0) +
-                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                    
-                    const int idx_data_BBB = (i + num_subghosts_0_data) +
-                        (j - 3 + num_subghosts_1_data)*subghostcell_dim_0_data;
-                    
-                    const int idx_data_BB = (i + num_subghosts_0_data) +
-                        (j - 2 + num_subghosts_1_data)*subghostcell_dim_0_data;
-                    
-                    const int idx_data_B = (i + num_subghosts_0_data) +
-                        (j - 1 + num_subghosts_1_data)*subghostcell_dim_0_data;
-                    
-                    const int idx_data_T = (i + num_subghosts_0_data) +
-                        (j + num_subghosts_1_data)*subghostcell_dim_0_data;
-                    
-                    const int idx_data_TT = (i + num_subghosts_0_data) +
-                        (j + 1 + num_subghosts_1_data)*subghostcell_dim_0_data;
-                    
-                    const int idx_data_TTT = (i + num_subghosts_0_data) +
-                        (j + 2 + num_subghosts_1_data)*subghostcell_dim_0_data;
-                    
-                    diffus_midpoint_y[idx] = (a_n*(u[idx_data_T]   + u[idx_data_B]) +
-                                              b_n*(u[idx_data_TT]  + u[idx_data_BB]) +
-                                              c_n*(u[idx_data_TTT] + u[idx_data_BBB])
-                                             );
-                }
-            }
+            
+            domain_lo = hier::IntVector::getZero(d_dim);
+            domain_dims = interior_dims;
+            
+            domain_lo[1] += (-d_num_diff_ghosts[1] + d_num_interp_midpoint_ghosts[1]);
+            domain_dims[1] += 1;
+            domain_dims[1] += 2*(d_num_diff_ghosts[1] - d_num_interp_midpoint_ghosts[1]);
+            
+            interpolateDataFromNodeToMidpointY(
+                u_midpoint_y,
+                u_node,
+                num_ghosts_data_midpoint,
+                num_ghosts_data_node,
+                ghostcell_dims_data_midpoint,
+                ghostcell_dims_data_node,
+                domain_lo,
+                domain_dims);
         }
         else if (d_dim == tbox::Dimension(3))
         {
             // Get the pointers to the diffusivities at midpoints.
-            double* diffus_midpoint_x =
+            double* u_midpoint_x =
                 d_scratch_diffusivities_midpoint[d_num_scratch_diffusivities_midpoint_used - 1]->getPointer(0, 0);
-            double* diffus_midpoint_y =
+            double* u_midpoint_y =
                 d_scratch_diffusivities_midpoint[d_num_scratch_diffusivities_midpoint_used - 1]->getPointer(1, 0);
-            double* diffus_midpoint_z =
+            double* u_midpoint_z =
                 d_scratch_diffusivities_midpoint[d_num_scratch_diffusivities_midpoint_used - 1]->getPointer(2, 0);
             
-            /*
-             * Get the dimensions and number of ghost cells.
-             */
-            
-            const int interior_dim_0 = interior_dims[0];
-            const int interior_dim_1 = interior_dims[1];
-            const int interior_dim_2 = interior_dims[2];
-            
-            const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-            const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-            const int num_diff_ghosts_2 = d_num_diff_ghosts[2];
-            const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-            const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
-            
-            const int num_subghosts_0_data = num_subghosts_data[0];
-            const int num_subghosts_1_data = num_subghosts_data[1];
-            const int num_subghosts_2_data = num_subghosts_data[2];
-            const int subghostcell_dim_0_data = subghostcell_dims_data[0];
-            const int subghostcell_dim_1_data = subghostcell_dims_data[1];
-            
-            const int num_interp_midpoint_ghosts_0 = d_num_interp_midpoint_ghosts[0];
-            const int num_interp_midpoint_ghosts_1 = d_num_interp_midpoint_ghosts[1];
-            const int num_interp_midpoint_ghosts_2 = d_num_interp_midpoint_ghosts[2];
-            
             // Interpolation in x-direction.
-            for (int k = 0; k < interior_dim_2; k++)
-            {
-                for (int j = 0; j < interior_dim_1; j++)
-                {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = -num_diff_ghosts_0 + num_interp_midpoint_ghosts_0;
-                        i < (interior_dim_0 + 1) + num_diff_ghosts_0 - num_interp_midpoint_ghosts_0;
-                        i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx = (i + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*(diff_ghostcell_dim_0 + 1) +
-                            (k + num_diff_ghosts_2)*(diff_ghostcell_dim_0 + 1)*
-                                diff_ghostcell_dim_1;
-                        
-                        const int idx_data_LLL = (i - 3 + num_subghosts_0_data) +
-                            (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        const int idx_data_LL = (i - 2 + num_subghosts_0_data) +
-                            (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        const int idx_data_L = (i - 1 + num_subghosts_0_data) +
-                            (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        const int idx_data_R = (i + num_subghosts_0_data) +
-                            (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        const int idx_data_RR = (i + 1 + num_subghosts_0_data) +
-                            (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        const int idx_data_RRR = (i + 2 + num_subghosts_0_data) +
-                            (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        diffus_midpoint_x[idx] = (a_n*(u[idx_data_R]   + u[idx_data_L]) +
-                                                  b_n*(u[idx_data_RR]  + u[idx_data_LL]) +
-                                                  c_n*(u[idx_data_RRR] + u[idx_data_LLL])
-                                                 );
-                    }
-                }
-            }
+            
+            domain_lo = hier::IntVector::getZero(d_dim);
+            domain_dims = interior_dims;
+            
+            domain_lo[0] += (-d_num_diff_ghosts[0] + d_num_interp_midpoint_ghosts[0]);
+            domain_dims[0] += 1;
+            domain_dims[0] += 2*(d_num_diff_ghosts[0] - d_num_interp_midpoint_ghosts[0]);
+            
+            interpolateDataFromNodeToMidpointX(
+                u_midpoint_x,
+                u_node,
+                num_ghosts_data_midpoint,
+                num_ghosts_data_node,
+                ghostcell_dims_data_midpoint,
+                ghostcell_dims_data_node,
+                domain_lo,
+                domain_dims);
             
             // Interpolation in y-direction.
-            for (int k = 0; k < interior_dim_2; k++)
-            {
-                for (int j = -num_diff_ghosts_1 + num_interp_midpoint_ghosts_1;
-                    j < (interior_dim_1 + 1) + num_diff_ghosts_1 - num_interp_midpoint_ghosts_1;
-                    j++)
-                {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0; i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx = (i + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                (diff_ghostcell_dim_1 + 1);
-                        
-                        const int idx_data_BBB = (i + num_subghosts_0_data) +
-                            (j - 3 + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        const int idx_data_BB = (i + num_subghosts_0_data) +
-                            (j - 2 + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        const int idx_data_B = (i + num_subghosts_0_data) +
-                            (j - 1 + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        const int idx_data_T = (i + num_subghosts_0_data) +
-                            (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        const int idx_data_TT = (i + num_subghosts_0_data) +
-                            (j + 1 + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        const int idx_data_TTT = (i + num_subghosts_0_data) +
-                            (j + 2 + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        diffus_midpoint_y[idx] = (a_n*(u[idx_data_T]   + u[idx_data_B]) +
-                                                  b_n*(u[idx_data_TT]  + u[idx_data_BB]) +
-                                                  c_n*(u[idx_data_TTT] + u[idx_data_BBB])
-                                                 );
-                    }
-                }
-            }
+            
+            domain_lo = hier::IntVector::getZero(d_dim);
+            domain_dims = interior_dims;
+            
+            domain_lo[1] += (-d_num_diff_ghosts[1] + d_num_interp_midpoint_ghosts[1]);
+            domain_dims[1] += 1;
+            domain_dims[1] += 2*(d_num_diff_ghosts[1] - d_num_interp_midpoint_ghosts[1]);
+            
+            interpolateDataFromNodeToMidpointY(
+                u_midpoint_y,
+                u_node,
+                num_ghosts_data_midpoint,
+                num_ghosts_data_node,
+                ghostcell_dims_data_midpoint,
+                ghostcell_dims_data_node,
+                domain_lo,
+                domain_dims);
             
             // Interpolation in z-direction.
-            for (int k = -num_diff_ghosts_2 + num_interp_midpoint_ghosts_2;
-                k < (interior_dim_2 + 1) + num_diff_ghosts_2 - num_interp_midpoint_ghosts_2;
-                k++)
-            {
-                for (int j = 0; j < interior_dim_1; j++)
-                {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0; i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx = (i + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                diff_ghostcell_dim_1;
-                        
-                        const int idx_data_BBB = (i + num_subghosts_0_data) +
-                            (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k - 3 + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        const int idx_data_BB = (i + num_subghosts_0_data) +
-                            (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k - 2 + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        const int idx_data_B = (i + num_subghosts_0_data) +
-                            (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k - 1 + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        const int idx_data_F = (i + num_subghosts_0_data) +
-                            (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        const int idx_data_FF = (i + num_subghosts_0_data) +
-                            (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k + 1 + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        const int idx_data_FFF = (i + num_subghosts_0_data) +
-                            (j + num_subghosts_1_data)*subghostcell_dim_0_data +
-                            (k + 2 + num_subghosts_2_data)*subghostcell_dim_0_data*
-                                subghostcell_dim_1_data;
-                        
-                        diffus_midpoint_z[idx] = (a_n*(u[idx_data_F]   + u[idx_data_B]) +
-                                                  b_n*(u[idx_data_FF]  + u[idx_data_BB]) +
-                                                  c_n*(u[idx_data_FFF] + u[idx_data_BBB])
-                                                 );
-                    }
-                }
-            }
+            
+            domain_lo = hier::IntVector::getZero(d_dim);
+            domain_dims = interior_dims;
+            
+            domain_lo[2] += (-d_num_diff_ghosts[2] + d_num_interp_midpoint_ghosts[2]);
+            domain_dims[2] += 1;
+            domain_dims[2] += 2*(d_num_diff_ghosts[2] - d_num_interp_midpoint_ghosts[2]);
+            
+            interpolateDataFromNodeToMidpointZ(
+                u_midpoint_z,
+                u_node,
+                num_ghosts_data_midpoint,
+                num_ghosts_data_node,
+                ghostcell_dims_data_midpoint,
+                ghostcell_dims_data_node,
+                domain_lo,
+                domain_dims);
         }
         
         var_side_data_for_diffusivities.push_back(d_scratch_diffusivities_midpoint[d_num_scratch_diffusivities_midpoint_used - 1]);
@@ -3244,10 +3037,6 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(derivative_node.size()) == d_num_eqn);
 #endif
-    
-    const double a_n =  double(75)/double(128);
-    const double b_n = -double(25)/double(256);
-    const double c_n =  double(3)/double(256);
     
     derivatives_midpoint_x.resize(d_num_eqn);
     
@@ -3312,167 +3101,35 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
                 // Get the pointer to the derivative at midpoint.
                 double* der_midpoint_x = d_scratch_derivatives_midpoint_x[d_num_scratch_derivatives_midpoint_x_used - 1]->getPointer(0, 0);
                 
-                if (d_dim == tbox::Dimension(1))
-                {
-                    /*
-                     * Get the dimensions and number of ghost cells.
-                     */
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    
-                    const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-                    
-                    const int num_interp_midpoint_ghosts_0 = d_num_interp_midpoint_ghosts[0];
-                    
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = -num_diff_ghosts_0 + num_interp_midpoint_ghosts_0;
-                        i < (interior_dim_0 + 1) + num_diff_ghosts_0 - num_interp_midpoint_ghosts_0;
-                        i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx = i + num_diff_ghosts_0;
-                        
-                        const int idx_node_LLL = i - 3 + num_diff_ghosts_0;
-                        const int idx_node_LL  = i - 2 + num_diff_ghosts_0;
-                        const int idx_node_L   = i - 1 + num_diff_ghosts_0;
-                        const int idx_node_R   = i + 0 + num_diff_ghosts_0;
-                        const int idx_node_RR  = i + 1 + num_diff_ghosts_0;
-                        const int idx_node_RRR = i + 2 + num_diff_ghosts_0;
-                        
-                        der_midpoint_x[idx] = (a_n*(der_node[idx_node_R]   + der_node[idx_node_L]) +
-                                               b_n*(der_node[idx_node_RR]  + der_node[idx_node_LL]) +
-                                               c_n*(der_node[idx_node_RRR] + der_node[idx_node_LLL])
-                                              );
-                    }
-                }
-                else if (d_dim == tbox::Dimension(2))
-                {
-                    /*
-                     * Get the dimensions and number of ghost cells.
-                     */
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    
-                    const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-                    const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-                    const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-                    
-                    const int num_interp_midpoint_ghosts_0 = d_num_interp_midpoint_ghosts[0];
-                    
-                    for (int j = 0; j < interior_dim_1; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = -num_diff_ghosts_0 + num_interp_midpoint_ghosts_0;
-                            i < (interior_dim_0 + 1) + num_diff_ghosts_0 - num_interp_midpoint_ghosts_0;
-                            i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*(diff_ghostcell_dim_0 + 1);
-                            
-                            const int idx_node_LLL = (i - 3 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            const int idx_node_LL = (i - 2 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            const int idx_node_L = (i - 1 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            const int idx_node_R = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            const int idx_node_RR = (i + 1 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            const int idx_node_RRR = (i + 2 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            der_midpoint_x[idx] = (a_n*(der_node[idx_node_R]   + der_node[idx_node_L]) +
-                                                   b_n*(der_node[idx_node_RR]  + der_node[idx_node_LL]) +
-                                                   c_n*(der_node[idx_node_RRR] + der_node[idx_node_LLL])
-                                                  );
-                        }
-                    }
-                }
-                else if (d_dim == tbox::Dimension(3))
-                {
-                    /*
-                     * Get the dimensions and number of ghost cells.
-                     */
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    const int interior_dim_2 = interior_dims[2];
-                    
-                    const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-                    const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-                    const int num_diff_ghosts_2 = d_num_diff_ghosts[2];
-                    const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-                    const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
-                    
-                    const int num_interp_midpoint_ghosts_0 = d_num_interp_midpoint_ghosts[0];
-                    
-                    for (int k = 0; k < interior_dim_2; k++)
-                    {
-                        for (int j = 0; j < interior_dim_1; j++)
-                        {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = -num_diff_ghosts_0 + num_interp_midpoint_ghosts_0;
-                                i < (interior_dim_0 + 1) + num_diff_ghosts_0 - num_interp_midpoint_ghosts_0;
-                                i++)
-                            {
-                                // Compute the linear indices.
-                                const int idx = (i + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*(diff_ghostcell_dim_0 + 1) +
-                                    (k + num_diff_ghosts_2)*(diff_ghostcell_dim_0 + 1)*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_node_LLL = (i - 3 + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_node_LL = (i - 2 + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_node_L = (i - 1 + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_node_R = (i + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_node_RR = (i + 1 + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_node_RRR = (i + 2 + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                der_midpoint_x[idx] = (a_n*(der_node[idx_node_R]   + der_node[idx_node_L]) +
-                                                       b_n*(der_node[idx_node_RR]  + der_node[idx_node_LL]) +
-                                                       c_n*(der_node[idx_node_RRR] + der_node[idx_node_LLL])
-                                                      );
-                            }
-                        }
-                    }
-                }
+                /*
+                 * Get the ghost cell widths and ghost box dimensions of the variables.
+                 */
+                
+                const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
+                const hier::IntVector& num_ghosts_derivative_midpoint = d_num_diff_ghosts;
+                
+                const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
+                const hier::IntVector& ghostcell_dims_derivative_midpoint = diff_ghostcell_dims;
+                
+                hier::IntVector domain_lo(d_dim);
+                hier::IntVector domain_dims(d_dim);
+                
+                domain_lo = hier::IntVector::getZero(d_dim);
+                domain_dims = interior_dims;
+                
+                domain_lo[0] += (-d_num_diff_ghosts[0] + d_num_interp_midpoint_ghosts[0]);
+                domain_dims[0] += 1;
+                domain_dims[0] += 2*(d_num_diff_ghosts[0] - d_num_interp_midpoint_ghosts[0]);
+                
+                interpolateDataFromNodeToMidpointX(
+                    der_midpoint_x,
+                    der_node,
+                    num_ghosts_derivative_midpoint,
+                    num_ghosts_derivative_node,
+                    ghostcell_dims_derivative_midpoint,
+                    ghostcell_dims_derivative_node,
+                    domain_lo,
+                    domain_dims);
                 
                 std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
                     u,
@@ -3514,10 +3171,6 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
             << std::endl);
     }
 #endif
-    
-    const double a_n =  double(75)/double(128);
-    const double b_n = -double(25)/double(256);
-    const double c_n =  double(3)/double(256);
     
     derivatives_midpoint_y.resize(d_num_eqn);
     
@@ -3582,132 +3235,35 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
                 // Get the pointer to the derivative at midpoint.
                 double* der_midpoint_y = d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]->getPointer(1, 0);
                 
-                if (d_dim == tbox::Dimension(2))
-                {
-                    /*
-                     * Get the dimensions and number of ghost cells.
-                     */
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    
-                    const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-                    const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-                    const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-                    
-                    const int num_interp_midpoint_ghosts_1 = d_num_interp_midpoint_ghosts[1];
-                    
-                    for (int j = -num_diff_ghosts_1 + num_interp_midpoint_ghosts_1;
-                        j < (interior_dim_1 + 1) + num_diff_ghosts_1 - num_interp_midpoint_ghosts_1;
-                        j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            const int idx_node_BBB = (i + num_diff_ghosts_0) +
-                                (j - 3 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            const int idx_node_BB = (i + num_diff_ghosts_0) +
-                                (j - 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            const int idx_node_B = (i + num_diff_ghosts_0) +
-                                (j - 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            const int idx_node_T = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            const int idx_node_TT = (i + num_diff_ghosts_0) +
-                                (j + 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            const int idx_node_TTT = (i + num_diff_ghosts_0) +
-                                (j + 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            der_midpoint_y[idx] = (a_n*(der_node[idx_node_T]   + der_node[idx_node_B]) +
-                                                   b_n*(der_node[idx_node_TT]  + der_node[idx_node_BB]) +
-                                                   c_n*(der_node[idx_node_TTT] + der_node[idx_node_BBB])
-                                                  );
-                        }
-                    }
-                }
-                else if (d_dim == tbox::Dimension(3))
-                {
-                    /*
-                     * Get the dimensions and number of ghost cells.
-                     */
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    const int interior_dim_2 = interior_dims[2];
-                    
-                    const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-                    const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-                    const int num_diff_ghosts_2 = d_num_diff_ghosts[2];
-                    const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-                    const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
-                    
-                    const int num_interp_midpoint_ghosts_1 = d_num_interp_midpoint_ghosts[1];
-                    
-                    for (int k = 0; k < interior_dim_2; k++)
-                    {
-                        for (int j = -num_diff_ghosts_1 + num_interp_midpoint_ghosts_1;
-                            j < (interior_dim_1 + 1) + num_diff_ghosts_1 - num_interp_midpoint_ghosts_1;
-                            j++)
-                        {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = 0; i < interior_dim_0; i++)
-                            {
-                                // Compute the linear indices.
-                                const int idx = (i + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        (diff_ghostcell_dim_1 + 1);
-                                
-                                const int idx_node_BBB = (i + num_diff_ghosts_0) +
-                                    (j - 3 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_node_BB = (i + num_diff_ghosts_0) +
-                                    (j - 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_node_B = (i + num_diff_ghosts_0) +
-                                    (j - 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_node_T = (i + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_node_TT = (i + num_diff_ghosts_0) +
-                                    (j + 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_node_TTT = (i + num_diff_ghosts_0) +
-                                    (j + 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                der_midpoint_y[idx] = (a_n*(der_node[idx_node_T]   + der_node[idx_node_B]) +
-                                                       b_n*(der_node[idx_node_TT]  + der_node[idx_node_BB]) +
-                                                       c_n*(der_node[idx_node_TTT] + der_node[idx_node_BBB])
-                                                      );
-                            }
-                        }
-                    }
-                }
+                /*
+                 * Get the ghost cell widths and ghost box dimensions of the variables.
+                 */
+                
+                const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
+                const hier::IntVector& num_ghosts_derivative_midpoint = d_num_diff_ghosts;
+                
+                const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
+                const hier::IntVector& ghostcell_dims_derivative_midpoint = diff_ghostcell_dims;
+                
+                hier::IntVector domain_lo(d_dim);
+                hier::IntVector domain_dims(d_dim);
+                
+                domain_lo = hier::IntVector::getZero(d_dim);
+                domain_dims = interior_dims;
+                
+                domain_lo[1] += (-d_num_diff_ghosts[1] + d_num_interp_midpoint_ghosts[1]);
+                domain_dims[1] += 1;
+                domain_dims[1] += 2*(d_num_diff_ghosts[1] - d_num_interp_midpoint_ghosts[1]);
+                
+                interpolateDataFromNodeToMidpointY(
+                    der_midpoint_y,
+                    der_node,
+                    num_ghosts_derivative_midpoint,
+                    num_ghosts_derivative_node,
+                    ghostcell_dims_derivative_midpoint,
+                    ghostcell_dims_derivative_node,
+                    domain_lo,
+                    domain_dims);
                 
                 std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
                     u,
@@ -3757,10 +3313,6 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
             << std::endl);
     }
 #endif
-    
-    const double a_n =  double(75)/double(128);
-    const double b_n = -double(25)/double(256);
-    const double c_n =  double(3)/double(256);
     
     derivatives_midpoint_z.resize(d_num_eqn);
     
@@ -3826,75 +3378,34 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
                 double* der_midpoint_z = d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]->getPointer(2, 0);
                 
                 /*
-                 * Get the dimensions and number of ghost cells.
+                 * Get the ghost cell widths and ghost box dimensions of the variables.
                  */
                 
-                const int interior_dim_0 = interior_dims[0];
-                const int interior_dim_1 = interior_dims[1];
-                const int interior_dim_2 = interior_dims[2];
+                const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
+                const hier::IntVector& num_ghosts_derivative_midpoint = d_num_diff_ghosts;
                 
-                const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-                const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-                const int num_diff_ghosts_2 = d_num_diff_ghosts[2];
-                const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-                const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
+                const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
+                const hier::IntVector& ghostcell_dims_derivative_midpoint = diff_ghostcell_dims;
                 
-                const int num_interp_midpoint_ghosts_2 = d_num_interp_midpoint_ghosts[2];
+                hier::IntVector domain_lo(d_dim);
+                hier::IntVector domain_dims(d_dim);
                 
-                for (int k = -num_diff_ghosts_2 + num_interp_midpoint_ghosts_2;
-                    k < (interior_dim_2 + 1) + num_diff_ghosts_2 - num_interp_midpoint_ghosts_2;
-                    k++)
-                {
-                    for (int j = 0; j < interior_dim_1; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_BBB = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k - 3 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_BB = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k - 2 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_B = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k - 1 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_F = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_FF = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + 1 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_FFF = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + 2 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            der_midpoint_z[idx] = (a_n*(der_node[idx_node_F]   + der_node[idx_node_B]) +
-                                                   b_n*(der_node[idx_node_FF]  + der_node[idx_node_BB]) +
-                                                   c_n*(der_node[idx_node_FFF] + der_node[idx_node_BBB])
-                                                  );
-                        }
-                    }
-                }
+                domain_lo = hier::IntVector::getZero(d_dim);
+                domain_dims = interior_dims;
+                
+                domain_lo[2] += (-d_num_diff_ghosts[2] + d_num_interp_midpoint_ghosts[2]);
+                domain_dims[2] += 1;
+                domain_dims[2] += 2*(d_num_diff_ghosts[2] - d_num_interp_midpoint_ghosts[2]);
+                
+                interpolateDataFromNodeToMidpointZ(
+                    der_midpoint_z,
+                    der_node,
+                    num_ghosts_derivative_midpoint,
+                    num_ghosts_derivative_node,
+                    ghostcell_dims_derivative_midpoint,
+                    ghostcell_dims_derivative_node,
+                    domain_lo,
+                    domain_dims);
                 
                 std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
                     u,
@@ -4306,10 +3817,6 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpoi
     
     if (d_dim == tbox::Dimension(2))
     {
-        /*
-         * Get the dimensions and number of ghost cells.
-         */
-        
         /*
          * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
          */
@@ -4978,6 +4485,444 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
                              b_n*(u[idx_data_FF]  - u[idx_data_BB]) +
                              c_n*(u[idx_data_FFF] - u[idx_data_BBB])
                             )*dx_2_inv;
+            }
+        }
+    }
+}
+
+
+/*
+ * Kernel to interpolate the data from nodes to midpoints in x-direction.
+ */
+void
+DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointX(
+    double* u_midpoint_x,
+    const double* const u_node,
+    const hier::IntVector& num_ghosts_data_midpoint,
+    const hier::IntVector& num_ghosts_data_node,
+    const hier::IntVector& ghostcell_dims_data_midpoint,
+    const hier::IntVector& ghostcell_dims_data_node,
+    const hier::IntVector& domain_lo,
+    const hier::IntVector& domain_dims)
+{
+    const double a_n =  double(75)/double(128);
+    const double b_n = -double(25)/double(256);
+    const double c_n =  double(3)/double(256);
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_dim_0 = domain_dims[0];
+        
+        const int num_ghosts_0_data_midpoint = num_ghosts_data_midpoint[0];
+        
+        const int num_ghosts_0_data_node = num_ghosts_data_node[0];
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+        {
+            // Compute the linear indices.
+            const int idx = i + num_ghosts_0_data_midpoint;
+            
+            const int idx_node_LLL = i - 3 + num_ghosts_0_data_node;
+            const int idx_node_LL  = i - 2 + num_ghosts_0_data_node;
+            const int idx_node_L   = i - 1 + num_ghosts_0_data_node;
+            const int idx_node_R   = i + 0 + num_ghosts_0_data_node;
+            const int idx_node_RR  = i + 1 + num_ghosts_0_data_node;
+            const int idx_node_RRR = i + 2 + num_ghosts_0_data_node;
+            
+            u_midpoint_x[idx] = (a_n*(u_node[idx_node_R]   + u_node[idx_node_L]) +
+                                 b_n*(u_node[idx_node_RR]  + u_node[idx_node_LL]) +
+                                 c_n*(u_node[idx_node_RRR] + u_node[idx_node_LLL])
+                                );
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        
+        const int num_ghosts_0_data_midpoint = num_ghosts_data_midpoint[0];
+        const int num_ghosts_1_data_midpoint = num_ghosts_data_midpoint[1];
+        const int ghostcell_dim_0_data_midpoint = ghostcell_dims_data_midpoint[0];
+        
+        const int num_ghosts_0_data_node = num_ghosts_data_node[0];
+        const int num_ghosts_1_data_node = num_ghosts_data_node[1];
+        const int ghostcell_dim_0_data_node = ghostcell_dims_data_node[0];
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx = (i + num_ghosts_0_data_midpoint) +
+                    (j + num_ghosts_1_data_midpoint)*(ghostcell_dim_0_data_midpoint + 1);
+                
+                const int idx_node_LLL = (i - 3 + num_ghosts_0_data_node) +
+                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
+                
+                const int idx_node_LL = (i - 2 + num_ghosts_0_data_node) +
+                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
+                
+                const int idx_node_L = (i - 1 + num_ghosts_0_data_node) +
+                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
+                
+                const int idx_node_R = (i + num_ghosts_0_data_node) +
+                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
+                
+                const int idx_node_RR = (i + 1 + num_ghosts_0_data_node) +
+                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
+                
+                const int idx_node_RRR = (i + 2 + num_ghosts_0_data_node) +
+                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
+                
+                u_midpoint_x[idx] = (a_n*(u_node[idx_node_R]   + u_node[idx_node_L]) +
+                                     b_n*(u_node[idx_node_RR]  + u_node[idx_node_LL]) +
+                                     c_n*(u_node[idx_node_RRR] + u_node[idx_node_LLL])
+                                    );
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_lo_2 = domain_lo[2];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        const int domain_dim_2 = domain_dims[2];
+        
+        const int num_ghosts_0_data_midpoint = num_ghosts_data_midpoint[0];
+        const int num_ghosts_1_data_midpoint = num_ghosts_data_midpoint[1];
+        const int num_ghosts_2_data_midpoint = num_ghosts_data_midpoint[2];
+        const int ghostcell_dim_0_data_midpoint = ghostcell_dims_data_midpoint[0];
+        const int ghostcell_dim_1_data_midpoint = ghostcell_dims_data_midpoint[1];
+        
+        const int num_ghosts_0_data_node = num_ghosts_data_node[0];
+        const int num_ghosts_1_data_node = num_ghosts_data_node[1];
+        const int num_ghosts_2_data_node = num_ghosts_data_node[2];
+        const int ghostcell_dim_0_data_node = ghostcell_dims_data_node[0];
+        const int ghostcell_dim_1_data_node = ghostcell_dims_data_node[1];
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx = (i + num_ghosts_0_data_midpoint) +
+                        (j + num_ghosts_1_data_midpoint)*(ghostcell_dim_0_data_midpoint + 1) +
+                        (k + num_ghosts_2_data_midpoint)*(ghostcell_dim_0_data_midpoint + 1)*
+                            ghostcell_dim_1_data_midpoint;
+                    
+                    const int idx_node_LLL = (i - 3 + num_ghosts_0_data_node) +
+                        (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                            ghostcell_dim_1_data_node;
+                    
+                    const int idx_node_LL = (i - 2 + num_ghosts_0_data_node) +
+                        (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                            ghostcell_dim_1_data_node;
+                    
+                    const int idx_node_L = (i - 1 + num_ghosts_0_data_node) +
+                        (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                            ghostcell_dim_1_data_node;
+                    
+                    const int idx_node_R = (i + num_ghosts_0_data_node) +
+                        (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                            ghostcell_dim_1_data_node;
+                    
+                    const int idx_node_RR = (i + 1 + num_ghosts_0_data_node) +
+                        (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                            ghostcell_dim_1_data_node;
+                    
+                    const int idx_node_RRR = (i + 2 + num_ghosts_0_data_node) +
+                        (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                            ghostcell_dim_1_data_node;
+                    
+                    u_midpoint_x[idx] = (a_n*(u_node[idx_node_R]   + u_node[idx_node_L]) +
+                                         b_n*(u_node[idx_node_RR]  + u_node[idx_node_LL]) +
+                                         c_n*(u_node[idx_node_RRR] + u_node[idx_node_LLL])
+                                        );
+                }
+            }
+        }
+    }
+}
+
+
+/*
+ * Kernel to interpolate the data from nodes to midpoints in y-direction.
+ */
+void
+DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointY(
+    double* u_midpoint_y,
+    const double* const u_node,
+    const hier::IntVector& num_ghosts_data_midpoint,
+    const hier::IntVector& num_ghosts_data_node,
+    const hier::IntVector& ghostcell_dims_data_midpoint,
+    const hier::IntVector& ghostcell_dims_data_node,
+    const hier::IntVector& domain_lo,
+    const hier::IntVector& domain_dims)
+{
+    const double a_n =  double(75)/double(128);
+    const double b_n = -double(25)/double(256);
+    const double c_n =  double(3)/double(256);
+    
+    if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        
+        const int num_ghosts_0_data_midpoint = num_ghosts_data_midpoint[0];
+        const int num_ghosts_1_data_midpoint = num_ghosts_data_midpoint[1];
+        const int ghostcell_dim_0_data_midpoint = ghostcell_dims_data_midpoint[0];
+        
+        const int num_ghosts_0_data_node = num_ghosts_data_node[0];
+        const int num_ghosts_1_data_node = num_ghosts_data_node[1];
+        const int ghostcell_dim_0_data_node = ghostcell_dims_data_node[0];
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx = (i + num_ghosts_0_data_midpoint) +
+                    (j + num_ghosts_1_data_midpoint)*ghostcell_dim_0_data_midpoint;
+                
+                const int idx_node_BBB = (i + num_ghosts_0_data_node) +
+                    (j - 3 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
+                
+                const int idx_node_BB = (i + num_ghosts_0_data_node) +
+                    (j - 2 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
+                
+                const int idx_node_B = (i + num_ghosts_0_data_node) +
+                    (j - 1 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
+                
+                const int idx_node_T = (i + num_ghosts_0_data_node) +
+                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
+                
+                const int idx_node_TT = (i + num_ghosts_0_data_node) +
+                    (j + 1 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
+                
+                const int idx_node_TTT = (i + num_ghosts_0_data_node) +
+                    (j + 2 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
+                
+                u_midpoint_y[idx] = (a_n*(u_node[idx_node_T]   + u_node[idx_node_B]) +
+                                     b_n*(u_node[idx_node_TT]  + u_node[idx_node_BB]) +
+                                     c_n*(u_node[idx_node_TTT] + u_node[idx_node_BBB])
+                                    );
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_lo_2 = domain_lo[2];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        const int domain_dim_2 = domain_dims[2];
+        
+        const int num_ghosts_0_data_midpoint = num_ghosts_data_midpoint[0];
+        const int num_ghosts_1_data_midpoint = num_ghosts_data_midpoint[1];
+        const int num_ghosts_2_data_midpoint = num_ghosts_data_midpoint[2];
+        const int ghostcell_dim_0_data_midpoint = ghostcell_dims_data_midpoint[0];
+        const int ghostcell_dim_1_data_midpoint = ghostcell_dims_data_midpoint[1];
+        
+        const int num_ghosts_0_data_node = num_ghosts_data_node[0];
+        const int num_ghosts_1_data_node = num_ghosts_data_node[1];
+        const int num_ghosts_2_data_node = num_ghosts_data_node[2];
+        const int ghostcell_dim_0_data_node = ghostcell_dims_data_node[0];
+        const int ghostcell_dim_1_data_node = ghostcell_dims_data_node[1];
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx = (i + num_ghosts_0_data_midpoint) +
+                        (j + num_ghosts_1_data_midpoint)*ghostcell_dim_0_data_midpoint +
+                        (k + num_ghosts_2_data_midpoint)*ghostcell_dim_0_data_midpoint*
+                            (ghostcell_dim_1_data_midpoint + 1);
+                    
+                    const int idx_node_BBB = (i + num_ghosts_0_data_node) +
+                        (j - 3 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                            ghostcell_dim_1_data_node;
+                    
+                    const int idx_node_BB = (i + num_ghosts_0_data_node) +
+                        (j - 2 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                            ghostcell_dim_1_data_node;
+                    
+                    const int idx_node_B = (i + num_ghosts_0_data_node) +
+                        (j - 1 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                            ghostcell_dim_1_data_node;
+                    
+                    const int idx_node_T = (i + num_ghosts_0_data_node) +
+                        (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                            ghostcell_dim_1_data_node;
+                    
+                    const int idx_node_TT = (i + num_ghosts_0_data_node) +
+                        (j + 1 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                            ghostcell_dim_1_data_node;
+                    
+                    const int idx_node_TTT = (i + num_ghosts_0_data_node) +
+                        (j + 2 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                            ghostcell_dim_1_data_node;
+                    
+                    u_midpoint_y[idx] = (a_n*(u_node[idx_node_T]   + u_node[idx_node_B]) +
+                                         b_n*(u_node[idx_node_TT]  + u_node[idx_node_BB]) +
+                                         c_n*(u_node[idx_node_TTT] + u_node[idx_node_BBB])
+                                        );
+                }
+            }
+        }
+    }
+}
+
+
+/*
+ * Kernel to interpolate the data from nodes to midpoints in z-direction.
+ */
+void
+DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointZ(
+    double* u_midpoint_z,
+    const double* const u_node,
+    const hier::IntVector& num_ghosts_data_midpoint,
+    const hier::IntVector& num_ghosts_data_node,
+    const hier::IntVector& ghostcell_dims_data_midpoint,
+    const hier::IntVector& ghostcell_dims_data_node,
+    const hier::IntVector& domain_lo,
+    const hier::IntVector& domain_dims)
+{
+    const double a_n =  double(75)/double(128);
+    const double b_n = -double(25)/double(256);
+    const double c_n =  double(3)/double(256);
+    
+    /*
+     * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+     */
+    
+    const int domain_lo_0 = domain_lo[0];
+    const int domain_lo_1 = domain_lo[1];
+    const int domain_lo_2 = domain_lo[2];
+    const int domain_dim_0 = domain_dims[0];
+    const int domain_dim_1 = domain_dims[1];
+    const int domain_dim_2 = domain_dims[2];
+    
+    const int num_ghosts_0_data_midpoint = num_ghosts_data_midpoint[0];
+    const int num_ghosts_1_data_midpoint = num_ghosts_data_midpoint[1];
+    const int num_ghosts_2_data_midpoint = num_ghosts_data_midpoint[2];
+    const int ghostcell_dim_0_data_midpoint = ghostcell_dims_data_midpoint[0];
+    const int ghostcell_dim_1_data_midpoint = ghostcell_dims_data_midpoint[1];
+    
+    const int num_ghosts_0_data_node = num_ghosts_data_node[0];
+    const int num_ghosts_1_data_node = num_ghosts_data_node[1];
+    const int num_ghosts_2_data_node = num_ghosts_data_node[2];
+    const int ghostcell_dim_0_data_node = ghostcell_dims_data_node[0];
+    const int ghostcell_dim_1_data_node = ghostcell_dims_data_node[1];
+    
+    for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+    {
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx = (i + num_ghosts_0_data_midpoint) +
+                    (j + num_ghosts_1_data_midpoint)*ghostcell_dim_0_data_midpoint +
+                    (k + num_ghosts_2_data_midpoint)*ghostcell_dim_0_data_midpoint*
+                        ghostcell_dim_1_data_midpoint;
+                
+                const int idx_node_BBB = (i + num_ghosts_0_data_node) +
+                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                    (k - 3 + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                        ghostcell_dim_1_data_node;
+                
+                const int idx_node_BB = (i + num_ghosts_0_data_node) +
+                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                    (k - 2 + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                        ghostcell_dim_1_data_node;
+                
+                const int idx_node_B = (i + num_ghosts_0_data_node) +
+                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                    (k - 1 + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                        ghostcell_dim_1_data_node;
+                
+                const int idx_node_F = (i + num_ghosts_0_data_node) +
+                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                    (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                        ghostcell_dim_1_data_node;
+                
+                const int idx_node_FF = (i + num_ghosts_0_data_node) +
+                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                    (k + 1 + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                        ghostcell_dim_1_data_node;
+                
+                const int idx_node_FFF = (i + num_ghosts_0_data_node) +
+                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
+                    (k + 2 + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
+                        ghostcell_dim_1_data_node;
+                
+                u_midpoint_z[idx] = (a_n*(u_node[idx_node_F]   + u_node[idx_node_B]) +
+                                     b_n*(u_node[idx_node_FF]  + u_node[idx_node_BB]) +
+                                     c_n*(u_node[idx_node_FFF] + u_node[idx_node_BBB])
+                                    );
             }
         }
     }
