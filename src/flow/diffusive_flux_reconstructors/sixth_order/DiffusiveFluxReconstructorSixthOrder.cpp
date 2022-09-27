@@ -2175,8 +2175,8 @@ DiffusiveFluxReconstructorSixthOrder::reconstructFluxX(
     const double dt)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(diffusive_flux.getDepth() == d_num_eqn);
-    TBOX_ASSERT(diffusive_flux_node.getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux->getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux_node->getDepth() == d_num_eqn);
 #endif
     
     // Get the dimensions of box that covers the interior of patch.
@@ -2227,8 +2227,8 @@ DiffusiveFluxReconstructorSixthOrder::reconstructFluxY(
     const double dt)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(diffusive_flux.getDepth() == d_num_eqn);
-    TBOX_ASSERT(diffusive_flux_node.getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux->getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux_node->getDepth() == d_num_eqn);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -2288,8 +2288,8 @@ DiffusiveFluxReconstructorSixthOrder::reconstructFluxZ(
     const double dt)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(diffusive_flux.getDepth() == d_num_eqn);
-    TBOX_ASSERT(diffusive_flux_node.getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux->getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux_node->getDepth() == d_num_eqn);
     
     if (d_dim == tbox::Dimension(1))
     {

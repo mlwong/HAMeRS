@@ -5,6 +5,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::FlowModelDiffusiveFluxUtilit
     const tbox::Dimension& dim,
     const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_species,
+    const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db,
     const HAMERS_SHARED_PTR<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules,
     const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
     const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
@@ -14,7 +15,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::FlowModelDiffusiveFluxUtilit
             dim,
             grid_geometry,
             num_species,
-            num_species + dim.getValue() + 1),
+            num_species + dim.getValue() + 1,
+            flow_model_db),
         d_num_subghosts_mass_diffusivities(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_shear_viscosity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_bulk_viscosity(-hier::IntVector::getOne(d_dim)),
@@ -3073,7 +3075,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
             
             for (int vi = 0; vi < static_cast<int>(var_data_for_diffusivities.size()); vi++)
             {
-                TBOX_ASSERT(var_data_for_diffusivities[vi] == num_ghosts);
+                TBOX_ASSERT(var_data_for_diffusivities[vi]->getGhostCellWidth() == num_ghosts);
                 TBOX_ASSERT(var_data_for_diffusivities[vi]->getGhostBox().contains(interior_box));
             }
 #endif

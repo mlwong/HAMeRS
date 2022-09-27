@@ -20,6 +20,7 @@ set(flow_models_source_files
     ./single-species/FlowModelRiemannSolverSingleSpecies.cpp
     ./single-species/FlowModelSourceUtilitiesSingleSpecies.cpp
     ./single-species/FlowModelStatisticsUtilitiesSingleSpecies.cpp
+    ./single-species/FlowModelSubgridScaleModelSingleSpecies.cpp
     ./single-species/Riemann_solvers/FlowModelRiemannSolverSingleSpeciesHLLC.cpp
     ./single-species/Riemann_solvers/FlowModelRiemannSolverSingleSpeciesHLLC-HLL.cpp
     ./four-eqn_conservative/FlowModelFourEqnConservative.cpp

@@ -1997,15 +1997,19 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpoi
     const std::vector<std::vector<int> >& data_component_idx_x,
     const bool allocate_scratch_derivatives_midpoint)
 {
+    const int num_eqn = static_cast<int>(data_x.size());
+    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    for (int ei = 0; ei < d_num_eqn; ei++)
+    TBOX_ASSERT(static_cast<int>(data_component_idx_x.size()) == num_eqn);
+    
+    for (int ei = 0; ei < num_eqn; ei++)
     {
         TBOX_ASSERT(static_cast<int>(data_x[ei].size()) ==
                     static_cast<int>(data_component_idx_x[ei].size()));
     }
 #endif
     
-    derivatives_x_midpoint_x.resize(d_num_eqn);
+    derivatives_x_midpoint_x.resize(num_eqn);
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -2029,7 +2033,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpoi
     hier::IntVector direction = hier::IntVector::getZero(d_dim);
     direction[0] = 1;
     
-    for (int ei = 0; ei < d_num_eqn; ei++)
+    for (int ei = 0; ei < num_eqn; ei++)
     {
         derivatives_x_midpoint_x[ei].reserve(static_cast<int>(data_x[ei].size()));
         
@@ -2127,8 +2131,12 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpoi
     const std::vector<std::vector<int> >& data_component_idx_y,
     const bool allocate_scratch_derivatives_midpoint)
 {
+    const int num_eqn = static_cast<int>(data_y.size());
+    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    for (int ei = 0; ei < d_num_eqn; ei++)
+    TBOX_ASSERT(static_cast<int>(data_component_idx_y.size()) == num_eqn);
+    
+    for (int ei = 0; ei < num_eqn; ei++)
     {
         TBOX_ASSERT(static_cast<int>(data_y[ei].size()) ==
                     static_cast<int>(data_component_idx_y[ei].size()));
@@ -2144,7 +2152,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpoi
     }
 #endif
     
-    derivatives_y_midpoint_y.resize(d_num_eqn);
+    derivatives_y_midpoint_y.resize(num_eqn);
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -2168,7 +2176,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpoi
     hier::IntVector direction = hier::IntVector::getZero(d_dim);
     direction[1] = 1;
     
-    for (int ei = 0; ei < d_num_eqn; ei++)
+    for (int ei = 0; ei < num_eqn; ei++)
     {
         derivatives_y_midpoint_y[ei].reserve(static_cast<int>(data_y[ei].size()));
         
@@ -2266,11 +2274,15 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpoi
     const std::vector<std::vector<int> >& data_component_idx_z,
     const bool allocate_scratch_derivatives_midpoint)
 {
+    const int num_eqn = static_cast<int>(data_z.size());
+    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    for (int ei = 0; ei < d_num_eqn; ei++)
+    TBOX_ASSERT(static_cast<int>(data_component_idx_z.size()) == num_eqn);
+    
+    for (int ei = 0; ei < num_eqn; ei++)
     {
-        TBOX_ASSERT(static_cast<int>(data_y[ei].size()) ==
-                    static_cast<int>(data_component_idx_y[ei].size()));
+        TBOX_ASSERT(static_cast<int>(data_z[ei].size()) ==
+                    static_cast<int>(data_component_idx_z[ei].size()));
     }
     
     if (d_dim == tbox::Dimension(1))
@@ -2291,7 +2303,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpoi
     }
 #endif
     
-    derivatives_z_midpoint_z.resize(d_num_eqn);
+    derivatives_z_midpoint_z.resize(num_eqn);
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -2315,7 +2327,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpoi
     hier::IntVector direction = hier::IntVector::getZero(d_dim);
     direction[2] = 1;
     
-    for (int ei = 0; ei < d_num_eqn; ei++)
+    for (int ei = 0; ei < num_eqn; ei++)
     {
         derivatives_z_midpoint_z[ei].reserve(static_cast<int>(data_z[ei].size()));
         
@@ -2413,15 +2425,19 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
     const std::vector<std::vector<int> >& data_component_idx_x,
     const bool allocate_scratch_derivatives_node)
 {
+    const int num_eqn = static_cast<int>(data_x.size());
+    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    for (int ei = 0; ei < d_num_eqn; ei++)
+    TBOX_ASSERT(static_cast<int>(data_component_idx_x.size()) == num_eqn);
+    
+    for (int ei = 0; ei < num_eqn; ei++)
     {
         TBOX_ASSERT(static_cast<int>(data_x[ei].size()) ==
                     static_cast<int>(data_component_idx_x[ei].size()));
     }
 #endif
     
-    derivatives_x_node.resize(d_num_eqn);
+    derivatives_x_node.resize(num_eqn);
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -2442,7 +2458,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
     
     const double dx_0_inv = double(1)/dx[0];
     
-    for (int ei = 0; ei < d_num_eqn; ei++)
+    for (int ei = 0; ei < num_eqn; ei++)
     {
         derivatives_x_node[ei].reserve(static_cast<int>(data_x[ei].size()));
         
@@ -2539,8 +2555,12 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
     const std::vector<std::vector<int> >& data_component_idx_y,
     const bool allocate_scratch_derivatives_node)
 {
+    const int num_eqn = static_cast<int>(data_y.size());
+    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    for (int ei = 0; ei < d_num_eqn; ei++)
+    TBOX_ASSERT(static_cast<int>(data_component_idx_y.size()) == num_eqn);
+    
+    for (int ei = 0; ei < num_eqn; ei++)
     {
         TBOX_ASSERT(static_cast<int>(data_y[ei].size()) ==
                     static_cast<int>(data_component_idx_y[ei].size()));
@@ -2556,7 +2576,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
     }
 #endif
     
-    derivatives_y_node.resize(d_num_eqn);
+    derivatives_y_node.resize(num_eqn);
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -2577,7 +2597,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
     
     const double dx_1_inv = double(1)/dx[1];
     
-    for (int ei = 0; ei < d_num_eqn; ei++)
+    for (int ei = 0; ei < num_eqn; ei++)
     {
         derivatives_y_node[ei].reserve(static_cast<int>(data_y[ei].size()));
         
@@ -2674,8 +2694,12 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
     const std::vector<std::vector<int> >& data_component_idx_z,
     const bool allocate_scratch_derivatives_node)
 {
+    const int num_eqn = static_cast<int>(data_z.size());
+    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    for (int ei = 0; ei < d_num_eqn; ei++)
+    TBOX_ASSERT(static_cast<int>(data_component_idx_z.size()) == num_eqn);
+    
+    for (int ei = 0; ei < num_eqn; ei++)
     {
         TBOX_ASSERT(static_cast<int>(data_z[ei].size()) ==
                     static_cast<int>(data_component_idx_z[ei].size()));
@@ -2699,7 +2723,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
     }
 #endif
     
-    derivatives_z_node.resize(d_num_eqn);
+    derivatives_z_node.resize(num_eqn);
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -2720,7 +2744,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
     
     const double dx_2_inv = double(1)/dx[2];
     
-    for (int ei = 0; ei < d_num_eqn; ei++)
+    for (int ei = 0; ei < num_eqn; ei++)
     {
         derivatives_z_node[ei].reserve(static_cast<int>(data_z[ei].size()));
         
@@ -2836,7 +2860,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDiffusivitiesFromNodeTo
     for (int vi = 0; vi < static_cast<int>(var_cell_data_for_diffusivities.size()); vi++)
     {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-        TBOX_ASSERT(var_cell_data_for_diffusivities[vi]->->getGhostCellWidth() >= d_num_diff_ghosts);
+        TBOX_ASSERT(var_cell_data_for_diffusivities[vi]->getGhostCellWidth() >= d_num_diff_ghosts);
 #endif
         
         // Get the pointer to variable for interpoation.
@@ -3433,8 +3457,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxX(
     const double dt)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(diffusive_flux.getDepth() == d_num_eqn);
-    TBOX_ASSERT(diffusive_flux_midpoint.getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux->getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux_midpoint->getDepth() == d_num_eqn);
 #endif
     
     // Get the dimensions of box that covers the interior of patch.
@@ -3485,8 +3509,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxY(
     const double dt)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(diffusive_flux.getDepth() == d_num_eqn);
-    TBOX_ASSERT(diffusive_flux_midpoint.getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux->getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux_midpoint->getDepth() == d_num_eqn);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -3546,8 +3570,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxZ(
     const double dt)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(diffusive_flux.getDepth() == d_num_eqn);
-    TBOX_ASSERT(diffusive_flux_midpoint.getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux->getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux_midpoint->getDepth() == d_num_eqn);
     
     if (d_dim == tbox::Dimension(1))
     {

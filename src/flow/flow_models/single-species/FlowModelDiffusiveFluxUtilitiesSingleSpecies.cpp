@@ -1,10 +1,13 @@
 #include "flow/flow_models/single-species/FlowModelDiffusiveFluxUtilitiesSingleSpecies.hpp"
 
+#include "flow/flow_models/single-species/FlowModelSubgridScaleModelSingleSpecies.hpp"
+
 FlowModelDiffusiveFluxUtilitiesSingleSpecies::FlowModelDiffusiveFluxUtilitiesSingleSpecies(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_species,
+    const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db,
     const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
     const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
     const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules):
@@ -13,7 +16,8 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::FlowModelDiffusiveFluxUtilitiesSin
             dim,
             grid_geometry,
             num_species,
-            2 + dim.getValue()),
+            2 + dim.getValue(),
+            flow_model_db),
         d_num_subghosts_shear_viscosity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_bulk_viscosity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_thermal_conductivity(-hier::IntVector::getOne(d_dim)),
@@ -29,7 +33,68 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::FlowModelDiffusiveFluxUtilitiesSin
         d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
         d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
         d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules)
-{}
+{
+    if (d_use_subgrid_scale_model)
+    {
+        std::string subgrid_scale_model_str;
+        if (flow_model_db->keyExists("subgrid_scale_model"))
+        {
+            subgrid_scale_model_str = flow_model_db->getString("subgrid_scale_model");
+        }
+        else if (flow_model_db->keyExists("d_subgrid_scale_model"))
+        {
+            subgrid_scale_model_str = flow_model_db->getString("d_subgrid_scale_model");
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "No key 'subgrid_scale_model'/'d_subgrid_scale_model' found in data for flow model."
+                << std::endl);
+        }
+        
+        if (subgrid_scale_model_str == "VREMAN")
+        {
+                d_subgrid_scale_model_type = SUBGRID_SCALE_MODEL::VREMAN;
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::FlowModelDiffusiveFluxUtilitiesSingleSpecies()\n"
+                << "Unknown/unsupported subgrid scale model with string: '" << subgrid_scale_model_str << "'"
+                << std::endl);
+        }
+        
+        HAMERS_SHARED_PTR<tbox::Database> subgrid_scale_model_db;
+        
+        if (flow_model_db->keyExists("Subgrid_scale_model"))
+        {
+            subgrid_scale_model_db = flow_model_db->getDatabase("Subgrid_scale_model");
+        }
+        else if (flow_model_db->keyExists("d_subgrid_scale_model_db"))
+        {
+            subgrid_scale_model_db = flow_model_db->getDatabase("d_subgrid_scale_model_db");
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "No key 'Subgrid_scale_model'/'d_subgrid_scale_model_db' found in data for flow model."
+                << std::endl);
+        }
+        
+        /*
+         * Initialize subgrid scale model object.
+         */
+        d_flow_model_subgrid_scale_model.reset(new FlowModelSubgridScaleModelSingleSpecies(
+            "d_flow_model_subgrid_scale_model",
+            d_dim,
+            d_grid_geometry,
+            d_num_species,
+            subgrid_scale_model_db));
+    }
+    
+}
 
 
 /*
@@ -2441,7 +2506,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
             
             for (int vi = 0; vi < static_cast<int>(var_data_for_diffusivities.size()); vi++)
             {
-                TBOX_ASSERT(var_data_for_diffusivities[vi] == num_ghosts);
+                TBOX_ASSERT(var_data_for_diffusivities[vi]->getGhostCellWidth() == num_ghosts);
                 TBOX_ASSERT(var_data_for_diffusivities[vi]->getGhostBox().contains(interior_box));
             }
 #endif

@@ -6,6 +6,7 @@
 #include "HAMeRS_memory.hpp"
 
 #include "flow/flow_models/FlowModel.hpp"
+#include "flow/flow_models/FlowModelSubgridScaleModel.hpp"
 
 #include "util/Directions.hpp"
 
@@ -26,7 +27,8 @@ class FlowModelDiffusiveFluxUtilities
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
-            const int& num_eqn);
+            const int& num_eqn,
+            const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db);
         
         virtual ~FlowModelDiffusiveFluxUtilities() {}
         
@@ -135,6 +137,11 @@ class FlowModelDiffusiveFluxUtilities
             const DIRECTION::TYPE& flux_direction,
             const DIRECTION::TYPE& derivative_direction);
         
+        bool getUseSubgridScaleModel() const
+        {
+            return d_use_subgrid_scale_model;
+        }
+        
 protected:
         /*
          * The object name is used for error/warning reporting.
@@ -210,6 +217,21 @@ protected:
          * Whether side data of diffusivities is needed.
          */
         bool d_need_side_diffusivities;
+        
+        /*
+         * Whether to use subgrid-scale model.
+         */
+        bool d_use_subgrid_scale_model;
+        
+        /*
+         * Whether to use subgrid-scale model.
+         */
+        SUBGRID_SCALE_MODEL::TYPE d_subgrid_scale_model_type;
+        
+        /*
+         * HAMERS_SHARED_PTR to subgrid-scale model object.
+         */
+        HAMERS_SHARED_PTR<FlowModelSubgridScaleModel> d_flow_model_subgrid_scale_model;
 };
 
 #endif /* FLOW_MODEL_DIFFUSIVE_FLUX_UTILITIES_HPP */

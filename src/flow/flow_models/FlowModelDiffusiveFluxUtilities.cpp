@@ -5,7 +5,8 @@ FlowModelDiffusiveFluxUtilities::FlowModelDiffusiveFluxUtilities(
     const tbox::Dimension& dim,
     const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_species,
-    const int& num_eqn):
+    const int& num_eqn,
+    const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db):
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
@@ -17,8 +18,18 @@ FlowModelDiffusiveFluxUtilities::FlowModelDiffusiveFluxUtilities(
         d_subghostcell_dims_diffusivities(hier::IntVector::getZero(d_dim)),
         d_cell_data_computed_diffusivities(false),
         d_side_data_diffusivities_computed(false),
-        d_need_side_diffusivities(false)
-{}
+        d_need_side_diffusivities(false),
+        d_use_subgrid_scale_model(false)
+{
+    if (flow_model_db->keyExists("use_subgrid_scale_model"))
+    {
+        d_use_subgrid_scale_model = flow_model_db->getBool("use_subgrid_scale_model");
+    }
+    else if (flow_model_db->keyExists("d_use_subgrid_scale_model"))
+    {
+        d_use_subgrid_scale_model = flow_model_db->getBool("d_use_subgrid_scale_model");
+    }
+}
 
 
 /*

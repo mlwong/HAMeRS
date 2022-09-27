@@ -312,6 +312,7 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_dim,
         d_grid_geometry,
         d_num_species,
+        flow_model_db,
         d_equation_of_shear_viscosity_mixing_rules,
         d_equation_of_bulk_viscosity_mixing_rules));
     
