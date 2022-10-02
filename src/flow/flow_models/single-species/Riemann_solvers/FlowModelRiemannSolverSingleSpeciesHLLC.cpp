@@ -1989,7 +1989,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverSingleSpecies::"
             << "computeConvectiveFluxAndVelocityInYDirectionFromConservativeVariablesHLLC()\n"
-            << "There is no y direction for 1D problem."
+            << "There is no y direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2585,7 +2585,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverSingleSpecies::"
             << "computeConvectiveFluxAndVelocityInZDirectionFromConservativeVariablesHLLC()\n"
-            << "There is no z direction for 1D problem."
+            << "There is no z direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2593,7 +2593,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverSingleSpecies::"
             << "computeConvectiveFluxAndVelocityInZDirectionFromConservativeVariablesHLLC()\n"
-            << "There is no z direction for 2D problem."
+            << "There is no z direction for two-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -3588,7 +3588,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverSingleSpecies::"
             << "computeConvectiveFluxAndVelocityInYDirectionFromPrimitiveVariablesHLLC()\n"
-            << "There is no y direction for 1D problem."
+            << "There is no y direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -4076,7 +4076,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverSingleSpecies::"
             << "computeConvectiveFluxAndVelocityInZDirectionFromPrimitiveVariablesHLLC()\n"
-            << "There is no z direction for 1D problem."
+            << "There is no z direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -4084,7 +4084,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverSingleSpecies::"
             << "computeConvectiveFluxAndVelocityInZDirectionFromPrimitiveVariablesHLLC()\n"
-            << "There is no z direction for 2D problem."
+            << "There is no z direction for two-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(3))

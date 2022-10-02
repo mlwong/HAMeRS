@@ -496,7 +496,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeFirstDerivative
         TBOX_ERROR(d_object_name
             << ": NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::"
             << "computeFirstDerivativesInY()\n"
-            << "There isn't y-direction for 1D problem."
+            << "There isn't y-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -811,7 +811,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeFirstDerivative
         TBOX_ERROR(d_object_name
             << ": NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::"
             << "computeFirstDerivativesInZ()\n"
-            << "There isn't z-direction for 1D problem."
+            << "There isn't z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -819,7 +819,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeFirstDerivative
         TBOX_ERROR(d_object_name
             << ": NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::"
             << "computeFirstDerivativesInZ()\n"
-            << "There isn't z-direction for 2D problem."
+            << "There isn't z-direction for two-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -1423,7 +1423,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeSecondDerivativ
         TBOX_ERROR(d_object_name
             << ": NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::"
             << "computeSecondDerivativesInY()\n"
-            << "There isn't y-direction for 1D problem."
+            << "There isn't y-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -1749,7 +1749,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeSecondDerivativ
         TBOX_ERROR(d_object_name
             << ": NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::"
             << "computeSecondDerivativesInZ()\n"
-            << "There isn't z-direction for 1D problem."
+            << "There isn't z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -1757,7 +1757,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeSecondDerivativ
         TBOX_ERROR(d_object_name
             << ": NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::"
             << "computeSecondDerivativesInZ()\n"
-            << "There isn't z-direction for 2D problem."
+            << "There isn't z-direction for two-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(3))
