@@ -25,7 +25,7 @@ FlowModelSubgridScaleModel::FlowModelSubgridScaleModel(
     else
     {
         TBOX_ERROR(d_object_name
-            << ": "
+            << ": FlowModelSubgridScaleModel::FlowModelSubgridScaleModel()\n"
             << "No key 'subgrid_scale_model'/'d_subgrid_scale_model' found in data for subgrid scale model."
             << std::endl);
     }

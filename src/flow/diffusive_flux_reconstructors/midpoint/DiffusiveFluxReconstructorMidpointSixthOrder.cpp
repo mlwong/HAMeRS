@@ -1092,6 +1092,9 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             var_component_idx_sgs_y.clear();
             var_component_idx_sgs_z.clear();
             
+            derivatives_sgs_y_node.clear();
+            derivatives_sgs_z_node.clear();
+            
             /*
              * (2) Compute the derivatives at midpoints in the y-direction.
              */
@@ -1176,6 +1179,9 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             var_component_idx_sgs_y.clear();
             var_component_idx_sgs_z.clear();
             
+            derivatives_sgs_x_node.clear();
+            derivatives_sgs_z_node.clear();
+            
             /*
              * (3) Compute the derivatives at midpoints in the z-direction.
              */
@@ -1259,6 +1265,9 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             var_component_idx_sgs_x.clear();
             var_component_idx_sgs_y.clear();
             var_component_idx_sgs_z.clear();
+            
+            derivatives_sgs_x_node.clear();
+            derivatives_sgs_y_node.clear();
             
             /*
              * (4) Update the diffusivities with subgrid scale model
