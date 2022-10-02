@@ -97,6 +97,18 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
     HAMERS_SHARED_PTR<FlowModelDiffusiveFluxUtilities> diffusive_flux_utilities =
         d_flow_model->getFlowModelDiffusiveFluxUtilities();
     
+    if (d_dim == tbox::Dimension(1) || d_dim == tbox::Dimension(2))
+    {
+        if (diffusive_flux_utilities->useSubgridScaleModel())
+        {
+            TBOX_ERROR(d_object_name
+                << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
+                << "computeDiffusiveFluxOnPatch()\n"
+                << "Subgrid scale model not implemented for one-dimensional or two-dimensional problems."
+                << std::endl);
+        }
+    }
+    
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
@@ -967,8 +979,367 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
         diffusive_flux_midpoint->fillAll(double(0));
         
         /*
-         * (1) Compute the flux in the x-direction.
+         * Delcare containers for subgrid scale model.
          */
+        
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > var_data_sgs_x;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > var_data_sgs_y;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > var_data_sgs_z;
+        
+        std::vector<int> var_component_idx_sgs_x;
+        std::vector<int> var_component_idx_sgs_y;
+        std::vector<int> var_component_idx_sgs_z;
+        
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_x_midpoint_x;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_y_midpoint_x;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_z_midpoint_x;
+        
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_x_midpoint_y;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_y_midpoint_y;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_z_midpoint_y;
+        
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_x_midpoint_z;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_y_midpoint_z;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_z_midpoint_z;
+        
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_sgs_x_node;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_sgs_y_node;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_sgs_z_node;
+        
+        if (diffusive_flux_utilities->useSubgridScaleModel())
+        {
+            /*
+             * (1) Compute the derivatives at midpoints in the x-direction.
+             */
+            
+            diffusive_flux_utilities->getCellDataOfVariablesForSideDerivativeForSubgridScaleViscosity(
+                var_data_sgs_x,
+                var_component_idx_sgs_x,
+                DIRECTION::X_DIRECTION,
+                DIRECTION::X_DIRECTION);
+            
+            diffusive_flux_utilities->getCellDataOfVariablesForSideDerivativeForSubgridScaleViscosity(
+                var_data_sgs_y,
+                var_component_idx_sgs_y,
+                DIRECTION::X_DIRECTION,
+                DIRECTION::Y_DIRECTION);
+            
+            diffusive_flux_utilities->getCellDataOfVariablesForSideDerivativeForSubgridScaleViscosity(
+                var_data_sgs_z,
+                var_component_idx_sgs_z,
+                DIRECTION::X_DIRECTION,
+                DIRECTION::Z_DIRECTION);
+            
+            /*
+             * Compute the derivatives in x-direction.
+             */
+            
+            computeFirstDerivativesInXAtMidpointX(
+                patch,
+                derivatives_sgs_x_midpoint_x,
+                derivatives_x_midpoint_x_computed,
+                var_data_sgs_x,
+                var_component_idx_sgs_x,
+                allocate_scratch_data_containers);
+            
+            /*
+             * Compute the derivatives in y-direction.
+             */
+            
+            computeFirstDerivativesInYAtNode(
+                patch,
+                derivatives_sgs_y_node,
+                derivatives_y_node_computed,
+                var_data_sgs_y,
+                var_component_idx_sgs_y,
+                allocate_scratch_data_containers);
+            
+            interpolateDerivativesFromNodeToMidpointX(
+                patch,
+                derivatives_sgs_y_midpoint_x,
+                derivatives_y_midpoint_x_computed,
+                derivatives_sgs_y_node,
+                var_data_sgs_y,
+                var_component_idx_sgs_y,
+                allocate_scratch_data_containers);
+            
+            /*
+             * Compute the derivatives in z-direction.
+             */
+            
+            computeFirstDerivativesInZAtNode(
+                patch,
+                derivatives_sgs_z_node,
+                derivatives_z_node_computed,
+                var_data_sgs_z,
+                var_component_idx_sgs_z,
+                allocate_scratch_data_containers);
+            
+            interpolateDerivativesFromNodeToMidpointX(
+                patch,
+                derivatives_sgs_z_midpoint_x,
+                derivatives_z_midpoint_x_computed,
+                derivatives_sgs_z_node,
+                var_data_sgs_z,
+                var_component_idx_sgs_z,
+                allocate_scratch_data_containers);
+            
+            var_data_sgs_x.clear();
+            var_data_sgs_y.clear();
+            var_data_sgs_z.clear();
+            
+            var_component_idx_sgs_x.clear();
+            var_component_idx_sgs_y.clear();
+            var_component_idx_sgs_z.clear();
+            
+            /*
+             * (2) Compute the derivatives at midpoints in the y-direction.
+             */
+            
+            diffusive_flux_utilities->getCellDataOfVariablesForSideDerivativeForSubgridScaleViscosity(
+                var_data_sgs_x,
+                var_component_idx_sgs_x,
+                DIRECTION::Y_DIRECTION,
+                DIRECTION::X_DIRECTION);
+            
+            diffusive_flux_utilities->getCellDataOfVariablesForSideDerivativeForSubgridScaleViscosity(
+                var_data_sgs_y,
+                var_component_idx_sgs_y,
+                DIRECTION::Y_DIRECTION,
+                DIRECTION::Y_DIRECTION);
+            
+            diffusive_flux_utilities->getCellDataOfVariablesForSideDerivativeForSubgridScaleViscosity(
+                var_data_sgs_z,
+                var_component_idx_sgs_z,
+                DIRECTION::Y_DIRECTION,
+                DIRECTION::Z_DIRECTION);
+            
+            /*
+             * Compute the derivatives in x-direction.
+             */
+            
+            computeFirstDerivativesInXAtNode(
+                patch,
+                derivatives_sgs_x_node,
+                derivatives_x_node_computed,
+                var_data_sgs_x,
+                var_component_idx_sgs_x,
+                allocate_scratch_data_containers);
+            
+            interpolateDerivativesFromNodeToMidpointY(
+                patch,
+                derivatives_sgs_x_midpoint_y,
+                derivatives_x_midpoint_y_computed,
+                derivatives_sgs_x_node,
+                var_data_sgs_x,
+                var_component_idx_sgs_x,
+                allocate_scratch_data_containers);
+            
+            /*
+             * Compute the derivatives in y-direction.
+             */
+            
+            computeFirstDerivativesInYAtMidpointY(
+                patch,
+                derivatives_sgs_y_midpoint_y,
+                derivatives_y_midpoint_y_computed,
+                var_data_sgs_y,
+                var_component_idx_sgs_y,
+                allocate_scratch_data_containers);
+            
+            /*
+             * Compute the derivatives in z-direction.
+             */
+            
+            computeFirstDerivativesInZAtNode(
+                patch,
+                derivatives_sgs_z_node,
+                derivatives_z_node_computed,
+                var_data_sgs_z,
+                var_component_idx_sgs_z,
+                allocate_scratch_data_containers);
+            
+            interpolateDerivativesFromNodeToMidpointY(
+                patch,
+                derivatives_sgs_z_midpoint_y,
+                derivatives_z_midpoint_y_computed,
+                derivatives_sgs_z_node,
+                var_data_sgs_z,
+                var_component_idx_sgs_z,
+                allocate_scratch_data_containers);
+            
+            var_data_sgs_x.clear();
+            var_data_sgs_y.clear();
+            var_data_sgs_z.clear();
+            
+            var_component_idx_sgs_x.clear();
+            var_component_idx_sgs_y.clear();
+            var_component_idx_sgs_z.clear();
+            
+            /*
+             * (3) Compute the derivatives at midpoints in the z-direction.
+             */
+            
+            diffusive_flux_utilities->getCellDataOfVariablesForSideDerivativeForSubgridScaleViscosity(
+                var_data_sgs_x,
+                var_component_idx_sgs_x,
+                DIRECTION::Z_DIRECTION,
+                DIRECTION::X_DIRECTION);
+            
+            diffusive_flux_utilities->getCellDataOfVariablesForSideDerivativeForSubgridScaleViscosity(
+                var_data_sgs_y,
+                var_component_idx_sgs_y,
+                DIRECTION::Z_DIRECTION,
+                DIRECTION::Y_DIRECTION);
+            
+            diffusive_flux_utilities->getCellDataOfVariablesForSideDerivativeForSubgridScaleViscosity(
+                var_data_sgs_z,
+                var_component_idx_sgs_z,
+                DIRECTION::Z_DIRECTION,
+                DIRECTION::Z_DIRECTION);
+            
+            /*
+             * Compute the derivatives in x-direction.
+             */
+            
+            computeFirstDerivativesInXAtNode(
+                patch,
+                derivatives_sgs_x_node,
+                derivatives_x_node_computed,
+                var_data_sgs_x,
+                var_component_idx_sgs_x,
+                allocate_scratch_data_containers);
+            
+            interpolateDerivativesFromNodeToMidpointZ(
+                patch,
+                derivatives_sgs_x_midpoint_z,
+                derivatives_x_midpoint_z_computed,
+                derivatives_sgs_x_node,
+                var_data_sgs_x,
+                var_component_idx_sgs_x,
+                allocate_scratch_data_containers);
+            
+            /*
+             * Compute the derivatives in y-direction.
+             */
+            
+            computeFirstDerivativesInYAtNode(
+                patch,
+                derivatives_sgs_y_node,
+                derivatives_y_node_computed,
+                var_data_sgs_y,
+                var_component_idx_sgs_y,
+                allocate_scratch_data_containers);
+            
+            interpolateDerivativesFromNodeToMidpointZ(
+                patch,
+                derivatives_sgs_y_midpoint_z,
+                derivatives_y_midpoint_z_computed,
+                derivatives_sgs_y_node,
+                var_data_sgs_y,
+                var_component_idx_sgs_y,
+                allocate_scratch_data_containers);
+            
+            /*
+             * Compute the derivatives in z-direction.
+             */
+            
+            computeFirstDerivativesInZAtMidpointZ(
+                patch,
+                derivatives_sgs_z_midpoint_z,
+                derivatives_z_midpoint_z_computed,
+                var_data_sgs_z,
+                var_component_idx_sgs_z,
+                allocate_scratch_data_containers);
+            
+            var_data_sgs_x.clear();
+            var_data_sgs_y.clear();
+            var_data_sgs_z.clear();
+            
+            var_component_idx_sgs_x.clear();
+            var_component_idx_sgs_y.clear();
+            var_component_idx_sgs_z.clear();
+            
+            /*
+             * (4) Update the diffusivities with subgrid scale model
+             */
+            
+            std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_midpoint_x;
+            std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_midpoint_y;
+            std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_midpoint_z;
+            
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+                derivatives_x_midpoint_x_pair(
+                    DIRECTION::X_DIRECTION,
+                    derivatives_sgs_x_midpoint_x);
+            
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+                derivatives_y_midpoint_x_pair(
+                    DIRECTION::Y_DIRECTION,
+                    derivatives_sgs_y_midpoint_x);
+            
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+                derivatives_z_midpoint_x_pair(
+                    DIRECTION::Z_DIRECTION,
+                    derivatives_sgs_z_midpoint_x);
+            
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+                derivatives_x_midpoint_y_pair(
+                    DIRECTION::X_DIRECTION,
+                    derivatives_sgs_x_midpoint_y);
+            
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+                derivatives_y_midpoint_y_pair(
+                    DIRECTION::Y_DIRECTION,
+                    derivatives_sgs_y_midpoint_y);
+            
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+                derivatives_z_midpoint_y_pair(
+                    DIRECTION::Z_DIRECTION,
+                    derivatives_sgs_z_midpoint_y);
+            
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+                derivatives_x_midpoint_z_pair(
+                    DIRECTION::X_DIRECTION,
+                    derivatives_sgs_x_midpoint_z);
+            
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+                derivatives_y_midpoint_z_pair(
+                    DIRECTION::Y_DIRECTION,
+                    derivatives_sgs_y_midpoint_z);
+            
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+                derivatives_z_midpoint_z_pair(
+                    DIRECTION::Z_DIRECTION,
+                    derivatives_sgs_z_midpoint_z);
+            
+            derivatives_midpoint_x.insert(derivatives_x_midpoint_x_pair);
+            derivatives_midpoint_x.insert(derivatives_y_midpoint_x_pair);
+            derivatives_midpoint_x.insert(derivatives_z_midpoint_x_pair);
+            
+            derivatives_midpoint_y.insert(derivatives_x_midpoint_y_pair);
+            derivatives_midpoint_y.insert(derivatives_y_midpoint_y_pair);
+            derivatives_midpoint_y.insert(derivatives_z_midpoint_y_pair);
+            
+            derivatives_midpoint_z.insert(derivatives_x_midpoint_z_pair);
+            derivatives_midpoint_z.insert(derivatives_y_midpoint_z_pair);
+            derivatives_midpoint_z.insert(derivatives_z_midpoint_z_pair);
+            
+            diffusive_flux_utilities->updateSideDataOfDiffusiveFluxDiffusivitiesWithSubgridScaleModel(
+                var_side_data_for_diffusivities,
+                derivatives_midpoint_x,
+                DIRECTION::X_DIRECTION);
+            
+            diffusive_flux_utilities->updateSideDataOfDiffusiveFluxDiffusivitiesWithSubgridScaleModel(
+                var_side_data_for_diffusivities,
+                derivatives_midpoint_y,
+                DIRECTION::Y_DIRECTION);
+            
+            diffusive_flux_utilities->updateSideDataOfDiffusiveFluxDiffusivitiesWithSubgridScaleModel(
+                var_side_data_for_diffusivities,
+                derivatives_midpoint_z,
+                DIRECTION::Z_DIRECTION);
+        }
         
         // Get the variables for the derivatives in the diffusive flux.
         diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
@@ -1991,26 +2362,12 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpointX(
     hier::Patch& patch,
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_x_midpoint_x,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_x_midpoint_x,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_x_midpoint_x_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
-    const std::vector<std::vector<int> >& data_component_idx_x,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_x,
+    const std::vector<int>& data_component_idx_x,
     const bool allocate_scratch_derivatives_midpoint)
 {
-    const int num_eqn = static_cast<int>(data_x.size());
-    
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(data_component_idx_x.size()) == num_eqn);
-    
-    for (int ei = 0; ei < num_eqn; ei++)
-    {
-        TBOX_ASSERT(static_cast<int>(data_x[ei].size()) ==
-                    static_cast<int>(data_component_idx_x[ei].size()));
-    }
-#endif
-    
-    derivatives_x_midpoint_x.resize(num_eqn);
-    
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
@@ -2033,88 +2390,125 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpoi
     hier::IntVector direction = hier::IntVector::getZero(d_dim);
     direction[0] = 1;
     
+    derivatives_x_midpoint_x.reserve(static_cast<int>(data_x.size()));
+    
+    for (int vi = 0; vi < static_cast<int>(data_x.size()); vi++)
+    {
+        // Get the index of variable for derivative.
+        const int u_idx = data_component_idx_x[vi];
+        
+        if (derivatives_x_midpoint_x_computed.find(data_x[vi]->getPointer(u_idx))
+            == derivatives_x_midpoint_x_computed.end())
+        {
+            // Get the pointer to variable for derivative.
+            double* u = data_x[vi]->getPointer(u_idx);
+            
+            d_num_scratch_derivatives_midpoint_x_used++;
+            // Declare container to store the derivative.
+            if (allocate_scratch_derivatives_midpoint)
+            {
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_x.size()) == d_num_scratch_derivatives_midpoint_x_used - 1);
+#endif
+                d_scratch_derivatives_midpoint_x.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
+                    new pdat::SideData<double>(
+                        interior_box, 1, d_num_diff_ghosts, direction)));
+            }
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+            else
+            {
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_x.size()) >= d_num_scratch_derivatives_midpoint_x_used);
+            }
+#endif
+            
+            // Get the pointer to the derivative at midpoint.
+            double* dudx = d_scratch_derivatives_midpoint_x[d_num_scratch_derivatives_midpoint_x_used - 1]->getPointer(0, 0);
+            
+            /*
+             * Get the ghost cell widths and ghost box dimensions of the variables.
+             */
+            
+            const hier::IntVector& num_ghosts_derivative_midpoint = d_num_diff_ghosts;
+            
+            const hier::IntVector& ghostcell_dims_derivative_midpoint = diff_ghostcell_dims;
+            
+            const hier::IntVector& num_ghosts_data_node =
+                data_x[vi]->getGhostCellWidth();
+            
+            const hier::IntVector& ghostcell_dims_data_node =
+                data_x[vi]->getGhostBox().numberCells();
+            
+            hier::IntVector domain_lo(d_dim);
+            hier::IntVector domain_dims(d_dim);
+            
+            domain_lo = hier::IntVector::getZero(d_dim);
+            domain_dims = interior_dims;
+            
+            domain_lo[0] += (-d_num_diff_ghosts[0] + d_num_der_midpoint_ghosts[0]);
+            domain_dims[0] += 1;
+            domain_dims[0] += 2*(d_num_diff_ghosts[0] - d_num_der_midpoint_ghosts[0]);
+            
+            computeFirstDerivativesInXAtMidpointX(
+                dudx,
+                u,
+                num_ghosts_derivative_midpoint,
+                num_ghosts_data_node,
+                ghostcell_dims_derivative_midpoint,
+                ghostcell_dims_data_node,
+                domain_lo,
+                domain_dims,
+                dx_0_inv);
+            
+            std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
+                u,
+                d_scratch_derivatives_midpoint_x[d_num_scratch_derivatives_midpoint_x_used - 1]);
+            
+            derivatives_x_midpoint_x_computed.insert(derivative_pair);
+        }
+        
+        derivatives_x_midpoint_x.push_back(
+            derivatives_x_midpoint_x_computed.find(data_x[vi]->getPointer(u_idx))->
+            second);
+    }
+}
+
+
+/*
+ * Compute the derivatives in x-direction at midpoints.
+ */
+void
+DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpointX(
+    hier::Patch& patch,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_x_midpoint_x,
+    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_x_midpoint_x_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
+    const std::vector<std::vector<int> >& data_component_idx_x,
+    const bool allocate_scratch_derivatives_midpoint)
+{
+    const int num_eqn = static_cast<int>(data_x.size());
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(d_num_eqn == num_eqn);
+    TBOX_ASSERT(static_cast<int>(data_component_idx_x.size()) == num_eqn);
+    
     for (int ei = 0; ei < num_eqn; ei++)
     {
-        derivatives_x_midpoint_x[ei].reserve(static_cast<int>(data_x[ei].size()));
-        
-        for (int vi = 0; vi < static_cast<int>(data_x[ei].size()); vi++)
-        {
-            // Get the index of variable for derivative.
-            const int u_idx = data_component_idx_x[ei][vi];
-            
-            if (derivatives_x_midpoint_x_computed.find(data_x[ei][vi]->getPointer(u_idx))
-                == derivatives_x_midpoint_x_computed.end())
-            {
-                // Get the pointer to variable for derivative.
-                double* u = data_x[ei][vi]->getPointer(u_idx);
-                
-                d_num_scratch_derivatives_midpoint_x_used++;
-                // Declare container to store the derivative.
-                if (allocate_scratch_derivatives_midpoint)
-                {
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_x.size()) == d_num_scratch_derivatives_midpoint_x_used - 1);
+        TBOX_ASSERT(static_cast<int>(data_x[ei].size()) ==
+                    static_cast<int>(data_component_idx_x[ei].size()));
+    }
 #endif
-                    d_scratch_derivatives_midpoint_x.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
-                        new pdat::SideData<double>(
-                            interior_box, 1, d_num_diff_ghosts, direction)));
-                }
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                else
-                {
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_x.size()) >= d_num_scratch_derivatives_midpoint_x_used);
-                }
-#endif
-                
-                // Get the pointer to the derivative at midpoint.
-                double* dudx = d_scratch_derivatives_midpoint_x[d_num_scratch_derivatives_midpoint_x_used - 1]->getPointer(0, 0);
-                
-                /*
-                 * Get the ghost cell widths and ghost box dimensions of the variables.
-                 */
-                
-                const hier::IntVector& num_ghosts_derivative_midpoint = d_num_diff_ghosts;
-                
-                const hier::IntVector& ghostcell_dims_derivative_midpoint = diff_ghostcell_dims;
-                
-                const hier::IntVector& num_ghosts_data_node =
-                    data_x[ei][vi]->getGhostCellWidth();
-                
-                const hier::IntVector& ghostcell_dims_data_node =
-                    data_x[ei][vi]->getGhostBox().numberCells();
-                
-                hier::IntVector domain_lo(d_dim);
-                hier::IntVector domain_dims(d_dim);
-                
-                domain_lo = hier::IntVector::getZero(d_dim);
-                domain_dims = interior_dims;
-                
-                domain_lo[0] += (-d_num_diff_ghosts[0] + d_num_der_midpoint_ghosts[0]);
-                domain_dims[0] += 1;
-                domain_dims[0] += 2*(d_num_diff_ghosts[0] - d_num_der_midpoint_ghosts[0]);
-                
-                computeFirstDerivativesInXAtMidpointX(
-                    dudx,
-                    u,
-                    num_ghosts_derivative_midpoint,
-                    num_ghosts_data_node,
-                    ghostcell_dims_derivative_midpoint,
-                    ghostcell_dims_data_node,
-                    domain_lo,
-                    domain_dims,
-                    dx_0_inv);
-                
-                std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
-                    u,
-                    d_scratch_derivatives_midpoint_x[d_num_scratch_derivatives_midpoint_x_used - 1]);
-                
-                derivatives_x_midpoint_x_computed.insert(derivative_pair);
-            }
-            
-            derivatives_x_midpoint_x[ei].push_back(
-                derivatives_x_midpoint_x_computed.find(data_x[ei][vi]->getPointer(u_idx))->
-                second);
-        }
+    
+    derivatives_x_midpoint_x.resize(num_eqn);
+    
+    for (int ei = 0; ei < num_eqn; ei++)
+    {
+        computeFirstDerivativesInXAtMidpointX(
+            patch,
+            derivatives_x_midpoint_x[ei],
+            derivatives_x_midpoint_x_computed,
+            data_x[ei],
+            data_component_idx_x[ei],
+            allocate_scratch_derivatives_midpoint);
     }
 }
 
@@ -2125,34 +2519,22 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpoi
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpointY(
     hier::Patch& patch,
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_y_midpoint_y,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_y_midpoint_y,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_y_midpoint_y_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
-    const std::vector<std::vector<int> >& data_component_idx_y,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_y,
+    const std::vector<int>& data_component_idx_y,
     const bool allocate_scratch_derivatives_midpoint)
 {
-    const int num_eqn = static_cast<int>(data_y.size());
-    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(data_component_idx_y.size()) == num_eqn);
-    
-    for (int ei = 0; ei < num_eqn; ei++)
-    {
-        TBOX_ASSERT(static_cast<int>(data_y[ei].size()) ==
-                    static_cast<int>(data_component_idx_y[ei].size()));
-    }
-    
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
             << "computeFirstDerivativesInYAtMidpointY()\n"
-            << "There isn't y-direction for 1D problem."
+            << "There isn't y-direction for one-dimensional problem."
             << std::endl);
     }
 #endif
-    
-    derivatives_y_midpoint_y.resize(num_eqn);
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -2176,88 +2558,134 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpoi
     hier::IntVector direction = hier::IntVector::getZero(d_dim);
     direction[1] = 1;
     
+    derivatives_y_midpoint_y.reserve(static_cast<int>(data_y.size()));
+    
+    for (int vi = 0; vi < static_cast<int>(data_y.size()); vi++)
+    {
+        // Get the index of variable for derivative.
+        const int u_idx = data_component_idx_y[vi];
+        
+        if (derivatives_y_midpoint_y_computed.find(data_y[vi]->getPointer(u_idx))
+            == derivatives_y_midpoint_y_computed.end())
+        {
+            // Get the pointer to variable for derivative.
+            double* u = data_y[vi]->getPointer(u_idx);
+            
+            d_num_scratch_derivatives_midpoint_y_used++;
+            // Declare container to store the derivative.
+            if (allocate_scratch_derivatives_midpoint)
+            {
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_y.size()) == d_num_scratch_derivatives_midpoint_y_used - 1);
+#endif
+                d_scratch_derivatives_midpoint_y.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
+                    new pdat::SideData<double>(
+                        interior_box, 1, d_num_diff_ghosts, direction)));
+            }
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+            else
+            {
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_y.size()) >= d_num_scratch_derivatives_midpoint_y_used);
+            }
+#endif
+            
+            // Get the pointer to the derivative at midpoint.
+            double* dudy = d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]->getPointer(1, 0);
+            
+            /*
+             * Get the ghost cell widths and ghost box dimensions of the variables.
+             */
+            
+            const hier::IntVector& num_ghosts_derivative_midpoint = d_num_diff_ghosts;
+            
+            const hier::IntVector& ghostcell_dims_derivative_midpoint = diff_ghostcell_dims;
+            
+            const hier::IntVector& num_ghosts_data_node =
+                data_y[vi]->getGhostCellWidth();
+            
+            const hier::IntVector& ghostcell_dims_data_node =
+                data_y[vi]->getGhostBox().numberCells();
+            
+            hier::IntVector domain_lo(d_dim);
+            hier::IntVector domain_dims(d_dim);
+            
+            domain_lo = hier::IntVector::getZero(d_dim);
+            domain_dims = interior_dims;
+            
+            domain_lo[1] += (-d_num_diff_ghosts[1] + d_num_der_midpoint_ghosts[1]);
+            domain_dims[1] += 1;
+            domain_dims[1] += 2*(d_num_diff_ghosts[1] - d_num_der_midpoint_ghosts[1]);
+            
+            computeFirstDerivativesInYAtMidpointY(
+                dudy,
+                u,
+                num_ghosts_derivative_midpoint,
+                num_ghosts_data_node,
+                ghostcell_dims_derivative_midpoint,
+                ghostcell_dims_data_node,
+                domain_lo,
+                domain_dims,
+                dx_1_inv);
+            
+            std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
+                u,
+                d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]);
+            
+            derivatives_y_midpoint_y_computed.insert(derivative_pair);
+        }
+        
+        derivatives_y_midpoint_y.push_back(
+            derivatives_y_midpoint_y_computed.find(data_y[vi]->getPointer(u_idx))->
+            second);
+    }
+}
+
+
+/*
+ * Compute the derivatives in y-direction at midpoints.
+ */
+void
+DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpointY(
+    hier::Patch& patch,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_y_midpoint_y,
+    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_y_midpoint_y_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
+    const std::vector<std::vector<int> >& data_component_idx_y,
+    const bool allocate_scratch_derivatives_midpoint)
+{
+    const int num_eqn = static_cast<int>(data_y.size());
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(d_num_eqn == num_eqn);
+    TBOX_ASSERT(static_cast<int>(data_component_idx_y.size()) == num_eqn);
+    
     for (int ei = 0; ei < num_eqn; ei++)
     {
-        derivatives_y_midpoint_y[ei].reserve(static_cast<int>(data_y[ei].size()));
-        
-        for (int vi = 0; vi < static_cast<int>(data_y[ei].size()); vi++)
-        {
-            // Get the index of variable for derivative.
-            const int u_idx = data_component_idx_y[ei][vi];
-            
-            if (derivatives_y_midpoint_y_computed.find(data_y[ei][vi]->getPointer(u_idx))
-                == derivatives_y_midpoint_y_computed.end())
-            {
-                // Get the pointer to variable for derivative.
-                double* u = data_y[ei][vi]->getPointer(u_idx);
-                
-                d_num_scratch_derivatives_midpoint_y_used++;
-                // Declare container to store the derivative.
-                if (allocate_scratch_derivatives_midpoint)
-                {
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_y.size()) == d_num_scratch_derivatives_midpoint_y_used - 1);
+        TBOX_ASSERT(static_cast<int>(data_y[ei].size()) ==
+                    static_cast<int>(data_component_idx_y[ei].size()));
+    }
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
+            << "computeFirstDerivativesInYAtMidpointY()\n"
+            << "There isn't y-direction for one-dimensional problem."
+            << std::endl);
+    }
 #endif
-                    d_scratch_derivatives_midpoint_y.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
-                        new pdat::SideData<double>(
-                            interior_box, 1, d_num_diff_ghosts, direction)));
-                }
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                else
-                {
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_y.size()) >= d_num_scratch_derivatives_midpoint_y_used);
-                }
-#endif
-                
-                // Get the pointer to the derivative at midpoint.
-                double* dudy = d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]->getPointer(1, 0);
-                
-                /*
-                 * Get the ghost cell widths and ghost box dimensions of the variables.
-                 */
-                
-                const hier::IntVector& num_ghosts_derivative_midpoint = d_num_diff_ghosts;
-                
-                const hier::IntVector& ghostcell_dims_derivative_midpoint = diff_ghostcell_dims;
-                
-                const hier::IntVector& num_ghosts_data_node =
-                    data_y[ei][vi]->getGhostCellWidth();
-                
-                const hier::IntVector& ghostcell_dims_data_node =
-                    data_y[ei][vi]->getGhostBox().numberCells();
-                
-                hier::IntVector domain_lo(d_dim);
-                hier::IntVector domain_dims(d_dim);
-                
-                domain_lo = hier::IntVector::getZero(d_dim);
-                domain_dims = interior_dims;
-                
-                domain_lo[1] += (-d_num_diff_ghosts[1] + d_num_der_midpoint_ghosts[1]);
-                domain_dims[1] += 1;
-                domain_dims[1] += 2*(d_num_diff_ghosts[1] - d_num_der_midpoint_ghosts[1]);
-                
-                computeFirstDerivativesInYAtMidpointY(
-                    dudy,
-                    u,
-                    num_ghosts_derivative_midpoint,
-                    num_ghosts_data_node,
-                    ghostcell_dims_derivative_midpoint,
-                    ghostcell_dims_data_node,
-                    domain_lo,
-                    domain_dims,
-                    dx_1_inv);
-                
-                std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
-                    u,
-                    d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]);
-                
-                derivatives_y_midpoint_y_computed.insert(derivative_pair);
-            }
-            
-            derivatives_y_midpoint_y[ei].push_back(
-                derivatives_y_midpoint_y_computed.find(data_y[ei][vi]->getPointer(u_idx))->
-                second);
-        }
+    
+    derivatives_y_midpoint_y.resize(num_eqn);
+    
+    for (int ei = 0; ei < num_eqn; ei++)
+    {
+        computeFirstDerivativesInYAtMidpointY(
+            patch,
+            derivatives_y_midpoint_y[ei],
+            derivatives_y_midpoint_y_computed,
+            data_y[ei],
+            data_component_idx_y[ei],
+            allocate_scratch_derivatives_midpoint);
     }
 }
 
@@ -2268,29 +2696,19 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpoi
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpointZ(
     hier::Patch& patch,
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_z_midpoint_z,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_z_midpoint_z,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_z_midpoint_z_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
-    const std::vector<std::vector<int> >& data_component_idx_z,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_z,
+    const std::vector<int>& data_component_idx_z,
     const bool allocate_scratch_derivatives_midpoint)
 {
-    const int num_eqn = static_cast<int>(data_z.size());
-    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(data_component_idx_z.size()) == num_eqn);
-    
-    for (int ei = 0; ei < num_eqn; ei++)
-    {
-        TBOX_ASSERT(static_cast<int>(data_z[ei].size()) ==
-                    static_cast<int>(data_component_idx_z[ei].size()));
-    }
-    
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
             << "computeFirstDerivativesInZAtMidpointZ()\n"
-            << "There isn't z-direction for 1D problem."
+            << "There isn't z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2298,12 +2716,10 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpoi
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
             << "computeFirstDerivativesInZAtMidpointZ()\n"
-            << "There isn't z-direction for 2D problem."
+            << "There isn't z-direction for two-dimensional problem."
             << std::endl);
     }
 #endif
-    
-    derivatives_z_midpoint_z.resize(num_eqn);
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -2327,88 +2743,142 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpoi
     hier::IntVector direction = hier::IntVector::getZero(d_dim);
     direction[2] = 1;
     
+    derivatives_z_midpoint_z.reserve(static_cast<int>(data_z.size()));
+    
+    for (int vi = 0; vi < static_cast<int>(data_z.size()); vi++)
+    {
+        // Get the index of variable for derivative.
+        const int u_idx = data_component_idx_z[vi];
+        
+        if (derivatives_z_midpoint_z_computed.find(data_z[vi]->getPointer(u_idx))
+            == derivatives_z_midpoint_z_computed.end())
+        {
+            // Get the pointer to variable for derivative.
+            double* u = data_z[vi]->getPointer(u_idx);
+            
+            d_num_scratch_derivatives_midpoint_z_used++;
+            // Declare container to store the derivative.
+            if (allocate_scratch_derivatives_midpoint)
+            {
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_z.size()) == d_num_scratch_derivatives_midpoint_z_used - 1);
+#endif
+                d_scratch_derivatives_midpoint_z.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
+                    new pdat::SideData<double>(
+                        interior_box, 1, d_num_diff_ghosts, direction)));
+            }
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+            else
+            {
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_z.size()) >= d_num_scratch_derivatives_midpoint_z_used);
+            }
+#endif
+            
+            // Get the pointer to the derivative at midpoint.
+            double* dudz = d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]->getPointer(2, 0);
+            
+            /*
+             * Get the ghost cell widths and ghost box dimensions of the variables.
+             */
+            
+            const hier::IntVector& num_ghosts_derivative_midpoint = d_num_diff_ghosts;
+            
+            const hier::IntVector& ghostcell_dims_derivative_midpoint = diff_ghostcell_dims;
+            
+            const hier::IntVector& num_ghosts_data_node =
+                data_z[vi]->getGhostCellWidth();
+            
+            const hier::IntVector& ghostcell_dims_data_node =
+                data_z[vi]->getGhostBox().numberCells();
+            
+            hier::IntVector domain_lo(d_dim);
+            hier::IntVector domain_dims(d_dim);
+            
+            domain_lo = hier::IntVector::getZero(d_dim);
+            domain_dims = interior_dims;
+            
+            domain_lo[2] += (-d_num_diff_ghosts[2] + d_num_der_midpoint_ghosts[2]);
+            domain_dims[2] += 1;
+            domain_dims[2] += 2*(d_num_diff_ghosts[2] - d_num_der_midpoint_ghosts[2]);
+            
+            computeFirstDerivativesInZAtMidpointZ(
+                dudz,
+                u,
+                num_ghosts_derivative_midpoint,
+                num_ghosts_data_node,
+                ghostcell_dims_derivative_midpoint,
+                ghostcell_dims_data_node,
+                domain_lo,
+                domain_dims,
+                dx_2_inv);
+            
+            std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
+                u,
+                d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]);
+            
+            derivatives_z_midpoint_z_computed.insert(derivative_pair);
+        }
+        
+        derivatives_z_midpoint_z.push_back(
+            derivatives_z_midpoint_z_computed.find(data_z[vi]->getPointer(u_idx))->
+            second);
+    }
+}
+
+
+/*
+ * Compute the derivatives in z-direction at midpoints.
+ */
+void
+DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpointZ(
+    hier::Patch& patch,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_z_midpoint_z,
+    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_z_midpoint_z_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
+    const std::vector<std::vector<int> >& data_component_idx_z,
+    const bool allocate_scratch_derivatives_midpoint)
+{
+    const int num_eqn = static_cast<int>(data_z.size());
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(d_num_eqn == num_eqn);
+    TBOX_ASSERT(static_cast<int>(data_component_idx_z.size()) == num_eqn);
+    
     for (int ei = 0; ei < num_eqn; ei++)
     {
-        derivatives_z_midpoint_z[ei].reserve(static_cast<int>(data_z[ei].size()));
-        
-        for (int vi = 0; vi < static_cast<int>(data_z[ei].size()); vi++)
-        {
-            // Get the index of variable for derivative.
-            const int u_idx = data_component_idx_z[ei][vi];
-            
-            if (derivatives_z_midpoint_z_computed.find(data_z[ei][vi]->getPointer(u_idx))
-                == derivatives_z_midpoint_z_computed.end())
-            {
-                // Get the pointer to variable for derivative.
-                double* u = data_z[ei][vi]->getPointer(u_idx);
-                
-                d_num_scratch_derivatives_midpoint_z_used++;
-                // Declare container to store the derivative.
-                if (allocate_scratch_derivatives_midpoint)
-                {
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_z.size()) == d_num_scratch_derivatives_midpoint_z_used - 1);
+        TBOX_ASSERT(static_cast<int>(data_z[ei].size()) ==
+                    static_cast<int>(data_component_idx_z[ei].size()));
+    }
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
+            << "computeFirstDerivativesInZAtMidpointZ()\n"
+            << "There isn't z-direction for one-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        TBOX_ERROR(d_object_name
+            << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
+            << "computeFirstDerivativesInZAtMidpointZ()\n"
+            << "There isn't z-direction for two-dimensional problem."
+            << std::endl);
+    }
 #endif
-                    d_scratch_derivatives_midpoint_z.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
-                        new pdat::SideData<double>(
-                            interior_box, 1, d_num_diff_ghosts, direction)));
-                }
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                else
-                {
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_z.size()) >= d_num_scratch_derivatives_midpoint_z_used);
-                }
-#endif
-                
-                // Get the pointer to the derivative at midpoint.
-                double* dudz = d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]->getPointer(2, 0);
-                
-                /*
-                 * Get the ghost cell widths and ghost box dimensions of the variables.
-                 */
-                
-                const hier::IntVector& num_ghosts_derivative_midpoint = d_num_diff_ghosts;
-                
-                const hier::IntVector& ghostcell_dims_derivative_midpoint = diff_ghostcell_dims;
-                
-                const hier::IntVector& num_ghosts_data_node =
-                    data_z[ei][vi]->getGhostCellWidth();
-                
-                const hier::IntVector& ghostcell_dims_data_node =
-                    data_z[ei][vi]->getGhostBox().numberCells();
-                
-                hier::IntVector domain_lo(d_dim);
-                hier::IntVector domain_dims(d_dim);
-                
-                domain_lo = hier::IntVector::getZero(d_dim);
-                domain_dims = interior_dims;
-                
-                domain_lo[2] += (-d_num_diff_ghosts[2] + d_num_der_midpoint_ghosts[2]);
-                domain_dims[2] += 1;
-                domain_dims[2] += 2*(d_num_diff_ghosts[2] - d_num_der_midpoint_ghosts[2]);
-                
-                computeFirstDerivativesInZAtMidpointZ(
-                    dudz,
-                    u,
-                    num_ghosts_derivative_midpoint,
-                    num_ghosts_data_node,
-                    ghostcell_dims_derivative_midpoint,
-                    ghostcell_dims_data_node,
-                    domain_lo,
-                    domain_dims,
-                    dx_2_inv);
-                
-                std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
-                    u,
-                    d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]);
-                
-                derivatives_z_midpoint_z_computed.insert(derivative_pair);
-            }
-            
-            derivatives_z_midpoint_z[ei].push_back(
-                derivatives_z_midpoint_z_computed.find(data_z[ei][vi]->getPointer(u_idx))->
-                second);
-        }
+    
+    derivatives_z_midpoint_z.resize(num_eqn);
+    
+    for (int ei = 0; ei < num_eqn; ei++)
+    {
+        computeFirstDerivativesInZAtMidpointZ(
+            patch,
+            derivatives_z_midpoint_z[ei],
+            derivatives_z_midpoint_z_computed,
+            data_z[ei],
+            data_component_idx_z[ei],
+            allocate_scratch_derivatives_midpoint);
     }
 }
 
@@ -2419,26 +2889,12 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpoi
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
     hier::Patch& patch,
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_x_node,
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x_node,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x_node_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
-    const std::vector<std::vector<int> >& data_component_idx_x,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_x,
+    const std::vector<int>& data_component_idx_x,
     const bool allocate_scratch_derivatives_node)
 {
-    const int num_eqn = static_cast<int>(data_x.size());
-    
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(data_component_idx_x.size()) == num_eqn);
-    
-    for (int ei = 0; ei < num_eqn; ei++)
-    {
-        TBOX_ASSERT(static_cast<int>(data_x[ei].size()) ==
-                    static_cast<int>(data_component_idx_x[ei].size()));
-    }
-#endif
-    
-    derivatives_x_node.resize(num_eqn);
-    
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
@@ -2458,87 +2914,124 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
     
     const double dx_0_inv = double(1)/dx[0];
     
+    derivatives_x_node.reserve(static_cast<int>(data_x.size()));
+    
+    for (int vi = 0; vi < static_cast<int>(data_x.size()); vi++)
+    {
+        // Get the index of variable for derivative.
+        const int u_idx = data_component_idx_x[vi];
+        
+        if (derivatives_x_node_computed.find(data_x[vi]->getPointer(u_idx))
+            == derivatives_x_node_computed.end())
+        {
+            // Get the pointer to variable for derivative.
+            double* u = data_x[vi]->getPointer(u_idx);
+            
+            d_num_scratch_derivatives_node_used++;
+            // Declare container to store the derivative.
+            if (allocate_scratch_derivatives_node)
+            {
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_node.size()) == d_num_scratch_derivatives_node_used - 1);
+#endif
+                d_scratch_derivatives_node.push_back(HAMERS_SHARED_PTR<pdat::CellData<double> >(
+                    new pdat::CellData<double>(
+                        interior_box, 1, d_num_diff_ghosts)));
+            }
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+            else
+            {
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_node.size()) >= d_num_scratch_derivatives_node_used);
+            }
+#endif
+            
+            // Get the pointer to the derivative.
+            double* dudx = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
+            
+            /*
+             * Get the ghost cell widths and ghost box dimensions of the variables.
+             */
+            
+            const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
+            
+            const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
+            
+            const hier::IntVector& num_ghosts_data_node =
+                data_x[vi]->getGhostCellWidth();
+            
+            const hier::IntVector& ghostcell_dims_data_node =
+                data_x[vi]->getGhostBox().numberCells();
+            
+            hier::IntVector domain_lo(d_dim);
+            hier::IntVector domain_dims(d_dim);
+            
+            domain_lo = -d_num_diff_ghosts;
+            domain_dims = interior_dims + d_num_diff_ghosts*2;
+            
+            domain_lo[0] += d_num_der_node_ghosts[0];
+            domain_dims[0] -= 2*d_num_der_node_ghosts[0];
+            
+            computeFirstDerivativesInXAtNode(
+                dudx,
+                u,
+                num_ghosts_derivative_node,
+                num_ghosts_data_node,
+                ghostcell_dims_derivative_node,
+                ghostcell_dims_data_node,
+                domain_lo,
+                domain_dims,
+                dx_0_inv);
+            
+            std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+                u,
+                d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]);
+            
+            derivatives_x_node_computed.insert(derivative_pair);
+        }
+        
+        derivatives_x_node.push_back(
+            derivatives_x_node_computed.find(data_x[vi]->getPointer(u_idx))->
+                second);
+    }
+}
+
+
+/*
+ * Compute the derivatives in x-direction at nodes.
+ */
+void
+DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
+    hier::Patch& patch,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_x_node,
+    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x_node_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
+    const std::vector<std::vector<int> >& data_component_idx_x,
+    const bool allocate_scratch_derivatives_node)
+{
+    const int num_eqn = static_cast<int>(data_x.size());
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(d_num_eqn == num_eqn);
+    TBOX_ASSERT(static_cast<int>(data_component_idx_x.size()) == num_eqn);
+    
     for (int ei = 0; ei < num_eqn; ei++)
     {
-        derivatives_x_node[ei].reserve(static_cast<int>(data_x[ei].size()));
-        
-        for (int vi = 0; vi < static_cast<int>(data_x[ei].size()); vi++)
-        {
-            // Get the index of variable for derivative.
-            const int u_idx = data_component_idx_x[ei][vi];
-            
-            if (derivatives_x_node_computed.find(data_x[ei][vi]->getPointer(u_idx))
-                == derivatives_x_node_computed.end())
-            {
-                // Get the pointer to variable for derivative.
-                double* u = data_x[ei][vi]->getPointer(u_idx);
-                
-                d_num_scratch_derivatives_node_used++;
-                // Declare container to store the derivative.
-                if (allocate_scratch_derivatives_node)
-                {
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_node.size()) == d_num_scratch_derivatives_node_used - 1);
+        TBOX_ASSERT(static_cast<int>(data_x[ei].size()) ==
+                    static_cast<int>(data_component_idx_x[ei].size()));
+    }
 #endif
-                    d_scratch_derivatives_node.push_back(HAMERS_SHARED_PTR<pdat::CellData<double> >(
-                        new pdat::CellData<double>(
-                            interior_box, 1, d_num_diff_ghosts)));
-                }
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                else
-                {
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_node.size()) >= d_num_scratch_derivatives_node_used);
-                }
-#endif
-                
-                // Get the pointer to the derivative.
-                double* dudx = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
-                
-                /*
-                 * Get the ghost cell widths and ghost box dimensions of the variables.
-                 */
-                
-                const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
-                
-                const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
-                
-                const hier::IntVector& num_ghosts_data_node =
-                    data_x[ei][vi]->getGhostCellWidth();
-                
-                const hier::IntVector& ghostcell_dims_data_node =
-                    data_x[ei][vi]->getGhostBox().numberCells();
-                
-                hier::IntVector domain_lo(d_dim);
-                hier::IntVector domain_dims(d_dim);
-                
-                domain_lo = -d_num_diff_ghosts;
-                domain_dims = interior_dims + d_num_diff_ghosts*2;
-                
-                domain_lo[0] += d_num_der_node_ghosts[0];
-                domain_dims[0] -= 2*d_num_der_node_ghosts[0];
-                
-                computeFirstDerivativesInXAtNode(
-                    dudx,
-                    u,
-                    num_ghosts_derivative_node,
-                    num_ghosts_data_node,
-                    ghostcell_dims_derivative_node,
-                    ghostcell_dims_data_node,
-                    domain_lo,
-                    domain_dims,
-                    dx_0_inv);
-                
-                std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
-                    u,
-                    d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]);
-                
-                derivatives_x_node_computed.insert(derivative_pair);
-            }
-            
-            derivatives_x_node[ei].push_back(
-                derivatives_x_node_computed.find(data_x[ei][vi]->getPointer(u_idx))->
-                    second);
-        }
+    
+    derivatives_x_node.resize(num_eqn);
+    
+    for (int ei = 0; ei < num_eqn; ei++)
+    {
+        computeFirstDerivativesInXAtNode(
+            patch,
+            derivatives_x_node[ei],
+            derivatives_x_node_computed,
+            data_x[ei],
+            data_component_idx_x[ei],
+            allocate_scratch_derivatives_node);
     }
 }
 
@@ -2549,34 +3042,22 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
     hier::Patch& patch,
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_y_node,
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y_node,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y_node_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
-    const std::vector<std::vector<int> >& data_component_idx_y,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_y,
+    const std::vector<int>& data_component_idx_y,
     const bool allocate_scratch_derivatives_node)
 {
-    const int num_eqn = static_cast<int>(data_y.size());
-    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(data_component_idx_y.size()) == num_eqn);
-    
-    for (int ei = 0; ei < num_eqn; ei++)
-    {
-        TBOX_ASSERT(static_cast<int>(data_y[ei].size()) ==
-                    static_cast<int>(data_component_idx_y[ei].size()));
-    }
-    
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
             << "computeFirstDerivativesInYAtNode()\n"
-            << "There isn't y-direction for 1D problem."
+            << "There isn't y-direction for one-dimensional problem."
             << std::endl);
     }
 #endif
-    
-    derivatives_y_node.resize(num_eqn);
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -2597,87 +3078,133 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
     
     const double dx_1_inv = double(1)/dx[1];
     
+    derivatives_y_node.reserve(static_cast<int>(data_y.size()));
+    
+    for (int vi = 0; vi < static_cast<int>(data_y.size()); vi++)
+    {
+        // Get the index of variable for derivative.
+        const int u_idx = data_component_idx_y[vi];
+        
+        if (derivatives_y_node_computed.find(data_y[vi]->getPointer(u_idx))
+            == derivatives_y_node_computed.end())
+        {
+            // Get the pointer to variable for derivative.
+            double* u = data_y[vi]->getPointer(u_idx);
+            
+            d_num_scratch_derivatives_node_used++;
+            // Declare container to store the derivative.
+            if (allocate_scratch_derivatives_node)
+            {
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_node.size()) == d_num_scratch_derivatives_node_used - 1);
+#endif
+                d_scratch_derivatives_node.push_back(HAMERS_SHARED_PTR<pdat::CellData<double> >(
+                    new pdat::CellData<double>(
+                        interior_box, 1, d_num_diff_ghosts)));
+            }
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+            else
+            {
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_node.size()) >= d_num_scratch_derivatives_node_used);
+            }
+#endif
+            
+            // Get the pointer to the derivative.
+            double* dudy = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
+            
+            /*
+             * Get the ghost cell widths and ghost box dimensions of the variables.
+             */
+            
+            const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
+            
+            const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
+            
+            const hier::IntVector& num_ghosts_data_node =
+                data_y[vi]->getGhostCellWidth();
+            
+            const hier::IntVector& ghostcell_dims_data_node =
+                data_y[vi]->getGhostBox().numberCells();
+            
+            hier::IntVector domain_lo(d_dim);
+            hier::IntVector domain_dims(d_dim);
+            
+            domain_lo = -d_num_diff_ghosts;
+            domain_dims = interior_dims + d_num_diff_ghosts*2;
+            
+            domain_lo[1] += d_num_der_node_ghosts[1];
+            domain_dims[1] -= 2*d_num_der_node_ghosts[1];
+            
+            computeFirstDerivativesInYAtNode(
+                dudy,
+                u,
+                num_ghosts_derivative_node,
+                num_ghosts_data_node,
+                ghostcell_dims_derivative_node,
+                ghostcell_dims_data_node,
+                domain_lo,
+                domain_dims,
+                dx_1_inv);
+            
+            std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+                u,
+                d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]);
+            
+            derivatives_y_node_computed.insert(derivative_pair);
+        }
+        
+        derivatives_y_node.push_back(
+            derivatives_y_node_computed.find(data_y[vi]->getPointer(u_idx))->
+                second);
+    }
+}
+
+
+/*
+ * Compute the derivatives in y-direction at nodes.
+ */
+void
+DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
+    hier::Patch& patch,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_y_node,
+    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y_node_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
+    const std::vector<std::vector<int> >& data_component_idx_y,
+    const bool allocate_scratch_derivatives_node)
+{
+    const int num_eqn = static_cast<int>(data_y.size());
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(d_num_eqn == num_eqn);
+    TBOX_ASSERT(static_cast<int>(data_component_idx_y.size()) == num_eqn);
+    
     for (int ei = 0; ei < num_eqn; ei++)
     {
-        derivatives_y_node[ei].reserve(static_cast<int>(data_y[ei].size()));
-        
-        for (int vi = 0; vi < static_cast<int>(data_y[ei].size()); vi++)
-        {
-            // Get the index of variable for derivative.
-            const int u_idx = data_component_idx_y[ei][vi];
-            
-            if (derivatives_y_node_computed.find(data_y[ei][vi]->getPointer(u_idx))
-                == derivatives_y_node_computed.end())
-            {
-                // Get the pointer to variable for derivative.
-                double* u = data_y[ei][vi]->getPointer(u_idx);
-                
-                d_num_scratch_derivatives_node_used++;
-                // Declare container to store the derivative.
-                if (allocate_scratch_derivatives_node)
-                {
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_node.size()) == d_num_scratch_derivatives_node_used - 1);
+        TBOX_ASSERT(static_cast<int>(data_y[ei].size()) ==
+                    static_cast<int>(data_component_idx_y[ei].size()));
+    }
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
+            << "computeFirstDerivativesInYAtNode()\n"
+            << "There isn't y-direction for one-dimensional problem."
+            << std::endl);
+    }
 #endif
-                    d_scratch_derivatives_node.push_back(HAMERS_SHARED_PTR<pdat::CellData<double> >(
-                        new pdat::CellData<double>(
-                            interior_box, 1, d_num_diff_ghosts)));
-                }
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                else
-                {
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_node.size()) >= d_num_scratch_derivatives_node_used);
-                }
-#endif
-                
-                // Get the pointer to the derivative.
-                double* dudy = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
-                
-                /*
-                 * Get the ghost cell widths and ghost box dimensions of the variables.
-                 */
-                
-                const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
-                
-                const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
-                
-                const hier::IntVector& num_ghosts_data_node =
-                    data_y[ei][vi]->getGhostCellWidth();
-                
-                const hier::IntVector& ghostcell_dims_data_node =
-                    data_y[ei][vi]->getGhostBox().numberCells();
-                
-                hier::IntVector domain_lo(d_dim);
-                hier::IntVector domain_dims(d_dim);
-                
-                domain_lo = -d_num_diff_ghosts;
-                domain_dims = interior_dims + d_num_diff_ghosts*2;
-                
-                domain_lo[1] += d_num_der_node_ghosts[1];
-                domain_dims[1] -= 2*d_num_der_node_ghosts[1];
-                
-                computeFirstDerivativesInYAtNode(
-                    dudy,
-                    u,
-                    num_ghosts_derivative_node,
-                    num_ghosts_data_node,
-                    ghostcell_dims_derivative_node,
-                    ghostcell_dims_data_node,
-                    domain_lo,
-                    domain_dims,
-                    dx_1_inv);
-                
-                std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
-                    u,
-                    d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]);
-                
-                derivatives_y_node_computed.insert(derivative_pair);
-            }
-            
-            derivatives_y_node[ei].push_back(
-                derivatives_y_node_computed.find(data_y[ei][vi]->getPointer(u_idx))->
-                    second);
-        }
+    
+    derivatives_y_node.resize(num_eqn);
+    
+    for (int ei = 0; ei < num_eqn; ei++)
+    {
+        computeFirstDerivativesInYAtNode(
+            patch,
+            derivatives_y_node[ei],
+            derivatives_y_node_computed,
+            data_y[ei],
+            data_component_idx_y[ei],
+            allocate_scratch_derivatives_node);
     }
 }
 
@@ -2688,29 +3215,19 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
     hier::Patch& patch,
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_z_node,
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z_node,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z_node_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
-    const std::vector<std::vector<int> >& data_component_idx_z,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_z,
+    const std::vector<int>& data_component_idx_z,
     const bool allocate_scratch_derivatives_node)
 {
-    const int num_eqn = static_cast<int>(data_z.size());
-    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(data_component_idx_z.size()) == num_eqn);
-    
-    for (int ei = 0; ei < num_eqn; ei++)
-    {
-        TBOX_ASSERT(static_cast<int>(data_z[ei].size()) ==
-                    static_cast<int>(data_component_idx_z[ei].size()));
-    }
-    
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
             << "computeFirstDerivativesInZAtNode()\n"
-            << "There isn't z-direction for 1D problem."
+            << "There isn't z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2718,12 +3235,10 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
             << "computeFirstDerivativesInZAtNode()\n"
-            << "There isn't z-direction for 2D problem."
+            << "There isn't z-direction for two-dimensional problem."
             << std::endl);
     }
 #endif
-    
-    derivatives_z_node.resize(num_eqn);
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -2744,87 +3259,141 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
     
     const double dx_2_inv = double(1)/dx[2];
     
+    derivatives_z_node.reserve(static_cast<int>(data_z.size()));
+    
+    for (int vi = 0; vi < static_cast<int>(data_z.size()); vi++)
+    {
+        // Get the index of variable for derivative.
+        const int u_idx = data_component_idx_z[vi];
+        
+        if (derivatives_z_node_computed.find(data_z[vi]->getPointer(u_idx))
+            == derivatives_z_node_computed.end())
+        {
+            // Get the pointer to variable for derivative.
+            double* u = data_z[vi]->getPointer(u_idx);
+            
+            d_num_scratch_derivatives_node_used++;
+            // Declare container to store the derivative.
+            if (allocate_scratch_derivatives_node)
+            {
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_node.size()) == d_num_scratch_derivatives_node_used - 1);
+#endif
+                d_scratch_derivatives_node.push_back(HAMERS_SHARED_PTR<pdat::CellData<double> >(
+                    new pdat::CellData<double>(
+                        interior_box, 1, d_num_diff_ghosts)));
+            }
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+            else
+            {
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_node.size()) >= d_num_scratch_derivatives_node_used);
+            }
+#endif
+            
+            // Get the pointer to the derivative.
+            double* dudz = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
+            
+            /*
+             * Get the ghost cell widths and ghost box dimensions of the variables.
+             */
+            
+            const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
+            
+            const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
+            
+            const hier::IntVector& num_ghosts_data_node =
+                data_z[vi]->getGhostCellWidth();
+            
+            const hier::IntVector& ghostcell_dims_data_node =
+                data_z[vi]->getGhostBox().numberCells();
+            
+            hier::IntVector domain_lo(d_dim);
+            hier::IntVector domain_dims(d_dim);
+            
+            domain_lo = -d_num_diff_ghosts;
+            domain_dims = interior_dims + d_num_diff_ghosts*2;
+            
+            domain_lo[2] += d_num_der_node_ghosts[2];
+            domain_dims[2] -= 2*d_num_der_node_ghosts[2];
+            
+            computeFirstDerivativesInZAtNode(
+                dudz,
+                u,
+                num_ghosts_derivative_node,
+                num_ghosts_data_node,
+                ghostcell_dims_derivative_node,
+                ghostcell_dims_data_node,
+                domain_lo,
+                domain_dims,
+                dx_2_inv);
+            
+            std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+                u,
+                d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]);
+            
+            derivatives_z_node_computed.insert(derivative_pair);
+        }
+        
+        derivatives_z_node.push_back(
+            derivatives_z_node_computed.find(data_z[vi]->getPointer(u_idx))->
+                second);
+    }
+}
+
+
+/*
+ * Compute the derivatives in z-direction at nodes.
+ */
+void
+DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
+    hier::Patch& patch,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_z_node,
+    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z_node_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
+    const std::vector<std::vector<int> >& data_component_idx_z,
+    const bool allocate_scratch_derivatives_node)
+{
+    const int num_eqn = static_cast<int>(data_z.size());
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(d_num_eqn == num_eqn);
+    TBOX_ASSERT(static_cast<int>(data_component_idx_z.size()) == num_eqn);
+    
     for (int ei = 0; ei < num_eqn; ei++)
     {
-        derivatives_z_node[ei].reserve(static_cast<int>(data_z[ei].size()));
-        
-        for (int vi = 0; vi < static_cast<int>(data_z[ei].size()); vi++)
-        {
-            // Get the index of variable for derivative.
-            const int u_idx = data_component_idx_z[ei][vi];
-            
-            if (derivatives_z_node_computed.find(data_z[ei][vi]->getPointer(u_idx))
-                == derivatives_z_node_computed.end())
-            {
-                // Get the pointer to variable for derivative.
-                double* u = data_z[ei][vi]->getPointer(u_idx);
-                
-                d_num_scratch_derivatives_node_used++;
-                // Declare container to store the derivative.
-                if (allocate_scratch_derivatives_node)
-                {
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_node.size()) == d_num_scratch_derivatives_node_used - 1);
+        TBOX_ASSERT(static_cast<int>(data_z[ei].size()) ==
+                    static_cast<int>(data_component_idx_z[ei].size()));
+    }
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
+            << "computeFirstDerivativesInZAtNode()\n"
+            << "There isn't z-direction for one-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        TBOX_ERROR(d_object_name
+            << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
+            << "computeFirstDerivativesInZAtNode()\n"
+            << "There isn't z-direction for two-dimensional problem."
+            << std::endl);
+    }
 #endif
-                    d_scratch_derivatives_node.push_back(HAMERS_SHARED_PTR<pdat::CellData<double> >(
-                        new pdat::CellData<double>(
-                            interior_box, 1, d_num_diff_ghosts)));
-                }
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                else
-                {
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_node.size()) >= d_num_scratch_derivatives_node_used);
-                }
-#endif
-                
-                // Get the pointer to the derivative.
-                double* dudz = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
-                
-                /*
-                 * Get the ghost cell widths and ghost box dimensions of the variables.
-                 */
-                
-                const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
-                
-                const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
-                
-                const hier::IntVector& num_ghosts_data_node =
-                    data_z[ei][vi]->getGhostCellWidth();
-                
-                const hier::IntVector& ghostcell_dims_data_node =
-                    data_z[ei][vi]->getGhostBox().numberCells();
-                
-                hier::IntVector domain_lo(d_dim);
-                hier::IntVector domain_dims(d_dim);
-                
-                domain_lo = -d_num_diff_ghosts;
-                domain_dims = interior_dims + d_num_diff_ghosts*2;
-                
-                domain_lo[2] += d_num_der_node_ghosts[2];
-                domain_dims[2] -= 2*d_num_der_node_ghosts[2];
-                
-                computeFirstDerivativesInZAtNode(
-                    dudz,
-                    u,
-                    num_ghosts_derivative_node,
-                    num_ghosts_data_node,
-                    ghostcell_dims_derivative_node,
-                    ghostcell_dims_data_node,
-                    domain_lo,
-                    domain_dims,
-                    dx_2_inv);
-                
-                std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
-                    u,
-                    d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]);
-                
-                derivatives_z_node_computed.insert(derivative_pair);
-            }
-            
-            derivatives_z_node[ei].push_back(
-                derivatives_z_node_computed.find(data_z[ei][vi]->getPointer(u_idx))->
-                    second);
-        }
+    
+    derivatives_z_node.resize(num_eqn);
+    
+    for (int ei = 0; ei < num_eqn; ei++)
+    {
+        computeFirstDerivativesInZAtNode(
+            patch,
+            derivatives_z_node,
+            derivatives_z_node_computed,
+            data_z,
+            data_component_idx_z,
+            allocate_scratch_derivatives_node);
     }
 }
 
@@ -3051,19 +3620,13 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDiffusivitiesFromNodeTo
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMidpointX(
     hier::Patch& patch,
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_midpoint_x,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_x,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_x_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_node,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data,
-    const std::vector<std::vector<int> >& data_component_idx,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_node,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data,
+    const std::vector<int>& data_component_idx,
     const bool allocate_scratch_derivatives_midpoint)
 {
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(derivative_node.size()) == d_num_eqn);
-#endif
-    
-    derivatives_midpoint_x.resize(d_num_eqn);
-    
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
@@ -3082,90 +3645,124 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
     hier::IntVector direction = hier::IntVector::getZero(d_dim);
     direction[0] = 1;
     
-    for (int ei = 0; ei < d_num_eqn; ei++)
+    derivatives_midpoint_x.reserve(static_cast<int>(derivative_node.size()));
+    
+    for (int vi = 0; vi < static_cast<int>(derivative_node.size()); vi++)
     {
-        derivatives_midpoint_x[ei].reserve(static_cast<int>(derivative_node[ei].size()));
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+        TBOX_ASSERT(derivative_node[vi]->getGhostCellWidth() == d_num_diff_ghosts);
+#endif
         
-        for (int vi = 0; vi < static_cast<int>(derivative_node[ei].size()); vi++)
+        // Get the index of variable for derivative.
+        const int u_idx = data_component_idx[vi];
+        
+        if (derivatives_midpoint_x_computed.find(data[vi]->getPointer(u_idx))
+            == derivatives_midpoint_x_computed.end())
         {
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-            TBOX_ASSERT(derivative_node[ei][vi]->getGhostCellWidth() == d_num_diff_ghosts);
-#endif
+            // Get the pointer to variable for derivative.
+            double* u = data[vi]->getPointer(u_idx);
             
-            // Get the index of variable for derivative.
-            const int u_idx = data_component_idx[ei][vi];
+            // Get the pointer to variable for interpoation.
+            double* der_node = derivative_node[vi]->getPointer(0);
             
-            if (derivatives_midpoint_x_computed.find(data[ei][vi]->getPointer(u_idx))
-                == derivatives_midpoint_x_computed.end())
+            d_num_scratch_derivatives_midpoint_x_used++;
+            // Declare container to store the derivative.
+            if (allocate_scratch_derivatives_midpoint)
             {
-                // Get the pointer to variable for derivative.
-                double* u = data[ei][vi]->getPointer(u_idx);
-                
-                // Get the pointer to variable for interpoation.
-                double* der_node = derivative_node[ei][vi]->getPointer(0);
-                
-                d_num_scratch_derivatives_midpoint_x_used++;
-                // Declare container to store the derivative.
-                if (allocate_scratch_derivatives_midpoint)
-                {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_x.size()) == d_num_scratch_derivatives_midpoint_x_used - 1);
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_x.size()) == d_num_scratch_derivatives_midpoint_x_used - 1);
 #endif
-                    d_scratch_derivatives_midpoint_x.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
-                        new pdat::SideData<double>(
-                            interior_box, 1, d_num_diff_ghosts, direction)));
-                }
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                else
-                {
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_x.size()) >= d_num_scratch_derivatives_midpoint_x_used);
-                }
-#endif
-                
-                // Get the pointer to the derivative at midpoint.
-                double* der_midpoint_x = d_scratch_derivatives_midpoint_x[d_num_scratch_derivatives_midpoint_x_used - 1]->getPointer(0, 0);
-                
-                /*
-                 * Get the ghost cell widths and ghost box dimensions of the variables.
-                 */
-                
-                const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
-                const hier::IntVector& num_ghosts_derivative_midpoint = d_num_diff_ghosts;
-                
-                const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
-                const hier::IntVector& ghostcell_dims_derivative_midpoint = diff_ghostcell_dims;
-                
-                hier::IntVector domain_lo(d_dim);
-                hier::IntVector domain_dims(d_dim);
-                
-                domain_lo = hier::IntVector::getZero(d_dim);
-                domain_dims = interior_dims;
-                
-                domain_lo[0] += (-d_num_diff_ghosts[0] + d_num_interp_midpoint_ghosts[0]);
-                domain_dims[0] += 1;
-                domain_dims[0] += 2*(d_num_diff_ghosts[0] - d_num_interp_midpoint_ghosts[0]);
-                
-                interpolateDataFromNodeToMidpointX(
-                    der_midpoint_x,
-                    der_node,
-                    num_ghosts_derivative_midpoint,
-                    num_ghosts_derivative_node,
-                    ghostcell_dims_derivative_midpoint,
-                    ghostcell_dims_derivative_node,
-                    domain_lo,
-                    domain_dims);
-                
-                std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
-                    u,
-                    d_scratch_derivatives_midpoint_x[d_num_scratch_derivatives_midpoint_x_used - 1]);
-                
-                derivatives_midpoint_x_computed.insert(derivative_pair);
+                d_scratch_derivatives_midpoint_x.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
+                    new pdat::SideData<double>(
+                        interior_box, 1, d_num_diff_ghosts, direction)));
             }
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+            else
+            {
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_x.size()) >= d_num_scratch_derivatives_midpoint_x_used);
+            }
+#endif
             
-            derivatives_midpoint_x[ei].push_back(
-                derivatives_midpoint_x_computed.find(data[ei][vi]->getPointer(u_idx))->
-                    second);
+            // Get the pointer to the derivative at midpoint.
+            double* der_midpoint_x = d_scratch_derivatives_midpoint_x[d_num_scratch_derivatives_midpoint_x_used - 1]->getPointer(0, 0);
+            
+            /*
+             * Get the ghost cell widths and ghost box dimensions of the variables.
+             */
+            
+            const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
+            const hier::IntVector& num_ghosts_derivative_midpoint = d_num_diff_ghosts;
+            
+            const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
+            const hier::IntVector& ghostcell_dims_derivative_midpoint = diff_ghostcell_dims;
+            
+            hier::IntVector domain_lo(d_dim);
+            hier::IntVector domain_dims(d_dim);
+            
+            domain_lo = hier::IntVector::getZero(d_dim);
+            domain_dims = interior_dims;
+            
+            domain_lo[0] += (-d_num_diff_ghosts[0] + d_num_interp_midpoint_ghosts[0]);
+            domain_dims[0] += 1;
+            domain_dims[0] += 2*(d_num_diff_ghosts[0] - d_num_interp_midpoint_ghosts[0]);
+            
+            interpolateDataFromNodeToMidpointX(
+                der_midpoint_x,
+                der_node,
+                num_ghosts_derivative_midpoint,
+                num_ghosts_derivative_node,
+                ghostcell_dims_derivative_midpoint,
+                ghostcell_dims_derivative_node,
+                domain_lo,
+                domain_dims);
+            
+            std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
+                u,
+                d_scratch_derivatives_midpoint_x[d_num_scratch_derivatives_midpoint_x_used - 1]);
+            
+            derivatives_midpoint_x_computed.insert(derivative_pair);
         }
+        
+        derivatives_midpoint_x.push_back(
+            derivatives_midpoint_x_computed.find(data[vi]->getPointer(u_idx))->
+                second);
+    }
+}
+
+
+/*
+ * Interpolate the derivatives from nodes to midpoints in x-direction.
+ */
+void
+DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMidpointX(
+    hier::Patch& patch,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_midpoint_x,
+    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_x_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_node,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data,
+    const std::vector<std::vector<int> >& data_component_idx,
+    const bool allocate_scratch_derivatives_midpoint)
+{
+    const int num_eqn = static_cast<int>(derivative_node.size());
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(d_num_eqn == num_eqn);
+    TBOX_ASSERT(static_cast<int>(data.size()) == num_eqn);
+    TBOX_ASSERT(static_cast<int>(data_component_idx.size()) == num_eqn);
+#endif
+    
+    derivatives_midpoint_x.resize(num_eqn);
+    
+    for (int ei = 0; ei < num_eqn; ei++)
+    {
+        interpolateDerivativesFromNodeToMidpointX(
+            patch,
+            derivatives_midpoint_x[ei],
+            derivatives_midpoint_x_computed,
+            derivative_node[ei],
+            data[ei],
+            data_component_idx[ei],
+            allocate_scratch_derivatives_midpoint);
     }
 }
 
@@ -3176,27 +3773,23 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMidpointY(
     hier::Patch& patch,
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_midpoint_y,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_y,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_y_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_node,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data,
-    const std::vector<std::vector<int> >& data_component_idx,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_node,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data,
+    const std::vector<int>& data_component_idx,
     const bool allocate_scratch_derivatives_midpoint)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(derivative_node.size()) == d_num_eqn);
-    
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
             << "interpolateDerivativesFromNodeToMidpointY()\n"
-            << "There isn't y-direction for 1D problem."
+            << "There isn't y-direction for one-dimensional problem."
             << std::endl);
     }
 #endif
-    
-    derivatives_midpoint_y.resize(d_num_eqn);
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -3216,90 +3809,133 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
     hier::IntVector direction = hier::IntVector::getZero(d_dim);
     direction[1] = 1;
     
-    for (int ei = 0; ei < d_num_eqn; ei++)
+    derivatives_midpoint_y.reserve(static_cast<int>(derivative_node.size()));
+    
+    for (int vi = 0; vi < static_cast<int>(derivative_node.size()); vi++)
     {
-        derivatives_midpoint_y[ei].reserve(static_cast<int>(derivative_node[ei].size()));
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+        TBOX_ASSERT(derivative_node[vi]->getGhostCellWidth() == d_num_diff_ghosts);
+#endif
         
-        for (int vi = 0; vi < static_cast<int>(derivative_node[ei].size()); vi++)
+        // Get the index of variable for derivative.
+        const int u_idx = data_component_idx[vi];
+        
+        if (derivatives_midpoint_y_computed.find(data[vi]->getPointer(u_idx))
+            == derivatives_midpoint_y_computed.end())
         {
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-            TBOX_ASSERT(derivative_node[ei][vi]->getGhostCellWidth() == d_num_diff_ghosts);
-#endif
+            // Get the pointer to variable for derivative.
+            double* u = data[vi]->getPointer(u_idx);
             
-            // Get the index of variable for derivative.
-            const int u_idx = data_component_idx[ei][vi];
+            // Get the pointer to variable for interpoation.
+            double* der_node = derivative_node[vi]->getPointer(0);
             
-            if (derivatives_midpoint_y_computed.find(data[ei][vi]->getPointer(u_idx))
-                == derivatives_midpoint_y_computed.end())
+            d_num_scratch_derivatives_midpoint_y_used++;
+            // Declare container to store the derivative.
+            if (allocate_scratch_derivatives_midpoint)
             {
-                // Get the pointer to variable for derivative.
-                double* u = data[ei][vi]->getPointer(u_idx);
-                
-                // Get the pointer to variable for interpoation.
-                double* der_node = derivative_node[ei][vi]->getPointer(0);
-                
-                d_num_scratch_derivatives_midpoint_y_used++;
-                // Declare container to store the derivative.
-                if (allocate_scratch_derivatives_midpoint)
-                {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_y.size()) == d_num_scratch_derivatives_midpoint_y_used - 1);
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_y.size()) == d_num_scratch_derivatives_midpoint_y_used - 1);
 #endif
-                    d_scratch_derivatives_midpoint_y.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
-                        new pdat::SideData<double>(
-                            interior_box, 1, d_num_diff_ghosts, direction)));
-                }
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                else
-                {
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_y.size()) >= d_num_scratch_derivatives_midpoint_y_used);
-                }
-#endif
-                
-                // Get the pointer to the derivative at midpoint.
-                double* der_midpoint_y = d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]->getPointer(1, 0);
-                
-                /*
-                 * Get the ghost cell widths and ghost box dimensions of the variables.
-                 */
-                
-                const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
-                const hier::IntVector& num_ghosts_derivative_midpoint = d_num_diff_ghosts;
-                
-                const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
-                const hier::IntVector& ghostcell_dims_derivative_midpoint = diff_ghostcell_dims;
-                
-                hier::IntVector domain_lo(d_dim);
-                hier::IntVector domain_dims(d_dim);
-                
-                domain_lo = hier::IntVector::getZero(d_dim);
-                domain_dims = interior_dims;
-                
-                domain_lo[1] += (-d_num_diff_ghosts[1] + d_num_interp_midpoint_ghosts[1]);
-                domain_dims[1] += 1;
-                domain_dims[1] += 2*(d_num_diff_ghosts[1] - d_num_interp_midpoint_ghosts[1]);
-                
-                interpolateDataFromNodeToMidpointY(
-                    der_midpoint_y,
-                    der_node,
-                    num_ghosts_derivative_midpoint,
-                    num_ghosts_derivative_node,
-                    ghostcell_dims_derivative_midpoint,
-                    ghostcell_dims_derivative_node,
-                    domain_lo,
-                    domain_dims);
-                
-                std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
-                    u,
-                    d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]);
-                
-                derivatives_midpoint_y_computed.insert(derivative_pair);
+                d_scratch_derivatives_midpoint_y.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
+                    new pdat::SideData<double>(
+                        interior_box, 1, d_num_diff_ghosts, direction)));
             }
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+            else
+            {
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_y.size()) >= d_num_scratch_derivatives_midpoint_y_used);
+            }
+#endif
             
-            derivatives_midpoint_y[ei].push_back(
-                derivatives_midpoint_y_computed.find(data[ei][vi]->getPointer(u_idx))->
-                    second);
+            // Get the pointer to the derivative at midpoint.
+            double* der_midpoint_y = d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]->getPointer(1, 0);
+            
+            /*
+             * Get the ghost cell widths and ghost box dimensions of the variables.
+             */
+            
+            const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
+            const hier::IntVector& num_ghosts_derivative_midpoint = d_num_diff_ghosts;
+            
+            const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
+            const hier::IntVector& ghostcell_dims_derivative_midpoint = diff_ghostcell_dims;
+            
+            hier::IntVector domain_lo(d_dim);
+            hier::IntVector domain_dims(d_dim);
+            
+            domain_lo = hier::IntVector::getZero(d_dim);
+            domain_dims = interior_dims;
+            
+            domain_lo[1] += (-d_num_diff_ghosts[1] + d_num_interp_midpoint_ghosts[1]);
+            domain_dims[1] += 1;
+            domain_dims[1] += 2*(d_num_diff_ghosts[1] - d_num_interp_midpoint_ghosts[1]);
+            
+            interpolateDataFromNodeToMidpointY(
+                der_midpoint_y,
+                der_node,
+                num_ghosts_derivative_midpoint,
+                num_ghosts_derivative_node,
+                ghostcell_dims_derivative_midpoint,
+                ghostcell_dims_derivative_node,
+                domain_lo,
+                domain_dims);
+            
+            std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
+                u,
+                d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]);
+            
+            derivatives_midpoint_y_computed.insert(derivative_pair);
         }
+        
+        derivatives_midpoint_y.push_back(
+            derivatives_midpoint_y_computed.find(data[vi]->getPointer(u_idx))->
+                second);
+    }
+}
+
+
+/*
+ * Interpolate the derivatives from nodes to midpoints in y-direction.
+ */
+void
+DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMidpointY(
+    hier::Patch& patch,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_midpoint_y,
+    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_y_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_node,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data,
+    const std::vector<std::vector<int> >& data_component_idx,
+    const bool allocate_scratch_derivatives_midpoint)
+{
+    const int num_eqn = static_cast<int>(derivative_node.size());
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(d_num_eqn == num_eqn);
+    TBOX_ASSERT(static_cast<int>(data.size()) == num_eqn);
+    TBOX_ASSERT(static_cast<int>(data_component_idx.size()) == num_eqn);
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
+            << "interpolateDerivativesFromNodeToMidpointY()\n"
+            << "There isn't y-direction for one-dimensional problem."
+            << std::endl);
+    }
+#endif
+    
+    derivatives_midpoint_y.resize(num_eqn);
+    
+    for (int ei = 0; ei < num_eqn; ei++)
+    {
+        interpolateDerivativesFromNodeToMidpointY(
+            patch,
+            derivatives_midpoint_y[ei],
+            derivatives_midpoint_y_computed,
+            derivative_node[ei],
+            data[ei],
+            data_component_idx[ei],
+            allocate_scratch_derivatives_midpoint);
     }
 }
 
@@ -3310,22 +3946,20 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMidpointZ(
     hier::Patch& patch,
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_midpoint_z,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_z,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_z_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_node,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data,
-    const std::vector<std::vector<int> >& data_component_idx,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_node,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data,
+    const std::vector<int>& data_component_idx,
     const bool allocate_scratch_derivatives_midpoint)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(derivative_node.size()) == d_num_eqn);
-    
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
             << "interpolateDerivativesFromNodeToMidpointZ()\n"
-            << "There isn't z-direction for 1D problem."
+            << "There isn't z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -3333,12 +3967,10 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
             << "interpolateDerivativesFromNodeToMidpointZ()\n"
-            << "There isn't z-direction for 2D problem."
+            << "There isn't z-direction for two-dimensional problem."
             << std::endl);
     }
 #endif
-    
-    derivatives_midpoint_z.resize(d_num_eqn);
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -3358,90 +3990,141 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
     hier::IntVector direction = hier::IntVector::getZero(d_dim);
     direction[2] = 1;
     
-    for (int ei = 0; ei < d_num_eqn; ei++)
+    derivatives_midpoint_z.reserve(static_cast<int>(derivative_node.size()));
+    
+    for (int vi = 0; vi < static_cast<int>(derivative_node.size()); vi++)
     {
-        derivatives_midpoint_z[ei].reserve(static_cast<int>(derivative_node[ei].size()));
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+        TBOX_ASSERT(derivative_node[vi]->getGhostCellWidth() == d_num_diff_ghosts);
+#endif
         
-        for (int vi = 0; vi < static_cast<int>(derivative_node[ei].size()); vi++)
+        // Get the index of variable for derivative.
+        const int u_idx = data_component_idx[vi];
+        
+        if (derivatives_midpoint_z_computed.find(data[vi]->getPointer(u_idx))
+            == derivatives_midpoint_z_computed.end())
         {
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-            TBOX_ASSERT(derivative_node[ei][vi]->getGhostCellWidth() == d_num_diff_ghosts);
-#endif
+            // Get the pointer to variable for derivative.
+            double* u = data[vi]->getPointer(u_idx);
             
-            // Get the index of variable for derivative.
-            const int u_idx = data_component_idx[ei][vi];
+            // Get the pointer to variable for interpoation.
+            double* der_node = derivative_node[vi]->getPointer(0);
             
-            if (derivatives_midpoint_z_computed.find(data[ei][vi]->getPointer(u_idx))
-                == derivatives_midpoint_z_computed.end())
+            d_num_scratch_derivatives_midpoint_z_used++;
+            // Declare container to store the derivative.
+            if (allocate_scratch_derivatives_midpoint)
             {
-                // Get the pointer to variable for derivative.
-                double* u = data[ei][vi]->getPointer(u_idx);
-                
-                // Get the pointer to variable for interpoation.
-                double* der_node = derivative_node[ei][vi]->getPointer(0);
-                
-                d_num_scratch_derivatives_midpoint_z_used++;
-                // Declare container to store the derivative.
-                if (allocate_scratch_derivatives_midpoint)
-                {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_z.size()) == d_num_scratch_derivatives_midpoint_z_used - 1);
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_z.size()) == d_num_scratch_derivatives_midpoint_z_used - 1);
 #endif
-                    d_scratch_derivatives_midpoint_z.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
-                        new pdat::SideData<double>(
-                            interior_box, 1, d_num_diff_ghosts, direction)));
-                }
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                else
-                {
-                    TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_z.size()) >= d_num_scratch_derivatives_midpoint_z_used);
-                }
-#endif
-                
-                // Get the pointer to the derivative at midpoint.
-                double* der_midpoint_z = d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]->getPointer(2, 0);
-                
-                /*
-                 * Get the ghost cell widths and ghost box dimensions of the variables.
-                 */
-                
-                const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
-                const hier::IntVector& num_ghosts_derivative_midpoint = d_num_diff_ghosts;
-                
-                const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
-                const hier::IntVector& ghostcell_dims_derivative_midpoint = diff_ghostcell_dims;
-                
-                hier::IntVector domain_lo(d_dim);
-                hier::IntVector domain_dims(d_dim);
-                
-                domain_lo = hier::IntVector::getZero(d_dim);
-                domain_dims = interior_dims;
-                
-                domain_lo[2] += (-d_num_diff_ghosts[2] + d_num_interp_midpoint_ghosts[2]);
-                domain_dims[2] += 1;
-                domain_dims[2] += 2*(d_num_diff_ghosts[2] - d_num_interp_midpoint_ghosts[2]);
-                
-                interpolateDataFromNodeToMidpointZ(
-                    der_midpoint_z,
-                    der_node,
-                    num_ghosts_derivative_midpoint,
-                    num_ghosts_derivative_node,
-                    ghostcell_dims_derivative_midpoint,
-                    ghostcell_dims_derivative_node,
-                    domain_lo,
-                    domain_dims);
-                
-                std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
-                    u,
-                    d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]);
-                
-                derivatives_midpoint_z_computed.insert(derivative_pair);
+                d_scratch_derivatives_midpoint_z.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
+                    new pdat::SideData<double>(
+                        interior_box, 1, d_num_diff_ghosts, direction)));
             }
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+            else
+            {
+                TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_z.size()) >= d_num_scratch_derivatives_midpoint_z_used);
+            }
+#endif
             
-            derivatives_midpoint_z[ei].push_back(
-                derivatives_midpoint_z_computed.find(data[ei][vi]->getPointer(u_idx))->
-                    second);
+            // Get the pointer to the derivative at midpoint.
+            double* der_midpoint_z = d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]->getPointer(2, 0);
+            
+            /*
+             * Get the ghost cell widths and ghost box dimensions of the variables.
+             */
+            
+            const hier::IntVector& num_ghosts_derivative_node = d_num_diff_ghosts;
+            const hier::IntVector& num_ghosts_derivative_midpoint = d_num_diff_ghosts;
+            
+            const hier::IntVector& ghostcell_dims_derivative_node = diff_ghostcell_dims;
+            const hier::IntVector& ghostcell_dims_derivative_midpoint = diff_ghostcell_dims;
+            
+            hier::IntVector domain_lo(d_dim);
+            hier::IntVector domain_dims(d_dim);
+            
+            domain_lo = hier::IntVector::getZero(d_dim);
+            domain_dims = interior_dims;
+            
+            domain_lo[2] += (-d_num_diff_ghosts[2] + d_num_interp_midpoint_ghosts[2]);
+            domain_dims[2] += 1;
+            domain_dims[2] += 2*(d_num_diff_ghosts[2] - d_num_interp_midpoint_ghosts[2]);
+            
+            interpolateDataFromNodeToMidpointZ(
+                der_midpoint_z,
+                der_node,
+                num_ghosts_derivative_midpoint,
+                num_ghosts_derivative_node,
+                ghostcell_dims_derivative_midpoint,
+                ghostcell_dims_derivative_node,
+                domain_lo,
+                domain_dims);
+            
+            std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
+                u,
+                d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]);
+            
+            derivatives_midpoint_z_computed.insert(derivative_pair);
         }
+        
+        derivatives_midpoint_z.push_back(
+            derivatives_midpoint_z_computed.find(data[vi]->getPointer(u_idx))->
+                second);
+    }
+}
+
+
+/*
+ * Interpolate the derivatives from nodes to midpoints in z-direction.
+ */
+void
+DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMidpointZ(
+    hier::Patch& patch,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_midpoint_z,
+    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_z_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_node,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data,
+    const std::vector<std::vector<int> >& data_component_idx,
+    const bool allocate_scratch_derivatives_midpoint)
+{
+    const int num_eqn = static_cast<int>(derivative_node.size());
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(d_num_eqn == num_eqn);
+    TBOX_ASSERT(static_cast<int>(data.size()) == num_eqn);
+    TBOX_ASSERT(static_cast<int>(data_component_idx.size()) == num_eqn);
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
+            << "interpolateDerivativesFromNodeToMidpointZ()\n"
+            << "There isn't z-direction for one-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        TBOX_ERROR(d_object_name
+            << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
+            << "interpolateDerivativesFromNodeToMidpointZ()\n"
+            << "There isn't z-direction for two-dimensional problem."
+            << std::endl);
+    }
+#endif
+    
+    derivatives_midpoint_z.resize(num_eqn);
+    
+    for (int ei = 0; ei < num_eqn; ei++)
+    {
+        interpolateDerivativesFromNodeToMidpointZ(
+            patch,
+            derivatives_midpoint_z[ei],
+            derivatives_midpoint_z_computed,
+            derivative_node[ei],
+            data[ei],
+            data_component_idx[ei],
+            allocate_scratch_derivatives_midpoint);
     }
 }
 
@@ -3517,7 +4200,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxY(
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
             << "reconstructFluxY()\n"
-            << "There isn't y-direction for 1D problem."
+            << "There isn't y-direction for one-dimensional problem."
             << std::endl);
     }
 #endif
@@ -3578,7 +4261,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxZ(
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
             << "reconstructFluxZ()\n"
-            << "There isn't z-direction for 1D problem."
+            << "There isn't z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -3586,7 +4269,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxZ(
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorMidpointSixthOrder::"
             << "reconstructFluxZ()\n"
-            << "There isn't z-direction for 2D problem."
+            << "There isn't z-direction for two-dimensional problem."
             << std::endl);
     }
 #endif

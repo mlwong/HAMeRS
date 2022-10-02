@@ -93,7 +93,7 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
             const DIRECTION::TYPE& derivative_direction);
         
         /*
-         * Get the cell data that needs interpolation to midpoints for computing side data of diffusivities in the
+         * Get the cell data that needs interpolation to sides for computing side data of diffusivities in the
          * diffusive flux.
          */
         void
@@ -108,7 +108,7 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
         computeSideDataOfDiffusiveFluxDiffusivities(
             const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_data_for_diffusivities);
         
-        /*
+       /*
          * Get the side data of the diffusivities in the diffusive fluxa.
          */
         void

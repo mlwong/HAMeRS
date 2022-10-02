@@ -7,6 +7,7 @@ set(flow_models_source_files
     FlowModelMonitoringStatisticsUtilities.cpp
     FlowModelSourceUtilities.cpp
     FlowModelSpecialSourceTerms.cpp
+    FlowModelSubgridScaleModel.cpp
     ./MPI_helpers/FlowModelMPIHelper.cpp
     ./MPI_helpers/FlowModelMPIHelperMaxMin.cpp
     ./MPI_helpers/FlowModelMPIHelperAverage.cpp

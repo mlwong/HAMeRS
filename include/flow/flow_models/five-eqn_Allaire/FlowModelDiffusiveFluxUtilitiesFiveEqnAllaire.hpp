@@ -91,7 +91,7 @@ class FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire: public FlowModelDiffusiveFl
             const DIRECTION::TYPE& derivative_direction);
         
         /*
-         * Get the cell data that needs interpolation to midpoints for computing side data of diffusivities in the
+         * Get the cell data that needs interpolation to sides for computing side data of diffusivities in the
          * diffusive flux.
          */
         void

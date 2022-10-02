@@ -1910,7 +1910,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorSixthOrder::"
             << "computeFirstDerivativesInY()\n"
-            << "There isn't y-direction for 1D problem."
+            << "There isn't y-direction for one-dimensional problem."
             << std::endl);
     }
 #endif
@@ -2045,7 +2045,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorSixthOrder::"
             << "computeFirstDerivativesInZ()\n"
-            << "There isn't z-direction for 1D problem."
+            << "There isn't z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2053,7 +2053,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorSixthOrder::"
             << "computeFirstDerivativesInZ()\n"
-            << "There isn't z-direction for 2D problem."
+            << "There isn't z-direction for two-dimensional problem."
             << std::endl);
     }
 #endif
@@ -2235,7 +2235,7 @@ DiffusiveFluxReconstructorSixthOrder::reconstructFluxY(
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorSixthOrder::"
             << "reconstructFluxY()\n"
-            << "There isn't y-direction for 1D problem."
+            << "There isn't y-direction for one-dimensional problem."
             << std::endl);
     }
 #endif
@@ -2296,7 +2296,7 @@ DiffusiveFluxReconstructorSixthOrder::reconstructFluxZ(
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorSixthOrder::"
             << "reconstructFluxZ()\n"
-            << "There isn't z-direction for 1D problem."
+            << "There isn't z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2304,7 +2304,7 @@ DiffusiveFluxReconstructorSixthOrder::reconstructFluxZ(
         TBOX_ERROR(d_object_name
             << ": DiffusiveFluxReconstructorSixthOrder::"
             << "reconstructFluxZ()\n"
-            << "There isn't z-direction for 2D problem."
+            << "There isn't z-direction for two-dimensional problem."
             << std::endl);
     }
 #endif

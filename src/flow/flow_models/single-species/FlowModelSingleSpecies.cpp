@@ -539,6 +539,11 @@ FlowModelSingleSpecies::putToRestart(
     }
     
     /*
+     * Put the properties of d_flow_model_diffusive_flux_utilities into the restart database.
+     */
+    d_flow_model_diffusive_flux_utilities->putToRestart(restart_db);
+    
+    /*
      * Put the properties of d_flow_model_source_utilities into the restart database.
      */
     d_flow_model_source_utilities->putToRestart(restart_db);

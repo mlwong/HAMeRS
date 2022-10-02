@@ -36,50 +36,21 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::FlowModelDiffusiveFluxUtilitiesSin
 {
     if (d_use_subgrid_scale_model)
     {
-        std::string subgrid_scale_model_str;
-        if (flow_model_db->keyExists("subgrid_scale_model"))
-        {
-            subgrid_scale_model_str = flow_model_db->getString("subgrid_scale_model");
-        }
-        else if (flow_model_db->keyExists("d_subgrid_scale_model"))
-        {
-            subgrid_scale_model_str = flow_model_db->getString("d_subgrid_scale_model");
-        }
-        else
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "No key 'subgrid_scale_model'/'d_subgrid_scale_model' found in data for flow model."
-                << std::endl);
-        }
-        
-        if (subgrid_scale_model_str == "VREMAN")
-        {
-                d_subgrid_scale_model_type = SUBGRID_SCALE_MODEL::VREMAN;
-        }
-        else
-        {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::FlowModelDiffusiveFluxUtilitiesSingleSpecies()\n"
-                << "Unknown/unsupported subgrid scale model with string: '" << subgrid_scale_model_str << "'"
-                << std::endl);
-        }
-        
         HAMERS_SHARED_PTR<tbox::Database> subgrid_scale_model_db;
         
         if (flow_model_db->keyExists("Subgrid_scale_model"))
         {
             subgrid_scale_model_db = flow_model_db->getDatabase("Subgrid_scale_model");
         }
-        else if (flow_model_db->keyExists("d_subgrid_scale_model_db"))
+        else if (flow_model_db->keyExists("d_subgrid_scale_model"))
         {
-            subgrid_scale_model_db = flow_model_db->getDatabase("d_subgrid_scale_model_db");
+            subgrid_scale_model_db = flow_model_db->getDatabase("d_subgrid_scale_model");
         }
         else
         {
             TBOX_ERROR(d_object_name
                 << ": "
-                << "No key 'Subgrid_scale_model'/'d_subgrid_scale_model_db' found in data for flow model."
+                << "No key 'Subgrid_scale_model'/'d_subgrid_scale_model' found in data for flow model."
                 << std::endl);
         }
         
@@ -93,7 +64,6 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::FlowModelDiffusiveFluxUtilitiesSin
             d_num_species,
             subgrid_scale_model_db));
     }
-    
 }
 
 
@@ -282,6 +252,17 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDerivedVariablesForDiffusi
         "DIFFUSIVITIES");
     
     d_need_side_diffusivities = need_side_diffusivities;
+    
+    if (d_use_subgrid_scale_model)
+    {
+        const std::vector<std::string>& var_to_register = d_flow_model_subgrid_scale_model->getDerivedVariablesToRegister();
+        
+        for (int vi = 0; vi < static_cast<int>(var_to_register.size()); vi++)
+        {
+            num_subghosts_of_data.insert(
+                std::pair<std::string, hier::IntVector>(var_to_register[vi], num_subghosts));
+        }
+    }
 }
 
 
@@ -2378,7 +2359,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusiv
 
 
 /*
- * Get the cell data that needs interpolation to midpoints for computing side data of diffusivities in the
+ * Get the cell data that needs interpolation to sides for computing side data of diffusivities in the
  * diffusive flux.
  */
 void
@@ -2464,6 +2445,24 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataForInterpolationToSideD
         var_data_for_diffusivities_component_idx[4] = 1;
         var_data_for_diffusivities[5] = data_velocity;
         var_data_for_diffusivities_component_idx[5] = 2;
+    }
+    
+    if (d_use_subgrid_scale_model)
+    {
+        std::vector<std::string> var_to_interpolate;
+        std::vector<int> var_to_interpolate_component_idx;
+        d_flow_model_subgrid_scale_model->getDerivedVariablesForInterpolationToSideData(var_to_interpolate, var_to_interpolate_component_idx);
+        
+        for (int vi = 0; vi < static_cast<int>(var_to_interpolate.size()); vi++)
+        {
+            const std::string var_str = var_to_interpolate[vi];
+            if (var_to_interpolate[vi] != "VELOCITY")
+            {
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_u = flow_model_tmp->getCellData(var_to_interpolate[vi]);
+                var_data_for_diffusivities.push_back(data_u);
+                var_data_for_diffusivities_component_idx.push_back(var_to_interpolate_component_idx[vi]);
+            }
+        }
     }
 }
 
