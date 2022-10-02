@@ -3389,10 +3389,10 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
     {
         computeFirstDerivativesInZAtNode(
             patch,
-            derivatives_z_node,
+            derivatives_z_node[ei],
             derivatives_z_node_computed,
-            data_z,
-            data_component_idx_z,
+            data_z[ei],
+            data_component_idx_z[ei],
             allocate_scratch_derivatives_node);
     }
 }
