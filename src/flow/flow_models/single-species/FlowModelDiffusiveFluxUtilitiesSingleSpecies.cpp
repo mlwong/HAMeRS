@@ -2441,7 +2441,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
             
             for (int vi = 0; vi < static_cast<int>(var_data_for_diffusivities.size()); vi++)
             {
-                TBOX_ASSERT(var_data_for_diffusivities[vi] == num_ghosts);
+                TBOX_ASSERT(var_data_for_diffusivities[vi]->getGhostCellWidth() == num_ghosts);
                 TBOX_ASSERT(var_data_for_diffusivities[vi]->getGhostBox().contains(interior_box));
             }
 #endif

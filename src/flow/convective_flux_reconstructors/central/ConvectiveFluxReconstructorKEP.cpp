@@ -9204,7 +9204,6 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_f->getBox().isSpatiallyEqual(interior_box));
         TBOX_ASSERT(data_g->getBox().isSpatiallyEqual(interior_box));
-        TBOX_ASSERT(data_h->getBox().isSpatiallyEqual(interior_box));
 #endif
     
     // Get the dimensions of the ghost cell boxes.

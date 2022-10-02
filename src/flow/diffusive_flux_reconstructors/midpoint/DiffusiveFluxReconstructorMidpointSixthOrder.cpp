@@ -2424,8 +2424,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpoi
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     for (int ei = 0; ei < d_num_eqn; ei++)
     {
-        TBOX_ASSERT(static_cast<int>(data_y[ei].size()) ==
-                    static_cast<int>(data_component_idx_y[ei].size()));
+        TBOX_ASSERT(static_cast<int>(data_z[ei].size()) ==
+                    static_cast<int>(data_component_idx_z[ei].size()));
     }
     
     if (d_dim == tbox::Dimension(1))
@@ -3367,7 +3367,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDiffusivitiesFromNodeTo
     for (int vi = 0; vi < static_cast<int>(var_cell_data_for_diffusivities.size()); vi++)
     {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-        TBOX_ASSERT(var_cell_data_for_diffusivities[vi]->->getGhostCellWidth() >= d_num_diff_ghosts);
+        TBOX_ASSERT(var_cell_data_for_diffusivities[vi]->getGhostCellWidth() >= d_num_diff_ghosts);
 #endif
         
         // Get the pointer to variable for interpoation.
@@ -4388,8 +4388,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxX(
     const double dt)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(diffusive_flux.getDepth() == d_num_eqn);
-    TBOX_ASSERT(diffusive_flux_midpoint.getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux->getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux_midpoint->getDepth() == d_num_eqn);
 #endif
     
     const double a_m =  double(75)/double(64);
@@ -4572,8 +4572,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxY(
     const double dt)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(diffusive_flux.getDepth() == d_num_eqn);
-    TBOX_ASSERT(diffusive_flux_midpoint.getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux->getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux_midpoint->getDepth() == d_num_eqn);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -4734,8 +4734,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxZ(
     const double dt)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(diffusive_flux.getDepth() == d_num_eqn);
-    TBOX_ASSERT(diffusive_flux_midpoint.getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux->getDepth() == d_num_eqn);
+    TBOX_ASSERT(diffusive_flux_midpoint->getDepth() == d_num_eqn);
     
     if (d_dim == tbox::Dimension(1))
     {
