@@ -44,7 +44,8 @@ class FlowModelSubgridScaleModelSingleSpecies: public FlowModelSubgridScaleModel
         updateSideDataOfDiffusiveFluxDiffusivities(
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_data_for_diffusivities,
             const std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives,
-            const DIRECTION::TYPE& side_direction);
+            const DIRECTION::TYPE& side_direction,
+            const hier::Patch& patch);
         
         /*
          * Put the characteristics of this class into the restart database.
@@ -54,6 +55,31 @@ class FlowModelSubgridScaleModelSingleSpecies: public FlowModelSubgridScaleModel
             const HAMERS_SHARED_PTR<tbox::Database>& restart_subgrid_scale_model_db) const;
         
     private:
+        /*
+         * Kernal to modify the side data of the diffusivities/viscosities at sides with Vreman's subgrid scale
+         * diffusivity/viscosity.
+         */
+        void updateSideDataOfDiffusiveFluxDiffusivitiesVreman(
+            double* mu,
+            double* kappa,
+            const double* const rho,
+            const double* const ddx_u,
+            const double* const ddx_v,
+            const double* const ddx_w,
+            const double* const ddy_u,
+            const double* const ddy_v,
+            const double* const ddy_w,
+            const double* const ddz_u,
+            const double* const ddz_v,
+            const double* const ddz_w,
+            const hier::IntVector& num_ghosts_diffus,
+            const hier::IntVector& num_ghosts_der,
+            const hier::IntVector& ghostcell_dims_diffus,
+            const hier::IntVector& ghostcell_dims_der,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims,
+            const double& delta) const;
+            
         /*
          * Constants used to compute subgrid scale viscosity.
          */

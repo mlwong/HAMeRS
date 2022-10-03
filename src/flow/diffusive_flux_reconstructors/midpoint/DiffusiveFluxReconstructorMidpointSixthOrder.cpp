@@ -903,11 +903,6 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
             var_cell_data_for_diffusivities_component_idx,
             allocate_scratch_data_containers);
         
-        diffusive_flux_utilities->allocateMemoryForSideDataOfDiffusiveFluxDiffusivities();
-        
-        diffusive_flux_utilities->computeSideDataOfDiffusiveFluxDiffusivities(
-            var_side_data_for_diffusivities);
-        
         /*
          * Delcare containers for computing fluxes in different directions.
          */
@@ -1349,6 +1344,12 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
                 derivatives_midpoint_z,
                 DIRECTION::Z_DIRECTION);
         }
+        
+        
+        diffusive_flux_utilities->allocateMemoryForSideDataOfDiffusiveFluxDiffusivities();
+        
+        diffusive_flux_utilities->computeSideDataOfDiffusiveFluxDiffusivities(
+            var_side_data_for_diffusivities);
         
         // Get the variables for the derivatives in the diffusive flux.
         diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(

@@ -38,7 +38,7 @@ FlowModelSubgridScaleModel::FlowModelSubgridScaleModel(
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSubgridScaleModel::FlowModelSubgridScaleModel()\n"
-            << "Unknown/unsupported subgrid scale model with string: '" << subgrid_scale_model_str << "'"
+            << "Unknown/unsupported subgrid scale model with string: '" << subgrid_scale_model_str << "'."
             << std::endl);
     }
 }
@@ -92,11 +92,13 @@ void
 FlowModelSubgridScaleModel::updateSideDataOfDiffusiveFluxDiffusivities(
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_data_for_diffusivities,
     const std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives,
-    const DIRECTION::TYPE& side_direction)
+    const DIRECTION::TYPE& side_direction,
+    const hier::Patch& patch)
 {
     NULL_USE(var_data_for_diffusivities);
     NULL_USE(derivatives);
     NULL_USE(side_direction);
+    NULL_USE(patch);
 }
 
 

@@ -2456,12 +2456,9 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataForInterpolationToSideD
         for (int vi = 0; vi < static_cast<int>(var_to_interpolate.size()); vi++)
         {
             const std::string var_str = var_to_interpolate[vi];
-            if (var_to_interpolate[vi] != "VELOCITY")
-            {
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_u = flow_model_tmp->getCellData(var_to_interpolate[vi]);
-                var_data_for_diffusivities.push_back(data_u);
-                var_data_for_diffusivities_component_idx.push_back(var_to_interpolate_component_idx[vi]);
-            }
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_u = flow_model_tmp->getCellData(var_str);
+            var_data_for_diffusivities.push_back(data_u);
+            var_data_for_diffusivities_component_idx.push_back(var_to_interpolate_component_idx[vi]);
         }
     }
 }
@@ -2500,7 +2497,14 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
             const hier::IntVector ghostcell_dims = var_data_for_diffusivities[0]->getGhostBox().numberCells();
             
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-            TBOX_ASSERT(static_cast<int>(var_data_for_diffusivities.size()) == 3 + d_dim.getValue());
+            std::vector<std::string> var_to_interpolate;
+            std::vector<int> var_to_interpolate_component_idx;
+            if (d_use_subgrid_scale_model)
+            {
+                d_flow_model_subgrid_scale_model->getDerivedVariablesForInterpolationToSideData(var_to_interpolate, var_to_interpolate_component_idx);
+            }
+            
+            TBOX_ASSERT(static_cast<int>(var_data_for_diffusivities.size()) == 3 + d_dim.getValue() + static_cast<int>(var_to_interpolate.size()));
             TBOX_ASSERT(num_ghosts <= d_num_subghosts_diffusivities);
             
             for (int vi = 0; vi < static_cast<int>(var_data_for_diffusivities.size()); vi++)

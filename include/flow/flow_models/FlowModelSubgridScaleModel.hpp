@@ -43,7 +43,7 @@ class FlowModelSubgridScaleModel
         /*
          * Return different derived variables required for interpolation.
          */
-        void getDerivedVariablesForInterpolationToSideData(
+        virtual void getDerivedVariablesForInterpolationToSideData(
             std::vector<std::string>& var_to_interpolate,
             std::vector<int>& var_to_interpolate_component_idx) const;
         
@@ -64,7 +64,8 @@ class FlowModelSubgridScaleModel
         updateSideDataOfDiffusiveFluxDiffusivities(
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_data_for_diffusivities,
             const std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives,
-            const DIRECTION::TYPE& side_direction);
+            const DIRECTION::TYPE& side_direction,
+            const hier::Patch& patch);
         
         /*
          * Put the characteristics of this class into the restart database.

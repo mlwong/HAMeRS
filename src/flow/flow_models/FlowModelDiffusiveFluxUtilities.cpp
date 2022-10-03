@@ -325,10 +325,22 @@ FlowModelDiffusiveFluxUtilities::updateSideDataOfDiffusiveFluxDiffusivitiesWithS
     }
     else
     {
+        if (d_flow_model.expired())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "The object is not setup yet!"
+                << std::endl);
+        }
+        
+        HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+        const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
+        
         d_flow_model_subgrid_scale_model->updateSideDataOfDiffusiveFluxDiffusivities(
             var_data_for_diffusivities,
             derivatives,
-            side_direction);
+            side_direction,
+            patch);
     }
 }
 
