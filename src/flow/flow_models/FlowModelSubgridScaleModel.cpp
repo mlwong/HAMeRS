@@ -124,4 +124,11 @@ FlowModelSubgridScaleModel::putToRestartBase(
     {
         restart_subgrid_scale_model_db->putString("d_subgrid_scale_model", "VREMAN");
     }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSubgridScaleModel::putToRestartBase()\n"
+            << "Unknown/unsupported subgrid scale model."
+            << std::endl);
+    }
 }
