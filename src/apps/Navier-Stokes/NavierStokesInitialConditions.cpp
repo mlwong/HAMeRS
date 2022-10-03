@@ -1,1 +1,1 @@
-/home/wongml/Codes/HAMeRS/problems/Navier-Stokes/initial_conditions/BinaryMassDiffusion2D.cpp
+NavierStokesInitialConditionsDefault.cpp
