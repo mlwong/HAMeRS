@@ -171,10 +171,10 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
         // Interpolate variables from nodes to midpoints for computing diffusivities at midpoints.
         
         interpolateDiffusivitiesFromNodeToMidpoint(
-            patch,
             var_side_data_for_diffusivities,
             var_cell_data_for_diffusivities,
             var_cell_data_for_diffusivities_component_idx,
+            patch,
             allocate_scratch_data_containers);
         
         diffusive_flux_utilities->allocateMemoryForSideDataOfDiffusiveFluxDiffusivities();
@@ -242,11 +242,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInXAtMidpointX(
-            patch,
             derivatives_x_midpoint_x,
             derivatives_x_midpoint_x_computed,
             var_data_x,
             var_component_idx_x,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -302,9 +302,9 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         reconstructFluxX(
-            patch,
             diffusive_flux,
             diffusive_flux_midpoint,
+            patch,
             dt);
         
         var_data_x.clear();
@@ -363,10 +363,10 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
         // Interpolate variables from nodes to midpoints for computing diffusivities at midpoints.
         
         interpolateDiffusivitiesFromNodeToMidpoint(
-            patch,
             var_side_data_for_diffusivities,
             var_cell_data_for_diffusivities,
             var_cell_data_for_diffusivities_component_idx,
+            patch,
             allocate_scratch_data_containers);
         
         diffusive_flux_utilities->allocateMemoryForSideDataOfDiffusiveFluxDiffusivities();
@@ -467,11 +467,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInXAtMidpointX(
-            patch,
             derivatives_x_midpoint_x,
             derivatives_x_midpoint_x_computed,
             var_data_x,
             var_component_idx_x,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -479,20 +479,20 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInYAtNode(
-            patch,
             derivatives_y_node,
             derivatives_y_node_computed,
             var_data_y,
             var_component_idx_y,
+            patch,
             allocate_scratch_data_containers);
         
         interpolateDerivativesFromNodeToMidpointX(
-            patch,
             derivatives_y_midpoint_x,
             derivatives_y_midpoint_x_computed,
             derivatives_y_node,
             var_data_y,
             var_component_idx_y,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -611,9 +611,9 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         reconstructFluxX(
-            patch,
             diffusive_flux,
             diffusive_flux_midpoint,
+            patch,
             dt);
         
         var_data_x.clear();
@@ -677,20 +677,20 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInXAtNode(
-            patch,
             derivatives_x_node,
             derivatives_x_node_computed,
             var_data_x,
             var_component_idx_x,
+            patch,
             allocate_scratch_data_containers);
         
         interpolateDerivativesFromNodeToMidpointY(
-            patch,
             derivatives_x_midpoint_y,
             derivatives_x_midpoint_y_computed,
             derivatives_x_node,
             var_data_x,
             var_component_idx_x,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -698,11 +698,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInYAtMidpointY(
-            patch,
             derivatives_y_midpoint_y,
             derivatives_y_midpoint_y_computed,
             var_data_y,
             var_component_idx_y,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -821,9 +821,9 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         reconstructFluxY(
-            patch,
             diffusive_flux,
             diffusive_flux_midpoint,
+            patch,
             dt);
         
         var_data_x.clear();
@@ -897,10 +897,10 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
         // Interpolate variables from nodes to midpoints for computing diffusivities at midpoints.
         
         interpolateDiffusivitiesFromNodeToMidpoint(
-            patch,
             var_side_data_for_diffusivities,
             var_cell_data_for_diffusivities,
             var_cell_data_for_diffusivities_component_idx,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -1030,11 +1030,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
              */
             
             computeFirstDerivativesInXAtMidpointX(
-                patch,
                 derivatives_sgs_x_midpoint_x,
                 derivatives_x_midpoint_x_computed,
                 var_data_sgs_x,
                 var_component_idx_sgs_x,
+                patch,
                 allocate_scratch_data_containers);
             
             /*
@@ -1042,20 +1042,20 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
              */
             
             computeFirstDerivativesInYAtNode(
-                patch,
                 derivatives_sgs_y_node,
                 derivatives_y_node_computed,
                 var_data_sgs_y,
                 var_component_idx_sgs_y,
+                patch,
                 allocate_scratch_data_containers);
             
             interpolateDerivativesFromNodeToMidpointX(
-                patch,
                 derivatives_sgs_y_midpoint_x,
                 derivatives_y_midpoint_x_computed,
                 derivatives_sgs_y_node,
                 var_data_sgs_y,
                 var_component_idx_sgs_y,
+                patch,
                 allocate_scratch_data_containers);
             
             /*
@@ -1063,20 +1063,20 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
              */
             
             computeFirstDerivativesInZAtNode(
-                patch,
                 derivatives_sgs_z_node,
                 derivatives_z_node_computed,
                 var_data_sgs_z,
                 var_component_idx_sgs_z,
+                patch,
                 allocate_scratch_data_containers);
             
             interpolateDerivativesFromNodeToMidpointX(
-                patch,
                 derivatives_sgs_z_midpoint_x,
                 derivatives_z_midpoint_x_computed,
                 derivatives_sgs_z_node,
                 var_data_sgs_z,
                 var_component_idx_sgs_z,
+                patch,
                 allocate_scratch_data_containers);
             
             var_data_sgs_x.clear();
@@ -1117,20 +1117,20 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
              */
             
             computeFirstDerivativesInXAtNode(
-                patch,
                 derivatives_sgs_x_node,
                 derivatives_x_node_computed,
                 var_data_sgs_x,
                 var_component_idx_sgs_x,
+                patch,
                 allocate_scratch_data_containers);
             
             interpolateDerivativesFromNodeToMidpointY(
-                patch,
                 derivatives_sgs_x_midpoint_y,
                 derivatives_x_midpoint_y_computed,
                 derivatives_sgs_x_node,
                 var_data_sgs_x,
                 var_component_idx_sgs_x,
+                patch,
                 allocate_scratch_data_containers);
             
             /*
@@ -1138,11 +1138,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
              */
             
             computeFirstDerivativesInYAtMidpointY(
-                patch,
                 derivatives_sgs_y_midpoint_y,
                 derivatives_y_midpoint_y_computed,
                 var_data_sgs_y,
                 var_component_idx_sgs_y,
+                patch,
                 allocate_scratch_data_containers);
             
             /*
@@ -1150,20 +1150,20 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
              */
             
             computeFirstDerivativesInZAtNode(
-                patch,
                 derivatives_sgs_z_node,
                 derivatives_z_node_computed,
                 var_data_sgs_z,
                 var_component_idx_sgs_z,
+                patch,
                 allocate_scratch_data_containers);
             
             interpolateDerivativesFromNodeToMidpointY(
-                patch,
                 derivatives_sgs_z_midpoint_y,
                 derivatives_z_midpoint_y_computed,
                 derivatives_sgs_z_node,
                 var_data_sgs_z,
                 var_component_idx_sgs_z,
+                patch,
                 allocate_scratch_data_containers);
             
             var_data_sgs_x.clear();
@@ -1204,20 +1204,20 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
              */
             
             computeFirstDerivativesInXAtNode(
-                patch,
                 derivatives_sgs_x_node,
                 derivatives_x_node_computed,
                 var_data_sgs_x,
                 var_component_idx_sgs_x,
+                patch,
                 allocate_scratch_data_containers);
             
             interpolateDerivativesFromNodeToMidpointZ(
-                patch,
                 derivatives_sgs_x_midpoint_z,
                 derivatives_x_midpoint_z_computed,
                 derivatives_sgs_x_node,
                 var_data_sgs_x,
                 var_component_idx_sgs_x,
+                patch,
                 allocate_scratch_data_containers);
             
             /*
@@ -1225,20 +1225,20 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
              */
             
             computeFirstDerivativesInYAtNode(
-                patch,
                 derivatives_sgs_y_node,
                 derivatives_y_node_computed,
                 var_data_sgs_y,
                 var_component_idx_sgs_y,
+                patch,
                 allocate_scratch_data_containers);
             
             interpolateDerivativesFromNodeToMidpointZ(
-                patch,
                 derivatives_sgs_y_midpoint_z,
                 derivatives_y_midpoint_z_computed,
                 derivatives_sgs_y_node,
                 var_data_sgs_y,
                 var_component_idx_sgs_y,
+                patch,
                 allocate_scratch_data_containers);
             
             /*
@@ -1246,11 +1246,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
              */
             
             computeFirstDerivativesInZAtMidpointZ(
-                patch,
                 derivatives_sgs_z_midpoint_z,
                 derivatives_z_midpoint_z_computed,
                 var_data_sgs_z,
                 var_component_idx_sgs_z,
+                patch,
                 allocate_scratch_data_containers);
             
             var_data_sgs_x.clear();
@@ -1407,11 +1407,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInXAtMidpointX(
-            patch,
             derivatives_x_midpoint_x,
             derivatives_x_midpoint_x_computed,
             var_data_x,
             var_component_idx_x,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -1419,20 +1419,20 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInYAtNode(
-            patch,
             derivatives_y_node,
             derivatives_y_node_computed,
             var_data_y,
             var_component_idx_y,
+            patch,
             allocate_scratch_data_containers);
         
         interpolateDerivativesFromNodeToMidpointX(
-            patch,
             derivatives_y_midpoint_x,
             derivatives_y_midpoint_x_computed,
             derivatives_y_node,
             var_data_y,
             var_component_idx_y,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -1440,20 +1440,20 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInZAtNode(
-            patch,
             derivatives_z_node,
             derivatives_z_node_computed,
             var_data_z,
             var_component_idx_z,
+            patch,
             allocate_scratch_data_containers);
         
         interpolateDerivativesFromNodeToMidpointX(
-            patch,
             derivatives_z_midpoint_x,
             derivatives_z_midpoint_x_computed,
             derivatives_z_node,
             var_data_z,
             var_component_idx_z,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -1651,9 +1651,9 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         reconstructFluxX(
-            patch,
             diffusive_flux,
             diffusive_flux_midpoint,
+            patch,
             dt);
         
         var_data_x.clear();
@@ -1739,20 +1739,20 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInXAtNode(
-            patch,
             derivatives_x_node,
             derivatives_x_node_computed,
             var_data_x,
             var_component_idx_x,
+            patch,
             allocate_scratch_data_containers);
         
         interpolateDerivativesFromNodeToMidpointY(
-            patch,
             derivatives_x_midpoint_y,
             derivatives_x_midpoint_y_computed,
             derivatives_x_node,
             var_data_x,
             var_component_idx_x,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -1760,11 +1760,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInYAtMidpointY(
-            patch,
             derivatives_y_midpoint_y,
             derivatives_y_midpoint_y_computed,
             var_data_y,
             var_component_idx_y,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -1772,20 +1772,20 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInZAtNode(
-            patch,
             derivatives_z_node,
             derivatives_z_node_computed,
             var_data_z,
             var_component_idx_z,
+            patch,
             allocate_scratch_data_containers);
         
         interpolateDerivativesFromNodeToMidpointY(
-            patch,
             derivatives_z_midpoint_y,
             derivatives_z_midpoint_y_computed,
             derivatives_z_node,
             var_data_z,
             var_component_idx_z,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -1983,9 +1983,9 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         reconstructFluxY(
-            patch,
             diffusive_flux,
             diffusive_flux_midpoint,
+            patch,
             dt);
         
         var_data_x.clear();
@@ -2071,20 +2071,20 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInXAtNode(
-            patch,
             derivatives_x_node,
             derivatives_x_node_computed,
             var_data_x,
             var_component_idx_x,
+            patch,
             allocate_scratch_data_containers);
         
         interpolateDerivativesFromNodeToMidpointZ(
-            patch,
             derivatives_x_midpoint_z,
             derivatives_x_midpoint_z_computed,
             derivatives_x_node,
             var_data_x,
             var_component_idx_x,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -2092,20 +2092,20 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInYAtNode(
-            patch,
             derivatives_y_node,
             derivatives_y_node_computed,
             var_data_y,
             var_component_idx_y,
+            patch,
             allocate_scratch_data_containers);
         
         interpolateDerivativesFromNodeToMidpointZ(
-            patch,
             derivatives_y_midpoint_z,
             derivatives_y_midpoint_z_computed,
             derivatives_y_node,
             var_data_y,
             var_component_idx_y,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -2113,11 +2113,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInZAtMidpointZ(
-            patch,
             derivatives_z_midpoint_z,
             derivatives_z_midpoint_z_computed,
             var_data_z,
             var_component_idx_z,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -2315,9 +2315,9 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         reconstructFluxZ(
-            patch,
             diffusive_flux,
             diffusive_flux_midpoint,
+            patch,
             dt);
         
         var_data_x.clear();
@@ -2371,11 +2371,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeDiffusiveFluxOnPatch(
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpointX(
-    hier::Patch& patch,
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_x_midpoint_x,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_x_midpoint_x_computed,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_x,
     const std::vector<int>& data_component_idx_x,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
 {
     // Get the dimensions of box that covers the interior of patch.
@@ -2488,11 +2488,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpoi
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpointX(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_x_midpoint_x,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_x_midpoint_x_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
     const std::vector<std::vector<int> >& data_component_idx_x,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
 {
     const int num_eqn = static_cast<int>(data_x.size());
@@ -2513,11 +2513,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpoi
     for (int ei = 0; ei < num_eqn; ei++)
     {
         computeFirstDerivativesInXAtMidpointX(
-            patch,
             derivatives_x_midpoint_x[ei],
             derivatives_x_midpoint_x_computed,
             data_x[ei],
             data_component_idx_x[ei],
+            patch,
             allocate_scratch_derivatives_midpoint);
     }
 }
@@ -2528,11 +2528,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpoi
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpointY(
-    hier::Patch& patch,
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_y_midpoint_y,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_y_midpoint_y_computed,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_y,
     const std::vector<int>& data_component_idx_y,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -2656,11 +2656,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpoi
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpointY(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_y_midpoint_y,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_y_midpoint_y_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
     const std::vector<std::vector<int> >& data_component_idx_y,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
 {
     const int num_eqn = static_cast<int>(data_y.size());
@@ -2690,11 +2690,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpoi
     for (int ei = 0; ei < num_eqn; ei++)
     {
         computeFirstDerivativesInYAtMidpointY(
-            patch,
             derivatives_y_midpoint_y[ei],
             derivatives_y_midpoint_y_computed,
             data_y[ei],
             data_component_idx_y[ei],
+            patch,
             allocate_scratch_derivatives_midpoint);
     }
 }
@@ -2705,11 +2705,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpoi
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpointZ(
-    hier::Patch& patch,
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_z_midpoint_z,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_z_midpoint_z_computed,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_z,
     const std::vector<int>& data_component_idx_z,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -2841,11 +2841,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpoi
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpointZ(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_z_midpoint_z,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_z_midpoint_z_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
     const std::vector<std::vector<int> >& data_component_idx_z,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
 {
     const int num_eqn = static_cast<int>(data_z.size());
@@ -2883,11 +2883,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpoi
     for (int ei = 0; ei < num_eqn; ei++)
     {
         computeFirstDerivativesInZAtMidpointZ(
-            patch,
             derivatives_z_midpoint_z[ei],
             derivatives_z_midpoint_z_computed,
             data_z[ei],
             data_component_idx_z[ei],
+            patch,
             allocate_scratch_derivatives_midpoint);
     }
 }
@@ -2898,11 +2898,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpoi
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
-    hier::Patch& patch,
     std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x_node,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x_node_computed,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_x,
     const std::vector<int>& data_component_idx_x,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_node)
 {
     // Get the dimensions of box that covers the interior of patch.
@@ -3011,11 +3011,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_x_node,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x_node_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
     const std::vector<std::vector<int> >& data_component_idx_x,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_node)
 {
     const int num_eqn = static_cast<int>(data_x.size());
@@ -3036,11 +3036,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
     for (int ei = 0; ei < num_eqn; ei++)
     {
         computeFirstDerivativesInXAtNode(
-            patch,
             derivatives_x_node[ei],
             derivatives_x_node_computed,
             data_x[ei],
             data_component_idx_x[ei],
+            patch,
             allocate_scratch_derivatives_node);
     }
 }
@@ -3051,11 +3051,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
-    hier::Patch& patch,
     std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y_node,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y_node_computed,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_y,
     const std::vector<int>& data_component_idx_y,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_node)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -3175,11 +3175,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_y_node,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y_node_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
     const std::vector<std::vector<int> >& data_component_idx_y,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_node)
 {
     const int num_eqn = static_cast<int>(data_y.size());
@@ -3209,11 +3209,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
     for (int ei = 0; ei < num_eqn; ei++)
     {
         computeFirstDerivativesInYAtNode(
-            patch,
             derivatives_y_node[ei],
             derivatives_y_node_computed,
             data_y[ei],
             data_component_idx_y[ei],
+            patch,
             allocate_scratch_derivatives_node);
     }
 }
@@ -3224,11 +3224,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
-    hier::Patch& patch,
     std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z_node,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z_node_computed,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_z,
     const std::vector<int>& data_component_idx_z,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_node)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -3356,11 +3356,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_z_node,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z_node_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
     const std::vector<std::vector<int> >& data_component_idx_z,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_node)
 {
     const int num_eqn = static_cast<int>(data_z.size());
@@ -3398,11 +3398,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
     for (int ei = 0; ei < num_eqn; ei++)
     {
         computeFirstDerivativesInZAtNode(
-            patch,
             derivatives_z_node[ei],
             derivatives_z_node_computed,
             data_z[ei],
             data_component_idx_z[ei],
+            patch,
             allocate_scratch_derivatives_node);
     }
 }
@@ -3413,10 +3413,10 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDiffusivitiesFromNodeToMidpoint(
-    hier::Patch& patch,
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_side_data_for_diffusivities,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& var_cell_data_for_diffusivities,
     const std::vector<int>& var_cell_data_for_diffusivities_component_idx,
+    const hier::Patch& patch,
     const bool allocate_scratch_diffusivities_midpoint)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -3629,12 +3629,12 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDiffusivitiesFromNodeTo
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMidpointX(
-    hier::Patch& patch,
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_x,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_x_computed,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_node,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data,
     const std::vector<int>& data_component_idx,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
 {
     // Get the dimensions of box that covers the interior of patch.
@@ -3745,12 +3745,12 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMidpointX(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_midpoint_x,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_x_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_node,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data,
     const std::vector<std::vector<int> >& data_component_idx,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
 {
     const int num_eqn = static_cast<int>(derivative_node.size());
@@ -3766,12 +3766,12 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
     for (int ei = 0; ei < num_eqn; ei++)
     {
         interpolateDerivativesFromNodeToMidpointX(
-            patch,
             derivatives_midpoint_x[ei],
             derivatives_midpoint_x_computed,
             derivative_node[ei],
             data[ei],
             data_component_idx[ei],
+            patch,
             allocate_scratch_derivatives_midpoint);
     }
 }
@@ -3782,12 +3782,12 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMidpointY(
-    hier::Patch& patch,
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_y,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_y_computed,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_node,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data,
     const std::vector<int>& data_component_idx,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -3909,12 +3909,12 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMidpointY(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_midpoint_y,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_y_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_node,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data,
     const std::vector<std::vector<int> >& data_component_idx,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
 {
     const int num_eqn = static_cast<int>(derivative_node.size());
@@ -3939,12 +3939,12 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
     for (int ei = 0; ei < num_eqn; ei++)
     {
         interpolateDerivativesFromNodeToMidpointY(
-            patch,
             derivatives_midpoint_y[ei],
             derivatives_midpoint_y_computed,
             derivative_node[ei],
             data[ei],
             data_component_idx[ei],
+            patch,
             allocate_scratch_derivatives_midpoint);
     }
 }
@@ -3955,12 +3955,12 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMidpointZ(
-    hier::Patch& patch,
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_z,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_z_computed,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_node,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data,
     const std::vector<int>& data_component_idx,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -4090,12 +4090,12 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMidpointZ(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_midpoint_z,
     std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_z_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_node,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data,
     const std::vector<std::vector<int> >& data_component_idx,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
 {
     const int num_eqn = static_cast<int>(derivative_node.size());
@@ -4128,12 +4128,12 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
     for (int ei = 0; ei < num_eqn; ei++)
     {
         interpolateDerivativesFromNodeToMidpointZ(
-            patch,
             derivatives_midpoint_z[ei],
             derivatives_midpoint_z_computed,
             derivative_node[ei],
             data[ei],
             data_component_idx[ei],
+            patch,
             allocate_scratch_derivatives_midpoint);
     }
 }
@@ -4144,10 +4144,10 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDerivativesFromNodeToMi
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxX(
-    hier::Patch& patch,
     HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
     const HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux_midpoint,
-    const double dt)
+    const hier::Patch& patch,
+    const double dt) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(diffusive_flux->getDepth() == d_num_eqn);
@@ -4196,10 +4196,10 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxX(
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxY(
-    hier::Patch& patch,
     HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
     const HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux_midpoint,
-    const double dt)
+    const hier::Patch& patch,
+    const double dt) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(diffusive_flux->getDepth() == d_num_eqn);
@@ -4257,10 +4257,10 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxY(
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxZ(
-    hier::Patch& patch,
     HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
     const HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux_midpoint,
-    const double dt)
+    const hier::Patch& patch,
+    const double dt) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(diffusive_flux->getDepth() == d_num_eqn);
@@ -4337,7 +4337,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpoi
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_0_inv)
+    const double& dx_0_inv) const
 {
     const double a_n =  double(75)/double(64);
     const double b_n = -double(25)/double(384);
@@ -4526,7 +4526,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpoi
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_1_inv)
+    const double& dx_1_inv) const
 {
     const double a_n =  double(75)/double(64);
     const double b_n = -double(25)/double(384);
@@ -4681,7 +4681,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpoi
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_2_inv)
+    const double& dx_2_inv) const
 {
     const double a_n =  double(75)/double(64);
     const double b_n = -double(25)/double(384);
@@ -4762,7 +4762,6 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpoi
             }
         }
     }
-    
 }
 
 
@@ -4779,7 +4778,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_0_inv)
+    const double& dx_0_inv) const
 {
     const double a_n =  double(3)/double(4);
     const double b_n = -double(3)/double(20);
@@ -4969,7 +4968,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_1_inv)
+    const double& dx_1_inv) const
 {
     const double a_n =  double(3)/double(4);
     const double b_n = -double(3)/double(20);
@@ -5124,7 +5123,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_2_inv)
+    const double& dx_2_inv) const
 {
     const double a_n =  double(3)/double(4);
     const double b_n = -double(3)/double(20);
@@ -5220,7 +5219,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointX
     const hier::IntVector& ghostcell_dims_data_midpoint,
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
-    const hier::IntVector& domain_dims)
+    const hier::IntVector& domain_dims) const
 {
     const double a_n =  double(75)/double(128);
     const double b_n = -double(25)/double(256);
@@ -5408,7 +5407,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointY
     const hier::IntVector& ghostcell_dims_data_midpoint,
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
-    const hier::IntVector& domain_dims)
+    const hier::IntVector& domain_dims) const
 {
     const double a_n =  double(75)/double(128);
     const double b_n = -double(25)/double(256);
@@ -5562,7 +5561,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointZ
     const hier::IntVector& ghostcell_dims_data_midpoint,
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
-    const hier::IntVector& domain_dims)
+    const hier::IntVector& domain_dims) const
 {
     const double a_n =  double(75)/double(128);
     const double b_n = -double(25)/double(256);
@@ -5658,7 +5657,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxX(
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
     const hier::IntVector& interior_dims,
-    const double& dt)
+    const double& dt) const
 {
     const double a_m =  double(75)/double(64);
     const double b_m = -double(25)/double(384);
@@ -5836,7 +5835,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxY(
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
     const hier::IntVector& interior_dims,
-    const double& dt)
+    const double& dt) const
 {
     const double a_m =  double(75)/double(64);
     const double b_m = -double(25)/double(384);
@@ -5982,7 +5981,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxZ(
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
     const hier::IntVector& interior_dims,
-    const double& dt)
+    const double& dt) const
 {
     const double a_m =  double(75)/double(64);
     const double b_m = -double(25)/double(384);

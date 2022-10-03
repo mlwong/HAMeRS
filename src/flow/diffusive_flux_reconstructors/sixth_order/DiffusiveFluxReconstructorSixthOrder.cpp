@@ -189,11 +189,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInX(
-            patch,
             derivatives_x,
             derivatives_x_computed,
             var_data_x,
             var_component_idx_x,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -251,9 +251,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         reconstructFluxX(
-            patch,
             diffusive_flux,
             diffusive_flux_node[0],
+            patch,
             dt);
         
         var_data_x.clear();
@@ -378,11 +378,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInX(
-            patch,
             derivatives_x,
             derivatives_x_computed,
             var_data_x,
             var_component_idx_x,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -390,11 +390,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInY(
-            patch,
             derivatives_y,
             derivatives_y_computed,
             var_data_y,
             var_component_idx_y,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -513,9 +513,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         reconstructFluxX(
-            patch,
             diffusive_flux,
             diffusive_flux_node[0],
+            patch,
             dt);
         
         var_data_x.clear();
@@ -577,11 +577,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInX(
-            patch,
             derivatives_x,
             derivatives_x_computed,
             var_data_x,
             var_component_idx_x,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -589,11 +589,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInY(
-            patch,
             derivatives_y,
             derivatives_y_computed,
             var_data_y,
             var_component_idx_y,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -712,9 +712,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         reconstructFluxY(
-            patch,
             diffusive_flux,
             diffusive_flux_node[1],
+            patch,
             dt);
         
         var_data_x.clear();
@@ -878,11 +878,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInX(
-            patch,
             derivatives_x,
             derivatives_x_computed,
             var_data_x,
             var_component_idx_x,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -890,11 +890,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInY(
-            patch,
             derivatives_y,
             derivatives_y_computed,
             var_data_y,
             var_component_idx_y,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -902,11 +902,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInZ(
-            patch,
             derivatives_z,
             derivatives_z_computed,
             var_data_z,
             var_component_idx_z,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -1102,9 +1102,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         reconstructFluxX(
-            patch,
             diffusive_flux,
             diffusive_flux_node[0],
+            patch,
             dt);
         
         var_data_x.clear();
@@ -1187,11 +1187,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInX(
-            patch,
             derivatives_x,
             derivatives_x_computed,
             var_data_x,
             var_component_idx_x,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -1199,11 +1199,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInY(
-            patch,
             derivatives_y,
             derivatives_y_computed,
             var_data_y,
             var_component_idx_y,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -1211,11 +1211,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInZ(
-            patch,
             derivatives_z,
             derivatives_z_computed,
             var_data_z,
             var_component_idx_z,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -1411,9 +1411,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         reconstructFluxY(
-            patch,
             diffusive_flux,
             diffusive_flux_node[1],
+            patch,
             dt);
         
         var_data_x.clear();
@@ -1496,11 +1496,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInX(
-            patch,
             derivatives_x,
             derivatives_x_computed,
             var_data_x,
             var_component_idx_x,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -1508,11 +1508,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInY(
-            patch,
             derivatives_y,
             derivatives_y_computed,
             var_data_y,
             var_component_idx_y,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -1520,11 +1520,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         computeFirstDerivativesInZ(
-            patch,
             derivatives_z,
             derivatives_z_computed,
             var_data_z,
             var_component_idx_z,
+            patch,
             allocate_scratch_data_containers);
         
         /*
@@ -1720,9 +1720,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         reconstructFluxZ(
-            patch,
             diffusive_flux,
             diffusive_flux_node[2],
+            patch,
             dt);
         
         var_data_x.clear();
@@ -1765,11 +1765,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
  */
 void
 DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_x,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
     const std::vector<std::vector<int> >& data_component_idx_x,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_node)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -1891,11 +1891,11 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
  */
 void
 DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_y,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
     const std::vector<std::vector<int> >& data_component_idx_y,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_node)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -2026,11 +2026,11 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
  */
 void
 DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_z,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
     const std::vector<std::vector<int> >& data_component_idx_z,
+    const hier::Patch& patch,
     const bool allocate_scratch_derivatives_node)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -2169,10 +2169,10 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
  */
 void
 DiffusiveFluxReconstructorSixthOrder::reconstructFluxX(
-    hier::Patch& patch,
     HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
     const HAMERS_SHARED_PTR<pdat::CellData<double> >& diffusive_flux_node,
-    const double dt)
+    const hier::Patch& patch,
+    const double dt) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(diffusive_flux->getDepth() == d_num_eqn);
@@ -2221,10 +2221,10 @@ DiffusiveFluxReconstructorSixthOrder::reconstructFluxX(
  */
 void
 DiffusiveFluxReconstructorSixthOrder::reconstructFluxY(
-    hier::Patch& patch,
     HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
     const HAMERS_SHARED_PTR<pdat::CellData<double> >& diffusive_flux_node,
-    const double dt)
+    const hier::Patch& patch,
+    const double dt) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(diffusive_flux->getDepth() == d_num_eqn);
@@ -2282,10 +2282,10 @@ DiffusiveFluxReconstructorSixthOrder::reconstructFluxY(
  */
 void
 DiffusiveFluxReconstructorSixthOrder::reconstructFluxZ(
-    hier::Patch& patch,
     HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
     const HAMERS_SHARED_PTR<pdat::CellData<double> >& diffusive_flux_node,
-    const double dt)
+    const hier::Patch& patch,
+    const double dt) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(diffusive_flux->getDepth() == d_num_eqn);
@@ -2362,7 +2362,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_0_inv)
+    const double& dx_0_inv) const
 {
     const double a_n =  double(3)/double(4);
     const double b_n = -double(3)/double(20);
@@ -2552,7 +2552,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_1_inv)
+    const double& dx_1_inv) const
 {
     const double a_n =  double(3)/double(4);
     const double b_n = -double(3)/double(20);
@@ -2707,7 +2707,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_2_inv)
+    const double& dx_2_inv) const
 {
     const double a_n =  double(3)/double(4);
     const double b_n = -double(3)/double(20);
@@ -2803,7 +2803,7 @@ DiffusiveFluxReconstructorSixthOrder::reconstructFluxX(
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
     const hier::IntVector& interior_dims,
-    const double& dt)
+    const double& dt) const
 {
     const double a_n =  double(3)/double(4);
     const double b_n = -double(3)/double(20);
@@ -2990,7 +2990,7 @@ DiffusiveFluxReconstructorSixthOrder::reconstructFluxY(
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
     const hier::IntVector& interior_dims,
-    const double& dt)
+    const double& dt) const
 {
     const double a_n =  double(3)/double(4);
     const double b_n = -double(3)/double(20);
@@ -3144,7 +3144,7 @@ DiffusiveFluxReconstructorSixthOrder::reconstructFluxZ(
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
     const hier::IntVector& interior_dims,
-    const double& dt)
+    const double& dt) const
 {
     const double a_n =  double(3)/double(4);
     const double b_n = -double(3)/double(20);
