@@ -46,6 +46,17 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
          * Compute the first derivatives in the x-direction.
          */
         void computeFirstDerivativesInX(
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x,
+            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x_computed,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_x,
+            const std::vector<int>& data_component_idx_x,
+            const hier::Patch& patch,
+            const bool allocate_scratch_derivatives_node);
+            
+        /*
+         * Compute the first derivatives in the x-direction.
+         */
+        void computeFirstDerivativesInX(
             std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_x,
             std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x_computed,
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
@@ -57,10 +68,32 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
          * Compute the first derivatives in the y-direction.
          */
         void computeFirstDerivativesInY(
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y,
+            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y_computed,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_y,
+            const std::vector<int>& data_component_idx_y,
+            const hier::Patch& patch,
+            const bool allocate_scratch_derivatives_node);
+        
+        /*
+         * Compute the first derivatives in the y-direction.
+         */
+        void computeFirstDerivativesInY(
             std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_y,
             std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y_computed,
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
             const std::vector<std::vector<int> >& data_component_idx_y,
+            const hier::Patch& patch,
+            const bool allocate_scratch_derivatives_node);
+        
+        /*
+         * Compute the first derivatives in the z-direction.
+         */
+        void computeFirstDerivativesInZ(
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z,
+            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z_computed,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_z,
+            const std::vector<int>& data_component_idx_z,
             const hier::Patch& patch,
             const bool allocate_scratch_derivatives_node);
         
