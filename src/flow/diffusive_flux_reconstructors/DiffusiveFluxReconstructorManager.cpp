@@ -10,7 +10,31 @@ DiffusiveFluxReconstructorManager::DiffusiveFluxReconstructorManager(
     const std::string& diffusive_flux_reconstructor_str):
         d_object_name(object_name)
 {
-    if (diffusive_flux_reconstructor_str == "MIDPOINT_SIXTH_ORDER")
+    if (diffusive_flux_reconstructor_str == "MIDPOINT_SECOND_ORDER")
+    {
+        d_diffusive_flux_reconstructor_type = DIFFUSIVE_FLUX_RECONSTRUCTOR::MIDPOINT_SECOND_ORDER;
+        
+        d_diff_flux_reconstructor.reset(new DiffusiveFluxReconstructorMidpointSecondOrder(
+            "d_diffusive_flux_reconstructor",
+            dim,
+            grid_geometry,
+            flow_model->getNumberOfEquations(),
+            flow_model,
+            diffusive_flux_reconstructor_db));
+    }
+    else if (diffusive_flux_reconstructor_str == "MIDPOINT_FOURTH_ORDER")
+    {
+        d_diffusive_flux_reconstructor_type = DIFFUSIVE_FLUX_RECONSTRUCTOR::MIDPOINT_FOURTH_ORDER;
+        
+        d_diff_flux_reconstructor.reset(new DiffusiveFluxReconstructorMidpointFourthOrder(
+            "d_diffusive_flux_reconstructor",
+            dim,
+            grid_geometry,
+            flow_model->getNumberOfEquations(),
+            flow_model,
+            diffusive_flux_reconstructor_db));
+    }
+    else if (diffusive_flux_reconstructor_str == "MIDPOINT_SIXTH_ORDER")
     {
         d_diffusive_flux_reconstructor_type = DIFFUSIVE_FLUX_RECONSTRUCTOR::MIDPOINT_SIXTH_ORDER;
         
@@ -22,11 +46,35 @@ DiffusiveFluxReconstructorManager::DiffusiveFluxReconstructorManager(
             flow_model,
             diffusive_flux_reconstructor_db));
     }
+    else if (diffusive_flux_reconstructor_str == "SECOND_ORDER")
+    {
+        d_diffusive_flux_reconstructor_type = DIFFUSIVE_FLUX_RECONSTRUCTOR::SECOND_ORDER;
+        
+        d_diff_flux_reconstructor.reset(new DiffusiveFluxReconstructorNodeSecondOrder(
+            "d_diffusive_flux_reconstructor",
+            dim,
+            grid_geometry,
+            flow_model->getNumberOfEquations(),
+            flow_model,
+            diffusive_flux_reconstructor_db));
+    }
+    else if (diffusive_flux_reconstructor_str == "FOURTH_ORDER")
+    {
+        d_diffusive_flux_reconstructor_type = DIFFUSIVE_FLUX_RECONSTRUCTOR::FOURTH_ORDER;
+        
+        d_diff_flux_reconstructor.reset(new DiffusiveFluxReconstructorNodeFourthOrder(
+            "d_diffusive_flux_reconstructor",
+            dim,
+            grid_geometry,
+            flow_model->getNumberOfEquations(),
+            flow_model,
+            diffusive_flux_reconstructor_db));
+    }
     else if (diffusive_flux_reconstructor_str == "SIXTH_ORDER")
     {
         d_diffusive_flux_reconstructor_type = DIFFUSIVE_FLUX_RECONSTRUCTOR::SIXTH_ORDER;
         
-        d_diff_flux_reconstructor.reset(new DiffusiveFluxReconstructorSixthOrder(
+        d_diff_flux_reconstructor.reset(new DiffusiveFluxReconstructorNodeSixthOrder(
             "d_diffusive_flux_reconstructor",
             dim,
             grid_geometry,

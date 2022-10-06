@@ -1,12 +1,12 @@
-#ifndef DIFFUSIVE_FLUX_RECONSTRUCTOR_MIDPOINT_SIXTH_ORDER_HPP
-#define DIFFUSIVE_FLUX_RECONSTRUCTOR_MIDPOINT_SIXTH_ORDER_HPP
+#ifndef DIFFUSIVE_FLUX_RECONSTRUCTOR_MIDPOINT_FOURTH_ORDER_HPP
+#define DIFFUSIVE_FLUX_RECONSTRUCTOR_MIDPOINT_FOURTH_ORDER_HPP
 
 #include "flow/diffusive_flux_reconstructors/midpoint/DiffusiveFluxReconstructorMidpoint.hpp"
 
-class DiffusiveFluxReconstructorMidpointSixthOrder: public DiffusiveFluxReconstructorMidpoint
+class DiffusiveFluxReconstructorMidpointFourthOrder: public DiffusiveFluxReconstructorMidpoint
 {
     public:
-        DiffusiveFluxReconstructorMidpointSixthOrder(
+        DiffusiveFluxReconstructorMidpointFourthOrder(
             const std::string& object_name,
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
@@ -14,7 +14,7 @@ class DiffusiveFluxReconstructorMidpointSixthOrder: public DiffusiveFluxReconstr
             const HAMERS_SHARED_PTR<FlowModel>& flow_model,
             const HAMERS_SHARED_PTR<tbox::Database>& diffusive_flux_reconstructor_db);
         
-        ~DiffusiveFluxReconstructorMidpointSixthOrder() {}
+        ~DiffusiveFluxReconstructorMidpointFourthOrder() {}
         
         /*
          * Print all characteristics of the diffusive flux reconstruction class.
@@ -198,4 +198,4 @@ class DiffusiveFluxReconstructorMidpointSixthOrder: public DiffusiveFluxReconstr
         
 };
 
-#endif /* DIFFUSIVE_FLUX_RECONSTRUCTOR_MIDPOINT_SIXTH_ORDER_HPP */
+#endif /* DIFFUSIVE_FLUX_RECONSTRUCTOR_MIDPOINT_FOURTH_ORDER_HPP */

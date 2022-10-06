@@ -1,10 +1,10 @@
-#include "flow/diffusive_flux_reconstructors/midpoint/DiffusiveFluxReconstructorMidpointSixthOrder.hpp"
+#include "flow/diffusive_flux_reconstructors/midpoint/DiffusiveFluxReconstructorMidpointSecondOrder.hpp"
 
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 
 #include <map>
 
-DiffusiveFluxReconstructorMidpointSixthOrder::DiffusiveFluxReconstructorMidpointSixthOrder(
+DiffusiveFluxReconstructorMidpointSecondOrder::DiffusiveFluxReconstructorMidpointSecondOrder(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
@@ -19,13 +19,13 @@ DiffusiveFluxReconstructorMidpointSixthOrder::DiffusiveFluxReconstructorMidpoint
             flow_model,
             diffusive_flux_reconstructor_db)
 {
-    d_num_diff_ghosts = hier::IntVector::getOne(d_dim)*5;
+    d_num_diff_ghosts = hier::IntVector::getOne(d_dim);
     
     // The number of ghost cells used for finite difference and interpolation schemes at midpoints are the same.
-    d_num_der_midpoint_ghosts     = hier::IntVector::getOne(d_dim)*3;
-    d_num_der_node_ghosts         = hier::IntVector::getOne(d_dim)*3;
-    d_num_interp_midpoint_ghosts  = hier::IntVector::getOne(d_dim)*3;
-    d_num_flux_reconstruct_ghosts = hier::IntVector::getOne(d_dim)*3;
+    d_num_der_midpoint_ghosts     = hier::IntVector::getOne(d_dim);
+    d_num_der_node_ghosts         = hier::IntVector::getOne(d_dim);
+    d_num_interp_midpoint_ghosts  = hier::IntVector::getOne(d_dim);
+    d_num_flux_reconstruct_ghosts = hier::IntVector::getOne(d_dim);
 }
 
 
@@ -33,16 +33,16 @@ DiffusiveFluxReconstructorMidpointSixthOrder::DiffusiveFluxReconstructorMidpoint
  * Print all characteristics of the diffusive flux reconstruction class.
  */
 void
-DiffusiveFluxReconstructorMidpointSixthOrder::printClassData(
+DiffusiveFluxReconstructorMidpointSecondOrder::printClassData(
     std::ostream& os) const
 {
-    os << "\nPrint DiffusiveFluxReconstructorMidpointSixthOrder object..."
+    os << "\nPrint DiffusiveFluxReconstructorMidpointSecondOrder object..."
        << std::endl;
     
     os << std::endl;
     
-    os << "DiffusiveFluxReconstructorMidpointSixthOrder: this = "
-       << (DiffusiveFluxReconstructorMidpointSixthOrder *)this
+    os << "DiffusiveFluxReconstructorMidpointSecondOrder: this = "
+       << (DiffusiveFluxReconstructorMidpointSecondOrder *)this
        << std::endl;
     os << "d_object_name = "
        << d_object_name
@@ -55,7 +55,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::printClassData(
  * into the restart database.
  */
 void
-DiffusiveFluxReconstructorMidpointSixthOrder::putToRestart(
+DiffusiveFluxReconstructorMidpointSecondOrder::putToRestart(
    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
     restart_db->putString("d_diffusive_flux_reconstructor", "MIDPOINT_SIXTH_ORDER");
@@ -66,7 +66,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::putToRestart(
  * Kernel to compute the derivatives in x-direction at midpoints.
  */
 void
-DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpointX(
+DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInXAtMidpointX(
     double* dudx,
     const double* const u,
     const hier::IntVector& num_ghosts_derivative_midpoint,
@@ -255,7 +255,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpoi
  * Kernel to compute the derivatives in y-direction at midpoints.
  */
 void
-DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpointY(
+DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInYAtMidpointY(
     double* dudy,
     const double* const u,
     const hier::IntVector& num_ghosts_derivative_midpoint,
@@ -410,7 +410,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpoi
  * Kernel to compute the derivatives in z-direction at midpoints.
  */
 void
-DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpointZ(
+DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInZAtMidpointZ(
     double* dudz,
     const double* const u,
     const hier::IntVector& num_ghosts_derivative_midpoint,
@@ -507,7 +507,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpoi
  * Kernel to compute the derivatives in x-direction at nodes.
  */
 void
-DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
+DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInXAtNode(
     double* dudx,
     const double* const u,
     const hier::IntVector& num_ghosts_derivative_node,
@@ -697,7 +697,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
  * Kernel to compute the derivatives in y-direction at nodes.
  */
 void
-DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
+DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInYAtNode(
     double* dudy,
     const double* const u,
     const hier::IntVector& num_ghosts_derivative_node,
@@ -852,7 +852,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
  * Kernel to compute the derivatives in z-direction at nodes.
  */
 void
-DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
+DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInZAtNode(
     double* dudz,
     const double* const u,
     const hier::IntVector& num_ghosts_derivative_node,
@@ -949,7 +949,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
  * Kernel to interpolate the data from nodes to midpoints in x-direction.
  */
 void
-DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointX(
+DiffusiveFluxReconstructorMidpointSecondOrder::interpolateDataFromNodeToMidpointX(
     double* u_midpoint_x,
     const double* const u_node,
     const hier::IntVector& num_ghosts_data_midpoint,
@@ -1137,7 +1137,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointX
  * Kernel to interpolate the data from nodes to midpoints in y-direction.
  */
 void
-DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointY(
+DiffusiveFluxReconstructorMidpointSecondOrder::interpolateDataFromNodeToMidpointY(
     double* u_midpoint_y,
     const double* const u_node,
     const hier::IntVector& num_ghosts_data_midpoint,
@@ -1291,7 +1291,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointY
  * Kernel to interpolate the data from nodes to midpoints in z-direction.
  */
 void
-DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointZ(
+DiffusiveFluxReconstructorMidpointSecondOrder::interpolateDataFromNodeToMidpointZ(
     double* u_midpoint_z,
     const double* const u_node,
     const hier::IntVector& num_ghosts_data_midpoint,
@@ -1387,7 +1387,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointZ
  * Kernel to reconstruct the flux using flux at midpoints in x-direction.
  */
 void
-DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxX(
+DiffusiveFluxReconstructorMidpointSecondOrder::reconstructFluxX(
     double* F_face_x,
     const double* const F_midpoint_x,
     const hier::IntVector& num_ghosts_flux_midpoint,
@@ -1565,7 +1565,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxX(
  * Kernel to reconstruct the flux using flux at midpoints in y-direction.
  */
 void
-DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxY(
+DiffusiveFluxReconstructorMidpointSecondOrder::reconstructFluxY(
     double* F_face_y,
     const double* const F_midpoint_y,
     const hier::IntVector& num_ghosts_flux_midpoint,
@@ -1711,7 +1711,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxY(
  * Kernel to reconstruct the flux using flux at midpoints in z-direction.
  */
 void
-DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxZ(
+DiffusiveFluxReconstructorMidpointSecondOrder::reconstructFluxZ(
     double* F_face_z,
     const double* const F_midpoint_z,
     const hier::IntVector& num_ghosts_flux_midpoint,

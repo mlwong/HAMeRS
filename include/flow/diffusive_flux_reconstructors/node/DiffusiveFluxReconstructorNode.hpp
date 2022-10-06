@@ -1,12 +1,12 @@
-#ifndef DIFFUSIVE_FLUX_RECONSTRUCTOR_SIXTH_ORDER_HPP
-#define DIFFUSIVE_FLUX_RECONSTRUCTOR_SIXTH_ORDER_HPP
+#ifndef DIFFUSIVE_FLUX_RECONSTRUCTOR_NODE_HPP
+#define DIFFUSIVE_FLUX_RECONSTRUCTOR_NODE_HPP
 
 #include "flow/diffusive_flux_reconstructors/DiffusiveFluxReconstructor.hpp"
 
-class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
+class DiffusiveFluxReconstructorNode: public DiffusiveFluxReconstructor
 {
     public:
-        DiffusiveFluxReconstructorSixthOrder(
+        DiffusiveFluxReconstructorNode(
             const std::string& object_name,
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
@@ -14,21 +14,21 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
             const HAMERS_SHARED_PTR<FlowModel>& flow_model,
             const HAMERS_SHARED_PTR<tbox::Database>& diffusive_flux_reconstructor_db);
         
-        ~DiffusiveFluxReconstructorSixthOrder() {}
+        virtual ~DiffusiveFluxReconstructorNode() {}
         
         /*
          * Print all characteristics of the diffusive flux reconstruction class.
          */
-        void
-        printClassData(std::ostream& os) const;
+        virtual void
+        printClassData(std::ostream& os) const = 0;
         
         /*
          * Put the characteristics of the diffusive flux reconstruction class
          * into the restart database.
          */
-        void
+        virtual void
         putToRestart(
-            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const = 0;
         
         /*
          * Compute the diffusive flux on a patch.
@@ -135,12 +135,11 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
             const hier::Patch& patch,
             const double dt) const;
         
-        ///
-        
+    protected:
         /*
          * Kernel to compute the first derivatives in the x-direction.
          */
-        void computeFirstDerivativesInX(
+        virtual void computeFirstDerivativesInX(
             double* dudx,
             const double* const u,
             const hier::IntVector& num_ghosts_derivative_node,
@@ -149,12 +148,12 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
             const hier::IntVector& ghostcell_dims_data_node,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims,
-            const double& dx_0_inv) const;
+            const double& dx_0_inv) const = 0;
         
         /*
          * Kernel to compute the first derivatives in the y-direction.
          */
-        void computeFirstDerivativesInY(
+        virtual void computeFirstDerivativesInY(
             double* dudy,
             const double* const u,
             const hier::IntVector& num_ghosts_derivative_node,
@@ -163,12 +162,12 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
             const hier::IntVector& ghostcell_dims_data_node,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims,
-            const double& dx_1_in) const;
+            const double& dx_1_in) const = 0;
         
         /*
          * Kernel to compute the first derivatives in the z-direction.
          */
-        void computeFirstDerivativesInZ(
+        virtual void computeFirstDerivativesInZ(
             double* dudz,
             const double* const u,
             const hier::IntVector& num_ghosts_derivative_node,
@@ -177,12 +176,12 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
             const hier::IntVector& ghostcell_dims_data_node,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims,
-            const double& dx_2_inv) const;
+            const double& dx_2_inv) const = 0;
         
         /*
          * Kernel to reconstruct the flux using flux at nodes in x-direction.
          */
-        void reconstructFluxX(
+        virtual void reconstructFluxX(
             double* F_face_x,
             const double* const F_node_x,
             const hier::IntVector& num_ghosts_flux_node,
@@ -190,12 +189,12 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims,
             const hier::IntVector& interior_dims,
-            const double& dt) const;
+            const double& dt) const = 0;
         
         /*
          * Kernel to reconstruct the flux using flux at nodes in y-direction.
          */
-        void reconstructFluxY(
+        virtual void reconstructFluxY(
             double* F_face_y,
             const double* const F_node_y,
             const hier::IntVector& num_ghosts_flux_node,
@@ -203,12 +202,12 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims,
             const hier::IntVector& interior_dims,
-            const double& dt) const;
+            const double& dt) const = 0;
         
         /*
          * Kernel to reconstruct the flux using flux at nodes in z-direction.
          */
-        void reconstructFluxZ(
+        virtual void reconstructFluxZ(
             double* F_face_z,
             const double* const F_node_z,
             const hier::IntVector& num_ghosts_flux_node,
@@ -216,7 +215,7 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims,
             const hier::IntVector& interior_dims,
-            const double& dt) const;
+            const double& dt) const = 0;
         
         /*
          * Numbers of ghost cells needed for the stencil operations.
@@ -236,4 +235,4 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
         
 };
 
-#endif /* DIFFUSIVE_FLUX_RECONSTRUCTOR_SIXTH_ORDER_HPP */
+#endif /* DIFFUSIVE_FLUX_RECONSTRUCTOR_NODE_HPP */
