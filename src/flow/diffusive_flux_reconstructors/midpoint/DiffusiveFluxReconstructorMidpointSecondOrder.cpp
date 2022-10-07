@@ -58,7 +58,7 @@ void
 DiffusiveFluxReconstructorMidpointSecondOrder::putToRestart(
    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
-    restart_db->putString("d_diffusive_flux_reconstructor", "MIDPOINT_SIXTH_ORDER");
+    restart_db->putString("d_diffusive_flux_reconstructor", "MIDPOINT_SECOND_ORDER");
 }
 
 
@@ -77,9 +77,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInXAtMidpo
     const hier::IntVector& domain_dims,
     const double& dx_0_inv) const
 {
-    const double a_n =  double(75)/double(64);
-    const double b_n = -double(25)/double(384);
-    const double c_n =  double(3)/double(640);
+    const double a_n = double(1);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -102,17 +100,10 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInXAtMidpo
             // Compute the linear indices.
             const int idx = i + num_ghosts_0_derivative_midpoint;
             
-            const int idx_data_LLL = i - 3 + num_ghosts_0_data;
-            const int idx_data_LL  = i - 2 + num_ghosts_0_data;
-            const int idx_data_L   = i - 1 + num_ghosts_0_data;
-            const int idx_data_R   = i + 0 + num_ghosts_0_data;
-            const int idx_data_RR  = i + 1 + num_ghosts_0_data;
-            const int idx_data_RRR = i + 2 + num_ghosts_0_data;
+            const int idx_data_L = i - 1 + num_ghosts_0_data;
+            const int idx_data_R = i + 0 + num_ghosts_0_data;
             
-            dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
-                         b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
-                         c_n*(u[idx_data_RRR] - u[idx_data_LLL])
-                        )*dx_0_inv;
+            dudx[idx] = a_n*(u[idx_data_R] - u[idx_data_L])*dx_0_inv;
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -145,28 +136,13 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInXAtMidpo
                 const int idx = (i + num_ghosts_0_derivative_midpoint) +
                     (j + num_ghosts_1_derivative_midpoint)*(ghostcell_dim_0_derivative_midpoint + 1);
                 
-                const int idx_data_LLL = (i - 3 + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
-                const int idx_data_LL = (i - 2 + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
                 const int idx_data_L = (i - 1 + num_ghosts_0_data) +
                     (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                 
                 const int idx_data_R = (i + num_ghosts_0_data) +
                     (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                 
-                const int idx_data_RR = (i + 1 + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
-                const int idx_data_RRR = (i + 2 + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
-                dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
-                             b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
-                             c_n*(u[idx_data_RRR] - u[idx_data_LLL])
-                            )*dx_0_inv;
+                dudx[idx] = a_n*(u[idx_data_R] - u[idx_data_L])*dx_0_inv;
             }
         }
     }
@@ -210,16 +186,6 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInXAtMidpo
                         (k + num_ghosts_2_derivative_midpoint)*(ghostcell_dim_0_derivative_midpoint + 1)*
                             ghostcell_dim_1_derivative_midpoint;
                     
-                    const int idx_data_LLL = (i - 3 + num_ghosts_0_data) +
-                        (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
-                    const int idx_data_LL = (i - 2 + num_ghosts_0_data) +
-                        (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
                     const int idx_data_L = (i - 1 + num_ghosts_0_data) +
                         (j + num_ghosts_1_data)*ghostcell_dim_0_data +
                         (k + num_ghosts_2_data)*ghostcell_dim_0_data*
@@ -230,20 +196,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInXAtMidpo
                         (k + num_ghosts_2_data)*ghostcell_dim_0_data*
                             ghostcell_dim_1_data;
                     
-                    const int idx_data_RR = (i + 1 + num_ghosts_0_data) +
-                        (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
-                    const int idx_data_RRR = (i + 2 + num_ghosts_0_data) +
-                        (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
-                    dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
-                                 b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
-                                 c_n*(u[idx_data_RRR] - u[idx_data_LLL])
-                                )*dx_0_inv;
+                    dudx[idx] = a_n*(u[idx_data_R] - u[idx_data_L])*dx_0_inv;
                 }
             }
         }
@@ -266,9 +219,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInYAtMidpo
     const hier::IntVector& domain_dims,
     const double& dx_1_inv) const
 {
-    const double a_n =  double(75)/double(64);
-    const double b_n = -double(25)/double(384);
-    const double c_n =  double(3)/double(640);
+    const double a_n = double(1);
     
     if (d_dim == tbox::Dimension(2))
     {
@@ -300,28 +251,13 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInYAtMidpo
                 const int idx = (i + num_ghosts_0_derivative_midpoint) +
                     (j + num_ghosts_1_derivative_midpoint)*ghostcell_dim_0_derivative_midpoint;
                 
-                const int idx_data_BBB = (i + num_ghosts_0_data) +
-                    (j - 3 + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
-                const int idx_data_BB = (i + num_ghosts_0_data) +
-                    (j - 2 + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
                 const int idx_data_B = (i + num_ghosts_0_data) +
                     (j - 1 + num_ghosts_1_data)*ghostcell_dim_0_data;
                 
                 const int idx_data_T = (i + num_ghosts_0_data) +
                     (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                 
-                const int idx_data_TT = (i + num_ghosts_0_data) +
-                    (j + 1 + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
-                const int idx_data_TTT = (i + num_ghosts_0_data) +
-                    (j + 2 + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
-                dudy[idx] = (a_n*(u[idx_data_T]   - u[idx_data_B]) +
-                             b_n*(u[idx_data_TT]  - u[idx_data_BB]) +
-                             c_n*(u[idx_data_TTT] - u[idx_data_BBB])
-                            )*dx_1_inv;
+                dudy[idx] = a_n*(u[idx_data_T] - u[idx_data_B])*dx_1_inv;
             }
         }
     }
@@ -365,16 +301,6 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInYAtMidpo
                         (k + num_ghosts_2_derivative_midpoint)*ghostcell_dim_0_derivative_midpoint*
                             (ghostcell_dim_1_derivative_midpoint + 1);
                     
-                    const int idx_data_BBB = (i + num_ghosts_0_data) +
-                        (j - 3 + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
-                    const int idx_data_BB = (i + num_ghosts_0_data) +
-                        (j - 2 + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
                     const int idx_data_B = (i + num_ghosts_0_data) +
                         (j - 1 + num_ghosts_1_data)*ghostcell_dim_0_data +
                         (k + num_ghosts_2_data)*ghostcell_dim_0_data*
@@ -385,20 +311,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInYAtMidpo
                         (k + num_ghosts_2_data)*ghostcell_dim_0_data*
                             ghostcell_dim_1_data;
                     
-                    const int idx_data_TT = (i + num_ghosts_0_data) +
-                        (j + 1 + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
-                    const int idx_data_TTT = (i + num_ghosts_0_data) +
-                        (j + 2 + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
-                    dudy[idx] = (a_n*(u[idx_data_T]   - u[idx_data_B]) +
-                                 b_n*(u[idx_data_TT]  - u[idx_data_BB]) +
-                                 c_n*(u[idx_data_TTT] - u[idx_data_BBB])
-                                )*dx_1_inv;
+                    dudy[idx] = a_n*(u[idx_data_T] - u[idx_data_B])*dx_1_inv;
                 }
             }
         }
@@ -421,9 +334,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInZAtMidpo
     const hier::IntVector& domain_dims,
     const double& dx_2_inv) const
 {
-    const double a_n =  double(75)/double(64);
-    const double b_n = -double(25)/double(384);
-    const double c_n =  double(3)/double(640);
+    const double a_n = double(1);
     
     /*
      * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
@@ -463,16 +374,6 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInZAtMidpo
                     (k + num_ghosts_2_derivative_midpoint)*ghostcell_dim_0_derivative_midpoint*
                         ghostcell_dim_1_derivative_midpoint;
                 
-                const int idx_data_BBB = (i + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                    (k - 3 + num_ghosts_2_data)*ghostcell_dim_0_data*
-                        ghostcell_dim_1_data;
-                
-                const int idx_data_BB = (i + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                    (k - 2 + num_ghosts_2_data)*ghostcell_dim_0_data*
-                        ghostcell_dim_1_data;
-                
                 const int idx_data_B = (i + num_ghosts_0_data) +
                     (j + num_ghosts_1_data)*ghostcell_dim_0_data +
                     (k - 1 + num_ghosts_2_data)*ghostcell_dim_0_data*
@@ -483,20 +384,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInZAtMidpo
                     (k + num_ghosts_2_data)*ghostcell_dim_0_data*
                         ghostcell_dim_1_data;
                 
-                const int idx_data_FF = (i + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                    (k + 1 + num_ghosts_2_data)*ghostcell_dim_0_data*
-                        ghostcell_dim_1_data;
-                
-                const int idx_data_FFF = (i + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                    (k + 2 + num_ghosts_2_data)*ghostcell_dim_0_data*
-                        ghostcell_dim_1_data;
-                
-                dudz[idx] = (a_n*(u[idx_data_F]   - u[idx_data_B]) +
-                             b_n*(u[idx_data_FF]  - u[idx_data_BB]) +
-                             c_n*(u[idx_data_FFF] - u[idx_data_BBB])
-                            )*dx_2_inv;
+                dudz[idx] = a_n*(u[idx_data_F] - u[idx_data_B])*dx_2_inv;
             }
         }
     }
@@ -518,9 +406,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInXAtNode(
     const hier::IntVector& domain_dims,
     const double& dx_0_inv) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const double a_n = double(1)/double(2);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -544,17 +430,10 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInXAtNode(
             // Compute the linear indices.
             const int idx = i + num_ghosts_0_derivative_node;
             
-            const int idx_data_LLL = i - 3 + num_ghosts_0_data;
-            const int idx_data_LL  = i - 2 + num_ghosts_0_data;
-            const int idx_data_L   = i - 1 + num_ghosts_0_data;
-            const int idx_data_R   = i + 1 + num_ghosts_0_data;
-            const int idx_data_RR  = i + 2 + num_ghosts_0_data;
-            const int idx_data_RRR = i + 3 + num_ghosts_0_data;
+            const int idx_data_L = i - 1 + num_ghosts_0_data;
+            const int idx_data_R = i + 1 + num_ghosts_0_data;
             
-            dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
-                         b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
-                         c_n*(u[idx_data_RRR] - u[idx_data_LLL])
-                        )*dx_0_inv;
+            dudx[idx] = a_n*(u[idx_data_R] - u[idx_data_L])*dx_0_inv;
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -587,28 +466,13 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInXAtNode(
                 const int idx = (i + num_ghosts_0_derivative_node) +
                     (j + num_ghosts_1_derivative_node)*ghostcell_dim_0_derivative_node;
                 
-                const int idx_data_LLL = (i - 3 + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
-                const int idx_data_LL = (i - 2 + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
                 const int idx_data_L = (i - 1 + num_ghosts_0_data) +
                     (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                 
                 const int idx_data_R = (i + 1 + num_ghosts_0_data) +
                     (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                 
-                const int idx_data_RR = (i + 2 + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
-                const int idx_data_RRR = (i + 3 + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
-                dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
-                             b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
-                             c_n*(u[idx_data_RRR] - u[idx_data_LLL])
-                            )*dx_0_inv;
+                dudx[idx] = a_n*(u[idx_data_R] - u[idx_data_L])*dx_0_inv;
             }
         }
     }
@@ -652,16 +516,6 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInXAtNode(
                         (k + num_ghosts_2_derivative_node)*ghostcell_dim_0_derivative_node*
                             ghostcell_dim_1_derivative_node;
                     
-                    const int idx_data_LLL = (i - 3 + num_ghosts_0_data) +
-                        (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
-                    const int idx_data_LL = (i - 2 + num_ghosts_0_data) +
-                        (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
                     const int idx_data_L = (i - 1 + num_ghosts_0_data) +
                         (j + num_ghosts_1_data)*ghostcell_dim_0_data +
                         (k + num_ghosts_2_data)*ghostcell_dim_0_data*
@@ -672,20 +526,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInXAtNode(
                         (k + num_ghosts_2_data)*ghostcell_dim_0_data*
                             ghostcell_dim_1_data;
                     
-                    const int idx_data_RR = (i + 2 + num_ghosts_0_data) +
-                        (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
-                    const int idx_data_RRR = (i + 3 + num_ghosts_0_data) +
-                        (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
-                    dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
-                                 b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
-                                 c_n*(u[idx_data_RRR] - u[idx_data_LLL])
-                                )*dx_0_inv;
+                    dudx[idx] = a_n*(u[idx_data_R] - u[idx_data_L])*dx_0_inv;
                 }
             }
         }
@@ -708,9 +549,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInYAtNode(
     const hier::IntVector& domain_dims,
     const double& dx_1_inv) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const double a_n = double(1)/double(2);
     
     if (d_dim == tbox::Dimension(2))
     {
@@ -742,28 +581,13 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInYAtNode(
                 const int idx = (i + num_ghosts_0_derivative_node) +
                     (j + num_ghosts_1_derivative_node)*ghostcell_dim_0_derivative_node;
                 
-                const int idx_data_BBB = (i + num_ghosts_0_data) +
-                    (j - 3 + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
-                const int idx_data_BB = (i + num_ghosts_0_data) +
-                    (j - 2 + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
                 const int idx_data_B = (i + num_ghosts_0_data) +
                     (j - 1 + num_ghosts_1_data)*ghostcell_dim_0_data;
                 
                 const int idx_data_T = (i + num_ghosts_0_data) +
                     (j + 1 + num_ghosts_1_data)*ghostcell_dim_0_data;
                 
-                const int idx_data_TT = (i + num_ghosts_0_data) +
-                    (j + 2 + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
-                const int idx_data_TTT = (i + num_ghosts_0_data) +
-                    (j + 3 + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
-                dudy[idx] = (a_n*(u[idx_data_T]   - u[idx_data_B]) +
-                             b_n*(u[idx_data_TT]  - u[idx_data_BB]) +
-                             c_n*(u[idx_data_TTT] - u[idx_data_BBB])
-                            )*dx_1_inv;
+                dudy[idx] = a_n*(u[idx_data_T] - u[idx_data_B])*dx_1_inv;
             }
         }
     }
@@ -807,16 +631,6 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInYAtNode(
                         (k + num_ghosts_2_derivative_node)*ghostcell_dim_0_derivative_node*
                             ghostcell_dim_1_derivative_node;
                     
-                    const int idx_data_BBB = (i + num_ghosts_0_data) +
-                        (j - 3 + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
-                    const int idx_data_BB = (i + num_ghosts_0_data) +
-                        (j - 2 + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
                     const int idx_data_B = (i + num_ghosts_0_data) +
                         (j - 1 + num_ghosts_1_data)*ghostcell_dim_0_data +
                         (k + num_ghosts_2_data)*ghostcell_dim_0_data*
@@ -827,20 +641,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInYAtNode(
                         (k + num_ghosts_2_data)*ghostcell_dim_0_data*
                             ghostcell_dim_1_data;
                     
-                    const int idx_data_TT = (i + num_ghosts_0_data) +
-                        (j + 2 + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
-                    const int idx_data_TTT = (i + num_ghosts_0_data) +
-                        (j + 3 + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
-                    dudy[idx] = (a_n*(u[idx_data_T]   - u[idx_data_B]) +
-                                 b_n*(u[idx_data_TT]  - u[idx_data_BB]) +
-                                 c_n*(u[idx_data_TTT] - u[idx_data_BBB])
-                                )*dx_1_inv;
+                    dudy[idx] = a_n*(u[idx_data_T] - u[idx_data_B])*dx_1_inv;
                 }
             }
         }
@@ -863,9 +664,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInZAtNode(
     const hier::IntVector& domain_dims,
     const double& dx_2_inv) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const double a_n = double(1)/double(2);
     
     /*
      * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
@@ -905,16 +704,6 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInZAtNode(
                     (k + num_ghosts_2_derivative_node)*ghostcell_dim_0_derivative_node*
                         ghostcell_dim_1_derivative_node;
                 
-                const int idx_data_BBB = (i + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                    (k - 3 + num_ghosts_2_data)*ghostcell_dim_0_data*
-                        ghostcell_dim_1_data;
-                
-                const int idx_data_BB = (i + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                    (k - 2 + num_ghosts_2_data)*ghostcell_dim_0_data*
-                        ghostcell_dim_1_data;
-                
                 const int idx_data_B = (i + num_ghosts_0_data) +
                     (j + num_ghosts_1_data)*ghostcell_dim_0_data +
                     (k - 1 + num_ghosts_2_data)*ghostcell_dim_0_data*
@@ -925,20 +714,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::computeFirstDerivativesInZAtNode(
                     (k + 1 + num_ghosts_2_data)*ghostcell_dim_0_data*
                         ghostcell_dim_1_data;
                 
-                const int idx_data_FF = (i + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                    (k + 2 + num_ghosts_2_data)*ghostcell_dim_0_data*
-                        ghostcell_dim_1_data;
-                
-                const int idx_data_FFF = (i + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                    (k + 3 + num_ghosts_2_data)*ghostcell_dim_0_data*
-                        ghostcell_dim_1_data;
-                
-                dudz[idx] = (a_n*(u[idx_data_F]   - u[idx_data_B]) +
-                             b_n*(u[idx_data_FF]  - u[idx_data_BB]) +
-                             c_n*(u[idx_data_FFF] - u[idx_data_BBB])
-                            )*dx_2_inv;
+                dudz[idx] = a_n*(u[idx_data_F] - u[idx_data_B])*dx_2_inv;
             }
         }
     }
@@ -959,9 +735,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::interpolateDataFromNodeToMidpoint
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims) const
 {
-    const double a_n =  double(75)/double(128);
-    const double b_n = -double(25)/double(256);
-    const double c_n =  double(3)/double(256);
+    const double a_n = double(1)/double(2);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -984,17 +758,10 @@ DiffusiveFluxReconstructorMidpointSecondOrder::interpolateDataFromNodeToMidpoint
             // Compute the linear indices.
             const int idx = i + num_ghosts_0_data_midpoint;
             
-            const int idx_node_LLL = i - 3 + num_ghosts_0_data_node;
-            const int idx_node_LL  = i - 2 + num_ghosts_0_data_node;
-            const int idx_node_L   = i - 1 + num_ghosts_0_data_node;
-            const int idx_node_R   = i + 0 + num_ghosts_0_data_node;
-            const int idx_node_RR  = i + 1 + num_ghosts_0_data_node;
-            const int idx_node_RRR = i + 2 + num_ghosts_0_data_node;
+            const int idx_node_L = i - 1 + num_ghosts_0_data_node;
+            const int idx_node_R = i + 0 + num_ghosts_0_data_node;
             
-            u_midpoint_x[idx] = (a_n*(u_node[idx_node_R]   + u_node[idx_node_L]) +
-                                 b_n*(u_node[idx_node_RR]  + u_node[idx_node_LL]) +
-                                 c_n*(u_node[idx_node_RRR] + u_node[idx_node_LLL])
-                                );
+            u_midpoint_x[idx] = a_n*(u_node[idx_node_R] + u_node[idx_node_L]);
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -1027,28 +794,13 @@ DiffusiveFluxReconstructorMidpointSecondOrder::interpolateDataFromNodeToMidpoint
                 const int idx = (i + num_ghosts_0_data_midpoint) +
                     (j + num_ghosts_1_data_midpoint)*(ghostcell_dim_0_data_midpoint + 1);
                 
-                const int idx_node_LLL = (i - 3 + num_ghosts_0_data_node) +
-                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
-                
-                const int idx_node_LL = (i - 2 + num_ghosts_0_data_node) +
-                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
-                
                 const int idx_node_L = (i - 1 + num_ghosts_0_data_node) +
                     (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
                 
                 const int idx_node_R = (i + num_ghosts_0_data_node) +
                     (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
                 
-                const int idx_node_RR = (i + 1 + num_ghosts_0_data_node) +
-                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
-                
-                const int idx_node_RRR = (i + 2 + num_ghosts_0_data_node) +
-                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
-                
-                u_midpoint_x[idx] = (a_n*(u_node[idx_node_R]   + u_node[idx_node_L]) +
-                                     b_n*(u_node[idx_node_RR]  + u_node[idx_node_LL]) +
-                                     c_n*(u_node[idx_node_RRR] + u_node[idx_node_LLL])
-                                    );
+                u_midpoint_x[idx] = a_n*(u_node[idx_node_R] + u_node[idx_node_L]);
             }
         }
     }
@@ -1092,16 +844,6 @@ DiffusiveFluxReconstructorMidpointSecondOrder::interpolateDataFromNodeToMidpoint
                         (k + num_ghosts_2_data_midpoint)*(ghostcell_dim_0_data_midpoint + 1)*
                             ghostcell_dim_1_data_midpoint;
                     
-                    const int idx_node_LLL = (i - 3 + num_ghosts_0_data_node) +
-                        (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
-                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
-                            ghostcell_dim_1_data_node;
-                    
-                    const int idx_node_LL = (i - 2 + num_ghosts_0_data_node) +
-                        (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
-                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
-                            ghostcell_dim_1_data_node;
-                    
                     const int idx_node_L = (i - 1 + num_ghosts_0_data_node) +
                         (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
                         (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
@@ -1112,20 +854,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::interpolateDataFromNodeToMidpoint
                         (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
                             ghostcell_dim_1_data_node;
                     
-                    const int idx_node_RR = (i + 1 + num_ghosts_0_data_node) +
-                        (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
-                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
-                            ghostcell_dim_1_data_node;
-                    
-                    const int idx_node_RRR = (i + 2 + num_ghosts_0_data_node) +
-                        (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
-                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
-                            ghostcell_dim_1_data_node;
-                    
-                    u_midpoint_x[idx] = (a_n*(u_node[idx_node_R]   + u_node[idx_node_L]) +
-                                         b_n*(u_node[idx_node_RR]  + u_node[idx_node_LL]) +
-                                         c_n*(u_node[idx_node_RRR] + u_node[idx_node_LLL])
-                                        );
+                    u_midpoint_x[idx] = a_n*(u_node[idx_node_R] + u_node[idx_node_L]);
                 }
             }
         }
@@ -1147,9 +876,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::interpolateDataFromNodeToMidpoint
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims) const
 {
-    const double a_n =  double(75)/double(128);
-    const double b_n = -double(25)/double(256);
-    const double c_n =  double(3)/double(256);
+    const double a_n = double(1)/double(2);
     
     if (d_dim == tbox::Dimension(2))
     {
@@ -1181,28 +908,13 @@ DiffusiveFluxReconstructorMidpointSecondOrder::interpolateDataFromNodeToMidpoint
                 const int idx = (i + num_ghosts_0_data_midpoint) +
                     (j + num_ghosts_1_data_midpoint)*ghostcell_dim_0_data_midpoint;
                 
-                const int idx_node_BBB = (i + num_ghosts_0_data_node) +
-                    (j - 3 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
-                
-                const int idx_node_BB = (i + num_ghosts_0_data_node) +
-                    (j - 2 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
-                
                 const int idx_node_B = (i + num_ghosts_0_data_node) +
                     (j - 1 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
                 
                 const int idx_node_T = (i + num_ghosts_0_data_node) +
                     (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
                 
-                const int idx_node_TT = (i + num_ghosts_0_data_node) +
-                    (j + 1 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
-                
-                const int idx_node_TTT = (i + num_ghosts_0_data_node) +
-                    (j + 2 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node;
-                
-                u_midpoint_y[idx] = (a_n*(u_node[idx_node_T]   + u_node[idx_node_B]) +
-                                     b_n*(u_node[idx_node_TT]  + u_node[idx_node_BB]) +
-                                     c_n*(u_node[idx_node_TTT] + u_node[idx_node_BBB])
-                                    );
+                u_midpoint_y[idx] = a_n*(u_node[idx_node_T] + u_node[idx_node_B]);
             }
         }
     }
@@ -1246,16 +958,6 @@ DiffusiveFluxReconstructorMidpointSecondOrder::interpolateDataFromNodeToMidpoint
                         (k + num_ghosts_2_data_midpoint)*ghostcell_dim_0_data_midpoint*
                             (ghostcell_dim_1_data_midpoint + 1);
                     
-                    const int idx_node_BBB = (i + num_ghosts_0_data_node) +
-                        (j - 3 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
-                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
-                            ghostcell_dim_1_data_node;
-                    
-                    const int idx_node_BB = (i + num_ghosts_0_data_node) +
-                        (j - 2 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
-                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
-                            ghostcell_dim_1_data_node;
-                    
                     const int idx_node_B = (i + num_ghosts_0_data_node) +
                         (j - 1 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
                         (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
@@ -1266,20 +968,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::interpolateDataFromNodeToMidpoint
                         (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
                             ghostcell_dim_1_data_node;
                     
-                    const int idx_node_TT = (i + num_ghosts_0_data_node) +
-                        (j + 1 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
-                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
-                            ghostcell_dim_1_data_node;
-                    
-                    const int idx_node_TTT = (i + num_ghosts_0_data_node) +
-                        (j + 2 + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
-                        (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
-                            ghostcell_dim_1_data_node;
-                    
-                    u_midpoint_y[idx] = (a_n*(u_node[idx_node_T]   + u_node[idx_node_B]) +
-                                         b_n*(u_node[idx_node_TT]  + u_node[idx_node_BB]) +
-                                         c_n*(u_node[idx_node_TTT] + u_node[idx_node_BBB])
-                                        );
+                    u_midpoint_y[idx] = a_n*(u_node[idx_node_T] + u_node[idx_node_B]);
                 }
             }
         }
@@ -1301,9 +990,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::interpolateDataFromNodeToMidpoint
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims) const
 {
-    const double a_n =  double(75)/double(128);
-    const double b_n = -double(25)/double(256);
-    const double c_n =  double(3)/double(256);
+    const double a_n = double(1)/double(2);
     
     /*
      * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
@@ -1343,16 +1030,6 @@ DiffusiveFluxReconstructorMidpointSecondOrder::interpolateDataFromNodeToMidpoint
                     (k + num_ghosts_2_data_midpoint)*ghostcell_dim_0_data_midpoint*
                         ghostcell_dim_1_data_midpoint;
                 
-                const int idx_node_BBB = (i + num_ghosts_0_data_node) +
-                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
-                    (k - 3 + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
-                        ghostcell_dim_1_data_node;
-                
-                const int idx_node_BB = (i + num_ghosts_0_data_node) +
-                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
-                    (k - 2 + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
-                        ghostcell_dim_1_data_node;
-                
                 const int idx_node_B = (i + num_ghosts_0_data_node) +
                     (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
                     (k - 1 + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
@@ -1363,20 +1040,7 @@ DiffusiveFluxReconstructorMidpointSecondOrder::interpolateDataFromNodeToMidpoint
                     (k + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
                         ghostcell_dim_1_data_node;
                 
-                const int idx_node_FF = (i + num_ghosts_0_data_node) +
-                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
-                    (k + 1 + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
-                        ghostcell_dim_1_data_node;
-                
-                const int idx_node_FFF = (i + num_ghosts_0_data_node) +
-                    (j + num_ghosts_1_data_node)*ghostcell_dim_0_data_node +
-                    (k + 2 + num_ghosts_2_data_node)*ghostcell_dim_0_data_node*
-                        ghostcell_dim_1_data_node;
-                
-                u_midpoint_z[idx] = (a_n*(u_node[idx_node_F]   + u_node[idx_node_B]) +
-                                     b_n*(u_node[idx_node_FF]  + u_node[idx_node_BB]) +
-                                     c_n*(u_node[idx_node_FFF] + u_node[idx_node_BBB])
-                                    );
+                u_midpoint_z[idx] = a_n*(u_node[idx_node_F] + u_node[idx_node_B]);
             }
         }
     }
@@ -1397,13 +1061,9 @@ DiffusiveFluxReconstructorMidpointSecondOrder::reconstructFluxX(
     const hier::IntVector& interior_dims,
     const double& dt) const
 {
-    const double a_m =  double(75)/double(64);
-    const double b_m = -double(25)/double(384);
-    const double c_m =  double(3)/double(640);
+    const double a_m = double(1);
     
-    const double a_r = a_m + b_m + c_m;
-    const double b_r = b_m + c_m;
-    const double c_r = c_m;
+    const double a_r = a_m;
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -1424,17 +1084,9 @@ DiffusiveFluxReconstructorMidpointSecondOrder::reconstructFluxX(
             // Compute the linear indices.
             const int idx_face_x = i;
             
-            const int idx_midpoint_LL  = i - 2 + num_ghosts_0_flux_midpoint;
-            const int idx_midpoint_L   = i - 1 + num_ghosts_0_flux_midpoint;
-            const int idx_midpoint     = i + 0 + num_ghosts_0_flux_midpoint;
-            const int idx_midpoint_R   = i + 1 + num_ghosts_0_flux_midpoint;
-            const int idx_midpoint_RR  = i + 2 + num_ghosts_0_flux_midpoint;
+            const int idx_midpoint = i + 0 + num_ghosts_0_flux_midpoint;
             
-            F_face_x[idx_face_x] += dt*(
-                a_r*(F_midpoint_x[idx_midpoint]) +
-                b_r*(F_midpoint_x[idx_midpoint_L]  + F_midpoint_x[idx_midpoint_R]) +
-                c_r*(F_midpoint_x[idx_midpoint_LL] + F_midpoint_x[idx_midpoint_RR])
-                );
+            F_face_x[idx_face_x] += dt*a_r*F_midpoint_x[idx_midpoint];
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -1465,26 +1117,10 @@ DiffusiveFluxReconstructorMidpointSecondOrder::reconstructFluxX(
                 const int idx_face_x = i +
                     j*(interior_dim_0 + 1);
                 
-                const int idx_midpoint_LL = (i - 2 + num_ghosts_0_flux_midpoint) +
-                    (j + num_ghosts_1_flux_midpoint)*(ghostcell_dim_0_flux_midpoint + 1);
-                
-                const int idx_midpoint_L = (i - 1 + num_ghosts_0_flux_midpoint) +
-                    (j + num_ghosts_1_flux_midpoint)*(ghostcell_dim_0_flux_midpoint + 1);
-                
                 const int idx_midpoint = (i + num_ghosts_0_flux_midpoint) +
                     (j + num_ghosts_1_flux_midpoint)*(ghostcell_dim_0_flux_midpoint + 1);
                 
-                const int idx_midpoint_R = (i + 1 + num_ghosts_0_flux_midpoint) +
-                    (j + num_ghosts_1_flux_midpoint)*(ghostcell_dim_0_flux_midpoint + 1);
-                
-                const int idx_midpoint_RR = (i + 2 + num_ghosts_0_flux_midpoint) +
-                    (j + num_ghosts_1_flux_midpoint)*(ghostcell_dim_0_flux_midpoint + 1);
-                
-                F_face_x[idx_face_x] += dt*(
-                    a_r*(F_midpoint_x[idx_midpoint]) +
-                    b_r*(F_midpoint_x[idx_midpoint_L]  + F_midpoint_x[idx_midpoint_R]) +
-                    c_r*(F_midpoint_x[idx_midpoint_LL] + F_midpoint_x[idx_midpoint_RR])
-                    );
+                F_face_x[idx_face_x] += dt*a_r*F_midpoint_x[idx_midpoint];
             }
         }
     }
@@ -1524,36 +1160,12 @@ DiffusiveFluxReconstructorMidpointSecondOrder::reconstructFluxX(
                         j*(interior_dim_0 + 1) +
                         k*(interior_dim_0 + 1)*interior_dim_1;
                     
-                    const int idx_midpoint_LL = (i - 2 + num_ghosts_0_flux_midpoint) +
-                        (j + num_ghosts_1_flux_midpoint)*(ghostcell_dim_0_flux_midpoint + 1) +
-                        (k + num_ghosts_2_flux_midpoint)*(ghostcell_dim_0_flux_midpoint + 1)*
-                            ghostcell_dim_1_flux_midpoint;
-                    
-                    const int idx_midpoint_L = (i - 1 + num_ghosts_0_flux_midpoint) +
-                        (j + num_ghosts_1_flux_midpoint)*(ghostcell_dim_0_flux_midpoint + 1) +
-                        (k + num_ghosts_2_flux_midpoint)*(ghostcell_dim_0_flux_midpoint + 1)*
-                            ghostcell_dim_1_flux_midpoint;
-                    
                     const int idx_midpoint = (i + num_ghosts_0_flux_midpoint) +
                         (j + num_ghosts_1_flux_midpoint)*(ghostcell_dim_0_flux_midpoint + 1) +
                         (k + num_ghosts_2_flux_midpoint)*(ghostcell_dim_0_flux_midpoint + 1)*
                             ghostcell_dim_1_flux_midpoint;
                     
-                    const int idx_midpoint_R = (i + 1 + num_ghosts_0_flux_midpoint) +
-                        (j + num_ghosts_1_flux_midpoint)*(ghostcell_dim_0_flux_midpoint + 1) +
-                        (k + num_ghosts_2_flux_midpoint)*(ghostcell_dim_0_flux_midpoint + 1)*
-                            ghostcell_dim_1_flux_midpoint;
-                    
-                    const int idx_midpoint_RR = (i + 2 + num_ghosts_0_flux_midpoint) +
-                        (j + num_ghosts_1_flux_midpoint)*(ghostcell_dim_0_flux_midpoint + 1) +
-                        (k + num_ghosts_2_flux_midpoint)*(ghostcell_dim_0_flux_midpoint + 1)*
-                            ghostcell_dim_1_flux_midpoint;
-                    
-                    F_face_x[idx_face_x] += dt*(
-                        a_r*(F_midpoint_x[idx_midpoint]) +
-                        b_r*(F_midpoint_x[idx_midpoint_L]  + F_midpoint_x[idx_midpoint_R]) +
-                        c_r*(F_midpoint_x[idx_midpoint_LL] + F_midpoint_x[idx_midpoint_RR])
-                        );
+                    F_face_x[idx_face_x] += dt*a_r*F_midpoint_x[idx_midpoint];
                 }
             }
         }
@@ -1575,13 +1187,9 @@ DiffusiveFluxReconstructorMidpointSecondOrder::reconstructFluxY(
     const hier::IntVector& interior_dims,
     const double& dt) const
 {
-    const double a_m =  double(75)/double(64);
-    const double b_m = -double(25)/double(384);
-    const double c_m =  double(3)/double(640);
+    const double a_m = double(1);
     
-    const double a_r = a_m + b_m + c_m;
-    const double b_r = b_m + c_m;
-    const double c_r = c_m;
+    const double a_r = a_m;
     
     if (d_dim == tbox::Dimension(2))
     {
@@ -1611,26 +1219,10 @@ DiffusiveFluxReconstructorMidpointSecondOrder::reconstructFluxY(
                 const int idx_face_y = i +
                     j*interior_dim_0;
                 
-                const int idx_midpoint_BB = (i + num_ghosts_0_flux_midpoint) +
-                    (j - 2 + num_ghosts_1_flux_midpoint)*ghostcell_dim_0_flux_midpoint;
-                
-                const int idx_midpoint_B = (i + num_ghosts_0_flux_midpoint) +
-                    (j - 1 + num_ghosts_1_flux_midpoint)*ghostcell_dim_0_flux_midpoint;
-                
                 const int idx_midpoint = (i + num_ghosts_0_flux_midpoint) +
                     (j + num_ghosts_1_flux_midpoint)*ghostcell_dim_0_flux_midpoint;
                 
-                const int idx_midpoint_T = (i + num_ghosts_0_flux_midpoint) +
-                    (j + 1 + num_ghosts_1_flux_midpoint)*ghostcell_dim_0_flux_midpoint;
-                
-                const int idx_midpoint_TT = (i + num_ghosts_0_flux_midpoint) +
-                    (j + 2 + num_ghosts_1_flux_midpoint)*ghostcell_dim_0_flux_midpoint;
-                
-                F_face_y[idx_face_y] += dt*(
-                    a_r*(F_midpoint_y[idx_midpoint]) +
-                    b_r*(F_midpoint_y[idx_midpoint_B]  + F_midpoint_y[idx_midpoint_T]) +
-                    c_r*(F_midpoint_y[idx_midpoint_BB] + F_midpoint_y[idx_midpoint_TT])
-                    );
+                F_face_y[idx_face_y] += dt*a_r*F_midpoint_y[idx_midpoint];
             }
         }
     }
@@ -1670,36 +1262,12 @@ DiffusiveFluxReconstructorMidpointSecondOrder::reconstructFluxY(
                         j*interior_dim_0 +
                         k*interior_dim_0*(interior_dim_1 + 1);
                     
-                    const int idx_midpoint_BB = (i + num_ghosts_0_flux_midpoint) +
-                        (j - 2 + num_ghosts_1_flux_midpoint)*ghostcell_dim_0_flux_midpoint +
-                        (k + num_ghosts_2_flux_midpoint)*ghostcell_dim_0_flux_midpoint*
-                            (ghostcell_dim_1_flux_midpoint + 1);
-                    
-                    const int idx_midpoint_B = (i + num_ghosts_0_flux_midpoint) +
-                        (j - 1 + num_ghosts_1_flux_midpoint)*ghostcell_dim_0_flux_midpoint +
-                        (k + num_ghosts_2_flux_midpoint)*ghostcell_dim_0_flux_midpoint*
-                            (ghostcell_dim_1_flux_midpoint + 1);
-                    
                     const int idx_midpoint = (i + num_ghosts_0_flux_midpoint) +
                         (j + num_ghosts_1_flux_midpoint)*ghostcell_dim_0_flux_midpoint +
                         (k + num_ghosts_2_flux_midpoint)*ghostcell_dim_0_flux_midpoint*
                             (ghostcell_dim_1_flux_midpoint + 1);
                     
-                    const int idx_midpoint_T = (i + num_ghosts_0_flux_midpoint) +
-                        (j + 1 + num_ghosts_1_flux_midpoint)*ghostcell_dim_0_flux_midpoint +
-                        (k + num_ghosts_2_flux_midpoint)*ghostcell_dim_0_flux_midpoint*
-                            (ghostcell_dim_1_flux_midpoint + 1);
-                    
-                    const int idx_midpoint_TT = (i + num_ghosts_0_flux_midpoint) +
-                        (j + 2 + num_ghosts_1_flux_midpoint)*ghostcell_dim_0_flux_midpoint +
-                        (k + num_ghosts_2_flux_midpoint)*ghostcell_dim_0_flux_midpoint*
-                            (ghostcell_dim_1_flux_midpoint + 1);
-                    
-                    F_face_y[idx_face_y] += dt*(
-                        a_r*(F_midpoint_y[idx_midpoint]) +
-                        b_r*(F_midpoint_y[idx_midpoint_B]  + F_midpoint_y[idx_midpoint_T]) +
-                        c_r*(F_midpoint_y[idx_midpoint_BB] + F_midpoint_y[idx_midpoint_TT])
-                        );
+                    F_face_y[idx_face_y] += dt*a_r*F_midpoint_y[idx_midpoint];
                 }
             }
         }
@@ -1721,13 +1289,9 @@ DiffusiveFluxReconstructorMidpointSecondOrder::reconstructFluxZ(
     const hier::IntVector& interior_dims,
     const double& dt) const
 {
-    const double a_m =  double(75)/double(64);
-    const double b_m = -double(25)/double(384);
-    const double c_m =  double(3)/double(640);
+    const double a_m = double(1);
     
-    const double a_r = a_m + b_m + c_m;
-    const double b_r = b_m + c_m;
-    const double c_r = c_m;
+    const double a_r = a_m;
     
     /*
      * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
@@ -1763,36 +1327,12 @@ DiffusiveFluxReconstructorMidpointSecondOrder::reconstructFluxZ(
                     j*interior_dim_0 +
                     k*interior_dim_0*interior_dim_1;
                 
-                const int idx_midpoint_BB = (i + num_ghosts_0_flux_midpoint) +
-                    (j + num_ghosts_1_flux_midpoint)*ghostcell_dim_0_flux_midpoint +
-                    (k - 2 + num_ghosts_2_flux_midpoint)*ghostcell_dim_0_flux_midpoint*
-                        ghostcell_dim_1_flux_midpoint;
-                
-                const int idx_midpoint_B = (i + num_ghosts_0_flux_midpoint) +
-                    (j + num_ghosts_1_flux_midpoint)*ghostcell_dim_0_flux_midpoint +
-                    (k - 1 + num_ghosts_2_flux_midpoint)*ghostcell_dim_0_flux_midpoint*
-                        ghostcell_dim_1_flux_midpoint;
-                
                 const int idx_midpoint = (i + num_ghosts_0_flux_midpoint) +
                     (j + num_ghosts_1_flux_midpoint)*ghostcell_dim_0_flux_midpoint +
                     (k + num_ghosts_2_flux_midpoint)*ghostcell_dim_0_flux_midpoint*
                         ghostcell_dim_1_flux_midpoint;
                 
-                const int idx_midpoint_F = (i + num_ghosts_0_flux_midpoint) +
-                    (j + num_ghosts_1_flux_midpoint)*ghostcell_dim_0_flux_midpoint +
-                    (k + 1 + num_ghosts_2_flux_midpoint)*ghostcell_dim_0_flux_midpoint*
-                        ghostcell_dim_1_flux_midpoint;
-                
-                const int idx_midpoint_FF = (i + num_ghosts_0_flux_midpoint) +
-                    (j + num_ghosts_1_flux_midpoint)*ghostcell_dim_0_flux_midpoint +
-                    (k + 2 + num_ghosts_2_flux_midpoint)*ghostcell_dim_0_flux_midpoint*
-                        ghostcell_dim_1_flux_midpoint;
-                
-                F_face_z[idx_face_z] += dt*(
-                    a_r*(F_midpoint_z[idx_midpoint]) +
-                    b_r*(F_midpoint_z[idx_midpoint_B]  + F_midpoint_z[idx_midpoint_F]) +
-                    c_r*(F_midpoint_z[idx_midpoint_BB] + F_midpoint_z[idx_midpoint_FF])
-                    );
+                F_face_z[idx_face_z] += dt*a_r*F_midpoint_z[idx_midpoint];
             }
         }
     }

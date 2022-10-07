@@ -1424,11 +1424,11 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxX(
             // Compute the linear indices.
             const int idx_face_x = i;
             
-            const int idx_midpoint_LL  = i - 2 + num_ghosts_0_flux_midpoint;
-            const int idx_midpoint_L   = i - 1 + num_ghosts_0_flux_midpoint;
-            const int idx_midpoint     = i + 0 + num_ghosts_0_flux_midpoint;
-            const int idx_midpoint_R   = i + 1 + num_ghosts_0_flux_midpoint;
-            const int idx_midpoint_RR  = i + 2 + num_ghosts_0_flux_midpoint;
+            const int idx_midpoint_LL = i - 2 + num_ghosts_0_flux_midpoint;
+            const int idx_midpoint_L  = i - 1 + num_ghosts_0_flux_midpoint;
+            const int idx_midpoint    = i + 0 + num_ghosts_0_flux_midpoint;
+            const int idx_midpoint_R  = i + 1 + num_ghosts_0_flux_midpoint;
+            const int idx_midpoint_RR = i + 2 + num_ghosts_0_flux_midpoint;
             
             F_face_x[idx_face_x] += dt*(
                 a_r*(F_midpoint_x[idx_midpoint]) +

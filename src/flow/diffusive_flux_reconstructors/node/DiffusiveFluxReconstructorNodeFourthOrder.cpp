@@ -55,7 +55,7 @@ void
 DiffusiveFluxReconstructorNodeFourthOrder::putToRestart(
    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
-    restart_db->putString("d_diffusive_flux_reconstructor", "SIXTH_ORDER");
+    restart_db->putString("d_diffusive_flux_reconstructor", "FOURTH_ORDER");
 }
 
 
@@ -74,9 +74,8 @@ DiffusiveFluxReconstructorNodeFourthOrder::computeFirstDerivativesInX(
     const hier::IntVector& domain_dims,
     const double& dx_0_inv) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const double a_n =  double(2)/double(3);
+    const double b_n = -double(1)/double(12);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -100,16 +99,13 @@ DiffusiveFluxReconstructorNodeFourthOrder::computeFirstDerivativesInX(
             // Compute the linear indices.
             const int idx = i + num_ghosts_0_derivative_node;
             
-            const int idx_data_LLL = i - 3 + num_ghosts_0_data;
-            const int idx_data_LL  = i - 2 + num_ghosts_0_data;
-            const int idx_data_L   = i - 1 + num_ghosts_0_data;
-            const int idx_data_R   = i + 1 + num_ghosts_0_data;
-            const int idx_data_RR  = i + 2 + num_ghosts_0_data;
-            const int idx_data_RRR = i + 3 + num_ghosts_0_data;
+            const int idx_data_LL = i - 2 + num_ghosts_0_data;
+            const int idx_data_L  = i - 1 + num_ghosts_0_data;
+            const int idx_data_R  = i + 1 + num_ghosts_0_data;
+            const int idx_data_RR = i + 2 + num_ghosts_0_data;
             
-            dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
-                         b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
-                         c_n*(u[idx_data_RRR] - u[idx_data_LLL])
+            dudx[idx] = (a_n*(u[idx_data_R]  - u[idx_data_L]) +
+                         b_n*(u[idx_data_RR] - u[idx_data_LL])
                         )*dx_0_inv;
         }
     }
@@ -143,9 +139,6 @@ DiffusiveFluxReconstructorNodeFourthOrder::computeFirstDerivativesInX(
                 const int idx = (i + num_ghosts_0_derivative_node) +
                     (j + num_ghosts_1_derivative_node)*ghostcell_dim_0_derivative_node;
                 
-                const int idx_data_LLL = (i - 3 + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
                 const int idx_data_LL = (i - 2 + num_ghosts_0_data) +
                     (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                 
@@ -158,12 +151,8 @@ DiffusiveFluxReconstructorNodeFourthOrder::computeFirstDerivativesInX(
                 const int idx_data_RR = (i + 2 + num_ghosts_0_data) +
                     (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                 
-                const int idx_data_RRR = (i + 3 + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
-                dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
-                             b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
-                             c_n*(u[idx_data_RRR] - u[idx_data_LLL])
+                dudx[idx] = (a_n*(u[idx_data_R]  - u[idx_data_L]) +
+                             b_n*(u[idx_data_RR] - u[idx_data_LL])
                             )*dx_0_inv;
             }
         }
@@ -208,11 +197,6 @@ DiffusiveFluxReconstructorNodeFourthOrder::computeFirstDerivativesInX(
                         (k + num_ghosts_2_derivative_node)*ghostcell_dim_0_derivative_node*
                             ghostcell_dim_1_derivative_node;
                     
-                    const int idx_data_LLL = (i - 3 + num_ghosts_0_data) +
-                        (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
                     const int idx_data_LL = (i - 2 + num_ghosts_0_data) +
                         (j + num_ghosts_1_data)*ghostcell_dim_0_data +
                         (k + num_ghosts_2_data)*ghostcell_dim_0_data*
@@ -233,14 +217,8 @@ DiffusiveFluxReconstructorNodeFourthOrder::computeFirstDerivativesInX(
                         (k + num_ghosts_2_data)*ghostcell_dim_0_data*
                             ghostcell_dim_1_data;
                     
-                    const int idx_data_RRR = (i + 3 + num_ghosts_0_data) +
-                        (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
-                    dudx[idx] = (a_n*(u[idx_data_R]   - u[idx_data_L]) +
-                                 b_n*(u[idx_data_RR]  - u[idx_data_LL]) +
-                                 c_n*(u[idx_data_RRR] - u[idx_data_LLL])
+                    dudx[idx] = (a_n*(u[idx_data_R]  - u[idx_data_L]) +
+                                 b_n*(u[idx_data_RR] - u[idx_data_LL])
                                 )*dx_0_inv;
                 }
             }
@@ -264,9 +242,8 @@ DiffusiveFluxReconstructorNodeFourthOrder::computeFirstDerivativesInY(
     const hier::IntVector& domain_dims,
     const double& dx_1_inv) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const double a_n =  double(2)/double(3);
+    const double b_n = -double(1)/double(12);
     
     if (d_dim == tbox::Dimension(2))
     {
@@ -298,9 +275,6 @@ DiffusiveFluxReconstructorNodeFourthOrder::computeFirstDerivativesInY(
                 const int idx = (i + num_ghosts_0_derivative_node) +
                     (j + num_ghosts_1_derivative_node)*ghostcell_dim_0_derivative_node;
                 
-                const int idx_data_BBB = (i + num_ghosts_0_data) +
-                    (j - 3 + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
                 const int idx_data_BB = (i + num_ghosts_0_data) +
                     (j - 2 + num_ghosts_1_data)*ghostcell_dim_0_data;
                 
@@ -313,12 +287,8 @@ DiffusiveFluxReconstructorNodeFourthOrder::computeFirstDerivativesInY(
                 const int idx_data_TT = (i + num_ghosts_0_data) +
                     (j + 2 + num_ghosts_1_data)*ghostcell_dim_0_data;
                 
-                const int idx_data_TTT = (i + num_ghosts_0_data) +
-                    (j + 3 + num_ghosts_1_data)*ghostcell_dim_0_data;
-                
-                dudy[idx] = (a_n*(u[idx_data_T]   - u[idx_data_B]) +
-                             b_n*(u[idx_data_TT]  - u[idx_data_BB]) +
-                             c_n*(u[idx_data_TTT] - u[idx_data_BBB])
+                dudy[idx] = (a_n*(u[idx_data_T]  - u[idx_data_B]) +
+                             b_n*(u[idx_data_TT] - u[idx_data_BB])
                             )*dx_1_inv;
             }
         }
@@ -363,11 +333,6 @@ DiffusiveFluxReconstructorNodeFourthOrder::computeFirstDerivativesInY(
                         (k + num_ghosts_2_derivative_node)*ghostcell_dim_0_derivative_node*
                             ghostcell_dim_1_derivative_node;
                     
-                    const int idx_data_BBB = (i + num_ghosts_0_data) +
-                        (j - 3 + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
                     const int idx_data_BB = (i + num_ghosts_0_data) +
                         (j - 2 + num_ghosts_1_data)*ghostcell_dim_0_data +
                         (k + num_ghosts_2_data)*ghostcell_dim_0_data*
@@ -388,14 +353,8 @@ DiffusiveFluxReconstructorNodeFourthOrder::computeFirstDerivativesInY(
                         (k + num_ghosts_2_data)*ghostcell_dim_0_data*
                             ghostcell_dim_1_data;
                     
-                    const int idx_data_TTT = (i + num_ghosts_0_data) +
-                        (j + 3 + num_ghosts_1_data)*ghostcell_dim_0_data +
-                        (k + num_ghosts_2_data)*ghostcell_dim_0_data*
-                            ghostcell_dim_1_data;
-                    
-                    dudy[idx] = (a_n*(u[idx_data_T]   - u[idx_data_B]) +
-                                 b_n*(u[idx_data_TT]  - u[idx_data_BB]) +
-                                 c_n*(u[idx_data_TTT] - u[idx_data_BBB])
+                    dudy[idx] = (a_n*(u[idx_data_T]  - u[idx_data_B]) +
+                                 b_n*(u[idx_data_TT] - u[idx_data_BB])
                                 )*dx_1_inv;
                 }
             }
@@ -419,9 +378,8 @@ DiffusiveFluxReconstructorNodeFourthOrder::computeFirstDerivativesInZ(
     const hier::IntVector& domain_dims,
     const double& dx_2_inv) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const double a_n =  double(2)/double(3);
+    const double b_n = -double(1)/double(12);
     
     /*
      * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
@@ -461,11 +419,6 @@ DiffusiveFluxReconstructorNodeFourthOrder::computeFirstDerivativesInZ(
                     (k + num_ghosts_2_derivative_node)*ghostcell_dim_0_derivative_node*
                         ghostcell_dim_1_derivative_node;
                 
-                const int idx_data_BBB = (i + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                    (k - 3 + num_ghosts_2_data)*ghostcell_dim_0_data*
-                        ghostcell_dim_1_data;
-                
                 const int idx_data_BB = (i + num_ghosts_0_data) +
                     (j + num_ghosts_1_data)*ghostcell_dim_0_data +
                     (k - 2 + num_ghosts_2_data)*ghostcell_dim_0_data*
@@ -486,14 +439,8 @@ DiffusiveFluxReconstructorNodeFourthOrder::computeFirstDerivativesInZ(
                     (k + 2 + num_ghosts_2_data)*ghostcell_dim_0_data*
                         ghostcell_dim_1_data;
                 
-                const int idx_data_FFF = (i + num_ghosts_0_data) +
-                    (j + num_ghosts_1_data)*ghostcell_dim_0_data +
-                    (k + 3 + num_ghosts_2_data)*ghostcell_dim_0_data*
-                        ghostcell_dim_1_data;
-                
-                dudz[idx] = (a_n*(u[idx_data_F]   - u[idx_data_B]) +
-                             b_n*(u[idx_data_FF]  - u[idx_data_BB]) +
-                             c_n*(u[idx_data_FFF] - u[idx_data_BBB])
+                dudz[idx] = (a_n*(u[idx_data_F]  - u[idx_data_B]) +
+                             b_n*(u[idx_data_FF] - u[idx_data_BB])
                             )*dx_2_inv;
             }
         }
@@ -515,13 +462,11 @@ DiffusiveFluxReconstructorNodeFourthOrder::reconstructFluxX(
     const hier::IntVector& interior_dims,
     const double& dt) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const double a_n =  double(2)/double(3);
+    const double b_n = -double(1)/double(12);
     
-    const double a_r = a_n + b_n + c_n;
-    const double b_r = b_n + c_n;
-    const double c_r = c_n;
+    const double a_r = a_n + b_n;
+    const double b_r = b_n;
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -542,17 +487,14 @@ DiffusiveFluxReconstructorNodeFourthOrder::reconstructFluxX(
             // Compute the linear indices.
             const int idx_face_x = i;
             
-            const int idx_node_LLL = i - 3 + num_ghosts_0_flux_node;
-            const int idx_node_LL  = i - 2 + num_ghosts_0_flux_node;
-            const int idx_node_L   = i - 1 + num_ghosts_0_flux_node;
-            const int idx_node_R   = i + 0 + num_ghosts_0_flux_node;
-            const int idx_node_RR  = i + 1 + num_ghosts_0_flux_node;
-            const int idx_node_RRR = i + 2 + num_ghosts_0_flux_node;
+            const int idx_node_LL = i - 2 + num_ghosts_0_flux_node;
+            const int idx_node_L  = i - 1 + num_ghosts_0_flux_node;
+            const int idx_node_R  = i + 0 + num_ghosts_0_flux_node;
+            const int idx_node_RR = i + 1 + num_ghosts_0_flux_node;
             
             F_face_x[idx_face_x] += dt*(
-                a_r*(F_node_x[idx_node_L]   + F_node_x[idx_node_R]) +
-                b_r*(F_node_x[idx_node_LL]  + F_node_x[idx_node_RR]) +
-                c_r*(F_node_x[idx_node_LLL] + F_node_x[idx_node_RRR])
+                a_r*(F_node_x[idx_node_L]  + F_node_x[idx_node_R]) +
+                b_r*(F_node_x[idx_node_LL] + F_node_x[idx_node_RR])
                 );
         }
     }
@@ -584,9 +526,6 @@ DiffusiveFluxReconstructorNodeFourthOrder::reconstructFluxX(
                 const int idx_face_x = i +
                     j*(interior_dim_0 + 1);
                 
-                const int idx_node_LLL = (i - 3 + num_ghosts_0_flux_node) +
-                    (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
-                
                 const int idx_node_LL = (i - 2 + num_ghosts_0_flux_node) +
                     (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
                 
@@ -599,13 +538,9 @@ DiffusiveFluxReconstructorNodeFourthOrder::reconstructFluxX(
                 const int idx_node_RR = (i + 1 + num_ghosts_0_flux_node) +
                     (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
                 
-                const int idx_node_RRR = (i + 2 + num_ghosts_0_flux_node) +
-                    (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
-                
                 F_face_x[idx_face_x] += dt*(
-                    a_r*(F_node_x[idx_node_L]   + F_node_x[idx_node_R]) +
-                    b_r*(F_node_x[idx_node_LL]  + F_node_x[idx_node_RR]) +
-                    c_r*(F_node_x[idx_node_LLL] + F_node_x[idx_node_RRR])
+                    a_r*(F_node_x[idx_node_L]  + F_node_x[idx_node_R]) +
+                    b_r*(F_node_x[idx_node_LL] + F_node_x[idx_node_RR])
                     );
             }
         }
@@ -646,11 +581,6 @@ DiffusiveFluxReconstructorNodeFourthOrder::reconstructFluxX(
                         j*(interior_dim_0 + 1) +
                         k*(interior_dim_0 + 1)*interior_dim_1;
                     
-                    const int idx_node_LLL = (i - 3 + num_ghosts_0_flux_node) +
-                        (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
-                        (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
-                            ghostcell_dim_1_flux_node;
-                    
                     const int idx_node_LL = (i - 2 + num_ghosts_0_flux_node) +
                         (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
                         (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
@@ -671,15 +601,9 @@ DiffusiveFluxReconstructorNodeFourthOrder::reconstructFluxX(
                         (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
                             ghostcell_dim_1_flux_node;
                     
-                    const int idx_node_RRR = (i + 2 + num_ghosts_0_flux_node) +
-                        (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
-                        (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
-                            ghostcell_dim_1_flux_node;
-                    
                     F_face_x[idx_face_x] += dt*(
-                        a_r*(F_node_x[idx_node_L]   + F_node_x[idx_node_R]) +
-                        b_r*(F_node_x[idx_node_LL]  + F_node_x[idx_node_RR]) +
-                        c_r*(F_node_x[idx_node_LLL] + F_node_x[idx_node_RRR])
+                        a_r*(F_node_x[idx_node_L]  + F_node_x[idx_node_R]) +
+                        b_r*(F_node_x[idx_node_LL] + F_node_x[idx_node_RR])
                         );
                 }
             }
@@ -702,13 +626,11 @@ DiffusiveFluxReconstructorNodeFourthOrder::reconstructFluxY(
     const hier::IntVector& interior_dims,
     const double& dt) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const double a_n =  double(2)/double(3);
+    const double b_n = -double(1)/double(12);
     
-    const double a_r = a_n + b_n + c_n;
-    const double b_r = b_n + c_n;
-    const double c_r = c_n;
+    const double a_r = a_n + b_n;
+    const double b_r = b_n;
     
     if (d_dim == tbox::Dimension(2))
     {
@@ -738,9 +660,6 @@ DiffusiveFluxReconstructorNodeFourthOrder::reconstructFluxY(
                 const int idx_face_y = i +
                     j*interior_dim_0;
                 
-                const int idx_node_BBB = (i + num_ghosts_0_flux_node) +
-                    (j - 3 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
-                
                 const int idx_node_BB = (i + num_ghosts_0_flux_node) +
                     (j - 2 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
                 
@@ -753,13 +672,9 @@ DiffusiveFluxReconstructorNodeFourthOrder::reconstructFluxY(
                 const int idx_node_TT = (i + num_ghosts_0_flux_node) +
                     (j + 1 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
                 
-                const int idx_node_TTT = (i + num_ghosts_0_flux_node) +
-                    (j + 2 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
-                
                 F_face_y[idx_face_y] += dt*(
-                    a_r*(F_node_y[idx_node_B]   + F_node_y[idx_node_T]) +
-                    b_r*(F_node_y[idx_node_BB]  + F_node_y[idx_node_TT]) +
-                    c_r*(F_node_y[idx_node_BBB] + F_node_y[idx_node_TTT])
+                    a_r*(F_node_y[idx_node_B]  + F_node_y[idx_node_T]) +
+                    b_r*(F_node_y[idx_node_BB] + F_node_y[idx_node_TT])
                     );
             }
         }
@@ -800,11 +715,6 @@ DiffusiveFluxReconstructorNodeFourthOrder::reconstructFluxY(
                         j*interior_dim_0 +
                         k*interior_dim_0*(interior_dim_1 + 1);
                     
-                    const int idx_node_BBB = (i + num_ghosts_0_flux_node) +
-                        (j - 3 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
-                        (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
-                            ghostcell_dim_1_flux_node;
-                    
                     const int idx_node_BB = (i + num_ghosts_0_flux_node) +
                         (j - 2 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
                         (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
@@ -825,15 +735,9 @@ DiffusiveFluxReconstructorNodeFourthOrder::reconstructFluxY(
                         (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
                             ghostcell_dim_1_flux_node;
                     
-                    const int idx_node_TTT = (i + num_ghosts_0_flux_node) +
-                        (j + 2 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
-                        (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
-                            ghostcell_dim_1_flux_node;
-                    
                     F_face_y[idx_face_y] += dt*(
-                        a_r*(F_node_y[idx_node_B]   + F_node_y[idx_node_T]) +
-                        b_r*(F_node_y[idx_node_BB]  + F_node_y[idx_node_TT]) +
-                        c_r*(F_node_y[idx_node_BBB] + F_node_y[idx_node_TTT])
+                        a_r*(F_node_y[idx_node_B]  + F_node_y[idx_node_T]) +
+                        b_r*(F_node_y[idx_node_BB] + F_node_y[idx_node_TT])
                         );
                 }
             }
@@ -856,13 +760,11 @@ DiffusiveFluxReconstructorNodeFourthOrder::reconstructFluxZ(
     const hier::IntVector& interior_dims,
     const double& dt) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const double a_n =  double(2)/double(3);
+    const double b_n = -double(1)/double(12);
     
-    const double a_r = a_n + b_n + c_n;
-    const double b_r = b_n + c_n;
-    const double c_r = c_n;
+    const double a_r = a_n + b_n;
+    const double b_r = b_n;
     
     /*
      * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
@@ -898,11 +800,6 @@ DiffusiveFluxReconstructorNodeFourthOrder::reconstructFluxZ(
                     j*interior_dim_0 +
                     k*interior_dim_0*interior_dim_1;
                 
-                const int idx_node_BBB = (i + num_ghosts_0_flux_node) +
-                    (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
-                    (k - 3 + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
-                        ghostcell_dim_1_flux_node;
-                
                 const int idx_node_BB = (i + num_ghosts_0_flux_node) +
                     (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
                     (k - 2 + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
@@ -923,15 +820,9 @@ DiffusiveFluxReconstructorNodeFourthOrder::reconstructFluxZ(
                     (k + 1 + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
                         ghostcell_dim_1_flux_node;
                 
-                const int idx_node_FFF = (i + num_ghosts_0_flux_node) +
-                    (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node +
-                    (k + 2 + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
-                        ghostcell_dim_1_flux_node;
-                
                 F_face_z[idx_face_z] += dt*(
-                    a_r*(F_node_z[idx_node_B]   + F_node_z[idx_node_F]) +
-                    b_r*(F_node_z[idx_node_BB]  + F_node_z[idx_node_FF]) +
-                    c_r*(F_node_z[idx_node_BBB] + F_node_z[idx_node_FFF])
+                    a_r*(F_node_z[idx_node_B]  + F_node_z[idx_node_F]) +
+                    b_r*(F_node_z[idx_node_BB] + F_node_z[idx_node_FF])
                     );
             }
         }
