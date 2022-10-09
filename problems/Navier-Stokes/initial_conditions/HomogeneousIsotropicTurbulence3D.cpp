@@ -16,14 +16,14 @@ NavierStokesInitialConditions::initializeDataOnPatch(
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "Can only initialize data for 'project_name' = '3D HIT' or '3D random HIT' !\n"
+            << "Can only initialize data for 'project_name' = '3D HIT' or '3D random HIT'!\n"
             << "'project_name' = '"
             << d_project_name
             << "' is given."
             << std::endl);
     }
     
-    if (d_dim != tbox::Dimension(3) && d_dim != tbox::Dimension(2))
+    if (d_dim == tbox::Dimension(1) || d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
             << ": "
@@ -53,7 +53,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         const double* const patch_xlo = patch_geom->getXLower();
         
         if (d_project_name == "3D HIT")
-        {        
+        {
             // Get the dimensions of box that covers the interior of Patch.
             hier::Box patch_box = patch.getBox();
             const hier::IntVector patch_dims = patch_box.numberCells();
@@ -114,24 +114,23 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             // Get the dimensions of box that covers the interior of Patch.
             hier::Box patch_box = patch.getBox();
             const hier::IntVector patch_dims = patch_box.numberCells();
-
+            
             /*
              * Initialize data for a 3D inviscid Taylor-Green problem.
              */
-
+            
             HAMERS_SHARED_PTR<pdat::CellData<double> > density      = conservative_variables[0];
             HAMERS_SHARED_PTR<pdat::CellData<double> > momentum     = conservative_variables[1];
             HAMERS_SHARED_PTR<pdat::CellData<double> > total_energy = conservative_variables[2];
-
+            
             double* rho   = density->getPointer(0);
             double* rho_u = momentum->getPointer(0);
             double* rho_v = momentum->getPointer(1);
             double* rho_w = momentum->getPointer(2);
             double* E     = total_energy->getPointer(0);
-
+            
             double gamma = double(5)/double(3);
-            // srand(time(NULL));
-           
+            
             for (int k = 0; k < patch_dims[2]; k++)
             {
                 for (int j = 0; j < patch_dims[1]; j++)
@@ -149,18 +148,21 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
                         x[2] = patch_xlo[2] + (double(k) + double(1)/double(2))*dx[2];
                         
-                        // srand(100.0*x[0] + 55.0*x[1] + 307.0*x[2] + 68.0);
                         // Compute density, velocities and pressure.
+                        const double rand_double_0 = double(100000);
+                        const double rand_double_1 = double(890056);
+                        const double rand_double_2 = double(890056);
+                        
                         const double rho_i = double(1);
-                        srand(100000.0*x[0]*x[1]*x[2]);
-                        const double u_i = ((double) rand() / (RAND_MAX))*2.0 - 1.0;
-                        srand(890056.0*x[0]*x[1]*x[2]);
-                        const double v_i = ((double) rand() / (RAND_MAX))*2.0 - 1.0;
-                        srand(198785.0*x[0]*x[1]*x[2]);
-                        const double w_i = ((double) rand() / (RAND_MAX))*2.0 - 1.0;
+                        srand(rand_double_0*x[0]*x[1]*x[2]);
+                        const double u_i = ((double(rand())/double(RAND_MAX))*double(2) - double(1);
+                        srand(rand_double_1*x[0]*x[1]*x[2]);
+                        const double v_i = ((double(rand())/double(RAND_MAX))*double(2) - double(1);
+                        srand(rand_double_2*x[0]*x[1]*x[2]);
+                        const double w_i = ((double(rand())/double(RAND_MAX))*double(2) - double(1);
                         
                         const double p_i = double(100);
-                       
+                        
                         rho[idx_cell]   = rho_i;
                         rho_u[idx_cell] = rho_i*u_i;
                         rho_v[idx_cell] = rho_i*v_i;

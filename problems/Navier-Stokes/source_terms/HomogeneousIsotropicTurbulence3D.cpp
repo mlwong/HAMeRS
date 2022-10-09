@@ -13,9 +13,9 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     const double dt,
     const int RK_step_number)
 {
-    // Follow T. S. Lundgren "Linearly forced isotropic turbulence", 2003
+    // Follow Lundgren, T. S. "Linearly forced isotropic turbulence." Annual Research Briefs-2003 (2003): 461.
     
-    if ((d_project_name != "3D HIT")) 
+    if ((d_project_name != "3D HIT"))
     {
         TBOX_ERROR(d_object_name
             << ": "
@@ -25,7 +25,6 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << "' is given."
             << std::endl);
     }
-    
     
     if (d_dim != tbox::Dimension(3))
     {
@@ -49,7 +48,6 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << "No key 'forcing_rate' found in data for source terms."
             << std::endl);
     }
-
     
     const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
         HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
@@ -86,9 +84,9 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
      * Initialize data for a 2D Rayleigh-Taylor instability problem (At = 0.04, M = 0.3).
      */
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > density         = conservative_variables[0];
-    HAMERS_SHARED_PTR<pdat::CellData<double> > momentum        = conservative_variables[1];
-    HAMERS_SHARED_PTR<pdat::CellData<double> > total_energy    = conservative_variables[2];
+    HAMERS_SHARED_PTR<pdat::CellData<double> > density      = conservative_variables[0];
+    HAMERS_SHARED_PTR<pdat::CellData<double> > momentum     = conservative_variables[1];
+    HAMERS_SHARED_PTR<pdat::CellData<double> > total_energy = conservative_variables[2];
     
     double* rho   = density->getPointer(0);
     double* rho_u = momentum->getPointer(0);
@@ -101,7 +99,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     TBOX_ASSERT(d_source_terms_db != nullptr);
     
     const double TKE_avg = monitoring_statistics_map.at("KINETIC_ENERGY_AVG");
-    const double Q_force = dt*eps_0/TKE_avg/3.0;
+    const double Q_force = dt*eps_0/(TKE_avg*double(3));
 
     if (d_project_name == "3D HIT")
     {
