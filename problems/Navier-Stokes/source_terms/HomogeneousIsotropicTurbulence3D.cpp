@@ -49,6 +49,14 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << std::endl);
     }
     
+    if (monitoring_statistics_map.find("KINETIC_ENERGY_AVG") == monitoring_statistics_map.end())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "No key 'KINETIC_ENERGY_AVG' found in monitoring statistics."
+            << std::endl);
+    }
+    
     const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
         HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
@@ -73,9 +81,6 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     const hier::IntVector num_ghosts_cons_var     = conservative_variables[0]->getGhostCellWidth();
     const hier::IntVector ghostcell_dims_cons_var = conservative_variables[0]->getGhostBox().numberCells();
     
-    const double* const dx = patch_geom->getDx();
-    const double* const patch_xlo = patch_geom->getXLower();
-    
     // Get the dimensions of box that covers the interior of Patch.
     hier::Box patch_box = patch.getBox();
     const hier::IntVector patch_dims = patch_box.numberCells();
@@ -88,18 +93,20 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     HAMERS_SHARED_PTR<pdat::CellData<double> > momentum     = conservative_variables[1];
     HAMERS_SHARED_PTR<pdat::CellData<double> > total_energy = conservative_variables[2];
     
-    double* rho   = density->getPointer(0);
+    // double* rho   = density->getPointer(0);
     double* rho_u = momentum->getPointer(0);
     double* rho_v = momentum->getPointer(1);
     double* rho_w = momentum->getPointer(2);
-    double* E     = total_energy->getPointer(0);
+    // double* E     = total_energy->getPointer(0);
     
-    double gamma = double(5)/double(3);
+    // double gamma = double(5)/double(3);
     
     TBOX_ASSERT(d_source_terms_db != nullptr);
     
     const double TKE_avg = monitoring_statistics_map.at("KINETIC_ENERGY_AVG");
-    const double Q_force = dt*eps_0/(TKE_avg*double(3));
+    // eps_0 has the unit of kinetic energy per unit time.
+    const double Q_force = dt*eps_0/TKE_avg; // multiply  dt for time integration.
+    // const double Q_force = dt*eps_0/(TKE_avg*double(3));
 
     if (d_project_name == "3D HIT")
     {
@@ -118,9 +125,9 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                         (j + num_ghosts_cons_var[1])*ghostcell_dims_cons_var[0] +
                         (k + num_ghosts_cons_var[2])*ghostcell_dims_cons_var[0]*ghostcell_dims_cons_var[1];
 
-                    S[1][idx_source] += Q_force*(rho_u[idx_cons_var]/rho[idx_cons_var]);
-                    S[2][idx_source] += Q_force*(rho_v[idx_cons_var]/rho[idx_cons_var]);
-                    S[3][idx_source] += Q_force*(rho_w[idx_cons_var]/rho[idx_cons_var]);
+                    S[1][idx_source] += Q_force*rho_u[idx_cons_var];
+                    S[2][idx_source] += Q_force*rho_v[idx_cons_var];
+                    S[3][idx_source] += Q_force*rho_w[idx_cons_var];
                 }
             }
         }

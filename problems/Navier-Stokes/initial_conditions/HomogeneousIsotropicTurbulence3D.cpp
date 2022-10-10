@@ -155,11 +155,11 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         
                         const double rho_i = double(1);
                         srand(rand_double_0*x[0]*x[1]*x[2]);
-                        const double u_i = ((double(rand())/double(RAND_MAX))*double(2) - double(1);
+                        const double u_i = (double(rand())/double(RAND_MAX))*double(2) - double(1);
                         srand(rand_double_1*x[0]*x[1]*x[2]);
-                        const double v_i = ((double(rand())/double(RAND_MAX))*double(2) - double(1);
+                        const double v_i = (double(rand())/double(RAND_MAX))*double(2) - double(1);
                         srand(rand_double_2*x[0]*x[1]*x[2]);
-                        const double w_i = ((double(rand())/double(RAND_MAX))*double(2) - double(1);
+                        const double w_i = (double(rand())/double(RAND_MAX))*double(2) - double(1);
                         
                         const double p_i = double(100);
                         
