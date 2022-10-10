@@ -1,19 +1,19 @@
-#ifndef FLOW_MODEL_SUBGRID_SCALE_MODEL_SINGLE_SPECIES_HPP
-#define FLOW_MODEL_SUBGRID_SCALE_MODEL_SINGLE_SPECIES_HPP
+#ifndef FLOW_MODEL_SUBGRID_SCALE_MODEL_FOUR_EQN_CONSERVATIVE_HPP
+#define FLOW_MODEL_SUBGRID_SCALE_MODEL_FOUR_EQN_CONSERVATIVE_HPP
 
 #include "flow/flow_models/FlowModelSubgridScaleModel.hpp"
 
-class FlowModelSubgridScaleModelSingleSpecies: public FlowModelSubgridScaleModel
+class FlowModelSubgridScaleModelFourEqnConservative: public FlowModelSubgridScaleModel
 {
     public:
-        FlowModelSubgridScaleModelSingleSpecies(
+        FlowModelSubgridScaleModelFourEqnConservative(
             const std::string& object_name,
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
             const HAMERS_SHARED_PTR<tbox::Database>& subgrid_scale_model_db);
         
-        ~FlowModelSubgridScaleModelSingleSpecies() {}
+        ~FlowModelSubgridScaleModelFourEqnConservative() {}
         
         /*
          * Return names of different derived variables required to register.
@@ -60,6 +60,7 @@ class FlowModelSubgridScaleModelSingleSpecies: public FlowModelSubgridScaleModel
          * diffusivity/viscosity.
          */
         void updateSideDataOfDiffusiveFluxDiffusivitiesVreman(
+            std::vector<double*>& D,
             double* mu,
             double* kappa,
             const double* const rho,
@@ -84,8 +85,9 @@ class FlowModelSubgridScaleModelSingleSpecies: public FlowModelSubgridScaleModel
          * Constants used to compute subgrid scale viscosity.
          */
         double d_constant_sgs;
+        double d_species_Sc_t;
         double d_species_Pr_t;
         double d_species_c_p;
 };
 
-#endif /* FLOW_MODEL_SUBGRID_SCALE_MODEL_SINGLE_SPECIES_HPP */
+#endif /* FLOW_MODEL_SUBGRID_SCALE_MODEL_FOUR_EQN_CONSERVATIVE_HPP */

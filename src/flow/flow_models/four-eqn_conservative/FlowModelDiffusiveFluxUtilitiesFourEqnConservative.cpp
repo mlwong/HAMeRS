@@ -1,5 +1,7 @@
 #include "flow/flow_models/four-eqn_conservative/FlowModelDiffusiveFluxUtilitiesFourEqnConservative.hpp"
 
+#include "flow/flow_models/four-eqn_conservative/FlowModelSubgridScaleModelFourEqnConservative.hpp"
+
 FlowModelDiffusiveFluxUtilitiesFourEqnConservative::FlowModelDiffusiveFluxUtilitiesFourEqnConservative(
     const std::string& object_name,
     const tbox::Dimension& dim,
@@ -37,7 +39,38 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::FlowModelDiffusiveFluxUtilit
         d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
         d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
         d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules)
-{}
+{
+    if (d_use_subgrid_scale_model)
+    {
+        HAMERS_SHARED_PTR<tbox::Database> subgrid_scale_model_db;
+        
+        if (flow_model_db->keyExists("Subgrid_scale_model"))
+        {
+            subgrid_scale_model_db = flow_model_db->getDatabase("Subgrid_scale_model");
+        }
+        else if (flow_model_db->keyExists("d_subgrid_scale_model"))
+        {
+            subgrid_scale_model_db = flow_model_db->getDatabase("d_subgrid_scale_model");
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "No key 'Subgrid_scale_model'/'d_subgrid_scale_model' found in data for flow model."
+                << std::endl);
+        }
+        
+        /*
+         * Initialize subgrid scale model object.
+         */
+        d_flow_model_subgrid_scale_model.reset(new FlowModelSubgridScaleModelFourEqnConservative(
+            "d_flow_model_subgrid_scale_model",
+            d_dim,
+            d_grid_geometry,
+            d_num_species,
+            subgrid_scale_model_db));
+    }
+}
 
 
 /*
@@ -270,6 +303,17 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDerivedVariablesForD
         "DIFFUSIVITIES");
     
     d_need_side_diffusivities = need_side_diffusivities;
+    
+    if (d_use_subgrid_scale_model)
+    {
+        const std::vector<std::string>& var_to_register = d_flow_model_subgrid_scale_model->getDerivedVariablesToRegister();
+        
+        for (int vi = 0; vi < static_cast<int>(var_to_register.size()); vi++)
+        {
+            num_subghosts_of_data.insert(
+                std::pair<std::string, hier::IntVector>(var_to_register[vi], num_subghosts));
+        }
+    }
 }
 
 
@@ -3034,6 +3078,21 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataForInterpolationT
         var_data_for_diffusivities[2*d_num_species + 4 + d_dim.getValue() + si] = data_species_enthalpies[si];
         var_data_for_diffusivities_component_idx[2*d_num_species + 4 + d_dim.getValue() + si] = 0;
     }
+    
+    if (d_use_subgrid_scale_model)
+    {
+        std::vector<std::string> var_to_interpolate;
+        std::vector<int> var_to_interpolate_component_idx;
+        d_flow_model_subgrid_scale_model->getDerivedVariablesForInterpolationToSideData(var_to_interpolate, var_to_interpolate_component_idx);
+        
+        for (int vi = 0; vi < static_cast<int>(var_to_interpolate.size()); vi++)
+        {
+            const std::string var_str = var_to_interpolate[vi];
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_u = flow_model_tmp->getCellData(var_str);
+            var_data_for_diffusivities.push_back(data_u);
+            var_data_for_diffusivities_component_idx.push_back(var_to_interpolate_component_idx[vi]);
+        }
+    }
 }
 
 
@@ -3070,7 +3129,14 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeSideDataOfDiffusiveFl
             const hier::IntVector ghostcell_dims = var_data_for_diffusivities[0]->getGhostBox().numberCells();
             
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-            TBOX_ASSERT(static_cast<int>(var_data_for_diffusivities.size()) == 3*d_num_species + 4 + d_dim.getValue());
+            std::vector<std::string> var_to_interpolate;
+            std::vector<int> var_to_interpolate_component_idx;
+            if (d_use_subgrid_scale_model)
+            {
+                d_flow_model_subgrid_scale_model->getDerivedVariablesForInterpolationToSideData(var_to_interpolate, var_to_interpolate_component_idx);
+            }
+            
+            TBOX_ASSERT(static_cast<int>(var_data_for_diffusivities.size()) == 3*d_num_species + 4 + d_dim.getValue() + static_cast<int>(var_to_interpolate.size()));
             TBOX_ASSERT(num_ghosts <= d_num_subghosts_diffusivities);
             
             for (int vi = 0; vi < static_cast<int>(var_data_for_diffusivities.size()); vi++)
