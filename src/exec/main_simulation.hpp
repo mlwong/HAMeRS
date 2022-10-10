@@ -665,7 +665,7 @@ void runSimulation(
         }
         
         tbox::pout << "At begining of timestep # " << iteration_num - 1 << std::endl;
-        tbox::pout << "Simulation time is " << loop_time << std::endl;
+        tbox::pout << "Simulation time (old) is " << loop_time << std::endl;
         tbox::pout << "Current dt is " << dt_now << std::endl;
         
         // Advance the solution.
@@ -688,7 +688,7 @@ void runSimulation(
         }
         
         tbox::pout << "At end of timestep # " << iteration_num - 1 << std::endl;
-        tbox::pout << "Simulation time is " << loop_time << std::endl;
+        tbox::pout << "Simulation time (new) is " << loop_time << std::endl;
         switch (app_label)
         {
             case EULER:
