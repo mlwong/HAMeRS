@@ -64,7 +64,7 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
             TBOX_ERROR(d_object_name
                 << ": DiffusiveFluxReconstructorMidpoint::"
                 << "computeDiffusiveFluxOnPatch()\n"
-                << "Subgrid scale model not implemented for one-dimensional or two-dimensional problems."
+                << "Subgrid scale model is not implemented for one-dimensional or two-dimensional problems."
                 << std::endl);
         }
     }

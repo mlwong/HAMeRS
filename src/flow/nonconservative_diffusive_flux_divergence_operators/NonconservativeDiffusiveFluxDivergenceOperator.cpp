@@ -28,6 +28,15 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
     HAMERS_SHARED_PTR<FlowModelDiffusiveFluxUtilities> diffusive_flux_utilities =
         d_flow_model->getFlowModelDiffusiveFluxUtilities();
     
+    if (diffusive_flux_utilities->useSubgridScaleModel())
+    {
+        TBOX_ERROR(d_object_name
+            << ": NonconservativeDiffusiveFluxDivergenceOperator::"
+            << "computeNonconservativeDiffusiveFluxDivergenceOnPatch()\n"
+            << "Subgrid scale model is not implemented."
+            << std::endl);
+    }
+    
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
