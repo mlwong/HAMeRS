@@ -49,6 +49,14 @@ FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::computeMonitoringStat
 {
     NULL_USE(time);
     
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
     if (d_monitoring_time_step_interval > 0 && step_num%d_monitoring_time_step_interval == 0)
     {
         HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
@@ -227,14 +235,73 @@ FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::computeMonitoringStat
 
 
 /*
+ * Output names of monitoring statistical quantities to output to a file.
+ */
+void
+FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::outputMonitoringStatisticalQuantitiesNames(
+    const std::string& monitoring_stat_dump_filename) const
+{
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        f_out.open(monitoring_stat_dump_filename.c_str(), std::ios::app);
+        
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        for (int si = 0; si < static_cast<int>(d_monitoring_statistics_names.size()); si++)
+        {
+            // Get the key of the current variable.
+            std::string statistical_quantity_key = d_monitoring_statistics_names[si];
+            
+            if (statistical_quantity_key == "KINETIC_ENERGY_AVG")
+            {
+                f_out << "\t" << "KINETIC_ENERGY_AVG   ";
+            }
+            else if (statistical_quantity_key == "MACH_NUM_MAX")
+            {
+                f_out << "\t" << "MACH_NUM_MAX         ";
+            }
+        }
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output monitoring statistics to screen.
  */
 void
 FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::outputMonitoringStatistics(
     std::ostream& os,
+    const std::string& monitoring_stat_dump_filename,
     const double time)
 {
     NULL_USE(time);
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(monitoring_stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output monitoring statistics!"
+                << std::endl);
+        }
+    }
     
     for (int si = 0; si < static_cast<int>(d_monitoring_statistics_names.size()); si++)
     {
@@ -244,11 +311,26 @@ FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::outputMonitoringStati
         if (statistical_quantity_key == "KINETIC_ENERGY_AVG")
         {
             os << "Avg kinetic energy: " << d_kinetic_energy_avg << std::endl;
+            if (mpi.getRank() == 0)
+            {
+                f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << d_kinetic_energy_avg;
+            }
         }
         else if (statistical_quantity_key == "MACH_NUM_MAX")
         {
             os << "Max Mach number: " << d_Mach_num_max << std::endl;
+            if (mpi.getRank() == 0)
+            {
+                f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << d_Mach_num_max;
+            }
         }
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 

@@ -26,11 +26,19 @@ class FlowModelMonitoringStatisticsUtilitiesFiveEqnAllaire: public FlowModelMoni
             const double time);
         
         /*
+         * Output names of monitoring statistical quantities to output to a file.
+         */
+        void
+        outputMonitoringStatisticalQuantitiesNames(
+            const std::string& monitoring_stat_dump_filename) const;
+        
+        /*
          * Output monitoring statistics to screen.
          */
         void
         outputMonitoringStatistics(
             std::ostream& os,
+            const std::string& monitoring_stat_dump_filename,
             const double time);
         
         /*
