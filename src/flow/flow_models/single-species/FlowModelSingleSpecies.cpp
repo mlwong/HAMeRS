@@ -403,6 +403,7 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
         d_dim,
         d_grid_geometry,
         d_num_species,
+        flow_model_db,
         d_equation_of_shear_viscosity_mixing_rules,
         d_equation_of_bulk_viscosity_mixing_rules,
         d_equation_of_thermal_conductivity_mixing_rules));
@@ -536,6 +537,11 @@ FlowModelSingleSpecies::putToRestart(
         d_equation_of_thermal_conductivity_mixing_rules->
             putToRestart(restart_equation_of_thermal_conductivity_mixing_rules_db);
     }
+    
+    /*
+     * Put the properties of d_flow_model_diffusive_flux_utilities into the restart database.
+     */
+    d_flow_model_diffusive_flux_utilities->putToRestart(restart_db);
     
     /*
      * Put the properties of d_flow_model_source_utilities into the restart database.

@@ -14,6 +14,7 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
+            const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db,
             const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
             const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
             const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules);
@@ -92,7 +93,7 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
             const DIRECTION::TYPE& derivative_direction);
         
         /*
-         * Get the cell data that needs interpolation to midpoints for computing side data of diffusivities in the
+         * Get the cell data that needs interpolation to sides for computing side data of diffusivities in the
          * diffusive flux.
          */
         void
@@ -107,7 +108,7 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
         computeSideDataOfDiffusiveFluxDiffusivities(
             const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_data_for_diffusivities);
         
-        /*
+       /*
          * Get the side data of the diffusivities in the diffusive fluxa.
          */
         void

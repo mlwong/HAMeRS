@@ -6,6 +6,7 @@
 #include "HAMeRS_memory.hpp"
 
 #include "flow/flow_models/FlowModel.hpp"
+#include "flow/flow_models/FlowModelSubgridScaleModel.hpp"
 
 #include "util/Directions.hpp"
 
@@ -26,7 +27,8 @@ class FlowModelDiffusiveFluxUtilities
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
-            const int& num_eqn);
+            const int& num_eqn,
+            const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db);
         
         virtual ~FlowModelDiffusiveFluxUtilities() {}
         
@@ -110,7 +112,7 @@ class FlowModelDiffusiveFluxUtilities
             const DIRECTION::TYPE& derivative_direction);
         
         /*
-         * Get the cell data that needs interpolation to midpoints for computing side data of diffusivities in the
+         * Get the cell data that needs interpolation to sides for computing side data of diffusivities in the
          * diffusive flux.
          */
         virtual void
@@ -135,7 +137,38 @@ class FlowModelDiffusiveFluxUtilities
             const DIRECTION::TYPE& flux_direction,
             const DIRECTION::TYPE& derivative_direction);
         
-protected:
+        bool useSubgridScaleModel() const
+        {
+            return d_use_subgrid_scale_model;
+        }
+        
+        /*
+         * Get the variables for the derivatives used at computing subgrid scale diffusivity/viscosity at sides.
+         */
+        void
+        getCellDataOfVariablesForSideDerivativeForSubgridScaleViscosity(
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_var_data,
+            std::vector<int>& derivative_var_component_idx,
+            const DIRECTION::TYPE& side_direction,
+            const DIRECTION::TYPE& derivative_direction);
+        
+        /*
+         * Modify the side data of the diffusivities/viscosities at sides with subgrid scale diffusivity/viscosity.
+         */
+        void
+        updateSideDataOfDiffusiveFluxDiffusivitiesWithSubgridScaleModel(
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_data_for_diffusivities,
+            const std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives,
+            const DIRECTION::TYPE& side_direction);
+        
+        /*
+         * Put the characteristics of this class into the restart database.
+         */
+        virtual void
+        putToRestart(
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
+        
+    protected:
         /*
          * The object name is used for error/warning reporting.
          */
@@ -210,6 +243,16 @@ protected:
          * Whether side data of diffusivities is needed.
          */
         bool d_need_side_diffusivities;
+        
+        /*
+         * Whether to use subgrid-scale model.
+         */
+        bool d_use_subgrid_scale_model;
+        
+        /*
+         * HAMERS_SHARED_PTR to subgrid-scale model object.
+         */
+        HAMERS_SHARED_PTR<FlowModelSubgridScaleModel> d_flow_model_subgrid_scale_model;
 };
 
 #endif /* FLOW_MODEL_DIFFUSIVE_FLUX_UTILITIES_HPP */

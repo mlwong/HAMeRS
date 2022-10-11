@@ -1,10 +1,13 @@
 #include "flow/flow_models/single-species/FlowModelDiffusiveFluxUtilitiesSingleSpecies.hpp"
 
+#include "flow/flow_models/single-species/FlowModelSubgridScaleModelSingleSpecies.hpp"
+
 FlowModelDiffusiveFluxUtilitiesSingleSpecies::FlowModelDiffusiveFluxUtilitiesSingleSpecies(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_species,
+    const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db,
     const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
     const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
     const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules):
@@ -13,7 +16,8 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::FlowModelDiffusiveFluxUtilitiesSin
             dim,
             grid_geometry,
             num_species,
-            2 + dim.getValue()),
+            2 + dim.getValue(),
+            flow_model_db),
         d_num_subghosts_shear_viscosity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_bulk_viscosity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_thermal_conductivity(-hier::IntVector::getOne(d_dim)),
@@ -29,7 +33,38 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::FlowModelDiffusiveFluxUtilitiesSin
         d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
         d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
         d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules)
-{}
+{
+    if (d_use_subgrid_scale_model)
+    {
+        HAMERS_SHARED_PTR<tbox::Database> subgrid_scale_model_db;
+        
+        if (flow_model_db->keyExists("Subgrid_scale_model"))
+        {
+            subgrid_scale_model_db = flow_model_db->getDatabase("Subgrid_scale_model");
+        }
+        else if (flow_model_db->keyExists("d_subgrid_scale_model"))
+        {
+            subgrid_scale_model_db = flow_model_db->getDatabase("d_subgrid_scale_model");
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "No key 'Subgrid_scale_model'/'d_subgrid_scale_model' found in data for flow model."
+                << std::endl);
+        }
+        
+        /*
+         * Initialize subgrid scale model object.
+         */
+        d_flow_model_subgrid_scale_model.reset(new FlowModelSubgridScaleModelSingleSpecies(
+            "d_flow_model_subgrid_scale_model",
+            d_dim,
+            d_grid_geometry,
+            d_num_species,
+            subgrid_scale_model_db));
+    }
+}
 
 
 /*
@@ -217,6 +252,17 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDerivedVariablesForDiffusi
         "DIFFUSIVITIES");
     
     d_need_side_diffusivities = need_side_diffusivities;
+    
+    if (d_use_subgrid_scale_model)
+    {
+        const std::vector<std::string>& var_to_register = d_flow_model_subgrid_scale_model->getDerivedVariablesToRegister();
+        
+        for (int vi = 0; vi < static_cast<int>(var_to_register.size()); vi++)
+        {
+            num_subghosts_of_data.insert(
+                std::pair<std::string, hier::IntVector>(var_to_register[vi], num_subghosts));
+        }
+    }
 }
 
 
@@ -2313,7 +2359,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusiv
 
 
 /*
- * Get the cell data that needs interpolation to midpoints for computing side data of diffusivities in the
+ * Get the cell data that needs interpolation to sides for computing side data of diffusivities in the
  * diffusive flux.
  */
 void
@@ -2400,6 +2446,21 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataForInterpolationToSideD
         var_data_for_diffusivities[5] = data_velocity;
         var_data_for_diffusivities_component_idx[5] = 2;
     }
+    
+    if (d_use_subgrid_scale_model)
+    {
+        std::vector<std::string> var_to_interpolate;
+        std::vector<int> var_to_interpolate_component_idx;
+        d_flow_model_subgrid_scale_model->getDerivedVariablesForInterpolationToSideData(var_to_interpolate, var_to_interpolate_component_idx);
+        
+        for (int vi = 0; vi < static_cast<int>(var_to_interpolate.size()); vi++)
+        {
+            const std::string var_str = var_to_interpolate[vi];
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_u = flow_model_tmp->getCellData(var_str);
+            var_data_for_diffusivities.push_back(data_u);
+            var_data_for_diffusivities_component_idx.push_back(var_to_interpolate_component_idx[vi]);
+        }
+    }
 }
 
 
@@ -2436,12 +2497,19 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
             const hier::IntVector ghostcell_dims = var_data_for_diffusivities[0]->getGhostBox().numberCells();
             
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-            TBOX_ASSERT(static_cast<int>(var_data_for_diffusivities.size()) == 3 + d_dim.getValue());
+            std::vector<std::string> var_to_interpolate;
+            std::vector<int> var_to_interpolate_component_idx;
+            if (d_use_subgrid_scale_model)
+            {
+                d_flow_model_subgrid_scale_model->getDerivedVariablesForInterpolationToSideData(var_to_interpolate, var_to_interpolate_component_idx);
+            }
+            
+            TBOX_ASSERT(static_cast<int>(var_data_for_diffusivities.size()) == 3 + d_dim.getValue() + static_cast<int>(var_to_interpolate.size()));
             TBOX_ASSERT(num_ghosts <= d_num_subghosts_diffusivities);
             
             for (int vi = 0; vi < static_cast<int>(var_data_for_diffusivities.size()); vi++)
             {
-                TBOX_ASSERT(var_data_for_diffusivities[vi] == num_ghosts);
+                TBOX_ASSERT(var_data_for_diffusivities[vi]->getGhostCellWidth() == num_ghosts);
                 TBOX_ASSERT(var_data_for_diffusivities[vi]->getGhostBox().contains(interior_box));
             }
 #endif

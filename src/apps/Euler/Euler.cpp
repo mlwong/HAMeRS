@@ -61,6 +61,7 @@ Euler::Euler(
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
+        d_monitoring_stat_dump_filename("monitoring_stats.txt"),
         d_stat_dump_filename(stat_dump_filename),
         d_use_nonuniform_workload(false),
         d_Euler_boundary_conditions_db_is_from_restart(false)
@@ -2434,7 +2435,7 @@ Euler::printErrorStatistics(
 
 
 void
-Euler::computeAndPrintDataStatistics(
+Euler::computeAndOutputMonitoringDataStatistics(
     std::ostream& os,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const int step_num,
@@ -2499,9 +2500,44 @@ Euler::computeAndPrintDataStatistics(
         step_num,
         time);
     
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        f_out.open(d_monitoring_stat_dump_filename.c_str(), std::ios::app);
+        
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output monitoring statistics!"
+                << std::endl);
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10) << time;
+        f_out.close();
+    }
+    
     monitoring_statistics_utilities->outputMonitoringStatistics(
         os,
+        d_monitoring_stat_dump_filename,
         time);
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        f_out.open(d_monitoring_stat_dump_filename.c_str(), std::ios::app);
+        
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output monitoring statistics!"
+                << std::endl);
+        }
+        
+        f_out << std::endl;
+        f_out.close();
+    }
 }
 
 
@@ -2540,6 +2576,61 @@ Euler::filterStatisticsVariables(
         level,
         patch_hierarchy,
         getDataContext());
+}
+
+
+/**
+ * Output the header of monitoring statistics.
+ */
+void
+Euler::outputHeaderMonitoringStatistics()
+{
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    d_flow_model->setupMonitoringStatisticsUtilities();
+    
+    HAMERS_SHARED_PTR<FlowModelMonitoringStatisticsUtilities> monitoring_statistics_utilities =
+        d_flow_model->getFlowModelMonitoringStatisticsUtilities();
+    
+    if (monitoring_statistics_utilities->hasMonitoringStatistics())
+    {
+        if (mpi.getRank() == 0)
+        {
+            std::ofstream f_out;
+            f_out.open(d_monitoring_stat_dump_filename.c_str(), std::ios::app);
+            
+            if (!f_out.is_open())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Failed to open file to output statistics!"
+                    << std::endl);
+            }
+            
+            f_out << "# TIME               ";
+            f_out.close();
+        }
+        
+        monitoring_statistics_utilities->outputMonitoringStatisticalQuantitiesNames(
+            d_monitoring_stat_dump_filename);
+        
+        if (mpi.getRank() == 0)
+        {
+            std::ofstream f_out;
+            f_out.open(d_monitoring_stat_dump_filename.c_str(), std::ios::app);
+            
+            if (!f_out.is_open())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Failed to open file to output statistics!"
+                    << std::endl);
+            }
+            
+            f_out << std::endl;
+            f_out.close();
+        }
+    }
 }
 
 

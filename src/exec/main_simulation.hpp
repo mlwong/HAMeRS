@@ -596,12 +596,14 @@ void runSimulation(
     {
         case EULER:
         {
-            Euler_app->computeAndPrintDataStatistics(tbox::pout, patch_hierarchy, iteration_num, loop_time);
+            Euler_app->outputHeaderMonitoringStatistics();
+            Euler_app->computeAndOutputMonitoringDataStatistics(tbox::pout, patch_hierarchy, iteration_num, loop_time);
             break;
         }
         case NAVIER_STOKES:
         {
-            Navier_Stokes_app->computeAndPrintDataStatistics(tbox::pout, patch_hierarchy, iteration_num, loop_time);
+            Navier_Stokes_app->outputHeaderMonitoringStatistics();
+            Navier_Stokes_app->computeAndOutputMonitoringDataStatistics(tbox::pout, patch_hierarchy, iteration_num, loop_time);
             break;
         }
     }
@@ -665,7 +667,7 @@ void runSimulation(
         }
         
         tbox::pout << "At begining of timestep # " << iteration_num - 1 << std::endl;
-        tbox::pout << "Simulation time is " << loop_time << std::endl;
+        tbox::pout << "Simulation time (old) is " << loop_time << std::endl;
         tbox::pout << "Current dt is " << dt_now << std::endl;
         
         // Advance the solution.
@@ -688,17 +690,17 @@ void runSimulation(
         }
         
         tbox::pout << "At end of timestep # " << iteration_num - 1 << std::endl;
-        tbox::pout << "Simulation time is " << loop_time << std::endl;
+        tbox::pout << "Simulation time (new) is " << loop_time << std::endl;
         switch (app_label)
         {
             case EULER:
             {
-                Euler_app->computeAndPrintDataStatistics(tbox::pout, patch_hierarchy, iteration_num, loop_time);
+                Euler_app->computeAndOutputMonitoringDataStatistics(tbox::pout, patch_hierarchy, iteration_num, loop_time);
                 break;
             }
             case NAVIER_STOKES:
             {
-                Navier_Stokes_app->computeAndPrintDataStatistics(tbox::pout, patch_hierarchy, iteration_num, loop_time);
+                Navier_Stokes_app->computeAndOutputMonitoringDataStatistics(tbox::pout, patch_hierarchy, iteration_num, loop_time);
                 break;
             }
         }

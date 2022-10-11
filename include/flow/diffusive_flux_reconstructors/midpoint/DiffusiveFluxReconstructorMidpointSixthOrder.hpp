@@ -1,9 +1,9 @@
 #ifndef DIFFUSIVE_FLUX_RECONSTRUCTOR_MIDPOINT_SIXTH_ORDER_HPP
 #define DIFFUSIVE_FLUX_RECONSTRUCTOR_MIDPOINT_SIXTH_ORDER_HPP
 
-#include "flow/diffusive_flux_reconstructors/DiffusiveFluxReconstructor.hpp"
+#include "flow/diffusive_flux_reconstructors/midpoint/DiffusiveFluxReconstructorMidpoint.hpp"
 
-class DiffusiveFluxReconstructorMidpointSixthOrder: public DiffusiveFluxReconstructor
+class DiffusiveFluxReconstructorMidpointSixthOrder: public DiffusiveFluxReconstructorMidpoint
 {
     public:
         DiffusiveFluxReconstructorMidpointSixthOrder(
@@ -30,182 +30,171 @@ class DiffusiveFluxReconstructorMidpointSixthOrder: public DiffusiveFluxReconstr
         putToRestart(
             const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
-        /*
-         * Compute the diffusive flux on a patch.
-         */
-        void computeDiffusiveFluxOnPatch(
-            hier::Patch& patch,
-            const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_diffusive_flux,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double time,
-            const double dt,
-            const int RK_step_number);
-        
     private:
         /*
-         * Compute the derivatives in x-direction at midpoints.
+         * Kernel to compute the derivatives in x-direction at midpoints.
          */
         void computeFirstDerivativesInXAtMidpointX(
-            hier::Patch& patch,
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_x_midpoint_x,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_x_midpoint_x_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
-            const std::vector<std::vector<int> >& data_component_idx_x,
-            const bool allocate_scratch_derivatives_midpoint = true);
+            double* dudx,
+            const double* const u,
+            const hier::IntVector& num_ghosts_derivative_midpoint,
+            const hier::IntVector& num_ghosts_data_node,
+            const hier::IntVector& ghostcell_dims_derivative_midpoint,
+            const hier::IntVector& ghostcell_dims_data_node,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims,
+            const double& dx_0_inv) const;
         
         /*
-         * Compute the derivatives in y-direction at midpoints.
+         * Kernel to compute the derivatives in y-direction at midpoints.
          */
         void computeFirstDerivativesInYAtMidpointY(
-            hier::Patch& patch,
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_y_midpoint_y,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_y_midpoint_y_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
-            const std::vector<std::vector<int> >& data_component_idx_y,
-            const bool allocate_scratch_derivatives_midpoint = true);
+            double* dudy,
+            const double* const u,
+            const hier::IntVector& num_ghosts_derivative_midpoint,
+            const hier::IntVector& num_ghosts_data_node,
+            const hier::IntVector& ghostcell_dims_derivative_midpoint,
+            const hier::IntVector& ghostcell_dims_data_node,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims,
+            const double& dx_1_inv) const;
         
         /*
-         * Compute the derivatives in z-direction at midpoints.
+         * Kernel to compute the derivatives in z-direction at midpoints.
          */
         void computeFirstDerivativesInZAtMidpointZ(
-            hier::Patch& patch,
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_z_midpoint_z,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_z_midpoint_z_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
-            const std::vector<std::vector<int> >& data_component_idx_z,
-            const bool allocate_scratch_derivatives_midpoint = true);
+            double* dudz,
+            const double* const u,
+            const hier::IntVector& num_ghosts_derivative_midpoint,
+            const hier::IntVector& num_ghosts_data_node,
+            const hier::IntVector& ghostcell_dims_derivative_midpoint,
+            const hier::IntVector& ghostcell_dims_data_node,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims,
+            const double& dx_2_inv) const;
         
         /*
-         * Compute the derivatives in x-direction at nodes.
+         * Kernel to compute the derivatives in x-direction at nodes.
          */
         void computeFirstDerivativesInXAtNode(
-            hier::Patch& patch,
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_x_node,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x_node_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
-            const std::vector<std::vector<int> >& data_component_idx_x,
-            const bool allocate_scratch_derivatives_node = true);
+            double* dudx,
+            const double* const u,
+            const hier::IntVector& num_ghosts_derivative_node,
+            const hier::IntVector& num_ghosts_data_node,
+            const hier::IntVector& ghostcell_dims_derivative_node,
+            const hier::IntVector& ghostcell_dims_data_node,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims,
+            const double& dx_0_inv) const;
         
         /*
-         * Compute the derivatives in y-direction at nodes.
+         * Kernel to compute the derivatives in y-direction at nodes.
          */
         void computeFirstDerivativesInYAtNode(
-            hier::Patch& patch,
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_y_node,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y_node_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
-            const std::vector<std::vector<int> >& data_component_idx_y,
-            const bool allocate_scratch_derivatives_node = true);
+            double* dudy,
+            const double* const u,
+            const hier::IntVector& num_ghosts_derivative_node,
+            const hier::IntVector& num_ghosts_data_node,
+            const hier::IntVector& ghostcell_dims_derivative_node,
+            const hier::IntVector& ghostcell_dims_data_node,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims,
+            const double& dx_1_inv) const;
         
         /*
-         * Compute the derivatives in z-direction at nodes.
+         * Kernel to compute the derivatives in z-direction at nodes.
          */
         void computeFirstDerivativesInZAtNode(
-            hier::Patch& patch,
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_z_node,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z_node_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
-            const std::vector<std::vector<int> >& data_component_idx_z,
-            const bool allocate_scratch_derivatives_node = true);
+            double* dudz,
+            const double* const u,
+            const hier::IntVector& num_ghosts_derivative_node,
+            const hier::IntVector& num_ghosts_data_node,
+            const hier::IntVector& ghostcell_dims_derivative_node,
+            const hier::IntVector& ghostcell_dims_data_node,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims,
+            const double& dx_2_inv) const;
         
         /*
-         * Interpolate the diffusivities from nodes to midpoints.
+         * Kernel to interpolate the data from nodes to midpoints in x-direction.
          */
-        void interpolateDiffusivitiesFromNodeToMidpoint(
-            hier::Patch& patch,
-            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_side_data_for_diffusivities,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& var_cell_data_for_diffusivities,
-            const std::vector<int>& var_cell_data_for_diffusivities_component_idx,
-            const bool allocate_scratch_diffusivities_midpoint = true);
+        void interpolateDataFromNodeToMidpointX(
+            double* u_midpoint_x,
+            const double* const u_node,
+            const hier::IntVector& num_ghosts_data_midpoint,
+            const hier::IntVector& num_ghosts_data_node,
+            const hier::IntVector& ghostcell_dims_data_midpoint,
+            const hier::IntVector& ghostcell_dims_data_node,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
         
         /*
-         * Interpolate the derivatives from nodes to midpoints in x-direction.
+         * Kernel to interpolate the data from nodes to midpoints in y-direction.
          */
-        void interpolateDerivativesFromNodeToMidpointX(
-            hier::Patch& patch,
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_midpoint_x,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_x_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_node,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data,
-            const std::vector<std::vector<int> >& data_component_idx,
-            const bool allocate_scratch_derivatives_midpoint = true);
+        void interpolateDataFromNodeToMidpointY(
+            double* u_midpoint_y,
+            const double* const u_node,
+            const hier::IntVector& num_ghosts_data_midpoint,
+            const hier::IntVector& num_ghosts_data_node,
+            const hier::IntVector& ghostcell_dims_data_midpoint,
+            const hier::IntVector& ghostcell_dims_data_node,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
         
         /*
-         * Interpolate the derivatives from nodes to midpoints in y-direction.
+         * Kernel to interpolate the data from nodes to midpoints in z-direction.
          */
-        void interpolateDerivativesFromNodeToMidpointY(
-            hier::Patch& patch,
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_midpoint_y,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_y_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_node,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data,
-            const std::vector<std::vector<int> >& data_component_idx,
-            const bool allocate_scratch_derivatives_midpoint = true);
+        void interpolateDataFromNodeToMidpointZ(
+            double* u_midpoint_z,
+            const double* const u_node,
+            const hier::IntVector& num_ghosts_derivative_midpoint,
+            const hier::IntVector& num_ghosts_derivative_node,
+            const hier::IntVector& ghostcell_dims_data_midpoint,
+            const hier::IntVector& ghostcell_dims_data_node,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
         
         /*
-         * Interpolate the derivatives from nodes to midpoints in z-direction.
+         * Kernel to reconstruct the flux using flux at midpoints in x-direction.
          */
-        void interpolateDerivativesFromNodeToMidpointZ(
-            hier::Patch& patch,
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_midpoint_z,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_z_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_node,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data,
-            const std::vector<std::vector<int> >& data_component_idx,
-            const bool allocate_scratch_derivatives_midpoint = true);
+        void
+        reconstructFluxX(
+            double* F_face_x,
+            const double* const F_midpoint_x,
+            const hier::IntVector& num_ghosts_flux_midpoint,
+            const hier::IntVector& ghostcell_dims_flux_midpoint,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims,
+            const hier::IntVector& interior_dims,
+            const double& dt) const;
         
         /*
-         * Reconstruct the flux using flux at midpoints in x-direction.
+         * Kernel to reconstruct the flux using flux at midpoints in y-direction.
          */
-        void reconstructFluxX(
-            hier::Patch& patch,
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux_midpoint,
-            const double dt);
+        void
+        reconstructFluxY(
+            double* F_face_y,
+            const double* const F_midpoint_y,
+            const hier::IntVector& num_ghosts_flux_midpoint,
+            const hier::IntVector& ghostcell_dims_flux_midpoint,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims,
+            const hier::IntVector& interior_dims,
+            const double& dt) const;
         
         /*
-         * Reconstruct the flux using flux at midpoints in y-direction.
+         * Kernel to reconstruct the flux using flux at midpoints in z-direction.
          */
-        void reconstructFluxY(
-            hier::Patch& patch,
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux_midpoint,
-            const double dt);
-        
-        /*
-         * Reconstruct the flux using flux at midpoints in z-direction.
-         */
-        void reconstructFluxZ(
-            hier::Patch& patch,
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux_midpoint,
-            const double dt);
-        
-        /*
-         * Numbers of ghost cells needed for the stencil operations.
-         */
-        hier::IntVector d_num_der_midpoint_ghosts;
-        hier::IntVector d_num_der_node_ghosts;
-        hier::IntVector d_num_interp_midpoint_ghosts;
-        hier::IntVector d_num_flux_reconstruct_ghosts;
-        
-        /*
-         * Numbers of scratch data containers used.
-         */
-        int d_num_scratch_derivatives_node_used;
-        int d_num_scratch_derivatives_midpoint_x_used;
-        int d_num_scratch_derivatives_midpoint_y_used;
-        int d_num_scratch_derivatives_midpoint_z_used;
-        int d_num_scratch_diffusivities_midpoint_used;
-        
-        /*
-         * Scratch data containers.
-         */
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > d_scratch_derivatives_node;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > d_scratch_derivatives_midpoint_x;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > d_scratch_derivatives_midpoint_y;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > d_scratch_derivatives_midpoint_z;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > d_scratch_diffusivities_midpoint;
+        void
+        reconstructFluxZ(
+            double* F_face_z,
+            const double* const F_midpoint_z,
+            const hier::IntVector& num_ghosts_flux_midpoint,
+            const hier::IntVector& ghostcell_dims_flux_midpoint,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims,
+            const hier::IntVector& interior_dims,
+            const double& dt) const;
         
 };
 

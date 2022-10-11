@@ -7,6 +7,7 @@ set(flow_models_source_files
     FlowModelMonitoringStatisticsUtilities.cpp
     FlowModelSourceUtilities.cpp
     FlowModelSpecialSourceTerms.cpp
+    FlowModelSubgridScaleModel.cpp
     ./MPI_helpers/FlowModelMPIHelper.cpp
     ./MPI_helpers/FlowModelMPIHelperMaxMin.cpp
     ./MPI_helpers/FlowModelMPIHelperAverage.cpp
@@ -20,6 +21,7 @@ set(flow_models_source_files
     ./single-species/FlowModelRiemannSolverSingleSpecies.cpp
     ./single-species/FlowModelSourceUtilitiesSingleSpecies.cpp
     ./single-species/FlowModelStatisticsUtilitiesSingleSpecies.cpp
+    ./single-species/FlowModelSubgridScaleModelSingleSpecies.cpp
     ./single-species/Riemann_solvers/FlowModelRiemannSolverSingleSpeciesHLLC.cpp
     ./single-species/Riemann_solvers/FlowModelRiemannSolverSingleSpeciesHLLC-HLL.cpp
     ./four-eqn_conservative/FlowModelFourEqnConservative.cpp
@@ -30,6 +32,7 @@ set(flow_models_source_files
     ./four-eqn_conservative/FlowModelRiemannSolverFourEqnConservative.cpp
     ./four-eqn_conservative/FlowModelSourceUtilitiesFourEqnConservative.cpp
     ./four-eqn_conservative/FlowModelStatisticsUtilitiesFourEqnConservative.cpp
+    ./four-eqn_conservative/FlowModelSubgridScaleModelFourEqnConservative.cpp
     ./four-eqn_conservative/Riemann_solvers/FlowModelRiemannSolverFourEqnConservativeHLLC.cpp
     ./four-eqn_conservative/Riemann_solvers/FlowModelRiemannSolverFourEqnConservativeHLLC-HLL.cpp
     ./five-eqn_Allaire/FlowModelFiveEqnAllaire.cpp
@@ -40,6 +43,7 @@ set(flow_models_source_files
     ./five-eqn_Allaire/FlowModelRiemannSolverFiveEqnAllaire.cpp
     ./five-eqn_Allaire/FlowModelSourceUtilitiesFiveEqnAllaire.cpp
     ./five-eqn_Allaire/FlowModelStatisticsUtilitiesFiveEqnAllaire.cpp
+    ./five-eqn_Allaire/FlowModelSubgridScaleModelFiveEqnAllaire.cpp
     ./five-eqn_Allaire/Riemann_solvers/FlowModelRiemannSolverFiveEqnAllaireHLLC.cpp
     ./five-eqn_Allaire/Riemann_solvers/FlowModelRiemannSolverFiveEqnAllaireHLLC-HLL.cpp
 )

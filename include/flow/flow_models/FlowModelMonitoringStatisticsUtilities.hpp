@@ -51,12 +51,25 @@ class FlowModelMonitoringStatisticsUtilities
             const double time) = 0;
         
         /*
+         * Output names of monitoring statistical quantities to output to a file.
+         */
+        virtual void
+        outputMonitoringStatisticalQuantitiesNames(
+            const std::string& monitoring_stat_dump_filename) const = 0;
+        
+        /*
          * Output monitoring statistics to screen.
          */
         virtual void
         outputMonitoringStatistics(
             std::ostream& os,
+            const std::string& monitoring_stat_dump_filename,
             const double time) = 0;
+        
+        bool hasMonitoringStatistics() const
+        {
+            return (!d_monitoring_statistics_names.empty());
+        }
         
         /*
          * Get names of monitoring statistical quantities to output.

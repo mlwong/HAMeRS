@@ -28,6 +28,15 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
     HAMERS_SHARED_PTR<FlowModelDiffusiveFluxUtilities> diffusive_flux_utilities =
         d_flow_model->getFlowModelDiffusiveFluxUtilities();
     
+    if (diffusive_flux_utilities->useSubgridScaleModel())
+    {
+        TBOX_ERROR(d_object_name
+            << ": NonconservativeDiffusiveFluxDivergenceOperator::"
+            << "computeNonconservativeDiffusiveFluxDivergenceOnPatch()\n"
+            << "Subgrid scale model is not implemented."
+            << std::endl);
+    }
+    
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
@@ -112,31 +121,30 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         
         // Compute the first derivatives of variables in x-direction.
         computeFirstDerivativesInX(
-            patch,
             var_derivative_x,
             derivative_x_computed,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            patch);
         
         // Compute the first derivatives of diffusivities in x-direction.
         computeFirstDerivativesInX(
-            patch,
             diffusivities_derivative_x,
             derivative_x_computed,
             diffusivities_data_x,
-            diffusivities_component_idx_x);
+            diffusivities_component_idx_x,
+            patch);
         
         // Compute the second derivatives of variables in x-direction.
         computeSecondDerivativesInX(
-            patch,
             var_derivative_xx,
             derivative_xx_computed,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            patch);
         
         // Add the derivatives to the divergence of diffusive flux.
         addDerivativeToDivergence(
-            patch,
             diffusive_flux_divergence,
             var_derivative_x,
             var_derivative_xx,
@@ -144,6 +152,7 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
             diffusivities_derivative_x,
             var_component_idx_x,
             diffusivities_component_idx_x,
+            patch,
             dt);
         
         var_data_x.clear();
@@ -241,31 +250,30 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         
         // Compute the first derivatives of variables in x-direction.
         computeFirstDerivativesInX(
-            patch,
             var_derivative_x,
             derivative_x_computed,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            patch);
         
         // Compute the first derivatives of diffusivities in x-direction.
         computeFirstDerivativesInX(
-            patch,
             diffusivities_derivative_x,
             derivative_x_computed,
             diffusivities_data_x,
-            diffusivities_component_idx_x);
+            diffusivities_component_idx_x,
+            patch);
         
         // Compute the second derivatives of variables in x-direction.
         computeSecondDerivativesInX(
-            patch,
             var_derivative_xx,
             derivative_xx_computed,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            patch);
         
         // Add the derivatives to the divergence of diffusive flux.
         addDerivativeToDivergence(
-            patch,
             diffusive_flux_divergence,
             var_derivative_x,
             var_derivative_xx,
@@ -273,6 +281,7 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
             diffusivities_derivative_x,
             var_component_idx_x,
             diffusivities_component_idx_x,
+            patch,
             dt);
         
         var_data_x.clear();
@@ -308,19 +317,19 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         
         // Compute the first derivatives of variables in y-direction.
         computeFirstDerivativesInY(
-            patch,
             var_derivative_y,
             derivative_y_computed,
             var_data_y,
-            var_component_idx_y);
+            var_component_idx_y,
+            patch);
         
         // Compute the first derivatives of diffusivities in x-direction.
         computeFirstDerivativesInX(
-            patch,
             diffusivities_derivative_x,
             derivative_x_computed,
             diffusivities_data_y,
-            diffusivities_component_idx_y);
+            diffusivities_component_idx_y,
+            patch);
         
         // Compute the mixed derivatives of variables.
         var_derivative_component_idx_y.resize(d_num_eqn);
@@ -334,15 +343,14 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         }
         
         computeFirstDerivativesInX(
-            patch,
             var_derivative_xy,
             derivative_xy_computed,
             var_derivative_y,
-            var_derivative_component_idx_y);
+            var_derivative_component_idx_y,
+            patch);
         
         // Add the derivatives to the divergence of diffusive flux.
         addDerivativeToDivergence(
-            patch,
             diffusive_flux_divergence,
             var_derivative_y,
             var_derivative_xy,
@@ -350,6 +358,7 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
             diffusivities_derivative_x,
             var_component_idx_y,
             diffusivities_component_idx_y,
+            patch,
             dt);
         
         var_data_y.clear();
@@ -391,19 +400,19 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         
         // Compute the first derivatives of variables in x-direction.
         computeFirstDerivativesInX(
-            patch,
             var_derivative_x,
             derivative_x_computed,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            patch);
         
         // Compute the first derivatives of diffusivities in y-direction.
         computeFirstDerivativesInY(
-            patch,
             diffusivities_derivative_y,
             derivative_y_computed,
             diffusivities_data_x,
-            diffusivities_component_idx_x);
+            diffusivities_component_idx_x,
+            patch);
         
         // Compute the mixed derivatives of variables.
         var_derivative_component_idx_x.resize(d_num_eqn);
@@ -417,15 +426,14 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         }
         
         computeFirstDerivativesInY(
-            patch,
             var_derivative_yx,
             derivative_yx_computed,
             var_derivative_x,
-            var_derivative_component_idx_x);
+            var_derivative_component_idx_x,
+            patch);
         
         // Add the derivatives to the divergence of diffusive flux.
         addDerivativeToDivergence(
-            patch,
             diffusive_flux_divergence,
             var_derivative_x,
             var_derivative_yx,
@@ -433,6 +441,7 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
             diffusivities_derivative_y,
             var_component_idx_x,
             diffusivities_component_idx_x,
+            patch,
             dt);
         
         var_data_x.clear();
@@ -470,31 +479,30 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         
         // Compute the first derivatives of variables in y-direction.
         computeFirstDerivativesInY(
-            patch,
             var_derivative_y,
             derivative_y_computed,
             var_data_y,
-            var_component_idx_y);
+            var_component_idx_y,
+            patch);
         
         // Compute the first derivatives of diffusivities in y-direction.
         computeFirstDerivativesInY(
-            patch,
             diffusivities_derivative_y,
             derivative_y_computed,
             diffusivities_data_y,
-            diffusivities_component_idx_y);
+            diffusivities_component_idx_y,
+            patch);
         
         // Compute the second derivatives of variables in y-direction.
         computeSecondDerivativesInY(
-            patch,
             var_derivative_yy,
             derivative_yy_computed,
             var_data_y,
-            var_component_idx_y);
+            var_component_idx_y,
+            patch);
         
         // Add the derivatives to the divergence of diffusive flux.
         addDerivativeToDivergence(
-            patch,
             diffusive_flux_divergence,
             var_derivative_y,
             var_derivative_yy,
@@ -502,6 +510,7 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
             diffusivities_derivative_y,
             var_component_idx_y,
             diffusivities_component_idx_y,
+            patch,
             dt);
         
         var_data_y.clear();
@@ -617,31 +626,30 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         
         // Compute the first derivatives of variables in x-direction.
         computeFirstDerivativesInX(
-            patch,
             var_derivative_x,
             derivative_x_computed,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            patch);
         
         // Compute the first derivatives of diffusivities in x-direction.
         computeFirstDerivativesInX(
-            patch,
             diffusivities_derivative_x,
             derivative_x_computed,
             diffusivities_data_x,
-            diffusivities_component_idx_x);
+            diffusivities_component_idx_x,
+            patch);
         
         // Compute the second derivatives of variables in x-direction.
         computeSecondDerivativesInX(
-            patch,
             var_derivative_xx,
             derivative_xx_computed,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            patch);
         
         // Add the derivatives to the divergence of diffusive flux.
         addDerivativeToDivergence(
-            patch,
             diffusive_flux_divergence,
             var_derivative_x,
             var_derivative_xx,
@@ -649,6 +657,7 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
             diffusivities_derivative_x,
             var_component_idx_x,
             diffusivities_component_idx_x,
+            patch,
             dt);
         
         var_data_x.clear();
@@ -684,19 +693,19 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         
         // Compute the first derivatives of variables in y-direction.
         computeFirstDerivativesInY(
-            patch,
             var_derivative_y,
             derivative_y_computed,
             var_data_y,
-            var_component_idx_y);
+            var_component_idx_y,
+            patch);
         
         // Compute the first derivatives of diffusivities in x-direction.
         computeFirstDerivativesInX(
-            patch,
             diffusivities_derivative_x,
             derivative_x_computed,
             diffusivities_data_y,
-            diffusivities_component_idx_y);
+            diffusivities_component_idx_y,
+            patch);
         
         // Compute the mixed derivatives of variables.
         var_derivative_component_idx_y.resize(d_num_eqn);
@@ -710,15 +719,14 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         }
         
         computeFirstDerivativesInX(
-            patch,
             var_derivative_xy,
             derivative_xy_computed,
             var_derivative_y,
-            var_derivative_component_idx_y);
+            var_derivative_component_idx_y,
+            patch);
         
         // Add the derivatives to the divergence of diffusive flux.
         addDerivativeToDivergence(
-            patch,
             diffusive_flux_divergence,
             var_derivative_y,
             var_derivative_xy,
@@ -726,6 +734,7 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
             diffusivities_derivative_x,
             var_component_idx_y,
             diffusivities_component_idx_y,
+            patch,
             dt);
         
         var_data_y.clear();
@@ -763,19 +772,19 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         
         // Compute the first derivatives of variables in z-direction.
         computeFirstDerivativesInZ(
-            patch,
             var_derivative_z,
             derivative_z_computed,
             var_data_z,
-            var_component_idx_z);
+            var_component_idx_z,
+            patch);
         
         // Compute the first derivatives of diffusivities in x-direction.
         computeFirstDerivativesInX(
-            patch,
             diffusivities_derivative_x,
             derivative_x_computed,
             diffusivities_data_z,
-            diffusivities_component_idx_z);
+            diffusivities_component_idx_z,
+            patch);
         
         // Compute the mixed derivatives of variables.
         var_derivative_component_idx_z.resize(d_num_eqn);
@@ -789,15 +798,14 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         }
         
         computeFirstDerivativesInX(
-            patch,
             var_derivative_xz,
             derivative_xz_computed,
             var_derivative_z,
-            var_derivative_component_idx_z);
+            var_derivative_component_idx_z,
+            patch);
         
         // Add the derivatives to the divergence of diffusive flux.
         addDerivativeToDivergence(
-            patch,
             diffusive_flux_divergence,
             var_derivative_z,
             var_derivative_xz,
@@ -805,6 +813,7 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
             diffusivities_derivative_x,
             var_component_idx_z,
             diffusivities_component_idx_z,
+            patch,
             dt);
         
         var_data_z.clear();
@@ -846,19 +855,19 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         
         // Compute the first derivatives of variables in x-direction.
         computeFirstDerivativesInX(
-            patch,
             var_derivative_x,
             derivative_x_computed,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            patch);
         
         // Compute the first derivatives of diffusivities in y-direction.
         computeFirstDerivativesInY(
-            patch,
             diffusivities_derivative_y,
             derivative_y_computed,
             diffusivities_data_x,
-            diffusivities_component_idx_x);
+            diffusivities_component_idx_x,
+            patch);
         
         // Compute the mixed derivatives of variables.
         var_derivative_component_idx_x.resize(d_num_eqn);
@@ -872,15 +881,14 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         }
         
         computeFirstDerivativesInY(
-            patch,
             var_derivative_yx,
             derivative_yx_computed,
             var_derivative_x,
-            var_derivative_component_idx_x);
+            var_derivative_component_idx_x,
+            patch);
         
         // Add the derivatives to the divergence of diffusive flux.
         addDerivativeToDivergence(
-            patch,
             diffusive_flux_divergence,
             var_derivative_x,
             var_derivative_yx,
@@ -888,6 +896,7 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
             diffusivities_derivative_y,
             var_component_idx_x,
             diffusivities_component_idx_x,
+            patch,
             dt);
         
         var_data_x.clear();
@@ -925,31 +934,30 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         
         // Compute the first derivatives of variables in y-direction.
         computeFirstDerivativesInY(
-            patch,
             var_derivative_y,
             derivative_y_computed,
             var_data_y,
-            var_component_idx_y);
+            var_component_idx_y,
+            patch);
         
         // Compute the first derivatives of diffusivities in y-direction.
         computeFirstDerivativesInY(
-            patch,
             diffusivities_derivative_y,
             derivative_y_computed,
             diffusivities_data_y,
-            diffusivities_component_idx_y);
+            diffusivities_component_idx_y,
+            patch);
         
         // Compute the second derivatives of variables in y-direction.
         computeSecondDerivativesInY(
-            patch,
             var_derivative_yy,
             derivative_yy_computed,
             var_data_y,
-            var_component_idx_y);
+            var_component_idx_y,
+            patch);
         
         // Add the derivatives to the divergence of diffusive flux.
         addDerivativeToDivergence(
-            patch,
             diffusive_flux_divergence,
             var_derivative_y,
             var_derivative_yy,
@@ -957,6 +965,7 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
             diffusivities_derivative_y,
             var_component_idx_y,
             diffusivities_component_idx_y,
+            patch,
             dt);
         
         var_data_y.clear();
@@ -992,19 +1001,19 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         
         // Compute the first derivatives of variables in z-direction.
         computeFirstDerivativesInZ(
-            patch,
             var_derivative_z,
             derivative_z_computed,
             var_data_z,
-            var_component_idx_z);
+            var_component_idx_z,
+            patch);
         
         // Compute the first derivatives of diffusivities in y-direction.
         computeFirstDerivativesInY(
-            patch,
             diffusivities_derivative_y,
             derivative_y_computed,
             diffusivities_data_z,
-            diffusivities_component_idx_z);
+            diffusivities_component_idx_z,
+            patch);
         
         // Compute the mixed derivatives of variables.
         var_derivative_component_idx_z.resize(d_num_eqn);
@@ -1018,15 +1027,14 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         }
         
         computeFirstDerivativesInY(
-            patch,
             var_derivative_yz,
             derivative_yz_computed,
             var_derivative_z,
-            var_derivative_component_idx_z);
+            var_derivative_component_idx_z,
+            patch);
         
         // Add the derivatives to the divergence of diffusive flux.
         addDerivativeToDivergence(
-            patch,
             diffusive_flux_divergence,
             var_derivative_z,
             var_derivative_yz,
@@ -1034,6 +1042,7 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
             diffusivities_derivative_y,
             var_component_idx_z,
             diffusivities_component_idx_z,
+            patch,
             dt);
         
         var_data_z.clear();
@@ -1075,19 +1084,19 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         
         // Compute the first derivatives of variables in x-direction.
         computeFirstDerivativesInX(
-            patch,
             var_derivative_x,
             derivative_x_computed,
             var_data_x,
-            var_component_idx_x);
+            var_component_idx_x,
+            patch);
         
         // Compute the first derivatives of diffusivities in z-direction.
         computeFirstDerivativesInZ(
-            patch,
             diffusivities_derivative_z,
             derivative_z_computed,
             diffusivities_data_x,
-            diffusivities_component_idx_x);
+            diffusivities_component_idx_x,
+            patch);
         
         // Compute the mixed derivatives of variables.
         var_derivative_component_idx_x.resize(d_num_eqn);
@@ -1101,15 +1110,14 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         }
         
         computeFirstDerivativesInZ(
-            patch,
             var_derivative_zx,
             derivative_zx_computed,
             var_derivative_x,
-            var_derivative_component_idx_x);
+            var_derivative_component_idx_x,
+            patch);
         
         // Add the derivatives to the divergence of diffusive flux.
         addDerivativeToDivergence(
-            patch,
             diffusive_flux_divergence,
             var_derivative_x,
             var_derivative_zx,
@@ -1117,6 +1125,7 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
             diffusivities_derivative_z,
             var_component_idx_x,
             diffusivities_component_idx_x,
+            patch,
             dt);
         
         var_data_x.clear();
@@ -1154,19 +1163,19 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         
         // Compute the first derivatives of variables in y-direction.
         computeFirstDerivativesInY(
-            patch,
             var_derivative_y,
             derivative_y_computed,
             var_data_y,
-            var_component_idx_y);
+            var_component_idx_y,
+            patch);
         
         // Compute the first derivatives of diffusivities in z-direction.
         computeFirstDerivativesInZ(
-            patch,
             diffusivities_derivative_z,
             derivative_z_computed,
             diffusivities_data_y,
-            diffusivities_component_idx_y);
+            diffusivities_component_idx_y,
+            patch);
         
         // Compute the mixed derivatives of variables.
         var_derivative_component_idx_y.resize(d_num_eqn);
@@ -1180,15 +1189,14 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         }
         
         computeFirstDerivativesInZ(
-            patch,
             var_derivative_zy,
             derivative_zy_computed,
             var_derivative_y,
-            var_derivative_component_idx_y);
+            var_derivative_component_idx_y,
+            patch);
         
         // Add the derivatives to the divergence of diffusive flux.
         addDerivativeToDivergence(
-            patch,
             diffusive_flux_divergence,
             var_derivative_y,
             var_derivative_zy,
@@ -1196,6 +1204,7 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
             diffusivities_derivative_z,
             var_component_idx_y,
             diffusivities_component_idx_y,
+            patch,
             dt);
         
         var_data_y.clear();
@@ -1233,31 +1242,30 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         
         // Compute the first derivatives of variables in z-direction.
         computeFirstDerivativesInZ(
-            patch,
             var_derivative_z,
             derivative_z_computed,
             var_data_z,
-            var_component_idx_z);
+            var_component_idx_z,
+            patch);
         
         // Compute the first derivatives of diffusivities in z-direction.
         computeFirstDerivativesInZ(
-            patch,
             diffusivities_derivative_z,
             derivative_z_computed,
             diffusivities_data_z,
-            diffusivities_component_idx_z);
+            diffusivities_component_idx_z,
+            patch);
         
         // Compute the second derivatives of variables in z-direction.
         computeSecondDerivativesInZ(
-            patch,
             var_derivative_zz,
             derivative_zz_computed,
             var_data_z,
-            var_component_idx_z);
+            var_component_idx_z,
+            patch);
         
         // Add the derivatives to the divergence of diffusive flux.
         addDerivativeToDivergence(
-            patch,
             diffusive_flux_divergence,
             var_derivative_z,
             var_derivative_zz,
@@ -1265,6 +1273,7 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
             diffusivities_derivative_z,
             var_component_idx_z,
             diffusivities_component_idx_z,
+            patch,
             dt);
         
         var_data_z.clear();
@@ -1292,7 +1301,6 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
  * Add derivatives to divergence.
  */
 void NonconservativeDiffusiveFluxDivergenceOperator::addDerivativeToDivergence(
-    hier::Patch& patch,
     HAMERS_SHARED_PTR<pdat::CellData<double> > & divergence,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& var_first_derivative,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& var_derivative_cross_derivative,
@@ -1300,6 +1308,7 @@ void NonconservativeDiffusiveFluxDivergenceOperator::addDerivativeToDivergence(
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& diffusivities_first_derivative,
     const std::vector<std::vector<int> >& var_component_idx,
     const std::vector<std::vector<int> >& diffusivities_component_idx,
+    const hier::Patch& patch,
     const double dt)
 {
     // Get the dimensions of box that covers the interior of patch.

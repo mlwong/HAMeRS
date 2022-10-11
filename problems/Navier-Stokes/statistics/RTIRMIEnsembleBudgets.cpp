@@ -4948,7 +4948,7 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInYDirectionWithInhomoge
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "The budget of Reynolds normal stress in y-direction cannot be outputted for 1D problem!"
+            << "The budget of Reynolds normal stress in y-direction cannot be outputted for one-dimensional problem!"
             << std::endl);
     }
     

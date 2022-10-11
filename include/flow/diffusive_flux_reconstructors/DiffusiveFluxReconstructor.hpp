@@ -6,6 +6,7 @@
 #include "HAMeRS_memory.hpp"
 
 #include "flow/flow_models/FlowModels.hpp"
+#include "flow/flow_models/FlowModelSubgridScaleModel.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/hier/IntVector.h"
