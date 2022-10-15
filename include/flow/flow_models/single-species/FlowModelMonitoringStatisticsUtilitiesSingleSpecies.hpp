@@ -39,6 +39,7 @@ class FlowModelMonitoringStatisticsUtilitiesSingleSpecies: public FlowModelMonit
         outputMonitoringStatistics(
             std::ostream& os,
             const std::string& monitoring_stat_dump_filename,
+            const int step_num,
             const double time);
         
         /*
