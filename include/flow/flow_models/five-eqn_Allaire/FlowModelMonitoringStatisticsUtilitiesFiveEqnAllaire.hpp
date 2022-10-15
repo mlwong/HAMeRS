@@ -39,6 +39,7 @@ class FlowModelMonitoringStatisticsUtilitiesFiveEqnAllaire: public FlowModelMoni
         outputMonitoringStatistics(
             std::ostream& os,
             const std::string& monitoring_stat_dump_filename,
+            const int step_num,
             const double time);
         
         /*

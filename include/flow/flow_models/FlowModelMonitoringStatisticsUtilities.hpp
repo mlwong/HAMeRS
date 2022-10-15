@@ -51,6 +51,19 @@ class FlowModelMonitoringStatisticsUtilities
             const double time) = 0;
         
         /*
+         * Whether it is the step to output the monitoring statistics.
+         */
+        bool isStepToOutputMonitoringStatistics(
+            const int step_num) const
+        {
+            if (d_monitoring_time_step_interval > 0 && step_num%d_monitoring_time_step_interval == 0)
+            {
+                return true;
+            }
+            return false;
+        }
+        
+        /*
          * Output names of monitoring statistical quantities to output to a file.
          */
         virtual void
@@ -64,6 +77,7 @@ class FlowModelMonitoringStatisticsUtilities
         outputMonitoringStatistics(
             std::ostream& os,
             const std::string& monitoring_stat_dump_filename,
+            const int step_num,
             const double time) = 0;
         
         bool hasMonitoringStatistics() const
