@@ -361,7 +361,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
                     x[2] = patch_xlo[2] + (double(k) + double(1)/double(2))*dx[2];
 
-                    const double r = fabs(x[1]);
+                    const double r = sqrt(fabs(x[1])*fabs(x[1])+fabs(x[2])*fabs(x[2]));
 
                     if (x[0] <= d_special_source_box_lo[0])
                     {
