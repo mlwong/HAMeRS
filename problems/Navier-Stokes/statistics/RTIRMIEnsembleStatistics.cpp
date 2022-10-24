@@ -20,36 +20,38 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         
         void setVariablesNotComputed()
         {
-            X_0_avg_computed      = false;
-            X_0_sq_avg_computed   = false;
-            X_0_X_1_avg_computed  = false;
-            Y_0_avg_computed      = false;
-            Y_0_sq_avg_computed   = false;
-            Y_0_Y_1_avg_computed  = false;
-            Z_0_avg_computed      = false;
-            Z_0_sq_avg_computed   = false;
-            Z_0_Z_1_avg_computed  = false;
-            rho_avg_computed      = false;
-            rho_sq_avg_computed   = false;
-            rho_inv_avg_computed  = false;
-            p_avg_computed        = false;
-            u_avg_computed        = false;
-            v_avg_computed        = false;
-            w_avg_computed        = false;
-            u_sq_avg_computed     = false;
-            v_sq_avg_computed     = false;
-            w_sq_avg_computed     = false;
-            rho_u_avg_computed    = false;
-            rho_v_avg_computed    = false;
-            rho_w_avg_computed    = false;
-            rho_u_u_avg_computed  = false;
-            rho_v_v_avg_computed  = false;
-            rho_w_w_avg_computed  = false;
-            c_avg_computed        = false;
-            Omega_avg_computed    = false;
-            chi_avg_computed      = false;
-            mu_avg_computed       = false;
-            D_avg_computed        = false;
+            X_0_avg_computed            = false;
+            X_0_sq_avg_computed         = false;
+            X_0_X_1_avg_computed        = false;
+            Y_0_avg_computed            = false;
+            Y_0_sq_avg_computed         = false;
+            Y_0_Y_1_avg_computed        = false;
+            Z_0_avg_computed            = false;
+            Z_0_sq_avg_computed         = false;
+            Z_0_Z_1_avg_computed        = false;
+            rho_avg_computed            = false;
+            rho_sq_avg_computed         = false;
+            rho_inv_avg_computed        = false;
+            p_avg_computed              = false;
+            u_avg_computed              = false;
+            v_avg_computed              = false;
+            w_avg_computed              = false;
+            u_sq_avg_computed           = false;
+            v_sq_avg_computed           = false;
+            w_sq_avg_computed           = false;
+            rho_u_avg_computed          = false;
+            rho_v_avg_computed          = false;
+            rho_w_avg_computed          = false;
+            rho_u_u_avg_computed        = false;
+            rho_v_v_avg_computed        = false;
+            rho_w_w_avg_computed        = false;
+            c_avg_computed              = false;
+            Omega_avg_computed          = false;
+            chi_mass_frac_avg_computed  = false;
+            chi_mol_frac_avg_computed   = false;
+            chi_vol_frac_avg_computed   = false;
+            mu_avg_computed             = false;
+            D_avg_computed              = false;
             
             ddx_tau11_avg_computed = false;
             
@@ -128,7 +130,9 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
             rho_w_w_avg_realizations.clear();
             c_avg_realizations.clear();
             Omega_avg_realizations.clear();
-            chi_avg_realizations.clear();
+            chi_mass_frac_avg_realizations.clear();
+            chi_mol_frac_avg_realizations.clear();
+            chi_vol_frac_avg_realizations.clear();
             mu_avg_realizations.clear();
             D_avg_realizations.clear();
             
@@ -209,7 +213,9 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         std::vector<std::vector<double> > rho_w_w_avg_realizations;
         std::vector<std::vector<double> > c_avg_realizations;
         std::vector<std::vector<double> > Omega_avg_realizations;
-        std::vector<std::vector<double> > chi_avg_realizations;
+        std::vector<std::vector<double> > chi_mass_frac_avg_realizations;
+        std::vector<std::vector<double> > chi_mol_frac_avg_realizations;
+        std::vector<std::vector<double> > chi_vol_frac_avg_realizations;
         std::vector<std::vector<double> > mu_avg_realizations;
         std::vector<std::vector<double> > D_avg_realizations;
         
@@ -287,7 +293,9 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         bool rho_w_w_avg_computed;
         bool c_avg_computed;
         bool Omega_avg_computed;
-        bool chi_avg_computed;
+        bool chi_mass_frac_avg_computed;
+        bool chi_mol_frac_avg_computed;
+        bool chi_vol_frac_avg_computed;
         bool mu_avg_computed;
         bool D_avg_computed;
         
@@ -589,10 +597,26 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
-         * Compute scalar dissipation rate with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         * Compute mass fraction scalar dissipation rate with assumed homogeneity in y-direction (2D) or yz-plane (3D).
          */
         void
-        computeAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+        computeAveragedMassFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute mole fraction scalar dissipation rate with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeAveragedMoleFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute volume fraction scalar dissipation rate with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeAveragedVolumeFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
@@ -1134,19 +1158,53 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
-         * Output ensemble scalar dissipation rate of first species integrated to a file.
+         * Output ensemble mass fraction scalar dissipation rate of first species integrated to a file.
          */
         void
-        outputEnsembleScalarDissipationRateIntegrated(
+        outputEnsembleMassFractionScalarDissipationRateIntegrated(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
-         * Output mean of ensemble scalar dissipation rate of first species in mixing layer with assumed homogeneity in
+         * Output mean of ensemble mass fraction scalar dissipation rate of first species in mixing layer with assumed homogeneity in
          * y-direction (2D) or yz-plane (3D) to a file.
          */
         void
-        outputEnsembleScalarDissipationRateMeanWithInhomogeneousXDirection(
+        outputEnsembleMassFractionScalarDissipationRateMeanWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+        
+        /*
+         * Output ensemble mole fraction scalar dissipation rate of first species integrated to a file.
+         */
+        void
+        outputEnsembleMoleFractionScalarDissipationRateIntegrated(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+        
+        /*
+         * Output mean of ensemble mole fraction scalar dissipation rate of first species in mixing layer with assumed homogeneity in
+         * y-direction (2D) or yz-plane (3D) to a file.
+         */
+        void
+        outputEnsembleMoleFractionScalarDissipationRateMeanWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+        
+        /*
+         * Output ensemble volume fraction scalar dissipation rate of first species integrated to a file.
+         */
+        void
+        outputEnsembleVolumeFractionScalarDissipationRateIntegrated(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+        
+        /*
+         * Output mean of ensemble volume fraction scalar dissipation rate of first species in mixing layer with assumed homogeneity in
+         * y-direction (2D) or yz-plane (3D) to a file.
+         */
+        void
+        outputEnsembleVolumeFractionScalarDissipationRateMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
@@ -2929,10 +2987,10 @@ RTIRMIStatisticsUtilities::computeAveragedEnstrophyWithHomogeneityInYDirectionOr
 
 
 /*
- * Compute scalar dissipation rate with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ * Compute mass fraction scalar dissipation rate with assumed homogeneity in y-direction (2D) or yz-plane (3D).
  */
 void
-RTIRMIStatisticsUtilities::computeAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIStatisticsUtilities::computeAveragedMassFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
@@ -2956,7 +3014,7 @@ RTIRMIStatisticsUtilities::computeAveragedScalarDissipationRateWithHomogeneityIn
     
     const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
     
-    std::vector<std::vector<double> >& chi_avg_realizations = d_ensemble_statistics->chi_avg_realizations;
+    std::vector<std::vector<double> >& chi_mass_frac_avg_realizations = d_ensemble_statistics->chi_mass_frac_avg_realizations;
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -2991,7 +3049,7 @@ RTIRMIStatisticsUtilities::computeAveragedScalarDissipationRateWithHomogeneityIn
         use_derivative.clear();
         derivative_directions.clear();
         
-        chi_avg_realizations.push_back(scalar_dissipation_rate);
+        chi_mass_frac_avg_realizations.push_back(scalar_dissipation_rate);
     }
     else if (d_dim == tbox::Dimension(2))
     {
@@ -3058,7 +3116,7 @@ RTIRMIStatisticsUtilities::computeAveragedScalarDissipationRateWithHomogeneityIn
             scalar_dissipation_rate_full[i] = scalar_dissipation_rate_part_1[i] + scalar_dissipation_rate_part_2[i];
         }
         
-        chi_avg_realizations.push_back(scalar_dissipation_rate_full);
+        chi_mass_frac_avg_realizations.push_back(scalar_dissipation_rate_full);
     }
     else if (d_dim == tbox::Dimension(3))
     {
@@ -3152,10 +3210,472 @@ RTIRMIStatisticsUtilities::computeAveragedScalarDissipationRateWithHomogeneityIn
                 scalar_dissipation_rate_part_1[i] + scalar_dissipation_rate_part_2[i] + scalar_dissipation_rate_part_3[i];
         }
         
-        chi_avg_realizations.push_back(scalar_dissipation_rate_full);
+        chi_mass_frac_avg_realizations.push_back(scalar_dissipation_rate_full);
     }
     
-    d_ensemble_statistics->chi_avg_computed = true;
+    d_ensemble_statistics->chi_mass_frac_avg_computed = true;
+}
+
+
+/*
+ * Compute mole fraction scalar dissipation rate with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIStatisticsUtilities::computeAveragedMoleFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp,
+        true);
+    
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+    
+    std::vector<std::vector<double> >& chi_mol_frac_avg_realizations = d_ensemble_statistics->chi_mol_frac_avg_realizations;
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        std::vector<std::string> quantity_names;
+        std::vector<int> component_indices;
+        std::vector<bool> use_derivative;
+        std::vector<int> derivative_directions;
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        
+        std::vector<double> scalar_dissipation_rate = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        chi_mol_frac_avg_realizations.push_back(scalar_dissipation_rate);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        std::vector<std::string> quantity_names;
+        std::vector<int> component_indices;
+        std::vector<bool> use_derivative;
+        std::vector<int> derivative_directions;
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        
+        std::vector<double> scalar_dissipation_rate_part_1 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> scalar_dissipation_rate_part_2 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        std::vector<double> scalar_dissipation_rate_full(finest_level_dims[0], double(0));
+        for (int i = 0; i < finest_level_dims[0]; i++)
+        {
+            scalar_dissipation_rate_full[i] = scalar_dissipation_rate_part_1[i] + scalar_dissipation_rate_part_2[i];
+        }
+        
+        chi_mol_frac_avg_realizations.push_back(scalar_dissipation_rate_full);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        std::vector<std::string> quantity_names;
+        std::vector<int> component_indices;
+        std::vector<bool> use_derivative;
+        std::vector<int> derivative_directions;
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        
+        std::vector<double> scalar_dissipation_rate_part_1 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> scalar_dissipation_rate_part_2 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        
+        std::vector<double> scalar_dissipation_rate_part_3 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        std::vector<double> scalar_dissipation_rate_full(finest_level_dims[0], double(0));
+        for (int i = 0; i < finest_level_dims[0]; i++)
+        {
+            scalar_dissipation_rate_full[i] =
+                scalar_dissipation_rate_part_1[i] + scalar_dissipation_rate_part_2[i] + scalar_dissipation_rate_part_3[i];
+        }
+        
+        chi_mol_frac_avg_realizations.push_back(scalar_dissipation_rate_full);
+    }
+    
+    d_ensemble_statistics->chi_mol_frac_avg_computed = true;
+}
+
+
+/*
+ * Compute volume fraction scalar dissipation rate with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIStatisticsUtilities::computeAveragedVolumeFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp,
+        true);
+    
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+    
+    std::vector<std::vector<double> >& chi_vol_frac_avg_realizations = d_ensemble_statistics->chi_vol_frac_avg_realizations;
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        std::vector<std::string> quantity_names;
+        std::vector<int> component_indices;
+        std::vector<bool> use_derivative;
+        std::vector<int> derivative_directions;
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        
+        std::vector<double> scalar_dissipation_rate = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        chi_vol_frac_avg_realizations.push_back(scalar_dissipation_rate);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        std::vector<std::string> quantity_names;
+        std::vector<int> component_indices;
+        std::vector<bool> use_derivative;
+        std::vector<int> derivative_directions;
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        
+        std::vector<double> scalar_dissipation_rate_part_1 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> scalar_dissipation_rate_part_2 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        std::vector<double> scalar_dissipation_rate_full(finest_level_dims[0], double(0));
+        for (int i = 0; i < finest_level_dims[0]; i++)
+        {
+            scalar_dissipation_rate_full[i] = scalar_dissipation_rate_part_1[i] + scalar_dissipation_rate_part_2[i];
+        }
+        
+        chi_vol_frac_avg_realizations.push_back(scalar_dissipation_rate_full);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        std::vector<std::string> quantity_names;
+        std::vector<int> component_indices;
+        std::vector<bool> use_derivative;
+        std::vector<int> derivative_directions;
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        
+        std::vector<double> scalar_dissipation_rate_part_1 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> scalar_dissipation_rate_part_2 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        
+        std::vector<double> scalar_dissipation_rate_part_3 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        std::vector<double> scalar_dissipation_rate_full(finest_level_dims[0], double(0));
+        for (int i = 0; i < finest_level_dims[0]; i++)
+        {
+            scalar_dissipation_rate_full[i] =
+                scalar_dissipation_rate_part_1[i] + scalar_dissipation_rate_part_2[i] + scalar_dissipation_rate_part_3[i];
+        }
+        
+        chi_vol_frac_avg_realizations.push_back(scalar_dissipation_rate_full);
+    }
+    
+    d_ensemble_statistics->chi_vol_frac_avg_computed = true;
 }
 
 
@@ -6375,29 +6895,29 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedScalarDissipation
                 << std::endl);
         }
         
-        const std::vector<std::vector<double> >& chi_avg_realizations =
-            d_ensemble_statistics->chi_avg_realizations;
+        const std::vector<std::vector<double> >& chi_mass_frac_avg_realizations =
+            d_ensemble_statistics->chi_mass_frac_avg_realizations;
         
-        const int num_realizations = static_cast<int>(chi_avg_realizations.size());
+        const int num_realizations = static_cast<int>(chi_mass_frac_avg_realizations.size());
         
         TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
         TBOX_ASSERT(num_realizations > 0);
         
-        const int num_cells = static_cast<int>(chi_avg_realizations[0].size());
+        const int num_cells = static_cast<int>(chi_mass_frac_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
         
-        std::vector<double> chi_avg_global(num_cells, double(0));
+        std::vector<double> chi_mass_frac_avg_global(num_cells, double(0));
         
         for (int ri = 0; ri < num_realizations; ri++)
         {
             for (int i = 0; i < num_cells; i++)
             {
-                chi_avg_global[i] += weight*chi_avg_realizations[ri][i];
+                chi_mass_frac_avg_global[i] += weight*chi_mass_frac_avg_realizations[ri][i];
             }
         }
         
         f_out.write((char*)&output_time, sizeof(double));
-        f_out.write((char*)&chi_avg_global[0], sizeof(double)*chi_avg_global.size());
+        f_out.write((char*)&chi_mass_frac_avg_global[0], sizeof(double)*chi_mass_frac_avg_global.size());
         
         f_out.close();
     }
@@ -8871,10 +9391,10 @@ RTIRMIStatisticsUtilities::outputEnsembleEnstrophyMeanWithInhomogeneousXDirectio
 
 
 /*
- * Output ensemble scalar dissipation rate of first species integrated to a file.
+ * Output ensemble mass fraction scalar dissipation rate of first species integrated to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateIntegrated(
+RTIRMIStatisticsUtilities::outputEnsembleMassFractionScalarDissipationRateIntegrated(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
@@ -8917,31 +9437,31 @@ RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateIntegrated(
                 << std::endl);
         }
         
-        const std::vector<std::vector<double> >& chi_avg_realizations =
-            d_ensemble_statistics->chi_avg_realizations;
+        const std::vector<std::vector<double> >& chi_mass_frac_avg_realizations =
+            d_ensemble_statistics->chi_mass_frac_avg_realizations;
         
-        const int num_realizations = static_cast<int>(chi_avg_realizations.size());
+        const int num_realizations = static_cast<int>(chi_mass_frac_avg_realizations.size());
         
         TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
         TBOX_ASSERT(num_realizations > 0);
         
-        const int num_cells = static_cast<int>(chi_avg_realizations[0].size());
+        const int num_cells = static_cast<int>(chi_mass_frac_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
         
-        std::vector<double> chi_avg_global(num_cells, double(0));
+        std::vector<double> chi_mass_frac_avg_global(num_cells, double(0));
         
         for (int ri = 0; ri < num_realizations; ri++)
         {
             for (int i = 0; i < num_cells; i++)
             {
-                chi_avg_global[i] += weight*chi_avg_realizations[ri][i];
+                chi_mass_frac_avg_global[i] += weight*chi_mass_frac_avg_realizations[ri][i];
             }
         }
         
         double chi_integrated_global = double(0);
         for (int i = 0; i < num_cells; i++)
         {
-            chi_integrated_global += chi_avg_global[i]*dx_finest[0];
+            chi_integrated_global += chi_mass_frac_avg_global[i]*dx_finest[0];
         }
         
         const double* x_lo = d_grid_geometry->getXLower();
@@ -8967,11 +9487,11 @@ RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateIntegrated(
 
 
 /*
- * Output mean of ensemble scalar dissipation rate of first species in mixing layer with assumed homogeneity in
+ * Output mean of ensemble mass fraction scalar dissipation rate of first species in mixing layer with assumed homogeneity in
  * y-direction (2D) or yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateMeanWithInhomogeneousXDirection(
+RTIRMIStatisticsUtilities::outputEnsembleMassFractionScalarDissipationRateMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
@@ -9006,29 +9526,29 @@ RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateMeanWithInhomogene
                 << std::endl);
         }
         
-        const std::vector<std::vector<double> >& chi_avg_realizations =
-            d_ensemble_statistics->chi_avg_realizations;
+        const std::vector<std::vector<double> >& chi_mass_frac_avg_realizations =
+            d_ensemble_statistics->chi_mass_frac_avg_realizations;
         
         const std::vector<std::vector<double> >& Y_0_avg_realizations =
             d_ensemble_statistics->Y_0_avg_realizations;
         
-        const int num_realizations = static_cast<int>(chi_avg_realizations.size());
+        const int num_realizations = static_cast<int>(chi_mass_frac_avg_realizations.size());
         
         TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
         TBOX_ASSERT(num_realizations > 0);
         TBOX_ASSERT(num_realizations == static_cast<int>(Y_0_avg_realizations.size()));
         
-        const int num_cells = static_cast<int>(chi_avg_realizations[0].size());
+        const int num_cells = static_cast<int>(chi_mass_frac_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
         
-        std::vector<double> chi_avg_global(num_cells, double(0));
+        std::vector<double> chi_mass_frac_avg_global(num_cells, double(0));
         std::vector<double> Y_0_avg_global(num_cells, double(0));
         
         for (int ri = 0; ri < num_realizations; ri++)
         {
             for (int i = 0; i < num_cells; i++)
             {
-                chi_avg_global[i] += weight*chi_avg_realizations[ri][i];
+                chi_mass_frac_avg_global[i] += weight*chi_mass_frac_avg_realizations[ri][i];
                 Y_0_avg_global[i] += weight*Y_0_avg_realizations[ri][i];
             }
         }
@@ -9041,7 +9561,379 @@ RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateMeanWithInhomogene
             const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
             if (mixing_metric > double(9)/double(10))
             {
-                chi_sum += chi_avg_global[i];
+                chi_sum += chi_mass_frac_avg_global[i];
+                count++;
+            }
+        }
+        
+        const double chi_mean = chi_sum/count;
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << chi_mean;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble mole fraction scalar dissipation rate of first species integrated to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleMoleFractionScalarDissipationRateIntegrated(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& chi_mol_frac_avg_realizations =
+            d_ensemble_statistics->chi_mol_frac_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(chi_mol_frac_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(chi_mol_frac_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> chi_mol_frac_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                chi_mol_frac_avg_global[i] += weight*chi_mol_frac_avg_realizations[ri][i];
+            }
+        }
+        
+        double chi_integrated_global = double(0);
+        for (int i = 0; i < num_cells; i++)
+        {
+            chi_integrated_global += chi_mol_frac_avg_global[i]*dx_finest[0];
+        }
+        
+        const double* x_lo = d_grid_geometry->getXLower();
+        const double* x_hi = d_grid_geometry->getXUpper();
+        if (d_dim == tbox::Dimension(2))
+        {
+            const double L_y = x_hi[1] - x_lo[1];
+            chi_integrated_global *= L_y;
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            const double L_y = x_hi[1] - x_lo[1];
+            const double L_z = x_hi[2] - x_lo[2];
+            chi_integrated_global *= (L_y*L_z);
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << chi_integrated_global;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output mean of ensemble mole fraction scalar dissipation rate of first species in mixing layer with assumed homogeneity in
+ * y-direction (2D) or yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleMoleFractionScalarDissipationRateMeanWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& chi_mol_frac_avg_realizations =
+            d_ensemble_statistics->chi_mol_frac_avg_realizations;
+        
+        const std::vector<std::vector<double> >& Y_0_avg_realizations =
+            d_ensemble_statistics->Y_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(chi_mol_frac_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(Y_0_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(chi_mol_frac_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> chi_mol_frac_avg_global(num_cells, double(0));
+        std::vector<double> Y_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                chi_mol_frac_avg_global[i] += weight*chi_mol_frac_avg_realizations[ri][i];
+                Y_0_avg_global[i] += weight*Y_0_avg_realizations[ri][i];
+            }
+        }
+        
+        double chi_sum = double(0);
+        int count = 0;
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
+            if (mixing_metric > double(9)/double(10))
+            {
+                chi_sum += chi_mol_frac_avg_global[i];
+                count++;
+            }
+        }
+        
+        const double chi_mean = chi_sum/count;
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << chi_mean;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble volume fraction scalar dissipation rate of first species integrated to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleVolumeFractionScalarDissipationRateIntegrated(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& chi_vol_frac_avg_realizations =
+            d_ensemble_statistics->chi_vol_frac_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(chi_vol_frac_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(chi_vol_frac_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> chi_vol_frac_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                chi_vol_frac_avg_global[i] += weight*chi_vol_frac_avg_realizations[ri][i];
+            }
+        }
+        
+        double chi_integrated_global = double(0);
+        for (int i = 0; i < num_cells; i++)
+        {
+            chi_integrated_global += chi_vol_frac_avg_global[i]*dx_finest[0];
+        }
+        
+        const double* x_lo = d_grid_geometry->getXLower();
+        const double* x_hi = d_grid_geometry->getXUpper();
+        if (d_dim == tbox::Dimension(2))
+        {
+            const double L_y = x_hi[1] - x_lo[1];
+            chi_integrated_global *= L_y;
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            const double L_y = x_hi[1] - x_lo[1];
+            const double L_z = x_hi[2] - x_lo[2];
+            chi_integrated_global *= (L_y*L_z);
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << chi_integrated_global;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output mean of ensemble volume fraction scalar dissipation rate of first species in mixing layer with assumed homogeneity in
+ * y-direction (2D) or yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleVolumeFractionScalarDissipationRateMeanWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& chi_vol_frac_avg_realizations =
+            d_ensemble_statistics->chi_vol_frac_avg_realizations;
+        
+        const std::vector<std::vector<double> >& Y_0_avg_realizations =
+            d_ensemble_statistics->Y_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(chi_vol_frac_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(Y_0_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(chi_vol_frac_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> chi_vol_frac_avg_global(num_cells, double(0));
+        std::vector<double> Y_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                chi_vol_frac_avg_global[i] += weight*chi_vol_frac_avg_realizations[ri][i];
+                Y_0_avg_global[i] += weight*Y_0_avg_realizations[ri][i];
+            }
+        }
+        
+        double chi_sum = double(0);
+        int count = 0;
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
+            if (mixing_metric > double(9)/double(10))
+            {
+                chi_sum += chi_vol_frac_avg_global[i];
                 count++;
             }
         }
@@ -18473,6 +19365,22 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             {
                 f_out << "\t" << "S_DIS_RAT_MEAN_INHO_X";
             }
+            else if (statistical_quantity_key == "S_DIS_RAT_INT_MOL_F")
+            {
+                f_out << "\t" << "S_DIS_RAT_INT_MOL_F  ";
+            }
+            else if (statistical_quantity_key == "S_DIS_R_INHO_X_MOL_F")
+            {
+                f_out << "\t" << "S_DIS_R_INHO_X_MOL_F ";
+            }
+            else if (statistical_quantity_key == "S_DIS_RAT_INT_VOL_F")
+            {
+                f_out << "\t" << "S_DIS_RAT_INT_VOL_F  ";
+            }
+            else if (statistical_quantity_key == "S_DIS_R_INHO_X_VOL_F")
+            {
+                f_out << "\t" << "S_DIS_R_INHO_X_VOL_F ";
+            }
             else if (statistical_quantity_key == "RE_W_INHOMO_X")
             {
                 f_out << "\t" << "RE_W_INHOMO_X        ";
@@ -18914,10 +19822,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
         }
         else if (statistical_quantity_key == "SCAL_DISS_RAT_AVG_SP")
         {
-            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->chi_avg_computed))
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->chi_mass_frac_avg_computed))
             {
                 rti_rmi_statistics_utilities->
-                    computeAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+                    computeAveragedMassFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
@@ -19399,20 +20307,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
         }
         else if (statistical_quantity_key == "S_DIS_RAT_INT")
         {
-            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->chi_avg_computed))
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->chi_mass_frac_avg_computed))
             {
                 rti_rmi_statistics_utilities->
-                    computeAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+                    computeAveragedMassFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
         }
         else if (statistical_quantity_key == "S_DIS_RAT_MEAN_INHO_X")
         {
-            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->chi_avg_computed))
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->chi_mass_frac_avg_computed))
             {
                 rti_rmi_statistics_utilities->
-                    computeAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+                    computeAveragedMassFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
@@ -19421,6 +20329,62 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
             {
                 rti_rmi_statistics_utilities->
                     computeAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "S_DIS_RAT_INT_MOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->chi_mol_frac_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMoleFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "S_DIS_R_INHO_X_MOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->chi_mol_frac_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMoleFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->X_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "S_DIS_RAT_INT_VOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->chi_vol_frac_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVolumeFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "S_DIS_R_INHO_X_VOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->chi_vol_frac_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVolumeFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Z_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
@@ -20362,7 +21326,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         {
             rti_rmi_statistics_utilities->
                 outputSpatialProfileEnsembleAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
-                    "chi_avg.dat",
+                    "chi_mass_frac_avg.dat",
                     patch_hierarchy,
                     output_time);
         }
@@ -20555,14 +21519,42 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "S_DIS_RAT_INT")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleScalarDissipationRateIntegrated(
+                outputEnsembleMassFractionScalarDissipationRateIntegrated(
                     stat_dump_filename,
                     patch_hierarchy);
         }
         else if (statistical_quantity_key == "S_DIS_RAT_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleScalarDissipationRateMeanWithInhomogeneousXDirection(
+                outputEnsembleMassFractionScalarDissipationRateMeanWithInhomogeneousXDirection(
+                    stat_dump_filename,
+                    patch_hierarchy);
+        }
+        else if (statistical_quantity_key == "S_DIS_RAT_INT_MOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleMoleFractionScalarDissipationRateIntegrated(
+                    stat_dump_filename,
+                    patch_hierarchy);
+        }
+        else if (statistical_quantity_key == "S_DIS_R_INHO_X_MOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleMoleFractionScalarDissipationRateMeanWithInhomogeneousXDirection(
+                    stat_dump_filename,
+                    patch_hierarchy);
+        }
+        else if (statistical_quantity_key == "S_DIS_RAT_INT_VOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleVolumeFractionScalarDissipationRateIntegrated(
+                    stat_dump_filename,
+                    patch_hierarchy);
+        }
+        else if (statistical_quantity_key == "S_DIS_R_INHO_X_VOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleVolumeFractionScalarDissipationRateMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
                     patch_hierarchy);
         }
