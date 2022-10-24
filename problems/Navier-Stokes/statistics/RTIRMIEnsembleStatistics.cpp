@@ -9715,27 +9715,27 @@ RTIRMIStatisticsUtilities::outputEnsembleMoleFractionScalarDissipationRateMeanWi
         const std::vector<std::vector<double> >& chi_mol_frac_avg_realizations =
             d_ensemble_statistics->chi_mol_frac_avg_realizations;
         
-        const std::vector<std::vector<double> >& Y_0_avg_realizations =
-            d_ensemble_statistics->Y_0_avg_realizations;
+        const std::vector<std::vector<double> >& X_0_avg_realizations =
+            d_ensemble_statistics->X_0_avg_realizations;
         
         const int num_realizations = static_cast<int>(chi_mol_frac_avg_realizations.size());
         
         TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
         TBOX_ASSERT(num_realizations > 0);
-        TBOX_ASSERT(num_realizations == static_cast<int>(Y_0_avg_realizations.size()));
+        TBOX_ASSERT(num_realizations == static_cast<int>(X_0_avg_realizations.size()));
         
         const int num_cells = static_cast<int>(chi_mol_frac_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
         
         std::vector<double> chi_mol_frac_avg_global(num_cells, double(0));
-        std::vector<double> Y_0_avg_global(num_cells, double(0));
+        std::vector<double> X_0_avg_global(num_cells, double(0));
         
         for (int ri = 0; ri < num_realizations; ri++)
         {
             for (int i = 0; i < num_cells; i++)
             {
                 chi_mol_frac_avg_global[i] += weight*chi_mol_frac_avg_realizations[ri][i];
-                Y_0_avg_global[i] += weight*Y_0_avg_realizations[ri][i];
+                X_0_avg_global[i] += weight*X_0_avg_realizations[ri][i];
             }
         }
         
@@ -9744,7 +9744,7 @@ RTIRMIStatisticsUtilities::outputEnsembleMoleFractionScalarDissipationRateMeanWi
         
         for (int i = 0; i < num_cells; i++)
         {
-            const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
+            const double mixing_metric = double(4)*X_0_avg_global[i]*(double(1) - X_0_avg_global[i]);
             if (mixing_metric > double(9)/double(10))
             {
                 chi_sum += chi_mol_frac_avg_global[i];
@@ -9901,27 +9901,27 @@ RTIRMIStatisticsUtilities::outputEnsembleVolumeFractionScalarDissipationRateMean
         const std::vector<std::vector<double> >& chi_vol_frac_avg_realizations =
             d_ensemble_statistics->chi_vol_frac_avg_realizations;
         
-        const std::vector<std::vector<double> >& Y_0_avg_realizations =
-            d_ensemble_statistics->Y_0_avg_realizations;
+        const std::vector<std::vector<double> >& Z_0_avg_realizations =
+            d_ensemble_statistics->Z_0_avg_realizations;
         
         const int num_realizations = static_cast<int>(chi_vol_frac_avg_realizations.size());
         
         TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
         TBOX_ASSERT(num_realizations > 0);
-        TBOX_ASSERT(num_realizations == static_cast<int>(Y_0_avg_realizations.size()));
+        TBOX_ASSERT(num_realizations == static_cast<int>(Z_0_avg_realizations.size()));
         
         const int num_cells = static_cast<int>(chi_vol_frac_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
         
         std::vector<double> chi_vol_frac_avg_global(num_cells, double(0));
-        std::vector<double> Y_0_avg_global(num_cells, double(0));
+        std::vector<double> Z_0_avg_global(num_cells, double(0));
         
         for (int ri = 0; ri < num_realizations; ri++)
         {
             for (int i = 0; i < num_cells; i++)
             {
                 chi_vol_frac_avg_global[i] += weight*chi_vol_frac_avg_realizations[ri][i];
-                Y_0_avg_global[i] += weight*Y_0_avg_realizations[ri][i];
+                Z_0_avg_global[i] += weight*Z_0_avg_realizations[ri][i];
             }
         }
         
@@ -9930,7 +9930,7 @@ RTIRMIStatisticsUtilities::outputEnsembleVolumeFractionScalarDissipationRateMean
         
         for (int i = 0; i < num_cells; i++)
         {
-            const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
+            const double mixing_metric = double(4)*Z_0_avg_global[i]*(double(1) - Z_0_avg_global[i]);
             if (mixing_metric > double(9)/double(10))
             {
                 chi_sum += chi_vol_frac_avg_global[i];
