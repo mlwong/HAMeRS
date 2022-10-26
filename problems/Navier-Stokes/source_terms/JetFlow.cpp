@@ -13,9 +13,6 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     const double dt,
     const int RK_step_number)
 {
-    // Follow Reckinger, Scott J., Daniel Livescu, and Oleg V. Vasilyev.
-    // "Comprehensive numerical methodology for direct numerical simulations of compressible Rayleigh–Taylor instability."
-    
     if ((d_project_name != "2D jet") && (d_project_name != "3D jet") ) 
     {
         TBOX_ERROR(d_object_name
@@ -58,7 +55,38 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << "No key 'sponge_rate' found in data for source terms."
             << std::endl);
     }
+    
+    TBOX_ASSERT(d_source_terms_db->keyExists("inflow_sponge_rate"));
 
+    double inflow_sponge_rate = double(0);
+    if (d_source_terms_db->keyExists("inflow_sponge_rate"))
+    {
+        inflow_sponge_rate = d_source_terms_db->getDouble("inflow_sponge_rate");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "No key 'inflow_sponge_rate' found in data for source terms."
+            << std::endl);
+    }
+
+    TBOX_ASSERT(d_source_terms_db->keyExists("inflow_rate_power"));
+
+    double inflow_rate_power = double(0);
+    if (d_source_terms_db->keyExists("inflow_rate_power"))
+    {
+        inflow_rate_power = d_source_terms_db->getDouble("inflow_rate_power");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "No key 'inflow_rate_power' found in data for source terms."
+            << std::endl);
+    }
+
+    
     TBOX_ASSERT(d_source_terms_db->keyExists("U_jet"));
     
     double U_jet = double(0);
@@ -158,40 +186,6 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     const double T_ref = 300.0;    // background temperature
     
     TBOX_ASSERT(d_source_terms_db != nullptr);
-    // TBOX_ASSERT(d_source_terms_db->keyExists("has_gravity") || d_source_terms_db->keyExists("d_has_gravity"));
-    
-    // std::vector<double> gravity_vector;
-    
-    // if (d_source_terms_db->keyExists("has_gravity"))
-    // {
-    //     if (d_source_terms_db->keyExists("gravity"))
-    //     {
-    //         d_source_terms_db->getVector("gravity", gravity_vector);
-    //     }
-    //     else
-    //     {
-    //         TBOX_ERROR(d_object_name
-    //             << ": "
-    //             << "No key 'gravity' found in data for source terms."
-    //             << std::endl);
-    //     }
-    // }
-    // else if (d_source_terms_db->keyExists("d_has_gravity"))
-    // {
-    //     if (d_source_terms_db->keyExists("d_gravity"))
-    //     {
-    //         d_source_terms_db->getVector("d_gravity", gravity_vector);
-    //     }
-    //     else
-    //     {
-    //         TBOX_ERROR(d_object_name
-    //             << ": "
-    //             << "No key 'd_gravity' found in data for source terms."
-    //             << std::endl);
-    //     }
-    // }
-    
-    // const double g = gravity_vector[0]; // gravity
     
     const double R_u = 8.31446261815324; // universal gas constant
     const double R_0 = R_u/W_0;          // gas constant of heavier gas
@@ -235,16 +229,17 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     const double rho_v_ref = rho_ref * v_ref;
                     const double E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
 
-                    const double xi_b      = (1.0-(x[0]-domain_xlo[0])/(d_special_source_box_lo[0]-domain_xlo[0]))*sponge_rate; // mask value needs to be improved 
+                    // 
+                    // const double xi_b      = pow(fabs((x[0]-domain_xlo[0])/(d_special_source_box_lo[0]-domain_xlo[0])),inflow_rate_power)*inflow_sponge_rate; // mask value needs to be improved 
+                    const double xi_b      = inflow_sponge_rate;                    
+                    //
 
-                    //sponge_rate_tot = (pow((p_ref/rho_ref),0.5))*sponge_rate;
-                    //xi_b            = -(x[0])/(701.0-600.0); // mask value needs to be improved 
-                    
                     const double rho_p     = rho[idx_cons_var]     - rho_ref;
                     const double rho_u_p   = rho_u[idx_cons_var]   - rho_u_ref;
                     const double rho_v_p   = rho_v[idx_cons_var]   - rho_v_ref;
                     const double E_p       = E[idx_cons_var]       - E_ref;
                     
+
                     S[0][idx_source] -= dt*xi_b*rho_p;
                     S[1][idx_source] -= dt*xi_b*rho_u_p;
                     S[2][idx_source] -= dt*xi_b*rho_v_p;
@@ -573,6 +568,37 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
     }
     
     restart_source_terms_db->putDouble("sponge_rate", sponge_rate);
+    
+    double inflow_sponge_rate = double(0);
+    if (d_source_terms_db->keyExists("inflow_sponge_rate"))
+    {
+        inflow_sponge_rate = d_source_terms_db->getDouble("inflow_sponge_rate");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "No key 'inflow_sponge_rate' found in data for source terms."
+            << std::endl);
+    }
+
+    restart_source_terms_db->putDouble("inflow_sponge_rate", inflow_sponge_rate);
+
+    double inflow_rate_power = double(0);
+    if (d_source_terms_db->keyExists("inflow_rate_power"))
+    {
+        inflow_rate_power = d_source_terms_db->getDouble("inflow_rate_power");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "No key 'inflow_rate_power' found in data for source terms."
+            << std::endl);
+    }
+
+    restart_source_terms_db->putDouble("inflow_rate_power", inflow_rate_power);
+
 
     double U_jet = double(0);
     if (d_source_terms_db->keyExists("U_jet"))
