@@ -923,11 +923,31 @@ class RTIRMIStatisticsUtilities
             const double output_time) const;
         
         /*
-         * Output spatial profile of ensemble averaged scalar dissipation rate with assumed homogeneity in
+         * Output spatial profile of ensemble averaged mass fraction scalar dissipation rate with assumed homogeneity in
          * y-direction (2D) or yz-plane (3D) to a file.
          */
         void
-        outputSpatialProfileEnsembleAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+        outputSpatialProfileEnsembleAveragedMassFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble averaged mole fraction scalar dissipation rate with assumed homogeneity in
+         * y-direction (2D) or yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedMoleFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble averaged volume fraction scalar dissipation rate with assumed homogeneity in
+         * y-direction (2D) or yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedVolumeFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const double output_time) const;
@@ -6923,11 +6943,11 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedEnstrophyWithHomo
 
 
 /*
- * Output spatial profile of ensemble averaged scalar dissipation rate with assumed homogeneity in
+ * Output spatial profile of ensemble averaged mass fraction scalar dissipation rate with assumed homogeneity in
  * y-direction (2D) or yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMassFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const double output_time) const
@@ -6978,6 +6998,130 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedScalarDissipation
         
         f_out.write((char*)&output_time, sizeof(double));
         f_out.write((char*)&chi_mass_frac_avg_global[0], sizeof(double)*chi_mass_frac_avg_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output spatial profile of ensemble averaged mole fraction scalar dissipation rate with assumed homogeneity in
+ * y-direction (2D) or yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMoleFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& chi_mol_frac_avg_realizations =
+            d_ensemble_statistics->chi_mol_frac_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(chi_mol_frac_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(chi_mol_frac_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> chi_mol_frac_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                chi_mol_frac_avg_global[i] += weight*chi_mol_frac_avg_realizations[ri][i];
+            }
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&chi_mol_frac_avg_global[0], sizeof(double)*chi_mol_frac_avg_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output spatial profile of ensemble averaged volume fraction scalar dissipation rate with assumed homogeneity in
+ * y-direction (2D) or yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedVolumeFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& chi_vol_frac_avg_realizations =
+            d_ensemble_statistics->chi_vol_frac_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(chi_vol_frac_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(chi_vol_frac_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> chi_vol_frac_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                chi_vol_frac_avg_global[i] += weight*chi_vol_frac_avg_realizations[ri][i];
+            }
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&chi_vol_frac_avg_global[0], sizeof(double)*chi_vol_frac_avg_global.size());
         
         f_out.close();
     }
@@ -20586,6 +20730,26 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                         data_context);
             }
         }
+        else if (statistical_quantity_key == "SCAL_DISS_RAT_MOL_FRAC_AVG_SP")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->chi_mol_frac_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMoleFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "SCAL_DISS_RAT_VOL_FRAC_AVG_SP")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->chi_vol_frac_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVolumeFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
         else if (statistical_quantity_key == "BARO_TQ_Z_RMS_SP")
         {
             if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B3_sq_avg_computed))
@@ -22285,8 +22449,24 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "SCAL_DISS_RAT_AVG_SP")
         {
             rti_rmi_statistics_utilities->
-                outputSpatialProfileEnsembleAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
-                    "chi_mass_frac_avg.dat",
+                outputSpatialProfileEnsembleAveragedMassFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+                    "chi_avg.dat",
+                    patch_hierarchy,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "SCAL_DISS_RAT_MOL_FRAC_AVG_SP")
+        {
+            rti_rmi_statistics_utilities->
+                outputSpatialProfileEnsembleAveragedMoleFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+                    "chi_mol_frac_avg.dat",
+                    patch_hierarchy,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "SCAL_DISS_RAT_VOL_FRAC_AVG_SP")
+        {
+            rti_rmi_statistics_utilities->
+                outputSpatialProfileEnsembleAveragedVolumeFractionScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+                    "chi_vol_frac_avg.dat",
                     patch_hierarchy,
                     output_time);
         }
