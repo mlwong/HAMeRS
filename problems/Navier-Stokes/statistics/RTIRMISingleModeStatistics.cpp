@@ -99,10 +99,46 @@ class RTIRMISingleModeStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Output scalar dissipation rate of first species integrated to a file.
+         * Output squared vorticity in z-direction integrated to a file.
          */
         void
-        outputScalarDissipationRateIntegrated(
+        outputSquaredVorticityZIntegrated(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output squared baroclinic torque in z-direction integrated to a file.
+         */
+        void
+        outputSquaredBaroclinicTorqueZIntegrated(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output mass fraction scalar dissipation rate of first species integrated to a file.
+         */
+        void
+        outputMassFractionScalarDissipationRateIntegrated(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output mole fraction scalar dissipation rate of first species integrated to a file.
+         */
+        void
+        outputMoleFractionScalarDissipationRateIntegrated(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output volume fraction scalar dissipation rate of first species integrated to a file.
+         */
+        void
+        outputVolumeFractionScalarDissipationRateIntegrated(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
@@ -1277,10 +1313,577 @@ RTIRMISingleModeStatisticsUtilities::outputEnstrophyIntegrated(
 
 
 /*
- * Output scalar dissipation rate of first species integrated to a file.
+ * Output squared vorticity in z-direction integrated to a file.
  */
 void
-RTIRMISingleModeStatisticsUtilities::outputScalarDissipationRateIntegrated(
+RTIRMISingleModeStatisticsUtilities::outputSquaredVorticityZIntegrated(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const std::vector<double>& dx_finest = MPI_helper_average.getFinestRefinedDomainGridSpacing();
+    
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'VORTICITY_Z_SQ_INT' for one-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        std::vector<std::string> quantity_names;
+        std::vector<int> component_indices;
+        std::vector<bool> use_derivative;
+        std::vector<int> derivative_directions;
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        
+        std::vector<double> vorticity_z_sq_part_1 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> vorticity_z_sq_part_2 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> vorticity_z_sq_part_3 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        /*
+         * Output the squared z-voriticity integral (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            std::vector<double> vorticity_z_sq_full(finest_level_dims[0], double(0));
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                vorticity_z_sq_full[i] = vorticity_z_sq_part_1[i] + vorticity_z_sq_part_2[i] - double(2)*vorticity_z_sq_part_3[i];
+            }
+            
+            double vorticity_z_sq_integrated_global = double(0);
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                vorticity_z_sq_integrated_global += vorticity_z_sq_full[i]*dx_finest[0];
+            }
+            
+            const double* x_lo = d_grid_geometry->getXLower();
+            const double* x_hi = d_grid_geometry->getXUpper();
+            const double L_y = x_hi[1] - x_lo[1];
+            vorticity_z_sq_integrated_global *= L_y;
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << vorticity_z_sq_integrated_global;
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        std::vector<std::string> quantity_names;
+        std::vector<int> component_indices;
+        std::vector<bool> use_derivative;
+        std::vector<int> derivative_directions;
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        
+        std::vector<double> vorticity_z_sq_part_1 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> vorticity_z_sq_part_2 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> vorticity_z_sq_part_3 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        /*
+         * Output the enstrophy integral (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            std::vector<double> vorticity_z_sq_full(finest_level_dims[0], double(0));
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                vorticity_z_sq_full[i] = vorticity_z_sq_part_1[i] + vorticity_z_sq_part_2[i] - double(2)*vorticity_z_sq_part_3[i];
+            }
+            
+            double vorticity_z_sq_integrated_global = double(0);
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                vorticity_z_sq_integrated_global += vorticity_z_sq_full[i]*dx_finest[0];
+            }
+            
+            const double* x_lo = d_grid_geometry->getXLower();
+            const double* x_hi = d_grid_geometry->getXUpper();
+            const double L_y = x_hi[1] - x_lo[1];
+            const double L_z = x_hi[2] - x_lo[2];
+            vorticity_z_sq_integrated_global *= (L_y*L_z);
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << vorticity_z_sq_integrated_global;
+        }
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output squared baroclinic torque in z-direction integrated to a file.
+ */
+void
+RTIRMISingleModeStatisticsUtilities::outputSquaredBaroclinicTorqueZIntegrated(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'BARO_TQ_Z_SQ_INT' for one-dimensional problem."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp,
+        true);
+    
+    const std::vector<double>& dx_finest = MPI_helper_average.getFinestRefinedDomainGridSpacing();
+    
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<bool> use_derivative;
+    std::vector<int> derivative_directions;
+    std::vector<bool> use_reciprocal;
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
+    use_reciprocal.push_back(false);
+    
+    std::vector<double> B3_part_1 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        use_reciprocal,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    use_reciprocal.clear();
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    std::vector<double> B3_part_2 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        use_reciprocal,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    use_reciprocal.clear();
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
+    use_reciprocal.push_back(false);
+    
+    std::vector<double> B3_part_3 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        use_reciprocal,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    use_reciprocal.clear();
+    
+    std::vector<double> B3_sq_avg(finest_level_dims[0], double(0));
+    for (int i = 0; i < finest_level_dims[0]; i++)
+    {
+        B3_sq_avg[i] = B3_part_1[i] + B3_part_2[i] - double(2)*B3_part_3[i];
+    }
+    
+    if (d_dim == tbox::Dimension(2))
+    {
+        double B3_sq_integrated_global = double(0);
+        for (int i = 0; i < finest_level_dims[0]; i++)
+        {
+            B3_sq_integrated_global += B3_sq_avg[i]*dx_finest[0];
+        }
+        
+        const double* x_lo = d_grid_geometry->getXLower();
+        const double* x_hi = d_grid_geometry->getXUpper();
+        const double L_y = x_hi[1] - x_lo[1];
+        B3_sq_integrated_global *= L_y;
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << B3_sq_integrated_global;
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        double B3_sq_integrated_global = double(0);
+        for (int i = 0; i < finest_level_dims[0]; i++)
+        {
+            B3_sq_integrated_global += B3_sq_avg[i]*dx_finest[0];
+        }
+        
+        const double* x_lo = d_grid_geometry->getXLower();
+        const double* x_hi = d_grid_geometry->getXUpper();
+        const double L_y = x_hi[1] - x_lo[1];
+        const double L_z = x_hi[2] - x_lo[2];
+        B3_sq_integrated_global *= (L_y*L_z);
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << B3_sq_integrated_global;
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output mass fraction scalar dissipation rate of first species integrated to a file.
+ */
+void
+RTIRMISingleModeStatisticsUtilities::outputMassFractionScalarDissipationRateIntegrated(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -1530,6 +2133,622 @@ RTIRMISingleModeStatisticsUtilities::outputScalarDissipationRateIntegrated(
         use_derivative.push_back(true);
         derivative_directions.push_back(2);
         quantity_names.push_back("MASS_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        
+        std::vector<double> scalar_dissipation_rate_part_3 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        /*
+         * Output the scalar dissipation rate integral (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            std::vector<double> scalar_dissipation_rate_full(finest_level_dims[0], double(0));
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                scalar_dissipation_rate_full[i] =
+                    scalar_dissipation_rate_part_1[i] + scalar_dissipation_rate_part_2[i] + scalar_dissipation_rate_part_3[i];
+            }
+            
+            double chi_integrated_global = double(0);
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                chi_integrated_global += scalar_dissipation_rate_full[i]*dx_finest[0];
+            }
+            
+            const double* x_lo = d_grid_geometry->getXLower();
+            const double* x_hi = d_grid_geometry->getXUpper();
+            const double L_y = x_hi[1] - x_lo[1];
+            const double L_z = x_hi[2] - x_lo[2];
+            chi_integrated_global *= (L_y*L_z);
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << chi_integrated_global;
+        }
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output mole fraction scalar dissipation rate of first species integrated to a file.
+ */
+void
+RTIRMISingleModeStatisticsUtilities::outputMoleFractionScalarDissipationRateIntegrated(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp,
+        true);
+    
+    const std::vector<double>& dx_finest = MPI_helper_average.getFinestRefinedDomainGridSpacing();
+    
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        std::vector<std::string> quantity_names;
+        std::vector<int> component_indices;
+        std::vector<bool> use_derivative;
+        std::vector<int> derivative_directions;
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        
+        std::vector<double> scalar_dissipation_rate = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        /*
+         * Output the scalar dissipation rate integral (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            double chi_integrated_global = double(0);
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                chi_integrated_global += scalar_dissipation_rate[i]*dx_finest[0];
+            }
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << chi_integrated_global;
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        std::vector<std::string> quantity_names;
+        std::vector<int> component_indices;
+        std::vector<bool> use_derivative;
+        std::vector<int> derivative_directions;
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        
+        std::vector<double> scalar_dissipation_rate_part_1 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> scalar_dissipation_rate_part_2 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        /*
+         * Output the scalar dissipation rate integral (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            std::vector<double> scalar_dissipation_rate_full(finest_level_dims[0], double(0));
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                scalar_dissipation_rate_full[i] = scalar_dissipation_rate_part_1[i] + scalar_dissipation_rate_part_2[i];
+            }
+            
+            double chi_integrated_global = double(0);
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                chi_integrated_global += scalar_dissipation_rate_full[i]*dx_finest[0];
+            }
+            
+            const double* x_lo = d_grid_geometry->getXLower();
+            const double* x_hi = d_grid_geometry->getXUpper();
+            const double L_y = x_hi[1] - x_lo[1];
+            chi_integrated_global *= L_y;
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << chi_integrated_global;
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        std::vector<std::string> quantity_names;
+        std::vector<int> component_indices;
+        std::vector<bool> use_derivative;
+        std::vector<int> derivative_directions;
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        
+        std::vector<double> scalar_dissipation_rate_part_1 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> scalar_dissipation_rate_part_2 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        quantity_names.push_back("MOLE_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        
+        std::vector<double> scalar_dissipation_rate_part_3 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        /*
+         * Output the scalar dissipation rate integral (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            std::vector<double> scalar_dissipation_rate_full(finest_level_dims[0], double(0));
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                scalar_dissipation_rate_full[i] =
+                    scalar_dissipation_rate_part_1[i] + scalar_dissipation_rate_part_2[i] + scalar_dissipation_rate_part_3[i];
+            }
+            
+            double chi_integrated_global = double(0);
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                chi_integrated_global += scalar_dissipation_rate_full[i]*dx_finest[0];
+            }
+            
+            const double* x_lo = d_grid_geometry->getXLower();
+            const double* x_hi = d_grid_geometry->getXUpper();
+            const double L_y = x_hi[1] - x_lo[1];
+            const double L_z = x_hi[2] - x_lo[2];
+            chi_integrated_global *= (L_y*L_z);
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << chi_integrated_global;
+        }
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output volume fraction scalar dissipation rate of first species integrated to a file.
+ */
+void
+RTIRMISingleModeStatisticsUtilities::outputVolumeFractionScalarDissipationRateIntegrated(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp,
+        true);
+    
+    const std::vector<double>& dx_finest = MPI_helper_average.getFinestRefinedDomainGridSpacing();
+    
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        std::vector<std::string> quantity_names;
+        std::vector<int> component_indices;
+        std::vector<bool> use_derivative;
+        std::vector<int> derivative_directions;
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        
+        std::vector<double> scalar_dissipation_rate = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        /*
+         * Output the scalar dissipation rate integral (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            double chi_integrated_global = double(0);
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                chi_integrated_global += scalar_dissipation_rate[i]*dx_finest[0];
+            }
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << chi_integrated_global;
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        std::vector<std::string> quantity_names;
+        std::vector<int> component_indices;
+        std::vector<bool> use_derivative;
+        std::vector<int> derivative_directions;
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        
+        std::vector<double> scalar_dissipation_rate_part_1 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> scalar_dissipation_rate_part_2 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        /*
+         * Output the scalar dissipation rate integral (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            std::vector<double> scalar_dissipation_rate_full(finest_level_dims[0], double(0));
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                scalar_dissipation_rate_full[i] = scalar_dissipation_rate_part_1[i] + scalar_dissipation_rate_part_2[i];
+            }
+            
+            double chi_integrated_global = double(0);
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                chi_integrated_global += scalar_dissipation_rate_full[i]*dx_finest[0];
+            }
+            
+            const double* x_lo = d_grid_geometry->getXLower();
+            const double* x_hi = d_grid_geometry->getXUpper();
+            const double L_y = x_hi[1] - x_lo[1];
+            chi_integrated_global *= L_y;
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << chi_integrated_global;
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        std::vector<std::string> quantity_names;
+        std::vector<int> component_indices;
+        std::vector<bool> use_derivative;
+        std::vector<int> derivative_directions;
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        
+        std::vector<double> scalar_dissipation_rate_part_1 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> scalar_dissipation_rate_part_2 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("MASS_DIFFUSIVITIES");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VOLUME_FRACTIONS");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        quantity_names.push_back("VOLUME_FRACTIONS");
         component_indices.push_back(0);
         use_derivative.push_back(true);
         derivative_directions.push_back(2);
@@ -2288,9 +3507,25 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             {
                 f_out << "\t" << "ENSTROPHY_INT        ";
             }
+            else if (statistical_quantity_key == "VORTICITY_Z_SQ_INT")
+            {
+                f_out << "\t" << "VORTICITY_Z_SQ_INT   ";
+            }
+            else if (statistical_quantity_key == "BARO_TQ_Z_SQ_INT")
+            {
+                f_out << "\t" << "BARO_TQ_Z_SQ_INT     ";
+            }
             else if (statistical_quantity_key == "SCAL_DISS_RAT_INT")
             {
                 f_out << "\t" << "SCAL_DISS_RAT_INT    ";
+            }
+            else if (statistical_quantity_key == "SCAL_DIS_R_INT_MOL_F")
+            {
+                f_out << "\t" << "SCAL_DIS_R_INT_MOL_F ";
+            }
+            else if (statistical_quantity_key == "SCAL_DIS_R_INT_VOL_F")
+            {
+                f_out << "\t" << "SCAL_DIS_R_INT_VOL_F ";
             }
             else if (statistical_quantity_key == "NUM_INTEF_THICK")
             {
@@ -2434,9 +3669,37 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 patch_hierarchy,
                 data_context);
         }
+        else if (statistical_quantity_key == "VORTICITY_Z_SQ_INT")
+        {
+            rti_rmi_statistics_utilities->outputSquaredVorticityZIntegrated(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "BARO_TQ_Z_SQ_INT")
+        {
+            rti_rmi_statistics_utilities->outputSquaredBaroclinicTorqueZIntegrated(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
         else if (statistical_quantity_key == "SCAL_DISS_RAT_INT")
         {
-            rti_rmi_statistics_utilities->outputScalarDissipationRateIntegrated(
+            rti_rmi_statistics_utilities->outputMassFractionScalarDissipationRateIntegrated(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "SCAL_DIS_R_INT_MOL_F")
+        {
+            rti_rmi_statistics_utilities->outputMoleFractionScalarDissipationRateIntegrated(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "SCAL_DIS_R_INT_VOL_F")
+        {
+            rti_rmi_statistics_utilities->outputVolumeFractionScalarDissipationRateIntegrated(
                 stat_dump_filename,
                 patch_hierarchy,
                 data_context);
