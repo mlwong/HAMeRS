@@ -5433,7 +5433,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR("ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY:"
-            " Cannot compute linear term in y-direction for 1D problem!");
+            " Cannot compute linear term in y-direction for one-dimensional problem!");
     }
 #endif
     
@@ -6179,7 +6179,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR("ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY:"
-            " Cannot compute quadratic term in y-direction for 1D problem!");
+            " Cannot compute quadratic term in y-direction for one-dimensional problem!");
     }
 #endif
     
@@ -7282,7 +7282,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR("ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY:"
-            " Cannot compute cubic term in y-direction for 1D problem!");
+            " Cannot compute cubic term in y-direction for one-dimensional problem!");
     }
 #endif
     
@@ -8733,12 +8733,12 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR("ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ:"
-            " Cannot compute linear term in z-direction for 1D problem!");
+            " Cannot compute linear term in z-direction for one-dimensional problem!");
     }
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR("ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ:"
-            " Cannot compute linear term in z-direction for 2D problem!");
+            " Cannot compute linear term in z-direction for two-dimensional problem!");
     }
 #endif
     
@@ -9189,12 +9189,12 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR("ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ:"
-            " Cannot compute quadratic term in z-direction for 1D problem!");
+            " Cannot compute quadratic term in z-direction for one-dimensional problem!");
     }
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR("ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ:"
-            " Cannot compute quadratic term in z-direction for 2D problem!");
+            " Cannot compute quadratic term in z-direction for two-dimensional problem!");
     }
 #endif
     
@@ -9204,7 +9204,6 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_f->getBox().isSpatiallyEqual(interior_box));
         TBOX_ASSERT(data_g->getBox().isSpatiallyEqual(interior_box));
-        TBOX_ASSERT(data_h->getBox().isSpatiallyEqual(interior_box));
 #endif
     
     // Get the dimensions of the ghost cell boxes.
@@ -9872,12 +9871,12 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR("ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ:"
-            " Cannot compute cubic term in z-direction for 1D problem!");
+            " Cannot compute cubic term in z-direction for one-dimensional problem!");
     }
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR("ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ:"
-            " Cannot compute cubic term in z-direction for 2D problem!");
+            " Cannot compute cubic term in z-direction for two-dimensional problem!");
     }
 #endif
     

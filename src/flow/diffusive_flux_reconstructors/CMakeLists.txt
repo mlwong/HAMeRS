@@ -2,7 +2,14 @@
 # a list of the source files for the diffusive_flux_reconstructors library
 set(diffusive_flux_reconstructors_source_files
     DiffusiveFluxReconstructorManager.cpp
-    ./sixth_order/DiffusiveFluxReconstructorSixthOrder.cpp
+    ./midpoint/DiffusiveFluxReconstructorMidpoint.cpp
+    ./midpoint/DiffusiveFluxReconstructorMidpointSecondOrder.cpp
+    ./midpoint/DiffusiveFluxReconstructorMidpointFourthOrder.cpp
+    ./midpoint/DiffusiveFluxReconstructorMidpointSixthOrder.cpp
+    ./node/DiffusiveFluxReconstructorNode.cpp
+    ./node/DiffusiveFluxReconstructorNodeSecondOrder.cpp
+    ./node/DiffusiveFluxReconstructorNodeFourthOrder.cpp
+    ./node/DiffusiveFluxReconstructorNodeSixthOrder.cpp
 )
 
 # Create a library called diffusive_flux_reconstructors which includes the 

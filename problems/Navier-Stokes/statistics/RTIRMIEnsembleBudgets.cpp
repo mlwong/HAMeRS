@@ -4,7 +4,7 @@
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperAverage.hpp"
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperCorrelation.hpp"
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperMaxMin.hpp"
-#include "util/MPI_helpers/MPIHelperNumberOfCells.hpp"
+#include "util/MPI_helpers/MPIHelperGrid.hpp"
 
 #include <fstream>
 
@@ -20,7 +20,25 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         
         void setVariablesNotComputed()
         {
+            grid_level_num_avg_computed = false;
+            
+            rho_avg_coarsest_computed   = false;
+            p_avg_coarsest_computed     = false;
+            u_avg_coarsest_computed     = false;
+            rho_u_avg_coarsest_computed = false;
+            p_u_avg_coarsest_computed   = false;
+            
+            ddx_u_avg_coarsest_computed = false;
+            ddy_v_avg_coarsest_computed = false;
+            ddz_w_avg_coarsest_computed = false;
+            
+            p_ddx_u_avg_coarsest_computed = false;
+            p_ddy_v_avg_coarsest_computed = false;
+            p_ddz_w_avg_coarsest_computed = false;
+            
             Y_0_avg_computed     = false;
+            X_0_avg_computed     = false;
+            Z_0_avg_computed     = false;
             rho_avg_computed     = false;
             rho_inv_avg_computed = false;
             p_avg_computed       = false;
@@ -37,6 +55,8 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
             
             rho_u_v_avg_computed = false;
             rho_u_w_avg_computed = false;
+            
+            p_u_avg_computed = false;
             
             ddx_rho_avg_computed       = false;
             ddx_p_avg_computed         = false;
@@ -109,7 +129,25 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         
         void clearAllData()
         {
+            grid_level_num_avg_realizations.clear();
+            
+            rho_avg_coarsest_realizations.clear();
+            p_avg_coarsest_realizations.clear();
+            u_avg_coarsest_realizations.clear();
+            rho_u_avg_coarsest_realizations.clear();
+            p_u_avg_coarsest_realizations.clear();
+            
+            ddx_u_avg_coarsest_realizations.clear();
+            ddy_v_avg_coarsest_realizations.clear();
+            ddz_w_avg_coarsest_realizations.clear();
+            
+            p_ddx_u_avg_coarsest_realizations.clear();
+            p_ddy_v_avg_coarsest_realizations.clear();
+            p_ddz_w_avg_coarsest_realizations.clear();
+            
             Y_0_avg_realizations.clear();
+            X_0_avg_realizations.clear();
+            Z_0_avg_realizations.clear();
             rho_avg_realizations.clear();
             rho_inv_avg_realizations.clear();
             p_avg_realizations.clear();
@@ -126,7 +164,9 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
             
             rho_u_v_avg_realizations.clear();
             rho_u_w_avg_realizations.clear();
-        
+            
+            p_u_avg_realizations.clear();
+            
             ddx_rho_avg_realizations.clear();
             ddx_p_avg_realizations.clear();
             ddx_u_avg_realizations.clear();
@@ -200,7 +240,26 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         
         // Scratch arrays.
         // Number of realizalizations; number of cells.
+        
+        std::vector<std::vector<double> > grid_level_num_avg_realizations;
+        
+        std::vector<std::vector<double> > rho_avg_coarsest_realizations;
+        std::vector<std::vector<double> > p_avg_coarsest_realizations;
+        std::vector<std::vector<double> > u_avg_coarsest_realizations;
+        std::vector<std::vector<double> > rho_u_avg_coarsest_realizations;
+        std::vector<std::vector<double> > p_u_avg_coarsest_realizations;
+        
+        std::vector<std::vector<double> > ddx_u_avg_coarsest_realizations;
+        std::vector<std::vector<double> > ddy_v_avg_coarsest_realizations;
+        std::vector<std::vector<double> > ddz_w_avg_coarsest_realizations;
+        
+        std::vector<std::vector<double> > p_ddx_u_avg_coarsest_realizations;
+        std::vector<std::vector<double> > p_ddy_v_avg_coarsest_realizations;
+        std::vector<std::vector<double> > p_ddz_w_avg_coarsest_realizations;
+        
         std::vector<std::vector<double> > Y_0_avg_realizations;
+        std::vector<std::vector<double> > X_0_avg_realizations;
+        std::vector<std::vector<double> > Z_0_avg_realizations;
         std::vector<std::vector<double> > rho_avg_realizations;
         std::vector<std::vector<double> > rho_inv_avg_realizations;
         std::vector<std::vector<double> > p_avg_realizations;
@@ -217,6 +276,8 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         
         std::vector<std::vector<double> > rho_u_v_avg_realizations;
         std::vector<std::vector<double> > rho_u_w_avg_realizations;
+        
+        std::vector<std::vector<double> > p_u_avg_realizations;
         
         std::vector<std::vector<double> > ddx_rho_avg_realizations;
         std::vector<std::vector<double> > ddx_p_avg_realizations;
@@ -288,7 +349,25 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         
         // Whether the scratch arrays are filled.
         
+        bool grid_level_num_avg_computed;
+        
+        bool rho_avg_coarsest_computed;
+        bool p_avg_coarsest_computed;
+        bool u_avg_coarsest_computed;
+        bool rho_u_avg_coarsest_computed;
+        bool p_u_avg_coarsest_computed;
+        
+        bool ddx_u_avg_coarsest_computed;
+        bool ddy_v_avg_coarsest_computed;
+        bool ddz_w_avg_coarsest_computed;
+        
+        bool p_ddx_u_avg_coarsest_computed;
+        bool p_ddy_v_avg_coarsest_computed;
+        bool p_ddz_w_avg_coarsest_computed;
+        
         bool Y_0_avg_computed;
+        bool X_0_avg_computed;
+        bool Z_0_avg_computed;
         bool rho_avg_computed;
         bool rho_inv_avg_computed;
         bool p_avg_computed;
@@ -305,6 +384,8 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         
         bool rho_u_v_avg_computed;
         bool rho_u_w_avg_computed;
+        
+        bool p_u_avg_computed;
         
         bool ddx_rho_avg_computed;
         bool ddx_p_avg_computed;
@@ -409,6 +490,13 @@ class RTIRMIBudgetsUtilities
         {}
         
         /*
+         * Compute averaged grid level number with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeAveragedGridLevelNumberWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy);
+        
+        /*
          * Compute averaged quantities with assumed homogeneity in y-direction (2D) or yz-plane (3D).
          */
         void
@@ -417,14 +505,39 @@ class RTIRMIBudgetsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
+         * Output spatial profile of ensemble averaged grid level number with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedGridLevelNumberWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const double output_time) const;
+        
+        /*
          * Output spatial profile of ensemble averaged mass fraction with assumed homogeneity in y-direction (2D) or
          * yz-plane (3D) to a file.
          */
         void
         outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble averaged mole fraction with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble averaged volume fraction with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
             const double output_time) const;
         
         /*
@@ -434,8 +547,6 @@ class RTIRMIBudgetsUtilities
         void
         outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -445,8 +556,6 @@ class RTIRMIBudgetsUtilities
         void
         outputSpatialProfileEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -456,8 +565,6 @@ class RTIRMIBudgetsUtilities
         void
         outputSpatialProfileEnsembleFavreAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -467,8 +574,6 @@ class RTIRMIBudgetsUtilities
         void
         outputSpatialProfileEnsembleTurbulentMassFluxVelocityXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -478,8 +583,6 @@ class RTIRMIBudgetsUtilities
         void
         outputSpatialProfileEnsembleAveragedPressureGradientXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -489,7 +592,6 @@ class RTIRMIBudgetsUtilities
         outputBudgetFavreMeanTKEWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -499,7 +601,6 @@ class RTIRMIBudgetsUtilities
         outputBudgetTurbMassFluxXWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -509,7 +610,6 @@ class RTIRMIBudgetsUtilities
         outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -519,7 +619,6 @@ class RTIRMIBudgetsUtilities
         outputBudgetReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -529,7 +628,6 @@ class RTIRMIBudgetsUtilities
         outputBudgetReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -623,6 +721,13 @@ class RTIRMIBudgetsUtilities
             const double dx) const;
         
         /*
+         * Interpolate the one-dimensional derivative with the refinement ratio.
+         */
+        std::vector<double> interpolateVectorToFinestLevel1D(
+            const std::vector<double> quantity_vector,
+            int refinement_ratio) const;
+        
+        /*
          * Store ensemble statistics.
          */
         HAMERS_SHARED_PTR<EnsembleBudgetsRTIRMI> d_ensemble_statistics;
@@ -692,6 +797,30 @@ class RTIRMIBudgetsUtilities
 
 
 /*
+ * Compute averaged grid level number with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIBudgetsUtilities::computeAveragedGridLevelNumberWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy)
+{
+    MPIHelperGrid MPI_helper_grid = MPIHelperGrid(
+        "MPI_helper_grid",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const double num_cells_global = MPI_helper_grid.getNumberOfCells();
+    
+    std::vector<double> grid_level_num_avg = MPI_helper_grid.getAveragedGridLevelNumberWithInhomogeneousXDirection();
+    
+    std::vector<std::vector<double> >& grid_level_num_avg_realizations = d_ensemble_statistics->grid_level_num_avg_realizations;
+    grid_level_num_avg_realizations.push_back(grid_level_num_avg);
+    
+    d_ensemble_statistics->grid_level_num_avg_computed = true;
+}
+
+
+/*
  * Compute averaged quantities with assumed homogeneity in y-direction (2D) or yz-plane (3D).
  */
 void
@@ -716,6 +845,255 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
     std::vector<bool> use_reciprocal;
     std::vector<bool> use_derivative;
     
+    // Compute rho_avg_coarsest.
+    
+    std::vector<double> rho_avg_coarsest_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
+        "DENSITY",
+        0,
+        data_context);
+    
+    std::vector<std::vector<double> >& rho_avg_coarsest_realizations = d_ensemble_statistics->rho_avg_coarsest_realizations;
+    rho_avg_coarsest_realizations.push_back(rho_avg_coarsest_global);
+    
+    d_ensemble_statistics->rho_avg_coarsest_computed = true;
+    
+    // Compute p_avg_coarsest.
+    
+    std::vector<double> p_avg_coarsest_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
+        "PRESSURE",
+        0,
+        data_context);
+    
+    std::vector<std::vector<double> >& p_avg_coarsest_realizations = d_ensemble_statistics->p_avg_coarsest_realizations;
+    p_avg_coarsest_realizations.push_back(p_avg_coarsest_global);
+    
+    d_ensemble_statistics->p_avg_coarsest_computed = true;
+    
+    // Compute u_avg_coarsest.
+    
+    std::vector<double> u_avg_coarsest_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
+        "VELOCITY",
+        0,
+        data_context);
+    
+    std::vector<std::vector<double> >& u_avg_coarsest_realizations = d_ensemble_statistics->u_avg_coarsest_realizations;
+    u_avg_coarsest_realizations.push_back(u_avg_coarsest_global);
+    
+    d_ensemble_statistics->u_avg_coarsest_computed = true;
+    
+    // Compute rho_u_avg_coarsest.
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    std::vector<double> rho_u_avg_coarsest_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
+        quantity_names,
+        component_indices,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<std::vector<double> >& rho_u_avg_coarsest_realizations = d_ensemble_statistics->rho_u_avg_coarsest_realizations;
+    rho_u_avg_coarsest_realizations.push_back(rho_u_avg_coarsest_global);
+    
+    d_ensemble_statistics->rho_u_avg_coarsest_computed = true;
+    
+    // Compute p_u_avg_coarsest.
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    std::vector<double> p_u_avg_coarsest_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
+        quantity_names,
+        component_indices,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<std::vector<double> >& p_u_avg_coarsest_realizations = d_ensemble_statistics->p_u_avg_coarsest_realizations;
+    p_u_avg_coarsest_realizations.push_back(p_u_avg_coarsest_global);
+    
+    d_ensemble_statistics->p_u_avg_coarsest_computed = true;
+    
+    // Computed ddx_u_avg_coarsest.
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    std::vector<double> ddx_u_avg_coarsest = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
+        quantity_names,
+        component_indices,
+        use_reciprocal,
+        0,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_reciprocal.clear();
+    
+    std::vector<std::vector<double> >& ddx_u_avg_coarsest_realizations = d_ensemble_statistics->ddx_u_avg_coarsest_realizations;
+    ddx_u_avg_coarsest_realizations.push_back(ddx_u_avg_coarsest);
+    
+    d_ensemble_statistics->ddx_u_avg_coarsest_computed = true;
+    
+    // Compute ddy_v_avg_coarsest.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_reciprocal.push_back(false);
+    
+        std::vector<double> ddy_v_avg_coarsest = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
+            quantity_names,
+            component_indices,
+            use_reciprocal,
+            1,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& ddy_v_avg_coarsest_realizations = d_ensemble_statistics->ddy_v_avg_coarsest_realizations;
+        ddy_v_avg_coarsest_realizations.push_back(ddy_v_avg_coarsest);
+        
+        d_ensemble_statistics->ddy_v_avg_coarsest_computed = true;
+    }
+    
+    // Compute ddz_w_avg_coarsest.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_reciprocal.push_back(false);
+    
+        std::vector<double> ddz_w_avg_coarsest = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
+            quantity_names,
+            component_indices,
+            use_reciprocal,
+            2,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& ddz_w_avg_coarsest_realizations = d_ensemble_statistics->ddz_w_avg_coarsest_realizations;
+        ddz_w_avg_coarsest_realizations.push_back(ddz_w_avg_coarsest);
+        
+        d_ensemble_statistics->ddz_w_avg_coarsest_computed = true;
+    }
+    
+    // Compute p_ddx_u_avg_coarsest.
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    
+    std::vector<double> p_ddx_u_avg_coarsest = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    
+    std::vector<std::vector<double> >& p_ddx_u_avg_coarsest_realizations = d_ensemble_statistics->p_ddx_u_avg_coarsest_realizations;
+    p_ddx_u_avg_coarsest_realizations.push_back(p_ddx_u_avg_coarsest);
+    
+    d_ensemble_statistics->p_ddx_u_avg_coarsest_computed = true;
+    
+    // Compute p_ddy_v_avg_coarsest.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("PRESSURE");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> p_ddy_v_avg_coarsest = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        std::vector<std::vector<double> >& p_ddy_v_avg_coarsest_realizations = d_ensemble_statistics->p_ddy_v_avg_coarsest_realizations;
+        p_ddy_v_avg_coarsest_realizations.push_back(p_ddy_v_avg_coarsest);
+        
+        d_ensemble_statistics->p_ddy_v_avg_coarsest_computed = true;
+    }
+    
+    // Compute p_ddz_w_avg_coarsest.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("PRESSURE");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        
+        std::vector<double> p_ddz_w_avg_coarsest = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        std::vector<std::vector<double> >& p_ddz_w_avg_coarsest_realizations = d_ensemble_statistics->p_ddz_w_avg_coarsest_realizations;
+        p_ddz_w_avg_coarsest_realizations.push_back(p_ddz_w_avg_coarsest);
+        
+        d_ensemble_statistics->p_ddz_w_avg_coarsest_computed = true;
+    }
+    
     // Compute Y_0_avg.
     
     std::vector<double> Y_0_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
@@ -727,6 +1105,30 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
     Y_0_avg_realizations.push_back(Y_0_avg);
     
     d_ensemble_statistics->Y_0_avg_computed = true;
+    
+    // Compute X_0_avg.
+    
+    std::vector<double> X_0_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "MOLE_FRACTIONS",
+        0,
+        data_context);
+    
+    std::vector<std::vector<double> >& X_0_avg_realizations = d_ensemble_statistics->X_0_avg_realizations;
+    X_0_avg_realizations.push_back(X_0_avg);
+    
+    d_ensemble_statistics->X_0_avg_computed = true;
+    
+    // Compute Z_0_avg.
+    
+    std::vector<double> Z_0_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "VOLUME_FRACTIONS",
+        0,
+        data_context);
+    
+    std::vector<std::vector<double> >& Z_0_avg_realizations = d_ensemble_statistics->Z_0_avg_realizations;
+    Z_0_avg_realizations.push_back(Z_0_avg);
+    
+    d_ensemble_statistics->Z_0_avg_computed = true;
     
     // Compute rho_avg.
     
@@ -1000,6 +1402,27 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
         
         d_ensemble_statistics->rho_u_w_avg_computed = true;
     }
+    
+    // Compute p_u_avg.
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    
+    std::vector<double> p_u_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<std::vector<double> >& p_u_avg_realizations = d_ensemble_statistics->p_u_avg_realizations;
+    p_u_avg_realizations.push_back(p_u_avg_global);
+    
+    d_ensemble_statistics->p_u_avg_computed = true;
     
     // Compute ddx_rho_avg.
     
@@ -2489,14 +2912,73 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
 
 
 /*
+ * Output spatial profile of ensemble averaged grid level number with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
+ */
+void
+RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedGridLevelNumberWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& grid_level_num_avg_realizations =
+            d_ensemble_statistics->grid_level_num_avg_realizations;
+        
+        const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
+        
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(grid_level_num_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(grid_level_num_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> grid_level_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                grid_level_avg_global[i] += weight*grid_level_num_avg_realizations[ri][i];
+            }
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&grid_level_avg_global[0], sizeof(double)*grid_level_avg_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output spatial profile of ensemble averaged mass fraction with assumed homogeneity in y-direction (2D) or
  * yz-plane (3D) to a file.
  */
 void
 RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2552,14 +3034,134 @@ RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedMassFractionWithHomo
 
 
 /*
+ * Output spatial profile of ensemble averaged mole fraction with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
+ */
+void
+RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& X_0_avg_realizations =
+            d_ensemble_statistics->X_0_avg_realizations;
+        
+        const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
+        
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(X_0_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(X_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> X_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                X_0_avg_global[i] += weight*X_0_avg_realizations[ri][i];
+            }
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&X_0_avg_global[0], sizeof(double)*X_0_avg_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output spatial profile of ensemble averaged volume fraction with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
+ */
+void
+RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Z_0_avg_realizations =
+            d_ensemble_statistics->Z_0_avg_realizations;
+        
+        const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
+        
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(Z_0_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(Z_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Z_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Z_0_avg_global[i] += weight*Z_0_avg_realizations[ri][i];
+            }
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&Z_0_avg_global[0], sizeof(double)*Z_0_avg_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output spatial profile of ensemble averaged density with assumed homogeneity in y-direction (2D) or
  * yz-plane (3D) to a file.
  */
 void
 RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2621,8 +3223,6 @@ RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedDensityWithHomogenei
 void
 RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2684,8 +3284,6 @@ RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedVelocityXWithHomogen
 void
 RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleFavreAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2759,8 +3357,6 @@ RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleFavreAveragedVelocityXWithHo
 void
 RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleTurbulentMassFluxVelocityXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2846,8 +3442,6 @@ RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleTurbulentMassFluxVelocityXWi
 void
 RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedPressureGradientXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2909,7 +3503,6 @@ void
 RTIRMIBudgetsUtilities::outputBudgetFavreMeanTKEWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3322,7 +3915,6 @@ void
 RTIRMIBudgetsUtilities::outputBudgetTurbMassFluxXWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3800,7 +4392,6 @@ void
 RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3817,8 +4408,24 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
         d_grid_geometry,
         patch_hierarchy);
     
+    const std::vector<double>& dx_vec_coarsest = MPI_helper.getCoarsestDomainGridSpacing();
+    const double dx_coarsest = dx_vec_coarsest[0];
+    
     const std::vector<double>& dx_vec = MPI_helper.getFinestRefinedDomainGridSpacing();
     const double dx = dx_vec[0];
+    
+    /*
+     * Get the refinement ratio from the finest level to the coarsest level.
+     */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    hier::IntVector ratio_finest_level_to_coarsest_level =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratio_finest_level_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
     
     /*
      * Output the spatial profiles (only done by process 0).
@@ -3826,11 +4433,22 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
     
     if (mpi.getRank() == 0)
     {
+        const std::vector<std::vector<double> >& rho_avg_coarsest_realizations   = d_ensemble_statistics->rho_avg_coarsest_realizations;
+        const std::vector<std::vector<double> >& p_avg_coarsest_realizations     = d_ensemble_statistics->p_avg_coarsest_realizations;
+        const std::vector<std::vector<double> >& u_avg_coarsest_realizations     = d_ensemble_statistics->u_avg_coarsest_realizations;
+        const std::vector<std::vector<double> >& rho_u_avg_coarsest_realizations = d_ensemble_statistics->rho_u_avg_coarsest_realizations;
+        const std::vector<std::vector<double> >& p_u_avg_coarsest_realizations   = d_ensemble_statistics->p_u_avg_coarsest_realizations;
+        
+        const std::vector<std::vector<double> >& ddx_u_avg_coarsest_realizations   = d_ensemble_statistics->ddx_u_avg_coarsest_realizations;
+        const std::vector<std::vector<double> >& p_ddx_u_avg_coarsest_realizations = d_ensemble_statistics->p_ddx_u_avg_coarsest_realizations;
+        
         const std::vector<std::vector<double> >& rho_avg_realizations     = d_ensemble_statistics->rho_avg_realizations;
         const std::vector<std::vector<double> >& p_avg_realizations       = d_ensemble_statistics->p_avg_realizations;
         const std::vector<std::vector<double> >& u_avg_realizations       = d_ensemble_statistics->u_avg_realizations;
         const std::vector<std::vector<double> >& rho_u_avg_realizations   = d_ensemble_statistics->rho_u_avg_realizations;
         const std::vector<std::vector<double> >& rho_u_u_avg_realizations = d_ensemble_statistics->rho_u_u_avg_realizations;
+        
+        const std::vector<std::vector<double> >& p_u_avg_realizations = d_ensemble_statistics->p_u_avg_realizations;
         
         const std::vector<std::vector<double> >& ddx_rho_avg_realizations       = d_ensemble_statistics->ddx_rho_avg_realizations;
         const std::vector<std::vector<double> >& ddx_p_avg_realizations         = d_ensemble_statistics->ddx_p_avg_realizations;
@@ -3865,14 +4483,27 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
         TBOX_ASSERT(num_realizations > 0);
         TBOX_ASSERT(num_realizations == static_cast<int>(rho_avg_realizations.size()));
         
+        const int num_cells_coarsest = static_cast<int>(p_avg_coarsest_realizations[0].size());
+        
         const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> rho_avg_coarsest_global(num_cells_coarsest, double(0));
+        std::vector<double> p_avg_coarsest_global(num_cells_coarsest, double(0));
+        std::vector<double> u_avg_coarsest_global(num_cells_coarsest, double(0));
+        std::vector<double> rho_u_avg_coarsest_global(num_cells_coarsest, double(0));
+        std::vector<double> p_u_avg_coarsest_global(num_cells_coarsest, double(0));
+        
+        std::vector<double> ddx_u_avg_coarsest_global(num_cells_coarsest, double(0));
+        std::vector<double> p_ddx_u_avg_coarsest_global(num_cells_coarsest, double(0));
         
         std::vector<double> rho_avg_global(num_cells, double(0));
         std::vector<double> p_avg_global(num_cells, double(0));
         std::vector<double> u_avg_global(num_cells, double(0));
         std::vector<double> rho_u_avg_global(num_cells, double(0));
         std::vector<double> rho_u_u_avg_global(num_cells, double(0));
+        
+        std::vector<double> p_u_avg_global(num_cells, double(0));
         
         std::vector<double> ddx_rho_avg_global(num_cells, double(0));
         std::vector<double> ddx_p_avg_global(num_cells, double(0));
@@ -3904,6 +4535,18 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
         
         for (int ri = 0; ri < num_realizations; ri++)
         {
+            for (int i = 0; i < num_cells_coarsest; i++)
+            {
+                rho_avg_coarsest_global[i]   += weight*rho_avg_coarsest_realizations[ri][i];
+                p_avg_coarsest_global[i]     += weight*p_avg_coarsest_realizations[ri][i];
+                u_avg_coarsest_global[i]     += weight*u_avg_coarsest_realizations[ri][i];
+                rho_u_avg_coarsest_global[i] += weight*rho_u_avg_coarsest_realizations[ri][i];
+                p_u_avg_coarsest_global[i]   += weight*p_u_avg_coarsest_realizations[ri][i];
+                
+                ddx_u_avg_coarsest_global[i]   += weight*ddx_u_avg_coarsest_realizations[ri][i];
+                p_ddx_u_avg_coarsest_global[i] += weight*p_ddx_u_avg_coarsest_realizations[ri][i];
+            }
+            
             for (int i = 0; i < num_cells; i++)
             {
                 rho_avg_global[i]     += weight*rho_avg_realizations[ri][i];
@@ -3911,6 +4554,8 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
                 u_avg_global[i]       += weight*u_avg_realizations[ri][i];
                 rho_u_avg_global[i]   += weight*rho_u_avg_realizations[ri][i];
                 rho_u_u_avg_global[i] += weight*rho_u_u_avg_realizations[ri][i];
+                
+                p_u_avg_global[i] += weight*p_u_avg_realizations[ri][i];
                 
                 ddx_rho_avg_global[i]       += weight*ddx_rho_avg_realizations[ri][i];
                 ddx_p_avg_global[i]         += weight*ddx_p_avg_realizations[ri][i];
@@ -3993,6 +4638,18 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
             a1[i] /= rho_avg_global[i];
         }
         
+        std::vector<double> rho_p_u_p_coarsest(num_cells_coarsest, double(0));
+        for (int i = 0; i < num_cells_coarsest; i++)
+        {
+            rho_p_u_p_coarsest[i] = rho_u_avg_coarsest_global[i] - rho_avg_coarsest_global[i]*u_avg_coarsest_global[i];
+        }
+        
+        std::vector<double> a1_coarsest(rho_p_u_p_coarsest);
+        for (int i = 0; i < num_cells_coarsest; i++)
+        {
+            a1_coarsest[i] /= rho_avg_coarsest_global[i];
+        }
+        
         /*
          * Compute R11.
          */
@@ -4046,6 +4703,20 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
             two_a1_ddx_p[i] *= (double(2)*a1[i]);
         }
         
+        std::vector<double> ddx_p_coarsest = computeDerivativeOfVector1D(
+            p_avg_coarsest_global,
+            dx_coarsest);
+        
+        std::vector<double> two_a1_ddx_p_coarsest(num_cells_coarsest, double(0));
+        for (int i = 0; i < num_cells_coarsest; i++)
+        {
+            two_a1_ddx_p_coarsest[i] = double(2)*a1_coarsest[i]*ddx_p_coarsest[i];
+        }
+        
+        std::vector<double> two_a1_ddx_p_coarsest_refined = interpolateVectorToFinestLevel1D(
+            two_a1_ddx_p_coarsest,
+            ratio_finest_level_to_coarsest_level[0]);
+        
         /*
          * Compute term III(2).
          */
@@ -4096,6 +4767,25 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
                 p_avg_global[i]*ddx_u_avg_global[i]);
         }
         
+        std::vector<double> u_p_p_p_coarsest(num_cells_coarsest, double(0));
+        for (int i = 0; i < num_cells_coarsest; i++)
+        {
+            u_p_p_p_coarsest[i] = p_u_avg_coarsest_global[i] - u_avg_coarsest_global[i]*p_avg_coarsest_global[i];
+        }
+        
+        std::vector<double> m_2ddx_u_p_p_p_coarsest = computeDerivativeOfVector1D(
+            u_p_p_p_coarsest,
+            dx_coarsest);
+        
+        for (int i = 0; i < num_cells_coarsest; i++)
+        {
+            m_2ddx_u_p_p_p_coarsest[i] *= (-double(2));
+        }
+        
+        std::vector<double> m_2ddx_u_p_p_p_coarsest_refined = interpolateVectorToFinestLevel1D(
+            m_2ddx_u_p_p_p_coarsest,
+            ratio_finest_level_to_coarsest_level[0]);
+        
         /*
          * Compute term IV(3).
          */
@@ -4124,6 +4814,16 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
         {
             two_p_p_ddx_u_p[i] = double(2)*(p_ddx_u_avg_global[i] - p_avg_global[i]*ddx_u_avg_global[i]);
         }
+        
+        std::vector<double> two_p_p_ddx_u_p_coarsest(num_cells_coarsest, double(0));
+        for (int i = 0; i < num_cells_coarsest; i++)
+        {
+            two_p_p_ddx_u_p_coarsest[i] = double(2)*(p_ddx_u_avg_coarsest_global[i] - p_avg_coarsest_global[i]*ddx_u_avg_coarsest_global[i]);
+        }
+        
+        std::vector<double> two_p_p_ddx_u_p_coarsest_refined = interpolateVectorToFinestLevel1D(
+            two_p_p_ddx_u_p_coarsest,
+            ratio_finest_level_to_coarsest_level[0]);
         
         /*
          * Compute term VI.
@@ -4217,6 +4917,15 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
         // Term II in moving frame of mixing layer.
         f_out.write((char*)&ddx_rho_a1_R11[0], sizeof(double)*ddx_rho_a1_R11.size());
         
+        // Term III(1) on the coarsest level.
+        f_out.write((char*)&two_a1_ddx_p_coarsest_refined[0], sizeof(double)*two_a1_ddx_p_coarsest_refined.size());
+        
+        // Term IV(2) on the coarsest level.
+        f_out.write((char*)&m_2ddx_u_p_p_p_coarsest_refined[0], sizeof(double)*m_2ddx_u_p_p_p_coarsest_refined.size());
+        
+        // Term V on the coarsest level.
+        f_out.write((char*)&two_p_p_ddx_u_p_coarsest_refined[0], sizeof(double)*two_p_p_ddx_u_p_coarsest_refined.size());
+        
         f_out.close();
     }
 }
@@ -4229,7 +4938,6 @@ void
 RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -4240,7 +4948,7 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInYDirectionWithInhomoge
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "The budget of Reynolds normal stress in y-direction cannot be outputted for 1D problem!"
+            << "The budget of Reynolds normal stress in y-direction cannot be outputted for one-dimensional problem!"
             << std::endl);
     }
     
@@ -4258,11 +4966,28 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInYDirectionWithInhomoge
     const double dx = dx_vec[0];
     
     /*
+     * Get the refinement ratio from the finest level to the coarsest level.
+     */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    hier::IntVector ratio_finest_level_to_coarsest_level =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratio_finest_level_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
+    
+    /*
      * Output the spatial profiles (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        const std::vector<std::vector<double> >& p_avg_coarsest_realizations       = d_ensemble_statistics->p_avg_coarsest_realizations;
+        const std::vector<std::vector<double> >& ddy_v_avg_coarsest_realizations   = d_ensemble_statistics->ddy_v_avg_coarsest_realizations;
+        const std::vector<std::vector<double> >& p_ddy_v_avg_coarsest_realizations = d_ensemble_statistics->p_ddy_v_avg_coarsest_realizations;
+        
         const std::vector<std::vector<double> >& rho_avg_realizations     = d_ensemble_statistics->rho_avg_realizations;
         const std::vector<std::vector<double> >& p_avg_realizations       = d_ensemble_statistics->p_avg_realizations;
         const std::vector<std::vector<double> >& u_avg_realizations       = d_ensemble_statistics->u_avg_realizations;
@@ -4303,8 +5028,14 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInYDirectionWithInhomoge
         TBOX_ASSERT(num_realizations > 0);
         TBOX_ASSERT(num_realizations == static_cast<int>(rho_avg_realizations.size()));
         
+        const int num_cells_coarsest = static_cast<int>(p_avg_coarsest_realizations[0].size());
+        
         const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> p_avg_coarsest_global(num_cells_coarsest, double(0));
+        std::vector<double> ddy_v_avg_coarsest_global(num_cells_coarsest, double(0));
+        std::vector<double> p_ddy_v_avg_coarsest_global(num_cells_coarsest, double(0));
         
         std::vector<double> rho_avg_global(num_cells, double(0));
         std::vector<double> p_avg_global(num_cells, double(0));
@@ -4345,6 +5076,13 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInYDirectionWithInhomoge
         {
             for (int ri = 0; ri < num_realizations; ri++)
             {
+                for (int i = 0; i < num_cells_coarsest; i++)
+                {
+                    p_avg_coarsest_global[i] += weight*p_avg_coarsest_realizations[ri][i];
+                    
+                    ddy_v_avg_coarsest_global[i]   += weight*ddy_v_avg_coarsest_realizations[ri][i];
+                    p_ddy_v_avg_coarsest_global[i] += weight*p_ddy_v_avg_coarsest_realizations[ri][i];
+                }
                 for (int i = 0; i < num_cells; i++)
                 {
                     rho_avg_global[i]     += weight*rho_avg_realizations[ri][i];
@@ -4523,6 +5261,16 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInYDirectionWithInhomoge
             two_p_p_ddy_v_p[i] = double(2)*(p_ddy_v_avg_global[i] - p_avg_global[i]*ddy_v_avg_global[i]);
         }
         
+        std::vector<double> two_p_p_ddy_v_p_coarsest(num_cells_coarsest, double(0));
+        for (int i = 0; i < num_cells_coarsest; i++)
+        {
+            two_p_p_ddy_v_p_coarsest[i] = double(2)*(p_ddy_v_avg_coarsest_global[i] - p_avg_coarsest_global[i]*ddy_v_avg_coarsest_global[i]);
+        }
+        
+        std::vector<double> two_p_p_ddy_v_p_coarsest_refined = interpolateVectorToFinestLevel1D(
+            two_p_p_ddy_v_p_coarsest,
+            ratio_finest_level_to_coarsest_level[0]);
+        
         /*
          * Compute term VI.
          */
@@ -4596,6 +5344,9 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInYDirectionWithInhomoge
         // Term II in moving frame of mixing layer.
         f_out.write((char*)&ddx_rho_a1_R22[0], sizeof(double)*ddx_rho_a1_R22.size());
         
+        // Term V on the coarsest level.
+        f_out.write((char*)&two_p_p_ddy_v_p_coarsest_refined[0], sizeof(double)*two_p_p_ddy_v_p_coarsest_refined.size());
+        
         f_out.close();
     }
 }
@@ -4608,7 +5359,6 @@ void
 RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -4637,11 +5387,28 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInZDirectionWithInhomoge
     const double dx = dx_vec[0];
     
     /*
+     * Get the refinement ratio from the finest level to the coarsest level.
+     */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    hier::IntVector ratio_finest_level_to_coarsest_level =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratio_finest_level_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
+    
+    /*
      * Output the spatial profiles (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        const std::vector<std::vector<double> >& p_avg_coarsest_realizations       = d_ensemble_statistics->p_avg_coarsest_realizations;
+        const std::vector<std::vector<double> >& ddz_w_avg_coarsest_realizations   = d_ensemble_statistics->ddz_w_avg_coarsest_realizations;
+        const std::vector<std::vector<double> >& p_ddz_w_avg_coarsest_realizations = d_ensemble_statistics->p_ddz_w_avg_coarsest_realizations;
+        
         const std::vector<std::vector<double> >& rho_avg_realizations     = d_ensemble_statistics->rho_avg_realizations;
         const std::vector<std::vector<double> >& p_avg_realizations       = d_ensemble_statistics->p_avg_realizations;
         const std::vector<std::vector<double> >& u_avg_realizations       = d_ensemble_statistics->u_avg_realizations;
@@ -4682,8 +5449,14 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInZDirectionWithInhomoge
         TBOX_ASSERT(num_realizations > 0);
         TBOX_ASSERT(num_realizations == static_cast<int>(rho_avg_realizations.size()));
         
+        const int num_cells_coarsest = static_cast<int>(p_avg_coarsest_realizations[0].size());
+        
         const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> p_avg_coarsest_global(num_cells_coarsest, double(0));
+        std::vector<double> ddz_w_avg_coarsest_global(num_cells_coarsest, double(0));
+        std::vector<double> p_ddz_w_avg_coarsest_global(num_cells_coarsest, double(0));
         
         std::vector<double> rho_avg_global(num_cells, double(0));
         std::vector<double> p_avg_global(num_cells, double(0));
@@ -4724,6 +5497,14 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInZDirectionWithInhomoge
         {
             for (int ri = 0; ri < num_realizations; ri++)
             {
+                for (int i = 0; i < num_cells_coarsest; i++)
+                {
+                    p_avg_coarsest_global[i] += weight*p_avg_coarsest_realizations[ri][i];
+                    
+                    ddz_w_avg_coarsest_global[i]   += weight*ddz_w_avg_coarsest_realizations[ri][i];
+                    p_ddz_w_avg_coarsest_global[i] += weight*p_ddz_w_avg_coarsest_realizations[ri][i];
+                }
+                
                 for (int i = 0; i < num_cells; i++)
                 {
                     rho_avg_global[i]     += weight*rho_avg_realizations[ri][i];
@@ -4888,6 +5669,16 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInZDirectionWithInhomoge
             two_p_p_ddz_w_p[i] = double(2)*(p_ddz_w_avg_global[i] - p_avg_global[i]*ddz_w_avg_global[i]);
         }
         
+        std::vector<double> two_p_p_ddz_w_p_coarsest(num_cells_coarsest, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            two_p_p_ddz_w_p_coarsest[i] = double(2)*(p_ddz_w_avg_coarsest_global[i] - p_avg_coarsest_global[i]*ddz_w_avg_coarsest_global[i]);
+        }
+        
+        std::vector<double> two_p_p_ddz_w_p_coarsest_refined = interpolateVectorToFinestLevel1D(
+            two_p_p_ddz_w_p_coarsest,
+            ratio_finest_level_to_coarsest_level[0]);
+        
         /*
          * Compute term VI.
          */
@@ -4949,6 +5740,9 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInZDirectionWithInhomoge
         // Term II in moving frame of mixing layer.
         f_out.write((char*)&ddx_rho_a1_R33[0], sizeof(double)*ddx_rho_a1_R33.size());
         
+        // Term V on the coarsest level.
+        f_out.write((char*)&two_p_p_ddz_w_p_coarsest_refined[0], sizeof(double)*two_p_p_ddz_w_p_coarsest_refined.size());
+        
         f_out.close();
     }
 }
@@ -4979,16 +5773,16 @@ RTIRMIBudgetsUtilities::getAveragedShearStressComponentWithInhomogeneousXDirecti
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratio_finest_level_to_coarest_level =
+    hier::IntVector ratio_finest_level_to_coarsest_level =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratio_finest_level_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratio_finest_level_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -5009,7 +5803,7 @@ RTIRMIBudgetsUtilities::getAveragedShearStressComponentWithInhomogeneousXDirecti
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarest_level;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarsest_level;
     
     /*
      * Get the indices of the physical domain.
@@ -5048,15 +5842,15 @@ RTIRMIBudgetsUtilities::getAveragedShearStressComponentWithInhomogeneousXDirecti
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -5314,15 +6108,15 @@ RTIRMIBudgetsUtilities::getAveragedShearStressComponentWithInhomogeneousXDirecti
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -5701,15 +6495,15 @@ RTIRMIBudgetsUtilities::getAveragedShearStressComponentWithInhomogeneousXDirecti
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -6609,16 +7403,16 @@ RTIRMIBudgetsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomogen
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratio_finest_level_to_coarest_level =
+    hier::IntVector ratio_finest_level_to_coarsest_level =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratio_finest_level_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratio_finest_level_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -6639,7 +7433,7 @@ RTIRMIBudgetsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomogen
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarest_level;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarsest_level;
     
     /*
      * Get the indices of the physical domain.
@@ -6678,15 +7472,15 @@ RTIRMIBudgetsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomogen
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -6966,15 +7760,15 @@ RTIRMIBudgetsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomogen
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -7644,15 +8438,15 @@ RTIRMIBudgetsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomogen
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -9326,16 +10120,16 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogen
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratio_finest_level_to_coarest_level =
+    hier::IntVector ratio_finest_level_to_coarsest_level =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratio_finest_level_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratio_finest_level_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -9356,7 +10150,7 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogen
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarest_level;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarsest_level;
     
     /*
      * Get the indices of the physical domain.
@@ -9402,15 +10196,15 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogen
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -9790,15 +10584,15 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogen
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -10332,15 +11126,15 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogen
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -11471,16 +12265,16 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratio_finest_level_to_coarest_level =
+    hier::IntVector ratio_finest_level_to_coarsest_level =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratio_finest_level_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratio_finest_level_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -11501,7 +12295,7 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarest_level;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarsest_level;
     
     /*
      * Get the indices of the physical domain.
@@ -11547,15 +12341,15 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -11957,15 +12751,15 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -12785,15 +13579,15 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -14652,6 +15446,57 @@ RTIRMIBudgetsUtilities::computeDerivativeOfVector1D(
 
 
 /*
+ * Interpolate the one-dimensional derivative with the refinement ratio.
+ */
+std::vector<double>
+RTIRMIBudgetsUtilities::interpolateVectorToFinestLevel1D(
+    const std::vector<double> quantity_vector,
+    int refinement_ratio) const
+{
+    const int num_cells_coarse = static_cast<int>(quantity_vector.size());
+    const int num_cells        = num_cells_coarse*refinement_ratio;
+    
+    std::vector<double> quantity_vector_refined(num_cells, double(0));
+    for (int i = 0; i < num_cells_coarse; i++)
+    {
+        if (i == 0 || i == num_cells_coarse - 1)
+        {
+            for (int ii = 0; ii < refinement_ratio; ii++)
+            {
+                const int idx_fine = i*refinement_ratio + ii;
+                
+                quantity_vector_refined[idx_fine] = quantity_vector[i];
+            }
+        }
+        else
+        {
+            // Linear interpolation.
+            
+            const int idx_L = i - 1;
+            const int idx_R = i + 1;
+            
+            const double value_L = quantity_vector[idx_L];
+            const double value_R = quantity_vector[idx_R];
+            
+            const double half = double(1)/double(2);
+            
+            for (int ii = 0; ii < refinement_ratio; ii++)
+            {
+                const int idx_fine = i*refinement_ratio + ii;
+                
+                const double weight = ((half + idx_fine) - refinement_ratio*(half + idx_L))/
+                    (refinement_ratio*(idx_R - idx_L));
+                
+                quantity_vector_refined[idx_fine] = value_L + weight*(value_R - value_L);
+            }
+        }
+    }
+    
+    return quantity_vector_refined;
+}
+
+
+/*
  * Output names of statistical quantities to output to a file.
  */
 void
@@ -14696,6 +15541,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
     // Statistics are not computed for this realization yet.
     rti_rmi_budgets_utilities->d_ensemble_statistics->setVariablesNotComputed();
     
+    // Compute the averaged grid level number no matter what.
+    rti_rmi_budgets_utilities->
+        computeAveragedGridLevelNumberWithHomogeneityInYDirectionOrInYZPlane(
+            patch_hierarchy);
+    
     // Loop over statistical quantities.
     for (int qi = 0; qi < static_cast<int>(d_statistical_quantities.size()); qi++)
     {
@@ -14704,6 +15554,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
         
         // Spatial profiles.
         if (statistical_quantity_key == "MASS_FRACTION_AVG_SP" ||
+            statistical_quantity_key == "MOLE_FRACTION_AVG_SP" ||
+            statistical_quantity_key == "VOLUME_FRACTION_AVG_SP" ||
             statistical_quantity_key == "DENSITY_AVG_SP" ||
             statistical_quantity_key == "VELOCITY_X_AVG_SP" ||
             statistical_quantity_key == "VELOCITY_X_FAVRE_AVG_SP" ||
@@ -14764,6 +15616,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             d_equation_of_thermal_conductivity_mixing_rules,
             HAMERS_DYNAMIC_POINTER_CAST<EnsembleBudgetsRTIRMI>(d_ensemble_statistics)));
     
+    // Output the averaged grid level number no matter what.
+    rti_rmi_budgets_utilities->outputSpatialProfileEnsembleAveragedGridLevelNumberWithHomogeneityInYDirectionOrInYZPlane(
+        "grid_level_num_avg.dat",
+        output_time);
+            
     // Loop over statistical quantities.
     for (int qi = 0; qi < static_cast<int>(d_statistical_quantities.size()); qi++)
     {
@@ -14776,8 +15633,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             rti_rmi_budgets_utilities->
                 outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
                     "Y_avg.dat",
-                    patch_hierarchy,
-                    data_context,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "MOLE_FRACTION_AVG_SP")
+        {
+            rti_rmi_budgets_utilities->
+                outputSpatialProfileEnsembleAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+                    "X_avg.dat",
+                    output_time);
+        }
+        else if (statistical_quantity_key == "VOLUME_FRACTION_AVG_SP")
+        {
+            rti_rmi_budgets_utilities->
+                outputSpatialProfileEnsembleAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+                    "Z_avg.dat",
                     output_time);
         }
         else if (statistical_quantity_key == "DENSITY_AVG_SP")
@@ -14785,8 +15654,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             rti_rmi_budgets_utilities->
                 outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_avg.dat",
-                    patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "VELOCITY_X_AVG_SP")
@@ -14794,8 +15661,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             rti_rmi_budgets_utilities->
                 outputSpatialProfileEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
                     "u_avg.dat",
-                    patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "VELOCITY_X_FAVRE_AVG_SP")
@@ -14803,8 +15668,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             rti_rmi_budgets_utilities->
                 outputSpatialProfileEnsembleFavreAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
                     "u_tilde.dat",
-                    patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "TURB_MASS_FLUX_VEL_X_SP")
@@ -14812,8 +15675,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             rti_rmi_budgets_utilities->
                 outputSpatialProfileEnsembleTurbulentMassFluxVelocityXWithHomogeneityInYDirectionOrInYZPlane(
                     "a1.dat",
-                    patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "PRESSURE_GRADIENT_X_AVG_SP")
@@ -14821,8 +15682,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             rti_rmi_budgets_utilities->
                 outputSpatialProfileEnsembleAveragedPressureGradientXWithHomogeneityInYDirectionOrInYZPlane(
                     "ddx_p_avg.dat",
-                    patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "rho_a1_budget_SP")
@@ -14831,7 +15690,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputBudgetTurbMassFluxXWithInhomogeneousXDirection(
                     "rho_a1_budget.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "rho_K_budget_SP")
@@ -14840,7 +15698,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputBudgetFavreMeanTKEWithInhomogeneousXDirection(
                     "rho_K_budget.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "rho_R11_budget_SP")
@@ -14849,7 +15706,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
                     "rho_R11_budget.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "rho_R22_budget_SP")
@@ -14858,7 +15714,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputBudgetReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
                     "rho_R22_budget.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "rho_R33_budget_SP")
@@ -14867,7 +15722,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputBudgetReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
                     "rho_R33_budget.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else

@@ -8,6 +8,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     HAMERS_SHARED_PTR<pdat::CellData<double> >& source,
     const hier::Patch& patch,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
+    const std::unordered_map<std::string, double>& monitoring_statistics_map,
     const double time,
     const double dt,
     const int RK_step_number)
@@ -15,6 +16,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     NULL_USE(patch);
     NULL_USE(source);
     NULL_USE(conservative_variables);
+    NULL_USE(monitoring_statistics_map);
     NULL_USE(time);
     NULL_USE(dt);
     NULL_USE(RK_step_number);

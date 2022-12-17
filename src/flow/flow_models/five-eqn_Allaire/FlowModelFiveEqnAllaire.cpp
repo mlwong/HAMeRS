@@ -3,6 +3,7 @@
 #include "flow/flow_models/five-eqn_Allaire/FlowModelBasicUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelBoundaryUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire.hpp"
+#include "flow/flow_models/five-eqn_Allaire/FlowModelMonitoringStatisticsUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelRiemannSolverFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelSourceUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelStatisticsUtilitiesFiveEqnAllaire.hpp"
@@ -311,6 +312,7 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_dim,
         d_grid_geometry,
         d_num_species,
+        flow_model_db,
         d_equation_of_shear_viscosity_mixing_rules,
         d_equation_of_bulk_viscosity_mixing_rules));
     
@@ -327,6 +329,27 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_equation_of_state_mixing_rules));
     
     /*
+     * Initialize boundary utilities object.
+     */
+    d_flow_model_boundary_utilities.reset(
+        new FlowModelBoundaryUtilitiesFiveEqnAllaire(
+            "d_flow_model_boundary_utilities",
+            d_dim,
+            d_num_species,
+            d_num_eqn,
+            d_equation_of_state_mixing_rules));
+    
+    /*
+     * Initialize monitoring statistics utilities object.
+     */
+    d_flow_model_monitoring_statistics_utilities.reset(new FlowModelMonitoringStatisticsUtilitiesFiveEqnAllaire(
+        "d_flow_model_monitoring_statistics_utilities",
+        d_dim,
+        d_grid_geometry,
+        d_num_species,
+        flow_model_db));
+    
+    /*
      * Initialize statistics utilities object.
      */
     d_flow_model_statistics_utilities.reset(new FlowModelStatisticsUtilitiesFiveEqnAllaire(
@@ -338,17 +361,6 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_equation_of_state_mixing_rules,
         d_equation_of_shear_viscosity_mixing_rules,
         d_equation_of_bulk_viscosity_mixing_rules));
-    
-    /*
-     * Initialize boundary utilities object.
-     */
-    d_flow_model_boundary_utilities.reset(
-        new FlowModelBoundaryUtilitiesFiveEqnAllaire(
-            "d_flow_model_boundary_utilities",
-            d_dim,
-            d_num_species,
-            d_num_eqn,
-            d_equation_of_state_mixing_rules));
     
     /*
      * Initialize pointers to species cell data.
@@ -385,6 +397,8 @@ void
 FlowModelFiveEqnAllaire::putToRestart(
     const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
+    putToRestartBase(restart_db);
+    
     /*
      * Put the properties of d_equation_of_state_mixing_rules into the restart database.
      */
@@ -424,9 +438,19 @@ FlowModelFiveEqnAllaire::putToRestart(
     }
     
     /*
+     * Put the properties of d_flow_model_diffusive_flux_utilities into the restart database.
+     */
+    d_flow_model_diffusive_flux_utilities->putToRestart(restart_db);
+    
+    /*
      * Put the properties of d_flow_model_source_utilities into the restart database.
      */
     d_flow_model_source_utilities->putToRestart(restart_db);
+    
+    /*
+     * Put the properties of d_flow_model_monitoring_statistics_utilities into the restart database.
+     */
+    d_flow_model_monitoring_statistics_utilities->putToRestart(restart_db);
     
     /*
      * Put the properties of d_flow_model_statistics_utilities into the restart database.
@@ -638,7 +662,7 @@ FlowModelFiveEqnAllaire::registerPatchWithDataContext(
 
 /*
  * Register different derived variables in the registered patch. The derived variables to be registered
- * are given as entires in a map of the variable name to the number of sub-ghost cells required.
+ * are given as entries in a map of the variable name to the number of sub-ghost cells required.
  * If the variable to be registered is one of the conservative variable, the corresponding entry
  * in the map is ignored.
  */
@@ -912,7 +936,7 @@ void FlowModelFiveEqnAllaire::unregisterPatch()
     d_cell_data_computed_species_densities    = false;
     d_cell_data_computed_species_temperatures = false;
     
-    d_flow_model_diffusive_flux_utilities->clearCellData();
+    d_flow_model_diffusive_flux_utilities->clearCellAndSideData();
     d_flow_model_source_utilities->clearCellData();
     
     d_derived_cell_data_computed = false;

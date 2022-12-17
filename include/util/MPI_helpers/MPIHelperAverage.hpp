@@ -21,6 +21,22 @@ class MPIHelperAverage: public MPIHelper
         {}
         
         /*
+         * Compute averaged value over the entire domain.
+         */
+        double getAveragedQuantity(
+            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged value (on product of variables) over the entire domain.
+         */
+        double getAveragedQuantity(
+            std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >& variable_quantities,
+            const std::vector<int>& component_indices,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
          * Compute averaged value with only x-direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(

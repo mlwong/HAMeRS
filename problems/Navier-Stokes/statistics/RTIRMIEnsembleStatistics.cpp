@@ -4,7 +4,7 @@
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperAverage.hpp"
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperCorrelation.hpp"
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperMaxMin.hpp"
-#include "util/MPI_helpers/MPIHelperNumberOfCells.hpp"
+#include "util/MPI_helpers/MPIHelperGrid.hpp"
 
 #include <fstream>
 
@@ -20,9 +20,15 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         
         void setVariablesNotComputed()
         {
+            X_0_avg_computed      = false;
+            X_0_sq_avg_computed   = false;
+            X_0_X_1_avg_computed  = false;
             Y_0_avg_computed      = false;
             Y_0_sq_avg_computed   = false;
             Y_0_Y_1_avg_computed  = false;
+            Z_0_avg_computed      = false;
+            Z_0_sq_avg_computed   = false;
+            Z_0_Z_1_avg_computed  = false;
             rho_avg_computed      = false;
             rho_sq_avg_computed   = false;
             rho_inv_avg_computed  = false;
@@ -95,9 +101,15 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         
         void clearAllData()
         {
+            X_0_avg_realizations.clear();
+            X_0_sq_avg_realizations.clear();
+            X_0_X_1_avg_realizations.clear();
             Y_0_avg_realizations.clear();
             Y_0_sq_avg_realizations.clear();
             Y_0_Y_1_avg_realizations.clear();
+            Z_0_avg_realizations.clear();
+            Z_0_sq_avg_realizations.clear();
+            Z_0_Z_1_avg_realizations.clear();
             rho_avg_realizations.clear();
             rho_sq_avg_realizations.clear();
             rho_inv_avg_realizations.clear();
@@ -170,9 +182,15 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         
         // Scratch arrays.
         // Number of realizalizations; number of cells.
+        std::vector<std::vector<double> > X_0_avg_realizations;
+        std::vector<std::vector<double> > X_0_sq_avg_realizations;
+        std::vector<std::vector<double> > X_0_X_1_avg_realizations;
         std::vector<std::vector<double> > Y_0_avg_realizations;
         std::vector<std::vector<double> > Y_0_sq_avg_realizations;
         std::vector<std::vector<double> > Y_0_Y_1_avg_realizations;
+        std::vector<std::vector<double> > Z_0_avg_realizations;
+        std::vector<std::vector<double> > Z_0_sq_avg_realizations;
+        std::vector<std::vector<double> > Z_0_Z_1_avg_realizations;
         std::vector<std::vector<double> > rho_avg_realizations;
         std::vector<std::vector<double> > rho_sq_avg_realizations;
         std::vector<std::vector<double> > rho_inv_avg_realizations;
@@ -242,9 +260,15 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         
         // Whether the scratch arrays are filled.
         
+        bool X_0_avg_computed;
+        bool X_0_sq_avg_computed;
+        bool X_0_X_1_avg_computed;
         bool Y_0_avg_computed;
         bool Y_0_sq_avg_computed;
         bool Y_0_Y_1_avg_computed;
+        bool Z_0_avg_computed;
+        bool Z_0_sq_avg_computed;
+        bool Z_0_Z_1_avg_computed;
         bool rho_avg_computed;
         bool rho_sq_avg_computed;
         bool rho_inv_avg_computed;
@@ -334,6 +358,7 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
             const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules,
             const HAMERS_SHARED_PTR<EnsembleStatisticsRTIRMI> ensemble_statistics):
+                d_ensemble_statistics(ensemble_statistics),
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
@@ -344,8 +369,7 @@ class RTIRMIStatisticsUtilities
                 d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
                 d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
                 d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules),
-                d_num_ghosts_derivative(3),
-                d_ensemble_statistics(ensemble_statistics)
+                d_num_ghosts_derivative(3)
         {}
         
         /*
@@ -353,6 +377,22 @@ class RTIRMIStatisticsUtilities
          */
         void
         computeAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute averaged mole fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute averaged volume fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
@@ -365,10 +405,42 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
+         * Compute mole fraction variance with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute volume fraction variance with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeVolumeFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
          * Compute mass fraction product with assumed homogeneity in y-direction (2D) or yz-plane (3D).
          */
         void
         computeMassFractionProductWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute mole fraction product with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeMoleFractionProductWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute volume fraction product with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeVolumeFractionProductWithHomogeneityInYDirectionOrInYZPlane(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
@@ -614,7 +686,26 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble averaged mole fraction with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble averaged volume fraction with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const double output_time) const;
         
         /*
@@ -625,7 +716,26 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble variance of mole fraction with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble variance of volume fraction with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleVolumeFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const double output_time) const;
         
         /*
@@ -636,7 +746,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -647,7 +756,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -658,7 +766,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedSpecificVolumeWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -669,7 +776,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedDensitySpecificVolumeCovarianceWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -680,7 +786,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedPressureWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -691,7 +796,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -702,7 +806,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedVelocityYWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -713,7 +816,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedVelocityZWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -724,7 +826,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -735,7 +836,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -746,7 +846,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedMomentumZWithHomogeneitynYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -757,7 +856,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleTurbulentMassFluxXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -768,7 +866,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleReynoldsNormalStressXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -779,7 +876,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleReynoldsNormalStressYWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -790,7 +886,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleReynoldsNormalStressZWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -801,7 +896,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedEnstrophyWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -812,7 +906,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -823,7 +916,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleRMSBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -834,7 +926,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleRMSBaroclinicTorqueXWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
@@ -845,7 +936,6 @@ class RTIRMIStatisticsUtilities
         outputSpatialProfileEnsembleRMSBaroclinicTorqueYWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /// Non-spatial profiles.
@@ -856,8 +946,23 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleMixingWidthInXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+        
+        /*
+         * Output ensemble mixing width in x-direction using mole fractions to a file.
+         */
+        void
+        outputEnsembleMixingWidthInXDirectionWithMoleFractions(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+        
+        /*
+         * Output ensemble mixing width in x-direction using volume fractions to a file.
+         */
+        void
+        outputEnsembleMixingWidthInXDirectionWithVolumeFractions(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble minimum interface location in x-direction to a file.
@@ -865,8 +970,23 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleInterfaceMinInXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+        
+        /*
+         * Output ensemble minimum interface location in x-direction using mole fractions to a file.
+         */
+        void
+        outputEnsembleInterfaceMinInXDirectionWithMoleFractions(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+        
+        /*
+         * Output ensemble minimum interface location in x-direction using volume fractions to a file.
+         */
+        void
+        outputEnsembleInterfaceMinInXDirectionWithVolumeFractions(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble maximum interface location in x-direction to a file.
@@ -874,8 +994,23 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleInterfaceMaxInXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+        
+        /*
+         * Output ensemble maximum interface location in x-direction using mole fractions to a file.
+         */
+        void
+        outputEnsembleInterfaceMaxInXDirectionWithMoleFractions(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+        
+        /*
+         * Output ensemble maximum interface location in x-direction using volume fractions to a file.
+         */
+        void
+        outputEnsembleInterfaceMaxInXDirectionWithVolumeFractions(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble mixedness in x-direction to a file.
@@ -883,8 +1018,23 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleMixednessInXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+        
+        /*
+         * Output ensemble mixedness in x-direction using mole fractions to a file.
+         */
+        void
+        outputEnsembleMixednessInXDirectionWithMoleFractions(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+        
+        /*
+         * Output ensemble mixedness in x-direction using volume fractions to a file.
+         */
+        void
+        outputEnsembleMixednessInXDirectionWithVolumeFractions(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble density mean in mixing layer with with assumed homogeneity in y-direction (2D) or
@@ -893,8 +1043,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleDensityMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble specific volume mean in mixing layer with with assumed homogeneity in
@@ -903,8 +1052,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleSpecificVolumeMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble pressure mean in mixing layer with with assumed homogeneity in y-direction (2D) or
@@ -913,8 +1061,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsemblePressureMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble velocity associated with turbulent mass flux component in x-direction in
@@ -923,8 +1070,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTurbulentMassFluxVelocityXMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble density-specific-volume covariance in mixing layer with assumed homogeneity in
@@ -933,8 +1079,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleDensitySpecificVolumeCovarianceMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble TKE integrated with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
@@ -942,8 +1087,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEIntegrateWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble Reynolds normal stress component in x-direction in mixing layer with assumed
@@ -952,8 +1096,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleReynoldsNormalStressXMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble Reynolds normal stress component in y-direction in mixing layer with assumed
@@ -962,8 +1105,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleReynoldsNormalStressYMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble Reynolds normal stress component in z-direction in mixing layer with assumed
@@ -972,8 +1114,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleReynoldsNormalStressZMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble enstrophy integrated to a file.
@@ -981,8 +1122,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleEnstrophyIntegrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble enstrophy in mixing layer with assumed homogeneity in y-direction (2D) or yz-plane (3D)
@@ -991,8 +1131,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleEnstrophyMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble scalar dissipation rate of first species integrated to a file.
@@ -1000,8 +1139,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleScalarDissipationRateIntegrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble scalar dissipation rate of first species in mixing layer with assumed homogeneity in
@@ -1010,8 +1148,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleScalarDissipationRateMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output turbulent Reynolds number based on mixing width with assumed homogeneity in y-direction (2D)
@@ -1020,8 +1157,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleMixingWidthReynoldsNumberWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output turbulent Mach number with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
@@ -1029,8 +1165,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTurbulentMachNumberWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output effective Atwood number with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
@@ -1038,8 +1173,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleEffectiveAtwoodNumberWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble RMS of baroclinic torque in z-direction integrated to a file.
@@ -1047,8 +1181,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleRMSBaroclinicTorqueZIntegrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble RMS of baroclinic torque in z-direction in mixing layer with assumed homogeneity in
@@ -1057,8 +1190,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleRMSBaroclinicTorqueZMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble RMS of baroclinic torque in x-direction integrated to a file.
@@ -1066,8 +1198,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleRMSBaroclinicTorqueXIntegrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble RMS of baroclinic torque in x-direction in mixing layer with assumed homogeneity in
@@ -1076,8 +1207,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleRMSBaroclinicTorqueXMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble RMS of baroclinic torque in y-direction integrated to a file.
@@ -1085,8 +1215,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleRMSBaroclinicTorqueYIntegrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble RMS of baroclinic torque in y-direction in mixing layer with assumed homogeneity in
@@ -1095,8 +1224,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleRMSBaroclinicTorqueYMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble TKE production term 1 integrated to a file.
@@ -1104,8 +1232,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEProduction1Integrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble TKE production term 1 in mixing layer with assumed homogeneity in y-direction (2D) or
@@ -1114,8 +1241,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEProduction1MeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble TKE production term 2 integrated to a file.
@@ -1123,8 +1249,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEProduction2Integrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble TKE production term 2 in mixing layer with assumed homogeneity in y-direction (2D) or
@@ -1133,8 +1258,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEProduction2MeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble TKE production term 3 integrated to a file.
@@ -1142,8 +1266,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEProduction3Integrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble TKE production term 3 in mixing layer with assumed homogeneity in y-direction (2D) or
@@ -1152,8 +1275,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEProduction3MeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output ensemble TKE dissipation integrated to a file.
@@ -1161,8 +1283,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEDissipationIntegrated(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble TKE dissipation in mixing layer with assumed homogeneity in y-direction (2D) or
@@ -1171,8 +1292,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleTKEDissipationMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble dynamic shear viscosity in mixing layer with assumed homogeneity in y-direction (2D)
@@ -1181,8 +1301,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleShearViscosityMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Output mean of ensemble mass diffusivity in mixing layer with assumed homogeneity in y-direction (2D) or
@@ -1191,8 +1310,7 @@ class RTIRMIStatisticsUtilities
         void
         outputEnsembleMassDiffusivityMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
          * Compute averaged shear stress component with only x direction as inhomogeneous direction.
@@ -1376,6 +1494,96 @@ RTIRMIStatisticsUtilities::computeAveragedMassFractionWithHomogeneityInYDirectio
 
 
 /*
+ * Compute averaged mole fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIStatisticsUtilities::computeAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'MOLE_FRACTION_AVG_SP' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<double> X_0_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "MOLE_FRACTIONS",
+        0,
+        data_context);
+    
+    std::vector<std::vector<double> >& X_0_avg_realizations = d_ensemble_statistics->X_0_avg_realizations;
+    X_0_avg_realizations.push_back(X_0_avg_global);
+    
+    d_ensemble_statistics->X_0_avg_computed = true;
+}
+
+
+/*
+ * Compute averaged volume fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIStatisticsUtilities::computeAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'VOLUME_FRACTION_AVG_SP' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<double> Z_0_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "VOLUME_FRACTIONS",
+        0,
+        data_context);
+    
+    std::vector<std::vector<double> >& Z_0_avg_realizations = d_ensemble_statistics->Z_0_avg_realizations;
+    Z_0_avg_realizations.push_back(Z_0_avg_global);
+    
+    d_ensemble_statistics->Z_0_avg_computed = true;
+}
+
+
+/*
  * Compute mass fraction variance with assumed homogeneity in y-direction (2D) or yz-plane (3D).
  */
 void
@@ -1433,6 +1641,120 @@ RTIRMIStatisticsUtilities::computeMassFractionVarianceWithHomogeneityInYDirectio
 
 
 /*
+ * Compute mole fraction variance with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIStatisticsUtilities::computeMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'MOLE_FRACTION_VAR_SP' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    
+    quantity_names.push_back("MOLE_FRACTIONS");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("MOLE_FRACTIONS");
+    component_indices.push_back(0);
+    
+    std::vector<double> X_0_sq_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<std::vector<double> >& X_0_sq_avg_realizations = d_ensemble_statistics->X_0_sq_avg_realizations;
+    X_0_sq_avg_realizations.push_back(X_0_sq_avg_global);
+    
+    d_ensemble_statistics->X_0_sq_avg_computed = true;
+}
+
+
+/*
+ * Compute volume fraction variance with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIStatisticsUtilities::computeVolumeFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'VOLUME_FRACTION_VAR_SP' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    
+    quantity_names.push_back("VOLUME_FRACTIONS");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VOLUME_FRACTIONS");
+    component_indices.push_back(0);
+    
+    std::vector<double> Z_0_sq_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<std::vector<double> >& Z_0_sq_avg_realizations = d_ensemble_statistics->Z_0_sq_avg_realizations;
+    Z_0_sq_avg_realizations.push_back(Z_0_sq_avg_global);
+    
+    d_ensemble_statistics->Z_0_sq_avg_computed = true;
+}
+
+
+/*
  * Compute mass fraction product with assumed homogeneity in y-direction (2D) or yz-plane (3D).
  */
 void
@@ -1486,6 +1808,120 @@ RTIRMIStatisticsUtilities::computeMassFractionProductWithHomogeneityInYDirection
     Y_0_Y_1_avg_realizations.push_back(Y_0_Y_1_avg_global);
     
     d_ensemble_statistics->Y_0_Y_1_avg_computed = true;
+}
+
+
+/*
+ * Compute mole fraction product with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIStatisticsUtilities::computeMoleFractionProductWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'MOLE_FRACTION_PROD_SP' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    
+    quantity_names.push_back("MOLE_FRACTIONS");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("MOLE_FRACTIONS");
+    component_indices.push_back(1);
+    
+    std::vector<double> X_0_X_1_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<std::vector<double> >& X_0_X_1_avg_realizations = d_ensemble_statistics->X_0_X_1_avg_realizations;
+    X_0_X_1_avg_realizations.push_back(X_0_X_1_avg_global);
+    
+    d_ensemble_statistics->X_0_X_1_avg_computed = true;
+}
+
+
+/*
+ * Compute volume fraction product with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIStatisticsUtilities::computeVolumeFractionProductWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'VOLUME_FRACTION_PROD_SP' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    
+    quantity_names.push_back("VOLUME_FRACTIONS");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VOLUME_FRACTIONS");
+    component_indices.push_back(1);
+    
+    std::vector<double> Z_0_Z_1_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<std::vector<double> >& Z_0_Z_1_avg_realizations = d_ensemble_statistics->Z_0_Z_1_avg_realizations;
+    Z_0_Z_1_avg_realizations.push_back(Z_0_Z_1_avg_global);
+    
+    d_ensemble_statistics->Z_0_Z_1_avg_computed = true;
 }
 
 
@@ -2749,8 +3185,6 @@ RTIRMIStatisticsUtilities::computeAveragedShearViscosityWithHomogeneityInYDirect
         flow_model_tmp,
         true);
     
-    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
-    
     std::vector<std::vector<double> >& mu_avg_realizations = d_ensemble_statistics->mu_avg_realizations;
     
     std::vector<double> shear_viscosity = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
@@ -2797,8 +3231,6 @@ RTIRMIStatisticsUtilities::computeAveragedMassDiffusivityWithHomogeneityInYDirec
         patch_hierarchy,
         flow_model_tmp,
         true);
-    
-    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
     
     std::vector<std::vector<double> >& D_avg_realizations = d_ensemble_statistics->D_avg_realizations;
     
@@ -2932,8 +3364,6 @@ RTIRMIStatisticsUtilities::computeAveragedYDerivativeOfPressureWithHomogeneityIn
         patch_hierarchy,
         flow_model_tmp);
     
-    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
-    
     std::vector<std::vector<double> >& ddy_p_avg_realizations = d_ensemble_statistics->ddy_p_avg_realizations;
     
     std::vector<std::string> quantity_names;
@@ -2997,8 +3427,6 @@ RTIRMIStatisticsUtilities::computeAveragedZDerivativeOfPressureWithHomogeneityIn
         d_grid_geometry,
         patch_hierarchy,
         flow_model_tmp);
-    
-    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
     
     std::vector<std::vector<double> >& ddz_p_avg_realizations = d_ensemble_statistics->ddz_p_avg_realizations;
     
@@ -3787,8 +4215,6 @@ RTIRMIStatisticsUtilities::computeAveragedQuantiitesForTKEDissipationWithHomogen
         patch_hierarchy,
         flow_model_tmp);
     
-    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
-    
     std::vector<std::string> quantity_names;
     std::vector<int> component_indices;
     std::vector<bool> use_derivative;
@@ -4419,7 +4845,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -4475,6 +4900,130 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMassFractionWithH
 
 
 /*
+ * Output spatial profile of ensemble averaged mole fraction with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& X_0_avg_realizations =
+            d_ensemble_statistics->X_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(X_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(X_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> X_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                X_0_avg_global[i] += weight*X_0_avg_realizations[ri][i];
+            }
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&X_0_avg_global[0], sizeof(double)*X_0_avg_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output spatial profile of ensemble averaged volume fraction with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Z_0_avg_realizations =
+            d_ensemble_statistics->Z_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(Z_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(Z_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Z_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Z_0_avg_global[i] += weight*Z_0_avg_realizations[ri][i];
+            }
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&Z_0_avg_global[0], sizeof(double)*Z_0_avg_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output spatial profile of ensemble variance of mass fraction with assumed homogeneity in y-direction (2D) or
  * yz-plane (3D) to a file.
  */
@@ -4482,7 +5031,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -4550,6 +5098,154 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleMassFractionVarianceWithH
 
 
 /*
+ * Output spatial profile of ensemble variance of mole fraction with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& X_0_avg_realizations =
+            d_ensemble_statistics->X_0_avg_realizations;
+        
+        const std::vector<std::vector<double> >& X_0_sq_avg_realizations = 
+            d_ensemble_statistics->X_0_sq_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(X_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(X_0_sq_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(X_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> X_0_avg_global(num_cells, double(0));
+        std::vector<double> X_0_sq_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                X_0_avg_global[i]    += weight*X_0_avg_realizations[ri][i];
+                X_0_sq_avg_global[i] += weight*X_0_sq_avg_realizations[ri][i];
+            }
+        }
+        
+        std::vector<double> X_0_var_global(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            X_0_var_global[i] = X_0_sq_avg_global[i] - X_0_avg_global[i]*X_0_avg_global[i];
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&X_0_var_global[0], sizeof(double)*X_0_var_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output spatial profile of ensemble variance of volume fraction with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleVolumeFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Z_0_avg_realizations =
+            d_ensemble_statistics->Z_0_avg_realizations;
+        
+        const std::vector<std::vector<double> >& Z_0_sq_avg_realizations = 
+            d_ensemble_statistics->Z_0_sq_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(Z_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(Z_0_sq_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(Z_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Z_0_avg_global(num_cells, double(0));
+        std::vector<double> Z_0_sq_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Z_0_avg_global[i]    += weight*Z_0_avg_realizations[ri][i];
+                Z_0_sq_avg_global[i] += weight*Z_0_sq_avg_realizations[ri][i];
+            }
+        }
+        
+        std::vector<double> Z_0_var_global(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            Z_0_var_global[i] = Z_0_sq_avg_global[i] - Z_0_avg_global[i]*Z_0_avg_global[i];
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&Z_0_var_global[0], sizeof(double)*Z_0_var_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output spatial profile of ensemble averaged density with assumed homogeneity in y-direction (2D) or
  * yz-plane (3D) to a file.
  */
@@ -4557,7 +5253,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -4620,7 +5315,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -4695,7 +5389,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedSpecificVolumeWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -4758,7 +5451,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedDensitySpecificVolumeCovarianceWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -4833,7 +5525,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedPressureWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -4896,7 +5587,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -4959,7 +5649,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedVelocityYWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5022,7 +5711,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedVelocityZWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5085,7 +5773,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5148,7 +5835,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5211,7 +5897,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMomentumZWithHomogeneitynYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5274,7 +5959,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleTurbulentMassFluxXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5355,7 +6039,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleReynoldsNormalStressXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5439,7 +6122,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleReynoldsNormalStressYWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5523,7 +6205,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleReynoldsNormalStressZWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5607,7 +6288,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedEnstrophyWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5670,7 +6350,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5733,7 +6412,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleRMSBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5801,7 +6479,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleRMSBaroclinicTorqueXWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5869,7 +6546,6 @@ void
 RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleRMSBaroclinicTorqueYWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double output_time) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5935,8 +6611,7 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleRMSBaroclinicTorqueYWithH
 void
 RTIRMIStatisticsUtilities::outputEnsembleMixingWidthInXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -6016,13 +6691,182 @@ RTIRMIStatisticsUtilities::outputEnsembleMixingWidthInXDirection(
 
 
 /*
+ * Output ensemble mixing width in x-direction using mole fractions to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleMixingWidthInXDirectionWithMoleFractions(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'MIXING_WIDTH_X_MOL_F' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& X_0_avg_realizations =
+            d_ensemble_statistics->X_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(X_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(X_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> X_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                X_0_avg_global[i] += weight*X_0_avg_realizations[ri][i];
+            }
+        }
+        
+        double W = double(0);
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            W += X_0_avg_global[i]*(double(1) - X_0_avg_global[i]);
+        }
+        
+        W = double(4)*W*dx_finest[0];
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << W;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble mixing width in x-direction using volume fractions to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleMixingWidthInXDirectionWithVolumeFractions(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'MIXING_WIDTH_X_VOL_F' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Z_0_avg_realizations =
+            d_ensemble_statistics->Z_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(Z_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(Z_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Z_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Z_0_avg_global[i] += weight*Z_0_avg_realizations[ri][i];
+            }
+        }
+        
+        double W = double(0);
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            W += Z_0_avg_global[i]*(double(1) - Z_0_avg_global[i]);
+        }
+        
+        W = double(4)*W*dx_finest[0];
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << W;
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output ensemble minimum interface location in x-direction to a file.
  */
 void
 RTIRMIStatisticsUtilities::outputEnsembleInterfaceMinInXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -6109,13 +6953,12 @@ RTIRMIStatisticsUtilities::outputEnsembleInterfaceMinInXDirection(
 
 
 /*
- * Output ensemble maximum interface location in x-direction to a file.
+ * Output ensemble minimum interface location in x-direction using mole fractions to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleInterfaceMaxInXDirection(
+RTIRMIStatisticsUtilities::outputEnsembleInterfaceMinInXDirectionWithMoleFractions(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -6125,7 +6968,191 @@ RTIRMIStatisticsUtilities::outputEnsembleInterfaceMaxInXDirection(
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "'INTERFACE_MIN_X' can be computed with two species only."
+            << "'INTERFACE_MIN_X_MOL_F' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& X_0_avg_realizations =
+            d_ensemble_statistics->X_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(X_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(X_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> X_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                X_0_avg_global[i] += weight*X_0_avg_realizations[ri][i];
+            }
+        }
+        
+        const double* x_lo = d_grid_geometry->getXLower();
+        const double* x_hi = d_grid_geometry->getXUpper();
+        double interface_min = x_hi[0];
+        
+        for (int i = num_cells - 1; i >= 0;  i--)
+        {
+            if (X_0_avg_global[i] > 0.01 && X_0_avg_global[i] < 0.99)
+            {
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc < interface_min)
+                {
+                   interface_min = x_loc;
+                }
+            }
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_min;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble minimum interface location in x-direction using volume fractions to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleInterfaceMinInXDirectionWithVolumeFractions(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_MIN_X_VOL_F' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Z_0_avg_realizations =
+            d_ensemble_statistics->Z_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(Z_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(Z_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Z_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Z_0_avg_global[i] += weight*Z_0_avg_realizations[ri][i];
+            }
+        }
+        
+        const double* x_lo = d_grid_geometry->getXLower();
+        const double* x_hi = d_grid_geometry->getXUpper();
+        double interface_min = x_hi[0];
+        
+        for (int i = num_cells - 1; i >= 0;  i--)
+        {
+            if (Z_0_avg_global[i] > 0.01 && Z_0_avg_global[i] < 0.99)
+            {
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc < interface_min)
+                {
+                   interface_min = x_loc;
+                }
+            }
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_min;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble maximum interface location in x-direction to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleInterfaceMaxInXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_MAX_X' can be computed with two species only."
             << std::endl);
     }
     
@@ -6202,13 +7229,196 @@ RTIRMIStatisticsUtilities::outputEnsembleInterfaceMaxInXDirection(
 
 
 /*
+ * Output ensemble maximum interface location in x-direction using mole fractions to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleInterfaceMaxInXDirectionWithMoleFractions(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_MAX_X_MOL_F' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& X_0_avg_realizations =
+            d_ensemble_statistics->X_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(X_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(X_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> X_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                X_0_avg_global[i] += weight*X_0_avg_realizations[ri][i];
+            }
+        }
+        
+        const double* x_lo = d_grid_geometry->getXLower();
+        // const double* x_hi = d_grid_geometry->getXUpper();
+        double interface_max = x_lo[0];
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            if (X_0_avg_global[i] > 0.01 && X_0_avg_global[i] < 0.99)
+            {
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc > interface_max)
+                {
+                   interface_max = x_loc;
+                }
+            }
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_max;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble maximum interface location in x-direction using volume fractions to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleInterfaceMaxInXDirectionWithVolumeFractions(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_MAX_X_VOL_F' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Z_0_avg_realizations =
+            d_ensemble_statistics->Z_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(Z_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(Z_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Z_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Z_0_avg_global[i] += weight*Z_0_avg_realizations[ri][i];
+            }
+        }
+        
+        const double* x_lo = d_grid_geometry->getXLower();
+        // const double* x_hi = d_grid_geometry->getXUpper();
+        double interface_max = x_lo[0];
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            if (Z_0_avg_global[i] > 0.01 && Z_0_avg_global[i] < 0.99)
+            {
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc > interface_max)
+                {
+                   interface_max = x_loc;
+                }
+            }
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_max;
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output ensemble mixedness in x-direction to a file.
  */
 void
 RTIRMIStatisticsUtilities::outputEnsembleMixednessInXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -6288,14 +7498,183 @@ RTIRMIStatisticsUtilities::outputEnsembleMixednessInXDirection(
 
 
 /*
+ * Output ensemble mixedness in x-direction using mole fractions to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleMixednessInXDirectionWithMoleFractions(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'MIXEDNESS_X_MOL_F' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& X_0_avg_realizations =
+            d_ensemble_statistics->X_0_avg_realizations;
+        
+        const std::vector<std::vector<double> >& X_0_X_1_avg_realizations =
+            d_ensemble_statistics->X_0_X_1_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(X_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(X_0_X_1_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(X_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> X_0_avg_global(num_cells, double(0));
+        std::vector<double> X_0_X_1_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                X_0_avg_global[i]     += weight*X_0_avg_realizations[ri][i];
+                X_0_X_1_avg_global[i] += weight*X_0_X_1_avg_realizations[ri][i];
+            }
+        }
+        
+        double num = double(0);
+        double den = double(0);
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            num += X_0_X_1_avg_global[i];
+            den += X_0_avg_global[i]*(double(1) - X_0_avg_global[i]);
+        }
+        
+        const double Theta = num/den;
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << Theta;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble mixedness in x-direction using volume fractions to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleMixednessInXDirectionWithVolumeFractions(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'MIXEDNESS_X_VOL_F' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Z_0_avg_realizations =
+            d_ensemble_statistics->Z_0_avg_realizations;
+        
+        const std::vector<std::vector<double> >& Z_0_Z_1_avg_realizations =
+            d_ensemble_statistics->Z_0_Z_1_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(Z_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(Z_0_Z_1_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(Z_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Z_0_avg_global(num_cells, double(0));
+        std::vector<double> Z_0_Z_1_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Z_0_avg_global[i]     += weight*Z_0_avg_realizations[ri][i];
+                Z_0_Z_1_avg_global[i] += weight*Z_0_Z_1_avg_realizations[ri][i];
+            }
+        }
+        
+        double num = double(0);
+        double den = double(0);
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            num += Z_0_Z_1_avg_global[i];
+            den += Z_0_avg_global[i]*(double(1) - Z_0_avg_global[i]);
+        }
+        
+        const double Theta = num/den;
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << Theta;
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output mean of ensemble density mean in mixing layer with with assumed homogeneity in y-direction (2D) or
  * yz-plane (3D) to a file.
  */
 void
 RTIRMIStatisticsUtilities::outputEnsembleDensityMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -6377,8 +7756,7 @@ RTIRMIStatisticsUtilities::outputEnsembleDensityMeanWithInhomogeneousXDirection(
 void
 RTIRMIStatisticsUtilities::outputEnsembleSpecificVolumeMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -6460,8 +7838,7 @@ RTIRMIStatisticsUtilities::outputEnsembleSpecificVolumeMeanWithInhomogeneousXDir
 void
 RTIRMIStatisticsUtilities::outputEnsemblePressureMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -6543,8 +7920,7 @@ RTIRMIStatisticsUtilities::outputEnsemblePressureMeanWithInhomogeneousXDirection
 void
 RTIRMIStatisticsUtilities::outputEnsembleTurbulentMassFluxVelocityXMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -6644,8 +8020,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTurbulentMassFluxVelocityXMeanWithInhom
 void
 RTIRMIStatisticsUtilities::outputEnsembleDensitySpecificVolumeCovarianceMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -6738,8 +8113,7 @@ RTIRMIStatisticsUtilities::outputEnsembleDensitySpecificVolumeCovarianceMeanWith
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEIntegrateWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -6984,8 +8358,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEIntegrateWithInhomogeneousXDirection
 void
 RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressXMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7096,8 +8469,7 @@ RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressXMeanWithInhomogene
 void
 RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressYMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7208,8 +8580,7 @@ RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressYMeanWithInhomogene
 void
 RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressZMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7319,8 +8690,7 @@ RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressZMeanWithInhomogene
 void
 RTIRMIStatisticsUtilities::outputEnsembleEnstrophyIntegrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7417,8 +8787,7 @@ RTIRMIStatisticsUtilities::outputEnsembleEnstrophyIntegrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleEnstrophyMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7507,8 +8876,7 @@ RTIRMIStatisticsUtilities::outputEnsembleEnstrophyMeanWithInhomogeneousXDirectio
 void
 RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateIntegrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7605,8 +8973,7 @@ RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateIntegrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7696,8 +9063,7 @@ RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateMeanWithInhomogene
 void
 RTIRMIStatisticsUtilities::outputEnsembleMixingWidthReynoldsNumberWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7944,8 +9310,7 @@ RTIRMIStatisticsUtilities::outputEnsembleMixingWidthReynoldsNumberWithInhomogene
 void
 RTIRMIStatisticsUtilities::outputEnsembleTurbulentMachNumberWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8157,8 +9522,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTurbulentMachNumberWithInhomogeneousXDi
 void
 RTIRMIStatisticsUtilities::outputEnsembleEffectiveAtwoodNumberWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8252,8 +9616,7 @@ RTIRMIStatisticsUtilities::outputEnsembleEffectiveAtwoodNumberWithInhomogeneousX
 void
 RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueZIntegrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8342,8 +9705,7 @@ RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueZIntegrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueZMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8423,8 +9785,7 @@ RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueZMeanWithInhomogeneo
 void
 RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueXIntegrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8513,8 +9874,7 @@ RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueXIntegrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueXMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8594,8 +9954,7 @@ RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueXMeanWithInhomogeneo
 void
 RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueYIntegrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8684,8 +10043,7 @@ RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueYIntegrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueYMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8765,8 +10123,7 @@ RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueYMeanWithInhomogeneo
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEProduction1Integrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8971,8 +10328,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEProduction1Integrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEProduction1MeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -9179,8 +10535,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEProduction1MeanWithInhomogeneousXDir
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEProduction2Integrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -9294,8 +10649,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEProduction2Integrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEProduction2MeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -9401,8 +10755,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEProduction2MeanWithInhomogeneousXDir
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEProduction3Integrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -9519,8 +10872,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEProduction3Integrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEProduction3MeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -9637,8 +10989,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEProduction3MeanWithInhomogeneousXDir
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEDissipationIntegrated(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -9946,8 +11297,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEDissipationIntegrated(
 void
 RTIRMIStatisticsUtilities::outputEnsembleTKEDissipationMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -10256,8 +11606,7 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEDissipationMeanWithInhomogeneousXDir
 void
 RTIRMIStatisticsUtilities::outputEnsembleShearViscosityMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -10347,8 +11696,7 @@ RTIRMIStatisticsUtilities::outputEnsembleShearViscosityMeanWithInhomogeneousXDir
 void
 RTIRMIStatisticsUtilities::outputEnsembleMassDiffusivityMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -10456,16 +11804,16 @@ RTIRMIStatisticsUtilities::getAveragedShearStressComponentWithInhomogeneousXDire
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratio_finest_level_to_coarest_level =
+    hier::IntVector ratio_finest_level_to_coarsest_level =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratio_finest_level_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratio_finest_level_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -10486,7 +11834,7 @@ RTIRMIStatisticsUtilities::getAveragedShearStressComponentWithInhomogeneousXDire
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarest_level;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarsest_level;
     
     /*
      * Get the indices of the physical domain.
@@ -10525,15 +11873,15 @@ RTIRMIStatisticsUtilities::getAveragedShearStressComponentWithInhomogeneousXDire
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -10791,15 +12139,15 @@ RTIRMIStatisticsUtilities::getAveragedShearStressComponentWithInhomogeneousXDire
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -11178,15 +12526,15 @@ RTIRMIStatisticsUtilities::getAveragedShearStressComponentWithInhomogeneousXDire
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -12087,16 +13435,16 @@ RTIRMIStatisticsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomo
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratio_finest_level_to_coarest_level =
+    hier::IntVector ratio_finest_level_to_coarsest_level =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratio_finest_level_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratio_finest_level_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -12117,7 +13465,7 @@ RTIRMIStatisticsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomo
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarest_level;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarsest_level;
     
     /*
      * Get the indices of the physical domain.
@@ -12156,15 +13504,15 @@ RTIRMIStatisticsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomo
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -12444,15 +13792,15 @@ RTIRMIStatisticsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomo
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -13122,15 +14470,15 @@ RTIRMIStatisticsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomo
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -14804,16 +16152,16 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratio_finest_level_to_coarest_level =
+    hier::IntVector ratio_finest_level_to_coarsest_level =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratio_finest_level_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratio_finest_level_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -14834,7 +16182,7 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarest_level;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarsest_level;
     
     /*
      * Get the indices of the physical domain.
@@ -14880,15 +16228,15 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -15268,15 +16616,15 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -15810,15 +17158,15 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratio_to_coarest_level =
+            hier::IntVector ratio_to_coarsest_level =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarsest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarsest_level/ratio_to_coarsest_level;
             
             const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
@@ -17029,17 +18377,49 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             {
                 f_out << "\t" << "MIXING_WIDTH_X       ";
             }
+            else if (statistical_quantity_key == "MIXING_WIDTH_X_MOL_F")
+            {
+                f_out << "\t" << "MIXING_WIDTH_X_MOL_F ";
+            }
+            else if (statistical_quantity_key == "MIXING_WIDTH_X_VOL_F")
+            {
+                f_out << "\t" << "MIXING_WIDTH_X_VOL_F ";
+            }
             else if (statistical_quantity_key == "INTERFACE_MIN_X")
             {
                 f_out << "\t" << "INTERFACE_MIN_X      ";
+            }
+            else if (statistical_quantity_key == "INTERFACE_MIN_X_MOL_F")
+            {
+                f_out << "\t" << "INTERFACE_MIN_X_MOL_F";
+            }
+            else if (statistical_quantity_key == "INTERFACE_MIN_X_VOL_F")
+            {
+                f_out << "\t" << "INTERFACE_MIN_X_VOL_F";
             }
             else if (statistical_quantity_key == "INTERFACE_MAX_X")
             {
                 f_out << "\t" << "INTERFACE_MAX_X      ";
             }
+            else if (statistical_quantity_key == "INTERFACE_MAX_X_MOL_F")
+            {
+                f_out << "\t" << "INTERFACE_MAX_X_MOL_F";
+            }
+            else if (statistical_quantity_key == "INTERFACE_MAX_X_VOL_F")
+            {
+                f_out << "\t" << "INTERFACE_MAX_X_VOL_F";
+            }
             else if (statistical_quantity_key == "MIXEDNESS_X")
             {
                 f_out << "\t" << "MIXEDNESS_X          ";
+            }
+            else if (statistical_quantity_key == "MIXEDNESS_X_MOL_F")
+            {
+                f_out << "\t" << "MIXEDNESS_X_MOL_F    ";
+            }
+            else if (statistical_quantity_key == "MIXEDNESS_X_VOL_F")
+            {
+                f_out << "\t" << "MIXEDNESS_X_VOL_F    ";
             }
             else if (statistical_quantity_key == "DENSITY_MEAN_INHOMO_X")
             {
@@ -17227,6 +18607,26 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                         data_context);
             }
         }
+        else if (statistical_quantity_key == "MOLE_FRACTION_AVG_SP")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->X_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "VOLUME_FRACTION_AVG_SP")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Z_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
         else if (statistical_quantity_key == "MASS_FRACTION_VAR_SP")
         {
             if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Y_0_avg_computed))
@@ -17241,6 +18641,42 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
             {
                 rti_rmi_statistics_utilities->
                     computeMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "MOLE_FRACTION_VAR_SP")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->X_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->X_0_sq_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "VOLUME_FRACTION_VAR_SP")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Z_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Z_0_sq_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeVolumeFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
@@ -17527,6 +18963,26 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                         data_context);
             }
         }
+        else if (statistical_quantity_key == "MIXING_WIDTH_X_MOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->X_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "MIXING_WIDTH_X_VOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Z_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
         else if (statistical_quantity_key == "INTERFACE_MIN_X")
         {
             if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Y_0_avg_computed))
@@ -17537,12 +18993,52 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                         data_context);
             }
         }
+        else if (statistical_quantity_key == "INTERFACE_MIN_X_MOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->X_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "INTERFACE_MIN_X_VOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Z_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
         else if (statistical_quantity_key == "INTERFACE_MAX_X")
         {
             if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Y_0_avg_computed))
             {
                 rti_rmi_statistics_utilities->
                     computeAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "INTERFACE_MAX_X_MOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->X_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "INTERFACE_MAX_X_VOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Z_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
@@ -17561,6 +19057,42 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
             {
                 rti_rmi_statistics_utilities->
                     computeMassFractionProductWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "MIXEDNESS_X_MOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->X_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->X_0_X_1_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeMoleFractionProductWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "MIXEDNESS_X_VOL_F")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Z_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Z_0_Z_1_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeVolumeFractionProductWithHomogeneityInYDirectionOrInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
@@ -18656,7 +20188,22 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
                     "Y_avg.dat",
                     patch_hierarchy,
-                    data_context,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "MOLE_FRACTION_AVG_SP")
+        {
+            rti_rmi_statistics_utilities->
+                outputSpatialProfileEnsembleAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
+                    "X_avg.dat",
+                    patch_hierarchy,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "VOLUME_FRACTION_AVG_SP")
+        {
+            rti_rmi_statistics_utilities->
+                outputSpatialProfileEnsembleAveragedVolumeFractionWithHomogeneityInYDirectionOrInYZPlane(
+                    "Z_avg.dat",
+                    patch_hierarchy,
                     output_time);
         }
         else if (statistical_quantity_key == "MASS_FRACTION_VAR_SP")
@@ -18665,7 +20212,22 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
                     "Y_var.dat",
                     patch_hierarchy,
-                    data_context,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "MOLE_FRACTION_VAR_SP")
+        {
+            rti_rmi_statistics_utilities->
+                outputSpatialProfileEnsembleMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                    "X_var.dat",
+                    patch_hierarchy,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "VOLUME_FRACTION_VAR_SP")
+        {
+            rti_rmi_statistics_utilities->
+                outputSpatialProfileEnsembleVolumeFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                    "Z_var.dat",
+                    patch_hierarchy,
                     output_time);
         }
         else if (statistical_quantity_key == "DENSITY_AVG_SP")
@@ -18674,7 +20236,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "DENSITY_VAR_SP")
@@ -18683,7 +20244,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_var.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "SPECIFIC_VOLUME_AVG_SP")
@@ -18692,7 +20252,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedSpecificVolumeWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_inv_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "DENSITY_SPEC_VOL_COV_SP")
@@ -18701,7 +20260,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedDensitySpecificVolumeCovarianceWithHomogeneityInYDirectionOrInYZPlane(
                     "b.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "PRESSURE_AVG_SP")
@@ -18710,7 +20268,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedPressureWithHomogeneityInYDirectionOrInYZPlane(
                     "p_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "VELOCITY_X_AVG_SP")
@@ -18719,7 +20276,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
                     "u_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "VELOCITY_Y_AVG_SP")
@@ -18728,7 +20284,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedVelocityYWithHomogeneityInYDirectionOrInYZPlane(
                     "v_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "VELOCITY_Z_AVG_SP")
@@ -18737,7 +20292,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedVelocityZWithHomogeneityInYZPlane(
                     "w_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "MOMENTUM_X_AVG_SP")
@@ -18746,7 +20300,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_u_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "MOMENTUM_Y_AVG_SP")
@@ -18755,7 +20308,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_v_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "MOMENTUM_Z_AVG_SP")
@@ -18764,7 +20316,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedMomentumZWithHomogeneitynYZPlane(
                     "rho_w_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "TURB_MASS_FLUX_X_SP")
@@ -18773,7 +20324,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleTurbulentMassFluxXWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_a1.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "R11_SP")
@@ -18782,7 +20332,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleReynoldsNormalStressXWithHomogeneityInYDirectionOrInYZPlane(
                     "R11.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "R22_SP")
@@ -18791,7 +20340,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleReynoldsNormalStressYWithHomogeneityInYDirectionOrInYZPlane(
                     "R22.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "R33_SP")
@@ -18800,7 +20348,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleReynoldsNormalStressZWithHomogeneityInYZPlane(
                     "R33.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "ENSTROPHY_AVG_SP")
@@ -18809,7 +20356,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedEnstrophyWithHomogeneityInYDirectionOrInYZPlane(
                     "Omega_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "SCAL_DISS_RAT_AVG_SP")
@@ -18818,7 +20364,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
                     "chi_avg.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "BARO_TQ_Z_RMS_SP")
@@ -18827,7 +20372,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleRMSBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
                     "B3_rms.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "BARO_TQ_X_RMS_SP")
@@ -18836,7 +20380,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleRMSBaroclinicTorqueXWithHomogeneityInYZPlane(
                     "B1_rms.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         else if (statistical_quantity_key == "BARO_TQ_Y_RMS_SP")
@@ -18845,7 +20388,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 outputSpatialProfileEnsembleRMSBaroclinicTorqueYWithHomogeneityInYZPlane(
                     "B2_rms.dat",
                     patch_hierarchy,
-                    data_context,
                     output_time);
         }
         // Non-spatial profiles.
@@ -18854,288 +20396,308 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             rti_rmi_statistics_utilities->
                 outputEnsembleMixingWidthInXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
+        }
+        else if (statistical_quantity_key == "MIXING_WIDTH_X_MOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleMixingWidthInXDirectionWithMoleFractions(
+                    stat_dump_filename,
+                    patch_hierarchy);
+        }
+        else if (statistical_quantity_key == "MIXING_WIDTH_X_VOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleMixingWidthInXDirectionWithVolumeFractions(
+                    stat_dump_filename,
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "INTERFACE_MIN_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleInterfaceMinInXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
+        }
+        else if (statistical_quantity_key == "INTERFACE_MIN_X_MOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleInterfaceMinInXDirectionWithMoleFractions(
+                    stat_dump_filename,
+                    patch_hierarchy);
+        }
+        else if (statistical_quantity_key == "INTERFACE_MIN_X_VOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleInterfaceMinInXDirectionWithVolumeFractions(
+                    stat_dump_filename,
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "INTERFACE_MAX_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleInterfaceMaxInXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
+        }
+        else if (statistical_quantity_key == "INTERFACE_MAX_X_MOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleInterfaceMaxInXDirectionWithMoleFractions(
+                    stat_dump_filename,
+                    patch_hierarchy);
+        }
+        else if (statistical_quantity_key == "INTERFACE_MAX_X_VOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleInterfaceMaxInXDirectionWithVolumeFractions(
+                    stat_dump_filename,
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "MIXEDNESS_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleMixednessInXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
+        }
+        else if (statistical_quantity_key == "MIXEDNESS_X_MOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleMixednessInXDirectionWithMoleFractions(
+                    stat_dump_filename,
+                    patch_hierarchy);
+        }
+        else if (statistical_quantity_key == "MIXEDNESS_X_VOL_F")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleMixednessInXDirectionWithVolumeFractions(
+                    stat_dump_filename,
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "DENSITY_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleDensityMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "SP_VOL_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleSpecificVolumeMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "PRESS_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsemblePressureMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEIntegrateWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "a1_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTurbulentMassFluxVelocityXMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "b_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleDensitySpecificVolumeCovarianceMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "R11_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleReynoldsNormalStressXMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "R22_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleReynoldsNormalStressYMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "R33_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleReynoldsNormalStressZMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "ENSTROPHY_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleEnstrophyIntegrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "ENSTROPHY_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleEnstrophyMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "S_DIS_RAT_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleScalarDissipationRateIntegrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "S_DIS_RAT_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleScalarDissipationRateMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "RE_W_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleMixingWidthReynoldsNumberWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "MA_T_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTurbulentMachNumberWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "EFF_AT_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleEffectiveAtwoodNumberWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "BARO_TQ_Z_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleRMSBaroclinicTorqueZIntegrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "BARO_TQ_Z_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleRMSBaroclinicTorqueZMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "BARO_TQ_X_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleRMSBaroclinicTorqueXIntegrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "BARO_TQ_X_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleRMSBaroclinicTorqueXMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "BARO_TQ_Y_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleRMSBaroclinicTorqueYIntegrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "BARO_TQ_Y_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleRMSBaroclinicTorqueYMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_PROD1_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEProduction1Integrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_PROD1_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEProduction1MeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_PROD2_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEProduction2Integrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_PROD2_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEProduction2MeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_PROD3_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEProduction3Integrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_PROD3_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEProduction3MeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_DISS_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEDissipationIntegrated(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "TKE_DISS_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTKEDissipationMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "SHEAR_VIS_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleShearViscosityMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else if (statistical_quantity_key == "MASS_DIFF_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleMassDiffusivityMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
-                    patch_hierarchy,
-                    data_context);
+                    patch_hierarchy);
         }
         else
         {

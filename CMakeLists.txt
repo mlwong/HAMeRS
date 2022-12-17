@@ -70,6 +70,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
         set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wno-deprecated -qopenmp -xCORE-AVX2 -axCORE-AVX512,MIC-AVX512 -qopt-report")
     elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
         set(CMAKE_CXX_FLAGS "-std=c++11 -g -O0 -Wall -Wno-deprecated")
+    elseif (CMAKE_BUILD_TYPE MATCHES "AMD")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wno-deprecated -qopenmp -march=core-avx2 -qopt-report")
     endif()
 
 # Standard GNU compilers

@@ -419,9 +419,11 @@ class Euler:
          * Print data statistics (max/min conservative variables).
          */
         void
-        printDataStatistics(
+        computeAndOutputMonitoringDataStatistics(
             std::ostream& os,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const int step_num,
+            const double time) const;
         
         void
         printErrorStatistics(
@@ -443,6 +445,11 @@ class Euler:
         filterStatisticsVariables(
             const int level,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy);
+        
+        /**
+         * Output the header of monitoring statistics.
+         */
+        void outputHeaderMonitoringStatistics();
         
         /**
          * Output the header of statistics.
@@ -525,6 +532,11 @@ class Euler:
          * plot context passed to the variable registration routine.
          */
         const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
+        
+        /*
+         * Name of file output that contains monitoring statistics of data.
+         */
+        const std::string d_monitoring_stat_dump_filename;
         
         /*
          * Name of file output that contains statistics of data.

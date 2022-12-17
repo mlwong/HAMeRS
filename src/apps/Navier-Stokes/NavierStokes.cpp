@@ -59,6 +59,7 @@ NavierStokes::NavierStokes(
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
+        d_monitoring_stat_dump_filename("monitoring_stats.txt"),
         d_stat_dump_filename(stat_dump_filename),
         d_use_nonuniform_workload(false),
         d_use_conservative_form_diffusive_flux(true),
@@ -3415,9 +3416,11 @@ NavierStokes::printErrorStatistics(
 
 
 void
-NavierStokes::printDataStatistics(
+NavierStokes::computeAndOutputMonitoringDataStatistics(
     std::ostream& os,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const int step_num,
+    const double time) const
 {
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -3466,6 +3469,29 @@ NavierStokes::printDataStatistics(
             os << "Max/min " << variable_names[vi] << ": " << var_max_global << "/" << var_min_global << std::endl;
         }
     }
+    
+    d_flow_model->setupMonitoringStatisticsUtilities();
+    
+    HAMERS_SHARED_PTR<FlowModelMonitoringStatisticsUtilities> monitoring_statistics_utilities =
+        d_flow_model->getFlowModelMonitoringStatisticsUtilities();
+    
+    if (monitoring_statistics_utilities->hasMonitoringStatistics())
+    {
+        if (monitoring_statistics_utilities->isStepToOutputMonitoringStatistics(step_num))
+        {
+            monitoring_statistics_utilities->computeMonitoringStatistics(
+                patch_hierarchy,
+                d_plot_context,
+                step_num,
+                time);
+            
+            monitoring_statistics_utilities->outputMonitoringStatistics(
+                os,
+                d_monitoring_stat_dump_filename,
+                step_num,
+                time);
+        }
+    }
 }
 
 
@@ -3504,6 +3530,61 @@ NavierStokes::filterStatisticsVariables(
         level,
         patch_hierarchy,
         getDataContext());
+}
+
+
+/**
+ * Output the header of monitoring statistics.
+ */
+void
+NavierStokes::outputHeaderMonitoringStatistics()
+{
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    d_flow_model->setupMonitoringStatisticsUtilities();
+    
+    HAMERS_SHARED_PTR<FlowModelMonitoringStatisticsUtilities> monitoring_statistics_utilities =
+        d_flow_model->getFlowModelMonitoringStatisticsUtilities();
+    
+    if (monitoring_statistics_utilities->hasMonitoringStatistics())
+    {
+        if (mpi.getRank() == 0)
+        {
+            std::ofstream f_out;
+            f_out.open(d_monitoring_stat_dump_filename.c_str(), std::ios::app);
+            
+            if (!f_out.is_open())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Failed to open file to output statistics!"
+                    << std::endl);
+            }
+            
+            f_out << "# TIME               ";
+            f_out.close();
+        }
+        
+        monitoring_statistics_utilities->outputMonitoringStatisticalQuantitiesNames(
+            d_monitoring_stat_dump_filename);
+        
+        if (mpi.getRank() == 0)
+        {
+            std::ofstream f_out;
+            f_out.open(d_monitoring_stat_dump_filename.c_str(), std::ios::app);
+            
+            if (!f_out.is_open())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Failed to open file to output statistics!"
+                    << std::endl);
+            }
+            
+            f_out << std::endl;
+            f_out.close();
+        }
+    }
 }
 
 

@@ -3,6 +3,7 @@
 #include "flow/flow_models/single-species/FlowModelBasicUtilitiesSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelBoundaryUtilitiesSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelDiffusiveFluxUtilitiesSingleSpecies.hpp"
+#include "flow/flow_models/single-species/FlowModelMonitoringStatisticsUtilitiesSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelRiemannSolverSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelSourceUtilitiesSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelStatisticsUtilitiesSingleSpecies.hpp"
@@ -402,6 +403,7 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
         d_dim,
         d_grid_geometry,
         d_num_species,
+        flow_model_db,
         d_equation_of_shear_viscosity_mixing_rules,
         d_equation_of_bulk_viscosity_mixing_rules,
         d_equation_of_thermal_conductivity_mixing_rules));
@@ -419,6 +421,27 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
         d_equation_of_state_mixing_rules));
     
     /*
+     * Initialize boundary utilities object.
+     */
+    d_flow_model_boundary_utilities.reset(
+        new FlowModelBoundaryUtilitiesSingleSpecies(
+            "d_flow_model_boundary_utilities",
+            d_dim,
+            d_num_species,
+            d_num_eqn,
+            d_equation_of_state_mixing_rules));
+    
+    /*
+     * Initialize monitoring statistics utilities object.
+     */
+    d_flow_model_monitoring_statistics_utilities.reset(new FlowModelMonitoringStatisticsUtilitiesSingleSpecies(
+        "d_flow_model_monitoring_statistics_utilities",
+        d_dim,
+        d_grid_geometry,
+        d_num_species,
+        flow_model_db));
+    
+    /*
      * Initialize statistics utilities object.
      */
     d_flow_model_statistics_utilities.reset(new FlowModelStatisticsUtilitiesSingleSpecies(
@@ -431,17 +454,6 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
         d_equation_of_shear_viscosity_mixing_rules,
         d_equation_of_bulk_viscosity_mixing_rules,
         d_equation_of_thermal_conductivity_mixing_rules));
-    
-    /*
-     * Initialize boundary utilities object.
-     */
-    d_flow_model_boundary_utilities.reset(
-        new FlowModelBoundaryUtilitiesSingleSpecies(
-            "d_flow_model_boundary_utilities",
-            d_dim,
-            d_num_species,
-            d_num_eqn,
-            d_equation_of_state_mixing_rules));
 }
 
 
@@ -472,6 +484,8 @@ void
 FlowModelSingleSpecies::putToRestart(
     const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
+    putToRestartBase(restart_db);
+    
     /*
      * Put the properties of d_equation_of_state_mixing_rules into the restart database.
      */
@@ -525,9 +539,19 @@ FlowModelSingleSpecies::putToRestart(
     }
     
     /*
+     * Put the properties of d_flow_model_diffusive_flux_utilities into the restart database.
+     */
+    d_flow_model_diffusive_flux_utilities->putToRestart(restart_db);
+    
+    /*
      * Put the properties of d_flow_model_source_utilities into the restart database.
      */
     d_flow_model_source_utilities->putToRestart(restart_db);
+    
+    /*
+     * Put the properties of d_flow_model_monitoring_statistics_utilities into the restart database.
+     */
+    d_flow_model_monitoring_statistics_utilities->putToRestart(restart_db);
     
     /*
      * Put the properties of d_flow_model_statistics_utilities into the restart database.
@@ -716,7 +740,7 @@ FlowModelSingleSpecies::registerPatchWithDataContext(
 
 /*
  * Register different derived variables in the registered patch. The derived variables to be registered
- * are given as entires in a map of the variable name to the number of sub-ghost cells required.
+ * are given as entries in a map of the variable name to the number of sub-ghost cells required.
  * If the variable to be registered is one of the conservative variable, the corresponding entry
  * in the map is ignored.
  */
@@ -951,7 +975,7 @@ FlowModelSingleSpecies::unregisterPatch()
     d_cell_data_computed_max_wave_speed_z  = false;
     d_cell_data_computed_max_diffusivity   = false;
     
-    d_flow_model_diffusive_flux_utilities->clearCellData();
+    d_flow_model_diffusive_flux_utilities->clearCellAndSideData();
     d_flow_model_source_utilities->clearCellData();
     
     d_derived_cell_data_computed = false;

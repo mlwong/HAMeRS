@@ -74,7 +74,7 @@ class FlowModelFiveEqnAllaire: public FlowModel
         
         /*
          * Register different derived variables in the registered patch. The derived variables to be registered
-         * are given as entires in a map of the variable name to the number of sub-ghost cells required.
+         * are given as entries in a map of the variable name to the number of sub-ghost cells required.
          * If the variable to be registered is one of the conservative variable, the corresponding entry
          * in the map is ignored.
          */

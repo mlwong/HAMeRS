@@ -573,7 +573,7 @@ void runSimulation(
     t_write_stat->stop();
     
     /*
-     * Time step loop.  Note that the step count and integration
+     * Time step loop. Note that the step count and integration
      * time are maintained by algs::TimeRefinementIntegrator.
      */
     
@@ -588,7 +588,27 @@ void runSimulation(
         stat_dump_time_interval)*stat_dump_time_interval;
     bool dump_stat = true;
     
-    int iteration_num = 0;
+    int iteration_num = time_integrator->getIntegratorStep();
+    
+    tbox::pout << "At timestep # " << iteration_num << std::endl;
+    tbox::pout << "Simulation time is " << loop_time << std::endl;
+    switch (app_label)
+    {
+        case EULER:
+        {
+            Euler_app->outputHeaderMonitoringStatistics();
+            Euler_app->computeAndOutputMonitoringDataStatistics(tbox::pout, patch_hierarchy, iteration_num, loop_time);
+            break;
+        }
+        case NAVIER_STOKES:
+        {
+            Navier_Stokes_app->outputHeaderMonitoringStatistics();
+            Navier_Stokes_app->computeAndOutputMonitoringDataStatistics(tbox::pout, patch_hierarchy, iteration_num, loop_time);
+            break;
+        }
+    }
+    tbox::pout << "--------------------------------------------------------------------------------";
+    tbox::pout << std::endl;
     
     tbox::pout << "Start simulation..." << std::endl;
     tbox::pout << std::endl;
@@ -647,7 +667,7 @@ void runSimulation(
         }
         
         tbox::pout << "At begining of timestep # " << iteration_num - 1 << std::endl;
-        tbox::pout << "Simulation time is " << loop_time << std::endl;
+        tbox::pout << "Simulation time (old) is " << loop_time << std::endl;
         tbox::pout << "Current dt is " << dt_now << std::endl;
         
         // Advance the solution.
@@ -670,17 +690,17 @@ void runSimulation(
         }
         
         tbox::pout << "At end of timestep # " << iteration_num - 1 << std::endl;
-        tbox::pout << "Simulation time is " << loop_time << std::endl;
+        tbox::pout << "Simulation time (new) is " << loop_time << std::endl;
         switch (app_label)
         {
             case EULER:
             {
-                Euler_app->printDataStatistics(tbox::pout, patch_hierarchy);
+                Euler_app->computeAndOutputMonitoringDataStatistics(tbox::pout, patch_hierarchy, iteration_num, loop_time);
                 break;
             }
             case NAVIER_STOKES:
             {
-                Navier_Stokes_app->printDataStatistics(tbox::pout, patch_hierarchy);
+                Navier_Stokes_app->computeAndOutputMonitoringDataStatistics(tbox::pout, patch_hierarchy, iteration_num, loop_time);
                 break;
             }
         }
