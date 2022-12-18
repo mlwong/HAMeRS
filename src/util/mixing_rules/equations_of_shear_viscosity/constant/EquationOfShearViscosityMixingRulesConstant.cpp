@@ -1904,11 +1904,11 @@ EquationOfShearViscosityMixingRulesConstant::getSpeciesMolecularProperties(
     // If the constant kinematic viscosities are used.
     if (d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions)
     {
-        *(species_molecular_properties[0]) = d_species_mu[species_index];
+        *(species_molecular_properties[0]) = d_species_nu[species_index];
     }
     else
     {
-        *(species_molecular_properties[0]) = d_species_nu[species_index];
+        *(species_molecular_properties[0]) = d_species_mu[species_index];
     }
     *(species_molecular_properties[1]) = d_species_M[species_index];
 }
