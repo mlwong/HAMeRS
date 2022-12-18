@@ -8,6 +8,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     HAMERS_SHARED_PTR<pdat::CellData<double> >& source,
     const hier::Patch& patch,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
+    const std::unordered_map<std::string, double>& monitoring_statistics_map,
     const double time,
     const double dt,
     const int RK_step_number)
@@ -122,8 +123,8 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     double lambda = 701.53278340668; // wavelength of single-mode perturbation
     double eta_0  = 0.01*lambda;      // 1% perturbation
     
-    const double W_1 = 0.0480; // molecular weight of heavier gas
-    const double W_2 = 0.0160; // molecular weight of lighter gas
+    const double W_1 = 0.0400; // molecular weight of heavier gas
+    const double W_2 = 0.0240; // molecular weight of lighter gas
     
     const double p_i = 100000.0; // interface pressure
     const double T_0 = 300.0;    // background temperature
@@ -168,6 +169,9 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     const double R_1 = R_u/W_1;          // gas constant of heavier gas
     const double R_2 = R_u/W_2;          // gas constant of lighter gas
     
+    const double* const domain_xlo = d_grid_geometry->getXLower();
+    const double* const domain_xhi = d_grid_geometry->getXUpper();
+
     if (d_project_name == "2D discontinuous Rayleigh-Taylor instability" ||
         d_project_name == "2D smooth Rayleigh-Taylor instability")
     {
@@ -216,7 +220,8 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                         E_ref           = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
                         sponge_rate_tot = (pow((p_ref/rho_ref),0.5))*sponge_rate;
                         
-                        xi_b            = -(x[0])/(701.0-600.0); // mask value needs to be improved 
+                        xi_b            = (x[0]-d_special_source_box_lo[0])/(domain_xlo[0]-d_special_source_box_lo[0]);
+
                     }
                     else // lighter fluid
                     {
@@ -233,7 +238,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                         rho_v_ref       = rho_ref*v_ref;
                         E_ref           = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
                         sponge_rate_tot = (pow((p_ref/rho_ref),0.5))*sponge_rate;
-                        xi_b            = (x[0])/(701.0-600.0);   // mask value needs to be improved
+                        xi_b            = (x[0]-d_special_source_box_hi[0])/(domain_xhi[0]-d_special_source_box_hi[0]);
                     }
                     
                     const double rho_Y_0_p = rho_Y_0[idx_cons_var] - rho_Y_0_ref;
