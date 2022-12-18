@@ -103,9 +103,14 @@ class EquationOfShearViscosityMixingRulesConstant: public EquationOfShearViscosi
         
     private:
         /*
-         * Shear viscosities of different species.
+         * Dynamic shear viscosities of different species.
          */
         std::vector<double> d_species_mu;
+        
+        /*
+         * Kinematic shear viscosities of different species.
+         */
+        std::vector<double> d_species_nu;
         
         /*
          * Molecular weights of different species.
@@ -116,6 +121,16 @@ class EquationOfShearViscosityMixingRulesConstant: public EquationOfShearViscosi
          * HAMERS_SHARED_PTR to EquationOfShearViscosity.
          */
         HAMERS_SHARED_PTR<EquationOfShearViscosity> d_equation_of_shear_viscosity;
+        
+        /*
+         * Whether to assume the kinematic viscosity (instead of dynamic viscosity) is constant and the species are ideal gases.
+         */
+        bool d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions;
+        
+        /*
+         * Universal gas constant.
+         */
+        double d_R_u;
         
 };
 

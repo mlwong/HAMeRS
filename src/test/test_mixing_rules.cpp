@@ -33,9 +33,12 @@ int main(int argc, char *argv[])
     
     HAMERS_SHARED_PTR<EquationOfShearViscosity> equation_of_shear_viscosity;
     
+    const bool use_constant_kinematic_viscosity_and_ideal_gas_assumptions = false;
+    
     equation_of_shear_viscosity.reset(new EquationOfShearViscosityConstant(
         "equation_of_shear_viscosity",
-        dim));
+        dim,
+        use_constant_kinematic_viscosity_and_ideal_gas_assumptions));
     
     molecular_properties.resize(2);
     molecular_properties_const_ptr.reserve(2);
