@@ -8,10 +8,14 @@ class EquationOfShearViscosityConstant: public EquationOfShearViscosity
     public:
         EquationOfShearViscosityConstant(
             const std::string& object_name,
-            const tbox::Dimension& dim):
+            const tbox::Dimension& dim,
+            const bool use_constant_kinematic_viscosity_and_ideal_gas_assumptions,
+            const double R_u = double(8.314462618153240)): // Universal gas constant in SI units.
                 EquationOfShearViscosity(
                     object_name,
-                    dim)
+                    dim),
+                d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions(use_constant_kinematic_viscosity_and_ideal_gas_assumptions),
+                d_R_u(R_u)
         {}
         
         ~EquationOfShearViscosityConstant() {}
@@ -54,6 +58,15 @@ class EquationOfShearViscosityConstant: public EquationOfShearViscosity
             const hier::Box& domain) const;
         
     private:
+        /*
+         * Whether to assume the kinematic viscosity (instead of dynamic viscosity) is constant and the species is ideal gas.
+         */
+        bool d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions;
+        
+        /*
+         * Universal gas constant.
+         */
+        double d_R_u;
         
 };
 
