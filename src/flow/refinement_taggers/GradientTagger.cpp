@@ -111,7 +111,11 @@ GradientTagger::GradientTagger(
             std::string sensor_key = sensor_keys[i];
             sensor_db.reset();
             
-            if (!((sensor_key == "gradient_sensors") || (sensor_key == "d_gradient_sensors")))
+            if (!((sensor_key == "gradient_sensors") || (sensor_key == "d_gradient_sensors") ||
+                  (sensor_key == "is_tagging_in_box_only") || (sensor_key == "d_is_tagging_in_box_only") ||
+                  (sensor_key == "tagging_box_lo") || (sensor_key == "d_tagging_box_lo") ||
+                  (sensor_key == "tagging_box_hi") || (sensor_key == "d_tagging_box_hi")
+               ))
             {
                 if (!((sensor_key == "DIFFERENCE_FIRST_ORDER") ||
                       (sensor_key == "DIFFERENCE_SECOND_ORDER") ||
