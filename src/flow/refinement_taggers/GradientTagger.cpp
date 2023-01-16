@@ -46,59 +46,59 @@ GradientTagger::GradientTagger(
         
         if (d_is_tagging_in_box_only)
         {
-            if (gradient_tagger_db->keyExists("tagging_box_lo"))
+            if (gradient_tagger_db->keyExists("tagging_box_xlo"))
             {
-                d_tagging_box_lo = gradient_tagger_db->getDoubleVector("tagging_box_lo");
+                d_tagging_box_xlo = gradient_tagger_db->getDoubleVector("tagging_box_xlo");
             }
-            else if (gradient_tagger_db->keyExists("d_tagging_box_lo"))
+            else if (gradient_tagger_db->keyExists("d_tagging_box_xlo"))
             {
-                d_tagging_box_lo = gradient_tagger_db->getDoubleVector("d_tagging_box_lo");
-            }
-            else
-            {
-                TBOX_ERROR(d_object_name
-                    << ": "
-                    << "No key 'tagging_box_lo' or 'd_tagging_box_lo' found in data for gradient sensors."
-                    << std::endl);
-            }
-            
-            if (gradient_tagger_db->keyExists("tagging_box_hi"))
-            {
-                d_tagging_box_hi = gradient_tagger_db->getDoubleVector("tagging_box_hi");
-            }
-            else if (gradient_tagger_db->keyExists("d_tagging_box_hi"))
-            {
-                d_tagging_box_hi = gradient_tagger_db->getDoubleVector("d_tagging_box_hi");
+                d_tagging_box_xlo = gradient_tagger_db->getDoubleVector("d_tagging_box_xlo");
             }
             else
             {
                 TBOX_ERROR(d_object_name
                     << ": "
-                    << "No key 'tagging_box_hi' or 'd_tagging_box_hi' found in data for gradient sensors."
+                    << "No key 'tagging_box_lo' or 'd_tagging_box_xlo' found in data for gradient sensors."
                     << std::endl);
             }
             
-            if (d_tagging_box_lo.size() != d_dim.getValue())
+            if (gradient_tagger_db->keyExists("tagging_box_xhi"))
+            {
+                d_tagging_box_xhi = gradient_tagger_db->getDoubleVector("tagging_box_xhi");
+            }
+            else if (gradient_tagger_db->keyExists("d_tagging_box_xhi"))
+            {
+                d_tagging_box_xhi = gradient_tagger_db->getDoubleVector("d_tagging_box_xhi");
+            }
+            else
             {
                 TBOX_ERROR(d_object_name
-                    << ": GradientTagger::GradientTagger\n"
-                    << "Size of 'tagging_box_lo' or 'd_tagging_box_lo' is not consistent with problem dimension."
+                    << ": "
+                    << "No key 'tagging_box_hi' or 'd_tagging_box_xhi' found in data for gradient sensors."
                     << std::endl);
             }
             
-            if (d_tagging_box_hi.size() != d_dim.getValue())
+            if (d_tagging_box_xlo.size() != d_dim.getValue())
             {
                 TBOX_ERROR(d_object_name
                     << ": GradientTagger::GradientTagger\n"
-                    << "Size of 'tagging_box_hi' or 'd_tagging_box_hi' is not consistent with problem dimension."
+                    << "Size of 'tagging_box_lo' or 'd_tagging_box_xlo' is not consistent with problem dimension."
                     << std::endl);
             }
             
-            if (d_tagging_box_lo > d_tagging_box_hi)
+            if (d_tagging_box_xhi.size() != d_dim.getValue())
             {
                 TBOX_ERROR(d_object_name
                     << ": GradientTagger::GradientTagger\n"
-                    << "'tagging_box_lo'/'d_tagging_box_lo' is larger than 'tagging_box_hi'/'d_tagging_box_hi'."
+                    << "Size of 'tagging_box_hi' or 'd_tagging_box_xhi' is not consistent with problem dimension."
+                    << std::endl);
+            }
+            
+            if (d_tagging_box_xlo > d_tagging_box_xhi)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": GradientTagger::GradientTagger\n"
+                    << "'tagging_box_lo'/'d_tagging_box_xlo' is larger than 'tagging_box_hi'/'d_tagging_box_xhi'."
                     << std::endl);
             }
         }
@@ -113,8 +113,8 @@ GradientTagger::GradientTagger(
             
             if (!((sensor_key == "gradient_sensors") || (sensor_key == "d_gradient_sensors") ||
                   (sensor_key == "is_tagging_in_box_only") || (sensor_key == "d_is_tagging_in_box_only") ||
-                  (sensor_key == "tagging_box_lo") || (sensor_key == "d_tagging_box_lo") ||
-                  (sensor_key == "tagging_box_hi") || (sensor_key == "d_tagging_box_hi")
+                  (sensor_key == "tagging_box_xlo") || (sensor_key == "d_tagging_box_xlo") ||
+                  (sensor_key == "tagging_box_xhi") || (sensor_key == "d_tagging_box_xhi")
                ))
             {
                 if (!((sensor_key == "DIFFERENCE_FIRST_ORDER") ||
@@ -1515,8 +1515,8 @@ GradientTagger::putToRestart(
     restart_db->putBool("d_is_tagging_in_box_only", d_is_tagging_in_box_only);
     if (d_is_tagging_in_box_only)
     {
-        restart_db->putDoubleVector("d_tagging_box_lo", d_tagging_box_lo);
-        restart_db->putDoubleVector("d_tagging_box_hi", d_tagging_box_hi);
+        restart_db->putDoubleVector("d_tagging_box_xlo", d_tagging_box_xlo);
+        restart_db->putDoubleVector("d_tagging_box_xhi", d_tagging_box_xhi);
     }
     
     for (int si = 0; si < static_cast<int>(d_gradient_sensors.size()); si++)
@@ -2675,8 +2675,8 @@ GradientTagger::tagCellsOnPatchWithGradientSensor(
     const double* const dx = patch_geom->getDx();
     const double* const patch_xlo = patch_geom->getXLower();
     
-    const double* const box_tagging_lo = d_is_tagging_in_box_only? d_tagging_box_lo.data() : nullptr;
-    const double* const box_tagging_hi = d_is_tagging_in_box_only? d_tagging_box_hi.data() : nullptr;
+    const double* const box_tagging_lo = d_is_tagging_in_box_only? d_tagging_box_xlo.data() : nullptr;
+    const double* const box_tagging_hi = d_is_tagging_in_box_only? d_tagging_box_xhi.data() : nullptr;
     
     // Get the dimensions of box that covers the interior of patch.
     const hier::Box interior_box = patch.getBox();
@@ -2918,8 +2918,8 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
     const double* const dx = patch_geom->getDx();
     const double* const patch_xlo = patch_geom->getXLower();
     
-    const double* const box_tagging_lo = d_is_tagging_in_box_only? d_tagging_box_lo.data() : nullptr;
-    const double* const box_tagging_hi = d_is_tagging_in_box_only? d_tagging_box_hi.data() : nullptr;
+    const double* const box_tagging_lo = d_is_tagging_in_box_only? d_tagging_box_xlo.data() : nullptr;
+    const double* const box_tagging_hi = d_is_tagging_in_box_only? d_tagging_box_xhi.data() : nullptr;
     
     // Get the dimensions of box that covers the interior of patch.
     const hier::Box interior_box = patch.getBox();
