@@ -159,8 +159,8 @@ class GradientTagger
          * Whether only apply the gradient sensors in a box.
          */
         bool d_is_tagging_in_box_only;
-        std::vector<double> d_tagging_box_lo; // Lower spatial coordinates.
-        std::vector<double> d_tagging_box_hi; // Upper spatial coordinates.
+        std::vector<double> d_tagging_box_xlo; // Lower spatial coordinates.
+        std::vector<double> d_tagging_box_xhi; // Upper spatial coordinates.
         
         /*
          * HAMERS_SHARED_PTR to difference operators.
