@@ -232,7 +232,7 @@ class RungeKuttaPatchStrategy:
          * data AFTER patches are advanced on the given level. This routine is called after looping
          * over advanceSingleStepOnPatch() is completed and before computeStableDtOnPatch(). The
          * arguments are:
-         * level          -- level that will be advanced,
+         * level          -- level that has been advanced,
          * current_time   -- current integration time,
          * dt             -- current time increment,
          * first_step     -- boolean flag that is true if advance is first in time step sequence on
