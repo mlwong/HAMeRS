@@ -70,7 +70,7 @@ using namespace SAMRAI;
  *           first tagging method in this set of tagging methods
  *              - \b tagging_method = one of RICHARDSON_EXTRAPOLATION,
  *                                    MULTIRESOLUTION_DETECTOR, GRADIENT_DETECTOR
- *                                    VALUE_DETECTOR, REFINE_BOXES, NONE
+ *                                    VALUE_DETECTOR, REFINE_REGIONS, REFINE_BOXES, NONE
  *              - \b level_m
  *                required if tagging_method is REFINE_BOXES, the static boxes
  *                for the mth level
@@ -98,7 +98,7 @@ using namespace SAMRAI;
  *
  *       It is possible to use a "shortcut" input syntax for extremely
  *       simple tagging criteria.  If you only want RICHARDSON_EXTRAPOLATION,
- *       MULTIRESOLUTION_DETECTOR, GRADIENT_DETECTOR, VALUE_DETECTOR on for
+ *       MULTIRESOLUTION_DETECTOR, GRADIENT_DETECTOR, VALUE_DETECTOR, REFINE_REGIONS on for
  *       the entire simulation then an input of the following form may be used:
  *
  * @code
@@ -302,13 +302,29 @@ class ExtendedTagAndInitialize:
             double time);
         
         /*!
-         * Returns true if user supplied refine boxes is used at any cycle or time.
+         * Returns true if user supplied refine regions are used at any cycle or time.
+         */
+        bool
+        everUsesRefineRegions() const;
+        
+        /*!
+         * Returns true if user supplied refine regions are used at the supplied cycle and time.
+         *
+         * @pre !d_use_cycle_criteria || !d_use_time_criteria
+         */
+        bool
+        usesRefineRegions(
+            int cycle,
+            double time);
+        
+        /*!
+         * Returns true if user supplied refine boxes are used at any cycle or time.
          */
         bool
         everUsesRefineBoxes() const;
         
         /*!
-         * Returns true if user supplied refine boxes is used at the supplied cycle
+         * Returns true if user supplied refine boxes are used at the supplied cycle
          * and time.
          *
          * @pre !d_use_cycle_criteria || !d_use_time_criteria
@@ -501,7 +517,29 @@ class ExtendedTagAndInitialize:
         void
         turnOffRefineBoxes(
             double time);
-
+        
+        /*!
+         * Turn on refine regions criteria at the specified time
+         * programmatically.
+         *
+         * @param time Time to turn refine regions criteria on.
+         *
+         * @pre d_tag_strategy
+         */
+        void
+        turnOnRefineRegions(
+            double time);
+        
+        /*!
+         * Turn off refine regions criteria at the specified time
+         * programmatically.
+         *
+         * @param time Time to turn refine regions criteria off.
+         */
+        void
+        turnOffRefineRegions(
+            double time);
+        
         /*!
          * Turn on value detector criteria at the specified time
          * programmatically.
@@ -834,6 +872,11 @@ class ExtendedTagAndInitialize:
          * Flag indicating if any tagging criteria is VALUE_DETECTOR.
          */
         bool d_ever_uses_value_detector;
+        
+        /*
+         * Flag indicating if any tagging criteria is REFINE_REGIONS.
+         */
+        bool d_ever_uses_refine_regions;
         
         /*
          * Flag indicating if any tagging criteria is REFINE_BOXES.
