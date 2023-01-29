@@ -1771,17 +1771,17 @@ RungeKuttaLevelIntegrator::advanceLevel(
     t_patch_num_kernel->stop();
     
     /*
-    * (9) If the level advance is for regridding, we compute the next timestep:
-    *
-    * (a) If the dt computation is lagged (i.e., we use pre-advance data to compute timestep), we
-    *     reset scratch space on patch interiors if needed. Then, we set the strategy context to
-    *     current or scratch depending on whether ghost values are used to compute dt.
-    * (b) If the dt computation is not lagged (i.e., we use advanced data to compute timestep), we
-    *     refill scratch space, including ghost data with new solution values if needed. Then, we
-    *     set the strategy context to new or scratch depending on whether ghost values are used to
-    *     compute dt.
-    * (c) Then, we loop over patches and compute the dt on each patch.
-    */
+     * (9) If the level advanced is for regridding, we compute the next timestep:
+     *
+     * (a) If the dt computation is lagged (i.e., we use pre-advance data to compute timestep), we
+     *     reset scratch space on patch interiors if needed. Then, we set the strategy context to
+     *     current or scratch depending on whether ghost values are used to compute dt.
+     * (b) If the dt computation is not lagged (i.e., we use advanced data to compute timestep), we
+     *     refill scratch space, including ghost data with new solution values if needed. Then, we
+     *     set the strategy context to new or scratch depending on whether ghost values are used to
+     *     compute dt.
+     * (c) Then, we loop over patches and compute the dt on each patch.
+     */
     
     double dt_next = tbox::MathUtilities<double>::getMax();
     
