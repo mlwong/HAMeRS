@@ -17,6 +17,7 @@ set(flow_models_source_files
     ./single-species/FlowModelBasicUtilitiesSingleSpecies.cpp
     ./single-species/FlowModelBoundaryUtilitiesSingleSpecies.cpp
     ./single-species/FlowModelDiffusiveFluxUtilitiesSingleSpecies.cpp
+    ./single-species/FlowModelImmersedBoundaryMethodSingleSpecies.cpp
     ./single-species/FlowModelMonitoringStatisticsUtilitiesSingleSpecies.cpp
     ./single-species/FlowModelRiemannSolverSingleSpecies.cpp
     ./single-species/FlowModelSourceUtilitiesSingleSpecies.cpp
@@ -28,6 +29,7 @@ set(flow_models_source_files
     ./four-eqn_conservative/FlowModelBasicUtilitiesFourEqnConservative.cpp
     ./four-eqn_conservative/FlowModelBoundaryUtilitiesFourEqnConservative.cpp
     ./four-eqn_conservative/FlowModelDiffusiveFluxUtilitiesFourEqnConservative.cpp
+    ./four-eqn_conservative/FlowModelImmersedBoundaryMethodFourEqnConservative.cpp
     ./four-eqn_conservative/FlowModelMonitoringStatisticsUtilitiesFourEqnConservative.cpp
     ./four-eqn_conservative/FlowModelRiemannSolverFourEqnConservative.cpp
     ./four-eqn_conservative/FlowModelSourceUtilitiesFourEqnConservative.cpp
@@ -39,6 +41,7 @@ set(flow_models_source_files
     ./five-eqn_Allaire/FlowModelBasicUtilitiesFiveEqnAllaire.cpp
     ./five-eqn_Allaire/FlowModelBoundaryUtilitiesFiveEqnAllaire.cpp
     ./five-eqn_Allaire/FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire.cpp
+    ./five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp
     ./five-eqn_Allaire/FlowModelMonitoringStatisticsUtilitiesFiveEqnAllaire.cpp
     ./five-eqn_Allaire/FlowModelRiemannSolverFiveEqnAllaire.cpp
     ./five-eqn_Allaire/FlowModelSourceUtilitiesFiveEqnAllaire.cpp
