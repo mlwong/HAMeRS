@@ -3,6 +3,7 @@
 #include "flow/flow_models/four-eqn_conservative/FlowModelBasicUtilitiesFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelBoundaryUtilitiesFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelDiffusiveFluxUtilitiesFourEqnConservative.hpp"
+#include "flow/flow_models/four-eqn_conservative/FlowModelImmersedBoundaryMethodFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelMonitoringStatisticsUtilitiesFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelRiemannSolverFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelSourceUtilitiesFourEqnConservative.hpp"
@@ -481,6 +482,29 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
      */
     d_data_species_densities.resize(d_num_species, nullptr);
     d_data_species_enthalpies.resize(d_num_species, nullptr);
+}
+
+
+/*
+ * Initialize the immersed boundary method object.
+ */
+void
+FlowModelFourEqnConservative::initializeImmersedBoundaryMethod(
+    const HAMERS_SHARED_PTR<ImmersedBoundaries>& immersed_boundaries,
+    const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db)
+{
+    /*
+     * Initialize immersed boundary method object.
+     */
+    d_flow_model_immersed_boundary_method.reset(
+        new FlowModelImmersedBoundaryMethodFourEqnConservative(
+            "d_flow_model_immersed_boundary_method",
+            d_dim,
+            d_grid_geometry,
+            d_num_species,
+            d_num_eqn,
+            immersed_boundaries,
+            immersed_boundary_method_db));
 }
 
 

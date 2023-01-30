@@ -168,6 +168,16 @@ FlowModel::setupSourceUtilities()
 
 
 /*
+ * Setup the immersed boundary method object.
+ */
+void
+FlowModel::setupImmersedBoundaryMethod()
+{
+    d_flow_model_immersed_boundary_method->setFlowModel(shared_from_this());
+}
+
+
+/*
  * Setup the monitoring statistics utilties object.
  */
 void

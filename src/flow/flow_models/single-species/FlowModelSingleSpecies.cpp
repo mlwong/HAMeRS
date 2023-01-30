@@ -3,6 +3,7 @@
 #include "flow/flow_models/single-species/FlowModelBasicUtilitiesSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelBoundaryUtilitiesSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelDiffusiveFluxUtilitiesSingleSpecies.hpp"
+#include "flow/flow_models/single-species/FlowModelImmersedBoundaryMethodSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelMonitoringStatisticsUtilitiesSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelRiemannSolverSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelSourceUtilitiesSingleSpecies.hpp"
@@ -454,6 +455,29 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
         d_equation_of_shear_viscosity_mixing_rules,
         d_equation_of_bulk_viscosity_mixing_rules,
         d_equation_of_thermal_conductivity_mixing_rules));
+}
+
+
+/*
+ * Initialize the immersed boundary method object.
+ */
+void
+FlowModelSingleSpecies::initializeImmersedBoundaryMethod(
+    const HAMERS_SHARED_PTR<ImmersedBoundaries>& immersed_boundaries,
+    const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db)
+{
+    /*
+     * Initialize immersed boundary method object.
+     */
+    d_flow_model_immersed_boundary_method.reset(
+        new FlowModelImmersedBoundaryMethodSingleSpecies(
+            "d_flow_model_immersed_boundary_method",
+            d_dim,
+            d_grid_geometry,
+            d_num_species,
+            d_num_eqn,
+            immersed_boundaries,
+            immersed_boundary_method_db));
 }
 
 

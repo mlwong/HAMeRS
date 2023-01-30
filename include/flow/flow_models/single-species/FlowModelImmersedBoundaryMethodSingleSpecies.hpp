@@ -13,7 +13,7 @@ class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoun
             const int& num_species,
             const int& num_eqn,
             const HAMERS_SHARED_PTR<ImmersedBoundaries>& immersed_boundaries,
-            const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db);
+            const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db);
         
         ~FlowModelImmersedBoundaryMethodSingleSpecies() {}
         

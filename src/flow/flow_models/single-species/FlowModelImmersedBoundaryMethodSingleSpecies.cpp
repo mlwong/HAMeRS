@@ -7,7 +7,7 @@ FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSin
     const int& num_species,
     const int& num_eqn,
     const HAMERS_SHARED_PTR<ImmersedBoundaries>& immersed_boundaries,
-    const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db):
+    const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db):
         FlowModelImmersedBoundaryMethod(
             object_name,
             dim,
@@ -15,6 +15,6 @@ FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSin
             num_species,
             num_eqn,
             immersed_boundaries,
-            flow_model_db)
+            immersed_boundary_method_db)
 {
 }

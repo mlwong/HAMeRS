@@ -21,6 +21,13 @@ class FlowModelFourEqnConservative: public FlowModel
         ~FlowModelFourEqnConservative() {}
         
         /*
+         * Initialize the immersed boundary method object.
+         */
+        void initializeImmersedBoundaryMethod(
+            const HAMERS_SHARED_PTR<ImmersedBoundaries>& immersed_boundaries,
+            const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db);
+        
+        /*
          * Print all characteristics of the flow model class.
          */
         void printClassData(std::ostream& os) const;

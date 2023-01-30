@@ -3,6 +3,7 @@
 #include "flow/flow_models/five-eqn_Allaire/FlowModelBasicUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelBoundaryUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire.hpp"
+#include "flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelMonitoringStatisticsUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelRiemannSolverFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelSourceUtilitiesFiveEqnAllaire.hpp"
@@ -367,6 +368,29 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
      */
     d_data_species_densities.resize(d_num_species, nullptr);
     d_data_species_temperatures.resize(d_num_species, nullptr);
+}
+
+
+/*
+ * Initialize the immersed boundary method object.
+ */
+void
+FlowModelFiveEqnAllaire::initializeImmersedBoundaryMethod(
+    const HAMERS_SHARED_PTR<ImmersedBoundaries>& immersed_boundaries,
+    const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db)
+{
+    /*
+     * Initialize immersed boundary method object.
+     */
+    d_flow_model_immersed_boundary_method.reset(
+        new FlowModelImmersedBoundaryMethodFiveEqnAllaire(
+            "d_flow_model_immersed_boundary_method",
+            d_dim,
+            d_grid_geometry,
+            d_num_species,
+            d_num_eqn,
+            immersed_boundaries,
+            immersed_boundary_method_db));
 }
 
 

@@ -64,7 +64,8 @@ Euler::Euler(
         d_monitoring_stat_dump_filename("monitoring_stats.txt"),
         d_stat_dump_filename(stat_dump_filename),
         d_use_nonuniform_workload(false),
-        d_Euler_boundary_conditions_db_is_from_restart(false)
+        d_Euler_boundary_conditions_db_is_from_restart(false),
+        d_use_immersed_boundaries(false)
 {
     TBOX_ASSERT(!object_name.empty());
     TBOX_ASSERT(input_db);
@@ -119,6 +120,17 @@ Euler::Euler(
         d_flow_model_str));
     
     d_flow_model = d_flow_model_manager->getFlowModel();
+    
+    if (d_use_immersed_boundaries)
+    {
+        d_immersed_boundaries.reset(new ImmersedBoundaries(
+            "d_immersed_boundaries",
+            d_dim));
+        
+        d_flow_model->initializeImmersedBoundaryMethod(
+            d_immersed_boundaries,
+            d_immersed_boundary_method_db);
+    }
     
     /*
      * Initialize d_convective_flux_reconstructor_manager and get the convective flux reconstructor object.
@@ -2278,6 +2290,18 @@ Euler::putToRestart(
     
     d_Euler_boundary_conditions->putToRestart(restart_Euler_boundary_conditions_db);
     
+    restart_db->putBool("d_use_immersed_boundaries", d_use_immersed_boundaries);
+    if (d_use_immersed_boundaries)
+    {
+        HAMERS_SHARED_PTR<tbox::Database> immersed_boundary_method_db =
+            restart_db->putDatabase("d_immersed_boundary_method_db");
+        
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        flow_model_immersed_boundary_method->putToRestart(immersed_boundary_method_db);
+    }
+    
     if (d_value_tagger != nullptr)
     {
         HAMERS_SHARED_PTR<tbox::Database> restart_value_tagger_db =
@@ -2955,6 +2979,20 @@ Euler::getFromInput(
             }
         }
     }
+    
+    /*
+     * Get whether to use immersed boundaries and the database for the immersed boundary method from the input database.
+     */
+    
+    if (input_db->keyExists("use_immersed_boundaries"))
+    {
+        d_use_immersed_boundaries = input_db->getBool("use_immersed_boundaries");
+        if (d_use_immersed_boundaries)
+        {
+            d_immersed_boundary_method_db = input_db->getDatabase("Immersed_boundary_method");
+        }
+    }
+    
 }
 
 
@@ -2987,6 +3025,12 @@ void Euler::getFromRestart()
     d_Euler_boundary_conditions_db = db->getDatabase("d_Euler_boundary_conditions_db");
     
     d_Euler_boundary_conditions_db_is_from_restart = true;
+    
+    d_use_immersed_boundaries = db->getBool("d_use_immersed_boundaries");
+    if (d_use_immersed_boundaries)
+    {
+        d_immersed_boundary_method_db = db->getDatabase("d_immersed_boundary_method_db");
+    }
     
     if (db->keyExists("d_value_tagger_db"))
     {

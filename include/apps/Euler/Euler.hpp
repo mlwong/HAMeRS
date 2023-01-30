@@ -599,6 +599,17 @@ class Euler:
         bool d_Euler_boundary_conditions_db_is_from_restart;
         
         /*
+         * Whether to use use immersed boundaries and the database for the immersed boundary method.
+         */
+        bool d_use_immersed_boundaries;
+        HAMERS_SHARED_PTR<tbox::Database> d_immersed_boundary_method_db;
+        
+        /* 
+         * HAMERS_SHARED_PTR to the immersed boundaries object.
+         */
+        HAMERS_SHARED_PTR<ImmersedBoundaries> d_immersed_boundaries;
+        
+        /*
          * HAMERS_SHARED_PTR to EulerErrorStatistics.
          */
         HAMERS_SHARED_PTR<EulerErrorStatistics> d_Euler_error_statistics;
