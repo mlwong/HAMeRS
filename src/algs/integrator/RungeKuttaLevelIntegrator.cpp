@@ -1710,8 +1710,58 @@ RungeKuttaLevelIntegrator::advanceLevel(
             }
         }
         
-        d_patch_strategy->setDataContext(d_scratch);
+        if (d_patch_strategy->useGhostCellImmersedBoundaryMethod())
+        {
+            if (sn == 0)
+            {
+                fill_schedule_intermediate = 
+                    d_bdry_fill_intermediate[sn]->createSchedule(
+                        level,
+                        d_patch_strategy);
+            }
             
+            for (hier::PatchLevel::iterator ip(level->begin());
+                ip != level->end();
+                ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch>& patch = *ip;
+                
+                t_patch_num_kernel->start();
+                
+                // Compute and set the immersed boundary ghost cells.
+                d_patch_strategy->setImmersedBoundaryGhostCells(
+                    *patch,
+                    current_time,
+                    sn,
+                    d_intermediate[sn]);
+                
+                t_patch_num_kernel->stop();
+            }
+            
+            if (regrid_advance)
+            {
+                t_error_bdry_fill_comm->start();
+            }
+            else
+            {
+                t_advance_bdry_fill_comm->start();
+            }
+            
+            // One more communication for exchanging the immersed boundary ghost cells in the halo regions.
+            fill_schedule_intermediate->fillData(current_time);
+            
+            if (regrid_advance)
+            {
+                t_error_bdry_fill_comm->stop();
+            }
+            else
+            {
+                t_advance_bdry_fill_comm->stop();
+            }
+        }
+        
+        d_patch_strategy->setDataContext(d_scratch);
+        
         for (hier::PatchLevel::iterator ip(level->begin());
              ip != level->end();
              ip++)

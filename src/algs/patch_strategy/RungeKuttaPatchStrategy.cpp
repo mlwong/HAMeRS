@@ -17,6 +17,7 @@
 RungeKuttaPatchStrategy::RungeKuttaPatchStrategy():
     xfer::RefinePatchStrategy(),
     xfer::CoarsenPatchStrategy(),
+    d_use_ghost_cell_immersed_boundary_method(false),
     d_data_context()
 {
 }
@@ -24,6 +25,22 @@ RungeKuttaPatchStrategy::RungeKuttaPatchStrategy():
 
 RungeKuttaPatchStrategy::~RungeKuttaPatchStrategy()
 {
+}
+
+
+/**
+ **************************************************************************************************
+ * Set the immersed boundary ghost cells.
+ **************************************************************************************************
+ */
+void
+RungeKuttaPatchStrategy::setImmersedBoundaryGhostCells(
+    hier::Patch& patch,
+    const double time,
+    const int RK_step_number,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    
 }
 
 

@@ -5,10 +5,13 @@
 
 #include "HAMeRS_memory.hpp"
 
+#include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
+#include "extn/visit_data_writer/ExtendedVisItDataWriter.hpp"
 #include "flow/flow_models/FlowModel.hpp"
 #include "util/immersed_boundaries/ImmersedBoundaries.hpp"
 
 #include "SAMRAI/pdat/CellData.h"
+#include "SAMRAI/pdat/CellVariable.h"
 
 class FlowModel;
 
@@ -22,14 +25,7 @@ class FlowModelImmersedBoundaryMethod
             const int& num_species,
             const int& num_eqn,
             const HAMERS_SHARED_PTR<ImmersedBoundaries>& immersed_boundaries,
-            const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db):
-                d_object_name(object_name),
-                d_dim(dim),
-                d_grid_geometry(grid_geometry),
-                d_num_species(num_species),
-                d_num_eqn(num_eqn),
-                d_immersed_boundaries(immersed_boundaries)
-        {}
+            const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db);
         
         virtual ~FlowModelImmersedBoundaryMethod() {}
         
@@ -52,6 +48,31 @@ class FlowModelImmersedBoundaryMethod
         void putToRestart(const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db) const
         {
         }
+        
+        /*
+         * Register the immersed boundary method variables.
+         */
+        void registerImmersedBoundaryMethodVariables(
+            RungeKuttaLevelIntegrator* integrator,
+            const hier::IntVector& num_ghosts,
+            const hier::IntVector& num_ghosts_intermediate);
+        
+        /*
+         * Register the plotting quantities.
+         */
+#ifdef HAVE_HDF5
+        void
+        registerPlotQuantities(
+            const HAMERS_SHARED_PTR<ExtendedVisItDataWriter>& visit_writer,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& plot_context);
+#endif
+        
+        /*
+         * Set the immersed boundary method variables.
+         */
+        void setImmersedBoundaryMethodVariables(
+            const double data_time,
+            const bool initial_time);
         
     protected:
         /*
@@ -88,6 +109,13 @@ class FlowModelImmersedBoundaryMethod
          * HAMERS_WEAK_PTR to FlowModel.
          */
         HAMERS_WEAK_PTR<FlowModel> d_flow_model;
+        
+        /*
+         * HAMERS_SHARED_PTR to registered cell variables of immersed boundary methods.
+         */
+        static HAMERS_SHARED_PTR<pdat::CellVariable<int> > s_variable_mask;
+        static HAMERS_SHARED_PTR<pdat::CellVariable<double> > s_variable_wall_distance;
+        static HAMERS_SHARED_PTR<pdat::CellVariable<double> > s_variable_surface_normal;
         
 };
 

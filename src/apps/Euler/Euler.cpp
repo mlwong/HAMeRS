@@ -106,6 +106,11 @@ Euler::Euler(
     }
     getFromInput(input_db, is_from_restart);
     
+    if (d_use_ghost_cell_immersed_boundary_method)
+    {
+        d_use_immersed_boundaries = true;
+    }
+    
     /*
      * Initialize d_flow_model_manager and get the flow model object.
      */
@@ -125,7 +130,8 @@ Euler::Euler(
     {
         d_immersed_boundaries.reset(new ImmersedBoundaries(
             "d_immersed_boundaries",
-            d_dim));
+            d_dim,
+            d_grid_geometry));
         
         d_flow_model->initializeImmersedBoundaryMethod(
             d_immersed_boundaries,
@@ -307,6 +313,20 @@ Euler::registerModelVariables(
         num_ghosts_intermediate);
     
     /*
+     * Register the variables of d_immersed_boundaries.
+     */
+    if (d_use_immersed_boundaries)
+    {
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        flow_model_immersed_boundary_method->registerImmersedBoundaryMethodVariables(
+            integrator,
+            num_ghosts,
+            num_ghosts_intermediate);
+    }
+    
+    /*
      * Register the fluxes and sources.
      */
     
@@ -375,6 +395,16 @@ Euler::registerModelVariables(
     {
         d_flow_model->registerPlotQuantities(
             d_visit_writer);
+        
+        if (d_use_immersed_boundaries)
+        {
+            HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+                d_flow_model->getFlowModelImmersedBoundaryMethod();
+            
+            flow_model_immersed_boundary_method->registerPlotQuantities(
+                d_visit_writer,
+                integrator->getPlotContext());
+        }
         
         if (d_value_tagger != nullptr)
         {
@@ -476,6 +506,22 @@ Euler::initializeDataOnPatch(
         conservative_var_data,
         data_time,
         initial_time);
+    
+    if (d_use_immersed_boundaries)
+    {
+        /*
+         * Initialize the immersed boundary method variables.
+         */
+        
+        d_flow_model->setupImmersedBoundaryMethod();
+        
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        flow_model_immersed_boundary_method->setImmersedBoundaryMethodVariables(
+            data_time,
+            initial_time);
+    }
     
     d_flow_model->unregisterPatch();
     
@@ -909,6 +955,47 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
     t_compute_dt->stop();
     
     return spectral_radiuses_and_dt;
+}
+
+
+/**
+ * Set the immersed boundary ghost cells.
+ */
+void
+Euler::setImmersedBoundaryGhostCells(
+    hier::Patch& patch,
+    const double time,
+    const int RK_step_number,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    NULL_USE(RK_step_number);
+    
+    if (!d_use_immersed_boundaries || !d_use_ghost_cell_immersed_boundary_method)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "d_use_immersed_boundaries or d_use_ghost_cell_immersed_boundary_method are set to false!"
+            << std::endl);
+    }
+    
+    d_flow_model->registerPatchWithDataContext(patch, data_context);
+    
+    /*
+     * Initialize the immersed boundary method variables.
+     */
+    
+    d_flow_model->setupImmersedBoundaryMethod();
+    
+    HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+        d_flow_model->getFlowModelImmersedBoundaryMethod();
+    
+    flow_model_immersed_boundary_method->setImmersedBoundaryMethodVariables(
+        time,
+        false);
+    
+    // Compute the immersed boundary ghost cells here...
+    
+    d_flow_model->unregisterPatch();
 }
 
 
@@ -2290,11 +2377,11 @@ Euler::putToRestart(
     
     d_Euler_boundary_conditions->putToRestart(restart_Euler_boundary_conditions_db);
     
-    restart_db->putBool("d_use_immersed_boundaries", d_use_immersed_boundaries);
-    if (d_use_immersed_boundaries)
+    restart_db->putBool("d_use_ghost_cell_immersed_boundary_method", d_use_ghost_cell_immersed_boundary_method);
+    if (d_use_ghost_cell_immersed_boundary_method)
     {
         HAMERS_SHARED_PTR<tbox::Database> immersed_boundary_method_db =
-            restart_db->putDatabase("d_immersed_boundary_method_db");
+            restart_db->putDatabase("immersed_boundary_method_db");
         
         HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
             d_flow_model->getFlowModelImmersedBoundaryMethod();
@@ -2984,10 +3071,10 @@ Euler::getFromInput(
      * Get whether to use immersed boundaries and the database for the immersed boundary method from the input database.
      */
     
-    if (input_db->keyExists("use_immersed_boundaries"))
+    if (input_db->keyExists("use_ghost_cell_immersed_boundary_method"))
     {
-        d_use_immersed_boundaries = input_db->getBool("use_immersed_boundaries");
-        if (d_use_immersed_boundaries)
+        d_use_ghost_cell_immersed_boundary_method = input_db->getBool("use_ghost_cell_immersed_boundary_method");
+        if (d_use_ghost_cell_immersed_boundary_method)
         {
             d_immersed_boundary_method_db = input_db->getDatabase("Immersed_boundary_method");
         }
@@ -3026,8 +3113,8 @@ void Euler::getFromRestart()
     
     d_Euler_boundary_conditions_db_is_from_restart = true;
     
-    d_use_immersed_boundaries = db->getBool("d_use_immersed_boundaries");
-    if (d_use_immersed_boundaries)
+    d_use_ghost_cell_immersed_boundary_method = db->getBool("d_use_ghost_cell_immersed_boundary_method");
+    if (d_use_ghost_cell_immersed_boundary_method)
     {
         d_immersed_boundary_method_db = db->getDatabase("d_immersed_boundary_method_db");
     }

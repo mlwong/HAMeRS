@@ -130,6 +130,16 @@ class Euler:
             const double dt_time);
         
         /**
+         * Set the immersed boundary ghost cells.
+         */
+        void
+        setImmersedBoundaryGhostCells(
+            hier::Patch& patch,
+            const double time,
+            const int RK_step_number,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context = HAMERS_SHARED_PTR<hier::VariableContext>());
+        
+        /**
          * Compute time integral of convective fluxes to be used in finite difference for patch Runge-
          * Kutta integration.
          * 

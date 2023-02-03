@@ -4,6 +4,7 @@ set(flow_models_source_files
     FlowModelManager.cpp
     FlowModel.cpp
     FlowModelDiffusiveFluxUtilities.cpp
+    FlowModelImmersedBoundaryMethod.cpp
     FlowModelMonitoringStatisticsUtilities.cpp
     FlowModelSourceUtilities.cpp
     FlowModelSpecialSourceTerms.cpp
@@ -55,8 +56,8 @@ set(flow_models_source_files
 # source files defined in flow_models_source_files
 add_library(flow_models ${flow_models_source_files})
 
-TARGET_LINK_LIBRARIES(flow_models MPI_helpers
-  visit_data_writer mixing_rules patch_hierarchies
+TARGET_LINK_LIBRARIES(flow_models immersed_boundaries 
+  MPI_helpers visit_data_writer mixing_rules patch_hierarchies
   SAMRAI_appu SAMRAI_geom SAMRAI_solv SAMRAI_algs SAMRAI_mesh
   SAMRAI_math SAMRAI_pdat SAMRAI_xfer SAMRAI_hier SAMRAI_tbox
   ${HDF5_C_LIBRARIES} gfortran)
