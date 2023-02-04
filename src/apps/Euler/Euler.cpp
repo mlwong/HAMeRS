@@ -520,7 +520,8 @@ Euler::initializeDataOnPatch(
         
         flow_model_immersed_boundary_method->setImmersedBoundaryMethodVariables(
             data_time,
-            initial_time);
+            initial_time,
+            getDataContext());
     }
     
     d_flow_model->unregisterPatch();
@@ -991,7 +992,8 @@ Euler::setImmersedBoundaryGhostCells(
     
     flow_model_immersed_boundary_method->setImmersedBoundaryMethodVariables(
         time,
-        false);
+        false,
+        getDataContext());
     
     // Compute the immersed boundary ghost cells here...
     
@@ -3079,7 +3081,6 @@ Euler::getFromInput(
             d_immersed_boundary_method_db = input_db->getDatabase("Immersed_boundary_method");
         }
     }
-    
 }
 
 

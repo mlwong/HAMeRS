@@ -72,7 +72,8 @@ class FlowModelImmersedBoundaryMethod
          */
         void setImmersedBoundaryMethodVariables(
             const double data_time,
-            const bool initial_time);
+            const bool initial_time,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
     protected:
         /*

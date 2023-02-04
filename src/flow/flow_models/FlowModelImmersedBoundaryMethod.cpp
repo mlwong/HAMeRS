@@ -55,12 +55,28 @@ FlowModelImmersedBoundaryMethod::registerImmersedBoundaryMethodVariables(
         s_variable_mask,
         num_ghosts,
         num_ghosts_intermediate,
-        RungeKuttaLevelIntegrator::TIME_DEP,
+        RungeKuttaLevelIntegrator::NO_FILL,
         d_grid_geometry,
         "NO_COARSEN",
         "NO_REFINE");
     
+    integrator->registerVariable(
+        s_variable_wall_distance,
+        num_ghosts,
+        num_ghosts_intermediate,
+        RungeKuttaLevelIntegrator::NO_FILL,
+        d_grid_geometry,
+        "NO_COARSEN",
+        "NO_REFINE");
     
+    integrator->registerVariable(
+        s_variable_surface_normal,
+        num_ghosts,
+        num_ghosts_intermediate,
+        RungeKuttaLevelIntegrator::NO_FILL,
+        d_grid_geometry,
+        "NO_COARSEN",
+        "NO_REFINE");
 }
 
 
@@ -91,12 +107,11 @@ FlowModelImmersedBoundaryMethod::registerPlotQuantities(
 void
 FlowModelImmersedBoundaryMethod::setImmersedBoundaryMethodVariables(
     const double data_time,
-    const bool initial_time)
+    const bool initial_time,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
-    
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context = flow_model_tmp->getDataContext();
     
     const HAMERS_SHARED_PTR<pdat::CellData<int> > data_mask(
         HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
@@ -109,6 +124,10 @@ FlowModelImmersedBoundaryMethod::setImmersedBoundaryMethodVariables(
     const HAMERS_SHARED_PTR<pdat::CellData<double> > data_surface_normal(
         HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(s_variable_surface_normal, data_context)));
+    
+    // data_mask->fillAll(1);
+    // data_wall_distance->fillAll(double(0));
+    // data_surface_normal->fillAll(double(0));
     
     d_immersed_boundaries->setImmersedBoundaryVariablesOnPatch(
         patch,

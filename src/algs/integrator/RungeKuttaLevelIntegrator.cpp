@@ -1728,6 +1728,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
                 
                 t_patch_num_kernel->start();
                 
+                d_patch_strategy->setDataContext(d_scratch);
+                
                 // Compute and set the immersed boundary ghost cells.
                 d_patch_strategy->setImmersedBoundaryGhostCells(
                     *patch,
@@ -2684,27 +2686,13 @@ RungeKuttaLevelIntegrator::registerVariable(
             
             d_new_patch_init_data.setFlag(cur_id);
             
+            d_saved_var_scratch_data.setFlag(scr_id);
+            
             /*
              * Register variable and context needed for restart.
              */
             hier::PatchDataRestartManager::getManager()->
                 registerPatchDataForRestart(cur_id);
-            
-            HAMERS_SHARED_PTR<hier::RefineOperator> refine_op(
-                transfer_geom->lookupRefineOperator(var, refine_name));
-            
-            d_fill_new_level->registerRefine(
-                cur_id, cur_id, scr_id, refine_op);
-            
-            /*
-             * Coarsen operation for setting initial data on coarser level
-             * in the Richardson extrapolation algorithm.
-             */
-            
-            HAMERS_SHARED_PTR<hier::CoarsenOperator> coarsen_op(
-                transfer_geom->lookupCoarsenOperator(var, coarsen_name));
-            
-            d_coarsen_rich_extrap_init->registerCoarsen(cur_id, cur_id, coarsen_op);
             
             break;
         }
