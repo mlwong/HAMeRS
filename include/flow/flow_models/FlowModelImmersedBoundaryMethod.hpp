@@ -71,6 +71,7 @@ class FlowModelImmersedBoundaryMethod
          * Set the immersed boundary method variables.
          */
         void setImmersedBoundaryMethodVariables(
+            const hier::Box& domain,
             const double data_time,
             const bool initial_time,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);

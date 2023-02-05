@@ -97,6 +97,23 @@ FlowModelImmersedBoundaryMethod::registerPlotQuantities(
         vardb->mapVariableAndContextToIndex(
            s_variable_mask,
            plot_context));
+    
+    visit_writer->registerPlotQuantity(
+        "wall distance",
+        "SCALAR",
+        vardb->mapVariableAndContextToIndex(
+           s_variable_wall_distance,
+           plot_context));
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        visit_writer->registerPlotQuantity(
+            "surface normal",
+            "VECTOR",
+            vardb->mapVariableAndContextToIndex(
+               s_variable_surface_normal,
+               plot_context));
+    }
 }
 #endif
 
@@ -106,6 +123,7 @@ FlowModelImmersedBoundaryMethod::registerPlotQuantities(
  */
 void
 FlowModelImmersedBoundaryMethod::setImmersedBoundaryMethodVariables(
+    const hier::Box& domain,
     const double data_time,
     const bool initial_time,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
@@ -125,12 +143,9 @@ FlowModelImmersedBoundaryMethod::setImmersedBoundaryMethodVariables(
         HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(s_variable_surface_normal, data_context)));
     
-    // data_mask->fillAll(1);
-    // data_wall_distance->fillAll(double(0));
-    // data_surface_normal->fillAll(double(0));
-    
     d_immersed_boundaries->setImmersedBoundaryVariablesOnPatch(
         patch,
+        domain,
         data_mask,
         data_wall_distance,
         data_surface_normal,

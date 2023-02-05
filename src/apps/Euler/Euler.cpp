@@ -130,6 +130,7 @@ Euler::Euler(
     {
         d_immersed_boundaries.reset(new ImmersedBoundaries(
             "d_immersed_boundaries",
+            d_project_name,
             d_dim,
             d_grid_geometry));
         
@@ -313,12 +314,15 @@ Euler::registerModelVariables(
         num_ghosts_intermediate);
     
     /*
-     * Register the variables of d_immersed_boundaries.
+     * Set the number of immersed boundary ghost cells of d_immersed_boundaries and register the variables of
+     * flow model immersed boundary method.
      */
     if (d_use_immersed_boundaries)
     {
         HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
             d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        d_immersed_boundaries->setNumberOfImmersedBoundaryGhosts(num_ghosts);
         
         flow_model_immersed_boundary_method->registerImmersedBoundaryMethodVariables(
             integrator,
@@ -518,7 +522,10 @@ Euler::initializeDataOnPatch(
         HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
             d_flow_model->getFlowModelImmersedBoundaryMethod();
         
+        const hier::Box empty_box = hier::Box::getEmptyBox(d_dim);
+        
         flow_model_immersed_boundary_method->setImmersedBoundaryMethodVariables(
+            empty_box,
             data_time,
             initial_time,
             getDataContext());
@@ -990,7 +997,10 @@ Euler::setImmersedBoundaryGhostCells(
     HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
         d_flow_model->getFlowModelImmersedBoundaryMethod();
     
+    const hier::Box empty_box = hier::Box::getEmptyBox(d_dim);
+        
     flow_model_immersed_boundary_method->setImmersedBoundaryMethodVariables(
+        empty_box,
         time,
         false,
         getDataContext());
