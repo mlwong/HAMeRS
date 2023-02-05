@@ -4447,9 +4447,9 @@ FlowModelSingleSpecies::computeCellDataOfMaxDiffusivityWithPressureAndTemperatur
             }
             else
             {
-    #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
                 TBOX_ASSERT(d_subghost_box_max_diffusivity.contains(domain));
-    #endif
+#endif
                 
                 domain_lo = domain.lower() - d_interior_box.lower();
                 domain_dims = domain.numberCells();
@@ -4581,9 +4581,9 @@ FlowModelSingleSpecies::computeCellDataOfMaxDiffusivityWithPressureAndTemperatur
                 const int num_ghosts_0 = d_num_ghosts[0];
                 const int num_subghosts_0_max_diffusivity = d_num_subghosts_max_diffusivity[0];
                 
-    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-    #endif
+#endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -4618,9 +4618,9 @@ FlowModelSingleSpecies::computeCellDataOfMaxDiffusivityWithPressureAndTemperatur
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-    #endif
+#endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -4667,9 +4667,9 @@ FlowModelSingleSpecies::computeCellDataOfMaxDiffusivityWithPressureAndTemperatur
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
-    #endif
+#endif
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
