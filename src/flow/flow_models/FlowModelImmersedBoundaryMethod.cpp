@@ -152,3 +152,22 @@ FlowModelImmersedBoundaryMethod::setImmersedBoundaryMethodVariables(
         data_time,
         initial_time);
 }
+
+
+/*
+ * Get the cell data of the immersed boundary mask in the registered patch.
+ */
+HAMERS_SHARED_PTR<pdat::CellData<int> >
+FlowModelImmersedBoundaryMethod::getCellDataOfImmersedBoundaryMask(
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
+    
+    // Get the cell data of the registered variable density.
+    HAMERS_SHARED_PTR<pdat::CellData<int> > data_mask(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
+            patch.getPatchData(s_variable_mask, data_context)));
+    
+    return data_mask;
+}

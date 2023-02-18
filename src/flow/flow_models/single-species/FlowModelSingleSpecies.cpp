@@ -1621,9 +1621,12 @@ FlowModelSingleSpecies::getSpeciesCellData(
 
 /*
  * Fill the cell data of conservative variables in the interior box with value zero.
+ * Only fill the data when the mask has valid value if a mask cell data is given.
  */
 void
-FlowModelSingleSpecies::fillCellDataOfConservativeVariablesWithZero()
+FlowModelSingleSpecies::fillCellDataOfConservativeVariablesWithZero(
+    const HAMERS_SHARED_PTR<pdat::CellData<int> >& mask_cell_data,
+    const int mask_valid_value)
 {
     // Check whether a patch is already registered.
     if (!d_patch)
@@ -1634,22 +1637,249 @@ FlowModelSingleSpecies::fillCellDataOfConservativeVariablesWithZero()
             << std::endl);
     }
     
+    /*
+     * Check whether the mask is used. Get the pointer to the cell data of the mask if the mask is used.
+     * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
+     */
+    
+    bool use_mask = false;
+    int* mask = nullptr;
+    hier::IntVector num_ghosts_mask(d_dim);
+    hier::IntVector ghostcell_dims_mask(d_dim);
+    
+    if (mask_cell_data != nullptr)
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(mask_cell_data->getGhostCellWidth() >= d_num_ghosts);
+#endif
+        
+        use_mask = true;
+        mask = mask_cell_data->getPointer(0);
+        
+        num_ghosts_mask = mask_cell_data->getGhostCellWidth();
+        ghostcell_dims_mask = mask_cell_data->getGhostBox().numberCells();
+    }
+    
     HAMERS_SHARED_PTR<pdat::CellData<double> > data_density = getCellDataOfDensity();
     HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum = getCellDataOfMomentum();
     HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy = getCellDataOfTotalEnergy();
     
-    data_density->fillAll(double(0), d_interior_box);
-    data_momentum->fillAll(double(0), d_interior_box);
-    data_total_energy->fillAll(double(0), d_interior_box);
+    // Get the pointers to the conservative variables.
+    double* rho = data_density->getPointer(0);
+    double* E   = data_total_energy->getPointer(0);
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        // Get the pointer to the momentum component.
+        double* rho_u = data_momentum->getPointer(0);
+        
+        // Get the dimension and the number of ghost cells.
+        
+        const int interior_dim_0 = d_interior_dims[0];
+        
+        const int num_ghosts_0 = d_num_ghosts[0];
+        
+        if (use_mask)
+        {
+            const int num_ghosts_0_mask = num_ghosts_mask[0];
+            
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx = i + num_ghosts_0;
+                const int idx_mask = i + num_ghosts_0_mask;
+                
+                if (mask[idx_mask] == mask_valid_value)
+                {
+                    rho[idx]   = double(0);
+                    rho_u[idx] = double(0);
+                    E[idx]     = double(0);
+                }
+            }
+        }
+        else
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx = i + num_ghosts_0;
+                
+                rho[idx]   = double(0);
+                rho_u[idx] = double(0);
+                E[idx]     = double(0);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        // Get the pointers to the momentum components.
+        double* rho_u = data_momentum->getPointer(0);
+        double* rho_v = data_momentum->getPointer(1);
+        
+        // Get the dimensions and the numbers of ghost cells.
+        
+        const int interior_dim_0 = d_interior_dims[0];
+        const int interior_dim_1 = d_interior_dims[1];
+        
+        const int num_ghosts_0 = d_num_ghosts[0];
+        const int num_ghosts_1 = d_num_ghosts[1];
+        const int ghostcell_dim_0 = d_ghostcell_dims[0];
+        
+        if (use_mask)
+        {
+            const int num_ghosts_0_mask = num_ghosts_mask[0];
+            const int num_ghosts_1_mask = num_ghosts_mask[1];
+            const int ghostcell_dim_0_mask = ghostcell_dims_mask[0];
+            
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx  = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0;
+                    
+                    const int idx_mask = (i + num_ghosts_0_mask) +
+                        (j + num_ghosts_1_mask)*ghostcell_dim_0_mask;
+                    
+                    if (mask[idx_mask] == mask_valid_value)
+                    {
+                        rho[idx]   = double(0);
+                        rho_u[idx] = double(0);
+                        rho_v[idx] = double(0);
+                        E[idx]     = double(0);
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx  = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0;
+                    
+                    rho[idx]   = double(0);
+                    rho_u[idx] = double(0);
+                    rho_v[idx] = double(0);
+                    E[idx]     = double(0);
+                }
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        // Get the pointers to the momentum components.
+        double* rho_u = data_momentum->getPointer(0);
+        double* rho_v = data_momentum->getPointer(1);
+        double* rho_w = data_momentum->getPointer(2);
+        
+        // Get the dimensions and the numbers of ghost cells.
+        
+        const int interior_dim_0 = d_interior_dims[0];
+        const int interior_dim_1 = d_interior_dims[1];
+        const int interior_dim_2 = d_interior_dims[2];
+        
+        const int num_ghosts_0 = d_num_ghosts[0];
+        const int num_ghosts_1 = d_num_ghosts[1];
+        const int num_ghosts_2 = d_num_ghosts[2];
+        const int ghostcell_dim_0 = d_ghostcell_dims[0];
+        const int ghostcell_dim_1 = d_ghostcell_dims[1];
+        
+        if (use_mask)
+        {
+            const int num_ghosts_0_mask = num_ghosts_mask[0];
+            const int num_ghosts_1_mask = num_ghosts_mask[1];
+            const int num_ghosts_2_mask = num_ghosts_mask[2];
+            const int ghostcell_dim_0_mask = ghostcell_dims_mask[0];
+            const int ghostcell_dim_1_mask = ghostcell_dims_mask[1];
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
+                        
+                        const int idx_mask = (i + num_ghosts_0_mask) +
+                            (j + num_ghosts_1_mask)*ghostcell_dim_0_mask +
+                            (k + num_ghosts_2_mask)*ghostcell_dim_0_mask*ghostcell_dim_1_mask;
+                        
+                        if (mask[idx_mask] == mask_valid_value)
+                        {
+                            rho[idx]   = double(0);
+                            rho_u[idx] = double(0);
+                            rho_v[idx] = double(0);
+                            rho_w[idx] = double(0);
+                            E[idx]     = double(0);
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
+                        
+                        rho[idx]   = double(0);
+                        rho_u[idx] = double(0);
+                        rho_v[idx] = double(0);
+                        rho_w[idx] = double(0);
+                        E[idx]     = double(0);
+                    }
+                }
+            }
+        }
+    }
 }
 
 
 /*
  * Update the cell data of conservative variables in the interior box after time advancement.
+ * Only update the data when the mask has valid value if a mask cell data is given.
  */
 void
-FlowModelSingleSpecies::updateCellDataOfConservativeVariables()
+FlowModelSingleSpecies::updateCellDataOfConservativeVariables(
+    const HAMERS_SHARED_PTR<pdat::CellData<int> >& mask_cell_data,
+    const int mask_valid_value)
 {
+    NULL_USE(mask_cell_data);
+    NULL_USE(mask_valid_value);
+    
     // Check whether a patch is already registered.
     if (!d_patch)
     {

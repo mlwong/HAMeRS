@@ -74,6 +74,19 @@ EulerInitialConditions::initializeDataOnPatch(
         double v_inf   = double(1);
         double p_inf   = double(1);
         
+        if (d_initial_conditions_db != nullptr)
+        {
+            TBOX_ASSERT(d_initial_conditions_db->keyExists("rho_inf"));
+            TBOX_ASSERT(d_initial_conditions_db->keyExists("u_inf"));
+            TBOX_ASSERT(d_initial_conditions_db->keyExists("v_inf"));
+            TBOX_ASSERT(d_initial_conditions_db->keyExists("p_inf"));
+            
+            rho_inf = d_initial_conditions_db->getDouble("rho_inf");
+            u_inf   = d_initial_conditions_db->getDouble("u_inf");
+            v_inf   = d_initial_conditions_db->getDouble("v_inf");
+            p_inf   = d_initial_conditions_db->getDouble("p_inf");
+        }
+        
         for (int j = 0; j < patch_dims[1]; j++)
         {
             for (int i = 0; i < patch_dims[0]; i++)

@@ -655,6 +655,7 @@ class RungeKuttaPatchStrategy:
         
     protected:
         bool d_use_ghost_cell_immersed_boundary_method;
+        bool d_use_static_immersed_boundaries;
         
     private:
         HAMERS_SHARED_PTR<hier::VariableContext> d_data_context;

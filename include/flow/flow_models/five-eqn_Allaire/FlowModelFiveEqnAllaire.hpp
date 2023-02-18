@@ -126,15 +126,21 @@ class FlowModelFiveEqnAllaire: public FlowModel
         
         /*
          * Fill the cell data of conservative variables in the interior box with value zero.
+         * Only fill the data when the mask has valid value if a mask cell data is given.
          */
         void
-        fillCellDataOfConservativeVariablesWithZero();
+        fillCellDataOfConservativeVariablesWithZero(
+            const HAMERS_SHARED_PTR<pdat::CellData<int> >& mask_cell_data = nullptr,
+            const int mask_valid_value = 0);
         
         /*
          * Update the cell data of conservative variables in the interior box after time advancement.
+         * Only update the data when the mask has valid value if a mask cell data is given.
          */
         void
-        updateCellDataOfConservativeVariables();
+        updateCellDataOfConservativeVariables(
+            const HAMERS_SHARED_PTR<pdat::CellData<int> >& mask_cell_data = nullptr,
+            const int mask_valid_value = 0);
         
         /*
          * Get the cell data of the conservative variables in the registered patch.

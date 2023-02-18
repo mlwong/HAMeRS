@@ -63,7 +63,8 @@ NavierStokes::NavierStokes(
         d_stat_dump_filename(stat_dump_filename),
         d_use_nonuniform_workload(false),
         d_use_conservative_form_diffusive_flux(true),
-        d_Navier_Stokes_boundary_conditions_db_is_from_restart(false)
+        d_Navier_Stokes_boundary_conditions_db_is_from_restart(false),
+        d_use_immersed_boundaries(false)
 {
     TBOX_ASSERT(!object_name.empty());
     TBOX_ASSERT(input_db);
@@ -104,6 +105,11 @@ NavierStokes::NavierStokes(
     }
     getFromInput(input_db, is_from_restart);
     
+    if (d_use_ghost_cell_immersed_boundary_method)
+    {
+        d_use_immersed_boundaries = true;
+    }
+    
     /*
      * Initialize d_flow_model_manager and get the flow model object.
      */
@@ -118,6 +124,23 @@ NavierStokes::NavierStokes(
         d_flow_model_str));
     
     d_flow_model = d_flow_model_manager->getFlowModel();
+    
+    /*
+     * Initialize the immersed boundaries and the flow model immersed boundary method objects.
+     */
+    
+    if (d_use_immersed_boundaries)
+    {
+        d_immersed_boundaries.reset(new ImmersedBoundaries(
+            "d_immersed_boundaries",
+            d_project_name,
+            d_dim,
+            d_grid_geometry));
+        
+        d_flow_model->initializeImmersedBoundaryMethod(
+            d_immersed_boundaries,
+            d_immersed_boundary_method_db);
+    }
     
     /*
      * Initialize d_convective_flux_reconstructor_manager and get the convective flux reconstructor object.
@@ -372,10 +395,29 @@ NavierStokes::registerModelVariables(
     /*
      * Register the conservative variables of d_flow_model.
      */
+    
     d_flow_model->registerConservativeVariables(
         integrator,
         num_ghosts,
         num_ghosts_intermediate);
+    
+    /*
+     * Set the number of immersed boundary ghost cells of d_immersed_boundaries and register the variables of
+     * flow model immersed boundary method.
+     */
+    
+    if (d_use_immersed_boundaries)
+    {
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        d_immersed_boundaries->setNumberOfImmersedBoundaryGhosts(num_ghosts);
+        
+        flow_model_immersed_boundary_method->registerImmersedBoundaryMethodVariables(
+            integrator,
+            num_ghosts,
+            num_ghosts_intermediate);
+    }
     
     /*
      * Register the fluxes and sources.
@@ -469,6 +511,17 @@ NavierStokes::registerModelVariables(
     {
         d_flow_model->registerPlotQuantities(
             d_visit_writer);
+        
+        if (d_use_immersed_boundaries)
+        {
+            HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+                d_flow_model->getFlowModelImmersedBoundaryMethod();
+            
+            flow_model_immersed_boundary_method->registerPlotQuantities(
+                d_visit_writer,
+                integrator->getPlotContext());
+        }
+        
         
         if (d_value_tagger != nullptr)
         {
@@ -571,6 +624,26 @@ NavierStokes::initializeDataOnPatch(
         data_time,
         initial_time);
     
+    if (d_use_immersed_boundaries)
+    {
+        /*
+         * Initialize the immersed boundary method variables.
+         */
+        
+        d_flow_model->setupImmersedBoundaryMethod();
+        
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        const hier::Box empty_box = hier::Box::getEmptyBox(d_dim);
+        
+        flow_model_immersed_boundary_method->setImmersedBoundaryMethodVariables(
+            empty_box,
+            data_time,
+            initial_time,
+            getDataContext());
+    }
+    
     d_flow_model->unregisterPatch();
     
     if (d_use_nonuniform_workload)
@@ -601,6 +674,32 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
     
     std::vector<double> spectral_radiuses_and_dt;
     
+    /*
+     * Get the pointer to the cell data of the immersed boundary mask.
+     * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
+     */
+    
+    int* IB_mask = nullptr;
+    HAMERS_SHARED_PTR<pdat::CellData<int> > IB_mask_cell_data;
+    hier::IntVector num_ghosts_IB_mask(d_dim);
+    hier::IntVector ghostcell_dims_IB_mask(d_dim);
+    const int fluid = int(IB_MASK::FLUID);
+    
+    if (d_use_immersed_boundaries)
+    {
+        d_flow_model->setupImmersedBoundaryMethod();
+        
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        IB_mask_cell_data = flow_model_immersed_boundary_method->
+            getCellDataOfImmersedBoundaryMask(getDataContext());
+        
+        IB_mask                = IB_mask_cell_data->getPointer(0);
+        num_ghosts_IB_mask     = IB_mask_cell_data->getGhostCellWidth();
+        ghostcell_dims_IB_mask = IB_mask_cell_data->getGhostBox().numberCells();
+    }
+    
     const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
         HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
@@ -615,6 +714,84 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
     const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
     
+    /*
+     * Register the patch, maximum wave speed and maximum diffusivity in the flow model and
+     * compute the corresponding cell data.
+     */
+    
+    d_flow_model->registerPatchWithDataContext(patch, getDataContext());
+    
+    hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
+    
+    hier::Box ghost_box = interior_box;
+    ghost_box.grow(num_ghosts);
+    const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+    
+    d_flow_model->setupSourceUtilities();
+    
+    HAMERS_SHARED_PTR<FlowModelSourceUtilities> source_utilities =
+        d_flow_model->getFlowModelSourceUtilities();
+    
+    std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        num_subghosts_of_data.insert(
+            std::pair<std::string, hier::IntVector>(
+                "MAX_WAVE_SPEED_X", num_ghosts));
+        num_subghosts_of_data.insert(
+            std::pair<std::string, hier::IntVector>(
+                "MAX_DIFFUSIVITY", num_ghosts));
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        num_subghosts_of_data.insert(
+            std::pair<std::string, hier::IntVector>(
+                "MAX_WAVE_SPEED_X", num_ghosts));
+        num_subghosts_of_data.insert(
+            std::pair<std::string, hier::IntVector>(
+                "MAX_WAVE_SPEED_Y", num_ghosts));
+        num_subghosts_of_data.insert(
+            std::pair<std::string, hier::IntVector>(
+                "MAX_DIFFUSIVITY", num_ghosts));
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        num_subghosts_of_data.insert(
+            std::pair<std::string, hier::IntVector>(
+                "MAX_WAVE_SPEED_X", num_ghosts));
+        num_subghosts_of_data.insert(
+            std::pair<std::string, hier::IntVector>(
+                "MAX_WAVE_SPEED_Y", num_ghosts));
+        num_subghosts_of_data.insert(
+            std::pair<std::string, hier::IntVector>(
+                "MAX_WAVE_SPEED_Z", num_ghosts));
+        num_subghosts_of_data.insert(
+            std::pair<std::string, hier::IntVector>(
+                "MAX_DIFFUSIVITY", num_ghosts));
+    }
+    
+    d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+    
+    if (source_utilities->hasSourceTerms())
+    {
+        source_utilities->registerDerivedVariablesForSourceTermsStableDt(hier::IntVector::getZero(d_dim));
+    }
+    
+    d_flow_model->allocateMemoryForDerivedCellData();
+    
+    if (source_utilities->hasSourceTerms())
+    {
+        source_utilities->allocateMemoryForDerivedCellData();
+    }
+    
+    d_flow_model->computeDerivedCellData();
+    
+    if (source_utilities->hasSourceTerms())
+    {
+        source_utilities->computeDerivedCellData();
+    }
+    
     if (d_dim == tbox::Dimension(1))
     {
         spectral_radiuses_and_dt.resize(2, double(0));
@@ -626,49 +803,6 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         const int interior_dim_0 = interior_dims[0];
         
         const double dx_0 = dx[0];
-        
-        /*
-         * Register the patch, maximum wave speed and maximum diffusivity in the flow model and
-         * compute the corresponding cell data.
-         */
-        
-        d_flow_model->registerPatchWithDataContext(patch, getDataContext());
-        
-        hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
-        
-        d_flow_model->setupSourceUtilities();
-        
-        HAMERS_SHARED_PTR<FlowModelSourceUtilities> source_utilities =
-            d_flow_model->getFlowModelSourceUtilities();
-        
-        std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-        num_subghosts_of_data.insert(
-            std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_X", num_ghosts));
-        num_subghosts_of_data.insert(
-            std::pair<std::string, hier::IntVector>(
-                "MAX_DIFFUSIVITY", num_ghosts));
-        
-        d_flow_model->registerDerivedVariables(num_subghosts_of_data);
-        
-        if (source_utilities->hasSourceTerms())
-        {
-            source_utilities->registerDerivedVariablesForSourceTermsStableDt(hier::IntVector::getZero(d_dim));
-        }
-        
-        d_flow_model->allocateMemoryForDerivedCellData();
-        
-        if (source_utilities->hasSourceTerms())
-        {
-            source_utilities->allocateMemoryForDerivedCellData();
-        }
-        
-        d_flow_model->computeDerivedCellData();
-        
-        if (source_utilities->hasSourceTerms())
-        {
-            source_utilities->computeDerivedCellData();
-        }
         
         /*
          * Get the pointers to the maximum wave speed and maximum diffusivity inside the flow model.
@@ -691,41 +825,98 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         
         double spectral_radiuses_and_dt_0 = double(0);
         double spectral_radiuses_and_dt_1 = double(0);
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1)
-#endif
-        for (int i = -num_ghosts_0;
-             i < interior_dim_0 + num_ghosts_0;
-             i++)
+        
+        if (d_use_immersed_boundaries)
         {
-            // Compute the linear index.
-            const int idx = i + num_ghosts_0;
+            const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
             
-            const double spectral_radius_acoustic_x = max_lambda_x[idx]/dx_0;
-            
-            spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
-            
-            spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_acoustic_x);
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1)
+#endif
+            for (int i = -num_ghosts_0;
+                 i < interior_dim_0 + num_ghosts_0;
+                 i++)
+            {
+                // Compute the linear indices.
+                const int idx = i + num_ghosts_0;
+                const int idx_IB_mask = i + num_ghosts_0_IB_mask;
+                
+                if (IB_mask[idx_IB_mask] == fluid)
+                {
+                    const double spectral_radius_acoustic_x = max_lambda_x[idx]/dx_0;
+                    
+                    spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
+                    
+                    spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_acoustic_x);
+                }
+            }
+        }
+        else
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1)
+#endif
+            for (int i = -num_ghosts_0;
+                 i < interior_dim_0 + num_ghosts_0;
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx = i + num_ghosts_0;
+                
+                const double spectral_radius_acoustic_x = max_lambda_x[idx]/dx_0;
+                
+                spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
+                
+                spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_acoustic_x);
+            }
         }
         
         spectral_radiuses_and_dt[0] = spectral_radiuses_and_dt_0;
         spectral_radiuses_and_dt[1] = spectral_radiuses_and_dt_1;
         
         double spectral_radius_tmp = double(0);
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd reduction(max: spectral_radius_tmp)
-#endif
-        for (int i = -num_ghosts_0;
-             i < interior_dim_0 + num_ghosts_0;
-             i++)
+        
+        if (d_use_immersed_boundaries)
         {
-            // Compute the linear index.
-            const int idx = i + num_ghosts_0;
+            const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
             
-            const double spectral_radius_diffusive = double(2)*max_D[idx]/(dx_0*dx_0);
-            
-            spectral_radius_tmp = fmax(spectral_radius_tmp, spectral_radius_diffusive);
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd reduction(max: spectral_radius_tmp)
+#endif
+            for (int i = -num_ghosts_0;
+                 i < interior_dim_0 + num_ghosts_0;
+                 i++)
+            {
+                // Compute the linear indices.
+                const int idx = i + num_ghosts_0;
+                const int idx_IB_mask = i + num_ghosts_0_IB_mask;
+                
+                if (IB_mask[idx_IB_mask] == fluid)
+                {
+                    const double spectral_radius_diffusive = double(2)*max_D[idx]/(dx_0*dx_0);
+                    
+                    spectral_radius_tmp = fmax(spectral_radius_tmp, spectral_radius_diffusive);
+                }
+            }
         }
+        else
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd reduction(max: spectral_radius_tmp)
+#endif
+            for (int i = -num_ghosts_0;
+                 i < interior_dim_0 + num_ghosts_0;
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx = i + num_ghosts_0;
+                
+                const double spectral_radius_diffusive = double(2)*max_D[idx]/(dx_0*dx_0);
+                
+                spectral_radius_tmp = fmax(spectral_radius_tmp, spectral_radius_diffusive);
+            }
+        }
+        
         spectral_radiuses_and_dt[1] = fmax(spectral_radius_tmp, spectral_radiuses_and_dt[1]);
         
         spectral_radiuses_and_dt[1] = double(1)/(spectral_radiuses_and_dt[1] + HAMERS_EPSILON);
@@ -736,12 +927,6 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
             
             spectral_radiuses_and_dt[1] = fmin(stable_dt_source, spectral_radiuses_and_dt[1]);
         }
-        
-        /*
-         * Unregister the patch and data of all registered derived cell variables in the flow model.
-         */
-        
-        d_flow_model->unregisterPatch();
     }
     else if (d_dim == tbox::Dimension(2))
     {
@@ -756,56 +941,6 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         
         const double dx_0 = dx[0];
         const double dx_1 = dx[1];
-        
-        /*
-         * Register the patch, maximum wave speeds and maximum diffusivity in the flow model and
-         * compute the corresponding cell data.
-         */
-        
-        d_flow_model->registerPatchWithDataContext(patch, getDataContext());
-        
-        hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
-        
-        hier::Box ghost_box = interior_box;
-        ghost_box.grow(num_ghosts);
-        const hier::IntVector ghostcell_dims = ghost_box.numberCells();
-        
-        d_flow_model->setupSourceUtilities();
-        
-        HAMERS_SHARED_PTR<FlowModelSourceUtilities> source_utilities =
-            d_flow_model->getFlowModelSourceUtilities();
-        
-        std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-        num_subghosts_of_data.insert(
-            std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_X", num_ghosts));
-        num_subghosts_of_data.insert(
-            std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_Y", num_ghosts));
-        num_subghosts_of_data.insert(
-            std::pair<std::string, hier::IntVector>(
-                "MAX_DIFFUSIVITY", num_ghosts));
-        
-        d_flow_model->registerDerivedVariables(num_subghosts_of_data);
-        
-        if (source_utilities->hasSourceTerms())
-        {
-            source_utilities->registerDerivedVariablesForSourceTermsStableDt(hier::IntVector::getZero(d_dim));
-        }
-        
-        d_flow_model->allocateMemoryForDerivedCellData();
-        
-        if (source_utilities->hasSourceTerms())
-        {
-            source_utilities->allocateMemoryForDerivedCellData();
-        }
-        
-        d_flow_model->computeDerivedCellData();
-        
-        if (source_utilities->hasSourceTerms())
-        {
-            source_utilities->computeDerivedCellData();
-        }
         
         /*
          * Get the pointers to the maximum wave speeds and maximum diffusivity inside the flow model.
@@ -835,29 +970,71 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         double spectral_radiuses_and_dt_0 = double(0);
         double spectral_radiuses_and_dt_1 = double(0);
         double spectral_radiuses_and_dt_2 = double(0);
-        for (int j = -num_ghosts_1;
-             j < interior_dim_1 + num_ghosts_1;
-             j++)
+        
+        if (d_use_immersed_boundaries)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2)
-#endif
-            for (int i = -num_ghosts_0;
-                 i < interior_dim_0 + num_ghosts_0;
-                 i++)
+            const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
+            const int num_ghosts_1_IB_mask = num_ghosts_IB_mask[1];
+            const int ghostcell_dim_0_IB_mask = ghostcell_dims_IB_mask[0];
+            
+            for (int j = -num_ghosts_1;
+                 j < interior_dim_1 + num_ghosts_1;
+                 j++)
             {
-                // Compute the linear indices.
-                const int idx = (i + num_ghosts_0) +
-                    (j + num_ghosts_1)*ghostcell_dim_0;
-                
-                const double spectral_radius_acoustic_x = max_lambda_x[idx]/dx_0;
-                const double spectral_radius_acoustic_y = max_lambda_y[idx]/dx_1;
-                
-                spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
-                spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_acoustic_y);
-                
-                spectral_radiuses_and_dt_2 = fmax(spectral_radiuses_and_dt_2,
-                    spectral_radius_acoustic_x + spectral_radius_acoustic_y);
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2)
+#endif
+                for (int i = -num_ghosts_0;
+                     i < interior_dim_0 + num_ghosts_0;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0;
+                    
+                    const int idx_IB_mask = (i + num_ghosts_0_IB_mask) +
+                        (j + num_ghosts_1_IB_mask)*ghostcell_dim_0_IB_mask;
+                    
+                    if (IB_mask[idx_IB_mask] == fluid)
+                    {
+                        const double spectral_radius_acoustic_x = max_lambda_x[idx]/dx_0;
+                        const double spectral_radius_acoustic_y = max_lambda_y[idx]/dx_1;
+                        
+                        spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
+                        spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_acoustic_y);
+                        
+                        spectral_radiuses_and_dt_2 = fmax(spectral_radiuses_and_dt_2,
+                            spectral_radius_acoustic_x + spectral_radius_acoustic_y);
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (int j = -num_ghosts_1;
+                 j < interior_dim_1 + num_ghosts_1;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2)
+#endif
+                for (int i = -num_ghosts_0;
+                     i < interior_dim_0 + num_ghosts_0;
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0;
+                    
+                    const double spectral_radius_acoustic_x = max_lambda_x[idx]/dx_0;
+                    const double spectral_radius_acoustic_y = max_lambda_y[idx]/dx_1;
+                    
+                    spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
+                    spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_acoustic_y);
+                    
+                    spectral_radiuses_and_dt_2 = fmax(spectral_radiuses_and_dt_2,
+                        spectral_radius_acoustic_x + spectral_radius_acoustic_y);
+                }
             }
         }
         
@@ -866,28 +1043,68 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         spectral_radiuses_and_dt[2] = spectral_radiuses_and_dt_2;
         
         double spectral_radius_tmp = double(0);
-        for (int j = -num_ghosts_1;
-             j < interior_dim_1 + num_ghosts_1;
-             j++)
+        
+        if (d_use_immersed_boundaries)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(max: spectral_radius_tmp)
-#endif
-            for (int i = -num_ghosts_0;
-                 i < interior_dim_0 + num_ghosts_0;
-                 i++)
+            const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
+            const int num_ghosts_1_IB_mask = num_ghosts_IB_mask[1];
+            const int ghostcell_dim_0_IB_mask = ghostcell_dims_IB_mask[0];
+            
+            for (int j = -num_ghosts_1;
+                 j < interior_dim_1 + num_ghosts_1;
+                 j++)
             {
-                // Compute the linear indices.
-                const int idx = (i + num_ghosts_0) +
-                    (j + num_ghosts_1)*ghostcell_dim_0;
-                
-                const double spectral_radius_diffusive = double(2)*fmax(
-                    max_D[idx]/(dx_0*dx_0),
-                    max_D[idx]/(dx_1*dx_1));
-                
-                spectral_radius_tmp = fmax(spectral_radius_tmp, spectral_radius_diffusive);
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd reduction(max: spectral_radius_tmp)
+#endif
+                for (int i = -num_ghosts_0;
+                     i < interior_dim_0 + num_ghosts_0;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0;
+                    
+                    const int idx_IB_mask = (i + num_ghosts_0_IB_mask) +
+                        (j + num_ghosts_1_IB_mask)*ghostcell_dim_0_IB_mask;
+                    
+                    if (IB_mask[idx_IB_mask] == fluid)
+                    {
+                        const double spectral_radius_diffusive = double(2)*fmax(
+                            max_D[idx]/(dx_0*dx_0),
+                            max_D[idx]/(dx_1*dx_1));
+                        
+                        spectral_radius_tmp = fmax(spectral_radius_tmp, spectral_radius_diffusive);
+                    }
+                }
             }
         }
+        else
+        {
+            for (int j = -num_ghosts_1;
+                 j < interior_dim_1 + num_ghosts_1;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd reduction(max: spectral_radius_tmp)
+#endif
+                for (int i = -num_ghosts_0;
+                     i < interior_dim_0 + num_ghosts_0;
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0;
+                    
+                    const double spectral_radius_diffusive = double(2)*fmax(
+                        max_D[idx]/(dx_0*dx_0),
+                        max_D[idx]/(dx_1*dx_1));
+                    
+                    spectral_radius_tmp = fmax(spectral_radius_tmp, spectral_radius_diffusive);
+                }
+            }
+        }
+        
         spectral_radiuses_and_dt[2] = fmax(spectral_radius_tmp, spectral_radiuses_and_dt[2]);
         
         spectral_radiuses_and_dt[2] = double(1)/(spectral_radiuses_and_dt[2] + HAMERS_EPSILON);
@@ -898,12 +1115,6 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
             
             spectral_radiuses_and_dt[2] = fmin(stable_dt_source, spectral_radiuses_and_dt[2]);
         }
-        
-        /*
-         * Unregister the patch and data of all registered derived cell variables in the flow model.
-         */
-        
-        d_flow_model->unregisterPatch();
     }
     else if (d_dim == tbox::Dimension(3))
     {
@@ -920,59 +1131,6 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         const double dx_0 = dx[0];
         const double dx_1 = dx[1];
         const double dx_2 = dx[2];
-        
-        /*
-         * Register the patch, maximum wave speeds and maximum diffusivity in the flow model and
-         * compute the corresponding cell data.
-         */
-        
-        d_flow_model->registerPatchWithDataContext(patch, getDataContext());
-        
-        hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
-        
-        hier::Box ghost_box = interior_box;
-        ghost_box.grow(num_ghosts);
-        const hier::IntVector ghostcell_dims = ghost_box.numberCells();
-        
-        d_flow_model->setupSourceUtilities();
-        
-        HAMERS_SHARED_PTR<FlowModelSourceUtilities> source_utilities =
-            d_flow_model->getFlowModelSourceUtilities();
-        
-        std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-        num_subghosts_of_data.insert(
-            std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_X", num_ghosts));
-        num_subghosts_of_data.insert(
-            std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_Y", num_ghosts));
-        num_subghosts_of_data.insert(
-            std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_Z", num_ghosts));
-        num_subghosts_of_data.insert(
-            std::pair<std::string, hier::IntVector>(
-                "MAX_DIFFUSIVITY", num_ghosts));
-        
-        d_flow_model->registerDerivedVariables(num_subghosts_of_data);
-        
-        if (source_utilities->hasSourceTerms())
-        {
-            source_utilities->registerDerivedVariablesForSourceTermsStableDt(hier::IntVector::getZero(d_dim));
-        }
-        
-        d_flow_model->allocateMemoryForDerivedCellData();
-        
-        if (source_utilities->hasSourceTerms())
-        {
-            source_utilities->allocateMemoryForDerivedCellData();
-        }
-        
-        d_flow_model->computeDerivedCellData();
-        
-        if (source_utilities->hasSourceTerms())
-        {
-            source_utilities->computeDerivedCellData();
-        }
         
         /*
          * Get the pointers to the maximum wave speeds and maximum diffusivity inside the flow model.
@@ -1009,37 +1167,92 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         double spectral_radiuses_and_dt_1 = double(0);
         double spectral_radiuses_and_dt_2 = double(0);
         double spectral_radiuses_and_dt_3 = double(0);
-        for (int k = -num_ghosts_2;
-             k < interior_dim_2 + num_ghosts_2;
-             k++)
+        
+        if (d_use_immersed_boundaries)
         {
-            for (int j = -num_ghosts_1;
-                 j < interior_dim_1 + num_ghosts_1;
-                 j++)
+            const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
+            const int num_ghosts_1_IB_mask = num_ghosts_IB_mask[1];
+            const int num_ghosts_2_IB_mask = num_ghosts_IB_mask[2];
+            const int ghostcell_dim_0_IB_mask = ghostcell_dims_IB_mask[0];
+            const int ghostcell_dim_1_IB_mask = ghostcell_dims_IB_mask[1];
+            
+            for (int k = -num_ghosts_2;
+                 k < interior_dim_2 + num_ghosts_2;
+                 k++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3)
-#endif
-                for (int i = -num_ghosts_0;
-                     i < interior_dim_0 + num_ghosts_0;
-                     i++)
+                for (int j = -num_ghosts_1;
+                     j < interior_dim_1 + num_ghosts_1;
+                     j++)
                 {
-                    // Compute the linear indices.
-                    const int idx = (i + num_ghosts_0) +
-                        (j + num_ghosts_1)*ghostcell_dim_0 +
-                        (k + num_ghosts_2)*ghostcell_dim_0*
-                            ghostcell_dim_1;
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3)
+#endif
+                    for (int i = -num_ghosts_0;
+                         i < interior_dim_0 + num_ghosts_0;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*
+                                ghostcell_dim_1;
+                        
+                        const int idx_IB_mask = (i + num_ghosts_0_IB_mask) +
+                            (j + num_ghosts_1_IB_mask)*ghostcell_dim_0_IB_mask +
+                            (k + num_ghosts_2_IB_mask)*ghostcell_dim_0_IB_mask*
+                                ghostcell_dim_1_IB_mask;
+                        
+                        if (IB_mask[idx_IB_mask] == fluid)
+                        {
+                            const double spectral_radius_acoustic_x = max_lambda_x[idx]/dx_0;
+                            const double spectral_radius_acoustic_y = max_lambda_y[idx]/dx_1;
+                            const double spectral_radius_acoustic_z = max_lambda_z[idx]/dx_2;
+                            
+                            spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
+                            spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_acoustic_y);
+                            spectral_radiuses_and_dt_2 = fmax(spectral_radiuses_and_dt_2, spectral_radius_acoustic_z);
+                        
+                            spectral_radiuses_and_dt_3 = fmax(spectral_radiuses_and_dt_3,
+                                spectral_radius_acoustic_x + spectral_radius_acoustic_y + spectral_radius_acoustic_z);
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (int k = -num_ghosts_2;
+                 k < interior_dim_2 + num_ghosts_2;
+                 k++)
+            {
+                for (int j = -num_ghosts_1;
+                     j < interior_dim_1 + num_ghosts_1;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3)
+#endif
+                    for (int i = -num_ghosts_0;
+                         i < interior_dim_0 + num_ghosts_0;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*
+                                ghostcell_dim_1;
+                        
+                        const double spectral_radius_acoustic_x = max_lambda_x[idx]/dx_0;
+                        const double spectral_radius_acoustic_y = max_lambda_y[idx]/dx_1;
+                        const double spectral_radius_acoustic_z = max_lambda_z[idx]/dx_2;
+                        
+                        spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
+                        spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_acoustic_y);
+                        spectral_radiuses_and_dt_2 = fmax(spectral_radiuses_and_dt_2, spectral_radius_acoustic_z);
                     
-                    const double spectral_radius_acoustic_x = max_lambda_x[idx]/dx_0;
-                    const double spectral_radius_acoustic_y = max_lambda_y[idx]/dx_1;
-                    const double spectral_radius_acoustic_z = max_lambda_z[idx]/dx_2;
-                    
-                    spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
-                    spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_acoustic_y);
-                    spectral_radiuses_and_dt_2 = fmax(spectral_radiuses_and_dt_2, spectral_radius_acoustic_z);
-                
-                    spectral_radiuses_and_dt_3 = fmax(spectral_radiuses_and_dt_3,
-                        spectral_radius_acoustic_x + spectral_radius_acoustic_y + spectral_radius_acoustic_z);
+                        spectral_radiuses_and_dt_3 = fmax(spectral_radiuses_and_dt_3,
+                            spectral_radius_acoustic_x + spectral_radius_acoustic_y + spectral_radius_acoustic_z);
+                    }
                 }
             }
         }
@@ -1050,36 +1263,88 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         spectral_radiuses_and_dt[3] = spectral_radiuses_and_dt_3;
         
         double spectral_radius_tmp = double(0);
-        for (int k = -num_ghosts_2;
-             k < interior_dim_2 + num_ghosts_2;
-             k++)
+        
+        if (d_use_immersed_boundaries)
         {
-            for (int j = -num_ghosts_1;
-                 j < interior_dim_1 + num_ghosts_1;
-                 j++)
+            const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
+            const int num_ghosts_1_IB_mask = num_ghosts_IB_mask[1];
+            const int num_ghosts_2_IB_mask = num_ghosts_IB_mask[2];
+            const int ghostcell_dim_0_IB_mask = ghostcell_dims_IB_mask[0];
+            const int ghostcell_dim_1_IB_mask = ghostcell_dims_IB_mask[1];
+            
+            for (int k = -num_ghosts_2;
+                 k < interior_dim_2 + num_ghosts_2;
+                 k++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd reduction(max: spectral_radius_tmp)
-#endif
-                for (int i = -num_ghosts_0;
-                     i < interior_dim_0 + num_ghosts_0;
-                     i++)
+                for (int j = -num_ghosts_1;
+                     j < interior_dim_1 + num_ghosts_1;
+                     j++)
                 {
-                    // Compute the linear indices.
-                    const int idx = (i + num_ghosts_0) +
-                        (j + num_ghosts_1)*ghostcell_dim_0 +
-                        (k + num_ghosts_2)*ghostcell_dim_0*
-                            ghostcell_dim_1;
-                    
-                    const double spectral_radius_diffusive = double(2)*fmax(
-                        max_D[idx]/(dx_0*dx_0),
-                        fmax(max_D[idx]/(dx_1*dx_1),
-                            max_D[idx]/(dx_2*dx_2)));
-                    
-                    spectral_radius_tmp = fmax(spectral_radius_tmp, spectral_radius_diffusive);
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd reduction(max: spectral_radius_tmp)
+#endif
+                    for (int i = -num_ghosts_0;
+                         i < interior_dim_0 + num_ghosts_0;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*
+                                ghostcell_dim_1;
+                        
+                        const int idx_IB_mask = (i + num_ghosts_0_IB_mask) +
+                            (j + num_ghosts_1_IB_mask)*ghostcell_dim_0_IB_mask +
+                            (k + num_ghosts_2_IB_mask)*ghostcell_dim_0_IB_mask*
+                                ghostcell_dim_1_IB_mask;
+                        
+                        if (IB_mask[idx_IB_mask] == fluid)
+                        {
+                            const double spectral_radius_diffusive = double(2)*fmax(
+                                max_D[idx]/(dx_0*dx_0),
+                                fmax(max_D[idx]/(dx_1*dx_1),
+                                    max_D[idx]/(dx_2*dx_2)));
+                            
+                            spectral_radius_tmp = fmax(spectral_radius_tmp, spectral_radius_diffusive);
+                        }
+                    }
                 }
             }
         }
+        else
+        {
+            for (int k = -num_ghosts_2;
+                 k < interior_dim_2 + num_ghosts_2;
+                 k++)
+            {
+                for (int j = -num_ghosts_1;
+                     j < interior_dim_1 + num_ghosts_1;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd reduction(max: spectral_radius_tmp)
+#endif
+                    for (int i = -num_ghosts_0;
+                         i < interior_dim_0 + num_ghosts_0;
+                         i++)
+                    {
+                        // Compute the linear index.
+                        const int idx = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*
+                                ghostcell_dim_1;
+                        
+                        const double spectral_radius_diffusive = double(2)*fmax(
+                            max_D[idx]/(dx_0*dx_0),
+                            fmax(max_D[idx]/(dx_1*dx_1),
+                                max_D[idx]/(dx_2*dx_2)));
+                        
+                        spectral_radius_tmp = fmax(spectral_radius_tmp, spectral_radius_diffusive);
+                    }
+                }
+            }
+        }
+        
         spectral_radiuses_and_dt[3] = fmax(spectral_radius_tmp, spectral_radiuses_and_dt[3]);
         
         spectral_radiuses_and_dt[3] = double(1)/(spectral_radiuses_and_dt[3] + HAMERS_EPSILON);;
@@ -1090,17 +1355,63 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
             
             spectral_radiuses_and_dt[3] = fmin(stable_dt_source, spectral_radiuses_and_dt[3]);
         }
-        
-        /*
-         * Unregister the patch and data of all registered derived cell variables in the flow model.
-         */
-        
-        d_flow_model->unregisterPatch();
     }
+    
+    /*
+     * Unregister the patch and data of all registered derived cell variables in the flow model.
+     */
+    
+    d_flow_model->unregisterPatch();
     
     t_compute_dt->stop();
     
     return spectral_radiuses_and_dt;
+}
+
+
+/**
+ * Set the immersed boundary ghost cells.
+ */
+void
+NavierStokes::setImmersedBoundaryGhostCells(
+    hier::Patch& patch,
+    const double time,
+    const int RK_step_number,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (!d_use_immersed_boundaries || !d_use_ghost_cell_immersed_boundary_method)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "d_use_immersed_boundaries or d_use_ghost_cell_immersed_boundary_method are set to false!"
+            << std::endl);
+    }
+    
+    d_flow_model->registerPatchWithDataContext(patch, data_context);
+    
+    /*
+     * Initialize the immersed boundary method variables.
+     */
+    
+    d_flow_model->setupImmersedBoundaryMethod();
+    
+    HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+        d_flow_model->getFlowModelImmersedBoundaryMethod();
+    
+    const hier::Box empty_box = hier::Box::getEmptyBox(d_dim);
+    
+    if (RK_step_number == 0 || !d_use_static_immersed_boundaries)
+    {
+        flow_model_immersed_boundary_method->setImmersedBoundaryMethodVariables(
+            empty_box,
+            time,
+            false,
+            getDataContext());
+    }
+    
+    // Compute the immersed boundary ghost cells here...
+    
+    d_flow_model->unregisterPatch();
 }
 
 
@@ -1314,7 +1625,42 @@ NavierStokes::advanceSingleStepOnPatch(
         }
     }
     
-    d_flow_model->fillCellDataOfConservativeVariablesWithZero();
+    /*
+     * Get the pointer to the cell data of the immersed boundary mask.
+     * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
+     */
+    
+    int* IB_mask = nullptr;
+    HAMERS_SHARED_PTR<pdat::CellData<int> > IB_mask_cell_data;
+    hier::IntVector num_ghosts_IB_mask(d_dim);
+    hier::IntVector ghostcell_dims_IB_mask(d_dim);
+    const int fluid = int(IB_MASK::FLUID);
+    
+    if (d_use_immersed_boundaries)
+    {
+        d_flow_model->setupImmersedBoundaryMethod();
+        
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        IB_mask_cell_data = flow_model_immersed_boundary_method->
+            getCellDataOfImmersedBoundaryMask(getDataContext());
+        
+        IB_mask                = IB_mask_cell_data->getPointer(0);
+        num_ghosts_IB_mask     = IB_mask_cell_data->getGhostCellWidth();
+        ghostcell_dims_IB_mask = IB_mask_cell_data->getGhostBox().numberCells();
+    }
+    
+    if (d_use_immersed_boundaries)
+    {
+        d_flow_model->fillCellDataOfConservativeVariablesWithZero(
+            IB_mask_cell_data,
+            fluid);
+    }
+    else
+    {
+        d_flow_model->fillCellDataOfConservativeVariablesWithZero();
+    }
     
     // Unregister the patch.
     d_flow_model->unregisterPatch();
@@ -1487,16 +1833,39 @@ NavierStokes::advanceSingleStepOnPatch(
                     const int num_ghosts_0_conservative_var_intermediate =
                         num_ghosts_conservative_var_intermediate[ei][0];
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0; i++)
+                    if (d_use_immersed_boundaries)
                     {
-                        // Compute linear indices of conservative variable data.
-                        const int idx = i + num_ghosts_0_conservative_var;
-                        const int idx_intermediate = i + num_ghosts_0_conservative_var_intermediate;
+                        const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
                         
-                        Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute linear indices of conservative variable data and immersed boundary mask.
+                            const int idx = i + num_ghosts_0_conservative_var;
+                            const int idx_intermediate = i + num_ghosts_0_conservative_var_intermediate;
+                            const int idx_IB_mask = i + num_ghosts_0_IB_mask;
+                            
+                            if (IB_mask[idx_IB_mask] == fluid)
+                            {
+                                Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                            }
+                        }
+                    }
+                    else
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute linear indices of conservative variable data.
+                            const int idx = i + num_ghosts_0_conservative_var;
+                            const int idx_intermediate = i + num_ghosts_0_conservative_var_intermediate;
+                            
+                            Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                        }
                     }
                 }
             }
@@ -1513,20 +1882,47 @@ NavierStokes::advanceSingleStepOnPatch(
                         
                         const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                         
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
+                        if (d_use_immersed_boundaries)
                         {
-                            // Compute linear indices.
-                            const int idx = i + num_ghosts_0_conservative_var;
-                            const int idx_flux_x = i + 1;
-                            const int idx_source = i;
+                            const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
                             
-                            Q[ei][idx] += beta[n]*
-                                (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1] +
-                                   F_d_x_intermediate[idx_flux_x] - F_d_x_intermediate[idx_flux_x - 1])/dx_0 +
-                                 S_intermediate[idx_source]);
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute linear indices.
+                                const int idx = i + num_ghosts_0_conservative_var;
+                                const int idx_flux_x = i + 1;
+                                const int idx_source = i;
+                                const int idx_IB_mask = i + num_ghosts_0_IB_mask;
+                                
+                                if (IB_mask[idx_IB_mask] == fluid)
+                                {
+                                    Q[ei][idx] += beta[n]*
+                                        (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1] +
+                                           F_d_x_intermediate[idx_flux_x] - F_d_x_intermediate[idx_flux_x - 1])/dx_0 +
+                                         S_intermediate[idx_source]);
+                                }
+                            }
+                        }
+                        else
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute linear indices.
+                                const int idx = i + num_ghosts_0_conservative_var;
+                                const int idx_flux_x = i + 1;
+                                const int idx_source = i;
+                                
+                                Q[ei][idx] += beta[n]*
+                                    (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1] +
+                                       F_d_x_intermediate[idx_flux_x] - F_d_x_intermediate[idx_flux_x - 1])/dx_0 +
+                                     S_intermediate[idx_source]);
+                            }
                         }
                     }
                 }
@@ -1540,20 +1936,47 @@ NavierStokes::advanceSingleStepOnPatch(
                         
                         const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                         
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
+                        if (d_use_immersed_boundaries)
                         {
-                            // Compute linear indices.
-                            const int idx = i + num_ghosts_0_conservative_var;
-                            const int idx_flux_x = i + 1;
-                            const int idx_cell = i;
+                            const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
                             
-                            Q[ei][idx] += beta[n]*
-                                (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1])/dx_0 -
-                                 nabla_F_d_intermediate[idx_cell] +
-                                 S_intermediate[idx_cell]);
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute linear indices.
+                                const int idx = i + num_ghosts_0_conservative_var;
+                                const int idx_flux_x = i + 1;
+                                const int idx_cell = i;
+                                const int idx_IB_mask = i + num_ghosts_0_IB_mask;
+                                
+                                if (IB_mask[idx_IB_mask] == fluid)
+                                {
+                                    Q[ei][idx] += beta[n]*
+                                        (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1])/dx_0 -
+                                         nabla_F_d_intermediate[idx_cell] +
+                                         S_intermediate[idx_cell]);
+                                }
+                            }
+                        }
+                        else
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute linear indices.
+                                const int idx = i + num_ghosts_0_conservative_var;
+                                const int idx_flux_x = i + 1;
+                                const int idx_cell = i;
+                                
+                                Q[ei][idx] += beta[n]*
+                                    (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1])/dx_0 -
+                                     nabla_F_d_intermediate[idx_cell] +
+                                     S_intermediate[idx_cell]);
+                            }
                         }
                     }
                 }
@@ -1677,22 +2100,56 @@ NavierStokes::advanceSingleStepOnPatch(
                     const int ghostcell_dim_0_conservative_var_intermediate =
                         ghostcell_dims_conservative_var_intermediate[ei][0];
                     
-                    for (int j = 0; j < interior_dim_1; j++)
+                    if (d_use_immersed_boundaries)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
+                        const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
+                        const int num_ghosts_1_IB_mask = num_ghosts_IB_mask[1];
+                        const int ghostcell_dim_0_IB_mask = ghostcell_dims_IB_mask[0];
+                        
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
-                            // Compute linear indices of conservative data.
-                            const int idx = (i + num_ghosts_0_conservative_var) +
-                                (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
-                            
-                            const int idx_intermediate = (i + num_ghosts_0_conservative_var_intermediate) +
-                                (j + num_ghosts_1_conservative_var_intermediate)*
-                                    ghostcell_dim_0_conservative_var_intermediate;
-                            
-                            Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute linear indices of conservative data and immersed boundary mask.
+                                const int idx = (i + num_ghosts_0_conservative_var) +
+                                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                                
+                                const int idx_intermediate = (i + num_ghosts_0_conservative_var_intermediate) +
+                                    (j + num_ghosts_1_conservative_var_intermediate)*
+                                        ghostcell_dim_0_conservative_var_intermediate;
+                                
+                                const int idx_IB_mask = (i + num_ghosts_0_IB_mask) +
+                                    (j + num_ghosts_1_IB_mask)*ghostcell_dim_0_IB_mask;
+                                
+                                if (IB_mask[idx_IB_mask] == fluid)
+                                {
+                                    Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute linear indices of conservative data.
+                                const int idx = (i + num_ghosts_0_conservative_var) +
+                                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                                
+                                const int idx_intermediate = (i + num_ghosts_0_conservative_var_intermediate) +
+                                    (j + num_ghosts_1_conservative_var_intermediate)*
+                                        ghostcell_dim_0_conservative_var_intermediate;
+                                
+                                Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                            }
                         }
                     }
                 }
@@ -1714,38 +2171,88 @@ NavierStokes::advanceSingleStepOnPatch(
                         const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
                         const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
                         
-                        for (int j = 0; j < interior_dim_1; j++)
+                        if (d_use_immersed_boundaries)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = 0; i < interior_dim_0; i++)
+                            const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
+                            const int num_ghosts_1_IB_mask = num_ghosts_IB_mask[1];
+                            const int ghostcell_dim_0_IB_mask = ghostcell_dims_IB_mask[0];
+                            
+                            for (int j = 0; j < interior_dim_1; j++)
                             {
-                                // Compute linear indices.
-                                const int idx = (i + num_ghosts_0_conservative_var) +
-                                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
-                                
-                                const int idx_flux_x_L = i +
-                                    j*(interior_dim_0 + 1);
-                                
-                                const int idx_flux_x_R = (i + 1) +
-                                    j*(interior_dim_0 + 1);
-                                
-                                const int idx_flux_y_B = i +
-                                    j*interior_dim_0;
-                                
-                                const int idx_flux_y_T = i +
-                                    (j + 1)*interior_dim_0;
-                                
-                                const int idx_source = i +
-                                    j*interior_dim_0;
-                                
-                                Q[ei][idx] += beta[n]*
-                                    (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L] +
-                                       F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])/dx_0 -
-                                      (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B] +
-                                       F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])/dx_1 +
-                                      S_intermediate[idx_source]);
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute linear indices.
+                                    const int idx = (i + num_ghosts_0_conservative_var) +
+                                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                                    
+                                    const int idx_flux_x_L = i +
+                                        j*(interior_dim_0 + 1);
+                                    
+                                    const int idx_flux_x_R = (i + 1) +
+                                        j*(interior_dim_0 + 1);
+                                    
+                                    const int idx_flux_y_B = i +
+                                        j*interior_dim_0;
+                                    
+                                    const int idx_flux_y_T = i +
+                                        (j + 1)*interior_dim_0;
+                                    
+                                    const int idx_source = i +
+                                        j*interior_dim_0;
+                                    
+                                    const int idx_IB_mask = (i + num_ghosts_0_IB_mask) +
+                                        (j + num_ghosts_1_IB_mask)*ghostcell_dim_0_IB_mask;
+                                    
+                                    if (IB_mask[idx_IB_mask] == fluid)
+                                    {
+                                        Q[ei][idx] += beta[n]*
+                                            (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L] +
+                                               F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])/dx_0 -
+                                              (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B] +
+                                               F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])/dx_1 +
+                                              S_intermediate[idx_source]);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int j = 0; j < interior_dim_1; j++)
+                            {
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute linear indices.
+                                    const int idx = (i + num_ghosts_0_conservative_var) +
+                                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                                    
+                                    const int idx_flux_x_L = i +
+                                        j*(interior_dim_0 + 1);
+                                    
+                                    const int idx_flux_x_R = (i + 1) +
+                                        j*(interior_dim_0 + 1);
+                                    
+                                    const int idx_flux_y_B = i +
+                                        j*interior_dim_0;
+                                    
+                                    const int idx_flux_y_T = i +
+                                        (j + 1)*interior_dim_0;
+                                    
+                                    const int idx_source = i +
+                                        j*interior_dim_0;
+                                    
+                                    Q[ei][idx] += beta[n]*
+                                        (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L] +
+                                           F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])/dx_0 -
+                                          (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B] +
+                                           F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])/dx_1 +
+                                          S_intermediate[idx_source]);
+                                }
                             }
                         }
                     }
@@ -1763,37 +2270,86 @@ NavierStokes::advanceSingleStepOnPatch(
                         const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
                         const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
                         
-                        for (int j = 0; j < interior_dim_1; j++)
+                        if (d_use_immersed_boundaries)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = 0; i < interior_dim_0; i++)
+                            const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
+                            const int num_ghosts_1_IB_mask = num_ghosts_IB_mask[1];
+                            const int ghostcell_dim_0_IB_mask = ghostcell_dims_IB_mask[0];
+                            
+                            for (int j = 0; j < interior_dim_1; j++)
                             {
-                                // Compute linear indices.
-                                const int idx = (i + num_ghosts_0_conservative_var) +
-                                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
-                                
-                                const int idx_flux_x_L = i +
-                                    j*(interior_dim_0 + 1);
-                                
-                                const int idx_flux_x_R = (i + 1) +
-                                    j*(interior_dim_0 + 1);
-                                
-                                const int idx_flux_y_B = i +
-                                    j*interior_dim_0;
-                                
-                                const int idx_flux_y_T = i +
-                                    (j + 1)*interior_dim_0;
-                                
-                                const int idx_cell = i +
-                                    j*interior_dim_0;
-                                
-                                Q[ei][idx] += beta[n]*
-                                    (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L])/dx_0 -
-                                      (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B])/dx_1 -
-                                      nabla_F_d_intermediate[idx_cell] +
-                                      S_intermediate[idx_cell]);
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute linear indices.
+                                    const int idx = (i + num_ghosts_0_conservative_var) +
+                                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                                    
+                                    const int idx_flux_x_L = i +
+                                        j*(interior_dim_0 + 1);
+                                    
+                                    const int idx_flux_x_R = (i + 1) +
+                                        j*(interior_dim_0 + 1);
+                                    
+                                    const int idx_flux_y_B = i +
+                                        j*interior_dim_0;
+                                    
+                                    const int idx_flux_y_T = i +
+                                        (j + 1)*interior_dim_0;
+                                    
+                                    const int idx_cell = i +
+                                        j*interior_dim_0;
+                                    
+                                    const int idx_IB_mask = (i + num_ghosts_0_IB_mask) +
+                                        (j + num_ghosts_1_IB_mask)*ghostcell_dim_0_IB_mask;
+                                    
+                                    if (IB_mask[idx_IB_mask] == fluid)
+                                    {
+                                        Q[ei][idx] += beta[n]*
+                                            (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L])/dx_0 -
+                                              (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B])/dx_1 -
+                                              nabla_F_d_intermediate[idx_cell] +
+                                              S_intermediate[idx_cell]);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int j = 0; j < interior_dim_1; j++)
+                            {
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute linear indices.
+                                    const int idx = (i + num_ghosts_0_conservative_var) +
+                                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                                    
+                                    const int idx_flux_x_L = i +
+                                        j*(interior_dim_0 + 1);
+                                    
+                                    const int idx_flux_x_R = (i + 1) +
+                                        j*(interior_dim_0 + 1);
+                                    
+                                    const int idx_flux_y_B = i +
+                                        j*interior_dim_0;
+                                    
+                                    const int idx_flux_y_T = i +
+                                        (j + 1)*interior_dim_0;
+                                    
+                                    const int idx_cell = i +
+                                        j*interior_dim_0;
+                                    
+                                    Q[ei][idx] += beta[n]*
+                                        (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L])/dx_0 -
+                                          (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B])/dx_1 -
+                                          nabla_F_d_intermediate[idx_cell] +
+                                          S_intermediate[idx_cell]);
+                                }
                             }
                         }
                     }
@@ -1990,29 +2546,75 @@ NavierStokes::advanceSingleStepOnPatch(
                     const int ghostcell_dim_1_conservative_var_intermediate =
                         ghostcell_dims_conservative_var_intermediate[ei][1];
                     
-                    for (int k = 0; k < interior_dim_2; k++)
+                    if (d_use_immersed_boundaries)
                     {
-                        for (int j = 0; j < interior_dim_1; j++)
+                        const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
+                        const int num_ghosts_1_IB_mask = num_ghosts_IB_mask[1];
+                        const int num_ghosts_2_IB_mask = num_ghosts_IB_mask[2];
+                        const int ghostcell_dim_0_IB_mask = ghostcell_dims_IB_mask[0];
+                        const int ghostcell_dim_1_IB_mask = ghostcell_dims_IB_mask[1];
+                        
+                        for (int k = 0; k < interior_dim_2; k++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = 0; i < interior_dim_0; i++)
+                            for (int j = 0; j < interior_dim_1; j++)
                             {
-                                // Compute linear indices of conservative variable data.
-                                const int idx = (i + num_ghosts_0_conservative_var) +
-                                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
-                                    (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
-                                        ghostcell_dim_1_conservative_var;
-                                
-                                const int idx_intermediate = (i + num_ghosts_0_conservative_var_intermediate) +
-                                    (j + num_ghosts_1_conservative_var_intermediate)*
-                                        ghostcell_dim_0_conservative_var_intermediate +
-                                    (k + num_ghosts_2_conservative_var_intermediate)*
-                                        ghostcell_dim_0_conservative_var_intermediate*
-                                            ghostcell_dim_1_conservative_var_intermediate;
-                                
-                                Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute linear indices of conservative variable data and immersed boundary mask.
+                                    const int idx = (i + num_ghosts_0_conservative_var) +
+                                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                                            ghostcell_dim_1_conservative_var;
+                                    
+                                    const int idx_intermediate = (i + num_ghosts_0_conservative_var_intermediate) +
+                                        (j + num_ghosts_1_conservative_var_intermediate)*
+                                            ghostcell_dim_0_conservative_var_intermediate +
+                                        (k + num_ghosts_2_conservative_var_intermediate)*
+                                            ghostcell_dim_0_conservative_var_intermediate*
+                                                ghostcell_dim_1_conservative_var_intermediate;
+                                    
+                                    const int idx_IB_mask = (i + num_ghosts_0_IB_mask) +
+                                        (j + num_ghosts_1_IB_mask)*ghostcell_dim_0_IB_mask +
+                                        (k + num_ghosts_2_IB_mask)*ghostcell_dim_0_IB_mask*
+                                            ghostcell_dim_1_IB_mask;
+                                    
+                                    if (IB_mask[idx_IB_mask] == fluid)
+                                    {
+                                        Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int k = 0; k < interior_dim_2; k++)
+                        {
+                            for (int j = 0; j < interior_dim_1; j++)
+                            {
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute linear indices of conservative variable data.
+                                    const int idx = (i + num_ghosts_0_conservative_var) +
+                                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                                            ghostcell_dim_1_conservative_var;
+                                    
+                                    const int idx_intermediate = (i + num_ghosts_0_conservative_var_intermediate) +
+                                        (j + num_ghosts_1_conservative_var_intermediate)*
+                                            ghostcell_dim_0_conservative_var_intermediate +
+                                        (k + num_ghosts_2_conservative_var_intermediate)*
+                                            ghostcell_dim_0_conservative_var_intermediate*
+                                                ghostcell_dim_1_conservative_var_intermediate;
+                                    
+                                    Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                                }
                             }
                         }
                     }
@@ -2039,57 +2641,131 @@ NavierStokes::advanceSingleStepOnPatch(
                         const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
                         const int ghostcell_dim_1_conservative_var = ghostcell_dims_conservative_var[ei][1];
                         
-                        for (int k = 0; k < interior_dim_2; k++)
+                        if (d_use_immersed_boundaries)
                         {
-                            for (int j = 0; j < interior_dim_1; j++)
+                            const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
+                            const int num_ghosts_1_IB_mask = num_ghosts_IB_mask[1];
+                            const int num_ghosts_2_IB_mask = num_ghosts_IB_mask[2];
+                            const int ghostcell_dim_0_IB_mask = ghostcell_dims_IB_mask[0];
+                            const int ghostcell_dim_1_IB_mask = ghostcell_dims_IB_mask[1];
+                            
+                            for (int k = 0; k < interior_dim_2; k++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
-                                for (int i = 0; i < interior_dim_0; i++)
+                                for (int j = 0; j < interior_dim_1; j++)
                                 {
-                                    // Compute linear indices.
-                                    const int idx = (i + num_ghosts_0_conservative_var) +
-                                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
-                                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
-                                            ghostcell_dim_1_conservative_var;
-                                    
-                                    const int idx_flux_x_L = i +
-                                        j*(interior_dim_0 + 1) +
-                                        k*(interior_dim_0 + 1)*interior_dim_1;
-                                    
-                                    const int idx_flux_x_R = (i + 1) +
-                                        j*(interior_dim_0 + 1) +
-                                        k*(interior_dim_0 + 1)*interior_dim_1;
-                                    
-                                    const int idx_flux_y_B = i +
-                                        j*interior_dim_0 +
-                                        k*interior_dim_0*(interior_dim_1 + 1);
-                                    
-                                    const int idx_flux_y_T = i +
-                                        (j + 1)*interior_dim_0 +
-                                        k*interior_dim_0*(interior_dim_1 + 1);
-                                    
-                                    const int idx_flux_z_B = i +
-                                        j*interior_dim_0 +
-                                        k*interior_dim_0*interior_dim_1;
-                                    
-                                    const int idx_flux_z_F = i +
-                                        j*interior_dim_0 +
-                                        (k + 1)*interior_dim_0*interior_dim_1;
-                                    
-                                    const int idx_source = i +
-                                        j*interior_dim_0 +
-                                        k*interior_dim_0*interior_dim_1;
-                                    
-                                    Q[ei][idx] += beta[n]*
-                                        (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L] +
-                                           F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])/dx_0 -
-                                          (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B] +
-                                           F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])/dx_1 -
-                                          (F_c_z_intermediate[idx_flux_z_F] - F_c_z_intermediate[idx_flux_z_B] +
-                                           F_d_z_intermediate[idx_flux_z_F] - F_d_z_intermediate[idx_flux_z_B])/dx_2 +
-                                          S_intermediate[idx_source]);
+#ifdef HAMERS_ENABLE_SIMD
+                                    #pragma omp simd
+#endif
+                                    for (int i = 0; i < interior_dim_0; i++)
+                                    {
+                                        // Compute linear indices.
+                                        const int idx = (i + num_ghosts_0_conservative_var) +
+                                            (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                                            (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                                                ghostcell_dim_1_conservative_var;
+                                        
+                                        const int idx_flux_x_L = i +
+                                            j*(interior_dim_0 + 1) +
+                                            k*(interior_dim_0 + 1)*interior_dim_1;
+                                        
+                                        const int idx_flux_x_R = (i + 1) +
+                                            j*(interior_dim_0 + 1) +
+                                            k*(interior_dim_0 + 1)*interior_dim_1;
+                                        
+                                        const int idx_flux_y_B = i +
+                                            j*interior_dim_0 +
+                                            k*interior_dim_0*(interior_dim_1 + 1);
+                                        
+                                        const int idx_flux_y_T = i +
+                                            (j + 1)*interior_dim_0 +
+                                            k*interior_dim_0*(interior_dim_1 + 1);
+                                        
+                                        const int idx_flux_z_B = i +
+                                            j*interior_dim_0 +
+                                            k*interior_dim_0*interior_dim_1;
+                                        
+                                        const int idx_flux_z_F = i +
+                                            j*interior_dim_0 +
+                                            (k + 1)*interior_dim_0*interior_dim_1;
+                                        
+                                        const int idx_source = i +
+                                            j*interior_dim_0 +
+                                            k*interior_dim_0*interior_dim_1;
+                                        
+                                        const int idx_IB_mask = (i + num_ghosts_0_IB_mask) +
+                                            (j + num_ghosts_1_IB_mask)*ghostcell_dim_0_IB_mask +
+                                            (k + num_ghosts_2_IB_mask)*ghostcell_dim_0_IB_mask*
+                                                ghostcell_dim_1_IB_mask;
+                                        
+                                        if (IB_mask[idx_IB_mask] == fluid)
+                                        {
+                                            Q[ei][idx] += beta[n]*
+                                                (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L] +
+                                                   F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])/dx_0 -
+                                                  (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B] +
+                                                   F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])/dx_1 -
+                                                  (F_c_z_intermediate[idx_flux_z_F] - F_c_z_intermediate[idx_flux_z_B] +
+                                                   F_d_z_intermediate[idx_flux_z_F] - F_d_z_intermediate[idx_flux_z_B])/dx_2 +
+                                                  S_intermediate[idx_source]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int k = 0; k < interior_dim_2; k++)
+                            {
+                                for (int j = 0; j < interior_dim_1; j++)
+                                {
+#ifdef HAMERS_ENABLE_SIMD
+                                    #pragma omp simd
+#endif
+                                    for (int i = 0; i < interior_dim_0; i++)
+                                    {
+                                        // Compute linear indices.
+                                        const int idx = (i + num_ghosts_0_conservative_var) +
+                                            (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                                            (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                                                ghostcell_dim_1_conservative_var;
+                                        
+                                        const int idx_flux_x_L = i +
+                                            j*(interior_dim_0 + 1) +
+                                            k*(interior_dim_0 + 1)*interior_dim_1;
+                                        
+                                        const int idx_flux_x_R = (i + 1) +
+                                            j*(interior_dim_0 + 1) +
+                                            k*(interior_dim_0 + 1)*interior_dim_1;
+                                        
+                                        const int idx_flux_y_B = i +
+                                            j*interior_dim_0 +
+                                            k*interior_dim_0*(interior_dim_1 + 1);
+                                        
+                                        const int idx_flux_y_T = i +
+                                            (j + 1)*interior_dim_0 +
+                                            k*interior_dim_0*(interior_dim_1 + 1);
+                                        
+                                        const int idx_flux_z_B = i +
+                                            j*interior_dim_0 +
+                                            k*interior_dim_0*interior_dim_1;
+                                        
+                                        const int idx_flux_z_F = i +
+                                            j*interior_dim_0 +
+                                            (k + 1)*interior_dim_0*interior_dim_1;
+                                        
+                                        const int idx_source = i +
+                                            j*interior_dim_0 +
+                                            k*interior_dim_0*interior_dim_1;
+                                        
+                                        Q[ei][idx] += beta[n]*
+                                            (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L] +
+                                               F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])/dx_0 -
+                                              (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B] +
+                                               F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])/dx_1 -
+                                              (F_c_z_intermediate[idx_flux_z_F] - F_c_z_intermediate[idx_flux_z_B] +
+                                               F_d_z_intermediate[idx_flux_z_F] - F_d_z_intermediate[idx_flux_z_B])/dx_2 +
+                                              S_intermediate[idx_source]);
+                                    }
                                 }
                             }
                         }
@@ -2111,55 +2787,127 @@ NavierStokes::advanceSingleStepOnPatch(
                         const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
                         const int ghostcell_dim_1_conservative_var = ghostcell_dims_conservative_var[ei][1];
                         
-                        for (int k = 0; k < interior_dim_2; k++)
+                        if (d_use_immersed_boundaries)
                         {
-                            for (int j = 0; j < interior_dim_1; j++)
+                            const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
+                            const int num_ghosts_1_IB_mask = num_ghosts_IB_mask[1];
+                            const int num_ghosts_2_IB_mask = num_ghosts_IB_mask[2];
+                            const int ghostcell_dim_0_IB_mask = ghostcell_dims_IB_mask[0];
+                            const int ghostcell_dim_1_IB_mask = ghostcell_dims_IB_mask[1];
+                            
+                            for (int k = 0; k < interior_dim_2; k++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
-                                for (int i = 0; i < interior_dim_0; i++)
+                                for (int j = 0; j < interior_dim_1; j++)
                                 {
-                                    // Compute linear indices.
-                                    const int idx = (i + num_ghosts_0_conservative_var) +
-                                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
-                                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
-                                            ghostcell_dim_1_conservative_var;
-                                    
-                                    const int idx_flux_x_L = i +
-                                        j*(interior_dim_0 + 1) +
-                                        k*(interior_dim_0 + 1)*interior_dim_1;
-                                    
-                                    const int idx_flux_x_R = (i + 1) +
-                                        j*(interior_dim_0 + 1) +
-                                        k*(interior_dim_0 + 1)*interior_dim_1;
-                                    
-                                    const int idx_flux_y_B = i +
-                                        j*interior_dim_0 +
-                                        k*interior_dim_0*(interior_dim_1 + 1);
-                                    
-                                    const int idx_flux_y_T = i +
-                                        (j + 1)*interior_dim_0 +
-                                        k*interior_dim_0*(interior_dim_1 + 1);
-                                    
-                                    const int idx_flux_z_B = i +
-                                        j*interior_dim_0 +
-                                        k*interior_dim_0*interior_dim_1;
-                                    
-                                    const int idx_flux_z_F = i +
-                                        j*interior_dim_0 +
-                                        (k + 1)*interior_dim_0*interior_dim_1;
-                                    
-                                    const int idx_cell = i +
-                                        j*interior_dim_0 +
-                                        k*interior_dim_0*interior_dim_1;
-                                    
-                                    Q[ei][idx] += beta[n]*
-                                        (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L])/dx_0 -
-                                          (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B])/dx_1 -
-                                          (F_c_z_intermediate[idx_flux_z_F] - F_c_z_intermediate[idx_flux_z_B])/dx_2 -
-                                          nabla_F_d_intermediate[idx_cell] +
-                                          S_intermediate[idx_cell]);
+#ifdef HAMERS_ENABLE_SIMD
+                                    #pragma omp simd
+#endif
+                                    for (int i = 0; i < interior_dim_0; i++)
+                                    {
+                                        // Compute linear indices.
+                                        const int idx = (i + num_ghosts_0_conservative_var) +
+                                            (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                                            (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                                                ghostcell_dim_1_conservative_var;
+                                        
+                                        const int idx_flux_x_L = i +
+                                            j*(interior_dim_0 + 1) +
+                                            k*(interior_dim_0 + 1)*interior_dim_1;
+                                        
+                                        const int idx_flux_x_R = (i + 1) +
+                                            j*(interior_dim_0 + 1) +
+                                            k*(interior_dim_0 + 1)*interior_dim_1;
+                                        
+                                        const int idx_flux_y_B = i +
+                                            j*interior_dim_0 +
+                                            k*interior_dim_0*(interior_dim_1 + 1);
+                                        
+                                        const int idx_flux_y_T = i +
+                                            (j + 1)*interior_dim_0 +
+                                            k*interior_dim_0*(interior_dim_1 + 1);
+                                        
+                                        const int idx_flux_z_B = i +
+                                            j*interior_dim_0 +
+                                            k*interior_dim_0*interior_dim_1;
+                                        
+                                        const int idx_flux_z_F = i +
+                                            j*interior_dim_0 +
+                                            (k + 1)*interior_dim_0*interior_dim_1;
+                                        
+                                        const int idx_cell = i +
+                                            j*interior_dim_0 +
+                                            k*interior_dim_0*interior_dim_1;
+                                        
+                                        const int idx_IB_mask = (i + num_ghosts_0_IB_mask) +
+                                            (j + num_ghosts_1_IB_mask)*ghostcell_dim_0_IB_mask +
+                                            (k + num_ghosts_2_IB_mask)*ghostcell_dim_0_IB_mask*
+                                                ghostcell_dim_1_IB_mask;
+                                        
+                                        if (IB_mask[idx_IB_mask] == fluid)
+                                        {
+                                            Q[ei][idx] += beta[n]*
+                                                (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L])/dx_0 -
+                                                  (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B])/dx_1 -
+                                                  (F_c_z_intermediate[idx_flux_z_F] - F_c_z_intermediate[idx_flux_z_B])/dx_2 -
+                                                  nabla_F_d_intermediate[idx_cell] +
+                                                  S_intermediate[idx_cell]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int k = 0; k < interior_dim_2; k++)
+                            {
+                                for (int j = 0; j < interior_dim_1; j++)
+                                {
+#ifdef HAMERS_ENABLE_SIMD
+                                    #pragma omp simd
+#endif
+                                    for (int i = 0; i < interior_dim_0; i++)
+                                    {
+                                        // Compute linear indices.
+                                        const int idx = (i + num_ghosts_0_conservative_var) +
+                                            (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                                            (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                                                ghostcell_dim_1_conservative_var;
+                                        
+                                        const int idx_flux_x_L = i +
+                                            j*(interior_dim_0 + 1) +
+                                            k*(interior_dim_0 + 1)*interior_dim_1;
+                                        
+                                        const int idx_flux_x_R = (i + 1) +
+                                            j*(interior_dim_0 + 1) +
+                                            k*(interior_dim_0 + 1)*interior_dim_1;
+                                        
+                                        const int idx_flux_y_B = i +
+                                            j*interior_dim_0 +
+                                            k*interior_dim_0*(interior_dim_1 + 1);
+                                        
+                                        const int idx_flux_y_T = i +
+                                            (j + 1)*interior_dim_0 +
+                                            k*interior_dim_0*(interior_dim_1 + 1);
+                                        
+                                        const int idx_flux_z_B = i +
+                                            j*interior_dim_0 +
+                                            k*interior_dim_0*interior_dim_1;
+                                        
+                                        const int idx_flux_z_F = i +
+                                            j*interior_dim_0 +
+                                            (k + 1)*interior_dim_0*interior_dim_1;
+                                        
+                                        const int idx_cell = i +
+                                            j*interior_dim_0 +
+                                            k*interior_dim_0*interior_dim_1;
+                                        
+                                        Q[ei][idx] += beta[n]*
+                                            (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L])/dx_0 -
+                                              (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B])/dx_1 -
+                                              (F_c_z_intermediate[idx_flux_z_F] - F_c_z_intermediate[idx_flux_z_B])/dx_2 -
+                                              nabla_F_d_intermediate[idx_cell] +
+                                              S_intermediate[idx_cell]);
+                                    }
                                 }
                             }
                         }
@@ -2411,7 +3159,16 @@ NavierStokes::advanceSingleStepOnPatch(
         {
             d_flow_model->registerPatchWithDataContext(patch, getDataContext());
             
-            d_flow_model->updateCellDataOfConservativeVariables();
+            if (d_use_immersed_boundaries)
+            {
+                d_flow_model->updateCellDataOfConservativeVariables(
+                    IB_mask_cell_data,
+                    fluid);
+            }
+            else
+            {
+                d_flow_model->updateCellDataOfConservativeVariables();
+            }
             
             d_flow_model->unregisterPatch();
         }
@@ -2485,6 +3242,32 @@ NavierStokes::synchronizeFluxes(
         }
     }
     
+    /*
+     * Get the pointer to the cell data of the immersed boundary mask.
+     * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
+     */
+    
+    int* IB_mask = nullptr;
+    HAMERS_SHARED_PTR<pdat::CellData<int> > IB_mask_cell_data;
+    hier::IntVector num_ghosts_IB_mask(d_dim);
+    hier::IntVector ghostcell_dims_IB_mask(d_dim);
+    const int fluid = int(IB_MASK::FLUID);
+    
+    if (d_use_immersed_boundaries)
+    {
+        d_flow_model->setupImmersedBoundaryMethod();
+        
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        IB_mask_cell_data = flow_model_immersed_boundary_method->
+            getCellDataOfImmersedBoundaryMask(getDataContext());
+        
+        IB_mask                = IB_mask_cell_data->getPointer(0);
+        num_ghosts_IB_mask     = IB_mask_cell_data->getGhostCellWidth();
+        ghostcell_dims_IB_mask = IB_mask_cell_data->getGhostBox().numberCells();
+    }
+    
     // Unregister the patch.
     d_flow_model->unregisterPatch();
     
@@ -2550,26 +3333,53 @@ NavierStokes::synchronizeFluxes(
         {
             for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
             {
-                double *F_c_x = convective_flux->getPointer(0, ei);
-                double *F_d_x = diffusive_flux->getPointer(0, ei);
-                double *S = source->getPointer(ei);
+                double* F_c_x = convective_flux->getPointer(0, ei);
+                double* F_d_x = diffusive_flux->getPointer(0, ei);
+                double* S = source->getPointer(ei);
                 
                 const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = 0; i < interior_dim_0; i++)
+                if (d_use_immersed_boundaries)
                 {
-                    // Compute linear indices.
-                    const int idx = i + num_ghosts_0_conservative_var;
-                    const int idx_flux_x_L = i;
-                    const int idx_flux_x_R = i + 1;
-                    const int idx_source = i;
+                    const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
                     
-                    Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
-                                     F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 +
-                                    S[idx_source]);
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute linear indices.
+                        const int idx = i + num_ghosts_0_conservative_var;
+                        const int idx_flux_x_L = i;
+                        const int idx_flux_x_R = i + 1;
+                        const int idx_source = i;
+                        const int idx_IB_mask = i + num_ghosts_0_IB_mask;
+                        
+                        if (IB_mask[idx_IB_mask] == fluid)
+                        {
+                            Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
+                                             F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 +
+                                            S[idx_source]);
+                        }
+                    }
+                }
+                else
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute linear indices.
+                        const int idx = i + num_ghosts_0_conservative_var;
+                        const int idx_flux_x_L = i;
+                        const int idx_flux_x_R = i + 1;
+                        const int idx_source = i;
+                        
+                        Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
+                                         F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 +
+                                        S[idx_source]);
+                    }
                 }
             }
         }
@@ -2577,26 +3387,53 @@ NavierStokes::synchronizeFluxes(
         {
             for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
             {
-                double *F_c_x = convective_flux->getPointer(0, ei);
-                double *nabla_F_d = diffusive_flux_divergence->getPointer(ei);
-                double *S = source->getPointer(ei);
+                double* F_c_x = convective_flux->getPointer(0, ei);
+                double* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
+                double* S = source->getPointer(ei);
                 
                 const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = 0; i < interior_dim_0; i++)
+                if (d_use_immersed_boundaries)
                 {
-                    // Compute linear indices.
-                    const int idx = i + num_ghosts_0_conservative_var;
-                    const int idx_flux_x_L = i;
-                    const int idx_flux_x_R = i + 1;
-                    const int idx_cell = i;
+                    const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
                     
-                    Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
-                                    nabla_F_d[idx_cell] +
-                                    S[idx_cell]);
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute linear indices.
+                        const int idx = i + num_ghosts_0_conservative_var;
+                        const int idx_flux_x_L = i;
+                        const int idx_flux_x_R = i + 1;
+                        const int idx_cell = i;
+                        const int idx_IB_mask = i + num_ghosts_0_IB_mask;
+                        
+                        if (IB_mask[idx_IB_mask] == fluid)
+                        {
+                            Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
+                                            nabla_F_d[idx_cell] +
+                                            S[idx_cell]);
+                        }
+                    }
+                }
+                else
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute linear indices.
+                        const int idx = i + num_ghosts_0_conservative_var;
+                        const int idx_flux_x_L = i;
+                        const int idx_flux_x_R = i + 1;
+                        const int idx_cell = i;
+                        
+                        Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
+                                        nabla_F_d[idx_cell] +
+                                        S[idx_cell]);
+                    }
                 }
             }
         }
@@ -2618,47 +3455,96 @@ NavierStokes::synchronizeFluxes(
         {
             for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
             {
-                double *F_c_x = convective_flux->getPointer(0, ei);
-                double *F_c_y = convective_flux->getPointer(1, ei);
-                double *F_d_x = diffusive_flux->getPointer(0, ei);
-                double *F_d_y = diffusive_flux->getPointer(1, ei);
-                double *S = source->getPointer(ei);
+                double* F_c_x = convective_flux->getPointer(0, ei);
+                double* F_c_y = convective_flux->getPointer(1, ei);
+                double* F_d_x = diffusive_flux->getPointer(0, ei);
+                double* F_d_y = diffusive_flux->getPointer(1, ei);
+                double* S = source->getPointer(ei);
                 
                 const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                 const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
                 const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
                 
-                for (int j = 0; j < interior_dim_1; j++)
+                if (d_use_immersed_boundaries)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0; i++)
+                    const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
+                    const int num_ghosts_1_IB_mask = num_ghosts_IB_mask[1];
+                    const int ghostcell_dim_0_IB_mask = ghostcell_dims_IB_mask[0];
+                    
+                    for (int j = 0; j < interior_dim_1; j++)
                     {
-                        // Compute linear indices.
-                        const int idx = (i + num_ghosts_0_conservative_var) +
-                            (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
-                        
-                        const int idx_flux_x_L = i +
-                            j*(interior_dim_0 + 1);
-                        
-                        const int idx_flux_x_R = (i + 1) +
-                            j*(interior_dim_0 + 1);
-                        
-                        const int idx_flux_y_B = i +
-                            j*interior_dim_0;
-                        
-                        const int idx_flux_y_T = i +
-                            (j + 1)*interior_dim_0;
-                        
-                        const int idx_source = i +
-                            j*interior_dim_0;
-                        
-                        Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
-                                         F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 -
-                                        (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B] +
-                                         F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])/dx_1 +
-                                        S[idx_source]);
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute linear indices.
+                            const int idx = (i + num_ghosts_0_conservative_var) +
+                                (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                            
+                            const int idx_flux_x_L = i +
+                                j*(interior_dim_0 + 1);
+                            
+                            const int idx_flux_x_R = (i + 1) +
+                                j*(interior_dim_0 + 1);
+                            
+                            const int idx_flux_y_B = i +
+                                j*interior_dim_0;
+                            
+                            const int idx_flux_y_T = i +
+                                (j + 1)*interior_dim_0;
+                            
+                            const int idx_source = i +
+                                j*interior_dim_0;
+                            
+                            const int idx_IB_mask = (i + num_ghosts_0_IB_mask) +
+                                (j + num_ghosts_1_IB_mask)*ghostcell_dim_0_IB_mask;
+                            
+                            if (IB_mask[idx_IB_mask] == fluid)
+                            {
+                                Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
+                                                 F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 -
+                                                (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B] +
+                                                 F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])/dx_1 +
+                                                S[idx_source]);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute linear indices.
+                            const int idx = (i + num_ghosts_0_conservative_var) +
+                                (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                            
+                            const int idx_flux_x_L = i +
+                                j*(interior_dim_0 + 1);
+                            
+                            const int idx_flux_x_R = (i + 1) +
+                                j*(interior_dim_0 + 1);
+                            
+                            const int idx_flux_y_B = i +
+                                j*interior_dim_0;
+                            
+                            const int idx_flux_y_T = i +
+                                (j + 1)*interior_dim_0;
+                            
+                            const int idx_source = i +
+                                j*interior_dim_0;
+                            
+                            Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
+                                             F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 -
+                                            (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B] +
+                                             F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])/dx_1 +
+                                            S[idx_source]);
+                        }
                     }
                 }
             }
@@ -2667,45 +3553,93 @@ NavierStokes::synchronizeFluxes(
         {
             for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
             {
-                double *F_c_x = convective_flux->getPointer(0, ei);
-                double *F_c_y = convective_flux->getPointer(1, ei);
-                double *nabla_F_d = diffusive_flux_divergence->getPointer(ei);
-                double *S = source->getPointer(ei);
+                double* F_c_x = convective_flux->getPointer(0, ei);
+                double* F_c_y = convective_flux->getPointer(1, ei);
+                double* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
+                double* S = source->getPointer(ei);
                 
                 const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                 const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
                 const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
                 
-                for (int j = 0; j < interior_dim_1; j++)
+                if (d_use_immersed_boundaries)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0; i++)
+                    const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
+                    const int num_ghosts_1_IB_mask = num_ghosts_IB_mask[1];
+                    const int ghostcell_dim_0_IB_mask = ghostcell_dims_IB_mask[0];
+                    
+                    for (int j = 0; j < interior_dim_1; j++)
                     {
-                        // Compute linear indices.
-                        const int idx = (i + num_ghosts_0_conservative_var) +
-                            (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
-                        
-                        const int idx_flux_x_L = i +
-                            j*(interior_dim_0 + 1);
-                        
-                        const int idx_flux_x_R = (i + 1) +
-                            j*(interior_dim_0 + 1);
-                        
-                        const int idx_flux_y_B = i +
-                            j*interior_dim_0;
-                        
-                        const int idx_flux_y_T = i +
-                            (j + 1)*interior_dim_0;
-                        
-                        const int idx_cell = i +
-                            j*interior_dim_0;
-                        
-                        Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
-                                        (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B])/dx_1 -
-                                        nabla_F_d[idx_cell] +
-                                        S[idx_cell]);
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute linear indices.
+                            const int idx = (i + num_ghosts_0_conservative_var) +
+                                (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                            
+                            const int idx_flux_x_L = i +
+                                j*(interior_dim_0 + 1);
+                            
+                            const int idx_flux_x_R = (i + 1) +
+                                j*(interior_dim_0 + 1);
+                            
+                            const int idx_flux_y_B = i +
+                                j*interior_dim_0;
+                            
+                            const int idx_flux_y_T = i +
+                                (j + 1)*interior_dim_0;
+                            
+                            const int idx_cell = i +
+                                j*interior_dim_0;
+                            
+                            const int idx_IB_mask = (i + num_ghosts_0_IB_mask) +
+                                (j + num_ghosts_1_IB_mask)*ghostcell_dim_0_IB_mask;
+                            
+                            if (IB_mask[idx_IB_mask] == fluid)
+                            {
+                                Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
+                                                (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B])/dx_1 -
+                                                nabla_F_d[idx_cell] +
+                                                S[idx_cell]);
+                            }   
+                        }
+                    }
+                }
+                else
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute linear indices.
+                            const int idx = (i + num_ghosts_0_conservative_var) +
+                                (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                            
+                            const int idx_flux_x_L = i +
+                                j*(interior_dim_0 + 1);
+                            
+                            const int idx_flux_x_R = (i + 1) +
+                                j*(interior_dim_0 + 1);
+                            
+                            const int idx_flux_y_B = i +
+                                j*interior_dim_0;
+                            
+                            const int idx_flux_y_T = i +
+                                (j + 1)*interior_dim_0;
+                            
+                            const int idx_cell = i +
+                                j*interior_dim_0;
+                            
+                            Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
+                                            (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B])/dx_1 -
+                                            nabla_F_d[idx_cell] +
+                                            S[idx_cell]);
+                        }
                     }
                 }
             }
@@ -2729,13 +3663,13 @@ NavierStokes::synchronizeFluxes(
         {
             for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
             {
-                double *F_c_x = convective_flux->getPointer(0, ei);
-                double *F_c_y = convective_flux->getPointer(1, ei);
-                double *F_c_z = convective_flux->getPointer(2, ei);
-                double *F_d_x = diffusive_flux->getPointer(0, ei);
-                double *F_d_y = diffusive_flux->getPointer(1, ei);
-                double *F_d_z = diffusive_flux->getPointer(2, ei);
-                double *S = source->getPointer(ei);
+                double* F_c_x = convective_flux->getPointer(0, ei);
+                double* F_c_y = convective_flux->getPointer(1, ei);
+                double* F_c_z = convective_flux->getPointer(2, ei);
+                double* F_d_x = diffusive_flux->getPointer(0, ei);
+                double* F_d_y = diffusive_flux->getPointer(1, ei);
+                double* F_d_z = diffusive_flux->getPointer(2, ei);
+                double* S = source->getPointer(ei);
                 
                 const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                 const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
@@ -2743,56 +3677,129 @@ NavierStokes::synchronizeFluxes(
                 const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
                 const int ghostcell_dim_1_conservative_var = ghostcell_dims_conservative_var[ei][1];
                 
-                for (int k = 0; k < interior_dim_2; k++)
+                if (d_use_immersed_boundaries)
                 {
-                    for (int j = 0; j < interior_dim_1; j++)
+                    const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
+                    const int num_ghosts_1_IB_mask = num_ghosts_IB_mask[1];
+                    const int num_ghosts_2_IB_mask = num_ghosts_IB_mask[2];
+                    const int ghostcell_dim_0_IB_mask = ghostcell_dims_IB_mask[0];
+                    const int ghostcell_dim_1_IB_mask = ghostcell_dims_IB_mask[1];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
-                            // Compute linear indices.
-                            const int idx = (i + num_ghosts_0_conservative_var) +
-                                (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
-                                (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
-                                    ghostcell_dim_1_conservative_var;
-                            
-                            const int idx_flux_x_L = i +
-                                j*(interior_dim_0 + 1) +
-                                k*(interior_dim_0 + 1)*interior_dim_1;
-                            
-                            const int idx_flux_x_R = (i + 1) +
-                                j*(interior_dim_0 + 1) +
-                                k*(interior_dim_0 + 1)*interior_dim_1;
-                            
-                            const int idx_flux_y_B = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*(interior_dim_1 + 1);
-                            
-                            const int idx_flux_y_T = i +
-                                (j + 1)*interior_dim_0 +
-                                k*interior_dim_0*(interior_dim_1 + 1);
-                            
-                            const int idx_flux_z_B = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*interior_dim_1;
-                            
-                            const int idx_flux_z_F = i +
-                                j*interior_dim_0 +
-                                (k + 1)*interior_dim_0*interior_dim_1;
-                            
-                            const int idx_source = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*interior_dim_1;
-                            
-                            Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
-                                             F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 -
-                                            (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B] +
-                                             F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])/dx_1 -
-                                            (F_c_z[idx_flux_z_F] - F_c_z[idx_flux_z_B] +
-                                             F_d_z[idx_flux_z_F] - F_d_z[idx_flux_z_B])/dx_2 +
-                                            S[idx_source]);
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute linear indices.
+                                const int idx = (i + num_ghosts_0_conservative_var) +
+                                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                                    (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                                        ghostcell_dim_1_conservative_var;
+                                
+                                const int idx_flux_x_L = i +
+                                    j*(interior_dim_0 + 1) +
+                                    k*(interior_dim_0 + 1)*interior_dim_1;
+                                
+                                const int idx_flux_x_R = (i + 1) +
+                                    j*(interior_dim_0 + 1) +
+                                    k*(interior_dim_0 + 1)*interior_dim_1;
+                                
+                                const int idx_flux_y_B = i +
+                                    j*interior_dim_0 +
+                                    k*interior_dim_0*(interior_dim_1 + 1);
+                                
+                                const int idx_flux_y_T = i +
+                                    (j + 1)*interior_dim_0 +
+                                    k*interior_dim_0*(interior_dim_1 + 1);
+                                
+                                const int idx_flux_z_B = i +
+                                    j*interior_dim_0 +
+                                    k*interior_dim_0*interior_dim_1;
+                                
+                                const int idx_flux_z_F = i +
+                                    j*interior_dim_0 +
+                                    (k + 1)*interior_dim_0*interior_dim_1;
+                                
+                                const int idx_source = i +
+                                    j*interior_dim_0 +
+                                    k*interior_dim_0*interior_dim_1;
+                                
+                                const int idx_IB_mask = (i + num_ghosts_0_IB_mask) +
+                                    (j + num_ghosts_1_IB_mask)*ghostcell_dim_0_IB_mask +
+                                    (k + num_ghosts_2_IB_mask)*ghostcell_dim_0_IB_mask*
+                                        ghostcell_dim_1_IB_mask;
+                                
+                                if (IB_mask[idx_IB_mask] == fluid)
+                                {
+                                    Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
+                                                     F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 -
+                                                    (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B] +
+                                                     F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])/dx_1 -
+                                                    (F_c_z[idx_flux_z_F] - F_c_z[idx_flux_z_B] +
+                                                     F_d_z[idx_flux_z_F] - F_d_z[idx_flux_z_B])/dx_2 +
+                                                    S[idx_source]);
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute linear indices.
+                                const int idx = (i + num_ghosts_0_conservative_var) +
+                                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                                    (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                                        ghostcell_dim_1_conservative_var;
+                                
+                                const int idx_flux_x_L = i +
+                                    j*(interior_dim_0 + 1) +
+                                    k*(interior_dim_0 + 1)*interior_dim_1;
+                                
+                                const int idx_flux_x_R = (i + 1) +
+                                    j*(interior_dim_0 + 1) +
+                                    k*(interior_dim_0 + 1)*interior_dim_1;
+                                
+                                const int idx_flux_y_B = i +
+                                    j*interior_dim_0 +
+                                    k*interior_dim_0*(interior_dim_1 + 1);
+                                
+                                const int idx_flux_y_T = i +
+                                    (j + 1)*interior_dim_0 +
+                                    k*interior_dim_0*(interior_dim_1 + 1);
+                                
+                                const int idx_flux_z_B = i +
+                                    j*interior_dim_0 +
+                                    k*interior_dim_0*interior_dim_1;
+                                
+                                const int idx_flux_z_F = i +
+                                    j*interior_dim_0 +
+                                    (k + 1)*interior_dim_0*interior_dim_1;
+                                
+                                const int idx_source = i +
+                                    j*interior_dim_0 +
+                                    k*interior_dim_0*interior_dim_1;
+                                
+                                Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
+                                                 F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 -
+                                                (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B] +
+                                                 F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])/dx_1 -
+                                                (F_c_z[idx_flux_z_F] - F_c_z[idx_flux_z_B] +
+                                                 F_d_z[idx_flux_z_F] - F_d_z[idx_flux_z_B])/dx_2 +
+                                                S[idx_source]);
+                            }
                         }
                     }
                 }
@@ -2802,11 +3809,11 @@ NavierStokes::synchronizeFluxes(
         {
             for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
             {
-                double *F_c_x = convective_flux->getPointer(0, ei);
-                double *F_c_y = convective_flux->getPointer(1, ei);
-                double *F_c_z = convective_flux->getPointer(2, ei);
-                double *nabla_F_d = diffusive_flux_divergence->getPointer(ei);
-                double *S = source->getPointer(ei);
+                double* F_c_x = convective_flux->getPointer(0, ei);
+                double* F_c_y = convective_flux->getPointer(1, ei);
+                double* F_c_z = convective_flux->getPointer(2, ei);
+                double* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
+                double* S = source->getPointer(ei);
                 
                 const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                 const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
@@ -2814,54 +3821,125 @@ NavierStokes::synchronizeFluxes(
                 const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
                 const int ghostcell_dim_1_conservative_var = ghostcell_dims_conservative_var[ei][1];
                 
-                for (int k = 0; k < interior_dim_2; k++)
+                if (d_use_immersed_boundaries)
                 {
-                    for (int j = 0; j < interior_dim_1; j++)
+                    const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
+                    const int num_ghosts_1_IB_mask = num_ghosts_IB_mask[1];
+                    const int num_ghosts_2_IB_mask = num_ghosts_IB_mask[2];
+                    const int ghostcell_dim_0_IB_mask = ghostcell_dims_IB_mask[0];
+                    const int ghostcell_dim_1_IB_mask = ghostcell_dims_IB_mask[1];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
-                            // Compute linear indices.
-                            const int idx = (i + num_ghosts_0_conservative_var) +
-                                (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
-                                (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
-                                    ghostcell_dim_1_conservative_var;
-                            
-                            const int idx_flux_x_L = i +
-                                j*(interior_dim_0 + 1) +
-                                k*(interior_dim_0 + 1)*interior_dim_1;
-                            
-                            const int idx_flux_x_R = (i + 1) +
-                                j*(interior_dim_0 + 1) +
-                                k*(interior_dim_0 + 1)*interior_dim_1;
-                            
-                            const int idx_flux_y_B = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*(interior_dim_1 + 1);
-                            
-                            const int idx_flux_y_T = i +
-                                (j + 1)*interior_dim_0 +
-                                k*interior_dim_0*(interior_dim_1 + 1);
-                            
-                            const int idx_flux_z_B = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*interior_dim_1;
-                            
-                            const int idx_flux_z_F = i +
-                                j*interior_dim_0 +
-                                (k + 1)*interior_dim_0*interior_dim_1;
-                            
-                            const int idx_cell = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*interior_dim_1;
-                            
-                            Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
-                                            (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B])/dx_1 -
-                                            (F_c_z[idx_flux_z_F] - F_c_z[idx_flux_z_B])/dx_2 -
-                                            nabla_F_d[idx_cell] +
-                                            S[idx_cell]);
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute linear indices.
+                                const int idx = (i + num_ghosts_0_conservative_var) +
+                                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                                    (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                                        ghostcell_dim_1_conservative_var;
+                                
+                                const int idx_flux_x_L = i +
+                                    j*(interior_dim_0 + 1) +
+                                    k*(interior_dim_0 + 1)*interior_dim_1;
+                                
+                                const int idx_flux_x_R = (i + 1) +
+                                    j*(interior_dim_0 + 1) +
+                                    k*(interior_dim_0 + 1)*interior_dim_1;
+                                
+                                const int idx_flux_y_B = i +
+                                    j*interior_dim_0 +
+                                    k*interior_dim_0*(interior_dim_1 + 1);
+                                
+                                const int idx_flux_y_T = i +
+                                    (j + 1)*interior_dim_0 +
+                                    k*interior_dim_0*(interior_dim_1 + 1);
+                                
+                                const int idx_flux_z_B = i +
+                                    j*interior_dim_0 +
+                                    k*interior_dim_0*interior_dim_1;
+                                
+                                const int idx_flux_z_F = i +
+                                    j*interior_dim_0 +
+                                    (k + 1)*interior_dim_0*interior_dim_1;
+                                
+                                const int idx_cell = i +
+                                    j*interior_dim_0 +
+                                    k*interior_dim_0*interior_dim_1;
+                                
+                                const int idx_IB_mask = (i + num_ghosts_0_IB_mask) +
+                                    (j + num_ghosts_1_IB_mask)*ghostcell_dim_0_IB_mask +
+                                    (k + num_ghosts_2_IB_mask)*ghostcell_dim_0_IB_mask*
+                                        ghostcell_dim_1_IB_mask;
+                                
+                                if (IB_mask[idx_IB_mask] == fluid)
+                                {
+                                    Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
+                                                    (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B])/dx_1 -
+                                                    (F_c_z[idx_flux_z_F] - F_c_z[idx_flux_z_B])/dx_2 -
+                                                    nabla_F_d[idx_cell] +
+                                                    S[idx_cell]);
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute linear indices.
+                                const int idx = (i + num_ghosts_0_conservative_var) +
+                                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                                    (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                                        ghostcell_dim_1_conservative_var;
+                                
+                                const int idx_flux_x_L = i +
+                                    j*(interior_dim_0 + 1) +
+                                    k*(interior_dim_0 + 1)*interior_dim_1;
+                                
+                                const int idx_flux_x_R = (i + 1) +
+                                    j*(interior_dim_0 + 1) +
+                                    k*(interior_dim_0 + 1)*interior_dim_1;
+                                
+                                const int idx_flux_y_B = i +
+                                    j*interior_dim_0 +
+                                    k*interior_dim_0*(interior_dim_1 + 1);
+                                
+                                const int idx_flux_y_T = i +
+                                    (j + 1)*interior_dim_0 +
+                                    k*interior_dim_0*(interior_dim_1 + 1);
+                                
+                                const int idx_flux_z_B = i +
+                                    j*interior_dim_0 +
+                                    k*interior_dim_0*interior_dim_1;
+                                
+                                const int idx_flux_z_F = i +
+                                    j*interior_dim_0 +
+                                    (k + 1)*interior_dim_0*interior_dim_1;
+                                
+                                const int idx_cell = i +
+                                    j*interior_dim_0 +
+                                    k*interior_dim_0*interior_dim_1;
+                                
+                                Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
+                                                (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B])/dx_1 -
+                                                (F_c_z[idx_flux_z_F] - F_c_z[idx_flux_z_B])/dx_2 -
+                                                nabla_F_d[idx_cell] +
+                                                S[idx_cell]);
+                            }
                         }
                     }
                 }
@@ -2875,7 +3953,16 @@ NavierStokes::synchronizeFluxes(
     
     d_flow_model->registerPatchWithDataContext(patch, getDataContext());
     
-    d_flow_model->updateCellDataOfConservativeVariables();
+    if (d_use_immersed_boundaries)
+    {
+        d_flow_model->updateCellDataOfConservativeVariables(
+            IB_mask_cell_data,
+            fluid);
+    }
+    else
+    {
+        d_flow_model->updateCellDataOfConservativeVariables();
+    }
     
     d_flow_model->unregisterPatch();
     
@@ -3240,6 +4327,18 @@ NavierStokes::putToRestart(
         restart_db->putDatabase("d_Navier_Stokes_boundary_conditions_db");
     
     d_Navier_Stokes_boundary_conditions->putToRestart(restart_Navier_Stokes_boundary_conditions_db);
+    
+    restart_db->putBool("d_use_ghost_cell_immersed_boundary_method", d_use_ghost_cell_immersed_boundary_method);
+    if (d_use_ghost_cell_immersed_boundary_method)
+    {
+        HAMERS_SHARED_PTR<tbox::Database> immersed_boundary_method_db =
+            restart_db->putDatabase("immersed_boundary_method_db");
+        
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        flow_model_immersed_boundary_method->putToRestart(immersed_boundary_method_db);
+    }
     
     if (d_value_tagger != nullptr)
     {
@@ -4005,6 +5104,19 @@ NavierStokes::getFromInput(
             }
         }
     }
+    
+    /*
+     * Get whether to use immersed boundaries and the database for the immersed boundary method from the input database.
+     */
+    
+    if (input_db->keyExists("use_ghost_cell_immersed_boundary_method"))
+    {
+        d_use_ghost_cell_immersed_boundary_method = input_db->getBool("use_ghost_cell_immersed_boundary_method");
+        if (d_use_ghost_cell_immersed_boundary_method)
+        {
+            d_immersed_boundary_method_db = input_db->getDatabase("Immersed_boundary_method");
+        }
+    }
 }
 
 
@@ -4052,6 +5164,12 @@ void NavierStokes::getFromRestart()
     d_Navier_Stokes_boundary_conditions_db = db->getDatabase("d_Navier_Stokes_boundary_conditions_db");
     
     d_Navier_Stokes_boundary_conditions_db_is_from_restart = true;
+    
+    d_use_ghost_cell_immersed_boundary_method = db->getBool("d_use_ghost_cell_immersed_boundary_method");
+    if (d_use_ghost_cell_immersed_boundary_method)
+    {
+        d_immersed_boundary_method_db = db->getDatabase("d_immersed_boundary_method_db");
+    }
     
     if (db->keyExists("d_value_tagger_db"))
     {

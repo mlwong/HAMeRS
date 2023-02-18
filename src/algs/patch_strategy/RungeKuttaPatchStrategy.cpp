@@ -18,6 +18,7 @@ RungeKuttaPatchStrategy::RungeKuttaPatchStrategy():
     xfer::RefinePatchStrategy(),
     xfer::CoarsenPatchStrategy(),
     d_use_ghost_cell_immersed_boundary_method(false),
+    d_use_static_immersed_boundaries(true),
     d_data_context()
 {
 }

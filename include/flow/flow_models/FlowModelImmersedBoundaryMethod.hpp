@@ -76,6 +76,13 @@ class FlowModelImmersedBoundaryMethod
             const bool initial_time,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
+        /*
+         * Get the cell data of the immersed boundary mask in the registered patch.
+         */
+        HAMERS_SHARED_PTR<pdat::CellData<int> >
+        getCellDataOfImmersedBoundaryMask(
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
     protected:
         /*
          * The object name is used for error/warning reporting.
