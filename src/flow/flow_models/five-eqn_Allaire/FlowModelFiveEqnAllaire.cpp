@@ -1783,8 +1783,8 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
     }
     double* E = data_total_energy->getPointer(0);
     std::vector<double*> Z;
-    Z.reserve(d_num_species - 1);
-    for (int si = 0; si < d_num_species - 1; si++)
+    Z.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
     {
         Z.push_back(data_volume_fractions->getPointer(si));
     }
