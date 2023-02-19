@@ -31,6 +31,7 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
     const hier::IntVector num_ghosts = data_mask->getGhostCellWidth();
     const hier::IntVector ghostcell_dims = data_mask->getGhostBox().numberCells();
     
+TBOX_ASSERT(false);
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(num_ghosts == data_wall_distance->getGhostCellWidth());
     TBOX_ASSERT(num_ghosts == data_surface_normal->getGhostCellWidth());
@@ -87,28 +88,51 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
             x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
             x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
             
-            const double radius = sqrt(pow(x[0] - x_c, 2.0) + pow(x[1] - y_c, 2.0));
+            const double radius = sqrt(pow(x[0] - x_c, 2) + pow(x[1] - y_c, 2));
+            const double theta  = atan2(x[1] - y_c, x[0] - x_c);
             if (radius < radius_c)
             {
-                if (radius_c - radius < (double(d_num_immersed_boundary_ghosts[0]) - half)*dx[0])
+                double x_p = double(0); // x coordiantes on the cylinder where y = x[1].
+                double y_p = double(0); // y coordiantes on the cylinder where x = x[0].
+                
+                if (x[0] > x_c)
                 {
-                    mask[idx] = int(IB_MASK::IB_GHOST);
-                    dist[idx] = radius;
+                    x_p = x_c + sqrt(pow(radius_c, 2) - pow(radius*sin(theta), 2));
+                }
+                else
+                {
+                    x_p = x_c - sqrt(pow(radius_c, 2) - pow(radius*sin(theta), 2));
+                }
+                
+                if (x[1] > y_c)
+                {
+                    y_p = y_c + sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));
+                }
+                else
+                {
+                    y_p = y_c - sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));
+                }
+                
+                if ((fabs(x_p - x[0]) < (double(d_num_immersed_boundary_ghosts[0]))*dx[0]) ||
+                    (fabs(y_p - x[1]) < (double(d_num_immersed_boundary_ghosts[1]))*dx[1]))
+                {
+                    mask[idx]   = int(IB_MASK::IB_GHOST);
+                    dist[idx]   = radius;
                     norm_0[idx] = (x[0] - x_c)/radius;
                     norm_1[idx] = (x[1] - y_c)/radius;
                 }
                 else
                 {
-                    mask[idx] = int(IB_MASK::BODY);
-                    dist[idx] = double(0);
+                    mask[idx]   = int(IB_MASK::BODY);
+                    dist[idx]   = double(0);
                     norm_0[idx] = double(0);
                     norm_1[idx] = double(0);
                 }
             }
             else
             {
-                mask[idx] = int(IB_MASK::FLUID);
-                dist[idx] = double(0);
+                mask[idx]   = int(IB_MASK::FLUID);
+                dist[idx]   = double(0);
                 norm_0[idx] = double(0);
                 norm_1[idx] = double(0);
             }

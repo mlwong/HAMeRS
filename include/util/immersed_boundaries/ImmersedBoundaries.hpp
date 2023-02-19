@@ -12,6 +12,8 @@
 
 #include <string>
 
+#define IB_EPS HAMERS_EPSILON
+
 using namespace SAMRAI;
 
 namespace IB_MASK
