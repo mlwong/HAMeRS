@@ -674,32 +674,6 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
     
     std::vector<double> spectral_radiuses_and_dt;
     
-    /*
-     * Get the pointer to the cell data of the immersed boundary mask.
-     * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
-     */
-    
-    int* IB_mask = nullptr;
-    HAMERS_SHARED_PTR<pdat::CellData<int> > IB_mask_cell_data;
-    hier::IntVector num_ghosts_IB_mask(d_dim);
-    hier::IntVector ghostcell_dims_IB_mask(d_dim);
-    const int fluid = int(IB_MASK::FLUID);
-    
-    if (d_use_immersed_boundaries)
-    {
-        d_flow_model->setupImmersedBoundaryMethod();
-        
-        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
-            d_flow_model->getFlowModelImmersedBoundaryMethod();
-        
-        IB_mask_cell_data = flow_model_immersed_boundary_method->
-            getCellDataOfImmersedBoundaryMask(getDataContext());
-        
-        IB_mask                = IB_mask_cell_data->getPointer(0);
-        num_ghosts_IB_mask     = IB_mask_cell_data->getGhostCellWidth();
-        ghostcell_dims_IB_mask = IB_mask_cell_data->getGhostBox().numberCells();
-    }
-    
     const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
         HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
@@ -790,6 +764,32 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
     if (source_utilities->hasSourceTerms())
     {
         source_utilities->computeDerivedCellData();
+    }
+    
+    /*
+     * Get the pointer to the cell data of the immersed boundary mask.
+     * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
+     */
+    
+    int* IB_mask = nullptr;
+    HAMERS_SHARED_PTR<pdat::CellData<int> > IB_mask_cell_data;
+    hier::IntVector num_ghosts_IB_mask(d_dim);
+    hier::IntVector ghostcell_dims_IB_mask(d_dim);
+    const int fluid = int(IB_MASK::FLUID);
+    
+    if (d_use_immersed_boundaries)
+    {
+        d_flow_model->setupImmersedBoundaryMethod();
+        
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        IB_mask_cell_data = flow_model_immersed_boundary_method->
+            getCellDataOfImmersedBoundaryMask(getDataContext());
+        
+        IB_mask                = IB_mask_cell_data->getPointer(0);
+        num_ghosts_IB_mask     = IB_mask_cell_data->getGhostCellWidth();
+        ghostcell_dims_IB_mask = IB_mask_cell_data->getGhostBox().numberCells();
     }
     
     if (d_dim == tbox::Dimension(1))
