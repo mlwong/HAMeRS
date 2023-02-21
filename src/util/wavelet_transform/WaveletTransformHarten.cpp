@@ -287,9 +287,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 const int i_bound_lo_x = -d_num_wavelet_ghosts[0] + 1;
                 const int i_bound_hi_x = interior_dim_0 + d_num_wavelet_ghosts[0] - 1;
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                 {
                     // Compute the linear indices.
@@ -308,9 +306,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 
                 if (compute_variable_local_means)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -347,9 +343,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 const int i_bound_lo_x = -d_num_wavelet_ghosts[0] + 2;
                 const int i_bound_hi_x = interior_dim_0 + d_num_wavelet_ghosts[0] - 2;
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                 {
                     // Compute the linear indices.
@@ -373,9 +367,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 
                 if (compute_variable_local_means)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -426,9 +418,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     const int i_bound_lo_x = -d_num_wavelet_ghosts[0] + offset;
                     const int i_bound_hi_x = interior_dim_0 + d_num_wavelet_ghosts[0] - offset;
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                     {
                         // Compute the linear indices.
@@ -446,9 +436,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     
                     if (compute_variable_local_means)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -473,9 +461,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     const int i_bound_lo_x = -d_num_wavelet_ghosts[0] + 2*offset;
                     const int i_bound_hi_x = interior_dim_0 + d_num_wavelet_ghosts[0] - 2*offset;
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                     {
                         // Compute indices.
@@ -497,9 +483,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     
                     if (compute_variable_local_means)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute indices.
@@ -607,9 +591,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 
                 for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                     {
                         // Compute the linear indices.
@@ -654,9 +636,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 
                 for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                     {
                         // Compute the linear indices.
@@ -683,9 +663,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -744,9 +722,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 
                 for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                     {
                         // Compute the linear indices.
@@ -799,9 +775,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 
                 for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                     {
                         // Compute indices.
@@ -836,9 +810,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -920,9 +892,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     
                     for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                         {
                             // Compute the linear indices.
@@ -954,9 +924,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     
                     for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                         {
                             // Compute the linear indices.
@@ -980,9 +948,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -1028,9 +994,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     
                     for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                         {
                             // Compute the linear indices.
@@ -1070,9 +1034,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     
                     for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                         {
                             // Compute the linear indices.
@@ -1104,9 +1066,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -1178,9 +1138,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
             
             for (int j = start_index_j; j < end_index_j; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = start_index_i; i < end_index_i; i++)
                 {
                     const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -1289,9 +1247,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 {
                     for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                         {
                             // Compute the linear indices.
@@ -1349,9 +1305,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 {
                     for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                         {
                             // Compute the linear indices.
@@ -1409,9 +1363,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 {
                     for (int j = j_bound_lo_z; j < j_bound_hi_z; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = i_bound_lo_z; i < i_bound_hi_z; i++)
                         {
                             // Compute the linear indices.
@@ -1449,9 +1401,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the indices.
@@ -1541,9 +1491,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 {
                     for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                         {
                             // Compute the indices.
@@ -1613,9 +1561,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 {
                     for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                         {
                             // Compute the linear indices.
@@ -1685,9 +1631,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 {
                     for (int j = j_bound_lo_z; j < j_bound_hi_z; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = i_bound_lo_z; i < i_bound_hi_z; i++)
                         {
                             // Compute the linear indices.
@@ -1737,9 +1681,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -1870,9 +1812,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     {
                         for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                             {
                                 // Compute the linear indices.
@@ -1915,9 +1855,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     {
                         for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                             {
                                 // Compute the linear indices.
@@ -1960,9 +1898,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     {
                         for (int j = j_bound_lo_z; j < j_bound_hi_z; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = i_bound_lo_z; i < i_bound_hi_z; i++)
                             {
                                 // Compute the linear indices.
@@ -1995,9 +1931,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute the linear indices.
@@ -2072,9 +2006,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     {
                         for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                             {
                                 // Compute the linear indices.
@@ -2129,9 +2061,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     {
                         for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                             {
                                 // Compute the linear indices.
@@ -2186,9 +2116,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     {
                         for (int j = j_bound_lo_z; j < j_bound_hi_z; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = i_bound_lo_z; i < i_bound_hi_z; i++)
                             {
                                 // Compute indices.
@@ -2233,9 +2161,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute the linear indices.
@@ -2354,9 +2280,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
             {
                 for (int j = start_index_j; j < end_index_j; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = start_index_i; i < end_index_i; i++)
                     {
                         const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -2412,9 +2336,7 @@ WaveletTransformHarten::smoothCellData(
         const int i_bound_lo_x = -num_ghosts_cell_data[0];
         const int i_bound_hi_x = interior_dims[0] + num_ghosts_cell_data[0];
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
         {
             // Compute the linear index.
@@ -2460,9 +2382,7 @@ WaveletTransformHarten::smoothCellData(
         
         for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
             {
                 // Compute the linear index.
@@ -2505,9 +2425,7 @@ WaveletTransformHarten::smoothCellData(
         
         for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
             {
                 // Compute the linear index.
@@ -2562,9 +2480,7 @@ WaveletTransformHarten::smoothCellData(
         {
             for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                 {
                     // Compute the linear index.
@@ -2616,9 +2532,7 @@ WaveletTransformHarten::smoothCellData(
         {
             for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                 {
                     // Compute the linear index.
@@ -2669,9 +2583,7 @@ WaveletTransformHarten::smoothCellData(
         {
             for (int j = j_bound_lo_z; j < j_bound_hi_z; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = i_bound_lo_z; i < i_bound_hi_z; i++)
                 {
                     // Compute the linear index.

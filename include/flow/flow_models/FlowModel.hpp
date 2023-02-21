@@ -10,12 +10,14 @@
 #include "flow/flow_models/FlowModelBasicUtilities.hpp"
 #include "flow/flow_models/FlowModelBoundaryUtilities.hpp"
 #include "flow/flow_models/FlowModelDiffusiveFluxUtilities.hpp"
+#include "flow/flow_models/FlowModelImmersedBoundaryMethod.hpp"
 #include "flow/flow_models/FlowModelMonitoringStatisticsUtilities.hpp"
 #include "flow/flow_models/FlowModelRiemannSolver.hpp"
 #include "flow/flow_models/FlowModelSourceUtilities.hpp"
 #include "flow/flow_models/FlowModelStatisticsUtilities.hpp"
 #include "util/Directions.hpp"
 #include "util/mixing_rules/equations_of_state/EquationOfStateMixingRulesManager.hpp"
+#include "util/immersed_boundaries/ImmersedBoundaries.hpp"
 
 #include "SAMRAI/appu/VisDerivedDataStrategy.h"
 // #include "SAMRAI/appu/VisItDataWriter.h"
@@ -47,6 +49,7 @@ class FlowModelRiemannSolver;
 class FlowModelBasicUtilities;
 class FlowModelDiffusiveFluxUtilities;
 class FlowModelSourceUtilities;
+class FlowModelImmersedBoundaryMethod;
 class FlowModelMonitoringStatisticsUtilities;
 class FlowModelStatisticsUtilities;
 
@@ -71,6 +74,13 @@ class FlowModel:
             const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db);
         
         virtual ~FlowModel() {}
+        
+        /*
+         * Initialize the immersed boundary method object.
+         */
+        virtual void initializeImmersedBoundaryMethod(
+            const HAMERS_SHARED_PTR<ImmersedBoundaries>& immersed_boundaries,
+            const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db) = 0;
         
         /*
          * Get the total number of species.
@@ -175,6 +185,23 @@ class FlowModel:
         getFlowModelBoundaryUtilities() const
         {
             return d_flow_model_boundary_utilities;
+        }
+        
+        /*
+         * Return the HAMERS_SHARED_PTR to the immersed boundary method object.
+         */
+        const HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod>&
+        getFlowModelImmersedBoundaryMethod() const
+        {
+            if (d_flow_model_immersed_boundary_method == nullptr)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModel::getFlowModelImmersedBoundaryMethod()\n"
+                    << "The immersed boundary method object is not yet initialized."
+                    << std::endl);
+            }
+            
+            return d_flow_model_immersed_boundary_method;
         }
         
         /*
@@ -321,15 +348,21 @@ class FlowModel:
         
         /*
          * Fill the cell data of conservative variables in the interior box with value zero.
+         * Only fill the data when the mask has valid value if a mask cell data is given.
          */
         virtual void
-        fillCellDataOfConservativeVariablesWithZero() = 0;
+        fillCellDataOfConservativeVariablesWithZero(
+            const HAMERS_SHARED_PTR<pdat::CellData<int> >& mask_cell_data = nullptr,
+            const int mask_valid_value = 0) = 0;
         
         /*
          * Update the cell data of conservative variables in the interior box after time advancement.
+         * Only update the data when the mask has valid value if a mask cell data is given.
          */
         virtual void
-        updateCellDataOfConservativeVariables() = 0;
+        updateCellDataOfConservativeVariables(
+            const HAMERS_SHARED_PTR<pdat::CellData<int> >& mask_cell_data = nullptr,
+            const int mask_valid_value = 0) = 0;
         
         /*
          * Get the cell data of the conservative variables in the registered patch.
@@ -376,6 +409,12 @@ class FlowModel:
          */
         void
         setupSourceUtilities();
+        
+        /*
+         * Setup the immersed boundary method object.
+         */
+        void
+        setupImmersedBoundaryMethod();
         
         /*
          * Setup the monitoring statistics utilties object.
@@ -558,6 +597,11 @@ class FlowModel:
          * HAMERS_SHARED_PTR to the boundary utilities object for the flow model.
          */
         HAMERS_SHARED_PTR<FlowModelBoundaryUtilities> d_flow_model_boundary_utilities;
+        
+        /*
+         * HAMERS_SHARED_PTR to the immersed boundary method object for the flow model.
+         */
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> d_flow_model_immersed_boundary_method;
         
         /*
          * HAMERS_SHARED_PTR to the monitoring statistics utilities object for the flow model.

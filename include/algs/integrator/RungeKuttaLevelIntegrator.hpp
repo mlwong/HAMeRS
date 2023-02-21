@@ -169,6 +169,8 @@ class RungeKuttaLevelIntegrator:
          *                      stored.}
          * - \b INPUT          {Data that is set once and do not change during the ghosts are never
          *                      re-filled outside of user-defined routines.}
+         * - \b NO_FILL        {Data that only needs one time level to be stored and there is no
+         *                      refine/coarsen and halo exchange for the ghosts.}
          * - \b FLUX           {Face-centered double values used in conservative difference and
          *                      synchronization (i.e., refluxing) process. A corresponding variable
          *                      to store flux integral information is created for each FLUX variable.}

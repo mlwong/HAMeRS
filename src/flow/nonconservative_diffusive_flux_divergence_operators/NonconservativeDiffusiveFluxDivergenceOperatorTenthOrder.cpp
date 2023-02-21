@@ -144,9 +144,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeFirstDerivative
                     
                     const int num_subghosts_0_data = num_subghosts_data[0];
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -237,9 +235,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeFirstDerivative
                     
                     for (int j = -3; j < interior_dim_1 + 3; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -358,9 +354,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeFirstDerivative
                     {
                         for (int j = -3; j < interior_dim_1 + 3; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -552,9 +546,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeFirstDerivative
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = -3; i < interior_dim_0 + 3; i++)
                         {
                             // Compute the linear indices.
@@ -673,9 +665,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeFirstDerivative
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = -3; i < interior_dim_0 + 3; i++)
                             {
                                 // Compute the linear indices.
@@ -882,9 +872,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeFirstDerivative
                     {
                         for (int j = -3; j < interior_dim_1 + 3; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = -3; i < interior_dim_0 + 3; i++)
                             {
                                 // Compute the linear indices.
@@ -1058,9 +1046,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeSecondDerivativ
                     
                     const int num_subghosts_0_data = num_subghosts_data[0];
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1153,9 +1139,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeSecondDerivativ
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1278,9 +1262,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeSecondDerivativ
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -1479,9 +1461,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeSecondDerivativ
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1604,9 +1584,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeSecondDerivativ
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -1820,9 +1798,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder::computeSecondDerivativ
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.

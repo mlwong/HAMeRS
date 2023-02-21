@@ -241,9 +241,7 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 
                 const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = -num_subghosts_0_diffusivity + num_flux_reconstruct_ghosts_0;
                     i < (interior_dim_0 + 1) + num_subghosts_0_diffusivity - num_flux_reconstruct_ghosts_0;
                     i++)
@@ -494,9 +492,7 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = -num_subghosts_0_diffusivity + num_flux_reconstruct_ghosts_0;
                         i < (interior_dim_0 + 1) + num_subghosts_0_diffusivity - num_flux_reconstruct_ghosts_0;
                         i++)
@@ -546,9 +542,7 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = -num_subghosts_0_diffusivity + num_flux_reconstruct_ghosts_0;
                         i < (interior_dim_0 + 1) + num_subghosts_0_diffusivity - num_flux_reconstruct_ghosts_0;
                         i++)
@@ -706,9 +700,7 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                     j < (interior_dim_1 + 1) + num_subghosts_1_diffusivity - num_flux_reconstruct_ghosts_1;
                     j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -758,9 +750,7 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                     j < (interior_dim_1 + 1) + num_subghosts_1_diffusivity - num_flux_reconstruct_ghosts_1;
                     j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1459,9 +1449,7 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = -num_subghosts_0_diffusivity + num_flux_reconstruct_ghosts_0;
                             i < (interior_dim_0 + 1) + num_subghosts_0_diffusivity - num_flux_reconstruct_ghosts_0;
                             i++)
@@ -1520,9 +1508,7 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = -num_subghosts_0_diffusivity + num_flux_reconstruct_ghosts_0;
                             i < (interior_dim_0 + 1) + num_subghosts_0_diffusivity - num_flux_reconstruct_ghosts_0;
                             i++)
@@ -1581,9 +1567,7 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = -num_subghosts_0_diffusivity + num_flux_reconstruct_ghosts_0;
                             i < (interior_dim_0 + 1) + num_subghosts_0_diffusivity - num_flux_reconstruct_ghosts_0;
                             i++)
@@ -1793,9 +1777,7 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                         j < (interior_dim_1 + 1) + num_subghosts_1_diffusivity - num_flux_reconstruct_ghosts_1;
                         j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1854,9 +1836,7 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                         j < (interior_dim_1 + 1) + num_subghosts_1_diffusivity - num_flux_reconstruct_ghosts_1;
                         j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1915,9 +1895,7 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                         j < (interior_dim_1 + 1) + num_subghosts_1_diffusivity - num_flux_reconstruct_ghosts_1;
                         j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -2125,9 +2103,7 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -2186,9 +2162,7 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -2247,9 +2221,7 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.

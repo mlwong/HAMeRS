@@ -1710,8 +1710,60 @@ RungeKuttaLevelIntegrator::advanceLevel(
             }
         }
         
-        d_patch_strategy->setDataContext(d_scratch);
+        if (d_patch_strategy->useGhostCellImmersedBoundaryMethod())
+        {
+            if (sn == 0)
+            {
+                fill_schedule_intermediate = 
+                    d_bdry_fill_intermediate[sn]->createSchedule(
+                        level,
+                        d_patch_strategy);
+            }
             
+            for (hier::PatchLevel::iterator ip(level->begin());
+                ip != level->end();
+                ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch>& patch = *ip;
+                
+                t_patch_num_kernel->start();
+                
+                d_patch_strategy->setDataContext(d_scratch);
+                
+                // Compute and set the immersed boundary ghost cells.
+                d_patch_strategy->setImmersedBoundaryGhostCells(
+                    *patch,
+                    current_time,
+                    sn,
+                    d_intermediate[sn]);
+                
+                t_patch_num_kernel->stop();
+            }
+            
+            if (regrid_advance)
+            {
+                t_error_bdry_fill_comm->start();
+            }
+            else
+            {
+                t_advance_bdry_fill_comm->start();
+            }
+            
+            // One more communication for exchanging the immersed boundary ghost cells in the halo regions.
+            fill_schedule_intermediate->fillData(current_time);
+            
+            if (regrid_advance)
+            {
+                t_error_bdry_fill_comm->stop();
+            }
+            else
+            {
+                t_advance_bdry_fill_comm->stop();
+            }
+        }
+        
+        d_patch_strategy->setDataContext(d_scratch);
+        
         for (hier::PatchLevel::iterator ip(level->begin());
              ip != level->end();
              ip++)
@@ -2634,27 +2686,13 @@ RungeKuttaLevelIntegrator::registerVariable(
             
             d_new_patch_init_data.setFlag(cur_id);
             
+            d_saved_var_scratch_data.setFlag(scr_id);
+            
             /*
              * Register variable and context needed for restart.
              */
             hier::PatchDataRestartManager::getManager()->
                 registerPatchDataForRestart(cur_id);
-            
-            HAMERS_SHARED_PTR<hier::RefineOperator> refine_op(
-                transfer_geom->lookupRefineOperator(var, refine_name));
-            
-            d_fill_new_level->registerRefine(
-                cur_id, cur_id, scr_id, refine_op);
-            
-            /*
-             * Coarsen operation for setting initial data on coarser level
-             * in the Richardson extrapolation algorithm.
-             */
-            
-            HAMERS_SHARED_PTR<hier::CoarsenOperator> coarsen_op(
-                transfer_geom->lookupCoarsenOperator(var, coarsen_name));
-            
-            d_coarsen_rich_extrap_init->registerCoarsen(cur_id, cur_id, coarsen_op);
             
             break;
         }
