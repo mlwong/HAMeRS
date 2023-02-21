@@ -12,7 +12,7 @@
 
 #include <string>
 
-#define IB_EPS HAMERS_EPSILON
+#define IB_EPSILON HAMERS_EPSILON
 
 using namespace SAMRAI;
 
