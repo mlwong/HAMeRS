@@ -1375,9 +1375,7 @@ void NonconservativeDiffusiveFluxDivergenceOperator::addDerivativeToDivergence(
                 
                 const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1455,9 +1453,7 @@ void NonconservativeDiffusiveFluxDivergenceOperator::addDerivativeToDivergence(
                 
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1545,9 +1541,7 @@ void NonconservativeDiffusiveFluxDivergenceOperator::addDerivativeToDivergence(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.

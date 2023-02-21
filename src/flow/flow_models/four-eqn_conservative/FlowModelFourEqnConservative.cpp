@@ -2079,9 +2079,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
             
             for (int si = 0; si < d_num_species; si++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -2095,9 +2093,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
                 }
             }
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -2115,9 +2111,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
         {
             for (int si = 0; si < d_num_species; si++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -2127,9 +2121,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
                 }
             }
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -2165,9 +2157,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -2187,9 +2177,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -2214,9 +2202,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -2230,9 +2216,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -2279,9 +2263,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -2306,9 +2288,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -2339,9 +2319,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear index.
@@ -2359,9 +2337,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -4362,9 +4338,7 @@ FlowModelFourEqnConservative::computeCellDataOfMassFractionsWithDensity(
                 // Compute the mass fraction field.
                 for (int si = 0; si < d_num_species; si++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -4404,9 +4378,7 @@ FlowModelFourEqnConservative::computeCellDataOfMassFractionsWithDensity(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -4462,9 +4434,7 @@ FlowModelFourEqnConservative::computeCellDataOfMassFractionsWithDensity(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -4590,9 +4560,7 @@ FlowModelFourEqnConservative::computeCellDataOfMoleFractionsWithMassFractions(
                     const double M_i = d_equation_of_state_mixing_rules->
                         getSpeciesMolecularWeight(si);
                     
-    #ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-    #endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -4630,9 +4598,7 @@ FlowModelFourEqnConservative::computeCellDataOfMoleFractionsWithMassFractions(
                     
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-    #ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-    #endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -4682,9 +4648,7 @@ FlowModelFourEqnConservative::computeCellDataOfMoleFractionsWithMassFractions(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-    #ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-    #endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -4800,9 +4764,7 @@ FlowModelFourEqnConservative::computeCellDataOfVolumeFractionsWithSpeciesDensiti
                 // Compute the volume fraction field.
                 for (int si = 0; si < d_num_species; si++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -4842,9 +4804,7 @@ FlowModelFourEqnConservative::computeCellDataOfVolumeFractionsWithSpeciesDensiti
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -4900,9 +4860,7 @@ FlowModelFourEqnConservative::computeCellDataOfVolumeFractionsWithSpeciesDensiti
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -5009,9 +4967,7 @@ FlowModelFourEqnConservative::computeCellDataOfVelocityWithDensity(
                 double* rho_u = data_momentum->getPointer(0);
                 
                 // Compute the velocity field.
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -5056,9 +5012,7 @@ FlowModelFourEqnConservative::computeCellDataOfVelocityWithDensity(
                 // Compute the velocity field.
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -5122,9 +5076,7 @@ FlowModelFourEqnConservative::computeCellDataOfVelocityWithDensity(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -5238,9 +5190,7 @@ FlowModelFourEqnConservative::computeCellDataOfInternalEnergyWithDensityAndVeloc
                 double* u = d_data_velocity->getPointer(0);
                 
                 // Compute the internal energy field.
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -5287,9 +5237,7 @@ FlowModelFourEqnConservative::computeCellDataOfInternalEnergyWithDensityAndVeloc
                 // Compute the internal energy field.
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -5357,9 +5305,7 @@ FlowModelFourEqnConservative::computeCellDataOfInternalEnergyWithDensityAndVeloc
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -5563,9 +5509,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                 const int num_subghosts_0_pressure = d_num_subghosts_pressure[0];
                 const int num_subghosts_0_sound_speed = d_num_subghosts_sound_speed[0];
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -5578,9 +5522,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                 
                 for (int si = 0; si < d_num_species; si++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -5591,9 +5533,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                     }
                 }
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -5631,9 +5571,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -5654,9 +5592,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -5673,9 +5609,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -5727,9 +5661,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -5759,9 +5691,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -5785,9 +5715,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear index.
@@ -5970,9 +5898,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     // Compute the convective flux in the x-direction.
                     for (int si = 0; si < d_num_species; si++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -5984,9 +5910,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                         }
                     }
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -6038,9 +5962,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 const int idx = (i + num_ghosts_0) +
@@ -6059,9 +5981,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             const int idx = (i + num_ghosts_0) +
@@ -6135,9 +6055,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                         {
                             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                                 {
                                     // Compute the linear indices.
@@ -6165,9 +6083,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -6328,9 +6244,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 const int idx = (i + num_ghosts_0) +
@@ -6349,9 +6263,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             const int idx = (i + num_ghosts_0) +
@@ -6424,9 +6336,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                         {
                             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                                 {
                                     // Compute the linear indices.
@@ -6454,9 +6364,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -6630,9 +6538,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                         {
                             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                                 {
                                     // Compute the linear indices.
@@ -6660,9 +6566,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -6779,9 +6683,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                     const int num_subghosts_0_max_wave_speed_x = d_num_subghosts_max_wave_speed_x[0];
                     
                     // Compute the maximum wave speed in the x-direction.
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -6818,9 +6720,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                     // Compute the maximum wave speed in the x-direction.
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -6873,9 +6773,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -6993,9 +6891,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                     // Compute the maximum wave speed in the y-direction.
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -7048,9 +6944,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -7178,9 +7072,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -7378,9 +7270,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
                 const int num_subghosts_0_max_diffusivity = d_num_subghosts_max_diffusivity[0];
                 const int num_subghosts_0_density = d_num_subghosts_density[0];
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -7396,9 +7286,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
                 
                 for (int si = 0; si < d_num_species; si++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -7430,9 +7318,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -7454,9 +7340,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear index.
@@ -7498,9 +7382,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -7529,9 +7411,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear index.

@@ -1683,9 +1683,7 @@ FlowModelSingleSpecies::fillCellDataOfConservativeVariablesWithZero(
         {
             const int num_ghosts_0_mask = num_ghosts_mask[0];
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -1702,9 +1700,7 @@ FlowModelSingleSpecies::fillCellDataOfConservativeVariablesWithZero(
         }
         else
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -1739,9 +1735,7 @@ FlowModelSingleSpecies::fillCellDataOfConservativeVariablesWithZero(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1765,9 +1759,7 @@ FlowModelSingleSpecies::fillCellDataOfConservativeVariablesWithZero(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -1813,9 +1805,7 @@ FlowModelSingleSpecies::fillCellDataOfConservativeVariablesWithZero(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1845,9 +1835,7 @@ FlowModelSingleSpecies::fillCellDataOfConservativeVariablesWithZero(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -2961,9 +2949,7 @@ FlowModelSingleSpecies::computeCellDataOfVelocity(
                 double* rho_u = data_momentum->getPointer(0);
                 
                 // Compute the velocity field.
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -3003,9 +2989,7 @@ FlowModelSingleSpecies::computeCellDataOfVelocity(
                 // Compute the velocity field.
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -3060,9 +3044,7 @@ FlowModelSingleSpecies::computeCellDataOfVelocity(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -3175,9 +3157,7 @@ FlowModelSingleSpecies::computeCellDataOfInternalEnergyWithVelocity(
                 double* u = d_data_velocity->getPointer(0);
                 
                 // Compute the internal energy field.
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -3219,9 +3199,7 @@ FlowModelSingleSpecies::computeCellDataOfInternalEnergyWithVelocity(
                 // Compute the internal energy field.
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -3280,9 +3258,7 @@ FlowModelSingleSpecies::computeCellDataOfInternalEnergyWithVelocity(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -3569,9 +3545,7 @@ FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     double* u = d_data_velocity->getPointer(0);
                     
                     // Compute the convective flux in the x-direction.
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -3622,9 +3596,7 @@ FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     // Compute the convective flux in the x-direction.
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             const int idx = (i + num_ghosts_0) +
@@ -3696,9 +3668,7 @@ FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -3845,9 +3815,7 @@ FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     // Compute the convective flux in the y-direction.
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             const int idx = (i + num_ghosts_0) +
@@ -3919,9 +3887,7 @@ FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -4082,9 +4048,7 @@ FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -4200,9 +4164,7 @@ FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                     const int num_subghosts_0_max_wave_speed_x = d_num_subghosts_max_wave_speed_x[0];
                     
                     // Compute the maximum wave speed in the x-direction.
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -4239,9 +4201,7 @@ FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                     // Compute the maximum wave speed in the x-direction.
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -4294,9 +4254,7 @@ FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -4412,9 +4370,7 @@ FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                     // Compute the maximum wave speed in the y-direction.
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -4467,9 +4423,7 @@ FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -4595,9 +4549,7 @@ FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -4811,9 +4763,7 @@ FlowModelSingleSpecies::computeCellDataOfMaxDiffusivityWithPressureAndTemperatur
                 const int num_ghosts_0 = d_num_ghosts[0];
                 const int num_subghosts_0_max_diffusivity = d_num_subghosts_max_diffusivity[0];
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -4848,9 +4798,7 @@ FlowModelSingleSpecies::computeCellDataOfMaxDiffusivityWithPressureAndTemperatur
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -4897,9 +4845,7 @@ FlowModelSingleSpecies::computeCellDataOfMaxDiffusivityWithPressureAndTemperatur
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.

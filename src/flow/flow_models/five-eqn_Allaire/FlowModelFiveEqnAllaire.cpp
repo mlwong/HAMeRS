@@ -1806,9 +1806,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
             
             for (int si = 0; si < d_num_species; si++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1822,9 +1820,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                 }
             }
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -1840,9 +1836,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
             
             for (int si = 0; si < d_num_species; si++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1860,9 +1854,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
         {
             for (int si = 0; si < d_num_species; si++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -1872,9 +1864,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                 }
             }
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -1886,9 +1876,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
             
             for (int si = 0; si < d_num_species; si++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -1924,9 +1912,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1946,9 +1932,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1971,9 +1955,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1997,9 +1979,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -2013,9 +1993,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -2032,9 +2010,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -2080,9 +2056,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -2107,9 +2081,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -2138,9 +2110,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -2169,9 +2139,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear index.
@@ -2189,9 +2157,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -2213,9 +2179,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear index.
@@ -2293,9 +2257,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
         {
             const int num_ghosts_0_mask = num_ghosts_mask[0];
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -2310,9 +2272,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
             
             for (int si = 0; si < d_num_species - 1; si++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -2328,9 +2288,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
         }
         else
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -2341,9 +2299,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
             
             for (int si = 0; si < d_num_species - 1; si++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -2371,9 +2327,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -2394,9 +2348,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -2418,9 +2370,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -2435,9 +2385,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -2474,9 +2422,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -2502,9 +2448,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -2531,9 +2475,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -2552,9 +2494,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear index.
@@ -4529,9 +4469,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMassFractionsWithDensity(
                 // Compute the mass fraction field.
                 for (int si = 0; si < d_num_species; si++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -4571,9 +4509,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMassFractionsWithDensity(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -4629,9 +4565,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMassFractionsWithDensity(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -4739,9 +4673,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfVelocityWithDensity(
                 double* rho_u = data_momentum->getPointer(0);
                 
                 // Compute the velocity field.
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -4786,9 +4718,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfVelocityWithDensity(
                 // Compute the velocity field.
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -4852,9 +4782,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfVelocityWithDensity(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -4968,9 +4896,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfInternalEnergyWithDensityAndVelocity(
                 double* u = d_data_velocity->getPointer(0);
                 
                 // Compute the internal energy field.
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -5017,9 +4943,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfInternalEnergyWithDensityAndVelocity(
                 // Compute the internal energy field.
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -5087,9 +5011,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfInternalEnergyWithDensityAndVelocity(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -5303,9 +5225,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
                 const int num_subghosts_0_pressure = d_num_subghosts_pressure[0];
                 const int num_subghosts_0_sound_speed = d_num_subghosts_sound_speed[0];
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -5318,9 +5238,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
                 
                 for (int si = 0; si < d_num_species; si++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -5331,9 +5249,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
                     }
                 }
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -5371,9 +5287,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -5394,9 +5308,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -5413,9 +5325,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -5467,9 +5377,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -5499,9 +5407,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -5525,9 +5431,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear index.
@@ -5667,9 +5571,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     // Compute the convective flux in the x-direction.
                     for (int si = 0; si < d_num_species; si++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -5681,9 +5583,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                         }
                     }
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -5698,9 +5598,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     
                     for (int si = 0; si < d_num_species - 1; si++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -5751,9 +5649,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 const int idx = (i + num_ghosts_0) +
@@ -5772,9 +5668,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             const int idx = (i + num_ghosts_0) +
@@ -5799,9 +5693,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 const int idx = (i + num_ghosts_0) +
@@ -5870,9 +5762,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                         {
                             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                                 {
                                     // Compute the linear indices.
@@ -5900,9 +5790,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -5939,9 +5827,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                         {
                             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                                 {
                                     // Compute the linear indices.
@@ -6104,9 +5990,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 const int idx = (i + num_ghosts_0) +
@@ -6125,9 +6009,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             const int idx = (i + num_ghosts_0) +
@@ -6152,9 +6034,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 const int idx = (i + num_ghosts_0) +
@@ -6223,9 +6103,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                         {
                             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                                 {
                                     // Compute the linear indices.
@@ -6253,9 +6131,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -6292,9 +6168,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                         {
                             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                                 {
                                     // Compute the linear indices.
@@ -6470,9 +6344,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                         {
                             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                                 {
                                     // Compute the linear indices.
@@ -6500,9 +6372,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -6539,9 +6409,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                         {
                             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                                 {
                                     // Compute the linear indices.
@@ -6651,9 +6519,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                     const int num_subghosts_0_max_wave_speed_x = d_num_subghosts_max_wave_speed_x[0];
                     
                     // Compute the maximum wave speed in the x-direction.
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -6690,9 +6556,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                     // Compute the maximum wave speed in the x-direction.
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -6745,9 +6609,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -6865,9 +6727,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                     // Compute the maximum wave speed in the y-direction.
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -6920,9 +6780,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -7050,9 +6908,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -7212,9 +7068,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxDiffusivityWithDensityMassFractions
                 const int num_subghosts_0_max_diffusivity = d_num_subghosts_max_diffusivity[0];
                 const int num_subghosts_0_density = d_num_subghosts_density[0];
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -7246,9 +7100,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxDiffusivityWithDensityMassFractions
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -7292,9 +7144,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxDiffusivityWithDensityMassFractions
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -7413,9 +7263,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfSpeciesDensities(
                 
                 for (int si = 0; si < d_num_species; si++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -7449,9 +7297,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfSpeciesDensities(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -7497,9 +7343,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfSpeciesDensities(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.

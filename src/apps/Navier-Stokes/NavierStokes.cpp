@@ -830,9 +830,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         {
             const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1)
-#endif
+            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -853,9 +851,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         }
         else
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1)
-#endif
+            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -880,9 +876,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         {
             const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(max: spectral_radius_tmp)
-#endif
+            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -901,9 +895,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         }
         else
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(max: spectral_radius_tmp)
-#endif
+            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -981,9 +973,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2)
-#endif
+                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -1015,9 +1005,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2)
-#endif
+                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -1054,9 +1042,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd reduction(max: spectral_radius_tmp)
-#endif
+                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -1085,9 +1071,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd reduction(max: spectral_radius_tmp)
-#endif
+                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -1184,9 +1168,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3)
-#endif
+                    HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -1229,9 +1211,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3)
-#endif
+                    HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -1280,9 +1260,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd reduction(max: spectral_radius_tmp)
-#endif
+                    HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -1321,9 +1299,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd reduction(max: spectral_radius_tmp)
-#endif
+                    HAMERS_PRAGMA_VEC("max: spectral_radius_tmp")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -1837,9 +1813,7 @@ NavierStokes::advanceSingleStepOnPatch(
                     {
                         const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
                         
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear indices of conservative variable data and immersed boundary mask.
@@ -1855,9 +1829,7 @@ NavierStokes::advanceSingleStepOnPatch(
                     }
                     else
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear indices of conservative variable data.
@@ -1886,9 +1858,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         {
                             const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
                             
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear indices.
@@ -1908,9 +1878,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         }
                         else
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear indices.
@@ -1940,9 +1908,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         {
                             const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
                             
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear indices.
@@ -1962,9 +1928,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         }
                         else
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear indices.
@@ -1995,9 +1959,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         double* F_d_x = diffusive_flux->getPointer(0, ei);
                         double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
                         
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0 + 1; i++)
                         {
                             // Compute linear index.
@@ -2015,9 +1977,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         double* F_c_x = convective_flux->getPointer(0, ei);
                         double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
                         
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0 + 1; i++)
                         {
                             // Compute linear index.
@@ -2036,9 +1996,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         double* S = source->getPointer(ei);
                         double* S_intermediate = source_intermediate->getPointer(ei);
                         
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear index.
@@ -2058,9 +2016,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         double* S = source->getPointer(ei);
                         double* S_intermediate = source_intermediate->getPointer(ei);
                         
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear index.
@@ -2108,9 +2064,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear indices of conservative data and immersed boundary mask.
@@ -2135,9 +2089,7 @@ NavierStokes::advanceSingleStepOnPatch(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear indices of conservative data.
@@ -2179,9 +2131,7 @@ NavierStokes::advanceSingleStepOnPatch(
                             
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute linear indices.
@@ -2222,9 +2172,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute linear indices.
@@ -2278,9 +2226,7 @@ NavierStokes::advanceSingleStepOnPatch(
                             
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute linear indices.
@@ -2320,9 +2266,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute linear indices.
@@ -2371,9 +2315,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0 + 1; i++)
                             {
                                 // Compute linear index.
@@ -2397,9 +2339,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         
                         for (int j = 0; j < interior_dim_1 + 1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear index.
@@ -2421,9 +2361,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0 + 1; i++)
                             {
                                 // Compute linear index.
@@ -2443,9 +2381,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         
                         for (int j = 0; j < interior_dim_1 + 1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear index.
@@ -2468,9 +2404,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear index.
@@ -2494,9 +2428,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear index.
@@ -2558,9 +2490,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute linear indices of conservative variable data and immersed boundary mask.
@@ -2595,9 +2525,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute linear indices of conservative variable data.
@@ -2653,9 +2581,7 @@ NavierStokes::advanceSingleStepOnPatch(
                             {
                                 for (int j = 0; j < interior_dim_1; j++)
                                 {
-#ifdef HAMERS_ENABLE_SIMD
-                                    #pragma omp simd
-#endif
+                                    HAMERS_PRAGMA_SIMD
                                     for (int i = 0; i < interior_dim_0; i++)
                                     {
                                         // Compute linear indices.
@@ -2718,9 +2644,7 @@ NavierStokes::advanceSingleStepOnPatch(
                             {
                                 for (int j = 0; j < interior_dim_1; j++)
                                 {
-#ifdef HAMERS_ENABLE_SIMD
-                                    #pragma omp simd
-#endif
+                                    HAMERS_PRAGMA_SIMD
                                     for (int i = 0; i < interior_dim_0; i++)
                                     {
                                         // Compute linear indices.
@@ -2799,9 +2723,7 @@ NavierStokes::advanceSingleStepOnPatch(
                             {
                                 for (int j = 0; j < interior_dim_1; j++)
                                 {
-#ifdef HAMERS_ENABLE_SIMD
-                                    #pragma omp simd
-#endif
+                                    HAMERS_PRAGMA_SIMD
                                     for (int i = 0; i < interior_dim_0; i++)
                                     {
                                         // Compute linear indices.
@@ -2862,9 +2784,7 @@ NavierStokes::advanceSingleStepOnPatch(
                             {
                                 for (int j = 0; j < interior_dim_1; j++)
                                 {
-#ifdef HAMERS_ENABLE_SIMD
-                                    #pragma omp simd
-#endif
+                                    HAMERS_PRAGMA_SIMD
                                     for (int i = 0; i < interior_dim_0; i++)
                                     {
                                         // Compute linear indices.
@@ -2932,9 +2852,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0 + 1; i++)
                                 {
                                     // Compute linear index.
@@ -2962,9 +2880,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1 + 1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute linear index.
@@ -2992,9 +2908,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-    #ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-    #endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute linear index.
@@ -3020,9 +2934,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0 + 1; i++)
                                 {
                                     // Compute linear index.
@@ -3046,9 +2958,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1 + 1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute linear index.
@@ -3072,9 +2982,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-    #ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-    #endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute linear index.
@@ -3101,9 +3009,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute linear index.
@@ -3131,9 +3037,7 @@ NavierStokes::advanceSingleStepOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute linear index.
@@ -3343,9 +3247,7 @@ NavierStokes::synchronizeFluxes(
                 {
                     const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear indices.
@@ -3365,9 +3267,7 @@ NavierStokes::synchronizeFluxes(
                 }
                 else
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear indices.
@@ -3397,9 +3297,7 @@ NavierStokes::synchronizeFluxes(
                 {
                     const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear indices.
@@ -3419,9 +3317,7 @@ NavierStokes::synchronizeFluxes(
                 }
                 else
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear indices.
@@ -3473,9 +3369,7 @@ NavierStokes::synchronizeFluxes(
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear indices.
@@ -3515,9 +3409,7 @@ NavierStokes::synchronizeFluxes(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear indices.
@@ -3570,9 +3462,7 @@ NavierStokes::synchronizeFluxes(
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear indices.
@@ -3611,9 +3501,7 @@ NavierStokes::synchronizeFluxes(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear indices.
@@ -3689,9 +3577,7 @@ NavierStokes::synchronizeFluxes(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear indices.
@@ -3753,9 +3639,7 @@ NavierStokes::synchronizeFluxes(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear indices.
@@ -3833,9 +3717,7 @@ NavierStokes::synchronizeFluxes(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear indices.
@@ -3895,9 +3777,7 @@ NavierStokes::synchronizeFluxes(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear indices.

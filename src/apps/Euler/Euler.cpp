@@ -709,9 +709,7 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
         {
             const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1)
-#endif
+            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -732,9 +730,7 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
         }
         else
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1)
-#endif
+            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -811,9 +807,7 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2)
-#endif
+                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -845,9 +839,7 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2)
-#endif
+                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -945,9 +937,7 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3)
-#endif
+                    HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -990,9 +980,7 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3)
-#endif
+                    HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -1406,9 +1394,7 @@ Euler::advanceSingleStepOnPatch(
                     {
                         const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
                         
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear indices of conservative variable data and immersed boundary mask.
@@ -1424,9 +1410,7 @@ Euler::advanceSingleStepOnPatch(
                     }
                     else
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear indices of conservative variable data.
@@ -1452,9 +1436,7 @@ Euler::advanceSingleStepOnPatch(
                     {
                         const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
                         
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear indices.
@@ -1473,9 +1455,7 @@ Euler::advanceSingleStepOnPatch(
                     }
                     else
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear indices.
@@ -1499,9 +1479,7 @@ Euler::advanceSingleStepOnPatch(
                     double* F_x = convective_flux->getPointer(0, ei);
                     double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute linear index.
@@ -1517,9 +1495,7 @@ Euler::advanceSingleStepOnPatch(
                     double* S = source->getPointer(ei);
                     double* S_intermediate = source_intermediate->getPointer(ei);
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear index.
@@ -1565,9 +1541,7 @@ Euler::advanceSingleStepOnPatch(
                         
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear indices of conservative data and immersed boundary mask.
@@ -1592,9 +1566,7 @@ Euler::advanceSingleStepOnPatch(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear indices of conservative data.
@@ -1632,9 +1604,7 @@ Euler::advanceSingleStepOnPatch(
                         
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear indices.
@@ -1673,9 +1643,7 @@ Euler::advanceSingleStepOnPatch(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear indices.
@@ -1717,9 +1685,7 @@ Euler::advanceSingleStepOnPatch(
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0 + 1; i++)
                         {
                             // Compute linear index.
@@ -1739,9 +1705,7 @@ Euler::advanceSingleStepOnPatch(
                     
                     for (int j = 0; j < interior_dim_1 + 1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear index.
@@ -1761,9 +1725,7 @@ Euler::advanceSingleStepOnPatch(
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear index.
@@ -1823,9 +1785,7 @@ Euler::advanceSingleStepOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute linear indices of conservative variable data and immersed boundary mask.
@@ -1860,9 +1820,7 @@ Euler::advanceSingleStepOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute linear indices of conservative variable data.
@@ -1913,9 +1871,7 @@ Euler::advanceSingleStepOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute linear indices.
@@ -1975,9 +1931,7 @@ Euler::advanceSingleStepOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute linear indices.
@@ -2038,9 +1992,7 @@ Euler::advanceSingleStepOnPatch(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0 + 1; i++)
                             {
                                 // Compute linear index.
@@ -2064,9 +2016,7 @@ Euler::advanceSingleStepOnPatch(
                     {
                         for (int j = 0; j < interior_dim_1 + 1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear index.
@@ -2090,9 +2040,7 @@ Euler::advanceSingleStepOnPatch(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear index.
@@ -2116,9 +2064,7 @@ Euler::advanceSingleStepOnPatch(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear index.
@@ -2291,9 +2237,7 @@ Euler::synchronizeFluxes(
             {
                 const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute linear indices.
@@ -2312,9 +2256,7 @@ Euler::synchronizeFluxes(
             }
             else
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute linear indices.
@@ -2359,9 +2301,7 @@ Euler::synchronizeFluxes(
                 
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear indices.
@@ -2399,9 +2339,7 @@ Euler::synchronizeFluxes(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear indices.
@@ -2470,9 +2408,7 @@ Euler::synchronizeFluxes(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear indices.
@@ -2531,9 +2467,7 @@ Euler::synchronizeFluxes(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear indices.

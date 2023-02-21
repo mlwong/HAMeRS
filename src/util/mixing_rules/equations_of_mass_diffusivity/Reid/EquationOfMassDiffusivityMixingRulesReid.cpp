@@ -680,9 +680,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     const int offset_0_pressure = offset_pressure[0];
                     const int offset_0_temperature = offset_temperature[0];
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -723,9 +721,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -782,9 +778,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -867,9 +861,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             {
                 getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -907,9 +899,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -959,9 +949,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1034,9 +1022,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             {
                 getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1054,9 +1040,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             
             getSpeciesMolecularProperties(species_molecular_properties_ptr, d_num_species - 1);
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear index.
@@ -1092,9 +1076,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1118,9 +1100,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -1166,9 +1146,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1199,9 +1177,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1240,9 +1216,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         
         for (int si = 0; si < d_num_species; si++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear index.
@@ -1271,9 +1245,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -1310,9 +1282,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -1373,9 +1343,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                             (si - (sj + 1));
                     }
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1388,9 +1356,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 }
             }
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -1443,9 +1409,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1464,9 +1428,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1531,9 +1493,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     {
                         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -1559,9 +1519,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
