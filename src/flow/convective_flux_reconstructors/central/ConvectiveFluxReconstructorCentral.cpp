@@ -281,9 +281,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
             {
                 double* F_face_x = convective_flux->getPointer(0, ei);
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
@@ -313,9 +311,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
             {
                 double* F_face_x = convective_flux->getPointer(0, ei);
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
@@ -348,9 +344,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
             {
                 double* F_face_x = convective_flux->getPointer(0, ei);
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
@@ -437,9 +431,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                     
                     if (d_order == 8)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices. 
@@ -467,9 +459,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                     }
                     else if (d_order == 10)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices. 
@@ -500,9 +490,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                     }
                     else if (d_order == 12)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices. 
@@ -625,9 +613,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                 
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -676,9 +662,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                 
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -734,9 +718,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                 
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -804,9 +786,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                 
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -855,9 +835,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                 
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -913,9 +891,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                 
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1041,9 +1017,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -1121,9 +1095,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -1215,9 +1187,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -1431,9 +1401,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0 + 1; i++)
                         {
                             // Compute the linear indices.
@@ -1502,9 +1470,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0 + 1; i++)
                         {
                             // Compute the linear indices.
@@ -1584,9 +1550,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0 + 1; i++)
                         {
                             // Compute the linear indices.
@@ -1682,9 +1646,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1 + 1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1753,9 +1715,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1 + 1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1835,9 +1795,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1 + 1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1933,9 +1891,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -2004,9 +1960,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -2086,9 +2040,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -2247,9 +2199,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute the linear indices. 
@@ -2413,9 +2363,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute the linear indices. 
@@ -2612,9 +2560,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd
-#endif
+                                HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute the linear indices. 

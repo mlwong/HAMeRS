@@ -1655,9 +1655,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                 
                 const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute linear index.
@@ -1685,9 +1683,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                 
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear index.
@@ -1731,9 +1727,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear index.
@@ -1796,9 +1790,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                     
                     const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear index.
@@ -1828,9 +1820,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear index.
@@ -1867,9 +1857,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear index.
@@ -1904,9 +1892,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                     
                     const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear index.
@@ -1937,9 +1923,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear index.
@@ -1977,9 +1961,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear index.
@@ -2015,9 +1997,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                     
                     const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear index.
@@ -2050,9 +2030,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear index.
@@ -2092,9 +2070,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear index.
@@ -2233,9 +2209,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
             
             for (int li = 0; li < d_Harten_wavelet_num_level; li++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -2249,9 +2223,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
                 }
             }
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -2274,9 +2246,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
             
             for (int li = 0; li < d_Harten_wavelet_num_level; li++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -2290,9 +2260,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
                 }
             }
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -2304,9 +2272,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
         
         if (uses_alpha_tol)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -2324,9 +2290,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
             }
         }
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = 0; i < interior_dim_0; i++)
         {
             // Compute the linear index.
@@ -2359,9 +2323,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -2380,9 +2342,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -2408,9 +2368,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -2429,9 +2387,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -2446,9 +2402,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -2471,9 +2425,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
         
         for (int j = 0; j < interior_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -2512,9 +2464,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -2538,9 +2488,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -2569,9 +2517,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -2595,9 +2541,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -2615,9 +2559,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -2645,9 +2587,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.

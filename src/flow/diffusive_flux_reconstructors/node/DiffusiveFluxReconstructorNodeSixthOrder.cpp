@@ -92,9 +92,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInX(
         const int num_ghosts_0_data = num_ghosts_data_node[0];
         
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
@@ -134,9 +132,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInX(
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -197,9 +193,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInX(
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -289,9 +283,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInY(
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -352,9 +344,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInY(
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -450,9 +440,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInZ(
     {
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -534,9 +522,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxX(
         
         const int num_ghosts_0_flux_node = num_ghosts_flux_node[0];
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
@@ -575,9 +561,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxX(
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -636,9 +620,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxX(
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -729,9 +711,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxY(
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -790,9 +770,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxY(
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -888,9 +866,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxZ(
     {
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.

@@ -904,9 +904,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 // Get the pointer to the cell data of velocity derivative.
                 double* dudx = velocity_derivatives->getPointer(0);
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -964,9 +962,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 // Compute the dilatation.
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1047,9 +1043,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1184,9 +1178,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 // Compute the enstrophy.
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -1300,9 +1292,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear index.
@@ -1726,9 +1716,7 @@ ValueTagger::tagCellsOnPatchWithValue(
         
         if (uses_global_tol_up)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -1748,9 +1736,7 @@ ValueTagger::tagCellsOnPatchWithValue(
         
         if (uses_global_tol_lo)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -1770,9 +1756,7 @@ ValueTagger::tagCellsOnPatchWithValue(
         
         if (uses_local_tol_up)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -1792,9 +1776,7 @@ ValueTagger::tagCellsOnPatchWithValue(
         
         if (uses_local_tol_lo)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -1812,9 +1794,7 @@ ValueTagger::tagCellsOnPatchWithValue(
             }
         }
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = 0; i < interior_dim_0; i++)
         {
             // Compute the linear index.
@@ -1836,9 +1816,7 @@ ValueTagger::tagCellsOnPatchWithValue(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1864,9 +1842,7 @@ ValueTagger::tagCellsOnPatchWithValue(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1892,9 +1868,7 @@ ValueTagger::tagCellsOnPatchWithValue(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1920,9 +1894,7 @@ ValueTagger::tagCellsOnPatchWithValue(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1946,9 +1918,7 @@ ValueTagger::tagCellsOnPatchWithValue(
         
         for (int j = 0; j < interior_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -1977,9 +1947,7 @@ ValueTagger::tagCellsOnPatchWithValue(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -2011,9 +1979,7 @@ ValueTagger::tagCellsOnPatchWithValue(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -2045,9 +2011,7 @@ ValueTagger::tagCellsOnPatchWithValue(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -2079,9 +2043,7 @@ ValueTagger::tagCellsOnPatchWithValue(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -2111,9 +2073,7 @@ ValueTagger::tagCellsOnPatchWithValue(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -2175,9 +2135,7 @@ ValueTagger::transferDataOnPatchToClassVariable(
         const int num_ghosts_0_input = num_ghosts_input[0];
         const int num_ghosts_0_value_tagger = num_ghosts_value_tagger[0];
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = -num_ghosts_0_value_tagger;
              i < interior_dim_0 + num_ghosts_0_value_tagger;
              i++)
@@ -2206,9 +2164,7 @@ ValueTagger::transferDataOnPatchToClassVariable(
              j < interior_dim_1 + num_ghosts_1_value_tagger;
              j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = -num_ghosts_0_value_tagger;
                  i < interior_dim_0 + num_ghosts_0_value_tagger;
                  i++)
@@ -2250,9 +2206,7 @@ ValueTagger::transferDataOnPatchToClassVariable(
                  j < interior_dim_1 + num_ghosts_1_value_tagger;
                  j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = -num_ghosts_0_value_tagger;
                      i < interior_dim_0 + num_ghosts_0_value_tagger;
                      i++)

@@ -135,6 +135,16 @@ class RungeKuttaPatchStrategy:
             const double dt_time) = 0;
         
         /**
+         * Set the immersed boundary ghost cells.
+         */
+        virtual void
+        setImmersedBoundaryGhostCells(
+            hier::Patch& patch,
+            const double time,
+            const int RK_step_number,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context = HAMERS_SHARED_PTR<hier::VariableContext>());
+        
+        /**
          * Compute TIME INTEGRALS of fluxes to be used in finite difference for patch integration.
          * That is, it is assumed that this numerical routine will compute the fluxes corresponding
          * to the cell faces multiplied by the time increment. Typically, the numerical flux is the
@@ -152,7 +162,7 @@ class RungeKuttaPatchStrategy:
             const double time,
             const double dt,
             const int RK_step_number,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context = HAMERS_SHARED_PTR<hier::VariableContext>()) = 0;      
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context = HAMERS_SHARED_PTR<hier::VariableContext>()) = 0;
         
         /**
          * Advance a single Runge-Kutta step using previous intermediate solutions and fluxes computed
@@ -232,7 +242,7 @@ class RungeKuttaPatchStrategy:
          * data AFTER patches are advanced on the given level. This routine is called after looping
          * over advanceSingleStepOnPatch() is completed and before computeStableDtOnPatch(). The
          * arguments are:
-         * level          -- level that will be advanced,
+         * level          -- level that has been advanced,
          * current_time   -- current integration time,
          * dt             -- current time increment,
          * first_step     -- boolean flag that is true if advance is first in time step sequence on
@@ -637,6 +647,15 @@ class RungeKuttaPatchStrategy:
         {
            d_data_context.reset();
         }
+        
+        bool useGhostCellImmersedBoundaryMethod() const
+        {
+            return d_use_ghost_cell_immersed_boundary_method;
+        }
+        
+    protected:
+        bool d_use_ghost_cell_immersed_boundary_method;
+        bool d_use_static_immersed_boundaries;
         
     private:
         HAMERS_SHARED_PTR<hier::VariableContext> d_data_context;

@@ -396,9 +396,7 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
         const int num_subghosts_0_pressure = num_subghosts_pressure[0];
         const int num_subghosts_0_total_energy = num_subghosts_total_energy[0];
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = -num_conv_ghosts_0; i < interior_dim_0 + num_conv_ghosts_0; i++)
         {
             // Compute the linear indices.
@@ -444,9 +442,7 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
         
         for (int j = -num_conv_ghosts_1; j < interior_dim_1 + num_conv_ghosts_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = -num_conv_ghosts_0; i < interior_dim_0 + num_conv_ghosts_0; i++)
             {
                 // Compute the linear indices.
@@ -503,9 +499,7 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int j = -num_conv_ghosts_1; j < interior_dim_1 + num_conv_ghosts_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = -num_conv_ghosts_0; i < interior_dim_0 + num_conv_ghosts_0; i++)
                 {
                     // Compute the linear indices.
@@ -1398,9 +1392,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
         
         if (d_stencil_width == 3)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -1416,9 +1408,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
         }
         else if (d_stencil_width == 5)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -1438,9 +1428,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
         }
         else if (d_stencil_width == 7)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -1465,9 +1453,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
         }
         else if (d_stencil_width == 9)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -1498,9 +1484,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
         }
         else if (d_stencil_width == 11)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -1538,9 +1522,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
         }
         else if (d_stencil_width == 13)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -1606,9 +1588,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -1629,9 +1609,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -1660,9 +1638,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -1700,9 +1676,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -1750,9 +1724,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -1811,9 +1783,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -1907,9 +1877,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -1940,9 +1908,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -1985,9 +1951,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -2043,9 +2007,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -2115,9 +2077,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -2202,9 +2162,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -2360,9 +2318,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
         
         if (d_stencil_width == 3)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -2381,9 +2337,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
         }
         else if (d_stencil_width == 5)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -2408,9 +2362,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
         }
         else if (d_stencil_width == 7)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -2442,9 +2394,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
         }
         else if (d_stencil_width == 9)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -2484,9 +2434,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
         }
         else if (d_stencil_width == 11)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -2535,9 +2483,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
         }
         else if (d_stencil_width == 13)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -2620,9 +2566,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -2649,9 +2593,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -2692,9 +2634,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -2750,9 +2690,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -2824,9 +2762,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -2915,9 +2851,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -3053,9 +2987,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -3096,9 +3028,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -3161,9 +3091,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -3249,9 +3177,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -3361,9 +3287,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -3498,9 +3422,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -3725,9 +3647,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
         
         if (d_stencil_width == 3)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -3749,9 +3669,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
         }
         else if (d_stencil_width == 5)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -3781,9 +3699,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
         }
         else if (d_stencil_width == 7)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -3822,9 +3738,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
         }
         else if (d_stencil_width == 9)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -3873,9 +3787,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
         }
         else if (d_stencil_width == 11)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -3935,9 +3847,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
         }
         else if (d_stencil_width == 13)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -4037,9 +3947,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -4072,9 +3980,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -4127,9 +4033,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -4203,9 +4107,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -4301,9 +4203,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -4422,9 +4322,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     const int idx_face_x = i +
@@ -4602,9 +4500,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -4655,9 +4551,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -4740,9 +4634,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -4858,9 +4750,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -5010,9 +4900,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -5197,9 +5085,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -5477,9 +5363,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -5500,9 +5384,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -5531,9 +5413,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -5571,9 +5451,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -5621,9 +5499,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -5682,9 +5558,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -5778,9 +5652,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -5809,9 +5681,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -5852,9 +5722,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -5908,9 +5776,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -5978,9 +5844,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -6063,9 +5927,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -6236,9 +6098,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -6265,9 +6125,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -6308,9 +6166,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -6366,9 +6222,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -6440,9 +6294,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -6531,9 +6383,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -6669,9 +6519,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -6710,9 +6558,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -6773,9 +6619,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -6859,9 +6703,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -6969,9 +6811,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -7104,9 +6944,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -7349,9 +7187,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -7384,9 +7220,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -7439,9 +7273,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -7515,9 +7347,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -7613,9 +7443,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -7734,9 +7562,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
         {
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     const int idx_face_y = i +
@@ -7914,9 +7740,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -7965,9 +7789,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -8048,9 +7870,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -8164,9 +7984,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -8314,9 +8132,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -8499,9 +8315,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_y = i +
@@ -8788,9 +8602,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -8819,9 +8631,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -8862,9 +8672,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -8918,9 +8726,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -8988,9 +8794,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -9073,9 +8877,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -9258,9 +9060,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -9299,9 +9099,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -9362,9 +9160,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -9448,9 +9244,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -9558,9 +9352,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -9693,9 +9485,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -9952,9 +9742,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -10003,9 +9791,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -10086,9 +9872,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -10202,9 +9986,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -10352,9 +10134,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -10537,9 +10317,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx_face_z = i +
@@ -10836,9 +10614,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
             
             if (d_stencil_width == 3)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -10858,9 +10634,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
             }
             else if (d_stencil_width == 5)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -10883,9 +10657,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
             }
             else if (d_stencil_width == 7)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -10911,9 +10683,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
             }
             else if (d_stencil_width == 9)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -10942,9 +10712,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
             }
             else if (d_stencil_width == 11)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -10976,9 +10744,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
             }
             else if (d_stencil_width == 13)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -11055,9 +10821,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -11094,9 +10858,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -11147,9 +10909,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -11214,9 +10974,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -11295,9 +11053,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -11390,9 +11146,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -11547,9 +11301,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -11614,9 +11366,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -11714,9 +11464,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -11847,9 +11595,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -12013,9 +11759,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -12212,9 +11956,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.

@@ -595,9 +595,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 
                 const double factor = double(1)/(sqrt(species_molecular_properties[1]));
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -611,9 +609,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 }
             }
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -663,9 +659,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -685,9 +679,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -751,9 +743,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -780,9 +770,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -847,9 +835,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 
                 const double factor = double(1)/(sqrt(species_molecular_properties[1]));
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -878,9 +864,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             
             const double factor = double(1)/(sqrt(species_molecular_properties[1]));
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -935,9 +919,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -972,9 +954,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1043,9 +1023,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1087,9 +1065,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1448,9 +1424,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1499,9 +1473,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1566,9 +1538,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1636,9 +1606,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1663,9 +1631,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                     species_molecular_properties_const_ptr,
                     domain);
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -1712,9 +1678,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1747,9 +1711,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1810,9 +1772,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1854,9 +1814,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
