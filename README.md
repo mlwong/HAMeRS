@@ -1,10 +1,10 @@
 # HAMeRS: Hydrodynamics Adaptive Mesh Refinement Simulator #
 
-[![Build Status](https://travis-ci.org/mlwong/HAMeRS.svg?branch=master)](https://travis-ci.org/mlwong/HAMeRS)
+[![mlwong](https://circleci.com/gh/mlwong/HAMeRS/tree/development.svg?style=svg)](https://circleci.com/gh/mlwong/HAMeRS/tree/development)
 
 [HAMeRS](https://fpal.stanford.edu/hamers) is a compressible Navier-Stokes/Euler solver with the patch-based adaptive mesh refinement (AMR) technique. The parallelization of the code and all the construction, management and storage of cells are facilitated by the [Structured Adaptive Mesh Refinement Application Infrastructure](https://computation.llnl.gov/project/SAMRAI/) (SAMRAI) from the [Lawrence Livermore National Laboratory](https://www.llnl.gov/) (LLNL).
 
-The code consists of various explicit high-order finite difference shock-capturing WCNS's (Weighted Compact Nonlinear Schemes) for capturing shock waves, material interfaces, and turbulent features. The AMR algorithm implemented is based on the one developed by Berger et al.
+The code consists of various explicit high-order finite difference schemes including the WCNS's (Weighted Compact Nonlinear Schemes) for capturing shock waves, material interfaces, and turbulent features, and also the kinetic-energy-preserving (KEP) schemes for large-eddy simulations with subgrid-scale models. The AMR algorithm implemented is based on the one developed by Berger et al.
 
 ### How do I get set up? ###
 

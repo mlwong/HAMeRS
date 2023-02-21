@@ -20,6 +20,13 @@ class FlowModelSingleSpecies: public FlowModel
         ~FlowModelSingleSpecies() {}
         
         /*
+         * Initialize the immersed boundary method object.
+         */
+        void initializeImmersedBoundaryMethod(
+            const HAMERS_SHARED_PTR<ImmersedBoundaries>& immersed_boundaries,
+            const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db);
+        
+        /*
          * Print all characteristics of the flow model class.
          */
         void printClassData(std::ostream& os) const;
@@ -75,7 +82,7 @@ class FlowModelSingleSpecies: public FlowModel
         
         /*
          * Register different derived variables in the registered patch. The derived variables to be registered
-         * are given as entires in a map of the variable name to the number of sub-ghost cells required.
+         * are given as entries in a map of the variable name to the number of sub-ghost cells required.
          * If the variable to be registered is one of the conservative variable, the corresponding entry
          * in the map is ignored.
          */
@@ -120,15 +127,21 @@ class FlowModelSingleSpecies: public FlowModel
         
         /*
          * Fill the cell data of conservative variables in the interior box with value zero.
+         * Only fill the data when the mask has valid value if a mask cell data is given.
          */
         void
-        fillCellDataOfConservativeVariablesWithZero();
+        fillCellDataOfConservativeVariablesWithZero(
+            const HAMERS_SHARED_PTR<pdat::CellData<int> >& mask_cell_data = nullptr,
+            const int mask_valid_value = 0);
         
         /*
          * Update the cell data of conservative variables in the interior box after time advancement.
+         * Only update the data when the mask has valid value if a mask cell data is given.
          */
         void
-        updateCellDataOfConservativeVariables();
+        updateCellDataOfConservativeVariables(
+            const HAMERS_SHARED_PTR<pdat::CellData<int> >& mask_cell_data = nullptr,
+            const int mask_valid_value = 0);
         
         /*
          * Get the cell data of the conservative variables in the registered patch.

@@ -1801,9 +1801,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
          * Compute the internal energy field.
          */
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
         {
             // Compute the linear index.
@@ -1813,9 +1811,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 double(1)/double(2)*Q_x_L[1][idx]*Q_x_L[1][idx]/Q_x_L[0][idx])/Q_x_L[0][idx];
         }
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
         {
             // Compute the linear index.
@@ -1877,9 +1873,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
             
             double* u = velocity->getPointer(0, 0);
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -1916,9 +1910,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
         }
         else
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -1969,9 +1961,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -1986,9 +1976,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -2059,9 +2047,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
@@ -2106,9 +2092,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
@@ -2171,9 +2155,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -2193,9 +2175,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -2273,9 +2253,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -2329,9 +2307,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -2537,7 +2513,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverSingleSpecies::"
             << "computeConvectiveFluxAndVelocityInYDirectionFromConservativeVariablesHLLC_HLL()\n"
-            << "There is no y direction for 1D problem."
+            << "There is no y direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2565,9 +2541,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear index.
@@ -2582,9 +2556,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear index.
@@ -2655,9 +2627,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -2702,9 +2672,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -2767,9 +2735,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -2789,9 +2755,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -2869,9 +2833,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -2925,9 +2887,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -3133,7 +3093,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverSingleSpecies::"
             << "computeConvectiveFluxAndVelocityInZDirectionFromConservativeVariablesHLLC_HLL()\n"
-            << "There is no z direction for 1D problem."
+            << "There is no z direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -3141,7 +3101,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverSingleSpecies::"
             << "computeConvectiveFluxAndVelocityInZDirectionFromConservativeVariablesHLLC_HLL()\n"
-            << "There is no z direction for 2D problem."
+            << "There is no z direction for two-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -3177,9 +3137,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3199,9 +3157,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3279,9 +3235,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -3335,9 +3289,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -3588,9 +3540,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
             
             double* u = velocity->getPointer(0, 0);
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -3625,9 +3575,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
         }
         else
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -3728,9 +3676,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
@@ -3773,9 +3719,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
@@ -3890,9 +3834,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -3944,9 +3886,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -4136,7 +4076,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverSingleSpecies::"
             << "computeConvectiveFluxAndVelocityInYDirectionFromPrimitiveVariablesHLLC_HLL()\n"
-            << "There is no y direction for 1D problem."
+            << "There is no y direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -4216,9 +4156,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -4261,9 +4199,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -4378,9 +4314,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -4432,9 +4366,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -4624,7 +4556,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverSingleSpecies::"
             << "computeConvectiveFluxAndVelocityInZDirectionFromPrimitiveVariablesHLLC_HLL()\n"
-            << "There is no z direction for 1D problem."
+            << "There is no z direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -4632,7 +4564,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverSingleSpecies::"
             << "computeConvectiveFluxAndVelocityInZDirectionFromPrimitiveVariablesHLLC_HLL()\n"
-            << "There is no z direction for 2D problem."
+            << "There is no z direction for two-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -4722,9 +4654,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -4776,9 +4706,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.

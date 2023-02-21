@@ -133,6 +133,16 @@ class NavierStokes:
             const double dt_time);
         
         /**
+         * Set the immersed boundary ghost cells.
+         */
+        void
+        setImmersedBoundaryGhostCells(
+            hier::Patch& patch,
+            const double time,
+            const int RK_step_number,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context = HAMERS_SHARED_PTR<hier::VariableContext>());
+        
+        /**
          * Compute time integral of convective fluxes to be used in finite difference for patch Runge-
          * Kutta integration.
          * 
@@ -422,9 +432,11 @@ class NavierStokes:
          * Print data statistics (max/min conservative variables).
          */
         void
-        printDataStatistics(
+        computeAndOutputMonitoringDataStatistics(
             std::ostream& os,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const int step_num,
+            const double time) const;
         
         void
         printErrorStatistics(
@@ -446,6 +458,11 @@ class NavierStokes:
         filterStatisticsVariables(
             const int level,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy);
+        
+        /**
+         * Output the header of monitoring statistics.
+         */
+        void outputHeaderMonitoringStatistics();
         
         /**
          * Output the header of statistics.
@@ -528,6 +545,11 @@ class NavierStokes:
          * plot context passed to the variable registration routine.
          */
         const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
+        
+        /*
+         * Name of file output that contains monitoring statistics of data.
+         */
+        const std::string d_monitoring_stat_dump_filename;
         
         /*
          * Name of file output that contains statistics of data.
@@ -616,6 +638,17 @@ class NavierStokes:
         HAMERS_SHARED_PTR<NavierStokesBoundaryConditions> d_Navier_Stokes_boundary_conditions;
         HAMERS_SHARED_PTR<tbox::Database> d_Navier_Stokes_boundary_conditions_db;
         bool d_Navier_Stokes_boundary_conditions_db_is_from_restart;
+        
+        /*
+         * Whether to use use immersed boundaries and the database for the immersed boundary method.
+         */
+        bool d_use_immersed_boundaries;
+        HAMERS_SHARED_PTR<tbox::Database> d_immersed_boundary_method_db;
+        
+        /* 
+         * HAMERS_SHARED_PTR to the immersed boundaries object.
+         */
+        HAMERS_SHARED_PTR<ImmersedBoundaries> d_immersed_boundaries;
         
         /*
          * HAMERS_SHARED_PTR to NavierStokesErrorStatistics.

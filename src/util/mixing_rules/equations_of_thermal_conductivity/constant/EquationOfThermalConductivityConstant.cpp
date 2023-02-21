@@ -178,9 +178,7 @@ EquationOfThermalConductivityConstant::computeThermalConductivity(
         const int offset_0_thermal_conductivity = offset_thermal_conductivity[0];
         const int offset_0_molecular_properties = offset_molecular_properties[0];
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
@@ -211,9 +209,7 @@ EquationOfThermalConductivityConstant::computeThermalConductivity(
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -256,9 +252,7 @@ EquationOfThermalConductivityConstant::computeThermalConductivity(
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.

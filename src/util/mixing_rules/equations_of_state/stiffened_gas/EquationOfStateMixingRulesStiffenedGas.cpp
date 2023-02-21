@@ -2968,9 +2968,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
         {
             double* Psi_i = Psi[si];
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -3026,9 +3024,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -3104,9 +3100,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -3181,9 +3175,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
         {
             double* M_i = M[si];
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -3236,9 +3228,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -3308,9 +3298,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -3379,9 +3367,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
             const double tmp_1 = double(1)/(d_species_gamma[si] - double(1));
             const double tmp_2 = d_species_gamma[si]*d_species_p_inf[si]/(d_species_gamma[si] - double(1));
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -3394,9 +3380,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         }
         
         // Compute gamma and p_inf.
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear index.
@@ -3435,9 +3419,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -3456,9 +3438,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         // Compute gamma and p_inf.
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear index.
@@ -3507,9 +3487,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -3535,9 +3513,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3594,9 +3570,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
             const double tmp_1 = double(1)/(d_species_gamma[si] - double(1));
             const double tmp_2 = d_species_gamma[si]*d_species_p_inf[si]/(d_species_gamma[si] - double(1));
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -3617,9 +3591,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         const double tmp_1 = double(1)/(d_species_gamma.back() - double(1));
         const double tmp_2 = d_species_gamma.back()*d_species_p_inf.back()/(d_species_gamma.back() - double(1));
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
@@ -3666,9 +3638,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -3697,9 +3667,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -3760,9 +3728,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -3800,9 +3766,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.

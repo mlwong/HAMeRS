@@ -1553,9 +1553,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
          * Compute the density field.
          */
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
         {
             // Compute the linear index.
@@ -1566,9 +1564,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int si = 0; si < d_num_species; si++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -1578,9 +1574,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             }
         }
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
         {
             // Compute the linear index.
@@ -1591,9 +1585,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int si = 0; si < d_num_species; si++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -1607,9 +1599,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
          * Compute the internal energy field.
          */
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
         {
             // Compute the linear index.
@@ -1620,9 +1610,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
                 rho_x_L[idx];
         }
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
         {
             // Compute the linear index.
@@ -1639,9 +1627,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int si = 0; si < d_num_species; si++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -1710,9 +1696,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
                 0,
                 domain);
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
         {
             // Compute the linear index.
@@ -1724,9 +1708,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int si = 0; si < d_num_species; si++)
         {   
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -1737,9 +1719,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             }
         }
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
         {
             // Compute the linear index.
@@ -1765,9 +1745,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             
             double* u = velocity->getPointer(0, 0);
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -1808,9 +1786,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         }
         else
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -1865,9 +1841,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -1882,9 +1856,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -1898,9 +1870,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -1915,9 +1885,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -1935,9 +1903,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -1953,9 +1919,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -1977,9 +1941,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -2052,9 +2014,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -2070,9 +2030,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -2087,9 +2045,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -2123,9 +2079,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
@@ -2174,9 +2128,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
@@ -2243,9 +2195,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -2265,9 +2215,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
                         // Compute the linear index.
@@ -2286,9 +2234,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -2308,9 +2254,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
                         // Compute the linear index.
@@ -2333,9 +2277,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -2357,9 +2299,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -2387,9 +2327,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
                         // Compute the linear index.
@@ -2467,9 +2405,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -2490,9 +2426,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
                         // Compute the linear index.
@@ -2512,9 +2446,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -2555,9 +2487,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -2615,9 +2545,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -2857,7 +2785,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverFourEqnConservative::"
             << "computeConvectiveFluxAndVelocityInYDirectionFromConservativeVariablesHLLC()\n"
-            << "There is no y direction for 1D problem."
+            << "There is no y direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2885,9 +2813,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear index.
@@ -2902,9 +2828,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -2918,9 +2842,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear index.
@@ -2935,9 +2857,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -2955,9 +2875,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear index.
@@ -2973,9 +2891,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear index.
@@ -2997,9 +2913,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3072,9 +2986,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear index.
@@ -3090,9 +3002,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3107,9 +3017,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear index.
@@ -3143,9 +3051,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -3194,9 +3100,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -3263,9 +3167,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3285,9 +3187,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -3306,9 +3206,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3328,9 +3226,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -3353,9 +3249,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3377,9 +3271,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3407,9 +3299,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -3487,9 +3377,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3510,9 +3398,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -3532,9 +3418,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3575,9 +3459,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -3635,9 +3517,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -3877,7 +3757,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverFourEqnConservative::"
             << "computeConvectiveFluxAndVelocityInZDirectionFromConservativeVariablesHLLC()\n"
-            << "There is no z direction for 1D problem."
+            << "There is no z direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -3885,7 +3765,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverFourEqnConservative::"
             << "computeConvectiveFluxAndVelocityInZDirectionFromConservativeVariablesHLLC()\n"
-            << "There is no z direction for 2D problem."
+            << "There is no z direction for two-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -3921,9 +3801,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3943,9 +3821,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -3964,9 +3840,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3986,9 +3860,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -4011,9 +3883,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -4035,9 +3905,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -4065,9 +3933,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -4145,9 +4011,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -4168,9 +4032,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -4190,9 +4052,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -4233,9 +4093,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -4293,9 +4151,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -4532,9 +4388,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
          * Compute the density field.
          */
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
         {
             // Compute the linear index.
@@ -4545,9 +4399,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int si = 0; si < d_num_species; si++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -4557,9 +4409,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             }
         }
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
         {
             // Compute the linear index.
@@ -4570,9 +4420,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int si = 0; si < d_num_species; si++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -4588,9 +4436,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int si = 0; si < d_num_species; si++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -4641,9 +4487,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
                 0,
                 domain);
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
         {
             // Compute the linear index.
@@ -4655,9 +4499,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int si = 0; si < d_num_species; si++)
         {   
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -4668,9 +4510,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             }
         }
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
         {
             // Compute the linear index.
@@ -4714,9 +4554,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             
             double* u = velocity->getPointer(0, 0);
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -4755,9 +4593,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         }
         else
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -4810,9 +4646,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -4827,9 +4661,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -4843,9 +4675,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -4860,9 +4690,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -4882,9 +4710,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -4939,9 +4765,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -4957,9 +4781,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -4974,9 +4796,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
                 // Compute the linear index.
@@ -5028,9 +4848,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
@@ -5077,9 +4895,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
@@ -5144,9 +4960,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -5166,9 +4980,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
                         // Compute the linear index.
@@ -5187,9 +4999,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -5209,9 +5019,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
                         // Compute the linear index.
@@ -5236,9 +5044,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
                         // Compute the linear index.
@@ -5298,9 +5104,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -5321,9 +5125,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
                         // Compute the linear index.
@@ -5343,9 +5145,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
@@ -5404,9 +5204,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -5462,9 +5260,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -5688,7 +5484,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverFourEqnConservative::"
             << "computeConvectiveFluxAndVelocityInYDirectionFromPrimitiveVariablesHLLC()\n"
-            << "There is no y direction for 1D problem."
+            << "There is no y direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -5716,9 +5512,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear index.
@@ -5733,9 +5527,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -5749,9 +5541,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear index.
@@ -5766,9 +5556,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -5788,9 +5576,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -5845,9 +5631,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear index.
@@ -5863,9 +5647,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -5880,9 +5662,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear index.
@@ -5934,9 +5714,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -5983,9 +5761,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -6050,9 +5826,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -6072,9 +5846,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -6093,9 +5865,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -6115,9 +5885,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -6142,9 +5910,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -6204,9 +5970,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -6227,9 +5991,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -6249,9 +6011,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -6310,9 +6070,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -6368,9 +6126,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -6594,7 +6350,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverFourEqnConservative::"
             << "computeConvectiveFluxAndVelocityInZDirectionFromPrimitiveVariablesHLLC()\n"
-            << "There is no z direction for 1D problem."
+            << "There is no z direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -6602,7 +6358,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
         TBOX_ERROR(d_object_name
             << ": FlowModelRiemannSolverFourEqnConservative::"
             << "computeConvectiveFluxAndVelocityInZDirectionFromPrimitiveVariablesHLLC()\n"
-            << "There is no z direction for 2D problem."
+            << "There is no z direction for two-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -6638,9 +6394,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -6660,9 +6414,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -6681,9 +6433,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -6703,9 +6453,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -6730,9 +6478,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -6792,9 +6538,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -6815,9 +6559,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -6837,9 +6579,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
         {
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -6898,9 +6638,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -6956,9 +6694,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.

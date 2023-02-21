@@ -14,7 +14,8 @@ GradientTagger::GradientTagger(
         d_dim(dim),
         d_grid_geometry(grid_geometry),
         d_num_gradient_ghosts(hier::IntVector::getZero(d_dim)),
-        d_flow_model(flow_model)
+        d_flow_model(flow_model),
+        d_is_tagging_in_box_only(false)
 {
     if (gradient_tagger_db != nullptr)
     {
@@ -39,6 +40,69 @@ GradientTagger::GradientTagger(
                 << std::endl);
         }
         
+        // Check whether the gradient sensors are used for tagging only in a box defined by the user.
+        d_is_tagging_in_box_only = gradient_tagger_db->getBoolWithDefault("is_tagging_in_box_only", false);
+        d_is_tagging_in_box_only = gradient_tagger_db->getBoolWithDefault("d_is_tagging_in_box_only", d_is_tagging_in_box_only);
+        
+        if (d_is_tagging_in_box_only)
+        {
+            if (gradient_tagger_db->keyExists("tagging_box_xlo"))
+            {
+                d_tagging_box_xlo = gradient_tagger_db->getDoubleVector("tagging_box_xlo");
+            }
+            else if (gradient_tagger_db->keyExists("d_tagging_box_xlo"))
+            {
+                d_tagging_box_xlo = gradient_tagger_db->getDoubleVector("d_tagging_box_xlo");
+            }
+            else
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "No key 'tagging_box_lo' or 'd_tagging_box_xlo' found in data for gradient sensors."
+                    << std::endl);
+            }
+            
+            if (gradient_tagger_db->keyExists("tagging_box_xhi"))
+            {
+                d_tagging_box_xhi = gradient_tagger_db->getDoubleVector("tagging_box_xhi");
+            }
+            else if (gradient_tagger_db->keyExists("d_tagging_box_xhi"))
+            {
+                d_tagging_box_xhi = gradient_tagger_db->getDoubleVector("d_tagging_box_xhi");
+            }
+            else
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "No key 'tagging_box_hi' or 'd_tagging_box_xhi' found in data for gradient sensors."
+                    << std::endl);
+            }
+            
+            if (d_tagging_box_xlo.size() != d_dim.getValue())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": GradientTagger::GradientTagger\n"
+                    << "Size of 'tagging_box_lo' or 'd_tagging_box_xlo' is not consistent with problem dimension."
+                    << std::endl);
+            }
+            
+            if (d_tagging_box_xhi.size() != d_dim.getValue())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": GradientTagger::GradientTagger\n"
+                    << "Size of 'tagging_box_hi' or 'd_tagging_box_xhi' is not consistent with problem dimension."
+                    << std::endl);
+            }
+            
+            if (d_tagging_box_xlo > d_tagging_box_xhi)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": GradientTagger::GradientTagger\n"
+                    << "'tagging_box_lo'/'d_tagging_box_xlo' is larger than 'tagging_box_hi'/'d_tagging_box_xhi'."
+                    << std::endl);
+            }
+        }
+        
         std::vector<std::string> sensor_keys_defined(num_keys);
         int sensor_keys_count = 0;
         HAMERS_SHARED_PTR<tbox::Database> sensor_db;
@@ -47,7 +111,11 @@ GradientTagger::GradientTagger(
             std::string sensor_key = sensor_keys[i];
             sensor_db.reset();
             
-            if (!((sensor_key == "gradient_sensors") || (sensor_key == "d_gradient_sensors")))
+            if (!((sensor_key == "gradient_sensors") || (sensor_key == "d_gradient_sensors") ||
+                  (sensor_key == "is_tagging_in_box_only") || (sensor_key == "d_is_tagging_in_box_only") ||
+                  (sensor_key == "tagging_box_xlo") || (sensor_key == "d_tagging_box_xlo") ||
+                  (sensor_key == "tagging_box_xhi") || (sensor_key == "d_tagging_box_xhi")
+               ))
             {
                 if (!((sensor_key == "DIFFERENCE_FIRST_ORDER") ||
                       (sensor_key == "DIFFERENCE_SECOND_ORDER") ||
@@ -1444,6 +1512,13 @@ GradientTagger::putToRestart(
         restart_db->putStringVector("d_gradient_sensors", d_gradient_sensors);
     }
     
+    restart_db->putBool("d_is_tagging_in_box_only", d_is_tagging_in_box_only);
+    if (d_is_tagging_in_box_only)
+    {
+        restart_db->putDoubleVector("d_tagging_box_xlo", d_tagging_box_xlo);
+        restart_db->putDoubleVector("d_tagging_box_xhi", d_tagging_box_xhi);
+    }
+    
     for (int si = 0; si < static_cast<int>(d_gradient_sensors.size()); si++)
     {
         if (d_gradient_sensors[si] == "DIFFERENCE_FIRST_ORDER")
@@ -2588,6 +2663,21 @@ GradientTagger::tagCellsOnPatchWithGradientSensor(
     TBOX_ASSERT(tags->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
 #endif
     
+    // Get the patch geometry and grid spacings.
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+            patch.getPatchGeometry()));
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(patch_geom);
+#endif
+    
+    const double* const dx = patch_geom->getDx();
+    const double* const patch_xlo = patch_geom->getXLower();
+    
+    const double* const box_tagging_lo = d_is_tagging_in_box_only? d_tagging_box_xlo.data() : nullptr;
+    const double* const box_tagging_hi = d_is_tagging_in_box_only? d_tagging_box_xhi.data() : nullptr;
+    
     // Get the dimensions of box that covers the interior of patch.
     const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
@@ -2598,10 +2688,12 @@ GradientTagger::tagCellsOnPatchWithGradientSensor(
     const hier::IntVector ghostcell_dims_gradient_tagger = gradient->getGhostBox().numberCells();
     
     // Get the pointer of the tags.
-    int* tag_ptr  = tags->getPointer(0);
+    int* tag_ptr = tags->getPointer(0);
     
     // Get the pointer to the data.
     double* psi = gradient->getPointer(0);
+    
+    const double half = double(1)/double(2);
     
     if (sensor_key == "JAMESON_GRADIENT")
     {
@@ -2611,18 +2703,39 @@ GradientTagger::tagCellsOnPatchWithGradientSensor(
             
             const int num_ghosts_0_gradient_tagger = num_ghosts_gradient_tagger[0];
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
-            for (int i = 0; i < interior_dim_0; i++)
+            if (d_is_tagging_in_box_only)
             {
-                // Compute indices.
-                const int idx = i + num_ghosts_0_gradient_tagger;
-                const int idx_nghost = i;
-                
-                if (psi[idx] > tol)
+                HAMERS_PRAGMA_SIMD
+                for (int i = 0; i < interior_dim_0; i++)
                 {
-                    tag_ptr[idx_nghost] |= 1;
+                    // Compute indices.
+                    const int idx = i + num_ghosts_0_gradient_tagger;
+                    const int idx_nghost = i;
+                    
+                    // Compute the coordinate.
+                    const double x_0 = patch_xlo[0] + (double(i) + half)*dx[0];
+                    
+                    const bool is_in_box = (x_0 >= box_tagging_lo[0]) && (x_0 <= box_tagging_hi[0]);
+                    
+                    if ((psi[idx] > tol) && is_in_box)
+                    {
+                        tag_ptr[idx_nghost] |= 1;
+                    }
+                }
+            }
+            else
+            {
+                HAMERS_PRAGMA_SIMD
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute indices.
+                    const int idx = i + num_ghosts_0_gradient_tagger;
+                    const int idx_nghost = i;
+                    
+                    if (psi[idx] > tol)
+                    {
+                        tag_ptr[idx_nghost] |= 1;
+                    }
                 }
             }
         }
@@ -2635,23 +2748,51 @@ GradientTagger::tagCellsOnPatchWithGradientSensor(
             const int num_ghosts_1_gradient_tagger = num_ghosts_gradient_tagger[1];
             const int ghostcell_dim_0_gradient_tagger = ghostcell_dims_gradient_tagger[0];
             
-            for (int j = 0; j < interior_dim_1; j++)
+            if (d_is_tagging_in_box_only)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int j = 0; j < interior_dim_1; j++)
                 {
-                    // Compute indices.
-                    const int idx = (i + num_ghosts_0_gradient_tagger) +
-                        (j + num_ghosts_1_gradient_tagger)*ghostcell_dim_0_gradient_tagger;
-                    
-                    const int idx_nghost = i +
-                        j*interior_dim_0;
-                    
-                    if (psi[idx] > tol)
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = 0; i < interior_dim_0; i++)
                     {
-                        tag_ptr[idx_nghost] |= 1;
+                        // Compute indices.
+                        const int idx = (i + num_ghosts_0_gradient_tagger) +
+                            (j + num_ghosts_1_gradient_tagger)*ghostcell_dim_0_gradient_tagger;
+                        
+                        const int idx_nghost = i + j*interior_dim_0;
+                        
+                        // Compute the coordinates.
+                        const double x_0 = patch_xlo[0] + (double(i) + half)*dx[0];
+                        const double x_1 = patch_xlo[1] + (double(j) + half)*dx[1];
+                        
+                        const bool is_in_box = (x_0 >= box_tagging_lo[0]) && (x_0 <= box_tagging_hi[0]) &&
+                            (x_1 >= box_tagging_lo[1]) && (x_1 <= box_tagging_hi[1]);
+                        
+                        if ((psi[idx] > tol) && is_in_box)
+                        {
+                            tag_ptr[idx_nghost] |= 1;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute indices.
+                        const int idx = (i + num_ghosts_0_gradient_tagger) +
+                            (j + num_ghosts_1_gradient_tagger)*ghostcell_dim_0_gradient_tagger;
+                        
+                        const int idx_nghost = i +
+                            j*interior_dim_0;
+                        
+                        if (psi[idx] > tol)
+                        {
+                            tag_ptr[idx_nghost] |= 1;
+                        }
                     }
                 }
             }
@@ -2668,28 +2809,63 @@ GradientTagger::tagCellsOnPatchWithGradientSensor(
             const int ghostcell_dim_0_gradient_tagger = ghostcell_dims_gradient_tagger[0];
             const int ghostcell_dim_1_gradient_tagger = ghostcell_dims_gradient_tagger[1];
             
-            for (int k = 0; k < interior_dim_2; k++)
+            if (d_is_tagging_in_box_only)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int k = 0; k < interior_dim_2; k++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int j = 0; j < interior_dim_1; j++)
                     {
-                        // Compute indices.
-                        const int idx = (i + num_ghosts_0_gradient_tagger) +
-                            (j + num_ghosts_1_gradient_tagger)*ghostcell_dim_0_gradient_tagger +
-                            (k + num_ghosts_2_gradient_tagger)*ghostcell_dim_0_gradient_tagger*
-                                ghostcell_dim_1_gradient_tagger;
-                        
-                        const int idx_nghost = i +
-                            j*interior_dim_0 +
-                            k*interior_dim_0*interior_dim_1;
-                        
-                        if (psi[idx] > tol)
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0; i++)
                         {
-                            tag_ptr[idx_nghost] |= 1;
+                            // Compute indices.
+                            const int idx = (i + num_ghosts_0_gradient_tagger) +
+                                (j + num_ghosts_1_gradient_tagger)*ghostcell_dim_0_gradient_tagger +
+                                (k + num_ghosts_2_gradient_tagger)*ghostcell_dim_0_gradient_tagger*
+                                    ghostcell_dim_1_gradient_tagger;
+                            
+                            const int idx_nghost = i + j*interior_dim_0 + k*interior_dim_0*interior_dim_1;
+                            
+                            // Compute the coordinates.
+                            const double x_0 = patch_xlo[0] + (double(i) + half)*dx[0];
+                            const double x_1 = patch_xlo[1] + (double(j) + half)*dx[1];
+                            const double x_2 = patch_xlo[2] + (double(k) + half)*dx[2];
+                            
+                            const bool is_in_box = (x_0 >= box_tagging_lo[0]) && (x_0 <= box_tagging_hi[0]) &&
+                                (x_1 >= box_tagging_lo[1]) && (x_1 <= box_tagging_hi[1]) &&
+                                (x_2 >= box_tagging_lo[2]) && (x_2 <= box_tagging_hi[2]);
+                            
+                            if ((psi[idx] > tol) && is_in_box)
+                            {
+                                tag_ptr[idx_nghost] |= 1;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute indices.
+                            const int idx = (i + num_ghosts_0_gradient_tagger) +
+                                (j + num_ghosts_1_gradient_tagger)*ghostcell_dim_0_gradient_tagger +
+                                (k + num_ghosts_2_gradient_tagger)*ghostcell_dim_0_gradient_tagger*
+                                    ghostcell_dim_1_gradient_tagger;
+                            
+                            const int idx_nghost = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*interior_dim_1;
+                            
+                            if (psi[idx] > tol)
+                            {
+                                tag_ptr[idx_nghost] |= 1;
+                            }
                         }
                     }
                 }
@@ -2717,6 +2893,21 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
 #endif
+    
+    // Get the patch geometry and grid spacings.
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+            patch.getPatchGeometry()));
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(patch_geom);
+#endif
+    
+    const double* const dx = patch_geom->getDx();
+    const double* const patch_xlo = patch_geom->getXLower();
+    
+    const double* const box_tagging_lo = d_is_tagging_in_box_only? d_tagging_box_xlo.data() : nullptr;
+    const double* const box_tagging_hi = d_is_tagging_in_box_only? d_tagging_box_xhi.data() : nullptr;
     
     // Get the dimensions of box that covers the interior of patch.
     const hier::Box interior_box = patch.getBox();
@@ -2747,6 +2938,8 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
         u_mean = variable_local_mean->getPointer(0);
     }
     
+    const double half = double(1)/double(2);
+    
     if (d_dim == tbox::Dimension(1))
     {
         const int interior_dim_0 = interior_dims[0];
@@ -2764,24 +2957,43 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
             // Get the pointer to the tags.
             int* tag_ptr_global_tol = tags_global_tol->getPointer(0);
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
-            for (int i = 0; i < interior_dim_0; i++)
+            if (d_is_tagging_in_box_only)
             {
-                // Compute the linear indices.
-                const int idx = i + num_ghosts_0_difference;
-                const int idx_nghost = i;
-                
-                if (w[idx]/(difference_max + EPSILON) > global_tol)
+                HAMERS_PRAGMA_SIMD
+                for (int i = 0; i < interior_dim_0; i++)
                 {
-                    tag_ptr_global_tol[idx_nghost] = 1;
+                    // Compute the linear indices.
+                    const int idx = i + num_ghosts_0_difference;
+                    const int idx_nghost = i;
+                    
+                    // Compute the coordinate.
+                    const double x_0 = patch_xlo[0] + (double(i) + half)*dx[0];
+                    
+                    const bool is_in_box = (x_0 >= box_tagging_lo[0]) && (x_0 <= box_tagging_hi[0]);
+                    
+                    if ((w[idx]/(difference_max + EPSILON) > global_tol) && is_in_box)
+                    {
+                        tag_ptr_global_tol[idx_nghost] = 1;
+                    }
+                }
+            }
+            else
+            {
+                HAMERS_PRAGMA_SIMD
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx = i + num_ghosts_0_difference;
+                    const int idx_nghost = i;
+                    
+                    if (w[idx]/(difference_max + EPSILON) > global_tol)
+                    {
+                        tag_ptr_global_tol[idx_nghost] = 1;
+                    }
                 }
             }
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -2802,24 +3014,43 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
             // Get the pointer to the tags.
             int* tag_ptr_local_tol = tags_local_tol->getPointer(0);
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
-            for (int i = 0; i < interior_dim_0; i++)
+            if (d_is_tagging_in_box_only)
             {
-                // Compute the linear indices.
-                const int idx = i + num_ghosts_0_difference;
-                const int idx_nghost = i;
-                
-                if (w[idx]/(u_mean[idx] + EPSILON) > local_tol)
+                HAMERS_PRAGMA_SIMD
+                for (int i = 0; i < interior_dim_0; i++)
                 {
-                    tag_ptr_local_tol[idx_nghost] = 1;
+                    // Compute the linear indices.
+                    const int idx = i + num_ghosts_0_difference;
+                    const int idx_nghost = i;
+                    
+                    // Compute the coordinate.
+                    const double x_0 = patch_xlo[0] + (double(i) + half)*dx[0];
+                    
+                    const bool is_in_box = (x_0 >= box_tagging_lo[0]) && (x_0 <= box_tagging_hi[0]);
+                    
+                    if ((w[idx]/(u_mean[idx] + EPSILON) > local_tol) && is_in_box)
+                    {
+                        tag_ptr_local_tol[idx_nghost] = 1;
+                    }
+                }
+            }
+            else
+            {
+                HAMERS_PRAGMA_SIMD
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx = i + num_ghosts_0_difference;
+                    const int idx_nghost = i;
+                    
+                    if (w[idx]/(u_mean[idx] + EPSILON) > local_tol)
+                    {
+                        tag_ptr_local_tol[idx_nghost] = 1;
+                    }
                 }
             }
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -2829,9 +3060,7 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
             }
         }
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = 0; i < interior_dim_0; i++)
         {
             // Compute the linear index.
@@ -2860,31 +3089,57 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
             // Get the pointer to the tags.
             int* tag_ptr_global_tol = tags_global_tol->getPointer(0);
             
-            for (int j = 0; j < interior_dim_1; j++)
+            if (d_is_tagging_in_box_only)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int j = 0; j < interior_dim_1; j++)
                 {
-                    // Compute the linear indices.
-                    const int idx = (i + num_ghosts_0_difference) +
-                        (j + num_ghosts_1_difference)*ghostcell_dim_0_difference;
-                    
-                    const int idx_nghost = i + j*interior_dim_0;
-                    
-                    if (w[idx]/(difference_max + EPSILON) > global_tol)
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = 0; i < interior_dim_0; i++)
                     {
-                        tag_ptr_global_tol[idx_nghost] = 1;
+                        // Compute the linear indices.
+                        const int idx = (i + num_ghosts_0_difference) +
+                            (j + num_ghosts_1_difference)*ghostcell_dim_0_difference;
+                        
+                        const int idx_nghost = i + j*interior_dim_0;
+                        
+                        // Compute the coordinates.
+                        const double x_0 = patch_xlo[0] + (double(i) + half)*dx[0];
+                        const double x_1 = patch_xlo[1] + (double(j) + half)*dx[1];
+                        
+                        const bool is_in_box = (x_0 >= box_tagging_lo[0]) && (x_0 <= box_tagging_hi[0]) &&
+                            (x_1 >= box_tagging_lo[1]) && (x_1 <= box_tagging_hi[1]);
+                        
+                        if ((w[idx]/(difference_max + EPSILON) > global_tol) && is_in_box)
+                        {
+                            tag_ptr_global_tol[idx_nghost] = 1;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx = (i + num_ghosts_0_difference) +
+                            (j + num_ghosts_1_difference)*ghostcell_dim_0_difference;
+                        
+                        const int idx_nghost = i + j*interior_dim_0;
+                        
+                        if (w[idx]/(difference_max + EPSILON) > global_tol)
+                        {
+                            tag_ptr_global_tol[idx_nghost] = 1;
+                        }
                     }
                 }
             }
             
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -2906,31 +3161,57 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
             // Get the pointer to the tags.
             int* tag_ptr_local_tol = tags_local_tol->getPointer(0);
             
-            for (int j = 0; j < interior_dim_1; j++)
+            if (d_is_tagging_in_box_only)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int j = 0; j < interior_dim_1; j++)
                 {
-                    // Compute the linear indices.
-                    const int idx = (i + num_ghosts_0_difference) +
-                        (j + num_ghosts_1_difference)*ghostcell_dim_0_difference;
-                    
-                    const int idx_nghost = i + j*interior_dim_0;
-                    
-                    if (w[idx]/(u_mean[idx] + EPSILON) > local_tol)
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = 0; i < interior_dim_0; i++)
                     {
-                        tag_ptr_local_tol[idx_nghost] = 1;
+                        // Compute the linear indices.
+                        const int idx = (i + num_ghosts_0_difference) +
+                            (j + num_ghosts_1_difference)*ghostcell_dim_0_difference;
+                        
+                        const int idx_nghost = i + j*interior_dim_0;
+                        
+                        // Compute the coordinates.
+                        const double x_0 = patch_xlo[0] + (double(i) + half)*dx[0];
+                        const double x_1 = patch_xlo[1] + (double(j) + half)*dx[1];
+                        
+                        const bool is_in_box = (x_0 >= box_tagging_lo[0]) && (x_0 <= box_tagging_hi[0]) &&
+                            (x_1 >= box_tagging_lo[1]) && (x_1 <= box_tagging_hi[1]);
+                        
+                        if ((w[idx]/(u_mean[idx] + EPSILON) > local_tol) && is_in_box)
+                        {
+                            tag_ptr_local_tol[idx_nghost] = 1;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx = (i + num_ghosts_0_difference) +
+                            (j + num_ghosts_1_difference)*ghostcell_dim_0_difference;
+                        
+                        const int idx_nghost = i + j*interior_dim_0;
+                        
+                        if (w[idx]/(u_mean[idx] + EPSILON) > local_tol)
+                        {
+                            tag_ptr_local_tol[idx_nghost] = 1;
+                        }
                     }
                 }
             }
             
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -2943,9 +3224,7 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
         
         for (int j = 0; j < interior_dim_1; j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -2979,26 +3258,61 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
             // Get the pointer to the tags.
             int* tag_ptr_global_tol = tags_global_tol->getPointer(0);
             
-            for (int k = 0; k < interior_dim_2; k++)
+            if (d_is_tagging_in_box_only)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int k = 0; k < interior_dim_2; k++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int j = 0; j < interior_dim_1; j++)
                     {
-                        // Compute the linear indices.
-                        const int idx = (i + num_ghosts_0_difference) +
-                            (j + num_ghosts_1_difference)*ghostcell_dim_0_difference +
-                            (k + num_ghosts_2_difference)*ghostcell_dim_0_difference*
-                                ghostcell_dim_1_difference;
-                        
-                        const int idx_nghost = i + j*interior_dim_0 + k*interior_dim_0*interior_dim_1;
-                        
-                        if (w[idx]/(difference_max + EPSILON) > global_tol)
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0; i++)
                         {
-                            tag_ptr_global_tol[idx_nghost] = 1;
+                            // Compute the linear indices.
+                            const int idx = (i + num_ghosts_0_difference) +
+                                (j + num_ghosts_1_difference)*ghostcell_dim_0_difference +
+                                (k + num_ghosts_2_difference)*ghostcell_dim_0_difference*
+                                    ghostcell_dim_1_difference;
+                            
+                            const int idx_nghost = i + j*interior_dim_0 + k*interior_dim_0*interior_dim_1;
+                            
+                            // Compute the coordinates.
+                            const double x_0 = patch_xlo[0] + (double(i) + half)*dx[0];
+                            const double x_1 = patch_xlo[1] + (double(j) + half)*dx[1];
+                            const double x_2 = patch_xlo[2] + (double(k) + half)*dx[2];
+                            
+                            const bool is_in_box = (x_0 >= box_tagging_lo[0]) && (x_0 <= box_tagging_hi[0]) &&
+                                (x_1 >= box_tagging_lo[1]) && (x_1 <= box_tagging_hi[1]) &&
+                                (x_2 >= box_tagging_lo[2]) && (x_2 <= box_tagging_hi[2]);
+                            
+                            if ((w[idx]/(difference_max + EPSILON) > global_tol) && is_in_box)
+                            {
+                                tag_ptr_global_tol[idx_nghost] = 1;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx = (i + num_ghosts_0_difference) +
+                                (j + num_ghosts_1_difference)*ghostcell_dim_0_difference +
+                                (k + num_ghosts_2_difference)*ghostcell_dim_0_difference*
+                                    ghostcell_dim_1_difference;
+                            
+                            const int idx_nghost = i + j*interior_dim_0 + k*interior_dim_0*interior_dim_1;
+                            
+                            if (w[idx]/(difference_max + EPSILON) > global_tol)
+                            {
+                                tag_ptr_global_tol[idx_nghost] = 1;
+                            }
                         }
                     }
                 }
@@ -3008,9 +3322,7 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -3033,26 +3345,61 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
             // Get the pointer to the tags.
             int* tag_ptr_local_tol = tags_local_tol->getPointer(0);
             
-            for (int k = 0; k < interior_dim_2; k++)
+            if (d_is_tagging_in_box_only)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int k = 0; k < interior_dim_2; k++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int j = 0; j < interior_dim_1; j++)
                     {
-                        // Compute the linear indices.
-                        const int idx = (i + num_ghosts_0_difference) +
-                            (j + num_ghosts_1_difference)*ghostcell_dim_0_difference +
-                            (k + num_ghosts_2_difference)*ghostcell_dim_0_difference*
-                                ghostcell_dim_1_difference;
-                        
-                        const int idx_nghost = i + j*interior_dim_0 + k*interior_dim_0*interior_dim_1;
-                        
-                        if (w[idx]/(u_mean[idx] + EPSILON) > local_tol)
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0; i++)
                         {
-                            tag_ptr_local_tol[idx_nghost] = 1;
+                            // Compute the linear indices.
+                            const int idx = (i + num_ghosts_0_difference) +
+                                (j + num_ghosts_1_difference)*ghostcell_dim_0_difference +
+                                (k + num_ghosts_2_difference)*ghostcell_dim_0_difference*
+                                    ghostcell_dim_1_difference;
+                            
+                            const int idx_nghost = i + j*interior_dim_0 + k*interior_dim_0*interior_dim_1;
+                            
+                            // Compute the coordinates.
+                            const double x_0 = patch_xlo[0] + (double(i) + half)*dx[0];
+                            const double x_1 = patch_xlo[1] + (double(j) + half)*dx[1];
+                            const double x_2 = patch_xlo[2] + (double(k) + half)*dx[2];
+                            
+                            const bool is_in_box = (x_0 >= box_tagging_lo[0]) && (x_0 <= box_tagging_hi[0]) &&
+                                (x_1 >= box_tagging_lo[1]) && (x_1 <= box_tagging_hi[1]) &&
+                                (x_2 >= box_tagging_lo[2]) && (x_2 <= box_tagging_hi[2]);
+                            
+                            if ((w[idx]/(u_mean[idx] + EPSILON) > local_tol) && is_in_box)
+                            {
+                                tag_ptr_local_tol[idx_nghost] = 1;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx = (i + num_ghosts_0_difference) +
+                                (j + num_ghosts_1_difference)*ghostcell_dim_0_difference +
+                                (k + num_ghosts_2_difference)*ghostcell_dim_0_difference*
+                                    ghostcell_dim_1_difference;
+                            
+                            const int idx_nghost = i + j*interior_dim_0 + k*interior_dim_0*interior_dim_1;
+                            
+                            if (w[idx]/(u_mean[idx] + EPSILON) > local_tol)
+                            {
+                                tag_ptr_local_tol[idx_nghost] = 1;
+                            }
                         }
                     }
                 }
@@ -3062,9 +3409,7 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -3080,9 +3425,7 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.

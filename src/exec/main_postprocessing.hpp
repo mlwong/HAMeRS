@@ -14,6 +14,8 @@ void runPostProcessing(
     const int& realizaton_num,
     const int& restore_index)
 {
+    TBOX_ASSERT(is_from_restart == true);
+    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     /*
@@ -345,6 +347,7 @@ void runPostProcessing(
      */
     
     double dt_now = time_integrator->initializeHierarchy();
+    NULL_USE(dt_now);
     
     restart_manager->closeRestartFile();
     

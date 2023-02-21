@@ -14,7 +14,6 @@ NavierStokesInitialConditions::initializeDataOnPatch(
     
     if ((d_project_name != "3D Taylor-Green vortex") &&
         (d_project_name != "2D Taylor-Green vortex"))
-
     {
         TBOX_ERROR(d_object_name
             << ": "
@@ -55,30 +54,28 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         const double* const dx = patch_geom->getDx();
         const double* const patch_xlo = patch_geom->getXLower();
         
-
         if (d_project_name == "3D Taylor-Green vortex")
         {        
             // Get the dimensions of box that covers the interior of Patch.
             hier::Box patch_box = patch.getBox();
             const hier::IntVector patch_dims = patch_box.numberCells();
-        
+            
             /*
              * Initialize data for a 3D inviscid Taylor-Green problem.
              */
-        
-
+            
             HAMERS_SHARED_PTR<pdat::CellData<double> > density      = conservative_variables[0];
             HAMERS_SHARED_PTR<pdat::CellData<double> > momentum     = conservative_variables[1];
             HAMERS_SHARED_PTR<pdat::CellData<double> > total_energy = conservative_variables[2];
-        
+            
             double* rho   = density->getPointer(0);
             double* rho_u = momentum->getPointer(0);
             double* rho_v = momentum->getPointer(1);
             double* rho_w = momentum->getPointer(2);
             double* E     = total_energy->getPointer(0);
-        
+            
             double gamma = double(5)/double(3);
-        
+            
             for (int k = 0; k < patch_dims[2]; k++)
             {
                 for (int j = 0; j < patch_dims[1]; j++)
@@ -119,23 +116,22 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             // Get the dimensions of box that covers the interior of Patch.
             hier::Box patch_box = patch.getBox();
             const hier::IntVector patch_dims = patch_box.numberCells();
-        
+            
             /*
              * Initialize data for a 2D inviscid Taylor-Green problem.
              */
-        
-
+            
             HAMERS_SHARED_PTR<pdat::CellData<double> > density      = conservative_variables[0];
             HAMERS_SHARED_PTR<pdat::CellData<double> > momentum     = conservative_variables[1];
             HAMERS_SHARED_PTR<pdat::CellData<double> > total_energy = conservative_variables[2];
-        
+            
             double* rho   = density->getPointer(0);
             double* rho_u = momentum->getPointer(0);
             double* rho_v = momentum->getPointer(1);
             double* E     = total_energy->getPointer(0);
-        
+            
             double gamma = double(5)/double(3);
-
+            
             for (int j = 0; j < patch_dims[1]; j++)
             {
                 for (int i = 0; i < patch_dims[0]; i++)

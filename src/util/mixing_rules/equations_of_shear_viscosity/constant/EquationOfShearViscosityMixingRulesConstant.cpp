@@ -13,55 +13,109 @@ EquationOfShearViscosityMixingRulesConstant::EquationOfShearViscosityMixingRules
             mixing_closure_model,
             equation_of_shear_viscosity_mixing_rules_db)
 {
-    d_equation_of_shear_viscosity.reset(new EquationOfShearViscosityConstant(
-        "d_equation_of_shear_viscosity",
-        dim));
+    d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions = equation_of_shear_viscosity_mixing_rules_db->getBoolWithDefault(
+        "use_constant_kinematic_viscosity_and_ideal_gas_assumptions",
+        false);
+    
+    d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions = equation_of_shear_viscosity_mixing_rules_db->getBoolWithDefault(
+        "d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions",
+        d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions);
     
     /*
      * Get the viscosity of each species from the database.
      */
     
-    if (equation_of_shear_viscosity_mixing_rules_db->keyExists("species_mu"))
+    // If the constant kinematic viscosities are used.
+    if (d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions)
     {
-        size_t species_mu_array_size =
-            equation_of_shear_viscosity_mixing_rules_db->getArraySize("species_mu");
-        if (static_cast<int>(species_mu_array_size) == d_num_species)
+        if (equation_of_shear_viscosity_mixing_rules_db->keyExists("species_nu"))
         {
-            d_species_mu =
-                equation_of_shear_viscosity_mixing_rules_db->getDoubleVector("species_mu");
+            size_t species_nu_array_size =
+                equation_of_shear_viscosity_mixing_rules_db->getArraySize("species_nu");
+            if (static_cast<int>(species_nu_array_size) == d_num_species)
+            {
+                d_species_nu =
+                    equation_of_shear_viscosity_mixing_rules_db->getDoubleVector("species_nu");
+            }
+            else
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "number of 'species_nu' entries must be equal to 'num_species'."
+                    << std::endl);
+            }
+        }
+        else if (equation_of_shear_viscosity_mixing_rules_db->keyExists("d_species_nu"))
+        {
+            size_t species_nu_array_size =
+                equation_of_shear_viscosity_mixing_rules_db->getArraySize("d_species_nu");
+            if (static_cast<int>(species_nu_array_size) == d_num_species)
+            {
+                d_species_nu =
+                    equation_of_shear_viscosity_mixing_rules_db->getDoubleVector("d_species_nu");
+            }
+            else
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "number of 'd_species_nu' entries must be equal to 'd_num_species'."
+                    << std::endl);
+            }
         }
         else
         {
             TBOX_ERROR(d_object_name
                 << ": "
-                << "number of 'species_mu' entries must be equal to 'num_species'."
+                << "Key data 'species_mu'/'d_species_mu'"
+                << "not found in data for equation of shear viscosity mixing rules."
                 << std::endl);
         }
     }
-    else if (equation_of_shear_viscosity_mixing_rules_db->keyExists("d_species_mu"))
-    {
-        size_t species_mu_array_size =
-            equation_of_shear_viscosity_mixing_rules_db->getArraySize("d_species_mu");
-        if (static_cast<int>(species_mu_array_size) == d_num_species)
-        {
-            d_species_mu =
-                equation_of_shear_viscosity_mixing_rules_db->getDoubleVector("d_species_mu");
-        }
-        else
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "number of 'd_species_mu' entries must be equal to 'd_num_species'."
-                << std::endl);
-        }
-    }
+    // If the constant dynamic viscosities are used.
     else
     {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "Key data 'species_mu'/'d_species_mu'"
-            << "not found in data for equation of shear viscosity mixing rules."
-            << std::endl);
+        if (equation_of_shear_viscosity_mixing_rules_db->keyExists("species_mu"))
+        {
+            size_t species_mu_array_size =
+                equation_of_shear_viscosity_mixing_rules_db->getArraySize("species_mu");
+            if (static_cast<int>(species_mu_array_size) == d_num_species)
+            {
+                d_species_mu =
+                    equation_of_shear_viscosity_mixing_rules_db->getDoubleVector("species_mu");
+            }
+            else
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "number of 'species_mu' entries must be equal to 'num_species'."
+                    << std::endl);
+            }
+        }
+        else if (equation_of_shear_viscosity_mixing_rules_db->keyExists("d_species_mu"))
+        {
+            size_t species_mu_array_size =
+                equation_of_shear_viscosity_mixing_rules_db->getArraySize("d_species_mu");
+            if (static_cast<int>(species_mu_array_size) == d_num_species)
+            {
+                d_species_mu =
+                    equation_of_shear_viscosity_mixing_rules_db->getDoubleVector("d_species_mu");
+            }
+            else
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "number of 'd_species_mu' entries must be equal to 'd_num_species'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Key data 'species_mu'/'d_species_mu'"
+                << "not found in data for equation of shear viscosity mixing rules."
+                << std::endl);
+        }
     }
     
     /*
@@ -110,6 +164,20 @@ EquationOfShearViscosityMixingRulesConstant::EquationOfShearViscosityMixingRules
             << "not found in data for equation of shear viscosity mixing rules."
             << std::endl);
     }
+    
+    d_R_u = equation_of_shear_viscosity_mixing_rules_db->getDoubleWithDefault(
+        "R_u",
+        double(8.314462618153240)); // Universal gas constant in SI units.
+    
+    d_R_u = equation_of_shear_viscosity_mixing_rules_db->getDoubleWithDefault(
+        "d_R_u",
+        d_R_u);
+    
+    d_equation_of_shear_viscosity.reset(new EquationOfShearViscosityConstant(
+        "d_equation_of_shear_viscosity",
+        dim,
+        d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions,
+        d_R_u));
 }
 
 
@@ -140,13 +208,28 @@ EquationOfShearViscosityMixingRulesConstant::printClassData(
      * Print the viscosity of each species.
      */
     
-    os << "d_species_mu = ";
-    for (int si = 0; si < d_num_species - 1; si++)
+    // If the constant kinematic viscosities are used.
+    if (d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions)
     {
-        os << d_species_mu[si] << ", ";
+        os << "d_species_nu = ";
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            os << d_species_nu[si] << ", ";
+        }
+        os << d_species_nu[d_num_species - 1];
+        os << std::endl;
     }
-    os << d_species_mu[d_num_species - 1];
-    os << std::endl;
+    // If the constant dynamic viscosities are used.
+    else
+    {
+        os << "d_species_mu = ";
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            os << d_species_mu[si] << ", ";
+        }
+        os << d_species_mu[d_num_species - 1];
+        os << std::endl;
+    }
     
     /*
      * Print the molecular weight of each species.
@@ -170,8 +253,20 @@ void
 EquationOfShearViscosityMixingRulesConstant::putToRestart(
     const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
-    restart_db->putDoubleVector("d_species_mu", d_species_mu);
+    restart_db->putBool("d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions",
+        d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions);
+    
+    if (d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions)
+    {
+        restart_db->putDoubleVector("d_species_nu", d_species_nu);
+    }
+    else
+    {
+        restart_db->putDoubleVector("d_species_mu", d_species_mu);
+    }
+    
     restart_db->putDoubleVector("d_species_M", d_species_M);
+    restart_db->putDouble("d_R_u", d_R_u);
 }
 
 
@@ -500,9 +595,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 
                 const double factor = double(1)/(sqrt(species_molecular_properties[1]));
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -516,9 +609,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 }
             }
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -568,9 +659,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -590,9 +679,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -656,9 +743,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -685,9 +770,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -752,9 +835,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 
                 const double factor = double(1)/(sqrt(species_molecular_properties[1]));
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -783,9 +864,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             
             const double factor = double(1)/(sqrt(species_molecular_properties[1]));
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -840,9 +919,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -877,9 +954,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -948,9 +1023,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -992,9 +1065,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1353,9 +1424,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1404,9 +1473,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1471,9 +1538,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1541,9 +1606,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1568,9 +1631,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                     species_molecular_properties_const_ptr,
                     domain);
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -1617,9 +1678,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1652,9 +1711,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1715,9 +1772,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 {
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1759,9 +1814,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1806,6 +1859,14 @@ EquationOfShearViscosityMixingRulesConstant::getSpeciesMolecularProperties(
     TBOX_ASSERT(species_index < d_num_species);
 #endif
     
-    *(species_molecular_properties[0]) = d_species_mu[species_index];
+    // If the constant kinematic viscosities are used.
+    if (d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions)
+    {
+        *(species_molecular_properties[0]) = d_species_nu[species_index];
+    }
+    else
+    {
+        *(species_molecular_properties[0]) = d_species_mu[species_index];
+    }
     *(species_molecular_properties[1]) = d_species_M[species_index];
 }

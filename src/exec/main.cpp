@@ -196,7 +196,6 @@ int main(int argc, char *argv[])
     tbox::SAMRAI_MPI::init(&argc, &argv);
     tbox::SAMRAIManager::initialize();
     tbox::SAMRAIManager::startup();
-    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     std::string input_filename;
     std::string restart_read_dirname;

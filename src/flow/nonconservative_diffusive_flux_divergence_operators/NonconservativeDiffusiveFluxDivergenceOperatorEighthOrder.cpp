@@ -61,11 +61,11 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::putToRestart(
  */
 void
 NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativesInX(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_x,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_x_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
-    const std::vector<std::vector<int> >& data_component_idx_x)
+    const std::vector<std::vector<int> >& data_component_idx_x,
+    const hier::Patch& patch)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -143,9 +143,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativ
                     
                     const int num_subghosts_0_data = num_subghosts_data[0];
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -233,9 +231,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativ
                     
                     for (int j = -3; j < interior_dim_1 + 3; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -347,9 +343,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativ
                     {
                         for (int j = -3; j < interior_dim_1 + 3; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -428,11 +422,11 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativ
  */
 void
 NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativesInY(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_y,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_y_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
-    const std::vector<std::vector<int> >& data_component_idx_y)
+    const std::vector<std::vector<int> >& data_component_idx_y,
+    const hier::Patch& patch)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -473,7 +467,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativ
         TBOX_ERROR(d_object_name
             << ": NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::"
             << "computeFirstDerivativesInY()\n"
-            << "There isn't y-direction for 1D problem."
+            << "There isn't y-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -529,9 +523,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativ
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = -3; i < interior_dim_0 + 3; i++)
                         {
                             // Compute the linear indices.
@@ -643,9 +635,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativ
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = -3; i < interior_dim_0 + 3; i++)
                             {
                                 // Compute the linear indices.
@@ -724,11 +714,11 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativ
  */
 void
 NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativesInZ(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_z,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_z_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
-    const std::vector<std::vector<int> >& data_component_idx_z)
+    const std::vector<std::vector<int> >& data_component_idx_z,
+    const hier::Patch& patch)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -769,7 +759,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativ
         TBOX_ERROR(d_object_name
             << ": NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::"
             << "computeFirstDerivativesInZ()\n"
-            << "There isn't z-direction for 1D problem."
+            << "There isn't z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -777,7 +767,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativ
         TBOX_ERROR(d_object_name
             << ": NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::"
             << "computeFirstDerivativesInZ()\n"
-            << "There isn't z-direction for 2D problem."
+            << "There isn't z-direction for two-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -840,9 +830,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativ
                     {
                         for (int j = -3; j < interior_dim_1 + 3; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = -3; i < interior_dim_0 + 3; i++)
                             {
                                 // Compute the linear indices.
@@ -921,11 +909,11 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativ
  */
 void
 NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeSecondDerivativesInX(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_x,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_x_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
-    const std::vector<std::vector<int> >& data_component_idx_x)
+    const std::vector<std::vector<int> >& data_component_idx_x,
+    const hier::Patch& patch)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -1004,9 +992,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeSecondDerivati
                     
                     const int num_subghosts_0_data = num_subghosts_data[0];
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1096,9 +1082,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeSecondDerivati
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1214,9 +1198,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeSecondDerivati
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -1301,11 +1283,11 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeSecondDerivati
  */
 void
 NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeSecondDerivativesInY(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_y,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_y_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
-    const std::vector<std::vector<int> >& data_component_idx_y)
+    const std::vector<std::vector<int> >& data_component_idx_y,
+    const hier::Patch& patch)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -1347,7 +1329,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeSecondDerivati
         TBOX_ERROR(d_object_name
             << ": NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::"
             << "computeSecondDerivativesInY()\n"
-            << "There isn't y-direction for 1D problem."
+            << "There isn't y-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -1403,9 +1385,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeSecondDerivati
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
+                        HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1521,9 +1501,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeSecondDerivati
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -1608,11 +1586,11 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeSecondDerivati
  */
 void
 NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeSecondDerivativesInZ(
-    hier::Patch& patch,
     std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_z,
     std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_z_computed,
     const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
-    const std::vector<std::vector<int> >& data_component_idx_z)
+    const std::vector<std::vector<int> >& data_component_idx_z,
+    const hier::Patch& patch)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -1654,7 +1632,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeSecondDerivati
         TBOX_ERROR(d_object_name
             << ": NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::"
             << "computeSecondDerivativesInZ()\n"
-            << "There isn't z-direction for 1D problem."
+            << "There isn't z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -1662,7 +1640,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeSecondDerivati
         TBOX_ERROR(d_object_name
             << ": NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::"
             << "computeSecondDerivativesInZ()\n"
-            << "There isn't z-direction for 2D problem."
+            << "There isn't z-direction for two-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -1725,9 +1703,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeSecondDerivati
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
+                            HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.

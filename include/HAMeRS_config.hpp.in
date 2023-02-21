@@ -21,4 +21,21 @@
 /* Enable compilation with Boost library */
 #cmakedefine HAMERS_USE_BOOST
 
+#ifndef NDEBUG
+#define DEBUG
+#endif
+
+#if defined(HAMERS_ENABLE_SIMD)
+#if defined(DEBUG)
+#define HAMERS_PRAGMA_VEC(EXP)
+#define HAMERS_PRAGMA_SIMD
+#else
+#define HAMERS_PRAGMA_VEC(EXP) _Pragma(EXP)
+#define HAMERS_PRAGMA_SIMD     HAMERS_PRAGMA_VEC("omp simd")
+#endif
+#else // defined(HAMERS_ENABLE_SIMD)
+#define HAMERS_PRAGMA_VEC(EXP)
+#define HAMERS_PRAGMA_SIMD
+#endif // defined(HAMERS_ENABLE_SIMD)
+
 #endif /* HAMERS_CONFIG_HPP */

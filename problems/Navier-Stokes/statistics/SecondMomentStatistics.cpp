@@ -355,16 +355,16 @@ SecondMomentStatisticsUtilities::outputMixingWidthInXDirection(
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -385,7 +385,7 @@ SecondMomentStatisticsUtilities::outputMixingWidthInXDirection(
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -426,15 +426,15 @@ SecondMomentStatisticsUtilities::outputMixingWidthInXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -628,15 +628,15 @@ SecondMomentStatisticsUtilities::outputMixingWidthInXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -849,15 +849,15 @@ SecondMomentStatisticsUtilities::outputMixingWidthInXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -1102,16 +1102,16 @@ SecondMomentStatisticsUtilities::outputMixednessInXDirection(
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -1132,7 +1132,7 @@ SecondMomentStatisticsUtilities::outputMixednessInXDirection(
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -1171,15 +1171,15 @@ SecondMomentStatisticsUtilities::outputMixednessInXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -1396,15 +1396,15 @@ SecondMomentStatisticsUtilities::outputMixednessInXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -1640,15 +1640,15 @@ SecondMomentStatisticsUtilities::outputMixednessInXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -1916,16 +1916,16 @@ outputTurbulentMassFluxVelocityInXDirectionInMixingLayerWithHomogeneityInYZPlane
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -1946,7 +1946,7 @@ outputTurbulentMassFluxVelocityInXDirectionInMixingLayerWithHomogeneityInYZPlane
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -2010,15 +2010,15 @@ outputTurbulentMassFluxVelocityInXDirectionInMixingLayerWithHomogeneityInYZPlane
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -2264,15 +2264,15 @@ outputTurbulentMassFluxVelocityInXDirectionInMixingLayerWithHomogeneityInYZPlane
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -2566,16 +2566,16 @@ outputTurbulentMassFluxInXDirectionInMixingLayerWithHomogeneityInYZPlane(
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -2596,7 +2596,7 @@ outputTurbulentMassFluxInXDirectionInMixingLayerWithHomogeneityInYZPlane(
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -2660,15 +2660,15 @@ outputTurbulentMassFluxInXDirectionInMixingLayerWithHomogeneityInYZPlane(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -2914,15 +2914,15 @@ outputTurbulentMassFluxInXDirectionInMixingLayerWithHomogeneityInYZPlane(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -3216,16 +3216,16 @@ outputDensitySpecificVolumeCovarianceInMixingLayerWithHomogeneityInYZPlane(
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -3246,7 +3246,7 @@ outputDensitySpecificVolumeCovarianceInMixingLayerWithHomogeneityInYZPlane(
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -3310,15 +3310,15 @@ outputDensitySpecificVolumeCovarianceInMixingLayerWithHomogeneityInYZPlane(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -3543,15 +3543,15 @@ outputDensitySpecificVolumeCovarianceInMixingLayerWithHomogeneityInYZPlane(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -3824,16 +3824,16 @@ outputDensityTimesDensitySpecificVolumeCovarianceInMixingLayerWithHomogeneityInY
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -3854,7 +3854,7 @@ outputDensityTimesDensitySpecificVolumeCovarianceInMixingLayerWithHomogeneityInY
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -3918,15 +3918,15 @@ outputDensityTimesDensitySpecificVolumeCovarianceInMixingLayerWithHomogeneityInY
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -4151,15 +4151,15 @@ outputDensityTimesDensitySpecificVolumeCovarianceInMixingLayerWithHomogeneityInY
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -4432,16 +4432,16 @@ outputReynoldsNormalStressInXDirectionInMixingLayerWithHomogeneityInYZPlane(
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -4462,7 +4462,7 @@ outputReynoldsNormalStressInXDirectionInMixingLayerWithHomogeneityInYZPlane(
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -4526,15 +4526,15 @@ outputReynoldsNormalStressInXDirectionInMixingLayerWithHomogeneityInYZPlane(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -4780,15 +4780,15 @@ outputReynoldsNormalStressInXDirectionInMixingLayerWithHomogeneityInYZPlane(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -5083,16 +5083,16 @@ outputDensityTimesReynoldsNormalStressInXDirectionInMixingLayerWithHomogeneityIn
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -5113,7 +5113,7 @@ outputDensityTimesReynoldsNormalStressInXDirectionInMixingLayerWithHomogeneityIn
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -5177,15 +5177,15 @@ outputDensityTimesReynoldsNormalStressInXDirectionInMixingLayerWithHomogeneityIn
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -5431,15 +5431,15 @@ outputDensityTimesReynoldsNormalStressInXDirectionInMixingLayerWithHomogeneityIn
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -5734,16 +5734,16 @@ outputReynoldsNormalStressInYDirectionInMixingLayerWithHomogeneityInYZPlane(
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -5764,7 +5764,7 @@ outputReynoldsNormalStressInYDirectionInMixingLayerWithHomogeneityInYZPlane(
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -5828,15 +5828,15 @@ outputReynoldsNormalStressInYDirectionInMixingLayerWithHomogeneityInYZPlane(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -6082,15 +6082,15 @@ outputReynoldsNormalStressInYDirectionInMixingLayerWithHomogeneityInYZPlane(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -6385,16 +6385,16 @@ outputDensityTimesReynoldsNormalStressInYDirectionInMixingLayerWithHomogeneityIn
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -6415,7 +6415,7 @@ outputDensityTimesReynoldsNormalStressInYDirectionInMixingLayerWithHomogeneityIn
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -6479,15 +6479,15 @@ outputDensityTimesReynoldsNormalStressInYDirectionInMixingLayerWithHomogeneityIn
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -6733,15 +6733,15 @@ outputDensityTimesReynoldsNormalStressInYDirectionInMixingLayerWithHomogeneityIn
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -7036,16 +7036,16 @@ outputReynoldsNormalStressInZDirectionInMixingLayerWithHomogeneityInYZPlane(
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -7066,7 +7066,7 @@ outputReynoldsNormalStressInZDirectionInMixingLayerWithHomogeneityInYZPlane(
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -7130,15 +7130,15 @@ outputReynoldsNormalStressInZDirectionInMixingLayerWithHomogeneityInYZPlane(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -7384,15 +7384,15 @@ outputReynoldsNormalStressInZDirectionInMixingLayerWithHomogeneityInYZPlane(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -7687,16 +7687,16 @@ outputDensityTimesReynoldsNormalStressInZDirectionInMixingLayerWithHomogeneityIn
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -7717,7 +7717,7 @@ outputDensityTimesReynoldsNormalStressInZDirectionInMixingLayerWithHomogeneityIn
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -7781,15 +7781,15 @@ outputDensityTimesReynoldsNormalStressInZDirectionInMixingLayerWithHomogeneityIn
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -8035,15 +8035,15 @@ outputDensityTimesReynoldsNormalStressInZDirectionInMixingLayerWithHomogeneityIn
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -8338,16 +8338,16 @@ outputReynoldsShearStressInXYDirectionsInMixingLayerWithHomogeneityInYZPlane(
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -8368,7 +8368,7 @@ outputReynoldsShearStressInXYDirectionsInMixingLayerWithHomogeneityInYZPlane(
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -8436,15 +8436,15 @@ outputReynoldsShearStressInXYDirectionsInMixingLayerWithHomogeneityInYZPlane(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -8700,15 +8700,15 @@ outputReynoldsShearStressInXYDirectionsInMixingLayerWithHomogeneityInYZPlane(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -9009,16 +9009,16 @@ outputDensityTimesReynoldsShearStressInXYDirectionsInMixingLayerWithHomogeneityI
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -9039,7 +9039,7 @@ outputDensityTimesReynoldsShearStressInXYDirectionsInMixingLayerWithHomogeneityI
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -9107,15 +9107,15 @@ outputDensityTimesReynoldsShearStressInXYDirectionsInMixingLayerWithHomogeneityI
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -9371,15 +9371,15 @@ outputDensityTimesReynoldsShearStressInXYDirectionsInMixingLayerWithHomogeneityI
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -9680,16 +9680,16 @@ outputReynoldsShearStressInXZDirectionsInMixingLayerWithHomogeneityInYZPlane(
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -9710,7 +9710,7 @@ outputReynoldsShearStressInXZDirectionsInMixingLayerWithHomogeneityInYZPlane(
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -9778,15 +9778,15 @@ outputReynoldsShearStressInXZDirectionsInMixingLayerWithHomogeneityInYZPlane(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -10042,15 +10042,15 @@ outputReynoldsShearStressInXZDirectionsInMixingLayerWithHomogeneityInYZPlane(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -10351,16 +10351,16 @@ outputDensityTimesReynoldsShearStressInXZDirectionsInMixingLayerWithHomogeneityI
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -10381,7 +10381,7 @@ outputDensityTimesReynoldsShearStressInXZDirectionsInMixingLayerWithHomogeneityI
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -10449,15 +10449,15 @@ outputDensityTimesReynoldsShearStressInXZDirectionsInMixingLayerWithHomogeneityI
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -10713,15 +10713,15 @@ outputDensityTimesReynoldsShearStressInXZDirectionsInMixingLayerWithHomogeneityI
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -11022,16 +11022,16 @@ outputReynoldsShearStressInYZDirectionsInMixingLayerWithHomogeneityInYZPlane(
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -11052,7 +11052,7 @@ outputReynoldsShearStressInYZDirectionsInMixingLayerWithHomogeneityInYZPlane(
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -11120,15 +11120,15 @@ outputReynoldsShearStressInYZDirectionsInMixingLayerWithHomogeneityInYZPlane(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -11384,15 +11384,15 @@ outputReynoldsShearStressInYZDirectionsInMixingLayerWithHomogeneityInYZPlane(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -11693,16 +11693,16 @@ outputDensityTimesReynoldsShearStressInYZDirectionsInMixingLayerWithHomogeneityI
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Get the refinement ratio from the finest level to the coarsest level.
      */
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    hier::IntVector ratioFinestLevelToCoarsestLevel =
         patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -11723,7 +11723,7 @@ outputDensityTimesReynoldsShearStressInYZDirectionsInMixingLayerWithHomogeneityI
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarsestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -11791,15 +11791,15 @@ outputDensityTimesReynoldsShearStressInYZDirectionsInMixingLayerWithHomogeneityI
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -12055,15 +12055,15 @@ outputDensityTimesReynoldsShearStressInYZDirectionsInMixingLayerWithHomogeneityI
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratioToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarsestLevel/ratioToCoarsestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -12553,19 +12553,19 @@ SecondMomentStatisticsUtilities::outputWeightedNumberOfCells(
         for (int li = 0; li < num_levels; li++)
         {
             /*
-             * Get the refinement ratio from the current level to the coarest level.
+             * Get the refinement ratio from the current level to the coarsest level.
              */
             
-            hier::IntVector ratioCurrentLevelToCoarestLevel =
+            hier::IntVector ratioCurrentLevelToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioCurrentLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioCurrentLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
             if (li == 0)
             {
-                ratioCurrentLevelToCoarestLevel = hier::IntVector::getOne(d_dim);
+                ratioCurrentLevelToCoarsestLevel = hier::IntVector::getOne(d_dim);
             }
             
             /*
@@ -12589,7 +12589,7 @@ SecondMomentStatisticsUtilities::outputWeightedNumberOfCells(
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                weighted_num_cells_local += double(interior_dims[0])*double(ratioCurrentLevelToCoarestLevel[0]);
+                weighted_num_cells_local += double(interior_dims[0])*double(ratioCurrentLevelToCoarsestLevel[0]);
             }
         }
         
@@ -12623,19 +12623,19 @@ SecondMomentStatisticsUtilities::outputWeightedNumberOfCells(
         for (int li = 0; li < num_levels; li++)
         {
             /*
-             * Get the refinement ratio from the current level to the coarest level.
+             * Get the refinement ratio from the current level to the coarsest level.
              */
             
-            hier::IntVector ratioCurrentLevelToCoarestLevel =
+            hier::IntVector ratioCurrentLevelToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioCurrentLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioCurrentLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
             if (li == 0)
             {
-                ratioCurrentLevelToCoarestLevel = hier::IntVector::getOne(d_dim);
+                ratioCurrentLevelToCoarsestLevel = hier::IntVector::getOne(d_dim);
             }
             
             /*
@@ -12660,7 +12660,7 @@ SecondMomentStatisticsUtilities::outputWeightedNumberOfCells(
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
                 weighted_num_cells_local += double(interior_dims[0])*double(interior_dims[1])*
-                    double(ratioCurrentLevelToCoarestLevel[0]);
+                    double(ratioCurrentLevelToCoarsestLevel[0]);
             }
         }
         
@@ -12694,19 +12694,19 @@ SecondMomentStatisticsUtilities::outputWeightedNumberOfCells(
         for (int li = 0; li < num_levels; li++)
         {
             /*
-             * Get the refinement ratio from the current level to the coarest level.
+             * Get the refinement ratio from the current level to the coarsest level.
              */
             
-            hier::IntVector ratioCurrentLevelToCoarestLevel =
+            hier::IntVector ratioCurrentLevelToCoarsestLevel =
                 patch_hierarchy->getRatioToCoarserLevel(li);
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioCurrentLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioCurrentLevelToCoarsestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
             if (li == 0)
             {
-                ratioCurrentLevelToCoarestLevel = hier::IntVector::getOne(d_dim);
+                ratioCurrentLevelToCoarsestLevel = hier::IntVector::getOne(d_dim);
             }
             
             /*
@@ -12731,7 +12731,7 @@ SecondMomentStatisticsUtilities::outputWeightedNumberOfCells(
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
                 weighted_num_cells_local += double(interior_dims[0])*double(interior_dims[1])*double(interior_dims[2])*
-                    double(ratioCurrentLevelToCoarestLevel[0]);
+                    double(ratioCurrentLevelToCoarsestLevel[0]);
             }
         }
         

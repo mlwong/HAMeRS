@@ -544,9 +544,7 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
         {
             const double M_i = d_species_M[si];
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0;
                  i < domain_lo_0 + domain_dim_0;
                  i++)
@@ -559,9 +557,7 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
             }
         }
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
+        HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0;
              i < domain_lo_0 + domain_dim_0;
              i++)
@@ -599,9 +595,7 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
                  j < domain_lo_1 + domain_dim_1;
                  j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0;
                      i < domain_lo_0 + domain_dim_0;
                      i++)
@@ -623,9 +617,7 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
              j < domain_lo_1 + domain_dim_1;
              j++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0;
                  i < domain_lo_0 + domain_dim_0;
                  i++)
@@ -675,9 +667,7 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
                      j < domain_lo_1 + domain_dim_1;
                      j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0;
                          i < domain_lo_0 + domain_dim_0;
                          i++)
@@ -707,9 +697,7 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
                  j < domain_lo_1 + domain_dim_1;
                  j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0;
                      i < domain_lo_0 + domain_dim_0;
                      i++)
@@ -756,9 +744,7 @@ EquationOfStateMixingRules::computeMixtureDensity(
         
         for (int si = 0; si < d_num_species; si++)
         {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
+            HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0;
                  i < domain_lo_0 + domain_dim_0;
                  i++)
@@ -796,9 +782,7 @@ EquationOfStateMixingRules::computeMixtureDensity(
                  j < domain_lo_1 + domain_dim_1;
                  j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
+                HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0;
                      i < domain_lo_0 + domain_dim_0;
                      i++)
@@ -850,9 +834,7 @@ EquationOfStateMixingRules::computeMixtureDensity(
                      j < domain_lo_1 + domain_dim_1;
                      j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
+                    HAMERS_PRAGMA_SIMD
                     for (int i = domain_lo_0;
                          i < domain_lo_0 + domain_dim_0;
                          i++)

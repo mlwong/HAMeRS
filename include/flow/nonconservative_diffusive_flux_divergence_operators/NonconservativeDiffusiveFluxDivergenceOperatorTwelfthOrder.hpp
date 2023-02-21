@@ -35,61 +35,61 @@ class NonconservativeDiffusiveFluxDivergenceOperatorTwelfthOrder: public Noncons
          * Compute the first derivatives in the x-direction.
          */
         void computeFirstDerivativesInX(
-            hier::Patch& patch,
             std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_x,
             std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_x_computed,
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
-            const std::vector<std::vector<int> >& data_component_idx_x);
+            const std::vector<std::vector<int> >& data_component_idx_x,
+            const hier::Patch& patch);
         
         /*
          * Compute the first derivatives in the y-direction.
          */
         void computeFirstDerivativesInY(
-            hier::Patch& patch,
             std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_y,
             std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_y_computed,
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
-            const std::vector<std::vector<int> >& data_component_idx_y);
+            const std::vector<std::vector<int> >& data_component_idx_y,
+            const hier::Patch& patch);
         
         /*
          * Compute the first derivatives in the z-direction.
          */
         void computeFirstDerivativesInZ(
-            hier::Patch& patch,
             std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_z,
             std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_z_computed,
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
-            const std::vector<std::vector<int> >& data_component_idx_z);
+            const std::vector<std::vector<int> >& data_component_idx_z,
+            const hier::Patch& patch);
         
         /*
          * Compute the second derivatives in the x-direction.
          */
         void computeSecondDerivativesInX(
-            hier::Patch& patch,
             std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_x,
             std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_x_computed,
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
-            const std::vector<std::vector<int> >& data_component_idx_x);
+            const std::vector<std::vector<int> >& data_component_idx_x,
+            const hier::Patch& patch);
         
         /*
          * Compute the second derivatives in the y-direction.
          */
         void computeSecondDerivativesInY(
-            hier::Patch& patch,
             std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_y,
             std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_y_computed,
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
-            const std::vector<std::vector<int> >& data_component_idx_y);
+            const std::vector<std::vector<int> >& data_component_idx_y,
+            const hier::Patch& patch);
         
         /*
          * Compute the second derivatives in the z-direction.
          */
         void computeSecondDerivativesInZ(
-            hier::Patch& patch,
             std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_z,
             std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_z_computed,
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
-            const std::vector<std::vector<int> >& data_component_idx_z);
+            const std::vector<std::vector<int> >& data_component_idx_z,
+            const hier::Patch& patch);
         
 };
 
