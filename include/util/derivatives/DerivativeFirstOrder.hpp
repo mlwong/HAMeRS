@@ -19,9 +19,9 @@ class DerivativeFirstOrder: public Derivative
          */
         void
         computeDerivative(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& derivative,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data,
-            const double dx,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& derivative,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data,
+            const Real dx,
             const int depth_derivative = 0,
             const int depth_data = 0)
         {
@@ -40,9 +40,9 @@ class DerivativeFirstOrder: public Derivative
          */
         void
         computeDerivative(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& derivative,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data,
-            const double dx,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& derivative,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data,
+            const Real dx,
             const hier::Box& domain,
             const int depth_derivative = 0,
             const int depth_data = 0);

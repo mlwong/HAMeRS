@@ -224,11 +224,11 @@ BasicCartesianBoundaryUtilities3::removeBoundaryFaceLocations(
 void
 BasicCartesianBoundaryUtilities3::fillFaceBoundaryData(
     const std::string& var_name,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& var_data,
     const hier::Patch& patch,
     const std::vector<int>& bdry_face_locs,
     const std::vector<int>& bdry_face_conds,
-    const std::vector<double>& bdry_face_values,
+    const std::vector<Real>& bdry_face_values,
     const hier::IntVector& ghost_width_to_fill)
 {
     TBOX_ASSERT(!var_name.empty());
@@ -684,11 +684,11 @@ BasicCartesianBoundaryUtilities3::removeBoundaryEdgeLocations(
 void
 BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData(
     const std::string& var_name,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& var_data,
     const hier::Patch& patch,
     const std::vector<int>& bdry_edge_locs,
     const std::vector<int>& bdry_edge_conds,
-    const std::vector<double>& bdry_face_values,
+    const std::vector<Real>& bdry_face_values,
     const hier::IntVector& ghost_width_to_fill)
 {
     TBOX_ASSERT(!var_name.empty());
@@ -1409,11 +1409,11 @@ BasicCartesianBoundaryUtilities3::removeBoundaryNodeLocations(
 void
 BasicCartesianBoundaryUtilities3::fillNodeBoundaryData(
     const std::string& var_name,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& var_data,
     const hier::Patch& patch,
     const std::vector<int>& bdry_node_locs,
     const std::vector<int>& bdry_node_conds,
-    const std::vector<double>& bdry_face_values,
+    const std::vector<Real>& bdry_face_values,
     const hier::IntVector& ghost_width_to_fill)
 {
     TBOX_ASSERT(!var_name.empty());

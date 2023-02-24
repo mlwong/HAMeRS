@@ -42,8 +42,8 @@ class GradientSensor
          */
         virtual void
         computeGradient(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& gradient,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& gradient,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& cell_data,
             hier::Patch& patch,
             const int depth = 0) = 0;
         

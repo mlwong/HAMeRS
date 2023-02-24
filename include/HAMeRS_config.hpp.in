@@ -12,6 +12,9 @@
 /* Enable HAMeRS developer assertion checking */
 #cmakedefine HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
 
+/* Define real data type*/
+typedef double Real;
+
 /* Define epsilon to prevent divisoin by zero */
 #define HAMERS_EPSILON 1.0e-15
 
@@ -21,10 +24,12 @@
 /* Enable compilation with Boost library */
 #cmakedefine HAMERS_USE_BOOST
 
+/* Define the DEBUG macro variable */
 #ifndef NDEBUG
 #define DEBUG
 #endif
 
+/* Set up vectorization pragmas */
 #if defined(HAMERS_ENABLE_SIMD)
 #if defined(DEBUG)
 #define HAMERS_PRAGMA_VEC(EXP)

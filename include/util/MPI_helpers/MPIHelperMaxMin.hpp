@@ -23,126 +23,126 @@ class MPIHelperMaxMin: public MPIHelper
         /*
          * Compute maximum value over the entire domain.
          */
-        double getMaxQuantity(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        Real getMaxQuantity(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Compute minimum value over the entire domain.
          */
-        double getMinQuantity(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        Real getMinQuantity(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Compute maximum value with only x-direction as inhomogeneous direction.
          */
-        std::vector<double> getMaxQuantityWithInhomogeneousXDirection(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        std::vector<Real> getMaxQuantityWithInhomogeneousXDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Compute minimum value with only x-direction as inhomogeneous direction.
          */
-        std::vector<double> getMinQuantityWithInhomogeneousXDirection(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        std::vector<Real> getMinQuantityWithInhomogeneousXDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Compute maximum value with only y-direction as inhomogeneous direction.
          */
-        std::vector<double> getMaxQuantityWithInhomogeneousYDirection(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        std::vector<Real> getMaxQuantityWithInhomogeneousYDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Compute minimum value with only y-direction as inhomogeneous direction.
          */
-        std::vector<double> getMinQuantityWithInhomogeneousYDirection(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        std::vector<Real> getMinQuantityWithInhomogeneousYDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Compute maximum value with only z-direction as inhomogeneous direction.
          */
-        std::vector<double> getMaxQuantityWithInhomogeneousZDirection(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        std::vector<Real> getMaxQuantityWithInhomogeneousZDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Compute minimum value with only z-direction as inhomogeneous direction.
          */
-        std::vector<double> getMinQuantityWithInhomogeneousZDirection(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        std::vector<Real> getMinQuantityWithInhomogeneousZDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Compute maximum location within quantity bounds in x-direction.
          */
-        double getMaxLocationWithinQuantityBoundsInXDirection(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        Real getMaxLocationWithinQuantityBoundsInXDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double bound_lo,
-            const double bound_hi) const;
+            const Real bound_lo,
+            const Real bound_hi) const;
         
         /*
          * Compute minimum location within quantity bounds in x-direction..
          */
-        double getMinLocationWithinQuantityBoundsInXDirection(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        Real getMinLocationWithinQuantityBoundsInXDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double bound_lo,
-            const double bound_hi) const;
+            const Real bound_lo,
+            const Real bound_hi) const;
         
         /*
          * Compute maximum location within quantity bounds in y-direction.
          */
-        double getMaxLocationWithinQuantityBoundsInYDirection(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        Real getMaxLocationWithinQuantityBoundsInYDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double bound_lo,
-            const double bound_hi) const;
+            const Real bound_lo,
+            const Real bound_hi) const;
         
         /*
          * Compute minimum location within quantity bounds in y-direction.
          */
-        double getMinLocationWithinQuantityBoundsInYDirection(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        Real getMinLocationWithinQuantityBoundsInYDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double bound_lo,
-            const double bound_hi) const;
+            const Real bound_lo,
+            const Real bound_hi) const;
         
         /*
          * Compute maximum location within quantity bounds in z-direction.
          */
-        double getMaxLocationWithinQuantityBoundsInZDirection(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        Real getMaxLocationWithinQuantityBoundsInZDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double bound_lo,
-            const double bound_hi) const;
+            const Real bound_lo,
+            const Real bound_hi) const;
         
         /*
          * Compute minimum location within quantity bounds in z-direction.
          */
-        double getMinLocationWithinQuantityBoundsInZDirection(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        Real getMinLocationWithinQuantityBoundsInZDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double bound_lo,
-            const double bound_hi) const;
+            const Real bound_lo,
+            const Real bound_hi) const;
         
     private:
         

@@ -7,11 +7,11 @@
 /*
  * Compute correlation with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
-    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >& variable_quantities,
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > >& variable_quantities,
     const std::vector<int>& component_indices,
-    const std::vector<std::vector<double> >& averaged_quantities,
+    const std::vector<std::vector<Real> >& averaged_quantities,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
     int num_quantities = static_cast<int>(variable_quantities.size());
@@ -19,7 +19,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(averaged_quantities.size()) == num_quantities);
     
-    std::vector<double> correlation;
+    std::vector<Real> correlation;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -56,24 +56,24 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        std::vector<const double*> u_qi_avg_global;
+        std::vector<const Real*> u_qi_avg_global;
         u_qi_avg_global.reserve(num_quantities);
         for (int qi = 0; qi < num_quantities; qi++)
         {
             u_qi_avg_global.push_back(averaged_quantities[qi].data());
         }
         
-        double* corr_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* corr_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         correlation.resize(finest_level_dim_0);
-        double* corr_global = correlation.data();
+        Real* corr_global = correlation.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            corr_local[i]  = double(0);
-            corr_global[i] = double(0);
+            corr_local[i]  = Real(0);
+            corr_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -122,15 +122,15 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantities[qi], data_context));
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -164,7 +164,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                     ghostcell_dim_0_u_qi.push_back(ghostcell_dims_u_qi[0]);
                 }
                 
-                const double weight = dx[1]/L_y;
+                const Real weight = Real(dx[1])/L_y;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -221,7 +221,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                                 const int idx_q0 = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
                                 
-                                double corr = u_qi[0][idx_q0] - u_qi_avg_global[0][idx_fine];
+                                Real corr = u_qi[0][idx_q0] - u_qi_avg_global[0][idx_fine];
                                 
                                 for (int qi = 1; qi < num_quantities; qi++)
                                 {
@@ -231,7 +231,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                                     corr *= (u_qi[qi][idx_qi] - u_qi_avg_global[qi][idx_fine]);
                                 }
                                 
-                                corr_local[idx_fine] += (corr*weight/((double) n_overlapped));
+                                corr_local[idx_fine] += (corr*weight/((Real) n_overlapped));
                             }
                         }
                     }
@@ -256,25 +256,25 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        std::vector<const double*> u_qi_avg_global;
+        std::vector<const Real*> u_qi_avg_global;
         u_qi_avg_global.reserve(num_quantities);
         for (int qi = 0; qi < num_quantities; qi++)
         {
             u_qi_avg_global.push_back(averaged_quantities[qi].data());
         }
         
-        double* corr_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* corr_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         correlation.resize(finest_level_dim_0);
-        double* corr_global = correlation.data();
+        Real* corr_global = correlation.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            corr_local[i]  = double(0);
-            corr_global[i] = double(0);
+            corr_local[i]  = Real(0);
+            corr_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -323,15 +323,15 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantities[qi], data_context));
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -371,7 +371,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                     ghostcell_dim_1_u_qi.push_back(ghostcell_dims_u_qi[1]);
                 }
                 
-                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                const Real weight = Real(dx[1]*dx[2])/(L_y*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -435,7 +435,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                                         (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
                                             ghostcell_dim_1_u_qi[0];
                                     
-                                    double corr = u_qi[0][idx_q0] - u_qi_avg_global[0][idx_fine];
+                                    Real corr = u_qi[0][idx_q0] - u_qi_avg_global[0][idx_fine];
                                     
                                     for (int qi = 1; qi < num_quantities; qi++)
                                     {
@@ -447,7 +447,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                                         corr *= (u_qi[qi][idx_qi] - u_qi_avg_global[qi][idx_fine]);
                                     }
                                     
-                                    corr_local[idx_fine] += (corr*weight/((double) n_overlapped));
+                                    corr_local[idx_fine] += (corr*weight/((Real) n_overlapped));
                                 }
                             }
                         }
@@ -473,12 +473,12 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
 /*
  * Compute correlation with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
-    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >& variable_quantities,
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > >& variable_quantities,
     const std::vector<int>& component_indices,
     const std::vector<bool>& use_reciprocal,
-    const std::vector<std::vector<double> >& averaged_quantities,
+    const std::vector<std::vector<Real> >& averaged_quantities,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
     int num_quantities = static_cast<int>(variable_quantities.size());
@@ -487,7 +487,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(averaged_quantities.size()) == num_quantities);
     
-    std::vector<double> correlation;
+    std::vector<Real> correlation;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -524,24 +524,24 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        std::vector<const double*> u_qi_avg_global;
+        std::vector<const Real*> u_qi_avg_global;
         u_qi_avg_global.reserve(num_quantities);
         for (int qi = 0; qi < num_quantities; qi++)
         {
             u_qi_avg_global.push_back(averaged_quantities[qi].data());
         }
         
-        double* corr_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* corr_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         correlation.resize(finest_level_dim_0);
-        double* corr_global = correlation.data();
+        Real* corr_global = correlation.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            corr_local[i]  = double(0);
-            corr_global[i] = double(0);
+            corr_local[i]  = Real(0);
+            corr_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -590,15 +590,15 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantities[qi], data_context));
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -632,7 +632,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                     ghostcell_dim_0_u_qi.push_back(ghostcell_dims_u_qi[0]);
                 }
                 
-                const double weight = dx[1]/L_y;
+                const Real weight = Real(dx[1])/L_y;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -689,10 +689,10 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                                 const int idx_q0 = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
                                 
-                                double corr = double(0);
+                                Real corr = Real(0);
                                 if (use_reciprocal[0])
                                 {
-                                    corr = double(1)/(u_qi[0][idx_q0]) - u_qi_avg_global[0][idx_fine];
+                                    corr = Real(1)/(u_qi[0][idx_q0]) - u_qi_avg_global[0][idx_fine];
                                 }
                                 else
                                 {
@@ -706,7 +706,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                                     
                                     if (use_reciprocal[qi])
                                     {
-                                        corr *= (double(1)/(u_qi[qi][idx_qi]) - u_qi_avg_global[qi][idx_fine]);
+                                        corr *= (Real(1)/(u_qi[qi][idx_qi]) - u_qi_avg_global[qi][idx_fine]);
                                     }
                                     else
                                     {
@@ -714,7 +714,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                                     }
                                 }
                                 
-                                corr_local[idx_fine] += (corr*weight/((double) n_overlapped));
+                                corr_local[idx_fine] += (corr*weight/((Real) n_overlapped));
                             }
                         }
                     }
@@ -739,25 +739,25 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        std::vector<const double*> u_qi_avg_global;
+        std::vector<const Real*> u_qi_avg_global;
         u_qi_avg_global.reserve(num_quantities);
         for (int qi = 0; qi < num_quantities; qi++)
         {
             u_qi_avg_global.push_back(averaged_quantities[qi].data());
         }
         
-        double* corr_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* corr_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         correlation.resize(finest_level_dim_0);
-        double* corr_global = correlation.data();
+        Real* corr_global = correlation.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            corr_local[i]  = double(0);
-            corr_global[i] = double(0);
+            corr_local[i]  = Real(0);
+            corr_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -806,15 +806,15 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantities[qi], data_context));
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -854,7 +854,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                     ghostcell_dim_1_u_qi.push_back(ghostcell_dims_u_qi[1]);
                 }
                 
-                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                const Real weight = Real(dx[1]*dx[2])/(L_y*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -918,10 +918,10 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                                         (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
                                             ghostcell_dim_1_u_qi[0];
                                     
-                                    double corr = double(0);
+                                    Real corr = Real(0);
                                     if (use_reciprocal[0])
                                     {
-                                        corr = double(1)/(u_qi[0][idx_q0]) - u_qi_avg_global[0][idx_fine];
+                                        corr = Real(1)/(u_qi[0][idx_q0]) - u_qi_avg_global[0][idx_fine];
                                     }
                                     else
                                     {
@@ -937,7 +937,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                                         
                                         if (use_reciprocal[qi])
                                         {
-                                            corr *= (double(1)/(u_qi[qi][idx_qi]) - u_qi_avg_global[qi][idx_fine]);
+                                            corr *= (Real(1)/(u_qi[qi][idx_qi]) - u_qi_avg_global[qi][idx_fine]);
                                         }
                                         else
                                         {
@@ -945,7 +945,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                                         }
                                     }
                                     
-                                    corr_local[idx_fine] += (corr*weight/((double) n_overlapped));
+                                    corr_local[idx_fine] += (corr*weight/((Real) n_overlapped));
                                 }
                             }
                         }
@@ -971,11 +971,11 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
 /*
  * Compute correlation with only y-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
-    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >& variable_quantities,
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > >& variable_quantities,
     const std::vector<int>& component_indices,
-    const std::vector<std::vector<double> >& averaged_quantities,
+    const std::vector<std::vector<Real> >& averaged_quantities,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
     int num_quantities = static_cast<int>(variable_quantities.size());
@@ -983,7 +983,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(averaged_quantities.size()) == num_quantities);
     
-    std::vector<double> correlation;
+    std::vector<Real> correlation;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -1021,24 +1021,24 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
         
-        std::vector<const double*> u_qi_avg_global;
+        std::vector<const Real*> u_qi_avg_global;
         u_qi_avg_global.reserve(num_quantities);
         for (int qi = 0; qi < num_quantities; qi++)
         {
             u_qi_avg_global.push_back(averaged_quantities[qi].data());
         }
         
-        double* corr_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* corr_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         correlation.resize(finest_level_dim_1);
-        double* corr_global = correlation.data();
+        Real* corr_global = correlation.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            corr_local[j]  = double(0);
-            corr_global[j] = double(0);
+            corr_local[j]  = Real(0);
+            corr_global[j] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -1087,15 +1087,15 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantities[qi], data_context));
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -1129,7 +1129,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                     ghostcell_dim_0_u_qi.push_back(ghostcell_dims_u_qi[0]);
                 }
                 
-                const double weight = dx[0]/L_x;
+                const Real weight = Real(dx[0])/L_x;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -1186,7 +1186,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                                 const int idx_q0 = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
                                 
-                                double corr = u_qi[0][idx_q0] - u_qi_avg_global[0][idx_fine];
+                                Real corr = u_qi[0][idx_q0] - u_qi_avg_global[0][idx_fine];
                                 
                                 for (int qi = 1; qi < num_quantities; qi++)
                                 {
@@ -1196,7 +1196,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                                     corr *= (u_qi[qi][idx_qi] - u_qi_avg_global[qi][idx_fine]);
                                 }
                                 
-                                corr_local[idx_fine] += (corr*weight/((double) n_overlapped));
+                                corr_local[idx_fine] += (corr*weight/((Real) n_overlapped));
                             }
                         }
                     }
@@ -1221,25 +1221,25 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        std::vector<const double*> u_qi_avg_global;
+        std::vector<const Real*> u_qi_avg_global;
         u_qi_avg_global.reserve(num_quantities);
         for (int qi = 0; qi < num_quantities; qi++)
         {
             u_qi_avg_global.push_back(averaged_quantities[qi].data());
         }
         
-        double* corr_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* corr_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         correlation.resize(finest_level_dim_1);
-        double* corr_global = correlation.data();
+        Real* corr_global = correlation.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            corr_local[j]  = double(0);
-            corr_global[j] = double(0);
+            corr_local[j]  = Real(0);
+            corr_global[j] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -1288,15 +1288,15 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantities[qi], data_context));
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -1336,7 +1336,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                     ghostcell_dim_1_u_qi.push_back(ghostcell_dims_u_qi[1]);
                 }
                 
-                const double weight = dx[0]*dx[2]/(L_x*L_z);
+                const Real weight = Real(dx[0]*dx[2])/(L_x*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -1400,7 +1400,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                                         (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
                                             ghostcell_dim_1_u_qi[0];
                                     
-                                    double corr = u_qi[0][idx_q0] - u_qi_avg_global[0][idx_fine];
+                                    Real corr = u_qi[0][idx_q0] - u_qi_avg_global[0][idx_fine];
                                     
                                     for (int qi = 1; qi < num_quantities; qi++)
                                     {
@@ -1412,7 +1412,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                                         corr *= (u_qi[qi][idx_qi] - u_qi_avg_global[qi][idx_fine]);
                                     }
                                     
-                                    corr_local[idx_fine] += (corr*weight/((double) n_overlapped));
+                                    corr_local[idx_fine] += (corr*weight/((Real) n_overlapped));
                                 }
                             }
                         }
@@ -1438,12 +1438,12 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
 /*
  * Compute correlation with only y-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
-    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >& variable_quantities,
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > >& variable_quantities,
     const std::vector<int>& component_indices,
     const std::vector<bool>& use_reciprocal,
-    const std::vector<std::vector<double> >& averaged_quantities,
+    const std::vector<std::vector<Real> >& averaged_quantities,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
     int num_quantities = static_cast<int>(variable_quantities.size());
@@ -1452,7 +1452,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(averaged_quantities.size()) == num_quantities);
     
-    std::vector<double> correlation;
+    std::vector<Real> correlation;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -1490,24 +1490,24 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
         
-        std::vector<const double*> u_qi_avg_global;
+        std::vector<const Real*> u_qi_avg_global;
         u_qi_avg_global.reserve(num_quantities);
         for (int qi = 0; qi < num_quantities; qi++)
         {
             u_qi_avg_global.push_back(averaged_quantities[qi].data());
         }
         
-        double* corr_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* corr_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         correlation.resize(finest_level_dim_1);
-        double* corr_global = correlation.data();
+        Real* corr_global = correlation.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            corr_local[j]  = double(0);
-            corr_global[j] = double(0);
+            corr_local[j]  = Real(0);
+            corr_global[j] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -1556,15 +1556,15 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantities[qi], data_context));
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -1598,7 +1598,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                     ghostcell_dim_0_u_qi.push_back(ghostcell_dims_u_qi[0]);
                 }
                 
-                const double weight = dx[0]/L_x;
+                const Real weight = Real(dx[0])/L_x;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -1655,10 +1655,10 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                                 const int idx_q0 = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
                                 
-                                double corr = double(0);
+                                Real corr = Real(0);
                                 if (use_reciprocal[0])
                                 {
-                                    corr = double(1)/(u_qi[0][idx_q0]) - u_qi_avg_global[0][idx_fine];
+                                    corr = Real(1)/(u_qi[0][idx_q0]) - u_qi_avg_global[0][idx_fine];
                                 }
                                 else
                                 {
@@ -1672,7 +1672,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                                     
                                     if (use_reciprocal[qi])
                                     {
-                                        corr *= (double(1)/(u_qi[qi][idx_qi]) - u_qi_avg_global[qi][idx_fine]);
+                                        corr *= (Real(1)/(u_qi[qi][idx_qi]) - u_qi_avg_global[qi][idx_fine]);
                                     }
                                     else
                                     {
@@ -1680,7 +1680,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                                     }
                                 }
                                 
-                                corr_local[idx_fine] += (corr*weight/((double) n_overlapped));
+                                corr_local[idx_fine] += (corr*weight/((Real) n_overlapped));
                             }
                         }
                     }
@@ -1705,25 +1705,25 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        std::vector<const double*> u_qi_avg_global;
+        std::vector<const Real*> u_qi_avg_global;
         u_qi_avg_global.reserve(num_quantities);
         for (int qi = 0; qi < num_quantities; qi++)
         {
             u_qi_avg_global.push_back(averaged_quantities[qi].data());
         }
         
-        double* corr_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* corr_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         correlation.resize(finest_level_dim_1);
-        double* corr_global = correlation.data();
+        Real* corr_global = correlation.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            corr_local[j]  = double(0);
-            corr_global[j] = double(0);
+            corr_local[j]  = Real(0);
+            corr_global[j] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -1772,15 +1772,15 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantities[qi], data_context));
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -1820,7 +1820,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                     ghostcell_dim_1_u_qi.push_back(ghostcell_dims_u_qi[1]);
                 }
                 
-                const double weight = dx[0]*dx[2]/(L_x*L_z);
+                const Real weight = Real(dx[0]*dx[2])/(L_x*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -1884,10 +1884,10 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                                         (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
                                             ghostcell_dim_1_u_qi[0];
                                     
-                                    double corr = double(0);
+                                    Real corr = Real(0);
                                     if (use_reciprocal[0])
                                     {
-                                        corr = double(1)/(u_qi[0][idx_q0]) - u_qi_avg_global[0][idx_fine];
+                                        corr = Real(1)/(u_qi[0][idx_q0]) - u_qi_avg_global[0][idx_fine];
                                     }
                                     else
                                     {
@@ -1903,7 +1903,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                                         
                                         if (use_reciprocal[qi])
                                         {
-                                            corr *= (double(1)/(u_qi[qi][idx_qi]) - u_qi_avg_global[qi][idx_fine]);
+                                            corr *= (Real(1)/(u_qi[qi][idx_qi]) - u_qi_avg_global[qi][idx_fine]);
                                         }
                                         else
                                         {
@@ -1911,7 +1911,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
                                         }
                                     }
                                     
-                                    corr_local[idx_fine] += (corr*weight/((double) n_overlapped));
+                                    corr_local[idx_fine] += (corr*weight/((Real) n_overlapped));
                                 }
                             }
                         }
@@ -1937,11 +1937,11 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection(
 /*
  * Compute correlation with only z-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection(
-    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >& variable_quantities,
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > >& variable_quantities,
     const std::vector<int>& component_indices,
-    const std::vector<std::vector<double> >& averaged_quantities,
+    const std::vector<std::vector<Real> >& averaged_quantities,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
     int num_quantities = static_cast<int>(variable_quantities.size());
@@ -1949,7 +1949,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection(
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(averaged_quantities.size()) == num_quantities);
     
-    std::vector<double> correlation;
+    std::vector<Real> correlation;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -1995,25 +1995,25 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        std::vector<const double*> u_qi_avg_global;
+        std::vector<const Real*> u_qi_avg_global;
         u_qi_avg_global.reserve(num_quantities);
         for (int qi = 0; qi < num_quantities; qi++)
         {
             u_qi_avg_global.push_back(averaged_quantities[qi].data());
         }
         
-        double* corr_local = (double*)std::malloc(finest_level_dim_2*sizeof(double));
+        Real* corr_local = (Real*)std::malloc(finest_level_dim_2*sizeof(Real));
         
         correlation.resize(finest_level_dim_2);
-        double* corr_global = correlation.data();
+        Real* corr_global = correlation.data();
         
         for (int k = 0; k < finest_level_dim_2; k++)
         {
-            corr_local[k]  = double(0);
-            corr_global[k] = double(0);
+            corr_local[k]  = Real(0);
+            corr_global[k] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -2062,15 +2062,15 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantities[qi], data_context));
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -2110,7 +2110,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection(
                     ghostcell_dim_1_u_qi.push_back(ghostcell_dims_u_qi[1]);
                 }
                 
-                const double weight = dx[0]*dx[1]/(L_x*L_y);
+                const Real weight = Real(dx[0]*dx[1])/(L_x*L_y);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -2174,7 +2174,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection(
                                         (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
                                             ghostcell_dim_1_u_qi[0];
                                     
-                                    double corr = u_qi[0][idx_q0] - u_qi_avg_global[0][idx_fine];
+                                    Real corr = u_qi[0][idx_q0] - u_qi_avg_global[0][idx_fine];
                                     
                                     for (int qi = 1; qi < num_quantities; qi++)
                                     {
@@ -2186,7 +2186,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection(
                                         corr *= (u_qi[qi][idx_qi] - u_qi_avg_global[qi][idx_fine]);
                                     }
                                     
-                                    corr_local[idx_fine] += (corr*weight/((double) n_overlapped));
+                                    corr_local[idx_fine] += (corr*weight/((Real) n_overlapped));
                                 }
                             }
                         }
@@ -2212,12 +2212,12 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection(
 /*
  * Compute correlation with only z-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection(
-    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >& variable_quantities,
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > >& variable_quantities,
     const std::vector<int>& component_indices,
     const std::vector<bool>& use_reciprocal,
-    const std::vector<std::vector<double> >& averaged_quantities,
+    const std::vector<std::vector<Real> >& averaged_quantities,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
     int num_quantities = static_cast<int>(variable_quantities.size());
@@ -2226,7 +2226,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection(
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(averaged_quantities.size()) == num_quantities);
     
-    std::vector<double> correlation;
+    std::vector<Real> correlation;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -2272,25 +2272,25 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        std::vector<const double*> u_qi_avg_global;
+        std::vector<const Real*> u_qi_avg_global;
         u_qi_avg_global.reserve(num_quantities);
         for (int qi = 0; qi < num_quantities; qi++)
         {
             u_qi_avg_global.push_back(averaged_quantities[qi].data());
         }
         
-        double* corr_local = (double*)std::malloc(finest_level_dim_2*sizeof(double));
+        Real* corr_local = (Real*)std::malloc(finest_level_dim_2*sizeof(Real));
         
         correlation.resize(finest_level_dim_2);
-        double* corr_global = correlation.data();
+        Real* corr_global = correlation.data();
         
         for (int k = 0; k < finest_level_dim_2; k++)
         {
-            corr_local[k]  = double(0);
-            corr_global[k] = double(0);
+            corr_local[k]  = Real(0);
+            corr_global[k] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -2339,15 +2339,15 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                    data_quantities[qi] = HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantities[qi], data_context));
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -2387,7 +2387,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection(
                     ghostcell_dim_1_u_qi.push_back(ghostcell_dims_u_qi[1]);
                 }
                 
-                const double weight = dx[0]*dx[1]/(L_x*L_y);
+                const Real weight = Real(dx[0]*dx[1])/(L_x*L_y);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -2451,10 +2451,10 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection(
                                         (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
                                             ghostcell_dim_1_u_qi[0];
                                     
-                                    double corr = double(0);
+                                    Real corr = Real(0);
                                     if (use_reciprocal[0])
                                     {
-                                        corr = double(1)/(u_qi[0][idx_q0]) - u_qi_avg_global[0][idx_fine];
+                                        corr = Real(1)/(u_qi[0][idx_q0]) - u_qi_avg_global[0][idx_fine];
                                     }
                                     else
                                     {
@@ -2470,7 +2470,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection(
                                         
                                         if (use_reciprocal[qi])
                                         {
-                                            corr *= (double(1)/(u_qi[qi][idx_qi]) - u_qi_avg_global[qi][idx_fine]);
+                                            corr *= (Real(1)/(u_qi[qi][idx_qi]) - u_qi_avg_global[qi][idx_fine]);
                                         }
                                         else
                                         {
@@ -2478,7 +2478,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection(
                                         }
                                     }
                                     
-                                    corr_local[idx_fine] += (corr*weight/((double) n_overlapped));
+                                    corr_local[idx_fine] += (corr*weight/((Real) n_overlapped));
                                 }
                             }
                         }

@@ -135,12 +135,12 @@ FlowModelImmersedBoundaryMethod::setImmersedBoundaryMethodVariables(
         HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
             patch.getPatchData(s_variable_mask, data_context)));
     
-    const HAMERS_SHARED_PTR<pdat::CellData<double> > data_wall_distance(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> > data_wall_distance(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(s_variable_wall_distance, data_context)));
     
-    const HAMERS_SHARED_PTR<pdat::CellData<double> > data_surface_normal(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> > data_surface_normal(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(s_variable_surface_normal, data_context)));
     
     d_immersed_boundaries->setImmersedBoundaryVariablesOnPatch(

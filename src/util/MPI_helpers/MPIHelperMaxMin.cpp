@@ -9,14 +9,14 @@
 /*
  * Compute maximum value over the entire domain.
  */
-double
+Real
 MPIHelperMaxMin::getMaxQuantity(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
-    double u_max_local  = std::numeric_limits<double>::min();
-    double u_max_global = std::numeric_limits<double>::min();
+    Real u_max_local  = std::numeric_limits<Real>::min();
+    Real u_max_global = std::numeric_limits<Real>::min();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -56,11 +56,11 @@ MPIHelperMaxMin::getMaxQuantity(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -94,7 +94,7 @@ MPIHelperMaxMin::getMaxQuantity(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        u_max_local = fmax(u_max_local, u[idx]);
+                        u_max_local = std::max(u_max_local, u[idx]);
                     }
                 }
             }
@@ -136,11 +136,11 @@ MPIHelperMaxMin::getMaxQuantity(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -182,7 +182,7 @@ MPIHelperMaxMin::getMaxQuantity(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            u_max_local = fmax(u_max_local, u[idx]);
+                            u_max_local = std::max(u_max_local, u[idx]);
                         }
                     }
                 }
@@ -225,11 +225,11 @@ MPIHelperMaxMin::getMaxQuantity(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -279,7 +279,7 @@ MPIHelperMaxMin::getMaxQuantity(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                u_max_local = fmax(u_max_local, u[idx]);
+                                u_max_local = std::max(u_max_local, u[idx]);
                             }
                         }
                     }
@@ -306,14 +306,14 @@ MPIHelperMaxMin::getMaxQuantity(
 /*
  * Compute minimum value over the entire domain.
  */
-double
+Real
 MPIHelperMaxMin::getMinQuantity(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
-    double u_min_local  = std::numeric_limits<double>::max();
-    double u_min_global = std::numeric_limits<double>::max();
+    Real u_min_local  = std::numeric_limits<Real>::max();
+    Real u_min_global = std::numeric_limits<Real>::max();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -353,11 +353,11 @@ MPIHelperMaxMin::getMinQuantity(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -391,7 +391,7 @@ MPIHelperMaxMin::getMinQuantity(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        u_min_local = fmin(u_min_local, u[idx]);
+                        u_min_local = std::min(u_min_local, u[idx]);
                     }
                 }
             }
@@ -433,11 +433,11 @@ MPIHelperMaxMin::getMinQuantity(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -479,7 +479,7 @@ MPIHelperMaxMin::getMinQuantity(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            u_min_local = fmin(u_min_local, u[idx]);
+                            u_min_local = std::min(u_min_local, u[idx]);
                         }
                     }
                 }
@@ -522,11 +522,11 @@ MPIHelperMaxMin::getMinQuantity(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -576,7 +576,7 @@ MPIHelperMaxMin::getMinQuantity(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                u_min_local = fmin(u_min_local, u[idx]);
+                                u_min_local = std::min(u_min_local, u[idx]);
                             }
                         }
                     }
@@ -603,13 +603,13 @@ MPIHelperMaxMin::getMinQuantity(
 /*
  * Compute maximum value with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
-    std::vector<double> max_quantity;
+    std::vector<Real> max_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -628,15 +628,15 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_0);
-        double* u_max_global = max_quantity.data();
+        Real* u_max_global = max_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_max_local[i]  = std::numeric_limits<double>::min();
-            u_max_global[i] = std::numeric_limits<double>::min();
+            u_max_local[i]  = std::numeric_limits<Real>::min();
+            u_max_global[i] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -678,11 +678,11 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -721,7 +721,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                             
-                            u_max_local[idx_fine] = fmax(u_max_local[idx_fine], u[idx]);
+                            u_max_local[idx_fine] = std::max(u_max_local[idx_fine], u[idx]);
                         }
                     }
                 }
@@ -745,15 +745,15 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_0);
-        double* u_max_global = max_quantity.data();
+        Real* u_max_global = max_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_max_local[i]  = std::numeric_limits<double>::min();
-            u_max_global[i] = std::numeric_limits<double>::min();
+            u_max_local[i]  = std::numeric_limits<Real>::min();
+            u_max_global[i] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -795,11 +795,11 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -847,7 +847,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                 
-                                u_max_local[idx_fine] = fmax(u_max_local[idx_fine], u[idx]);
+                                u_max_local[idx_fine] = std::max(u_max_local[idx_fine], u[idx]);
                             }
                         }
                     }
@@ -872,15 +872,15 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_0);
-        double* u_max_global = max_quantity.data();
+        Real* u_max_global = max_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_max_local[i]  = std::numeric_limits<double>::min();
-            u_max_global[i] = std::numeric_limits<double>::min();
+            u_max_local[i]  = std::numeric_limits<Real>::min();
+            u_max_global[i] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -922,11 +922,11 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -983,7 +983,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                     
-                                    u_max_local[idx_fine] = fmax(u_max_local[idx_fine], u[idx]);
+                                    u_max_local[idx_fine] = std::max(u_max_local[idx_fine], u[idx]);
                                 }
                             }
                         }
@@ -1013,13 +1013,13 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
 /*
  * Compute minimum value with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
-    std::vector<double> min_quantity;
+    std::vector<Real> min_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -1038,15 +1038,15 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_min_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_min_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_0);
-        double* u_min_global = min_quantity.data();
+        Real* u_min_global = min_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_min_local[i]  = std::numeric_limits<double>::max();
-            u_min_global[i] = std::numeric_limits<double>::max();
+            u_min_local[i]  = std::numeric_limits<Real>::max();
+            u_min_global[i] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -1088,11 +1088,11 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -1131,7 +1131,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                             
-                            u_min_local[idx_fine] = fmin(u_min_local[idx_fine], u[idx]);
+                            u_min_local[idx_fine] = std::min(u_min_local[idx_fine], u[idx]);
                         }
                     }
                 }
@@ -1155,15 +1155,15 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_min_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_min_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_0);
-        double* u_min_global = min_quantity.data();
+        Real* u_min_global = min_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_min_local[i]  = std::numeric_limits<double>::max();
-            u_min_global[i] = std::numeric_limits<double>::max();
+            u_min_local[i]  = std::numeric_limits<Real>::max();
+            u_min_global[i] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -1205,11 +1205,11 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -1257,7 +1257,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                 
-                                u_min_local[idx_fine] = fmin(u_min_local[idx_fine], u[idx]);
+                                u_min_local[idx_fine] = std::min(u_min_local[idx_fine], u[idx]);
                             }
                         }
                     }
@@ -1282,15 +1282,15 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_min_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_min_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_0);
-        double* u_min_global = min_quantity.data();
+        Real* u_min_global = min_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_min_local[i]  = std::numeric_limits<double>::max();
-            u_min_global[i] = std::numeric_limits<double>::max();
+            u_min_local[i]  = std::numeric_limits<Real>::max();
+            u_min_global[i] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -1332,11 +1332,11 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -1393,7 +1393,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                     
-                                    u_min_local[idx_fine] = fmin(u_min_local[idx_fine], u[idx]);
+                                    u_min_local[idx_fine] = std::min(u_min_local[idx_fine], u[idx]);
                                 }
                             }
                         }
@@ -1423,13 +1423,13 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
 /*
  * Compute maximum value with only y-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 MPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
-    std::vector<double> max_quantity;
+    std::vector<Real> max_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -1456,15 +1456,15 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
     {
         const int finest_level_dim_1 = d_finest_level_dims[1];
         
-        double* u_max_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* u_max_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_1);
-        double* u_max_global = max_quantity.data();
+        Real* u_max_global = max_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            u_max_local[j]  = std::numeric_limits<double>::min();
-            u_max_global[j] = std::numeric_limits<double>::min();
+            u_max_local[j]  = std::numeric_limits<Real>::min();
+            u_max_global[j] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -1506,11 +1506,11 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -1558,7 +1558,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                             {
                                 const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                 
-                                u_max_local[idx_fine] = fmax(u_max_local[idx_fine], u[idx]);
+                                u_max_local[idx_fine] = std::max(u_max_local[idx_fine], u[idx]);
                             }
                         }
                     }
@@ -1583,15 +1583,15 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
     {
         const int finest_level_dim_1 = d_finest_level_dims[1];
         
-        double* u_max_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* u_max_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_1);
-        double* u_max_global = max_quantity.data();
+        Real* u_max_global = max_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            u_max_local[j]  = std::numeric_limits<double>::min();
-            u_max_global[j] = std::numeric_limits<double>::min();
+            u_max_local[j]  = std::numeric_limits<Real>::min();
+            u_max_global[j] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -1633,11 +1633,11 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -1694,7 +1694,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                                 {
                                     const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                     
-                                    u_max_local[idx_fine] = fmax(u_max_local[idx_fine], u[idx]);
+                                    u_max_local[idx_fine] = std::max(u_max_local[idx_fine], u[idx]);
                                 }
                             }
                         }
@@ -1724,13 +1724,13 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
 /*
  * Compute minimum value with only y-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 MPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
-    std::vector<double> min_quantity;
+    std::vector<Real> min_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -1757,15 +1757,15 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
     {
         const int finest_level_dim_1 = d_finest_level_dims[1];
         
-        double* u_min_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* u_min_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_1);
-        double* u_min_global = min_quantity.data();
+        Real* u_min_global = min_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            u_min_local[j]  = std::numeric_limits<double>::max();
-            u_min_global[j] = std::numeric_limits<double>::max();
+            u_min_local[j]  = std::numeric_limits<Real>::max();
+            u_min_global[j] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -1807,11 +1807,11 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -1859,7 +1859,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                             {
                                 const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                 
-                                u_min_local[idx_fine] = fmin(u_min_local[idx_fine], u[idx]);
+                                u_min_local[idx_fine] = std::min(u_min_local[idx_fine], u[idx]);
                             }
                         }
                     }
@@ -1884,15 +1884,15 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
     {
         const int finest_level_dim_1 = d_finest_level_dims[1];
         
-        double* u_min_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* u_min_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_1);
-        double* u_min_global = min_quantity.data();
+        Real* u_min_global = min_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            u_min_local[j]  = std::numeric_limits<double>::max();
-            u_min_global[j] = std::numeric_limits<double>::max();
+            u_min_local[j]  = std::numeric_limits<Real>::max();
+            u_min_global[j] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -1934,11 +1934,11 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -1995,7 +1995,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                                 {
                                     const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                     
-                                    u_min_local[idx_fine] = fmin(u_min_local[idx_fine], u[idx]);
+                                    u_min_local[idx_fine] = std::min(u_min_local[idx_fine], u[idx]);
                                 }
                             }
                         }
@@ -2025,13 +2025,13 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
 /*
  * Compute maximum value with only z-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 MPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
-    std::vector<double> max_quantity;
+    std::vector<Real> max_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -2066,15 +2066,15 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
     {
         const int finest_level_dim_2 = d_finest_level_dims[2];
         
-        double* u_max_local = (double*)std::malloc(finest_level_dim_2*sizeof(double));
+        Real* u_max_local = (Real*)std::malloc(finest_level_dim_2*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_2);
-        double* u_max_global = max_quantity.data();
+        Real* u_max_global = max_quantity.data();
         
         for (int k = 0; k < finest_level_dim_2; k++)
         {
-            u_max_local[k]  = std::numeric_limits<double>::min();
-            u_max_global[k] = std::numeric_limits<double>::min();
+            u_max_local[k]  = std::numeric_limits<Real>::min();
+            u_max_global[k] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -2116,11 +2116,11 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -2177,7 +2177,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
                                 {
                                     const int idx_fine = (idx_lo_2 + k)*ratio_to_finest_level_2 + kk;
                                     
-                                    u_max_local[idx_fine] = fmax(u_max_local[idx_fine], u[idx]);
+                                    u_max_local[idx_fine] = std::max(u_max_local[idx_fine], u[idx]);
                                 }
                             }
                         }
@@ -2207,13 +2207,13 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
 /*
  * Compute minimum value with only z-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 MPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
-    std::vector<double> min_quantity;
+    std::vector<Real> min_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -2248,15 +2248,15 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
     {
         const int finest_level_dim_2 = d_finest_level_dims[2];
         
-        double* u_min_local = (double*)std::malloc(finest_level_dim_2*sizeof(double));
+        Real* u_min_local = (Real*)std::malloc(finest_level_dim_2*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_2);
-        double* u_min_global = min_quantity.data();
+        Real* u_min_global = min_quantity.data();
         
         for (int k = 0; k < finest_level_dim_2; k++)
         {
-            u_min_local[k]  = std::numeric_limits<double>::max();
-            u_min_global[k] = std::numeric_limits<double>::max();
+            u_min_local[k]  = std::numeric_limits<Real>::max();
+            u_min_global[k] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -2298,11 +2298,11 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -2359,7 +2359,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
                                 {
                                     const int idx_fine = (idx_lo_2 + k)*ratio_to_finest_level_2 + kk;
                                     
-                                    u_min_local[idx_fine] = fmin(u_min_local[idx_fine], u[idx]);
+                                    u_min_local[idx_fine] = std::min(u_min_local[idx_fine], u[idx]);
                                 }
                             }
                         }
@@ -2389,15 +2389,15 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
 /*
  * Compute maximum location within quantity bounds in x-direction.
  */
-double
+Real
 MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-    const double bound_lo,
-    const double bound_hi) const
+    const Real bound_lo,
+    const Real bound_hi) const
 {
-    double location_x_max_global;
+    Real location_x_max_global;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -2420,10 +2420,10 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
     
     if (d_dim == tbox::Dimension(1))
     {
-        double location_x_max_local = x_lo[0];
-        location_x_max_global       = x_lo[0];
+        Real location_x_max_local = Real(x_lo[0]);
+        location_x_max_global     = Real(x_lo[0]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -2456,11 +2456,11 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -2494,7 +2494,7 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                        const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                         
                         if (u[idx] > bound_lo && u[idx] < bound_hi)
                         {
@@ -2521,10 +2521,10 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double location_x_max_local = x_lo[0];
-        location_x_max_global       = x_lo[0];
+        Real location_x_max_local = Real(x_lo[0]);
+        location_x_max_global     = Real(x_lo[0]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -2557,11 +2557,11 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -2603,7 +2603,7 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                            const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                             
                             if (u[idx] > bound_lo && u[idx] < bound_hi)
                             {
@@ -2631,10 +2631,10 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double location_x_max_local = x_lo[0];
-        location_x_max_global       = x_lo[0];
+        Real location_x_max_local = Real(x_lo[0]);
+        location_x_max_global     = Real(x_lo[0]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -2667,11 +2667,11 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -2721,7 +2721,7 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                                const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
@@ -2756,15 +2756,15 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
 /*
  * Compute minimum location within quantity bounds in x-direction.
  */
-double
+Real
 MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-    const double bound_lo,
-    const double bound_hi) const
+    const Real bound_lo,
+    const Real bound_hi) const
 {
-    double location_x_min_global;
+    Real location_x_min_global;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -2787,10 +2787,10 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
     
     if (d_dim == tbox::Dimension(1))
     {
-        double location_x_min_local = x_hi[0];
-        location_x_min_global       = x_hi[0];
+        Real location_x_min_local = Real(x_hi[0]);
+        location_x_min_global     = Real(x_hi[0]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -2823,11 +2823,11 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -2861,7 +2861,7 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                        const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                         
                         if (u[idx] > bound_lo && u[idx] < bound_hi)
                         {
@@ -2888,10 +2888,10 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double location_x_min_local = x_hi[0];
-        location_x_min_global       = x_hi[0];
+        Real location_x_min_local = Real(x_hi[0]);
+        location_x_min_global     = Real(x_hi[0]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -2924,11 +2924,11 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -2970,7 +2970,7 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                            const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                             
                             if (u[idx] > bound_lo && u[idx] < bound_hi)
                             {
@@ -2998,10 +2998,10 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double location_x_min_local = x_hi[0];
-        location_x_min_global       = x_hi[0];
+        Real location_x_min_local = Real(x_hi[0]);
+        location_x_min_global     = Real(x_hi[0]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -3034,11 +3034,11 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -3088,7 +3088,7 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                                const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
@@ -3123,15 +3123,15 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
 /*
  * Compute maximum location within quantity bounds in y-direction.
  */
-double
+Real
 MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-    const double bound_lo,
-    const double bound_hi) const
+    const Real bound_lo,
+    const Real bound_hi) const
 {
-    double location_y_max_global;
+    Real location_y_max_global;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -3161,10 +3161,10 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double location_y_max_local = x_lo[1];
-        location_y_max_global       = x_lo[1];
+        Real location_y_max_local = Real(x_lo[1]);
+        location_y_max_global     = Real(x_lo[1]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -3197,11 +3197,11 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -3243,7 +3243,7 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
+                            const Real y = (Real(relative_idx_lo_1 + j) + half)*Real(dx[1]) + Real(x_lo_patch[1]);
                             
                             if (u[idx] > bound_lo && u[idx] < bound_hi)
                             {
@@ -3271,10 +3271,10 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double location_y_max_local = x_lo[1];
-        location_y_max_global       = x_lo[1];
+        Real location_y_max_local = Real(x_lo[1]);
+        location_y_max_global     = Real(x_lo[1]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -3307,11 +3307,11 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -3361,7 +3361,7 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
+                                const Real y = (Real(relative_idx_lo_1 + j) + half)*Real(dx[1]) + Real(x_lo_patch[1]);
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
@@ -3396,15 +3396,15 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
 /*
  * Compute minimum location within quantity bounds in y-direction.
  */
-double
+Real
 MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-    const double bound_lo,
-    const double bound_hi) const
+    const Real bound_lo,
+    const Real bound_hi) const
 {
-    double location_y_min_global;
+    Real location_y_min_global;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -3434,10 +3434,10 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double location_y_min_local = x_hi[1];
-        location_y_min_global       = x_hi[1];
+        Real location_y_min_local = Real(x_hi[1]);
+        location_y_min_global     = Real(x_hi[1]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -3470,11 +3470,11 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -3516,7 +3516,7 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
+                            const Real y = (Real(relative_idx_lo_1 + j) + half)*Real(dx[1]) + Real(x_lo_patch[1]);
                             
                             if (u[idx] > bound_lo && u[idx] < bound_hi)
                             {
@@ -3544,10 +3544,10 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double location_y_min_local = x_hi[1];
-        location_y_min_global       = x_hi[1];
+        Real location_y_min_local = Real(x_hi[1]);
+        location_y_min_global     = Real(x_hi[1]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -3580,11 +3580,11 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -3634,7 +3634,7 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
+                                const Real y = (Real(relative_idx_lo_1 + j) + half)*Real(dx[1]) + Real(x_lo_patch[1]);
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
@@ -3669,15 +3669,15 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
 /*
  * Compute maximum location within quantity bounds in z-direction.
  */
-double
+Real
 MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-    const double bound_lo,
-    const double bound_hi) const
+    const Real bound_lo,
+    const Real bound_hi) const
 {
-    double location_z_max_global;
+    Real location_z_max_global;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -3714,10 +3714,10 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double location_z_max_local = x_lo[2];
-        location_z_max_global       = x_lo[2];
+        Real location_z_max_local = Real(x_lo[2]);
+        location_z_max_global     = Real(x_lo[2]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -3750,11 +3750,11 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -3804,7 +3804,7 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double z = (relative_idx_lo_2 + k + half)*dx[2] + x_lo_patch[2];
+                                const Real z = (Real(relative_idx_lo_2 + k) + half)*Real(dx[2]) + Real(x_lo_patch[2]);
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
@@ -3839,15 +3839,15 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
 /*
  * Compute minimum location within quantity bounds in z-direction.
  */
-double
+Real
 MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-    const double bound_lo,
-    const double bound_hi) const
+    const Real bound_lo,
+    const Real bound_hi) const
 {
-    double location_z_min_global;
+    Real location_z_min_global;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -3884,10 +3884,10 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double location_z_min_local = x_hi[2];
-        location_z_min_global       = x_hi[2];
+        Real location_z_min_local = Real(x_hi[2]);
+        location_z_min_global     = Real(x_hi[2]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -3920,11 +3920,11 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -3974,7 +3974,7 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double z = (relative_idx_lo_2 + k + half)*dx[2] + x_lo_patch[2];
+                                const Real z = (Real(relative_idx_lo_2 + k) + half)*Real(dx[2]) + Real(x_lo_patch[2]);
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
