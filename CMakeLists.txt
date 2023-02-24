@@ -77,9 +77,9 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
 # Standard GNU compilers
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     if (CMAKE_BUILD_TYPE MATCHES "Release")
-        set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wno-deprecated -fopenmp")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wno-deprecated -Wconversion -fopenmp")
     elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
-        set(CMAKE_CXX_FLAGS "-std=c++11 -g -O0 -Wall -Wno-deprecated")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -g -O0 -Wall -Wno-deprecated -Wconversion")
     endif()
 
 # Clang compilers

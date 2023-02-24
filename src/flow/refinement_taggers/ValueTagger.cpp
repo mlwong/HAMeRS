@@ -105,7 +105,7 @@ ValueTagger::ValueTagger(
                 << std::endl);
         }
         
-        num_true = std::count(d_uses_global_tol_up.begin(), d_uses_global_tol_up.end(), true);
+        num_true = int(std::count(d_uses_global_tol_up.begin(), d_uses_global_tol_up.end(), true));
         
         if (num_true > 0)
         {
@@ -165,7 +165,7 @@ ValueTagger::ValueTagger(
                 << std::endl);
         }
         
-        num_true = std::count(d_uses_global_tol_lo.begin(), d_uses_global_tol_lo.end(), true);
+        num_true = int(std::count(d_uses_global_tol_lo.begin(), d_uses_global_tol_lo.end(), true));
         
         if (num_true > 0)
         {
@@ -225,7 +225,7 @@ ValueTagger::ValueTagger(
                 << std::endl);
         }
         
-        num_true = std::count(d_uses_local_tol_up.begin(), d_uses_local_tol_up.end(), true);
+        num_true = int(std::count(d_uses_local_tol_up.begin(), d_uses_local_tol_up.end(), true));
         
         if (num_true > 0)
         {
@@ -285,7 +285,7 @@ ValueTagger::ValueTagger(
                 << std::endl);
         }
         
-        num_true = std::count(d_uses_local_tol_lo.begin(), d_uses_local_tol_lo.end(), true);
+        num_true = int(std::count(d_uses_local_tol_lo.begin(), d_uses_local_tol_lo.end(), true));
         
         if (num_true > 0)
         {
@@ -654,25 +654,25 @@ ValueTagger::putToRestart(
     
     int num_true = 0;
     
-    num_true = std::count(d_uses_global_tol_up.begin(), d_uses_global_tol_up.end(), true);
+    num_true = int(std::count(d_uses_global_tol_up.begin(), d_uses_global_tol_up.end(), true));
     if (num_true > 0)
     {
         restart_db->putDoubleVector("d_global_tol_up", d_global_tol_up);
     }
     
-    num_true = std::count(d_uses_global_tol_lo.begin(), d_uses_global_tol_lo.end(), true);
+    num_true = int(std::count(d_uses_global_tol_lo.begin(), d_uses_global_tol_lo.end(), true));
     if (num_true > 0)
     {
         restart_db->putDoubleVector("d_global_tol_lo", d_global_tol_lo);
     }
     
-    num_true = std::count(d_uses_local_tol_up.begin(), d_uses_local_tol_up.end(), true);
+    num_true = int(std::count(d_uses_local_tol_up.begin(), d_uses_local_tol_up.end(), true));
     if (num_true > 0)
     {
         restart_db->putDoubleVector("d_local_tol_up", d_local_tol_up);
     }
     
-    num_true = std::count(d_uses_local_tol_lo.begin(), d_uses_local_tol_lo.end(), true);
+    num_true = int(std::count(d_uses_local_tol_lo.begin(), d_uses_local_tol_lo.end(), true));
     if (num_true > 0)
     {
         restart_db->putDoubleVector("d_local_tol_lo", d_local_tol_lo);

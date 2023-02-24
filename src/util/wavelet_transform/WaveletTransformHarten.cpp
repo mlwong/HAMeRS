@@ -57,10 +57,10 @@ WaveletTransformHarten::WaveletTransformHarten(
     
     for (int li = 0; li < num_level; li++)
     {
-        num_wavelet_ghosts += fmax(d_p, d_q)*pow(2, li);
+        num_wavelet_ghosts += std::max(d_p, d_q)*int(pow(double(2), double(li)));
     }
     
-    num_wavelet_ghosts += fmax(d_p, d_q)*pow(2, num_level);
+    num_wavelet_ghosts += std::max(d_p, d_q)*int(pow(double(2), double(num_level)));
     
     d_num_wavelet_ghosts = hier::IntVector::getOne(d_dim)*num_wavelet_ghosts;
 }
@@ -404,7 +404,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         
         for (int li = 1; li < d_num_level; li++)
         {
-            const int offset = pow(2, li);
+            const int offset = int(pow(double(2), double(li)));
             
             switch (d_k)
             {
@@ -874,7 +874,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         
         for (int li = 1; li < d_num_level; li++)
         {
-            const int offset = pow(2, li);
+            const int offset = int(pow(double(2), double(li)));
             
             switch (d_k)
             {
@@ -1128,7 +1128,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         
         for (int li = 0; li < d_num_level; li++)
         {
-            const int offset = pow(2, li + 1);
+            const int offset = int(pow(double(2), double(li + 1)));
             
             // Compute the starting and ending indices.
             const int start_index_i = -d_p*offset;
@@ -1790,7 +1790,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         
         for (int li = 1; li < d_num_level; li++)
         {
-            const int offset = pow(2, li);
+            const int offset = int(pow(double(2), double(li)));
             
             switch (d_k)
             {
@@ -2266,7 +2266,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         
         for (int li = 0; li < d_num_level; li++)
         {
-            const int offset = pow(2, li + 1);
+            const int offset = int(pow(double(2), double(li + 1)));
             
             // Compute the starting and ending indices.
             const int start_index_i = -d_p*offset;

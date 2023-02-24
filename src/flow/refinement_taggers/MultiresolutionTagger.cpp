@@ -218,9 +218,9 @@ MultiresolutionTagger::MultiresolutionTagger(
                             << std::endl);
                     }
                     
-                    num_true = std::count(d_Harten_wavelet_uses_global_tol.begin(),
+                    num_true = int(std::count(d_Harten_wavelet_uses_global_tol.begin(),
                         d_Harten_wavelet_uses_global_tol.end(),
-                        true);
+                        true));
                     
                     if (num_true > 0)
                     {
@@ -297,9 +297,9 @@ MultiresolutionTagger::MultiresolutionTagger(
                             << std::endl);
                     }
                     
-                    num_true = std::count(d_Harten_wavelet_uses_local_tol.begin(),
+                    num_true = int(std::count(d_Harten_wavelet_uses_local_tol.begin(),
                         d_Harten_wavelet_uses_local_tol.end(),
-                        true);
+                        true));
                     
                     if (num_true > 0)
                     {
@@ -376,9 +376,9 @@ MultiresolutionTagger::MultiresolutionTagger(
                             << std::endl);
                     }
                     
-                    num_true = std::count(d_Harten_wavelet_uses_alpha_tol.begin(),
+                    num_true = int(std::count(d_Harten_wavelet_uses_alpha_tol.begin(),
                         d_Harten_wavelet_uses_alpha_tol.end(),
-                        true);
+                        true));
                     
                     if (num_true > 0)
                     {
@@ -996,27 +996,27 @@ MultiresolutionTagger::putToRestart(
             
             int num_true = 0;
             
-            num_true = std::count(d_Harten_wavelet_uses_global_tol.begin(),
+            num_true = int(std::count(d_Harten_wavelet_uses_global_tol.begin(),
                 d_Harten_wavelet_uses_global_tol.end(),
-                true);
+                true));
             if (num_true > 0)
             {
                 sensor_db->putDoubleVector("d_Harten_wavelet_global_tol",
                     d_Harten_wavelet_global_tol);
             }
             
-            num_true = std::count(d_Harten_wavelet_uses_local_tol.begin(),
+            num_true = int(std::count(d_Harten_wavelet_uses_local_tol.begin(),
                 d_Harten_wavelet_uses_local_tol.end(),
-                true);
+                true));
             if (num_true > 0)
             {
                 sensor_db->putDoubleVector("d_Harten_wavelet_local_tol",
                     d_Harten_wavelet_local_tol);
             }
             
-            num_true = std::count(d_Harten_wavelet_uses_alpha_tol.begin(),
+            num_true = int(std::count(d_Harten_wavelet_uses_alpha_tol.begin(),
                 d_Harten_wavelet_uses_alpha_tol.end(),
-                true);
+                true));
             if (num_true > 0)
             {
                 sensor_db->putDoubleVector("d_Harten_wavelet_alpha_tol",
@@ -1663,7 +1663,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                     
                     // Find the maximum wavelet coefficient over the domain of dependence.
                     r[li][idx] = 0.0;
-                    for (int ii = -p*pow(2, li+1); ii <= q*pow(2, li+1); ii++)
+                    for (int ii = -p*int(pow(double(2), double(li+1))); ii <= q*int(pow(double(2), double(li+1))); ii++)
                     {
                         // Compute the index.
                         const int idx_s = i + ii + num_ghosts_0_wavelet_coeffs;
@@ -1692,7 +1692,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                         
                         // Find the maximum wavelet coefficient over the domain of dependence.
                         r[li][idx] = 0.0;
-                        for (int ii = -p*pow(2, li+1); ii <= q*pow(2, li+1); ii++)
+                        for (int ii = -p*int(pow(double(2), double(li+1))); ii <= q*int(pow(double(2), double(li+1))); ii++)
                         {
                             // Compute the index.
                             const int idx_s = (i + ii + num_ghosts_0_wavelet_coeffs) +
@@ -1700,7 +1700,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                             
                             r[li][idx] = fmax(r[li][idx], w[li][idx_s]);
                         }
-                        for (int jj = -p*pow(2, li+1); jj <= q*pow(2, li+1); jj++)
+                        for (int jj = -p*int(pow(double(2), double(li+1))); jj <= q*int(pow(double(2), double(li+1))); jj++)
                         {
                             // Compute the index.
                             const int idx_s = (i + num_ghosts_0_wavelet_coeffs) +
@@ -1738,7 +1738,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                             
                             // Find the maximum wavelet coefficient over the domain of dependence.
                             r[li][idx] = 0.0;
-                            for (int ii = -p*pow(2, li+1); ii <= q*pow(2, li+1); ii++)
+                            for (int ii = -p*int(pow(double(2), double(li+1))); ii <= q*int(pow(double(2), double(li+1))); ii++)
                             {
                                 // Compute the index.
                                 const int idx_s = (i + ii + num_ghosts_0_wavelet_coeffs) +
@@ -1748,7 +1748,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                                 
                                 r[li][idx] = fmax(r[li][idx], w[li][idx_s]);
                             }
-                            for (int jj = -p*pow(2, li+1); jj <= q*pow(2, li+1); jj++)
+                            for (int jj = -p*int(pow(double(2), double(li+1))); jj <= q*int(pow(double(2), double(li+1))); jj++)
                             {
                                 // Compute the index.
                                 const int idx_s = (i + num_ghosts_0_wavelet_coeffs) +
@@ -1758,7 +1758,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                                 
                                 r[li][idx] = fmax(r[li][idx], w[li][idx_s]);
                             }
-                            for (int kk = -p*pow(2, li+1); kk <=q*pow(2, li+1); kk++)
+                            for (int kk = -p*int(pow(double(2), double(li+1))); kk <=q*int(pow(double(2), double(li+1))); kk++)
                             {
                                 // Compute the index.
                                 const int idx_s = (i + num_ghosts_0_wavelet_coeffs) +

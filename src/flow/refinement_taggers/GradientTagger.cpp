@@ -221,9 +221,9 @@ GradientTagger::GradientTagger(
                             << std::endl);
                     }
                     
-                    num_true = std::count(d_difference_first_order_uses_global_tol.begin(),
+                    num_true = int(std::count(d_difference_first_order_uses_global_tol.begin(),
                         d_difference_first_order_uses_global_tol.end(),
-                        true);
+                        true));
                     
                     if (num_true > 0)
                     {
@@ -299,9 +299,9 @@ GradientTagger::GradientTagger(
                             << std::endl);
                     }
                     
-                    num_true = std::count(d_difference_first_order_uses_local_tol.begin(),
+                    num_true = int(std::count(d_difference_first_order_uses_local_tol.begin(),
                         d_difference_first_order_uses_local_tol.end(),
-                        true);
+                        true));
                     
                     if (num_true > 0)
                     {
@@ -425,9 +425,9 @@ GradientTagger::GradientTagger(
                             << std::endl);
                     }
                     
-                    num_true = std::count(d_difference_second_order_uses_global_tol.begin(),
+                    num_true = int(std::count(d_difference_second_order_uses_global_tol.begin(),
                         d_difference_second_order_uses_global_tol.end(),
-                        true);
+                        true));
                     
                     if (num_true > 0)
                     {
@@ -503,9 +503,9 @@ GradientTagger::GradientTagger(
                             << std::endl);
                     }
                     
-                    num_true = std::count(d_difference_second_order_uses_local_tol.begin(),
+                    num_true = int(std::count(d_difference_second_order_uses_local_tol.begin(),
                         d_difference_second_order_uses_local_tol.end(),
-                        true);
+                        true));
                     
                     if (num_true > 0)
                     {
@@ -1537,18 +1537,18 @@ GradientTagger::putToRestart(
             
             int num_true = 0;
             
-            num_true = std::count(d_difference_first_order_uses_global_tol.begin(),
+            num_true = int(std::count(d_difference_first_order_uses_global_tol.begin(),
                 d_difference_first_order_uses_global_tol.end(),
-                true);
+                true));
             if (num_true > 0)
             {
                 sensor_db->putDoubleVector("d_difference_first_order_global_tol",
                     d_difference_first_order_global_tol);
             }
             
-            num_true = std::count(d_difference_first_order_uses_local_tol.begin(),
+            num_true = int(std::count(d_difference_first_order_uses_local_tol.begin(),
                 d_difference_first_order_uses_local_tol.end(),
-                true);
+                true));
             if (num_true > 0)
             {
                 sensor_db->putDoubleVector("d_difference_first_order_local_tol",
@@ -1572,18 +1572,18 @@ GradientTagger::putToRestart(
             
             int num_true = 0;
             
-            num_true = std::count(d_difference_second_order_uses_global_tol.begin(),
+            num_true = int(std::count(d_difference_second_order_uses_global_tol.begin(),
                 d_difference_second_order_uses_global_tol.end(),
-                true);
+                true));
             if (num_true > 0)
             {
                 sensor_db->putDoubleVector("d_difference_second_order_global_tol",
                     d_difference_second_order_global_tol);
             }
             
-            num_true = std::count(d_difference_second_order_uses_local_tol.begin(),
+            num_true = int(std::count(d_difference_second_order_uses_local_tol.begin(),
                 d_difference_second_order_uses_local_tol.end(),
-                true);
+                true));
             if (num_true > 0)
             {
                 sensor_db->putDoubleVector("d_difference_second_order_local_tol",
