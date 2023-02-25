@@ -39,8 +39,8 @@ class ConvectiveFluxReconstructorWCNS56: public ConvectiveFluxReconstructor
         void
         computeConvectiveFluxAndSourceOnPatch(
             hier::Patch& patch,
-            const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_convective_flux,
-            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+            const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double time,
             const double dt,
@@ -52,9 +52,9 @@ class ConvectiveFluxReconstructorWCNS56: public ConvectiveFluxReconstructor
          */
         virtual void
         performWENOInterpolation(
-            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& variables_minus,
-            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& variables_plus,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& variables) = 0;
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& variables_minus,
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& variables_plus,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& variables) = 0;
         
         /*
          * Forms of equations.

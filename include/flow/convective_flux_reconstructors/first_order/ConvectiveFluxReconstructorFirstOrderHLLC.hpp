@@ -36,8 +36,8 @@ class ConvectiveFluxReconstructorFirstOrderHLLC: public ConvectiveFluxReconstruc
          */
         void computeConvectiveFluxAndSourceOnPatch(
             hier::Patch& patch,
-            const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_convective_flux,
-            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+            const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double time,
             const double dt,

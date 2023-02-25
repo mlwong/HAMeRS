@@ -115,8 +115,8 @@ ConvectiveFluxReconstructorDRP4::putToRestart(
 void
 ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
     hier::Patch& patch,
-    const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_convective_flux,
-    const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+    const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
+    const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double time,
     const double dt,
@@ -125,26 +125,26 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
     NULL_USE(time);
     NULL_USE(RK_step_number);
     
-    double a_n = double(0);
-    double b_n = double(0);
-    double c_n = double(0);
-    double d_n = double(0);
-    double e_n = double(0);
-    double f_n = double(0);
+    Real a_n = Real(0);
+    Real b_n = Real(0);
+    Real c_n = Real(0);
+    Real d_n = Real(0);
+    Real e_n = Real(0);
+    Real f_n = Real(0);
     
-    double a_m = double(0);
-    double b_m = double(0);
-    double c_m = double(0);
-    double d_m = double(0);
-    double e_m = double(0);
-    double f_m = double(0);
+    Real a_m = Real(0);
+    Real b_m = Real(0);
+    Real c_m = Real(0);
+    Real d_m = Real(0);
+    Real e_m = Real(0);
+    Real f_m = Real(0);
     
     if (d_stencil_width == 9)
     {
-        a_n = double( 0.841570125482);
-        b_n = double(-0.244678631765);
-        c_n = double( 0.059463584768);
-        d_n = double(-0.007650904064);
+        a_n = Real( 0.841570125482);
+        b_n = Real(-0.244678631765);
+        c_n = Real( 0.059463584768);
+        d_n = Real(-0.007650904064);
         
         a_m = a_n + b_n + c_n + d_n;
         b_m = b_n + c_n + d_n;
@@ -153,11 +153,11 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
     }
     else if (d_stencil_width == 11)
     {
-        a_n = double( 0.872756993962);
-        b_n = double(-0.286511173973);
-        c_n = double( 0.090320001280);
-        d_n = double(-0.020779405824);
-        e_n = double( 0.002484594688);
+        a_n = Real( 0.872756993962);
+        b_n = Real(-0.286511173973);
+        c_n = Real( 0.090320001280);
+        d_n = Real(-0.020779405824);
+        e_n = Real( 0.002484594688);
         
         a_m = a_n + b_n + c_n + d_n + e_n;
         b_m = b_n + c_n + d_n + e_n;
@@ -167,12 +167,12 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
     }
     else if (d_stencil_width == 13)
     {
-        a_n = double( 0.907646591371);
-        b_n = double(-0.337048393268);
-        c_n = double( 0.133442885327);
-        d_n = double(-0.045246480208);
-        e_n = double( 0.011169294114);
-        f_n = double(-0.001456501759);
+        a_n = Real( 0.907646591371);
+        b_n = Real(-0.337048393268);
+        c_n = Real( 0.133442885327);
+        d_n = Real(-0.045246480208);
+        e_n = Real( 0.011169294114);
+        f_n = Real(-0.001456501759);
         
         a_m = a_n + b_n + c_n + d_n + e_n + f_n;
         b_m = b_n + c_n + d_n + e_n + f_n;
@@ -205,13 +205,13 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
     const double* const dx = patch_geom->getDx();
     
     // Get the side data of convective flux.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux(
-        HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux(
+        HAMERS_SHARED_PTR_CAST<pdat::SideData<Real>, hier::PatchData>(
             patch.getPatchData(variable_convective_flux, data_context)));
     
     // Get the cell data of source.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > source(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > source(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(variable_source, data_context)));
     
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -256,13 +256,13 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > convective_flux_node(2);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > convective_flux_node(2);
         convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
         
         hier::IntVector num_subghosts_convective_flux_x = convective_flux_node[0]->getGhostCellWidth();
         const int num_subghosts_0_convective_flux_x = num_subghosts_convective_flux_x[0];
         
-        std::vector<double*> F_node_x;
+        std::vector<Real*> F_node_x;
         F_node_x.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -279,7 +279,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_x = convective_flux->getPointer(0, ei);
+                Real* F_face_x = convective_flux->getPointer(0, ei);
                 
                 HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
@@ -296,7 +296,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                     const int idx_node_RRR  = i + 2 + num_subghosts_0_convective_flux_x;
                     const int idx_node_RRRR = i + 3 + num_subghosts_0_convective_flux_x;
                     
-                    F_face_x[idx_face_x] = dt*(
+                    F_face_x[idx_face_x] = Real(dt)*(
                         a_m*(F_node_x[ei][idx_node_L]    + F_node_x[ei][idx_node_R]) +
                         b_m*(F_node_x[ei][idx_node_LL]   + F_node_x[ei][idx_node_RR]) +
                         c_m*(F_node_x[ei][idx_node_LLL]  + F_node_x[ei][idx_node_RRR]) +
@@ -309,7 +309,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_x = convective_flux->getPointer(0, ei);
+                Real* F_face_x = convective_flux->getPointer(0, ei);
                 
                 HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
@@ -328,7 +328,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                     const int idx_node_RRRR  = i + 3 + num_subghosts_0_convective_flux_x;
                     const int idx_node_RRRRR = i + 4 + num_subghosts_0_convective_flux_x;
                     
-                    F_face_x[idx_face_x] = dt*(
+                    F_face_x[idx_face_x] = Real(dt)*(
                         a_m*(F_node_x[ei][idx_node_L]     + F_node_x[ei][idx_node_R]) +
                         b_m*(F_node_x[ei][idx_node_LL]    + F_node_x[ei][idx_node_RR]) +
                         c_m*(F_node_x[ei][idx_node_LLL]   + F_node_x[ei][idx_node_RRR]) +
@@ -342,7 +342,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_x = convective_flux->getPointer(0, ei);
+                Real* F_face_x = convective_flux->getPointer(0, ei);
                 
                 HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0 + 1; i++)
@@ -363,7 +363,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                     const int idx_node_RRRRR  = i + 4 + num_subghosts_0_convective_flux_x;
                     const int idx_node_RRRRRR = i + 5 + num_subghosts_0_convective_flux_x;
                     
-                    F_face_x[idx_face_x] = dt*(
+                    F_face_x[idx_face_x] = Real(dt)*(
                         a_m*(F_node_x[ei][idx_node_L]      + F_node_x[ei][idx_node_R]) +
                         b_m*(F_node_x[ei][idx_node_LL]     + F_node_x[ei][idx_node_RR]) +
                         c_m*(F_node_x[ei][idx_node_LLL]    + F_node_x[ei][idx_node_RRR]) +
@@ -385,20 +385,20 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity = d_flow_model->getCellData("VELOCITY");
             
             hier::IntVector num_subghosts_velocity = velocity->getGhostCellWidth();
             const int num_subghosts_0_velocity = num_subghosts_velocity[0];
             
-            double* u = velocity->getPointer(0);
+            Real* u = velocity->getPointer(0);
             
             std::vector<hier::IntVector> num_subghosts_conservative_var;
             num_subghosts_conservative_var.reserve(d_num_eqn);
             
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_variables =
                 d_flow_model->getCellDataOfConservativeVariables();
             
-            std::vector<double*> Q;
+            std::vector<Real*> Q;
             Q.reserve(d_num_eqn);
             
             int count_eqn = 0;
@@ -425,7 +425,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
             {
                 if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
                 {
-                    double* S = source->getPointer(ei);
+                    Real* S = source->getPointer(ei);
                     
                     const int num_subghosts_0_conservative_var = num_subghosts_conservative_var[ei][0];
                     
@@ -448,13 +448,13 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                             
                             const int idx_cell_nghost = i;
                             
-                            S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                            S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
                                 (
                                 a_n*(u[idx_cell_wghost_x_R]    - u[idx_cell_wghost_x_L]) +
                                 b_n*(u[idx_cell_wghost_x_RR]   - u[idx_cell_wghost_x_LL]) +
                                 c_n*(u[idx_cell_wghost_x_RRR]  - u[idx_cell_wghost_x_LLL]) +
                                 d_n*(u[idx_cell_wghost_x_RRRR] - u[idx_cell_wghost_x_LLLL])
-                                )/dx[0]);
+                                )/Real(dx[0]));
                         }
                     }
                     else if (d_stencil_width == 11)
@@ -478,14 +478,14 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                             
                             const int idx_cell_nghost = i;
                             
-                            S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                            S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
                                 (
                                 a_n*(u[idx_cell_wghost_x_R]     - u[idx_cell_wghost_x_L]) +
                                 b_n*(u[idx_cell_wghost_x_RR]    - u[idx_cell_wghost_x_LL]) +
                                 c_n*(u[idx_cell_wghost_x_RRR]   - u[idx_cell_wghost_x_LLL]) +
                                 d_n*(u[idx_cell_wghost_x_RRRR]  - u[idx_cell_wghost_x_LLLL]) +
                                 e_n*(u[idx_cell_wghost_x_RRRRR] - u[idx_cell_wghost_x_LLLLL])
-                                )/dx[0]);
+                                )/Real(dx[0]));
                         }
                     }
                     else if (d_stencil_width == 13)
@@ -511,7 +511,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                             
                             const int idx_cell_nghost = i;
                             
-                            S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                            S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
                                 (
                                 a_n*(u[idx_cell_wghost_x_R]      - u[idx_cell_wghost_x_L]) +
                                 b_n*(u[idx_cell_wghost_x_RR]     - u[idx_cell_wghost_x_LL]) +
@@ -519,7 +519,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                 d_n*(u[idx_cell_wghost_x_RRRR]   - u[idx_cell_wghost_x_LLLL]) +
                                 e_n*(u[idx_cell_wghost_x_RRRRR]  - u[idx_cell_wghost_x_LLLLL]) +
                                 f_n*(u[idx_cell_wghost_x_RRRRRR] - u[idx_cell_wghost_x_LLLLLL])
-                                )/dx[0]);
+                                )/Real(dx[0]));
                         }
                     }
                 }
@@ -571,7 +571,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > convective_flux_node(2);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > convective_flux_node(2);
         convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
         convective_flux_node[1] = d_flow_model->getCellData("CONVECTIVE_FLUX_Y");
         
@@ -589,8 +589,8 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         const int num_subghosts_1_convective_flux_y = num_subghosts_convective_flux_y[1];
         const int subghostcell_dim_0_convective_flux_y = subghostcell_dims_convective_flux_y[0];
         
-        std::vector<double*> F_node_x;
-        std::vector<double*> F_node_y;
+        std::vector<Real*> F_node_x;
+        std::vector<Real*> F_node_y;
         F_node_x.reserve(d_num_eqn);
         F_node_y.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
@@ -609,7 +609,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_x = convective_flux->getPointer(0, ei);
+                Real* F_face_x = convective_flux->getPointer(0, ei);
                 
                 for (int j = 0; j < interior_dim_1; j++)
                 {
@@ -644,7 +644,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                         const int idx_node_RRRR = (i + 3 + num_subghosts_0_convective_flux_x) +
                             (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
                         
-                        F_face_x[idx_face_x] = dt*(
+                        F_face_x[idx_face_x] = Real(dt)*(
                             a_m*(F_node_x[ei][idx_node_L]    + F_node_x[ei][idx_node_R]) +
                             b_m*(F_node_x[ei][idx_node_LL]   + F_node_x[ei][idx_node_RR]) +
                             c_m*(F_node_x[ei][idx_node_LLL]  + F_node_x[ei][idx_node_RRR]) +
@@ -658,7 +658,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_x = convective_flux->getPointer(0, ei);
+                Real* F_face_x = convective_flux->getPointer(0, ei);
                 
                 for (int j = 0; j < interior_dim_1; j++)
                 {
@@ -699,7 +699,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                         const int idx_node_RRRRR = (i + 4 + num_subghosts_0_convective_flux_x) +
                             (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
                         
-                        F_face_x[idx_face_x] = dt*(
+                        F_face_x[idx_face_x] = Real(dt)*(
                             a_m*(F_node_x[ei][idx_node_L]     + F_node_x[ei][idx_node_R]) +
                             b_m*(F_node_x[ei][idx_node_LL]    + F_node_x[ei][idx_node_RR]) +
                             c_m*(F_node_x[ei][idx_node_LLL]   + F_node_x[ei][idx_node_RRR]) +
@@ -714,7 +714,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_x = convective_flux->getPointer(0, ei);
+                Real* F_face_x = convective_flux->getPointer(0, ei);
                 
                 for (int j = 0; j < interior_dim_1; j++)
                 {
@@ -761,7 +761,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                         const int idx_node_RRRRRR = (i + 5 + num_subghosts_0_convective_flux_x) +
                             (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
                         
-                        F_face_x[idx_face_x] = dt*(
+                        F_face_x[idx_face_x] = Real(dt)*(
                             a_m*(F_node_x[ei][idx_node_L]      + F_node_x[ei][idx_node_R]) +
                             b_m*(F_node_x[ei][idx_node_LL]     + F_node_x[ei][idx_node_RR]) +
                             c_m*(F_node_x[ei][idx_node_LLL]    + F_node_x[ei][idx_node_RRR]) +
@@ -782,7 +782,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_y = convective_flux->getPointer(1, ei);
+                Real* F_face_y = convective_flux->getPointer(1, ei);
                 
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
@@ -817,7 +817,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                         const int idx_node_TTTT = (i + num_subghosts_0_convective_flux_y) +
                             (j + 3 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
                         
-                        F_face_y[idx_face_y] = dt*(
+                        F_face_y[idx_face_y] = Real(dt)*(
                             a_m*(F_node_y[ei][idx_node_B]    + F_node_y[ei][idx_node_T]) +
                             b_m*(F_node_y[ei][idx_node_BB]   + F_node_y[ei][idx_node_TT]) +
                             c_m*(F_node_y[ei][idx_node_BBB]  + F_node_y[ei][idx_node_TTT]) +
@@ -831,7 +831,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_y = convective_flux->getPointer(1, ei);
+                Real* F_face_y = convective_flux->getPointer(1, ei);
                 
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
@@ -872,7 +872,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                         const int idx_node_TTTTT = (i + num_subghosts_0_convective_flux_y) +
                             (j + 4 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
                         
-                        F_face_y[idx_face_y] = dt*(
+                        F_face_y[idx_face_y] = Real(dt)*(
                             a_m*(F_node_y[ei][idx_node_B]     + F_node_y[ei][idx_node_T]) +
                             b_m*(F_node_y[ei][idx_node_BB]    + F_node_y[ei][idx_node_TT]) +
                             c_m*(F_node_y[ei][idx_node_BBB]   + F_node_y[ei][idx_node_TTT]) +
@@ -887,7 +887,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_y = convective_flux->getPointer(1, ei);
+                Real* F_face_y = convective_flux->getPointer(1, ei);
                 
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
@@ -934,7 +934,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                         const int idx_node_TTTTTT = (i + num_subghosts_0_convective_flux_y) +
                             (j + 5 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
                         
-                        F_face_y[idx_face_y] = dt*(
+                        F_face_y[idx_face_y] = Real(dt)*(
                             a_m*(F_node_y[ei][idx_node_B]      + F_node_y[ei][idx_node_T]) +
                             b_m*(F_node_y[ei][idx_node_BB]     + F_node_y[ei][idx_node_TT]) +
                             c_m*(F_node_y[ei][idx_node_BBB]    + F_node_y[ei][idx_node_TTT]) +
@@ -957,7 +957,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity = d_flow_model->getCellData("VELOCITY");
             
             hier::IntVector num_subghosts_velocity = velocity->getGhostCellWidth();
             hier::IntVector subghostcell_dims_velocity = velocity->getGhostBox().numberCells();
@@ -966,8 +966,8 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
             const int num_subghosts_1_velocity = num_subghosts_velocity[1];
             const int subghostcell_dim_0_velocity = subghostcell_dims_velocity[0];
             
-            double* u = velocity->getPointer(0);
-            double* v = velocity->getPointer(1);
+            Real* u = velocity->getPointer(0);
+            Real* v = velocity->getPointer(1);
             
             std::vector<hier::IntVector> num_subghosts_conservative_var;
             num_subghosts_conservative_var.reserve(d_num_eqn);
@@ -975,10 +975,10 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
             std::vector<hier::IntVector> subghostcell_dims_conservative_var;
             subghostcell_dims_conservative_var.reserve(d_num_eqn);
             
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_variables =
                 d_flow_model->getCellDataOfConservativeVariables();
             
-            std::vector<double*> Q;
+            std::vector<Real*> Q;
             Q.reserve(d_num_eqn);
             
             int count_eqn = 0;
@@ -1007,7 +1007,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
             {
                 if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
                 {
-                    double* S = source->getPointer(ei);
+                    Real* S = source->getPointer(ei);
                     
                     const int num_subghosts_0_conservative_var = num_subghosts_conservative_var[ei][0];
                     const int num_subghosts_1_conservative_var = num_subghosts_conservative_var[ei][1];
@@ -1074,19 +1074,19 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                 
                                 const int idx_cell_nghost = i + j*interior_dim_0;
                                 
-                                S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                                S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
                                     (
                                     a_n*(u[idx_cell_wghost_x_R]    - u[idx_cell_wghost_x_L]) +
                                     b_n*(u[idx_cell_wghost_x_RR]   - u[idx_cell_wghost_x_LL]) +
                                     c_n*(u[idx_cell_wghost_x_RRR]  - u[idx_cell_wghost_x_LLL]) +
                                     d_n*(u[idx_cell_wghost_x_RRRR] - u[idx_cell_wghost_x_LLLL])
-                                    )/dx[0] +
+                                    )/Real(dx[0]) +
                                     (
                                     a_n*(v[idx_cell_wghost_y_T]    - v[idx_cell_wghost_y_B]) +
                                     b_n*(v[idx_cell_wghost_y_TT]   - v[idx_cell_wghost_y_BB]) +
                                     c_n*(v[idx_cell_wghost_y_TTT]  - v[idx_cell_wghost_y_BBB]) +
                                     d_n*(v[idx_cell_wghost_y_TTTT] - v[idx_cell_wghost_y_BBBB])
-                                    )/dx[1]
+                                    )/Real(dx[1])
                                     );
                             }
                         }
@@ -1164,21 +1164,21 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                 
                                 const int idx_cell_nghost = i + j*interior_dim_0;
                                 
-                                S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                                S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
                                     (
                                     a_n*(u[idx_cell_wghost_x_R]     - u[idx_cell_wghost_x_L]) +
                                     b_n*(u[idx_cell_wghost_x_RR]    - u[idx_cell_wghost_x_LL]) +
                                     c_n*(u[idx_cell_wghost_x_RRR]   - u[idx_cell_wghost_x_LLL]) +
                                     d_n*(u[idx_cell_wghost_x_RRRR]  - u[idx_cell_wghost_x_LLLL]) +
                                     e_n*(u[idx_cell_wghost_x_RRRRR] - u[idx_cell_wghost_x_LLLLL])
-                                    )/dx[0] +
+                                    )/Real(dx[0]) +
                                     (
                                     a_n*(v[idx_cell_wghost_y_T]     - v[idx_cell_wghost_y_B]) +
                                     b_n*(v[idx_cell_wghost_y_TT]    - v[idx_cell_wghost_y_BB]) +
                                     c_n*(v[idx_cell_wghost_y_TTT]   - v[idx_cell_wghost_y_BBB]) +
                                     d_n*(v[idx_cell_wghost_y_TTTT]  - v[idx_cell_wghost_y_BBBB]) +
                                     e_n*(v[idx_cell_wghost_y_TTTTT] - v[idx_cell_wghost_y_BBBBB])
-                                    )/dx[1]
+                                    )/Real(dx[1])
                                     );
                             }
                         }
@@ -1268,7 +1268,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                 
                                 const int idx_cell_nghost = i + j*interior_dim_0;
                                 
-                                S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                                S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
                                     (
                                     a_n*(u[idx_cell_wghost_x_R]      - u[idx_cell_wghost_x_L]) +
                                     b_n*(u[idx_cell_wghost_x_RR]     - u[idx_cell_wghost_x_LL]) +
@@ -1276,7 +1276,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                     d_n*(u[idx_cell_wghost_x_RRRR]   - u[idx_cell_wghost_x_LLLL]) +
                                     e_n*(u[idx_cell_wghost_x_RRRRR]  - u[idx_cell_wghost_x_LLLLL]) +
                                     f_n*(u[idx_cell_wghost_x_RRRRRR] - u[idx_cell_wghost_x_LLLLLL])
-                                    )/dx[0] +
+                                    )/Real(dx[0]) +
                                     (
                                     a_n*(v[idx_cell_wghost_y_T]      - v[idx_cell_wghost_y_B]) +
                                     b_n*(v[idx_cell_wghost_y_TT]     - v[idx_cell_wghost_y_BB]) +
@@ -1284,7 +1284,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                     d_n*(v[idx_cell_wghost_y_TTTT]   - v[idx_cell_wghost_y_BBBB]) +
                                     e_n*(v[idx_cell_wghost_y_TTTTT]  - v[idx_cell_wghost_y_BBBBB]) +
                                     f_n*(v[idx_cell_wghost_y_TTTTTT] - v[idx_cell_wghost_y_BBBBBB])
-                                    )/dx[1]
+                                    )/Real(dx[1])
                                     );
                             }
                         }
@@ -1340,7 +1340,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > convective_flux_node(3);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > convective_flux_node(3);
         convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
         convective_flux_node[1] = d_flow_model->getCellData("CONVECTIVE_FLUX_Y");
         convective_flux_node[2] = d_flow_model->getCellData("CONVECTIVE_FLUX_Z");
@@ -1372,9 +1372,9 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         const int subghostcell_dim_0_convective_flux_z = subghostcell_dims_convective_flux_z[0];
         const int subghostcell_dim_1_convective_flux_z = subghostcell_dims_convective_flux_z[1];
         
-        std::vector<double*> F_node_x;
-        std::vector<double*> F_node_y;
-        std::vector<double*> F_node_z;
+        std::vector<Real*> F_node_x;
+        std::vector<Real*> F_node_y;
+        std::vector<Real*> F_node_z;
         F_node_x.reserve(d_num_eqn);
         F_node_y.reserve(d_num_eqn);
         F_node_z.reserve(d_num_eqn);
@@ -1395,7 +1395,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_x = convective_flux->getPointer(0, ei);
+                Real* F_face_x = convective_flux->getPointer(0, ei);
                 
                 for (int k = 0; k < interior_dim_2; k++)
                 {
@@ -1449,7 +1449,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                 (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
                                     subghostcell_dim_1_convective_flux_x;
                             
-                            F_face_x[idx_face_x] = dt*(
+                            F_face_x[idx_face_x] = Real(dt)*(
                                 a_m*(F_node_x[ei][idx_node_L]    + F_node_x[ei][idx_node_R]) +
                                 b_m*(F_node_x[ei][idx_node_LL]   + F_node_x[ei][idx_node_RR]) +
                                 c_m*(F_node_x[ei][idx_node_LLL]  + F_node_x[ei][idx_node_RRR]) +
@@ -1464,7 +1464,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_x = convective_flux->getPointer(0, ei);
+                Real* F_face_x = convective_flux->getPointer(0, ei);
                 
                 for (int k = 0; k < interior_dim_2; k++)
                 {
@@ -1528,7 +1528,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                 (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
                                     subghostcell_dim_1_convective_flux_x;
                             
-                            F_face_x[idx_face_x] = dt*(
+                            F_face_x[idx_face_x] = Real(dt)*(
                                 a_m*(F_node_x[ei][idx_node_L]     + F_node_x[ei][idx_node_R]) +
                                 b_m*(F_node_x[ei][idx_node_LL]    + F_node_x[ei][idx_node_RR]) +
                                 c_m*(F_node_x[ei][idx_node_LLL]   + F_node_x[ei][idx_node_RRR]) +
@@ -1544,7 +1544,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_x = convective_flux->getPointer(0, ei);
+                Real* F_face_x = convective_flux->getPointer(0, ei);
                 
                 for (int k = 0; k < interior_dim_2; k++)
                 {
@@ -1618,7 +1618,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                 (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
                                     subghostcell_dim_1_convective_flux_x;
                             
-                            F_face_x[idx_face_x] = dt*(
+                            F_face_x[idx_face_x] = Real(dt)*(
                                 a_m*(F_node_x[ei][idx_node_L]      + F_node_x[ei][idx_node_R]) +
                                 b_m*(F_node_x[ei][idx_node_LL]     + F_node_x[ei][idx_node_RR]) +
                                 c_m*(F_node_x[ei][idx_node_LLL]    + F_node_x[ei][idx_node_RRR]) +
@@ -1640,7 +1640,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_y = convective_flux->getPointer(1, ei);
+                Real* F_face_y = convective_flux->getPointer(1, ei);
                 
                 for (int k = 0; k < interior_dim_2; k++)
                 {
@@ -1694,7 +1694,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                 (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
                                     subghostcell_dim_1_convective_flux_y;
                             
-                            F_face_y[idx_face_y] = dt*(
+                            F_face_y[idx_face_y] = Real(dt)*(
                                 a_m*(F_node_y[ei][idx_node_B]    + F_node_y[ei][idx_node_T]) +
                                 b_m*(F_node_y[ei][idx_node_BB]   + F_node_y[ei][idx_node_TT]) +
                                 c_m*(F_node_y[ei][idx_node_BBB]  + F_node_y[ei][idx_node_TTT]) +
@@ -1709,7 +1709,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_y = convective_flux->getPointer(1, ei);
+                Real* F_face_y = convective_flux->getPointer(1, ei);
                 
                 for (int k = 0; k < interior_dim_2; k++)
                 {
@@ -1773,7 +1773,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                 (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
                                     subghostcell_dim_1_convective_flux_y;
                             
-                            F_face_y[idx_face_y] = dt*(
+                            F_face_y[idx_face_y] = Real(dt)*(
                                 a_m*(F_node_y[ei][idx_node_B]     + F_node_y[ei][idx_node_T]) +
                                 b_m*(F_node_y[ei][idx_node_BB]    + F_node_y[ei][idx_node_TT]) +
                                 c_m*(F_node_y[ei][idx_node_BBB]   + F_node_y[ei][idx_node_TTT]) +
@@ -1789,7 +1789,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_y = convective_flux->getPointer(1, ei);
+                Real* F_face_y = convective_flux->getPointer(1, ei);
                 
                 for (int k = 0; k < interior_dim_2; k++)
                 {
@@ -1863,7 +1863,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                 (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
                                     subghostcell_dim_1_convective_flux_y;
                             
-                            F_face_y[idx_face_y] = dt*(
+                            F_face_y[idx_face_y] = Real(dt)*(
                                 a_m*(F_node_y[ei][idx_node_B]      + F_node_y[ei][idx_node_T]) +
                                 b_m*(F_node_y[ei][idx_node_BB]     + F_node_y[ei][idx_node_TT]) +
                                 c_m*(F_node_y[ei][idx_node_BBB]    + F_node_y[ei][idx_node_TTT]) +
@@ -1885,7 +1885,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_z = convective_flux->getPointer(2, ei);
+                Real* F_face_z = convective_flux->getPointer(2, ei);
                 
                 for (int k = 0; k < interior_dim_2 + 1; k++)
                 {
@@ -1939,7 +1939,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                 (k + 3 + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
                                     subghostcell_dim_1_convective_flux_z;
                             
-                            F_face_z[idx_face_z] = dt*(
+                            F_face_z[idx_face_z] = Real(dt)*(
                                 a_m*(F_node_z[ei][idx_node_B]    + F_node_z[ei][idx_node_F]) +
                                 b_m*(F_node_z[ei][idx_node_BB]   + F_node_z[ei][idx_node_FF]) +
                                 c_m*(F_node_z[ei][idx_node_BBB]  + F_node_z[ei][idx_node_FFF]) +
@@ -1954,7 +1954,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_z = convective_flux->getPointer(2, ei);
+                Real* F_face_z = convective_flux->getPointer(2, ei);
                 
                 for (int k = 0; k < interior_dim_2 + 1; k++)
                 {
@@ -2018,7 +2018,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                 (k + 4 + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
                                     subghostcell_dim_1_convective_flux_z;
                             
-                            F_face_z[idx_face_z] = dt*(
+                            F_face_z[idx_face_z] = Real(dt)*(
                                 a_m*(F_node_z[ei][idx_node_B]     + F_node_z[ei][idx_node_F]) +
                                 b_m*(F_node_z[ei][idx_node_BB]    + F_node_z[ei][idx_node_FF]) +
                                 c_m*(F_node_z[ei][idx_node_BBB]   + F_node_z[ei][idx_node_FFF]) +
@@ -2034,7 +2034,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                double* F_face_z = convective_flux->getPointer(2, ei);
+                Real* F_face_z = convective_flux->getPointer(2, ei);
                 
                 for (int k = 0; k < interior_dim_2 + 1; k++)
                 {
@@ -2108,7 +2108,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                 (k + 5 + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
                                     subghostcell_dim_1_convective_flux_z;
                             
-                            F_face_z[idx_face_z] = dt*(
+                            F_face_z[idx_face_z] = Real(dt)*(
                                 a_m*(F_node_z[ei][idx_node_B]      + F_node_z[ei][idx_node_F]) +
                                 b_m*(F_node_z[ei][idx_node_BB]     + F_node_z[ei][idx_node_FF]) +
                                 c_m*(F_node_z[ei][idx_node_BBB]    + F_node_z[ei][idx_node_FFF]) +
@@ -2132,7 +2132,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity = d_flow_model->getCellData("VELOCITY");
             
             hier::IntVector num_subghosts_velocity = velocity->getGhostCellWidth();
             hier::IntVector subghostcell_dims_velocity = velocity->getGhostBox().numberCells();
@@ -2143,9 +2143,9 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
             const int subghostcell_dim_0_velocity = subghostcell_dims_velocity[0];
             const int subghostcell_dim_1_velocity = subghostcell_dims_velocity[1];
             
-            double* u = velocity->getPointer(0);
-            double* v = velocity->getPointer(1);
-            double* w = velocity->getPointer(2);
+            Real* u = velocity->getPointer(0);
+            Real* v = velocity->getPointer(1);
+            Real* w = velocity->getPointer(2);
             
             std::vector<hier::IntVector> num_subghosts_conservative_var;
             num_subghosts_conservative_var.reserve(d_num_eqn);
@@ -2153,10 +2153,10 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
             std::vector<hier::IntVector> subghostcell_dims_conservative_var;
             subghostcell_dims_conservative_var.reserve(d_num_eqn);
             
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_variables =
                 d_flow_model->getCellDataOfConservativeVariables();
             
-            std::vector<double*> Q;
+            std::vector<Real*> Q;
             Q.reserve(d_num_eqn);
             
             int count_eqn = 0;
@@ -2185,7 +2185,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
             {
                 if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
                 {
-                    double* S = source->getPointer(ei);
+                    Real* S = source->getPointer(ei);
                     
                     const int num_subghosts_0_conservative_var = num_subghosts_conservative_var[ei][0];
                     const int num_subghosts_1_conservative_var = num_subghosts_conservative_var[ei][1];
@@ -2333,25 +2333,25 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                         k*interior_dim_0*
                                             interior_dim_1;
                                     
-                                    S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                                    S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
                                         (
                                         a_n*(u[idx_cell_wghost_x_R]    - u[idx_cell_wghost_x_L]) +
                                         b_n*(u[idx_cell_wghost_x_RR]   - u[idx_cell_wghost_x_LL]) +
                                         c_n*(u[idx_cell_wghost_x_RRR]  - u[idx_cell_wghost_x_LLL]) +
                                         d_n*(u[idx_cell_wghost_x_RRRR] - u[idx_cell_wghost_x_LLLL])
-                                        )/dx[0] +
+                                        )/Real(dx[0]) +
                                         (
                                         a_n*(v[idx_cell_wghost_y_T]    - v[idx_cell_wghost_y_B]) +
                                         b_n*(v[idx_cell_wghost_y_TT]   - v[idx_cell_wghost_y_BB]) +
                                         c_n*(v[idx_cell_wghost_y_TTT]  - v[idx_cell_wghost_y_BBB]) +
                                         d_n*(v[idx_cell_wghost_y_TTTT] - v[idx_cell_wghost_y_BBBB])
-                                        )/dx[1] +
+                                        )/Real(dx[1]) +
                                         (
                                         a_n*(w[idx_cell_wghost_z_F]    - w[idx_cell_wghost_z_B]) +
                                         b_n*(w[idx_cell_wghost_z_FF]   - w[idx_cell_wghost_z_BB]) +
                                         c_n*(w[idx_cell_wghost_z_FFF]  - w[idx_cell_wghost_z_BBB]) +
                                         d_n*(w[idx_cell_wghost_z_FFFF] - w[idx_cell_wghost_z_BBBB])
-                                        )/dx[2]
+                                        )/Real(dx[2])
                                         );
                                 }
                             }
@@ -2527,28 +2527,28 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                         k*interior_dim_0*
                                             interior_dim_1;
                                     
-                                    S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                                    S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
                                         (
                                         a_n*(u[idx_cell_wghost_x_R]     - u[idx_cell_wghost_x_L]) +
                                         b_n*(u[idx_cell_wghost_x_RR]    - u[idx_cell_wghost_x_LL]) +
                                         c_n*(u[idx_cell_wghost_x_RRR]   - u[idx_cell_wghost_x_LLL]) +
                                         d_n*(u[idx_cell_wghost_x_RRRR]  - u[idx_cell_wghost_x_LLLL]) +
                                         e_n*(u[idx_cell_wghost_x_RRRRR] - u[idx_cell_wghost_x_LLLLL])
-                                        )/dx[0] +
+                                        )/Real(dx[0]) +
                                         (
                                         a_n*(v[idx_cell_wghost_y_T]     - v[idx_cell_wghost_y_B]) +
                                         b_n*(v[idx_cell_wghost_y_TT]    - v[idx_cell_wghost_y_BB]) +
                                         c_n*(v[idx_cell_wghost_y_TTT]   - v[idx_cell_wghost_y_BBB]) +
                                         d_n*(v[idx_cell_wghost_y_TTTT]  - v[idx_cell_wghost_y_BBBB]) +
                                         e_n*(v[idx_cell_wghost_y_TTTTT] - v[idx_cell_wghost_y_BBBBB])
-                                        )/dx[1] +
+                                        )/Real(dx[1]) +
                                         (
                                         a_n*(w[idx_cell_wghost_z_F]     - w[idx_cell_wghost_z_B]) +
                                         b_n*(w[idx_cell_wghost_z_FF]    - w[idx_cell_wghost_z_BB]) +
                                         c_n*(w[idx_cell_wghost_z_FFF]   - w[idx_cell_wghost_z_BBB]) +
                                         d_n*(w[idx_cell_wghost_z_FFFF]  - w[idx_cell_wghost_z_BBBB]) +
                                         e_n*(w[idx_cell_wghost_z_FFFFF] - w[idx_cell_wghost_z_BBBBB])
-                                        )/dx[2]
+                                        )/Real(dx[2])
                                         );
                                 }
                             }
@@ -2754,7 +2754,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                         k*interior_dim_0*
                                             interior_dim_1;
                                     
-                                    S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                                    S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
                                         (
                                         a_n*(u[idx_cell_wghost_x_R]      - u[idx_cell_wghost_x_L]) +
                                         b_n*(u[idx_cell_wghost_x_RR]     - u[idx_cell_wghost_x_LL]) +
@@ -2762,7 +2762,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                         d_n*(u[idx_cell_wghost_x_RRRR]   - u[idx_cell_wghost_x_LLLL]) +
                                         e_n*(u[idx_cell_wghost_x_RRRRR]  - u[idx_cell_wghost_x_LLLLL]) +
                                         f_n*(u[idx_cell_wghost_x_RRRRRR] - u[idx_cell_wghost_x_LLLLLL])
-                                        )/dx[0] +
+                                        )/Real(dx[0]) +
                                         (
                                         a_n*(v[idx_cell_wghost_y_T]      - v[idx_cell_wghost_y_B]) +
                                         b_n*(v[idx_cell_wghost_y_TT]     - v[idx_cell_wghost_y_BB]) +
@@ -2770,7 +2770,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                         d_n*(v[idx_cell_wghost_y_TTTT]   - v[idx_cell_wghost_y_BBBB]) +
                                         e_n*(v[idx_cell_wghost_y_TTTTT]  - v[idx_cell_wghost_y_BBBBB]) +
                                         f_n*(v[idx_cell_wghost_y_TTTTTT] - v[idx_cell_wghost_y_BBBBBB])
-                                        )/dx[1] +
+                                        )/Real(dx[1]) +
                                         (
                                         a_n*(w[idx_cell_wghost_z_F]      - w[idx_cell_wghost_z_B]) +
                                         b_n*(w[idx_cell_wghost_z_FF]     - w[idx_cell_wghost_z_BB]) +
@@ -2778,7 +2778,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                         d_n*(w[idx_cell_wghost_z_FFFF]   - w[idx_cell_wghost_z_BBBB]) +
                                         e_n*(w[idx_cell_wghost_z_FFFFF]  - w[idx_cell_wghost_z_BBBBB]) +
                                         f_n*(w[idx_cell_wghost_z_FFFFFF] - w[idx_cell_wghost_z_BBBBBB])
-                                        )/dx[2]
+                                        )/Real(dx[2])
                                         );
                                 }
                             }
