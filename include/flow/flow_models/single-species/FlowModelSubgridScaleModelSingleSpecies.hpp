@@ -42,8 +42,8 @@ class FlowModelSubgridScaleModelSingleSpecies: public FlowModelSubgridScaleModel
          */
         void
         updateSideDataOfDiffusiveFluxDiffusivities(
-            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_data_for_diffusivities,
-            const std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives,
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& var_data_for_diffusivities,
+            const std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& derivatives,
             const DIRECTION::TYPE& side_direction,
             const hier::Patch& patch);
         
@@ -60,32 +60,32 @@ class FlowModelSubgridScaleModelSingleSpecies: public FlowModelSubgridScaleModel
          * diffusivity/viscosity.
          */
         void updateSideDataOfDiffusiveFluxDiffusivitiesVreman(
-            double* mu,
-            double* kappa,
-            const double* const rho,
-            const double* const ddx_u,
-            const double* const ddx_v,
-            const double* const ddx_w,
-            const double* const ddy_u,
-            const double* const ddy_v,
-            const double* const ddy_w,
-            const double* const ddz_u,
-            const double* const ddz_v,
-            const double* const ddz_w,
+            Real* mu,
+            Real* kappa,
+            const Real* const rho,
+            const Real* const ddx_u,
+            const Real* const ddx_v,
+            const Real* const ddx_w,
+            const Real* const ddy_u,
+            const Real* const ddy_v,
+            const Real* const ddy_w,
+            const Real* const ddz_u,
+            const Real* const ddz_v,
+            const Real* const ddz_w,
             const hier::IntVector& num_ghosts_diffus,
             const hier::IntVector& num_ghosts_der,
             const hier::IntVector& ghostcell_dims_diffus,
             const hier::IntVector& ghostcell_dims_der,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims,
-            const double& delta) const;
+            const Real& delta) const;
         
         /*
          * Constants used to compute subgrid scale viscosity.
          */
-        double d_constant_sgs;
-        double d_species_Pr_t;
-        double d_species_c_p;
+        Real d_constant_sgs;
+        Real d_species_Pr_t;
+        Real d_species_c_p;
 };
 
 #endif /* FLOW_MODEL_SUBGRID_SCALE_MODEL_SINGLE_SPECIES_HPP */

@@ -29,7 +29,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum value over the entire domain.
          */
-        double getMaxQuantity(
+        Real getMaxQuantity(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -37,7 +37,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum reciprocal of value over the entire domain.
          */
-        double getMaxReciprocalOfQuantity(
+        Real getMaxReciprocalOfQuantity(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -45,7 +45,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum value (on product of variables) over the entire domain.
          */
-        double getMaxQuantity(
+        Real getMaxQuantity(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -53,7 +53,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum value (on product of variables) over the entire domain.
          */
-        double getMaxQuantity(
+        Real getMaxQuantity(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const std::vector<bool>& use_reciprocal,
@@ -62,7 +62,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum value over the entire domain.
          */
-        double getMinQuantity(
+        Real getMinQuantity(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -70,7 +70,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum reciprocal of value over the entire domain.
          */
-        double getMinReciprocalOfQuantity(
+        Real getMinReciprocalOfQuantity(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -78,7 +78,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum value (on product of variables) over the entire domain.
          */
-        double getMinQuantity(
+        Real getMinQuantity(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -86,7 +86,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum value (on product of variables) over the entire domain.
          */
-        double getMinQuantity(
+        Real getMinQuantity(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const std::vector<bool>& use_reciprocal,
@@ -95,7 +95,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum value with only x-direction as inhomogeneous direction.
          */
-        std::vector<double> getMaxQuantityWithInhomogeneousXDirection(
+        std::vector<Real> getMaxQuantityWithInhomogeneousXDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -103,7 +103,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum reciprocal of value with only x-direction as inhomogeneous direction.
          */
-        std::vector<double> getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
+        std::vector<Real> getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -111,7 +111,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum value (on product of variables) with only x-direction as inhomogeneous direction.
          */
-        std::vector<double> getMaxQuantityWithInhomogeneousXDirection(
+        std::vector<Real> getMaxQuantityWithInhomogeneousXDirection(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -119,7 +119,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum value (on product of variables) with only x-direction as inhomogeneous direction.
          */
-        std::vector<double> getMaxQuantityWithInhomogeneousXDirection(
+        std::vector<Real> getMaxQuantityWithInhomogeneousXDirection(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const std::vector<bool>& use_reciprocal,
@@ -128,7 +128,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum value with only x-direction as inhomogeneous direction.
          */
-        std::vector<double> getMinQuantityWithInhomogeneousXDirection(
+        std::vector<Real> getMinQuantityWithInhomogeneousXDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -136,7 +136,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum reciprocal of value with only x-direction as inhomogeneous direction.
          */
-        std::vector<double> getMinReciprocalOfQuantityWithInhomogeneousXDirection(
+        std::vector<Real> getMinReciprocalOfQuantityWithInhomogeneousXDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -144,7 +144,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum value (on product of variables) with only x-direction as inhomogeneous direction.
          */
-        std::vector<double> getMinQuantityWithInhomogeneousXDirection(
+        std::vector<Real> getMinQuantityWithInhomogeneousXDirection(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -152,7 +152,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum value (on product of variables) with only x-direction as inhomogeneous direction.
          */
-        std::vector<double> getMinQuantityWithInhomogeneousXDirection(
+        std::vector<Real> getMinQuantityWithInhomogeneousXDirection(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const std::vector<bool>& use_reciprocal,
@@ -161,7 +161,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum value with only y-direction as inhomogeneous direction.
          */
-        std::vector<double> getMaxQuantityWithInhomogeneousYDirection(
+        std::vector<Real> getMaxQuantityWithInhomogeneousYDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -169,7 +169,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum reciprocal of value with only y-direction as inhomogeneous direction.
          */
-        std::vector<double> getMaxReciprocalOfQuantityWithInhomogeneousYDirection(
+        std::vector<Real> getMaxReciprocalOfQuantityWithInhomogeneousYDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -177,7 +177,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum value (on product of variables) with only y-direction as inhomogeneous direction.
          */
-        std::vector<double> getMaxQuantityWithInhomogeneousYDirection(
+        std::vector<Real> getMaxQuantityWithInhomogeneousYDirection(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -185,7 +185,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum value (on product of variables) with only y-direction as inhomogeneous direction.
          */
-        std::vector<double> getMaxQuantityWithInhomogeneousYDirection(
+        std::vector<Real> getMaxQuantityWithInhomogeneousYDirection(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const std::vector<bool>& use_reciprocal,
@@ -194,7 +194,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum value with only y-direction as inhomogeneous direction.
          */
-        std::vector<double> getMinQuantityWithInhomogeneousYDirection(
+        std::vector<Real> getMinQuantityWithInhomogeneousYDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -202,7 +202,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum reciprocal of value with only y-direction as inhomogeneous direction.
          */
-        std::vector<double> getMinReciprocalOfQuantityWithInhomogeneousYDirection(
+        std::vector<Real> getMinReciprocalOfQuantityWithInhomogeneousYDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -210,7 +210,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum value (on product of variables) with only y-direction as inhomogeneous direction.
          */
-        std::vector<double> getMinQuantityWithInhomogeneousYDirection(
+        std::vector<Real> getMinQuantityWithInhomogeneousYDirection(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -218,7 +218,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum value (on product of variables) with only y-direction as inhomogeneous direction.
          */
-        std::vector<double> getMinQuantityWithInhomogeneousYDirection(
+        std::vector<Real> getMinQuantityWithInhomogeneousYDirection(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const std::vector<bool>& use_reciprocal,
@@ -227,7 +227,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum value with only z-direction as inhomogeneous direction.
          */
-        std::vector<double> getMaxQuantityWithInhomogeneousZDirection(
+        std::vector<Real> getMaxQuantityWithInhomogeneousZDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -235,7 +235,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum reciprocal of value with only z-direction as inhomogeneous direction.
          */
-        std::vector<double> getMaxReciprocalOfQuantityWithInhomogeneousZDirection(
+        std::vector<Real> getMaxReciprocalOfQuantityWithInhomogeneousZDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -243,7 +243,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum value (on product of variables) with only z-direction as inhomogeneous direction.
          */
-        std::vector<double> getMaxQuantityWithInhomogeneousZDirection(
+        std::vector<Real> getMaxQuantityWithInhomogeneousZDirection(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -251,7 +251,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum value (on product of variables) with only z-direction as inhomogeneous direction.
          */
-        std::vector<double> getMaxQuantityWithInhomogeneousZDirection(
+        std::vector<Real> getMaxQuantityWithInhomogeneousZDirection(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const std::vector<bool>& use_reciprocal,
@@ -260,7 +260,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum value with only z-direction as inhomogeneous direction.
          */
-        std::vector<double> getMinQuantityWithInhomogeneousZDirection(
+        std::vector<Real> getMinQuantityWithInhomogeneousZDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -268,7 +268,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum reciprocal of value with only z-direction as inhomogeneous direction.
          */
-        std::vector<double> getMinReciprocalOfQuantityWithInhomogeneousZDirection(
+        std::vector<Real> getMinReciprocalOfQuantityWithInhomogeneousZDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -276,7 +276,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum value (on product of variables) with only z-direction as inhomogeneous direction.
          */
-        std::vector<double> getMinQuantityWithInhomogeneousZDirection(
+        std::vector<Real> getMinQuantityWithInhomogeneousZDirection(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
@@ -284,7 +284,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum value (on product of variables) with only z-direction as inhomogeneous direction.
          */
-        std::vector<double> getMinQuantityWithInhomogeneousZDirection(
+        std::vector<Real> getMinQuantityWithInhomogeneousZDirection(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const std::vector<bool>& use_reciprocal,
@@ -293,67 +293,67 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum location within quantity bounds in x-direction.
          */
-        double getMaxLocationWithinQuantityBoundsInXDirection(
+        Real getMaxLocationWithinQuantityBoundsInXDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double bound_lo,
-            const double bound_hi);
+            const Real bound_lo,
+            const Real bound_hi);
         
         /*
          * Compute minimum location within quantity bounds in x-direction.
          */
-        double getMinLocationWithinQuantityBoundsInXDirection(
+        Real getMinLocationWithinQuantityBoundsInXDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double bound_lo,
-            const double bound_hi);
+            const Real bound_lo,
+            const Real bound_hi);
         
         /*
          * Compute maximum location within quantity bounds in y-direction.
          */
-        double getMaxLocationWithinQuantityBoundsInYDirection(
+        Real getMaxLocationWithinQuantityBoundsInYDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double bound_lo,
-            const double bound_hi);
+            const Real bound_lo,
+            const Real bound_hi);
         
         /*
          * Compute minimum location within quantity bounds in y-direction.
          */
-        double getMinLocationWithinQuantityBoundsInYDirection(
+        Real getMinLocationWithinQuantityBoundsInYDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double bound_lo,
-            const double bound_hi);
+            const Real bound_lo,
+            const Real bound_hi);
         
         /*
          * Compute maximum location within quantity bounds in z-direction.
          */
-        double getMaxLocationWithinQuantityBoundsInZDirection(
+        Real getMaxLocationWithinQuantityBoundsInZDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double bound_lo,
-            const double bound_hi);
+            const Real bound_lo,
+            const Real bound_hi);
         
         /*
          * Compute minimum location within quantity bounds in z-direction.
          */
-        double getMinLocationWithinQuantityBoundsInZDirection(
+        Real getMinLocationWithinQuantityBoundsInZDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double bound_lo,
-            const double bound_hi);
+            const Real bound_lo,
+            const Real bound_hi);
         
         /*
          * Compute maximum value of absolute value of gradient with only x-direction as inhomogeneous direction.
          */
-        std::vector<double> getMaxAbsoluteGradientWithInhomogeneousXDirection(
+        std::vector<Real> getMaxAbsoluteGradientWithInhomogeneousXDirection(
             const std::string quantity_name,
             const int component_idx,
             const int derivative_direction,
@@ -363,7 +363,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum value of magnitude of gradient with only x-direction as inhomogeneous direction.
          */
-        std::vector<double> getMaxMagnitudeGradientWithInhomogeneousXDirection(
+        std::vector<Real> getMaxMagnitudeGradientWithInhomogeneousXDirection(
             const std::string quantity_name,
             const int component_idx,
             const int num_ghosts_derivative,

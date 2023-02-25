@@ -6,14 +6,14 @@
 /*
  * Compute averaged value over the entire domain.
  */
-double
+Real
 FlowModelMPIHelperAverage::getAveragedQuantity(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    double u_avg_local  = double(0);
-    double u_avg_global = double(0);
+    Real u_avg_local  = Real(0);
+    Real u_avg_global = Real(0);
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -41,7 +41,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -94,10 +94,10 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -113,7 +113,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                 
                 const int num_ghosts_0_quantity = num_ghosts_quantity[0];
                 
-                const double weight = dx[0]/L_x;
+                const Real weight = Real(dx[0])/L_x;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -160,7 +160,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        u_avg_local += (u[idx]*weight/((double) n_overlapped));
+                        u_avg_local += (u[idx]*weight/((Real) n_overlapped));
                     }
                 }
                 
@@ -189,8 +189,8 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -243,10 +243,10 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -265,7 +265,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                 const int num_ghosts_1_quantity = num_ghosts_quantity[1];
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 
-                const double weight = (dx[0]*dx[1])/(L_x*L_y);
+                const Real weight = Real(dx[0]*dx[1])/(L_x*L_y);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -318,7 +318,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            u_avg_local += u[idx]*weight/((double) n_overlapped);
+                            u_avg_local += u[idx]*weight/((Real) n_overlapped);
                         }
                     }
                 }
@@ -348,9 +348,9 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -403,10 +403,10 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -427,7 +427,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
                 
-                const double weight = (dx[0]*dx[1]*dx[2])/(L_x*L_y*L_z);
+                const Real weight = Real(dx[0]*dx[1]*dx[2])/(L_x*L_y*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -487,7 +487,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                u_avg_local += u[idx]*weight/((double) n_overlapped);
+                                u_avg_local += u[idx]*weight/((Real) n_overlapped);
                             }
                         }
                     }
@@ -520,14 +520,14 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
 /*
  * Compute averaged reciprocal of value over the entire domain.
  */
-double
+Real
 FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantity(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    double u_inv_avg_local  = double(0);
-    double u_inv_avg_global = double(0);
+    Real u_inv_avg_local  = Real(0);
+    Real u_inv_avg_global = Real(0);
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -555,7 +555,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -608,10 +608,10 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -627,7 +627,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantity(
                 
                 const int num_ghosts_0_quantity = num_ghosts_quantity[0];
                 
-                const double weight = dx[0]/L_x;
+                const Real weight = Real(dx[0])/L_x;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -674,7 +674,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantity(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        u_inv_avg_local += (weight/u[idx])/((double) n_overlapped);
+                        u_inv_avg_local += (weight/u[idx])/((Real) n_overlapped);
                     }
                 }
                 
@@ -703,8 +703,8 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -757,10 +757,10 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -779,7 +779,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantity(
                 const int num_ghosts_1_quantity = num_ghosts_quantity[1];
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 
-                const double weight = (dx[0]*dx[1])/(L_x*L_y);
+                const Real weight = Real(dx[0]*dx[1])/(L_x*L_y);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -832,7 +832,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantity(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            u_inv_avg_local += (weight/u[idx])/((double) n_overlapped);
+                            u_inv_avg_local += (weight/u[idx])/((Real) n_overlapped);
                         }
                     }
                 }
@@ -862,9 +862,9 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -917,10 +917,10 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -941,7 +941,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantity(
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
                 
-                const double weight = (dx[0]*dx[1]*dx[2])/(L_x*L_y*L_z);
+                const Real weight = Real(dx[0]*dx[1]*dx[2])/(L_x*L_y*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -1001,7 +1001,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantity(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                u_inv_avg_local += (weight/u[idx])/((double) n_overlapped);
+                                u_inv_avg_local += (weight/u[idx])/((Real) n_overlapped);
                             }
                         }
                     }
@@ -1034,7 +1034,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantity(
 /*
  * Compute averaged value (on product of variables) over the entire domain.
  */
-double
+Real
 FlowModelMPIHelperAverage::getAveragedQuantity(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -1044,8 +1044,8 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
     
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     
-    double avg_local  = double(0);
-    double avg_global = double(0);
+    Real avg_local  = Real(0);
+    Real avg_global = Real(0);
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -1073,7 +1073,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -1129,14 +1129,14 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -1162,7 +1162,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                     num_ghosts_0_u_qi.push_back(num_ghosts_u_qi[0]);
                 }
                 
-                const double weight = dx[0]/L_x;
+                const Real weight = Real(dx[0])/L_x;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -1209,7 +1209,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                         
                         const int idx_q0 = relative_idx_lo_0 + i + num_ghosts_0_u_qi[0];
                         
-                        double avg = u_qi[0][idx_q0];
+                        Real avg = u_qi[0][idx_q0];
                         
                         for (int qi = 1; qi < num_quantities; qi++)
                         {
@@ -1218,7 +1218,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                             avg *= u_qi[qi][idx_qi];
                         }
                         
-                        avg_local += (avg*weight/((double) n_overlapped));
+                        avg_local += (avg*weight/((Real) n_overlapped));
                     }
                 }
                 
@@ -1247,8 +1247,8 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -1304,14 +1304,14 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -1345,7 +1345,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                     ghostcell_dim_0_u_qi.push_back(ghostcell_dims_u_qi[0]);
                 }
                 
-                const double weight = (dx[0]*dx[1])/(L_x*L_y);
+                const Real weight = Real(dx[0]*dx[1])/(L_x*L_y);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -1398,7 +1398,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                             const int idx_q0 = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
                             
-                            double avg = u_qi[0][idx_q0];
+                            Real avg = u_qi[0][idx_q0];
                             
                             for (int qi = 1; qi < num_quantities; qi++)
                             {
@@ -1408,7 +1408,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                                 avg *= u_qi[qi][idx_qi];
                             }
                             
-                            avg_local += (avg*weight/((double) n_overlapped));
+                            avg_local += (avg*weight/((Real) n_overlapped));
                         }
                     }
                 }
@@ -1438,9 +1438,9 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -1496,14 +1496,14 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -1543,7 +1543,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                     ghostcell_dim_1_u_qi.push_back(ghostcell_dims_u_qi[1]);
                 }
                 
-                const double weight = (dx[0]*dx[1]*dx[2])/(L_x*L_y*L_z);
+                const Real weight = Real(dx[0]*dx[1]*dx[2])/(L_x*L_y*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -1603,7 +1603,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                                     (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
                                         ghostcell_dim_1_u_qi[0];
                                 
-                                double avg = u_qi[0][idx_q0];
+                                Real avg = u_qi[0][idx_q0];
                                 
                                 for (int qi = 1; qi < num_quantities; qi++)
                                 {
@@ -1615,7 +1615,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                                     avg *= u_qi[qi][idx_qi];
                                 }
                                 
-                                avg_local += (avg*weight/((double) n_overlapped));
+                                avg_local += (avg*weight/((Real) n_overlapped));
                             }
                         }
                     }
@@ -1648,7 +1648,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
 /*
  * Compute averaged value (on product of variables) over the entire domain.
  */
-double
+Real
 FlowModelMPIHelperAverage::getAveragedQuantity(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -1660,8 +1660,8 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
-    double avg_local  = double(0);
-    double avg_global = double(0);
+    Real avg_local  = Real(0);
+    Real avg_global = Real(0);
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -1689,7 +1689,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -1745,14 +1745,14 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -1778,7 +1778,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                     num_ghosts_0_u_qi.push_back(num_ghosts_u_qi[0]);
                 }
                 
-                const double weight = dx[0]/L_x;
+                const Real weight = Real(dx[0])/L_x;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -1823,7 +1823,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                          * Compute the linear indices and the data to add.
                          */
                         
-                        double avg = double(1);
+                        Real avg = Real(1);
                         
                         for (int qi = 0; qi < num_quantities; qi++)
                         {
@@ -1839,7 +1839,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                             }
                         }
                         
-                        avg_local += (avg*weight/((double) n_overlapped));
+                        avg_local += (avg*weight/((Real) n_overlapped));
                     }
                 }
                 
@@ -1868,8 +1868,8 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -1925,14 +1925,14 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -1966,7 +1966,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                     ghostcell_dim_0_u_qi.push_back(ghostcell_dims_u_qi[0]);
                 }
                 
-                const double weight = (dx[0]*dx[1])/(L_x*L_y);
+                const Real weight = Real(dx[0]*dx[1])/(L_x*L_y);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -2016,7 +2016,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                              * Compute the linear indices and the data to add.
                              */
                             
-                            double avg = double(1);
+                            Real avg = Real(1);
                             
                             for (int qi = 0; qi < num_quantities; qi++)
                             {
@@ -2033,7 +2033,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                                 }
                             }
                             
-                            avg_local += (avg*weight/((double) n_overlapped));
+                            avg_local += (avg*weight/((Real) n_overlapped));
                         }
                     }
                 }
@@ -2063,9 +2063,9 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -2121,14 +2121,14 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -2168,7 +2168,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                     ghostcell_dim_1_u_qi.push_back(ghostcell_dims_u_qi[1]);
                 }
                 
-                const double weight = (dx[0]*dx[1]*dx[2])/(L_x*L_y*L_z);
+                const Real weight = Real(dx[0]*dx[1]*dx[2])/(L_x*L_y*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -2223,7 +2223,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                                  * Compute the linear index and the data to add.
                                  */
                                 
-                                double avg = double(1);
+                                Real avg = Real(1);
                                 
                                 for (int qi = 0; qi < num_quantities; qi++)
                                 {
@@ -2242,7 +2242,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                                     }
                                 }
                                 
-                                avg_local += (avg*weight/((double) n_overlapped));
+                                avg_local += (avg*weight/((Real) n_overlapped));
                             }
                         }
                     }
@@ -2275,7 +2275,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
 /*
  * Compute averaged value (on product of variable derivatives) over the entire domain.
  */
-double
+Real
 FlowModelMPIHelperAverage::getAveragedQuantity(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -2306,7 +2306,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
 /*
  * Compute averaged value (on product of variable derivatives) over the entire domain.
  */
-double
+Real
 FlowModelMPIHelperAverage::getAveragedQuantity(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -2323,8 +2323,8 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
     TBOX_ASSERT(static_cast<int>(derivative_directions.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
-    double avg_local  = double(0);
-    double avg_global = double(0);
+    Real avg_local  = Real(0);
+    Real avg_global = Real(0);
     
     int num_use_derivative = 0;
     
@@ -2383,7 +2383,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
         }
     }
     
-    std::vector<double> averaged_quantity;
+    std::vector<Real> averaged_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -2420,7 +2420,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -2484,14 +2484,14 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -2521,12 +2521,12 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                  * Initialize cell data for the derivatives and get pointers to the cell data.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
-                std::vector<double*> der_qi;
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative;
+                std::vector<Real*> der_qi;
                 
                 if (num_use_derivative > 0)
                 {
-                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
                     
                     der_qi.resize(num_use_derivative);
                     for (int qi = 0; qi < num_use_derivative; qi++)
@@ -2535,7 +2535,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                     }
                 }
                 
-                const double weight = dx[0]/L_x;
+                const Real weight = Real(dx[0])/L_x;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -2551,7 +2551,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                             derivative_first_order_x->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[0],
+                                Real(dx[0]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -2597,7 +2597,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                          * Compute the linear indices and the data to add.
                          */
                         
-                        double avg = double(1);
+                        Real avg = Real(1);
                         
                         count_derivative = 0;
                         for (int qi = 0; qi < num_quantities; qi++)
@@ -2640,7 +2640,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                          * Add the data.
                          */
                         
-                        avg_local += (avg*weight/((double) n_overlapped));
+                        avg_local += (avg*weight/((Real) n_overlapped));
                     }
                 }
                 
@@ -2685,8 +2685,8 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -2750,14 +2750,14 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -2795,12 +2795,12 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                  * Initialize cell data for the derivatives and get pointers to the cell data.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
-                std::vector<double*> der_qi;
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative;
+                std::vector<Real*> der_qi;
                 
                 if (num_use_derivative > 0)
                 {
-                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
                     
                     der_qi.resize(num_use_derivative);
                     for (int qi = 0; qi < num_use_derivative; qi++)
@@ -2812,7 +2812,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                 const hier::IntVector patch_interior_dims = patch_box.numberCells();
                 const int patch_interior_dim_0 = patch_interior_dims[0];
                 
-                const double weight = (dx[0]*dx[1])/(L_x*L_y);
+                const Real weight = Real(dx[0]*dx[1])/(L_x*L_y);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -2828,7 +2828,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                             derivative_first_order_x->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[0],
+                                Real(dx[0]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -2840,7 +2840,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                             derivative_first_order_y->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[1],
+                                Real(dx[1]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -2891,7 +2891,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                              * Compute the linear indices and the data to add.
                              */
                             
-                            double avg = double(1);
+                            Real avg = Real(1);
                             
                             count_derivative = 0;
                             for (int qi = 0; qi < num_quantities; qi++)
@@ -2940,7 +2940,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                              * Add the data.
                              */
                             
-                            avg_local += (avg*weight/((double) n_overlapped));
+                            avg_local += (avg*weight/((Real) n_overlapped));
                         }
                     }
                 }
@@ -2993,9 +2993,9 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -3059,14 +3059,14 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -3110,12 +3110,12 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                  * Initialize cell data for the derivatives and get pointers to the cell data.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
-                std::vector<double*> der_qi;
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative;
+                std::vector<Real*> der_qi;
                 
                 if (num_use_derivative > 0)
                 {
-                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
                     
                     der_qi.resize(num_use_derivative);
                     for (int qi = 0; qi < num_use_derivative; qi++)
@@ -3128,7 +3128,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                 const int patch_interior_dim_0 = patch_interior_dims[0];
                 const int patch_interior_dim_1 = patch_interior_dims[1];
                 
-                const double weight = (dx[0]*dx[1]*dx[2])/(L_x*L_y*L_z);
+                const Real weight = Real(dx[0]*dx[1]*dx[2])/(L_x*L_y*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -3144,7 +3144,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                             derivative_first_order_x->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[0],
+                                Real(dx[0]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -3156,7 +3156,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                             derivative_first_order_y->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[1],
+                                Real(dx[1]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -3168,7 +3168,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                             derivative_first_order_z->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[2],
+                                Real(dx[2]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -3224,7 +3224,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                                  * Compute the linear index and the data to add.
                                  */
                                 
-                                double avg = double(1);
+                                Real avg = Real(1);
                                 
                                 count_derivative = 0;
                                 for (int qi = 0; qi < num_quantities; qi++)
@@ -3281,7 +3281,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
                                  * Add the data.
                                  */
                                 
-                                avg_local += (avg*weight/((double) n_overlapped));
+                                avg_local += (avg*weight/((Real) n_overlapped));
                             }
                         }
                     }
@@ -3314,7 +3314,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
 /*
  * Compute averaged derivative of value (on product of variables) over the entire domain.
  */
-double
+Real
 FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -3328,8 +3328,8 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
-    double der_avg_local  = double(0);
-    double der_avg_global = double(0);
+    Real der_avg_local  = Real(0);
+    Real der_avg_global = Real(0);
     
     if (d_dim == tbox::Dimension(1) && (derivative_direction < 0 || derivative_direction > 0))
     {
@@ -3392,7 +3392,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -3451,14 +3451,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -3489,14 +3489,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                  * Also, get pointers to the cell data containers.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative(
-                    new pdat::CellData<double>(patch_box, 1, hier::IntVector::getZero(d_dim)));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative(
+                    new pdat::CellData<Real>(patch_box, 1, hier::IntVector::getZero(d_dim)));
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_product(
-                    new pdat::CellData<double>(patch_box, 1, num_ghosts_der));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_product(
+                    new pdat::CellData<Real>(patch_box, 1, num_ghosts_der));
                 
-                double* der     = data_derivative->getPointer(0);
-                double* product = data_product->getPointer(0);
+                Real* der     = data_derivative->getPointer(0);
+                Real* product = data_product->getPointer(0);
                 
                 const hier::IntVector num_ghosts_product = data_product->getGhostCellWidth();
                 
@@ -3505,7 +3505,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                 const hier::IntVector patch_interior_dims = patch_box.numberCells();
                 const int patch_interior_dim_0 = patch_interior_dims[0];
                 
-                data_product->fillAll(double(1));
+                data_product->fillAll(Real(1));
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -3531,7 +3531,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                     }
                 }
                 
-                const double weight = dx[0]/L_x;
+                const Real weight = Real(dx[0])/L_x;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -3544,7 +3544,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                         derivative_first_order_x->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[0],
+                            Real(dx[0]),
                             patch_visible_box,
                             0,
                             0);
@@ -3589,7 +3589,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                         
                         const int idx = relative_idx_lo_0 + i;
                         
-                        der_avg_local += (der[idx]*weight)/((double) n_overlapped);
+                        der_avg_local += (der[idx]*weight)/((Real) n_overlapped);
                     }
                 }
                 
@@ -3633,8 +3633,8 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -3693,14 +3693,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -3739,14 +3739,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                  * Also, get pointers to the cell data containers.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative(
-                    new pdat::CellData<double>(patch_box, 1, hier::IntVector::getZero(d_dim)));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative(
+                    new pdat::CellData<Real>(patch_box, 1, hier::IntVector::getZero(d_dim)));
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_product(
-                    new pdat::CellData<double>(patch_box, 1, num_ghosts_der));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_product(
+                    new pdat::CellData<Real>(patch_box, 1, num_ghosts_der));
                 
-                double* der     = data_derivative->getPointer(0);
-                double* product = data_product->getPointer(0);
+                Real* der     = data_derivative->getPointer(0);
+                Real* product = data_product->getPointer(0);
                 
                 const hier::IntVector num_ghosts_product = data_product->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_product = data_product->getGhostBox().numberCells();
@@ -3759,7 +3759,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                 const int patch_interior_dim_0 = patch_interior_dims[0];
                 const int patch_interior_dim_1 = patch_interior_dims[1];
                 
-                data_product->fillAll(double(1));
+                data_product->fillAll(Real(1));
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -3797,7 +3797,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                     }
                 }
                 
-                const double weight = (dx[0]*dx[1])/(L_x*L_y);
+                const Real weight = Real(dx[0]*dx[1])/(L_x*L_y);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -3810,7 +3810,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                         derivative_first_order_x->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[0],
+                            Real(dx[0]),
                             patch_visible_box,
                             0,
                             0);
@@ -3820,7 +3820,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                         derivative_first_order_y->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[1],
+                            Real(dx[1]),
                             patch_visible_box,
                             0,
                             0);
@@ -3871,7 +3871,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                             const int idx = (relative_idx_lo_0 + i) +
                                 (relative_idx_lo_1 + j)*patch_interior_dim_0;
                             
-                            der_avg_local += (der[idx]*weight)/((double) n_overlapped);
+                            der_avg_local += (der[idx]*weight)/((Real) n_overlapped);
                         }
                     }
                 }
@@ -3922,9 +3922,9 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -3983,14 +3983,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -4035,14 +4035,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                  * Also, get pointers to the cell data containers.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative(
-                    new pdat::CellData<double>(patch_box, 1, hier::IntVector::getZero(d_dim)));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative(
+                    new pdat::CellData<Real>(patch_box, 1, hier::IntVector::getZero(d_dim)));
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_product(
-                    new pdat::CellData<double>(patch_box, 1, num_ghosts_der));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_product(
+                    new pdat::CellData<Real>(patch_box, 1, num_ghosts_der));
                 
-                double* der     = data_derivative->getPointer(0);
-                double* product = data_product->getPointer(0);
+                Real* der     = data_derivative->getPointer(0);
+                Real* product = data_product->getPointer(0);
                 
                 const hier::IntVector num_ghosts_product = data_product->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_product = data_product->getGhostBox().numberCells();
@@ -4058,7 +4058,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                 const int patch_interior_dim_1 = patch_interior_dims[1];
                 const int patch_interior_dim_2 = patch_interior_dims[2];
                 
-                data_product->fillAll(double(1));
+                data_product->fillAll(Real(1));
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -4110,7 +4110,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                     }
                 }
                 
-                const double weight = (dx[0]*dx[1]*dx[2])/(L_x*L_y*L_z);
+                const Real weight = Real(dx[0]*dx[1]*dx[2])/(L_x*L_y*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -4123,7 +4123,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                         derivative_first_order_x->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[0],
+                            Real(dx[0]),
                             patch_visible_box,
                             0,
                             0);
@@ -4133,7 +4133,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                         derivative_first_order_y->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[1],
+                            Real(dx[1]),
                             patch_visible_box,
                             0,
                             0);
@@ -4143,7 +4143,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                          derivative_first_order_z->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[2],
+                            Real(dx[2]),
                             patch_visible_box,
                             0,
                             0);
@@ -4201,7 +4201,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
                                     (relative_idx_lo_2 + k)*patch_interior_dim_0*
                                         patch_interior_dim_1;
                                 
-                                der_avg_local += (der[idx]*weight)/((double) n_overlapped);
+                                der_avg_local += (der[idx]*weight)/((Real) n_overlapped);
                             }
                         }
                     }
@@ -4233,13 +4233,13 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
 /*
  * Compute averaged value with only x-direction as inhomogeneous direction on the coarsest level.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> averaged_quantity;
+    std::vector<Real> averaged_quantity;
     
     /*
      * Get the flattened hierarchy where only the finest existing grid is visible at any given
@@ -4263,15 +4263,15 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
     {
         const int coarsest_level_dim_0 = d_coarsest_level_dims[0];
         
-        double* u_avg_local = (double*)std::malloc(coarsest_level_dim_0*sizeof(double));
+        Real* u_avg_local = (Real*)std::malloc(coarsest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(coarsest_level_dim_0);
-        double* u_avg_global = averaged_quantity.data();
+        Real* u_avg_global = averaged_quantity.data();
         
         for (int i = 0; i < coarsest_level_dim_0; i++)
         {
-            u_avg_local[i]  = double(0);
-            u_avg_global[i] = double(0);
+            u_avg_local[i]  = Real(0);
+            u_avg_global[i] = Real(0);
         }
         
         /*
@@ -4317,10 +4317,10 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
              * Get the pointer to data inside the flow model.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                 getCellData(quantity_name);
             
-            double* u = data_quantity->getPointer(component_idx);
+            Real* u = data_quantity->getPointer(component_idx);
             
             const hier::BoxContainer& patch_visible_boxes =
                 flattened_hierarchy->getVisibleBoxes(
@@ -4382,7 +4382,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                     const int idx     = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                     const int idx_avg = idx_lo_0 + i;
                     
-                    const double value_to_add = u[idx]/((double) n_overlapped);
+                    const Real value_to_add = u[idx]/((Real) n_overlapped);
                     
                     u_avg_local[idx_avg] += value_to_add;
                 }
@@ -4416,17 +4416,17 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        double* u_avg_local = (double*)std::malloc(coarsest_level_dim_0*sizeof(double));
+        Real* u_avg_local = (Real*)std::malloc(coarsest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(coarsest_level_dim_0);
-        double* u_avg_global = averaged_quantity.data();
+        Real* u_avg_global = averaged_quantity.data();
         
         for (int i = 0; i < coarsest_level_dim_0; i++)
         {
-            u_avg_local[i]  = double(0);
-            u_avg_global[i] = double(0);
+            u_avg_local[i]  = Real(0);
+            u_avg_global[i] = Real(0);
         }
         
         /*
@@ -4478,10 +4478,10 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
              * Get the pointer to data inside the flow model.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                 getCellData(quantity_name);
             
-            double* u = data_quantity->getPointer(component_idx);
+            Real* u = data_quantity->getPointer(component_idx);
             
             const hier::BoxContainer& patch_visible_boxes =
                 flattened_hierarchy->getVisibleBoxes(
@@ -4500,7 +4500,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
             const int num_ghosts_1_quantity = num_ghosts_quantity[1];
             const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
             
-            const double weight = dx[1]/L_y;
+            const Real weight = Real(dx[1])/L_y;
             
             for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                  ib != patch_visible_boxes.end();
@@ -4555,7 +4555,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                         
                         const int idx_avg = idx_lo_0 + i;
                         
-                        const double value_to_add = u[idx]*weight/((double) n_overlapped);
+                        const Real value_to_add = u[idx]*weight/((Real) n_overlapped);
                         
                         u_avg_local[idx_avg] += value_to_add;
                     }
@@ -4590,18 +4590,18 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        double* u_avg_local = (double*)std::malloc(coarsest_level_dim_0*sizeof(double));
+        Real* u_avg_local = (Real*)std::malloc(coarsest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(coarsest_level_dim_0);
-        double* u_avg_global = averaged_quantity.data();
+        Real* u_avg_global = averaged_quantity.data();
         
         for (int i = 0; i < coarsest_level_dim_0; i++)
         {
-            u_avg_local[i]  = double(0);
-            u_avg_global[i] = double(0);
+            u_avg_local[i]  = Real(0);
+            u_avg_global[i] = Real(0);
         }
         
         /*
@@ -4653,10 +4653,10 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
              * Get the pointer to data inside the flow model.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                 getCellData(quantity_name);
             
-            double* u = data_quantity->getPointer(component_idx);
+            Real* u = data_quantity->getPointer(component_idx);
             
             const hier::BoxContainer& patch_visible_boxes =
                 flattened_hierarchy->getVisibleBoxes(
@@ -4677,7 +4677,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
             const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
             const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
             
-            const double weight = (dx[1]*dx[2])/(L_y*L_z);
+            const Real weight = Real(dx[1]*dx[2])/(L_y*L_z);
             
             for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                  ib != patch_visible_boxes.end();
@@ -4739,7 +4739,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                             
                             const int idx_avg = idx_lo_0 + i;
                             
-                            const double value_to_add = u[idx]*weight/((double) n_overlapped);
+                            const Real value_to_add = u[idx]*weight/((Real) n_overlapped);
                             
                             u_avg_local[idx_avg] += value_to_add;
                         }
@@ -4775,13 +4775,13 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
 /*
  * Compute averaged reciprocal of value with only x-direction as inhomogeneous direction on the coarsest level.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> averaged_reciprocal_quantity;
+    std::vector<Real> averaged_reciprocal_quantity;
     
     /*
      * Get the flattened hierarchy where only the finest existing grid is visible at any given
@@ -4805,15 +4805,15 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
     {
         const int coarsest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_inv_avg_local = (double*)std::malloc(coarsest_level_dim_0*sizeof(double));
+        Real* u_inv_avg_local = (Real*)std::malloc(coarsest_level_dim_0*sizeof(Real));
         
         averaged_reciprocal_quantity.resize(coarsest_level_dim_0);
-        double* u_inv_avg_global = averaged_reciprocal_quantity.data();
+        Real* u_inv_avg_global = averaged_reciprocal_quantity.data();
         
         for (int i = 0; i < coarsest_level_dim_0; i++)
         {
-            u_inv_avg_local[i]  = double(0);
-            u_inv_avg_global[i] = double(0);
+            u_inv_avg_local[i]  = Real(0);
+            u_inv_avg_global[i] = Real(0);
         }
         
         /*
@@ -4859,10 +4859,10 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
              * Get the pointer to data inside the flow model.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                 getCellData(quantity_name);
             
-            double* u = data_quantity->getPointer(component_idx);
+            Real* u = data_quantity->getPointer(component_idx);
             
             const hier::BoxContainer& patch_visible_boxes =
                 flattened_hierarchy->getVisibleBoxes(
@@ -4924,7 +4924,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                     const int idx     = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                     const int idx_avg = idx_lo_0 + i;
                     
-                    const double value_to_add = (double(1)/u[idx])/((double) n_overlapped);
+                    const Real value_to_add = (Real(1)/u[idx])/((Real) n_overlapped);
                     
                     u_inv_avg_local[idx_avg] += value_to_add;
                 }
@@ -4958,17 +4958,17 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        double* u_inv_avg_local = (double*)std::malloc(coarsest_level_dim_0*sizeof(double));
+        Real* u_inv_avg_local = (Real*)std::malloc(coarsest_level_dim_0*sizeof(Real));
         
         averaged_reciprocal_quantity.resize(coarsest_level_dim_0);
-        double* u_inv_avg_global = averaged_reciprocal_quantity.data();
+        Real* u_inv_avg_global = averaged_reciprocal_quantity.data();
         
         for (int i = 0; i < coarsest_level_dim_0; i++)
         {
-            u_inv_avg_local[i]  = double(0);
-            u_inv_avg_global[i] = double(0);
+            u_inv_avg_local[i]  = Real(0);
+            u_inv_avg_global[i] = Real(0);
         }
         
         /*
@@ -5020,10 +5020,10 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
              * Get the pointer to data inside the flow model.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                 getCellData(quantity_name);
             
-            double* u = data_quantity->getPointer(component_idx);
+            Real* u = data_quantity->getPointer(component_idx);
             
             const hier::BoxContainer& patch_visible_boxes =
                 flattened_hierarchy->getVisibleBoxes(
@@ -5042,7 +5042,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
             const int num_ghosts_1_quantity = num_ghosts_quantity[1];
             const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
             
-            const double weight = dx[1]/L_y;
+            const Real weight = Real(dx[1])/L_y;
             
             for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                  ib != patch_visible_boxes.end();
@@ -5097,7 +5097,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                         
                         const int idx_avg = idx_lo_0 + i;
                         
-                        const double value_to_add = (double(1)/u[idx])*weight/((double) n_overlapped);
+                        const Real value_to_add = (Real(1)/u[idx])*weight/((Real) n_overlapped);
                         
                         u_inv_avg_local[idx_avg] += value_to_add;
                     }
@@ -5132,18 +5132,18 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        double* u_inv_avg_local = (double*)std::malloc(coarsest_level_dim_0*sizeof(double));
+        Real* u_inv_avg_local = (Real*)std::malloc(coarsest_level_dim_0*sizeof(Real));
         
         averaged_reciprocal_quantity.resize(coarsest_level_dim_0);
-        double* u_inv_avg_global = averaged_reciprocal_quantity.data();
+        Real* u_inv_avg_global = averaged_reciprocal_quantity.data();
         
         for (int i = 0; i < coarsest_level_dim_0; i++)
         {
-            u_inv_avg_local[i]  = double(0);
-            u_inv_avg_global[i] = double(0);
+            u_inv_avg_local[i]  = Real(0);
+            u_inv_avg_global[i] = Real(0);
         }
         
         /*
@@ -5195,10 +5195,10 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
              * Get the pointer to data inside the flow model.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                 getCellData(quantity_name);
             
-            double* u = data_quantity->getPointer(component_idx);
+            Real* u = data_quantity->getPointer(component_idx);
             
             const hier::BoxContainer& patch_visible_boxes =
                 flattened_hierarchy->getVisibleBoxes(
@@ -5219,7 +5219,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
             const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
             const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
             
-            const double weight = (dx[1]*dx[2])/(L_y*L_z);
+            const Real weight = Real(dx[1]*dx[2])/(L_y*L_z);
             
             for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                  ib != patch_visible_boxes.end();
@@ -5281,7 +5281,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                             
                             const int idx_avg = idx_lo_0 + i;
                             
-                            const double value_to_add = (double(1)/u[idx])*weight/((double) n_overlapped);
+                            const Real value_to_add = (Real(1)/u[idx])*weight/((Real) n_overlapped);
                             
                             u_inv_avg_local[idx_avg] += value_to_add;
                         }
@@ -5318,7 +5318,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
  * Compute averaged value (on product of variables) with only x-direction as inhomogeneous direction on
  * the coarsest level.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -5342,7 +5342,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
  * Compute averaged value (on product of variables) with only x-direction as inhomogeneous direction on
  * the coarsest level.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -5354,7 +5354,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
-    std::vector<double> averaged_quantity;
+    std::vector<Real> averaged_quantity;
     
     /*
      * Get the flattened hierarchy where only the finest existing grid is visible at any given
@@ -5378,15 +5378,15 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
     {
         const int coarsest_level_dim_0 = d_coarsest_level_dims[0];
         
-        double* avg_local = (double*)std::malloc(coarsest_level_dim_0*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(coarsest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(coarsest_level_dim_0);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int i = 0; i < coarsest_level_dim_0; i++)
         {
-            avg_local[i]  = double(0);
-            avg_global[i] = double(0);
+            avg_local[i]  = Real(0);
+            avg_global[i] = Real(0);
         }
         
         /*
@@ -5435,14 +5435,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
              * Get the pointers to data inside the flow model.
              */
             
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
             data_quantities.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
                 data_quantities[qi] = getCellData(quantity_names[qi]);
             }
             
-            std::vector<double*> u_qi;
+            std::vector<Real*> u_qi;
             u_qi.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
@@ -5513,7 +5513,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                     
                     const int idx_avg = idx_lo_0 + i;
                     
-                    double avg = double(1);
+                    Real avg = Real(1);
                     
                     for (int qi = 0; qi < num_quantities; qi++)
                     {
@@ -5529,7 +5529,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                         }
                     }
                     
-                    avg_local[idx_avg] += (avg/((double) n_overlapped));
+                    avg_local[idx_avg] += (avg/((Real) n_overlapped));
                 }
             }
             
@@ -5561,17 +5561,17 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        double* avg_local = (double*)std::malloc(coarsest_level_dim_0*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(coarsest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(coarsest_level_dim_0);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int i = 0; i < coarsest_level_dim_0; i++)
         {
-            avg_local[i]  = double(0);
-            avg_global[i] = double(0);
+            avg_local[i]  = Real(0);
+            avg_global[i] = Real(0);
         }
         
         /*
@@ -5626,14 +5626,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
              * Get the pointers to data inside the flow model.
              */
             
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
             data_quantities.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
                 data_quantities[qi] = getCellData(quantity_names[qi]);
             }
             
-            std::vector<double*> u_qi;
+            std::vector<Real*> u_qi;
             u_qi.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
@@ -5667,7 +5667,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                 ghostcell_dim_0_u_qi.push_back(ghostcell_dims_u_qi[0]);
             }
             
-            const double weight = dx[1]/L_y;
+            const Real weight = Real(dx[1])/L_y;
             
             for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                  ib != patch_visible_boxes.end();
@@ -5719,7 +5719,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                         
                         const int idx_avg = idx_lo_0 + i;
                         
-                        double avg = double(1);
+                        Real avg = Real(1);
                         
                         for (int qi = 0; qi < num_quantities; qi++)
                         {
@@ -5736,7 +5736,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                             }
                         }
                         
-                        avg_local[idx_avg] += (avg*weight/((double) n_overlapped));
+                        avg_local[idx_avg] += (avg*weight/((Real) n_overlapped));
                     }
                 }
             }
@@ -5769,18 +5769,18 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        double* avg_local = (double*)std::malloc(coarsest_level_dim_0*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(coarsest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(coarsest_level_dim_0);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int i = 0; i < coarsest_level_dim_0; i++)
         {
-            avg_local[i]  = double(0);
-            avg_global[i] = double(0);
+            avg_local[i]  = Real(0);
+            avg_global[i] = Real(0);
         }
         
         /*
@@ -5835,14 +5835,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
              * Get the pointers to data inside the flow model.
              */
             
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
             data_quantities.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
                 data_quantities[qi] = getCellData(quantity_names[qi]);
             }
             
-            std::vector<double*> u_qi;
+            std::vector<Real*> u_qi;
             u_qi.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
@@ -5882,7 +5882,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                 ghostcell_dim_1_u_qi.push_back(ghostcell_dims_u_qi[1]);
             }
             
-            const double weight = dx[1]*dx[2]/(L_y*L_z);
+            const Real weight = Real(dx[1]*dx[2])/(L_y*L_z);
             
             for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                  ib != patch_visible_boxes.end();
@@ -5939,7 +5939,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                             
                             const int idx_avg = idx_lo_0 + i;
                             
-                            double avg = double(1);
+                            Real avg = Real(1);
                             
                             for (int qi = 0; qi < num_quantities; qi++)
                             {
@@ -5958,7 +5958,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                                 }
                             }
                             
-                            avg_local[idx_avg] += (avg*weight/((double) n_overlapped));
+                            avg_local[idx_avg] += (avg*weight/((Real) n_overlapped));
                         }
                     }
                 }
@@ -5993,7 +5993,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
  * Compute averaged value (on product of variable derivatives) with only x direction as inhomogeneous direction
  * on the coarsest level.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -6025,7 +6025,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
  * Compute averaged value (on product of variable derivatives) with only x direction as inhomogeneous direction
  * on the coarsest level.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -6099,7 +6099,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
         }
     }
     
-    std::vector<double> averaged_quantity;
+    std::vector<Real> averaged_quantity;
     
     /*
      * Get the flattened hierarchy where only the finest existing grid is visible at any given
@@ -6132,15 +6132,15 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
         
         const int coarsest_level_dim_0 = d_coarsest_level_dims[0];
         
-        double* avg_local = (double*)std::malloc(coarsest_level_dim_0*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(coarsest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(coarsest_level_dim_0);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int i = 0; i < coarsest_level_dim_0; i++)
         {
-            avg_local[i]  = double(0);
-            avg_global[i] = double(0);
+            avg_local[i]  = Real(0);
+            avg_global[i] = Real(0);
         }
         
         /*
@@ -6203,14 +6203,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
              * Get the pointers to data inside the flow model.
              */
             
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
             data_quantities.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
                 data_quantities[qi] = getCellData(quantity_names[qi]);
             }
             
-            std::vector<double*> u_qi;
+            std::vector<Real*> u_qi;
             u_qi.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
@@ -6240,12 +6240,12 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
              * Initialize cell data for the derivatives and get pointers to the cell data.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
-            std::vector<double*> der_qi;
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative;
+            std::vector<Real*> der_qi;
             
             if (num_use_derivative > 0)
             {
-                data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
                 
                 der_qi.resize(num_use_derivative);
                 for (int qi = 0; qi < num_use_derivative; qi++)
@@ -6268,7 +6268,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                         derivative_first_order_x->computeDerivative(
                             data_derivative,
                             data_quantities[qi],
-                            dx[0],
+                            Real(dx[0]),
                             patch_visible_box,
                             count_derivative,
                             component_indices[qi]);
@@ -6316,7 +6316,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                     
                     const int idx_avg = idx_lo_0 + i;
                     
-                    double avg = double(1);
+                    Real avg = Real(1);
                     
                     count_derivative = 0;
                     for (int qi = 0; qi < num_quantities; qi++)
@@ -6355,7 +6355,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                         }
                     }
                     
-                    avg_local[idx_avg] += (avg/((double) n_overlapped));
+                    avg_local[idx_avg] += (avg/((Real) n_overlapped));
                 }
             }
             
@@ -6403,17 +6403,17 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        double* avg_local = (double*)std::malloc(coarsest_level_dim_0*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(coarsest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(coarsest_level_dim_0);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int i = 0; i < coarsest_level_dim_0; i++)
         {
-            avg_local[i]  = double(0);
-            avg_global[i] = double(0);
+            avg_local[i]  = Real(0);
+            avg_global[i] = Real(0);
         }
         
         /*
@@ -6476,14 +6476,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
              * Get the pointers to data inside the flow model.
              */
             
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
             data_quantities.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
                 data_quantities[qi] = getCellData(quantity_names[qi]);
             }
             
-            std::vector<double*> u_qi;
+            std::vector<Real*> u_qi;
             u_qi.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
@@ -6521,12 +6521,12 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
              * Initialize cell data for the derivatives and get pointers to the cell data.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
-            std::vector<double*> der_qi;
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative;
+            std::vector<Real*> der_qi;
             
             if (num_use_derivative > 0)
             {
-                data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
                 
                 der_qi.resize(num_use_derivative);
                 for (int qi = 0; qi < num_use_derivative; qi++)
@@ -6538,7 +6538,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
             const hier::IntVector patch_interior_dims = patch_box.numberCells();
             const int patch_interior_dim_0 = patch_interior_dims[0];
             
-            const double weight = dx[1]/L_y;
+            const Real weight = Real(dx[1])/L_y;
             
             for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                  ib != patch_visible_boxes.end();
@@ -6554,7 +6554,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                         derivative_first_order_x->computeDerivative(
                             data_derivative,
                             data_quantities[qi],
-                            dx[0],
+                            Real(dx[0]),
                             patch_visible_box,
                             count_derivative,
                             component_indices[qi]);
@@ -6566,7 +6566,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                         derivative_first_order_y->computeDerivative(
                             data_derivative,
                             data_quantities[qi],
-                            dx[1],
+                            Real(dx[1]),
                             patch_visible_box,
                             count_derivative,
                             component_indices[qi]);
@@ -6619,7 +6619,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                         
                         const int idx_avg = idx_lo_0 + i;
                         
-                        double avg = double(1);
+                        Real avg = Real(1);
                         
                         count_derivative = 0;
                         for (int qi = 0; qi < num_quantities; qi++)
@@ -6664,7 +6664,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                             }
                         }
                         
-                        avg_local[idx_avg] += (avg*weight/((double) n_overlapped));
+                        avg_local[idx_avg] += (avg*weight/((Real) n_overlapped));
                     }
                 }
             }
@@ -6720,18 +6720,18 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        double* avg_local = (double*)std::malloc(coarsest_level_dim_0*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(coarsest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(coarsest_level_dim_0);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int i = 0; i < coarsest_level_dim_0; i++)
         {
-            avg_local[i]  = double(0);
-            avg_global[i] = double(0);
+            avg_local[i]  = Real(0);
+            avg_global[i] = Real(0);
         }
         
         /*
@@ -6794,14 +6794,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
              * Get the pointers to data inside the flow model.
              */
             
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
             data_quantities.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
                 data_quantities[qi] = getCellData(quantity_names[qi]);
             }
             
-            std::vector<double*> u_qi;
+            std::vector<Real*> u_qi;
             u_qi.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
@@ -6845,12 +6845,12 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
              * Initialize cell data for the derivatives and get pointers to the cell data.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
-            std::vector<double*> der_qi;
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative;
+            std::vector<Real*> der_qi;
             
             if (num_use_derivative > 0)
             {
-                data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
                 
                 der_qi.resize(num_use_derivative);
                 for (int qi = 0; qi < num_use_derivative; qi++)
@@ -6863,7 +6863,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
             const int patch_interior_dim_0 = patch_interior_dims[0];
             const int patch_interior_dim_1 = patch_interior_dims[1];
             
-            const double weight = dx[1]*dx[2]/(L_y*L_z);
+            const Real weight = Real(dx[1]*dx[2])/(L_y*L_z);
             
             for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                  ib != patch_visible_boxes.end();
@@ -6879,7 +6879,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                         derivative_first_order_x->computeDerivative(
                             data_derivative,
                             data_quantities[qi],
-                            dx[0],
+                            Real(dx[0]),
                             patch_visible_box,
                             count_derivative,
                             component_indices[qi]);
@@ -6891,7 +6891,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                         derivative_first_order_y->computeDerivative(
                             data_derivative,
                             data_quantities[qi],
-                            dx[1],
+                            Real(dx[1]),
                             patch_visible_box,
                             count_derivative,
                             component_indices[qi]);
@@ -6903,7 +6903,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                         derivative_first_order_z->computeDerivative(
                             data_derivative,
                             data_quantities[qi],
-                            dx[2],
+                            Real(dx[2]),
                             patch_visible_box,
                             count_derivative,
                             component_indices[qi]);
@@ -6961,7 +6961,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                             
                             const int idx_avg = idx_lo_0 + i;
                             
-                            double avg = double(1);
+                            Real avg = Real(1);
                             
                             count_derivative = 0;
                             for (int qi = 0; qi < num_quantities; qi++)
@@ -7014,7 +7014,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
                                 }
                             }
                             
-                            avg_local[idx_avg] += (avg*weight/((double) n_overlapped));
+                            avg_local[idx_avg] += (avg*weight/((Real) n_overlapped));
                         }
                     }
                 }
@@ -7049,7 +7049,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
  * Compute averaged derivative of value (on product of variables) with only x direction as inhomogeneous direction
  * on the coarsest level.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDirectionOnCoarsestLevel(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -7091,7 +7091,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
     hier::IntVector num_ghosts_der = hier::IntVector::getZero(d_dim);
     num_ghosts_der[derivative_direction] = num_ghosts_derivative;
     
-    std::vector<double> averaged_derivative;
+    std::vector<Real> averaged_derivative;
     
     /*
      * Get the flattened hierarchy where only the finest existing grid is visible at any given
@@ -7122,15 +7122,15 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
         
         const int coarsest_level_dim_0 = d_coarsest_level_dims[0];
         
-        double* der_avg_local = (double*)std::malloc(coarsest_level_dim_0*sizeof(double));
+        Real* der_avg_local = (Real*)std::malloc(coarsest_level_dim_0*sizeof(Real));
         
         averaged_derivative.resize(coarsest_level_dim_0);
-        double* der_avg_global = averaged_derivative.data();
+        Real* der_avg_global = averaged_derivative.data();
         
         for (int i = 0; i < coarsest_level_dim_0; i++)
         {
-            der_avg_local[i]  = double(0);
-            der_avg_global[i] = double(0);
+            der_avg_local[i]  = Real(0);
+            der_avg_global[i] = Real(0);
         }
         
         /*
@@ -7188,14 +7188,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
              * Get the pointers to data inside the flow model.
              */
             
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
             data_quantities.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
                 data_quantities[qi] = getCellData(quantity_names[qi]);
             }
             
-            std::vector<double*> u_qi;
+            std::vector<Real*> u_qi;
             u_qi.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
@@ -7226,14 +7226,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
              * Also, get pointers to the cell data containers.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative(
-                new pdat::CellData<double>(patch_box, 1, hier::IntVector::getZero(d_dim)));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative(
+                new pdat::CellData<Real>(patch_box, 1, hier::IntVector::getZero(d_dim)));
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_product(
-                new pdat::CellData<double>(patch_box, 1, num_ghosts_der));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_product(
+                new pdat::CellData<Real>(patch_box, 1, num_ghosts_der));
             
-            double* der     = data_derivative->getPointer(0);
-            double* product = data_product->getPointer(0);
+            Real* der     = data_derivative->getPointer(0);
+            Real* product = data_product->getPointer(0);
             
             const hier::IntVector num_ghosts_product = data_product->getGhostCellWidth();
             
@@ -7242,7 +7242,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
             const hier::IntVector patch_interior_dims = patch_box.numberCells();
             const int patch_interior_dim_0 = patch_interior_dims[0];
             
-            data_product->fillAll(double(1));
+            data_product->fillAll(Real(1));
             
             for (int qi = 0; qi < num_quantities; qi++)
             {
@@ -7279,7 +7279,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                     derivative_first_order_x->computeDerivative(
                         data_derivative,
                         data_product,
-                        dx[0],
+                        Real(dx[0]),
                         patch_visible_box,
                         0,
                         0);
@@ -7326,7 +7326,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                     
                     const int idx = relative_idx_lo_0 + i;
                     
-                    const double value_to_add = der[idx]/((double) n_overlapped);
+                    const Real value_to_add = der[idx]/((Real) n_overlapped);
                     
                     der_avg_local[idx_avg] += value_to_add;
                 }
@@ -7374,17 +7374,17 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        double* der_avg_local = (double*)std::malloc(coarsest_level_dim_0*sizeof(double));
+        Real* der_avg_local = (Real*)std::malloc(coarsest_level_dim_0*sizeof(Real));
         
         averaged_derivative.resize(coarsest_level_dim_0);
-        double* der_avg_global = averaged_derivative.data();
+        Real* der_avg_global = averaged_derivative.data();
         
         for (int i = 0; i < coarsest_level_dim_0; i++)
         {
-            der_avg_local[i]  = double(0);
-            der_avg_global[i] = double(0);
+            der_avg_local[i]  = Real(0);
+            der_avg_global[i] = Real(0);
         }
         
         /*
@@ -7442,14 +7442,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
              * Get the pointers to data inside the flow model.
              */
             
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
             data_quantities.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
                 data_quantities[qi] = getCellData(quantity_names[qi]);
             }
             
-            std::vector<double*> u_qi;
+            std::vector<Real*> u_qi;
             u_qi.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
@@ -7488,14 +7488,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
              * Also, get pointers to the cell data containers.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative(
-                new pdat::CellData<double>(patch_box, 1, hier::IntVector::getZero(d_dim)));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative(
+                new pdat::CellData<Real>(patch_box, 1, hier::IntVector::getZero(d_dim)));
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_product(
-                new pdat::CellData<double>(patch_box, 1, num_ghosts_der));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_product(
+                new pdat::CellData<Real>(patch_box, 1, num_ghosts_der));
             
-            double* der     = data_derivative->getPointer(0);
-            double* product = data_product->getPointer(0);
+            Real* der     = data_derivative->getPointer(0);
+            Real* product = data_product->getPointer(0);
             
             const hier::IntVector num_ghosts_product = data_product->getGhostCellWidth();
             const hier::IntVector ghostcell_dims_product = data_product->getGhostBox().numberCells();
@@ -7508,7 +7508,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
             const int patch_interior_dim_0 = patch_interior_dims[0];
             const int patch_interior_dim_1 = patch_interior_dims[1];
             
-            data_product->fillAll(double(1));
+            data_product->fillAll(Real(1));
             
             for (int qi = 0; qi < num_quantities; qi++)
             {
@@ -7546,7 +7546,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                 }
             }
             
-            const double weight = dx[1]/L_y;
+            const Real weight = Real(dx[1])/L_y;
             
             for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                  ib != patch_visible_boxes.end();
@@ -7559,7 +7559,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                     derivative_first_order_x->computeDerivative(
                         data_derivative,
                         data_product,
-                        dx[0],
+                        Real(dx[0]),
                         patch_visible_box,
                         0,
                         0);
@@ -7569,7 +7569,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                     derivative_first_order_y->computeDerivative(
                         data_derivative,
                         data_product,
-                        dx[1],
+                        Real(dx[1]),
                         patch_visible_box,
                         0,
                         0);
@@ -7622,7 +7622,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                         const int idx = (relative_idx_lo_0 + i) +
                             (relative_idx_lo_1 + j)*patch_interior_dim_0;
                         
-                        const double value_to_add = der[idx]*weight/((double) n_overlapped);
+                        const Real value_to_add = der[idx]*weight/((Real) n_overlapped);
                         
                         der_avg_local[idx_avg] += value_to_add;
                     }
@@ -7678,18 +7678,18 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        double* der_avg_local = (double*)std::malloc(coarsest_level_dim_0*sizeof(double));
+        Real* der_avg_local = (Real*)std::malloc(coarsest_level_dim_0*sizeof(Real));
         
         averaged_derivative.resize(coarsest_level_dim_0);
-        double* der_avg_global = averaged_derivative.data();
+        Real* der_avg_global = averaged_derivative.data();
         
         for (int i = 0; i < coarsest_level_dim_0; i++)
         {
-            der_avg_local[i]  = double(0);
-            der_avg_global[i] = double(0);
+            der_avg_local[i]  = Real(0);
+            der_avg_global[i] = Real(0);
         }
         
         /*
@@ -7747,14 +7747,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
              * Get the pointers to data inside the flow model.
              */
             
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
             data_quantities.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
                 data_quantities[qi] = getCellData(quantity_names[qi]);
             }
             
-            std::vector<double*> u_qi;
+            std::vector<Real*> u_qi;
             u_qi.resize(num_quantities);
             for (int qi = 0; qi < num_quantities; qi++)
             {
@@ -7799,14 +7799,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
              * Also, get pointers to the cell data containers.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative(
-                new pdat::CellData<double>(patch_box, 1, hier::IntVector::getZero(d_dim)));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative(
+                new pdat::CellData<Real>(patch_box, 1, hier::IntVector::getZero(d_dim)));
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_product(
-                new pdat::CellData<double>(patch_box, 1, num_ghosts_der));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_product(
+                new pdat::CellData<Real>(patch_box, 1, num_ghosts_der));
             
-            double* der     = data_derivative->getPointer(0);
-            double* product = data_product->getPointer(0);
+            Real* der     = data_derivative->getPointer(0);
+            Real* product = data_product->getPointer(0);
             
             const hier::IntVector num_ghosts_product = data_product->getGhostCellWidth();
             const hier::IntVector ghostcell_dims_product = data_product->getGhostBox().numberCells();
@@ -7822,7 +7822,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
             const int patch_interior_dim_1 = patch_interior_dims[1];
             const int patch_interior_dim_2 = patch_interior_dims[2];
             
-            data_product->fillAll(double(1));
+            data_product->fillAll(Real(1));
             
             for (int qi = 0; qi < num_quantities; qi++)
             {
@@ -7874,7 +7874,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                 }
             }
             
-            const double weight = (dx[1]*dx[2])/(L_y*L_z);
+            const Real weight = Real(dx[1]*dx[2])/(L_y*L_z);
             
             for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                  ib != patch_visible_boxes.end();
@@ -7887,7 +7887,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                     derivative_first_order_x->computeDerivative(
                         data_derivative,
                         data_product,
-                        dx[0],
+                        Real(dx[0]),
                         patch_visible_box,
                         0,
                         0);
@@ -7897,7 +7897,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                     derivative_first_order_y->computeDerivative(
                         data_derivative,
                         data_product,
-                        dx[1],
+                        Real(dx[1]),
                         patch_visible_box,
                         0,
                         0);
@@ -7907,7 +7907,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                      derivative_first_order_z->computeDerivative(
                         data_derivative,
                         data_product,
-                        dx[2],
+                        Real(dx[2]),
                         patch_visible_box,
                         0,
                         0);
@@ -7967,7 +7967,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                                 (relative_idx_lo_2 + k)*patch_interior_dim_0*
                                     patch_interior_dim_1;
                             
-                            const double value_to_add = der[idx]*weight/((double) n_overlapped);
+                            const Real value_to_add = der[idx]*weight/((Real) n_overlapped);
                             
                             der_avg_local[idx_avg] += value_to_add;
                         }
@@ -8003,13 +8003,13 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
 /*
  * Compute averaged value with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> averaged_quantity;
+    std::vector<Real> averaged_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -8035,15 +8035,15 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_0);
-        double* u_avg_global = averaged_quantity.data();
+        Real* u_avg_global = averaged_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_avg_local[i]  = double(0);
-            u_avg_global[i] = double(0);
+            u_avg_local[i]  = Real(0);
+            u_avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -8107,10 +8107,10 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -8171,7 +8171,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        const double value_to_add = u[idx]/((double) n_overlapped);
+                        const Real value_to_add = u[idx]/((Real) n_overlapped);
                         
                         for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                         {
@@ -8211,17 +8211,17 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        double* u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_0);
-        double* u_avg_global = averaged_quantity.data();
+        Real* u_avg_global = averaged_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_avg_local[i]  = double(0);
-            u_avg_global[i] = double(0);
+            u_avg_local[i]  = Real(0);
+            u_avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -8291,10 +8291,10 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -8313,7 +8313,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 const int num_ghosts_1_quantity = num_ghosts_quantity[1];
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 
-                const double weight = dx[1]/L_y;
+                const Real weight = Real(dx[1])/L_y;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -8366,7 +8366,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double value_to_add = u[idx]*weight/((double) n_overlapped);
+                            const Real value_to_add = u[idx]*weight/((Real) n_overlapped);
                             
                             for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                             {
@@ -8407,18 +8407,18 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        double* u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_0);
-        double* u_avg_global = averaged_quantity.data();
+        Real* u_avg_global = averaged_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_avg_local[i]  = double(0);
-            u_avg_global[i] = double(0);
+            u_avg_local[i]  = Real(0);
+            u_avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -8488,10 +8488,10 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -8512,7 +8512,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
                 
-                const double weight = (dx[1]*dx[2])/(L_y*L_z);
+                const Real weight = Real(dx[1]*dx[2])/(L_y*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -8572,7 +8572,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double value_to_add = u[idx]*weight/((double) n_overlapped);
+                                const Real value_to_add = u[idx]*weight/((Real) n_overlapped);
                                 
                                 for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                                 {
@@ -8614,13 +8614,13 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
 /*
  * Compute averaged reciprocal of value with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> averaged_reciprocal_quantity;
+    std::vector<Real> averaged_reciprocal_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -8646,15 +8646,15 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_inv_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_inv_avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_reciprocal_quantity.resize(finest_level_dim_0);
-        double* u_inv_avg_global = averaged_reciprocal_quantity.data();
+        Real* u_inv_avg_global = averaged_reciprocal_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_inv_avg_local[i]  = double(0);
-            u_inv_avg_global[i] = double(0);
+            u_inv_avg_local[i]  = Real(0);
+            u_inv_avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -8718,10 +8718,10 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -8782,7 +8782,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        const double value_to_add = (double(1)/u[idx])/((double) n_overlapped);
+                        const Real value_to_add = (Real(1)/u[idx])/((Real) n_overlapped);
                         
                         for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                         {
@@ -8822,17 +8822,17 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        double* u_inv_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_inv_avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_reciprocal_quantity.resize(finest_level_dim_0);
-        double* u_inv_avg_global = averaged_reciprocal_quantity.data();
+        Real* u_inv_avg_global = averaged_reciprocal_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_inv_avg_local[i]  = double(0);
-            u_inv_avg_global[i] = double(0);
+            u_inv_avg_local[i]  = Real(0);
+            u_inv_avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -8902,10 +8902,10 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -8924,7 +8924,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                 const int num_ghosts_1_quantity = num_ghosts_quantity[1];
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 
-                const double weight = dx[1]/L_y;
+                const Real weight = Real(dx[1])/L_y;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -8977,7 +8977,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double value_to_add = (double(1)/u[idx])*weight/((double) n_overlapped);
+                            const Real value_to_add = (Real(1)/u[idx])*weight/((Real) n_overlapped);
                             
                             for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                             {
@@ -9018,18 +9018,18 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        double* u_inv_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_inv_avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_reciprocal_quantity.resize(finest_level_dim_0);
-        double* u_inv_avg_global = averaged_reciprocal_quantity.data();
+        Real* u_inv_avg_global = averaged_reciprocal_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_inv_avg_local[i]  = double(0);
-            u_inv_avg_global[i] = double(0);
+            u_inv_avg_local[i]  = Real(0);
+            u_inv_avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -9099,10 +9099,10 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -9123,7 +9123,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
                 
-                const double weight = (dx[1]*dx[2])/(L_y*L_z);
+                const Real weight = Real(dx[1]*dx[2])/(L_y*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -9183,7 +9183,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double value_to_add = (double(1)/u[idx])*weight/((double) n_overlapped);
+                                const Real value_to_add = (Real(1)/u[idx])*weight/((Real) n_overlapped);
                                 
                                 for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                                 {
@@ -9225,7 +9225,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
 /*
  * Compute averaged value (on product of variables) with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -9248,7 +9248,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
 /*
  * Compute averaged value (on product of variables) with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -9260,7 +9260,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
-    std::vector<double> averaged_quantity;
+    std::vector<Real> averaged_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -9286,15 +9286,15 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_0);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            avg_local[i]  = double(0);
-            avg_global[i] = double(0);
+            avg_local[i]  = Real(0);
+            avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -9361,14 +9361,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -9441,7 +9441,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                             
-                            double avg = double(1);
+                            Real avg = Real(1);
                             
                             for (int qi = 0; qi < num_quantities; qi++)
                             {
@@ -9457,7 +9457,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                                 }
                             }
                             
-                            avg_local[idx_fine] += (avg/((double) n_overlapped));
+                            avg_local[idx_fine] += (avg/((Real) n_overlapped));
                         }
                     }
                 }
@@ -9491,17 +9491,17 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        double* avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_0);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            avg_local[i]  = double(0);
-            avg_global[i] = double(0);
+            avg_local[i]  = Real(0);
+            avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -9574,14 +9574,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -9615,7 +9615,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                     ghostcell_dim_0_u_qi.push_back(ghostcell_dims_u_qi[0]);
                 }
                 
-                const double weight = dx[1]/L_y;
+                const Real weight = Real(dx[1])/L_y;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -9669,7 +9669,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                 
-                                double avg = double(1);
+                                Real avg = Real(1);
                                 
                                 for (int qi = 0; qi < num_quantities; qi++)
                                 {
@@ -9686,7 +9686,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                                     }
                                 }
                                 
-                                avg_local[idx_fine] += (avg*weight/((double) n_overlapped));
+                                avg_local[idx_fine] += (avg*weight/((Real) n_overlapped));
                             }
                         }
                     }
@@ -9721,18 +9721,18 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        double* avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_0);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            avg_local[i]  = double(0);
-            avg_global[i] = double(0);
+            avg_local[i]  = Real(0);
+            avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -9805,14 +9805,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -9852,7 +9852,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                     ghostcell_dim_1_u_qi.push_back(ghostcell_dims_u_qi[1]);
                 }
                 
-                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                const Real weight = Real(dx[1]*dx[2])/(L_y*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -9911,7 +9911,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                     
-                                    double avg = double(1);
+                                    Real avg = Real(1);
                                     
                                     for (int qi = 0; qi < num_quantities; qi++)
                                     {
@@ -9930,7 +9930,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                                         }
                                     }
                                     
-                                    avg_local[idx_fine] += (avg*weight/((double) n_overlapped));
+                                    avg_local[idx_fine] += (avg*weight/((Real) n_overlapped));
                                 }
                             }
                         }
@@ -9966,7 +9966,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
 /*
  * Compute averaged value (on product of variable derivatives) with only x direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -9997,7 +9997,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
 /*
  * Compute averaged value (on product of variable derivatives) with only x direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -10071,7 +10071,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
         }
     }
     
-    std::vector<double> averaged_quantity;
+    std::vector<Real> averaged_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -10106,15 +10106,15 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
         
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_0);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            avg_local[i]  = double(0);
-            avg_global[i] = double(0);
+            avg_local[i]  = Real(0);
+            avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -10195,14 +10195,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -10232,12 +10232,12 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Initialize cell data for the derivatives and get pointers to the cell data.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
-                std::vector<double*> der_qi;
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative;
+                std::vector<Real*> der_qi;
                 
                 if (num_use_derivative > 0)
                 {
-                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
                     
                     der_qi.resize(num_use_derivative);
                     for (int qi = 0; qi < num_use_derivative; qi++)
@@ -10260,7 +10260,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                             derivative_first_order_x->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[0],
+                                Real(dx[0]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -10306,7 +10306,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                          * Compute the linear indices and the data to add.
                          */
                         
-                        double avg = double(1);
+                        Real avg = Real(1);
                         
                         count_derivative = 0;
                         for (int qi = 0; qi < num_quantities; qi++)
@@ -10353,7 +10353,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                             
-                            avg_local[idx_fine] += (avg/((double) n_overlapped));
+                            avg_local[idx_fine] += (avg/((Real) n_overlapped));
                         }
                     }
                 }
@@ -10403,17 +10403,17 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        double* avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_0);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            avg_local[i]  = double(0);
-            avg_global[i] = double(0);
+            avg_local[i]  = Real(0);
+            avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -10494,14 +10494,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -10539,12 +10539,12 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Initialize cell data for the derivatives and get pointers to the cell data.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
-                std::vector<double*> der_qi;
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative;
+                std::vector<Real*> der_qi;
                 
                 if (num_use_derivative > 0)
                 {
-                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
                     
                     der_qi.resize(num_use_derivative);
                     for (int qi = 0; qi < num_use_derivative; qi++)
@@ -10556,7 +10556,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 const hier::IntVector patch_interior_dims = patch_box.numberCells();
                 const int patch_interior_dim_0 = patch_interior_dims[0];
                 
-                const double weight = dx[1]/L_y;
+                const Real weight = Real(dx[1])/L_y;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -10572,7 +10572,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                             derivative_first_order_x->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[0],
+                                Real(dx[0]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -10584,7 +10584,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                             derivative_first_order_y->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[1],
+                                Real(dx[1]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -10635,7 +10635,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                              * Compute the linear indices and the data to add.
                              */
                             
-                            double avg = double(1);
+                            Real avg = Real(1);
                             
                             count_derivative = 0;
                             for (int qi = 0; qi < num_quantities; qi++)
@@ -10688,7 +10688,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                 
-                                avg_local[idx_fine] += (avg*weight/((double) n_overlapped));
+                                avg_local[idx_fine] += (avg*weight/((Real) n_overlapped));
                             }
                         }
                     }
@@ -10746,18 +10746,18 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        double* avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_0);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            avg_local[i]  = double(0);
-            avg_global[i] = double(0);
+            avg_local[i]  = Real(0);
+            avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -10838,14 +10838,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -10889,12 +10889,12 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Initialize cell data for the derivatives and get pointers to the cell data.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
-                std::vector<double*> der_qi;
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative;
+                std::vector<Real*> der_qi;
                 
                 if (num_use_derivative > 0)
                 {
-                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
                     
                     der_qi.resize(num_use_derivative);
                     for (int qi = 0; qi < num_use_derivative; qi++)
@@ -10907,7 +10907,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 const int patch_interior_dim_0 = patch_interior_dims[0];
                 const int patch_interior_dim_1 = patch_interior_dims[1];
                 
-                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                const Real weight = Real(dx[1]*dx[2])/(L_y*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -10923,7 +10923,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                             derivative_first_order_x->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[0],
+                                Real(dx[0]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -10935,7 +10935,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                             derivative_first_order_y->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[1],
+                                Real(dx[1]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -10947,7 +10947,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                             derivative_first_order_z->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[2],
+                                Real(dx[2]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -11003,7 +11003,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                                  * Compute the linear index and the data to add.
                                  */
                                 
-                                double avg = double(1);
+                                Real avg = Real(1);
                                 
                                 count_derivative = 0;
                                 for (int qi = 0; qi < num_quantities; qi++)
@@ -11064,7 +11064,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                     
-                                    avg_local[idx_fine] += (avg*weight/((double) n_overlapped));
+                                    avg_local[idx_fine] += (avg*weight/((Real) n_overlapped));
                                 }
                             }
                         }
@@ -11100,7 +11100,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
 /*
  * Compute averaged derivative of value (on product of variables) with only x direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -11142,7 +11142,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
     hier::IntVector num_ghosts_der = hier::IntVector::getZero(d_dim);
     num_ghosts_der[derivative_direction] = num_ghosts_derivative;
     
-    std::vector<double> averaged_derivative;
+    std::vector<Real> averaged_derivative;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -11175,15 +11175,15 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
         
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* der_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* der_avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_derivative.resize(finest_level_dim_0);
-        double* der_avg_global = averaged_derivative.data();
+        Real* der_avg_global = averaged_derivative.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            der_avg_local[i]  = double(0);
-            der_avg_global[i] = double(0);
+            der_avg_local[i]  = Real(0);
+            der_avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -11259,14 +11259,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -11297,14 +11297,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                  * Also, get pointers to the cell data containers.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative(
-                    new pdat::CellData<double>(patch_box, 1, hier::IntVector::getZero(d_dim)));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative(
+                    new pdat::CellData<Real>(patch_box, 1, hier::IntVector::getZero(d_dim)));
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_product(
-                    new pdat::CellData<double>(patch_box, 1, num_ghosts_der));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_product(
+                    new pdat::CellData<Real>(patch_box, 1, num_ghosts_der));
                 
-                double* der     = data_derivative->getPointer(0);
-                double* product = data_product->getPointer(0);
+                Real* der     = data_derivative->getPointer(0);
+                Real* product = data_product->getPointer(0);
                 
                 const hier::IntVector num_ghosts_product = data_product->getGhostCellWidth();
                 
@@ -11313,7 +11313,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                 const hier::IntVector patch_interior_dims = patch_box.numberCells();
                 const int patch_interior_dim_0 = patch_interior_dims[0];
                 
-                data_product->fillAll(double(1));
+                data_product->fillAll(Real(1));
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -11350,7 +11350,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                         derivative_first_order_x->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[0],
+                            Real(dx[0]),
                             patch_visible_box,
                             0,
                             0);
@@ -11395,7 +11395,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                         
                         const int idx = relative_idx_lo_0 + i;
                         
-                        const double value_to_add = der[idx]/((double) n_overlapped);
+                        const Real value_to_add = der[idx]/((Real) n_overlapped);
                         
                         /*
                          * Add the data.
@@ -11453,17 +11453,17 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        double* der_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* der_avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_derivative.resize(finest_level_dim_0);
-        double* der_avg_global = averaged_derivative.data();
+        Real* der_avg_global = averaged_derivative.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            der_avg_local[i]  = double(0);
-            der_avg_global[i] = double(0);
+            der_avg_local[i]  = Real(0);
+            der_avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -11539,14 +11539,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -11585,14 +11585,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                  * Also, get pointers to the cell data containers.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative(
-                    new pdat::CellData<double>(patch_box, 1, hier::IntVector::getZero(d_dim)));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative(
+                    new pdat::CellData<Real>(patch_box, 1, hier::IntVector::getZero(d_dim)));
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_product(
-                    new pdat::CellData<double>(patch_box, 1, num_ghosts_der));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_product(
+                    new pdat::CellData<Real>(patch_box, 1, num_ghosts_der));
                 
-                double* der     = data_derivative->getPointer(0);
-                double* product = data_product->getPointer(0);
+                Real* der     = data_derivative->getPointer(0);
+                Real* product = data_product->getPointer(0);
                 
                 const hier::IntVector num_ghosts_product = data_product->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_product = data_product->getGhostBox().numberCells();
@@ -11605,7 +11605,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                 const int patch_interior_dim_0 = patch_interior_dims[0];
                 const int patch_interior_dim_1 = patch_interior_dims[1];
                 
-                data_product->fillAll(double(1));
+                data_product->fillAll(Real(1));
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -11643,7 +11643,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                     }
                 }
                 
-                const double weight = dx[1]/L_y;
+                const Real weight = Real(dx[1])/L_y;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -11656,7 +11656,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                         derivative_first_order_x->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[0],
+                            Real(dx[0]),
                             patch_visible_box,
                             0,
                             0);
@@ -11666,7 +11666,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                         derivative_first_order_y->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[1],
+                            Real(dx[1]),
                             patch_visible_box,
                             0,
                             0);
@@ -11717,7 +11717,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                             const int idx = (relative_idx_lo_0 + i) +
                                 (relative_idx_lo_1 + j)*patch_interior_dim_0;
                             
-                            const double value_to_add = der[idx]*weight/((double) n_overlapped);
+                            const Real value_to_add = der[idx]*weight/((Real) n_overlapped);
                             
                             /*
                              * Add the data.
@@ -11783,18 +11783,18 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        double* der_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* der_avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_derivative.resize(finest_level_dim_0);
-        double* der_avg_global = averaged_derivative.data();
+        Real* der_avg_global = averaged_derivative.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            der_avg_local[i]  = double(0);
-            der_avg_global[i] = double(0);
+            der_avg_local[i]  = Real(0);
+            der_avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -11870,14 +11870,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -11922,14 +11922,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                  * Also, get pointers to the cell data containers.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative(
-                    new pdat::CellData<double>(patch_box, 1, hier::IntVector::getZero(d_dim)));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative(
+                    new pdat::CellData<Real>(patch_box, 1, hier::IntVector::getZero(d_dim)));
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_product(
-                    new pdat::CellData<double>(patch_box, 1, num_ghosts_der));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_product(
+                    new pdat::CellData<Real>(patch_box, 1, num_ghosts_der));
                 
-                double* der     = data_derivative->getPointer(0);
-                double* product = data_product->getPointer(0);
+                Real* der     = data_derivative->getPointer(0);
+                Real* product = data_product->getPointer(0);
                 
                 const hier::IntVector num_ghosts_product = data_product->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_product = data_product->getGhostBox().numberCells();
@@ -11945,7 +11945,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                 const int patch_interior_dim_1 = patch_interior_dims[1];
                 const int patch_interior_dim_2 = patch_interior_dims[2];
                 
-                data_product->fillAll(double(1));
+                data_product->fillAll(Real(1));
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -11997,7 +11997,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                     }
                 }
                 
-                const double weight = (dx[1]*dx[2])/(L_y*L_z);
+                const Real weight = Real(dx[1]*dx[2])/(L_y*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -12010,7 +12010,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                         derivative_first_order_x->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[0],
+                            Real(dx[0]),
                             patch_visible_box,
                             0,
                             0);
@@ -12020,7 +12020,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                         derivative_first_order_y->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[1],
+                            Real(dx[1]),
                             patch_visible_box,
                             0,
                             0);
@@ -12030,7 +12030,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                          derivative_first_order_z->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[2],
+                            Real(dx[2]),
                             patch_visible_box,
                             0,
                             0);
@@ -12088,7 +12088,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                                     (relative_idx_lo_2 + k)*patch_interior_dim_0*
                                         patch_interior_dim_1;
                                 
-                                const double value_to_add = der[idx]*weight/((double) n_overlapped);
+                                const Real value_to_add = der[idx]*weight/((Real) n_overlapped);
                                 
                                 /*
                                  * Add the data.
@@ -12134,12 +12134,12 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
 /*
  * Compute averaged value with only y-direction as inhomogeneous direction.
  */
-std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
+std::vector<Real> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> averaged_quantity;
+    std::vector<Real> averaged_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -12177,17 +12177,17 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
         
-        double* u_avg_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* u_avg_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_1);
-        double* u_avg_global = averaged_quantity.data();
+        Real* u_avg_global = averaged_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            u_avg_local[j]  = double(0);
-            u_avg_global[j] = double(0);
+            u_avg_local[j]  = Real(0);
+            u_avg_global[j] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -12257,10 +12257,10 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -12279,7 +12279,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                 const int num_ghosts_1_quantity = num_ghosts_quantity[1];
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 
-                const double weight = dx[0]/L_x;
+                const Real weight = Real(dx[0])/L_x;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -12332,7 +12332,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double value_to_add = u[idx]*weight/((double) n_overlapped);
+                            const Real value_to_add = u[idx]*weight/((Real) n_overlapped);
                             
                             for (int jj = 0; jj < ratio_to_finest_level_1; jj++)
                             {
@@ -12373,18 +12373,18 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        double* u_avg_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* u_avg_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_1);
-        double* u_avg_global = averaged_quantity.data();
+        Real* u_avg_global = averaged_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            u_avg_local[j]  = double(0);
-            u_avg_global[j] = double(0);
+            u_avg_local[j]  = Real(0);
+            u_avg_global[j] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -12454,10 +12454,10 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -12478,7 +12478,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
                 
-                const double weight = (dx[0]*dx[2])/(L_x*L_z);
+                const Real weight = Real(dx[0]*dx[2])/(L_x*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -12538,7 +12538,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double value_to_add = u[idx]*weight/((double) n_overlapped);
+                                const Real value_to_add = u[idx]*weight/((Real) n_overlapped);
                                 
                                 for (int jj = 0; jj < ratio_to_finest_level_1; jj++)
                                 {
@@ -12580,13 +12580,13 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
 /*
  * Compute averaged reciprocal of value with only y-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> averaged_reciprocal_quantity;
+    std::vector<Real> averaged_reciprocal_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -12624,17 +12624,17 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDire
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
         
-        double* u_inv_avg_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* u_inv_avg_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         averaged_reciprocal_quantity.resize(finest_level_dim_1);
-        double* u_inv_avg_global = averaged_reciprocal_quantity.data();
+        Real* u_inv_avg_global = averaged_reciprocal_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            u_inv_avg_local[j]  = double(0);
-            u_inv_avg_global[j] = double(0);
+            u_inv_avg_local[j]  = Real(0);
+            u_inv_avg_global[j] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -12704,10 +12704,10 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDire
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -12726,7 +12726,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDire
                 const int num_ghosts_1_quantity = num_ghosts_quantity[1];
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 
-                const double weight = dx[0]/L_x;
+                const Real weight = Real(dx[0])/L_x;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -12779,7 +12779,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDire
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double value_to_add = (double(1)/u[idx])*weight/((double) n_overlapped);
+                            const Real value_to_add = (Real(1)/u[idx])*weight/((Real) n_overlapped);
                             
                             for (int jj = 0; jj < ratio_to_finest_level_1; jj++)
                             {
@@ -12820,18 +12820,18 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDire
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        double* u_inv_avg_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* u_inv_avg_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         averaged_reciprocal_quantity.resize(finest_level_dim_1);
-        double* u_inv_avg_global = averaged_reciprocal_quantity.data();
+        Real* u_inv_avg_global = averaged_reciprocal_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            u_inv_avg_local[j]  = double(0);
-            u_inv_avg_global[j] = double(0);
+            u_inv_avg_local[j]  = Real(0);
+            u_inv_avg_global[j] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -12901,10 +12901,10 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDire
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -12925,7 +12925,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDire
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
                 
-                const double weight = (dx[0]*dx[2])/(L_x*L_z);
+                const Real weight = Real(dx[0]*dx[2])/(L_x*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -12985,7 +12985,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDire
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double value_to_add = (double(1)/u[idx])*weight/((double) n_overlapped);
+                                const Real value_to_add = (Real(1)/u[idx])*weight/((Real) n_overlapped);
                                 
                                 for (int jj = 0; jj < ratio_to_finest_level_1; jj++)
                                 {
@@ -13027,7 +13027,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDire
 /*
  * Compute averaged value (on product of variables) with only y-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -13050,7 +13050,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
 /*
  * Compute averaged value (on product of variables) with only y-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -13062,7 +13062,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
-    std::vector<double> averaged_quantity;
+    std::vector<Real> averaged_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -13100,17 +13100,17 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
         
-        double* avg_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_1);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            avg_local[j]  = double(0);
-            avg_global[j] = double(0);
+            avg_local[j]  = Real(0);
+            avg_global[j] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -13183,14 +13183,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -13224,7 +13224,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                     ghostcell_dim_0_u_qi.push_back(ghostcell_dims_u_qi[0]);
                 }
                 
-                const double weight = dx[0]/L_x;
+                const Real weight = Real(dx[0])/L_x;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -13278,7 +13278,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                             {
                                 const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                 
-                                double avg = double(1);
+                                Real avg = Real(1);
                                 
                                 for (int qi = 0; qi < num_quantities; qi++)
                                 {
@@ -13295,7 +13295,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                                     }
                                 }
                                 
-                                avg_local[idx_fine] += (avg*weight/((double) n_overlapped));
+                                avg_local[idx_fine] += (avg*weight/((Real) n_overlapped));
                             }
                         }
                     }
@@ -13330,18 +13330,18 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        double* avg_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_1);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            avg_local[j]  = double(0);
-            avg_global[j] = double(0);
+            avg_local[j]  = Real(0);
+            avg_global[j] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -13414,14 +13414,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -13461,7 +13461,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                     ghostcell_dim_1_u_qi.push_back(ghostcell_dims_u_qi[1]);
                 }
                 
-                const double weight = dx[0]*dx[2]/(L_x*L_z);
+                const Real weight = Real(dx[0]*dx[2])/(L_x*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -13520,7 +13520,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                                 {
                                     const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                     
-                                    double avg = double(1);
+                                    Real avg = Real(1);
                                     
                                     for (int qi = 0; qi < num_quantities; qi++)
                                     {
@@ -13539,7 +13539,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                                         }
                                     }
                                     
-                                    avg_local[idx_fine] += (avg*weight/((double) n_overlapped));
+                                    avg_local[idx_fine] += (avg*weight/((Real) n_overlapped));
                                 }
                             }
                         }
@@ -13575,7 +13575,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
 /*
  * Compute averaged value (on product of variable derivatives) with only y direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -13606,7 +13606,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
 /*
  * Compute averaged value (on product of variable derivatives) with only y direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -13670,7 +13670,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
         }
     }
     
-    std::vector<double> averaged_quantity;
+    std::vector<Real> averaged_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -13716,17 +13716,17 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
         
-        double* avg_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_1);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            avg_local[j]  = double(0);
-            avg_global[j] = double(0);
+            avg_local[j]  = Real(0);
+            avg_global[j] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -13807,14 +13807,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -13852,12 +13852,12 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                  * Initialize cell data for the derivatives and get pointers to the cell data.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
-                std::vector<double*> der_qi;
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative;
+                std::vector<Real*> der_qi;
                 
                 if (num_use_derivative > 0)
                 {
-                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
                     
                     der_qi.resize(num_use_derivative);
                     for (int qi = 0; qi < num_use_derivative; qi++)
@@ -13869,7 +13869,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                 const hier::IntVector patch_interior_dims = patch_box.numberCells();
                 const int patch_interior_dim_0 = patch_interior_dims[0];
                 
-                const double weight = dx[0]/L_x;
+                const Real weight = Real(dx[0])/L_x;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -13885,7 +13885,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                             derivative_first_order_x->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[0],
+                                Real(dx[0]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -13897,7 +13897,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                             derivative_first_order_y->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[1],
+                                Real(dx[1]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -13948,7 +13948,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                              * Compute the linear indices and the data to add.
                              */
                             
-                            double avg = double(1);
+                            Real avg = Real(1);
                             
                             count_derivative = 0;
                             for (int qi = 0; qi < num_quantities; qi++)
@@ -14001,7 +14001,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                             {
                                 const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                 
-                                avg_local[idx_fine] += (avg*weight/((double) n_overlapped));
+                                avg_local[idx_fine] += (avg*weight/((Real) n_overlapped));
                             }
                         }
                     }
@@ -14059,18 +14059,18 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        double* avg_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_1);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            avg_local[j]  = double(0);
-            avg_global[j] = double(0);
+            avg_local[j]  = Real(0);
+            avg_global[j] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -14151,14 +14151,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -14202,12 +14202,12 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                  * Initialize cell data for the derivatives and get pointers to the cell data.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
-                std::vector<double*> der_qi;
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative;
+                std::vector<Real*> der_qi;
                 
                 if (num_use_derivative > 0)
                 {
-                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
                     
                     der_qi.resize(num_use_derivative);
                     for (int qi = 0; qi < num_use_derivative; qi++)
@@ -14220,7 +14220,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                 const int patch_interior_dim_0 = patch_interior_dims[0];
                 const int patch_interior_dim_1 = patch_interior_dims[1];
                 
-                const double weight = (dx[0]*dx[2])/(L_x*L_z);
+                const Real weight = Real(dx[0]*dx[2])/(L_x*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -14236,7 +14236,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                             derivative_first_order_x->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[0],
+                                Real(dx[0]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -14248,7 +14248,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                             derivative_first_order_y->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[1],
+                                Real(dx[1]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -14260,7 +14260,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                             derivative_first_order_z->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[2],
+                                Real(dx[2]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -14316,7 +14316,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                                  * Compute the linear index and the data to add.
                                  */
                                 
-                                double avg = double(1);
+                                Real avg = Real(1);
                                 
                                 count_derivative = 0;
                                 for (int qi = 0; qi < num_quantities; qi++)
@@ -14377,7 +14377,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                                 {
                                     const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                     
-                                    avg_local[idx_fine] += (avg*weight/((double) n_overlapped));
+                                    avg_local[idx_fine] += (avg*weight/((Real) n_overlapped));
                                 }
                             }
                         }
@@ -14413,7 +14413,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
 /*
  * Compute averaged derivative of value (on product of variables) with only y direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -14455,7 +14455,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
     hier::IntVector num_ghosts_der = hier::IntVector::getZero(d_dim);
     num_ghosts_der[derivative_direction] = num_ghosts_derivative;
     
-    std::vector<double> averaged_derivative;
+    std::vector<Real> averaged_derivative;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -14499,17 +14499,17 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
         
-        double* der_avg_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* der_avg_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         averaged_derivative.resize(finest_level_dim_1);
-        double* der_avg_global = averaged_derivative.data();
+        Real* der_avg_global = averaged_derivative.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            der_avg_local[j]  = double(0);
-            der_avg_global[j] = double(0);
+            der_avg_local[j]  = Real(0);
+            der_avg_global[j] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -14585,14 +14585,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -14631,14 +14631,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
                  * Also, get pointers to the cell data containers.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative(
-                    new pdat::CellData<double>(patch_box, 1, hier::IntVector::getZero(d_dim)));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative(
+                    new pdat::CellData<Real>(patch_box, 1, hier::IntVector::getZero(d_dim)));
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_product(
-                    new pdat::CellData<double>(patch_box, 1, num_ghosts_der));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_product(
+                    new pdat::CellData<Real>(patch_box, 1, num_ghosts_der));
                 
-                double* der     = data_derivative->getPointer(0);
-                double* product = data_product->getPointer(0);
+                Real* der     = data_derivative->getPointer(0);
+                Real* product = data_product->getPointer(0);
                 
                 const hier::IntVector num_ghosts_product = data_product->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_product = data_product->getGhostBox().numberCells();
@@ -14651,7 +14651,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
                 const int patch_interior_dim_0 = patch_interior_dims[0];
                 const int patch_interior_dim_1 = patch_interior_dims[1];
                 
-                data_product->fillAll(double(1));
+                data_product->fillAll(Real(1));
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -14689,7 +14689,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
                     }
                 }
                 
-                const double weight = dx[0]/L_x;
+                const Real weight = Real(dx[0])/L_x;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -14702,7 +14702,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
                         derivative_first_order_x->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[0],
+                            Real(dx[0]),
                             patch_visible_box,
                             0,
                             0);
@@ -14712,7 +14712,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
                         derivative_first_order_y->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[1],
+                            Real(dx[1]),
                             patch_visible_box,
                             0,
                             0);
@@ -14763,7 +14763,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
                             const int idx = (relative_idx_lo_0 + i) +
                                 (relative_idx_lo_1 + j)*patch_interior_dim_0;
                             
-                            const double value_to_add = der[idx]*weight/((double) n_overlapped);
+                            const Real value_to_add = der[idx]*weight/((Real) n_overlapped);
                             
                             /*
                              * Add the data.
@@ -14829,18 +14829,18 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        double* der_avg_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* der_avg_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         averaged_derivative.resize(finest_level_dim_1);
-        double* der_avg_global = averaged_derivative.data();
+        Real* der_avg_global = averaged_derivative.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            der_avg_local[j]  = double(0);
-            der_avg_global[j] = double(0);
+            der_avg_local[j]  = Real(0);
+            der_avg_global[j] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -14916,14 +14916,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -14968,14 +14968,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
                  * Also, get pointers to the cell data containers.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative(
-                    new pdat::CellData<double>(patch_box, 1, hier::IntVector::getZero(d_dim)));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative(
+                    new pdat::CellData<Real>(patch_box, 1, hier::IntVector::getZero(d_dim)));
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_product(
-                    new pdat::CellData<double>(patch_box, 1, num_ghosts_der));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_product(
+                    new pdat::CellData<Real>(patch_box, 1, num_ghosts_der));
                 
-                double* der     = data_derivative->getPointer(0);
-                double* product = data_product->getPointer(0);
+                Real* der     = data_derivative->getPointer(0);
+                Real* product = data_product->getPointer(0);
                 
                 const hier::IntVector num_ghosts_product = data_product->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_product = data_product->getGhostBox().numberCells();
@@ -14991,7 +14991,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
                 const int patch_interior_dim_1 = patch_interior_dims[1];
                 const int patch_interior_dim_2 = patch_interior_dims[2];
                 
-                data_product->fillAll(double(1));
+                data_product->fillAll(Real(1));
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -15043,7 +15043,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
                     }
                 }
                 
-                const double weight = (dx[0]*dx[2])/(L_x*L_z);
+                const Real weight = Real(dx[0]*dx[2])/(L_x*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -15056,7 +15056,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
                         derivative_first_order_x->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[0],
+                            Real(dx[0]),
                             patch_visible_box,
                             0,
                             0);
@@ -15066,7 +15066,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
                         derivative_first_order_y->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[1],
+                            Real(dx[1]),
                             patch_visible_box,
                             0,
                             0);
@@ -15076,7 +15076,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
                          derivative_first_order_z->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[2],
+                            Real(dx[2]),
                             patch_visible_box,
                             0,
                             0);
@@ -15134,7 +15134,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
                                     (relative_idx_lo_2 + k)*patch_interior_dim_0*
                                         patch_interior_dim_1;
                                 
-                                const double value_to_add = der[idx]*weight/((double) n_overlapped);
+                                const Real value_to_add = der[idx]*weight/((Real) n_overlapped);
                                 
                                 /*
                                  * Add the data.
@@ -15180,12 +15180,12 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
 /*
  * Compute averaged value with only z-direction as inhomogeneous direction.
  */
-std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
+std::vector<Real> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> averaged_quantity;
+    std::vector<Real> averaged_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -15231,18 +15231,18 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        double* u_avg_local = (double*)std::malloc(finest_level_dim_2*sizeof(double));
+        Real* u_avg_local = (Real*)std::malloc(finest_level_dim_2*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_2);
-        double* u_avg_global = averaged_quantity.data();
+        Real* u_avg_global = averaged_quantity.data();
         
         for (int k = 0; k < finest_level_dim_2; k++)
         {
-            u_avg_local[k]  = double(0);
-            u_avg_global[k] = double(0);
+            u_avg_local[k]  = Real(0);
+            u_avg_global[k] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -15312,10 +15312,10 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -15336,7 +15336,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
                 
-                const double weight = (dx[0]*dx[1])/(L_x*L_y);
+                const Real weight = Real(dx[0]*dx[1])/(L_x*L_y);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -15396,7 +15396,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double value_to_add = u[idx]*weight/((double) n_overlapped);
+                                const Real value_to_add = u[idx]*weight/((Real) n_overlapped);
                                 
                                 for (int kk = 0; kk < ratio_to_finest_level_2; kk++)
                                 {
@@ -15438,13 +15438,13 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
 /*
  * Compute averaged reciprocal of value with only z-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousZDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> averaged_reciprocal_quantity;
+    std::vector<Real> averaged_reciprocal_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -15490,18 +15490,18 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousZDire
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        double* u_inv_avg_local = (double*)std::malloc(finest_level_dim_2*sizeof(double));
+        Real* u_inv_avg_local = (Real*)std::malloc(finest_level_dim_2*sizeof(Real));
         
         averaged_reciprocal_quantity.resize(finest_level_dim_2);
-        double* u_inv_avg_global = averaged_reciprocal_quantity.data();
+        Real* u_inv_avg_global = averaged_reciprocal_quantity.data();
         
         for (int k = 0; k < finest_level_dim_2; k++)
         {
-            u_inv_avg_local[k]  = double(0);
-            u_inv_avg_global[k] = double(0);
+            u_inv_avg_local[k]  = Real(0);
+            u_inv_avg_global[k] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -15571,10 +15571,10 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousZDire
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -15595,7 +15595,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousZDire
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
                 
-                const double weight = (dx[0]*dx[1])/(L_x*L_y);
+                const Real weight = Real(dx[0]*dx[1])/(L_x*L_y);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -15655,7 +15655,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousZDire
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double value_to_add = (double(1)/u[idx])*weight/((double) n_overlapped);
+                                const Real value_to_add = (Real(1)/u[idx])*weight/((Real) n_overlapped);
                                 
                                 for (int kk = 0; kk < ratio_to_finest_level_2; kk++)
                                 {
@@ -15697,7 +15697,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousZDire
 /*
  * Compute averaged value (on product of variables) with only z-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -15720,7 +15720,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
 /*
  * Compute averaged value (on product of variables) with only z-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -15732,7 +15732,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
-    std::vector<double> averaged_quantity;
+    std::vector<Real> averaged_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -15778,18 +15778,18 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        double* avg_local = (double*)std::malloc(finest_level_dim_2*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(finest_level_dim_2*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_2);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int k = 0; k < finest_level_dim_2; k++)
         {
-            avg_local[k]  = double(0);
-            avg_global[k] = double(0);
+            avg_local[k]  = Real(0);
+            avg_global[k] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -15862,14 +15862,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -15909,7 +15909,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                     ghostcell_dim_1_u_qi.push_back(ghostcell_dims_u_qi[1]);
                 }
                 
-                const double weight = dx[0]*dx[1]/(L_x*L_y);
+                const Real weight = Real(dx[0]*dx[1])/(L_x*L_y);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -15968,7 +15968,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                                 {
                                     const int idx_fine = (idx_lo_2 + k)*ratio_to_finest_level_2 + kk;
                                     
-                                    double avg = double(1);
+                                    Real avg = Real(1);
                                     
                                     for (int qi = 0; qi < num_quantities; qi++)
                                     {
@@ -15987,7 +15987,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                                         }
                                     }
                                     
-                                    avg_local[idx_fine] += (avg*weight/((double) n_overlapped));
+                                    avg_local[idx_fine] += (avg*weight/((Real) n_overlapped));
                                 }
                             }
                         }
@@ -16023,7 +16023,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
 /*
  * Compute averaged value (on product of variable derivatives) with only z direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -16054,7 +16054,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
 /*
  * Compute averaged value (on product of variable derivatives) with only z direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -16108,7 +16108,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
         }
     }
     
-    std::vector<double> averaged_quantity;
+    std::vector<Real> averaged_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -16161,18 +16161,18 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        double* avg_local = (double*)std::malloc(finest_level_dim_2*sizeof(double));
+        Real* avg_local = (Real*)std::malloc(finest_level_dim_2*sizeof(Real));
         
         averaged_quantity.resize(finest_level_dim_2);
-        double* avg_global = averaged_quantity.data();
+        Real* avg_global = averaged_quantity.data();
         
         for (int k = 0; k < finest_level_dim_2; k++)
         {
-            avg_local[k]  = double(0);
-            avg_global[k] = double(0);
+            avg_local[k]  = Real(0);
+            avg_global[k] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -16253,14 +16253,14 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -16304,12 +16304,12 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                  * Initialize cell data for the derivatives and get pointers to the cell data.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
-                std::vector<double*> der_qi;
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative;
+                std::vector<Real*> der_qi;
                 
                 if (num_use_derivative > 0)
                 {
-                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
                     
                     der_qi.resize(num_use_derivative);
                     for (int qi = 0; qi < num_use_derivative; qi++)
@@ -16322,7 +16322,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                 const int patch_interior_dim_0 = patch_interior_dims[0];
                 const int patch_interior_dim_1 = patch_interior_dims[1];
                 
-                const double weight = (dx[0]*dx[1])/(L_x*L_y);
+                const Real weight = Real(dx[0]*dx[1])/(L_x*L_y);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -16338,7 +16338,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                             derivative_first_order_x->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[0],
+                                Real(dx[0]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -16350,7 +16350,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                             derivative_first_order_y->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[1],
+                                Real(dx[1]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -16362,7 +16362,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                             derivative_first_order_z->computeDerivative(
                                 data_derivative,
                                 data_quantities[qi],
-                                dx[2],
+                                Real(dx[2]),
                                 patch_visible_box,
                                 count_derivative,
                                 component_indices[qi]);
@@ -16418,7 +16418,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                                  * Compute the linear index and the data to add.
                                  */
                                 
-                                double avg = double(1);
+                                Real avg = Real(1);
                                 
                                 count_derivative = 0;
                                 for (int qi = 0; qi < num_quantities; qi++)
@@ -16479,7 +16479,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                                 {
                                     const int idx_fine = (idx_lo_2 + k)*ratio_to_finest_level_2 + kk;
                                     
-                                    avg_local[idx_fine] += (avg*weight/((double) n_overlapped));
+                                    avg_local[idx_fine] += (avg*weight/((Real) n_overlapped));
                                 }
                             }
                         }
@@ -16515,7 +16515,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
 /*
  * Compute averaged derivative of value (on product of variables) with only z direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousZDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -16557,7 +16557,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousZDire
     hier::IntVector num_ghosts_der = hier::IntVector::getZero(d_dim);
     num_ghosts_der[derivative_direction] = num_ghosts_derivative;
     
-    std::vector<double> averaged_derivative;
+    std::vector<Real> averaged_derivative;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -16608,18 +16608,18 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousZDire
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        double* der_avg_local = (double*)std::malloc(finest_level_dim_2*sizeof(double));
+        Real* der_avg_local = (Real*)std::malloc(finest_level_dim_2*sizeof(Real));
         
         averaged_derivative.resize(finest_level_dim_2);
-        double* der_avg_global = averaged_derivative.data();
+        Real* der_avg_global = averaged_derivative.data();
         
         for (int k = 0; k < finest_level_dim_2; k++)
         {
-            der_avg_local[k]  = double(0);
-            der_avg_global[k] = double(0);
+            der_avg_local[k]  = Real(0);
+            der_avg_global[k] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -16695,14 +16695,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousZDire
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -16747,14 +16747,14 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousZDire
                  * Also, get pointers to the cell data containers.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative(
-                    new pdat::CellData<double>(patch_box, 1, hier::IntVector::getZero(d_dim)));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative(
+                    new pdat::CellData<Real>(patch_box, 1, hier::IntVector::getZero(d_dim)));
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_product(
-                    new pdat::CellData<double>(patch_box, 1, num_ghosts_der));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_product(
+                    new pdat::CellData<Real>(patch_box, 1, num_ghosts_der));
                 
-                double* der     = data_derivative->getPointer(0);
-                double* product = data_product->getPointer(0);
+                Real* der     = data_derivative->getPointer(0);
+                Real* product = data_product->getPointer(0);
                 
                 const hier::IntVector num_ghosts_product = data_product->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_product = data_product->getGhostBox().numberCells();
@@ -16770,7 +16770,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousZDire
                 const int patch_interior_dim_1 = patch_interior_dims[1];
                 const int patch_interior_dim_2 = patch_interior_dims[2];
                 
-                data_product->fillAll(double(1));
+                data_product->fillAll(Real(1));
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -16822,7 +16822,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousZDire
                     }
                 }
                 
-                const double weight = (dx[0]*dx[1])/(L_x*L_y);
+                const Real weight = Real(dx[0]*dx[1])/(L_x*L_y);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -16835,7 +16835,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousZDire
                         derivative_first_order_x->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[0],
+                            Real(dx[0]),
                             patch_visible_box,
                             0,
                             0);
@@ -16845,7 +16845,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousZDire
                         derivative_first_order_y->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[1],
+                            Real(dx[1]),
                             patch_visible_box,
                             0,
                             0);
@@ -16855,7 +16855,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousZDire
                          derivative_first_order_z->computeDerivative(
                             data_derivative,
                             data_product,
-                            dx[2],
+                            Real(dx[2]),
                             patch_visible_box,
                             0,
                             0);
@@ -16913,7 +16913,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousZDire
                                     (relative_idx_lo_2 + k)*patch_interior_dim_0*
                                         patch_interior_dim_1;
                                 
-                                const double value_to_add = der[idx]*weight/((double) n_overlapped);
+                                const Real value_to_add = der[idx]*weight/((Real) n_overlapped);
                                 
                                 /*
                                  * Add the data.

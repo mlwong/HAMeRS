@@ -45,21 +45,21 @@ class FlowModelMonitoringStatisticsUtilitiesFourEqnConservative: public FlowMode
         /*
          * Get monitoring statistical quantities.
          */
-        double getMonitoringStatistics(
+        Real getMonitoringStatistics(
             std::string statistics_name) const;
         
         /*
          * Get map of monitoring statistical quantities.
          */
-        std::unordered_map<std::string, double> getMonitoringStatisticsMap() const;
+        std::unordered_map<std::string, Real> getMonitoringStatisticsMap() const;
         
     private:
         /*
          * Monitoring statistical quantities.
          */
          
-        double d_kinetic_energy_avg;
-        double d_Mach_num_max;
+        Real d_kinetic_energy_avg;
+        Real d_Mach_num_max;
         
 };
 

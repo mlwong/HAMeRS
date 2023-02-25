@@ -1,8 +1,8 @@
 #include "flow/flow_models/FlowModelImmersedBoundaryMethod.hpp"
 
 HAMERS_SHARED_PTR<pdat::CellVariable<int> > FlowModelImmersedBoundaryMethod::s_variable_mask;
-HAMERS_SHARED_PTR<pdat::CellVariable<double> > FlowModelImmersedBoundaryMethod::s_variable_wall_distance;
-HAMERS_SHARED_PTR<pdat::CellVariable<double> > FlowModelImmersedBoundaryMethod::s_variable_surface_normal;
+HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelImmersedBoundaryMethod::s_variable_wall_distance;
+HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelImmersedBoundaryMethod::s_variable_surface_normal;
 
 FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod(
     const std::string& object_name,
@@ -26,11 +26,11 @@ FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod(
     s_variable_mask = HAMERS_SHARED_PTR<pdat::CellVariable<int> > (
         new pdat::CellVariable<int>(d_dim, "immersed boundary mask", 1));
     
-    s_variable_wall_distance = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(d_dim, "wall distance", 1));
+    s_variable_wall_distance = HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
+        new pdat::CellVariable<Real>(d_dim, "wall distance", 1));
     
-    s_variable_surface_normal = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(d_dim, "surface_normal", dim.getValue()));
+    s_variable_surface_normal = HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
+        new pdat::CellVariable<Real>(d_dim, "surface_normal", dim.getValue()));
 }
 
 

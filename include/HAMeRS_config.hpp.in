@@ -22,7 +22,7 @@ typedef float Real;
 #define putRealWithDefault putFloatWithDefault
 
 /* Define epsilon to prevent divisoin by zero */
-#define HAMERS_EPSILON 1.0e-15
+#define HAMERS_EPSILON (Real(1.0e-15))
 
 /* Define machine epsilon */
 #define HAMERS_REAL_EPSILON DBL_EPSILON

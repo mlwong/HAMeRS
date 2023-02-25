@@ -475,11 +475,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::getFaceLocationForNodeBdry(
  */
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_node_locs,
     const std::vector<int>& bdry_node_conds,
-    const std::vector<std::vector<double> >& bdry_node_values,
+    const std::vector<std::vector<Real> >& bdry_node_values,
     const hier::IntVector& ghost_width_to_fill)
 {
     TBOX_ASSERT(static_cast<int>(conservative_var_data.size()) == 3);
@@ -587,7 +587,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
                  * the conservative variables.
                  */
                 
-                std::vector<double*> Q;
+                std::vector<Real*> Q;
                 Q.reserve(d_num_eqn);
                 
                 std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -660,7 +660,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
                          * Compute the mixture density of the pivot.
                          */
                         
-                        double rho_pivot = 0.0;
+                        Real rho_pivot = 0.0;
                         for (int si = 0; si < d_num_species; si++)
                         {
                             rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -670,7 +670,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
                          * Compute the mass fractions of the pivot.
                          */
                         
-                        std::vector<double> Y_pivot;
+                        std::vector<Real> Y_pivot;
                         Y_pivot.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
@@ -681,7 +681,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
                          * Get the pointers to the mass fractions of the pivot.
                          */
                         
-                        std::vector<const double*> Y_pivot_ptr;
+                        std::vector<const Real*> Y_pivot_ptr;
                         Y_pivot_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
@@ -697,38 +697,38 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
                             Q[si][idx_cell_rho_Y] = Q[si][idx_cell_pivot_rho_Y];
                         }
                         Q[d_num_species][idx_cell_mom] = -Q[d_num_species][idx_cell_pivot_mom] +
-                            2.0*rho_pivot*d_bdry_node_adiabatic_no_slip_vel[node_loc];
+                            Real(2)*rho_pivot*d_bdry_node_adiabatic_no_slip_vel[node_loc];
                         
                         /*
                          * Set the values for total internal energy.
                          */
                         
-                        double epsilon_pivot = (Q[d_num_species + 1][idx_cell_pivot_E] -
-                            0.5*Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom]/
-                                rho_pivot)/rho_pivot;
+                        Real epsilon_pivot = (Q[d_num_species + 1][idx_cell_pivot_E] -
+                            Real(1)/Real(2)*Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom]/
+                            rho_pivot)/rho_pivot;
                         
-                        double p_pivot = d_equation_of_state_mixing_rules->
+                        Real p_pivot = d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho_pivot,
                                 &epsilon_pivot,
                                 Y_pivot_ptr);
                         
-                        double T_pivot = d_equation_of_state_mixing_rules->
+                        Real T_pivot = d_equation_of_state_mixing_rules->
                             getTemperature(
                                 &rho_pivot,
                                 &p_pivot,
                                 Y_pivot_ptr);
                         
-                        double T = T_pivot;
+                        Real T = T_pivot;
                         
-                        double epsilon = d_equation_of_state_mixing_rules->
+                        Real epsilon = d_equation_of_state_mixing_rules->
                             getInternalEnergyFromTemperature(
                                 &rho_pivot,
                                 &T,
                                 Y_pivot_ptr);
                         
-                        double E = rho_pivot*epsilon +
-                            0.5*Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom]/rho_pivot;
+                        Real E = rho_pivot*epsilon +
+                            Real(1)/Real(2)*Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom]/rho_pivot;
                         
                         Q[d_num_species + 1][idx_cell_E] = E;
                     }
@@ -776,7 +776,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
                          * Compute the mixture density of the pivot.
                          */
                         
-                        double rho_pivot = 0.0;
+                        Real rho_pivot = 0.0;
                         for (int si = 0; si < d_num_species; si++)
                         {
                             rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -786,7 +786,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
                          * Compute the mass fractions of the pivot.
                          */
                         
-                        std::vector<double> Y_pivot;
+                        std::vector<Real> Y_pivot;
                         Y_pivot.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
@@ -797,7 +797,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
                          * Get the pointers to the mass fractions of the pivot.
                          */
                         
-                        std::vector<const double*> Y_pivot_ptr;
+                        std::vector<const Real*> Y_pivot_ptr;
                         Y_pivot_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
@@ -808,34 +808,34 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
                          * Set the values for partial densities, momentum and total internal energy.
                          */
                         
-                        double epsilon_pivot = (Q[d_num_species + 1][idx_cell_pivot_E] -
-                            0.5*Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom]/
-                                rho_pivot)/rho_pivot;
+                        Real epsilon_pivot = (Q[d_num_species + 1][idx_cell_pivot_E] -
+                            Real(1)/Real(2)*Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom]/
+                            rho_pivot)/rho_pivot;
                         
-                        double p_pivot = d_equation_of_state_mixing_rules->
+                        Real p_pivot = d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho_pivot,
                                 &epsilon_pivot,
                                 Y_pivot_ptr);
                         
-                        double p = p_pivot;
+                        Real p = p_pivot;
                         
-                        double T_pivot = d_equation_of_state_mixing_rules->
+                        Real T_pivot = d_equation_of_state_mixing_rules->
                             getTemperature(
                                 &rho_pivot,
                                 &p_pivot,
                                 Y_pivot_ptr);
                         
-                        double T = -T_pivot + 2.0*d_bdry_node_isothermal_no_slip_T[node_loc];
+                        Real T = -T_pivot + Real(2)*d_bdry_node_isothermal_no_slip_T[node_loc];
                         
-                        double rho = d_equation_of_state_mixing_rules->
+                        Real rho = d_equation_of_state_mixing_rules->
                             getMixtureDensity(
                                 &p,
                                 &T,
                                 Y_pivot_ptr);
                         
-                        double u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
-                            2.0*d_bdry_node_isothermal_no_slip_vel[node_loc];
+                        Real u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
+                            Real(2)*d_bdry_node_isothermal_no_slip_vel[node_loc];
                         
                         for (int si = 0; si < d_num_species; si++)
                         {
@@ -843,13 +843,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
                         }
                         Q[d_num_species][idx_cell_mom] = rho*u;
                         
-                        double epsilon = d_equation_of_state_mixing_rules->
+                        Real epsilon = d_equation_of_state_mixing_rules->
                             getInternalEnergyFromTemperature(
                                 &rho,
                                 &T,
                                 Y_pivot_ptr);
                         
-                        double E = rho*epsilon + 0.5*Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom]/rho;
+                        Real E = rho*epsilon + Real(1)/Real(2)*Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom]/rho;
                         
                         Q[d_num_species + 1][idx_cell_E] = E;
                     }
@@ -887,11 +887,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
  */
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_edge_locs,
     const std::vector<int>& bdry_edge_conds,
-    const std::vector<std::vector<double> >& bdry_edge_values,
+    const std::vector<std::vector<Real> >& bdry_edge_values,
     const hier::IntVector& ghost_width_to_fill)
 {
     TBOX_ASSERT(static_cast<int>(conservative_var_data.size()) == 3);
@@ -1008,7 +1008,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                  * the conservative variables.
                  */
                 
-                std::vector<double*> Q;
+                std::vector<Real*> Q;
                 Q.reserve(d_num_eqn);
                 
                 std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -1136,7 +1136,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mixture density of the pivot.
                              */
                             
-                            double rho_pivot = 0.0;
+                            Real rho_pivot = 0.0;
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -1146,7 +1146,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions of the pivot.
                              */
                             
-                            std::vector<double> Y_pivot;
+                            std::vector<Real> Y_pivot;
                             Y_pivot.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -1157,7 +1157,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions of the pivot.
                              */
                             
-                            std::vector<const double*> Y_pivot_ptr;
+                            std::vector<const Real*> Y_pivot_ptr;
                             Y_pivot_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -1173,42 +1173,42 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 Q[si][idx_cell_rho_Y] = Q[si][idx_cell_pivot_rho_Y];
                             }
                             Q[d_num_species][idx_cell_mom] = -Q[d_num_species][idx_cell_pivot_mom] +
-                                2.0*rho_pivot*d_bdry_edge_adiabatic_no_slip_vel[edge_loc*2];
+                                Real(2)*rho_pivot*d_bdry_edge_adiabatic_no_slip_vel[edge_loc*2];
                             Q[d_num_species + 1][idx_cell_mom] = -Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                2.0*rho_pivot*d_bdry_edge_adiabatic_no_slip_vel[edge_loc*2 + 1];
+                                Real(2)*rho_pivot*d_bdry_edge_adiabatic_no_slip_vel[edge_loc*2 + 1];
                             
                             /*
                              * Set the values for total internal energy.
                              */
                             
-                            double epsilon_pivot = (Q[d_num_species + 2][idx_cell_pivot_E] -
-                                0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                     Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom])/
+                            Real epsilon_pivot = (Q[d_num_species + 2][idx_cell_pivot_E] -
+                                Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom])/
                                 rho_pivot)/rho_pivot;
                             
-                            double p_pivot = d_equation_of_state_mixing_rules->
+                            Real p_pivot = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_pivot,
                                     &epsilon_pivot,
                                     Y_pivot_ptr);
                             
-                            double T_pivot = d_equation_of_state_mixing_rules->
+                            Real T_pivot = d_equation_of_state_mixing_rules->
                                 getTemperature(
                                     &rho_pivot,
                                     &p_pivot,
                                     Y_pivot_ptr);
                             
-                            double T = T_pivot;
+                            Real T = T_pivot;
                             
-                            double epsilon = d_equation_of_state_mixing_rules->
+                            Real epsilon = d_equation_of_state_mixing_rules->
                                 getInternalEnergyFromTemperature(
                                     &rho_pivot,
                                     &T,
                                     Y_pivot_ptr);
                             
-                            double E = rho_pivot*epsilon +
-                                0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
-                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/rho_pivot;
+                            Real E = rho_pivot*epsilon +
+                                Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
+                                Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/rho_pivot;
                             
                             Q[d_num_species + 2][idx_cell_E] = E;
                         }
@@ -1313,7 +1313,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mixture density of the pivot.
                              */
                             
-                            double rho_pivot = 0.0;
+                            Real rho_pivot = 0.0;
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -1323,7 +1323,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions of the pivot.
                              */
                             
-                            std::vector<double> Y_pivot;
+                            std::vector<Real> Y_pivot;
                             Y_pivot.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -1334,7 +1334,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions of the pivot.
                              */
                             
-                            std::vector<const double*> Y_pivot_ptr;
+                            std::vector<const Real*> Y_pivot_ptr;
                             Y_pivot_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -1345,37 +1345,37 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Set the values for partial densities, momentum and total internal energy.
                              */
                             
-                            double epsilon_pivot = (Q[d_num_species + 2][idx_cell_pivot_E] -
-                                0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                     Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom])/
+                            Real epsilon_pivot = (Q[d_num_species + 2][idx_cell_pivot_E] -
+                                Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom])/
                                 rho_pivot)/rho_pivot;
                             
-                            double p_pivot = d_equation_of_state_mixing_rules->
+                            Real p_pivot = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_pivot,
                                     &epsilon_pivot,
                                     Y_pivot_ptr);
                             
-                            double p = p_pivot;
+                            Real p = p_pivot;
                             
-                            double T_pivot = d_equation_of_state_mixing_rules->
+                            Real T_pivot = d_equation_of_state_mixing_rules->
                                 getTemperature(
                                     &rho_pivot,
                                     &p_pivot,
                                     Y_pivot_ptr);
                             
-                            double T = -T_pivot + 2.0*d_bdry_edge_isothermal_no_slip_T[edge_loc];
+                            Real T = -T_pivot + Real(2)*d_bdry_edge_isothermal_no_slip_T[edge_loc];
                             
-                            double rho = d_equation_of_state_mixing_rules->
+                            Real rho = d_equation_of_state_mixing_rules->
                                 getMixtureDensity(
                                     &p,
                                     &T,
                                     Y_pivot_ptr);
                             
-                            double u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
-                                2.0*d_bdry_edge_isothermal_no_slip_vel[edge_loc*2];
-                            double v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
-                                2.0*d_bdry_edge_isothermal_no_slip_vel[edge_loc*2 + 1];
+                            Real u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
+                                Real(2)*d_bdry_edge_isothermal_no_slip_vel[edge_loc*2];
+                            Real v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
+                                Real(2)*d_bdry_edge_isothermal_no_slip_vel[edge_loc*2 + 1];
                             
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -1384,15 +1384,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             Q[d_num_species][idx_cell_mom] = rho*u;
                             Q[d_num_species + 1][idx_cell_mom] = rho*v;
                             
-                            double epsilon = d_equation_of_state_mixing_rules->
+                            Real epsilon = d_equation_of_state_mixing_rules->
                                 getInternalEnergyFromTemperature(
                                     &rho,
                                     &T,
                                     Y_pivot_ptr);
                             
-                            double E = rho*epsilon +
-                                0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
-                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/rho;
+                            Real E = rho*epsilon +
+                                Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
+                                Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/rho;
                             
                             Q[d_num_species + 2][idx_cell_E] = E;
                         }
@@ -1446,7 +1446,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                  * the conservative variables.
                  */
                 
-                std::vector<double*> Q;
+                std::vector<Real*> Q;
                 Q.reserve(d_num_eqn);
                 
                 std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -1522,9 +1522,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         const int idx_cell_E_x_RRR = (interior_box_lo_idx[0] + 2 + num_subghosts_conservative_var[2][0]) +
                             (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
                         
-                        std::vector<double> rho_Y_x_R;
-                        std::vector<double> rho_Y_x_RR;
-                        std::vector<double> rho_Y_x_RRR;
+                        std::vector<Real> rho_Y_x_R;
+                        std::vector<Real> rho_Y_x_RR;
+                        std::vector<Real> rho_Y_x_RRR;
                         rho_Y_x_R.reserve(d_num_species);
                         rho_Y_x_RR.reserve(d_num_species);
                         rho_Y_x_RRR.reserve(d_num_species);
@@ -1539,9 +1539,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                          * Compute the mixture density.
                          */
                         
-                        double rho_x_R   = double(0);
-                        double rho_x_RR  = double(0);
-                        double rho_x_RRR = double(0);
+                        Real rho_x_R   = Real(0);
+                        Real rho_x_RR  = Real(0);
+                        Real rho_x_RRR = Real(0);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             rho_x_R   += Q[si][idx_cell_rho_Y_x_R];
@@ -1553,9 +1553,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                          * Compute the mass fractions.
                          */
                         
-                        std::vector<double> Y_x_R;
-                        std::vector<double> Y_x_RR;
-                        std::vector<double> Y_x_RRR;
+                        std::vector<Real> Y_x_R;
+                        std::vector<Real> Y_x_RR;
+                        std::vector<Real> Y_x_RRR;
                         Y_x_R.reserve(d_num_species);
                         Y_x_RR.reserve(d_num_species);
                         Y_x_RRR.reserve(d_num_species);
@@ -1570,9 +1570,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                          * Get the pointers to the mass fractions.
                          */
                         
-                        std::vector<const double*> Y_x_R_ptr;
-                        std::vector<const double*> Y_x_RR_ptr;
-                        std::vector<const double*> Y_x_RRR_ptr;
+                        std::vector<const Real*> Y_x_R_ptr;
+                        std::vector<const Real*> Y_x_RR_ptr;
+                        std::vector<const Real*> Y_x_RRR_ptr;
                         Y_x_R_ptr.reserve(d_num_species);
                         Y_x_RR_ptr.reserve(d_num_species);
                         Y_x_RRR_ptr.reserve(d_num_species);
@@ -1583,32 +1583,32 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             Y_x_RRR_ptr.push_back(&Y_x_RRR[si]);
                         }
                        
-                        const double u_x_R   = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
-                        const double u_x_RR  = Q[d_num_species][idx_cell_mom_x_RR]/rho_x_RR;
-                        const double u_x_RRR = Q[d_num_species][idx_cell_mom_x_RRR]/rho_x_RRR;
+                        const Real u_x_R   = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
+                        const Real u_x_RR  = Q[d_num_species][idx_cell_mom_x_RR]/rho_x_RR;
+                        const Real u_x_RRR = Q[d_num_species][idx_cell_mom_x_RRR]/rho_x_RRR;
                         
-                        const double v_x_R   = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
-                        const double v_x_RR  = Q[d_num_species + 1][idx_cell_mom_x_RR]/rho_x_RR;
-                        const double v_x_RRR = Q[d_num_species + 1][idx_cell_mom_x_RRR]/rho_x_RRR;
+                        const Real v_x_R   = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
+                        const Real v_x_RR  = Q[d_num_species + 1][idx_cell_mom_x_RR]/rho_x_RR;
+                        const Real v_x_RRR = Q[d_num_species + 1][idx_cell_mom_x_RRR]/rho_x_RRR;
                         
-                        const double half = double(1)/double(2);
-                        const double epsilon_x_R   = Q[d_num_species + 2][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R);
-                        const double epsilon_x_RR  = Q[d_num_species + 2][idx_cell_E_x_RR]/rho_x_RR - half*(u_x_RR*u_x_RR + v_x_RR*v_x_RR);
-                        const double epsilon_x_RRR = Q[d_num_species + 2][idx_cell_E_x_RRR]/rho_x_RRR - half*(u_x_RRR*u_x_RRR + v_x_RRR*v_x_RRR);
+                        const Real half = Real(1)/Real(2);
+                        const Real epsilon_x_R   = Q[d_num_species + 2][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R);
+                        const Real epsilon_x_RR  = Q[d_num_species + 2][idx_cell_E_x_RR]/rho_x_RR - half*(u_x_RR*u_x_RR + v_x_RR*v_x_RR);
+                        const Real epsilon_x_RRR = Q[d_num_species + 2][idx_cell_E_x_RRR]/rho_x_RRR - half*(u_x_RRR*u_x_RRR + v_x_RRR*v_x_RRR);
                         
-                        double p_x_R = d_equation_of_state_mixing_rules->
+                        Real p_x_R = d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho_x_R,
                                 &epsilon_x_R,
                                 Y_x_R_ptr);
                         
-                        double p_x_RR = d_equation_of_state_mixing_rules->
+                        Real p_x_RR = d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho_x_RR,
                                 &epsilon_x_RR,
                                 Y_x_RR_ptr);
                         
-                        double p_x_RRR = d_equation_of_state_mixing_rules->
+                        Real p_x_RRR = d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho_x_RRR,
                                 &epsilon_x_RRR,
@@ -1618,24 +1618,24 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                          * Compute derivatives in x-direction.
                          */
                         
-                        std::vector<double> drho_Y_dx;
+                        std::vector<Real> drho_Y_dx;
                         drho_Y_dx.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            drho_Y_dx.push_back(-(Q[si][idx_cell_rho_Y_x_RRR] - double(4)*Q[si][idx_cell_rho_Y_x_RR] +
-                                double(3)*Q[si][idx_cell_rho_Y_x_R])/(double(2)*dx[0]));
+                            drho_Y_dx.push_back(-(Q[si][idx_cell_rho_Y_x_RRR] - Real(4)*Q[si][idx_cell_rho_Y_x_RR] +
+                                Real(3)*Q[si][idx_cell_rho_Y_x_R])/(Real(2)*Real(dx[0])));
                         }
-                        const double du_dx = -(u_x_RRR - double(4)*u_x_RR + double(3)*u_x_R)/(double(2)*dx[0]);
-                        const double dv_dx = -(v_x_RRR - double(4)*v_x_RR + double(3)*v_x_R)/(double(2)*dx[0]);
-                        const double dp_dx = -(p_x_RRR - double(4)*p_x_RR + double(3)*p_x_R)/(double(2)*dx[0]);
+                        const Real du_dx = -(u_x_RRR - Real(4)*u_x_RR + Real(3)*u_x_R)/(Real(2)*Real(dx[0]));
+                        const Real dv_dx = -(v_x_RRR - Real(4)*v_x_RR + Real(3)*v_x_R)/(Real(2)*Real(dx[0]));
+                        const Real dp_dx = -(p_x_RRR - Real(4)*p_x_RR + Real(3)*p_x_R)/(Real(2)*Real(dx[0]));
                         
                         /*
                          * Compute derivatives in y-direction.
                          */
                         
-                        double du_dy = double(0);
-                        double dv_dy = double(0);
-                        double dp_dy = double(0);
+                        Real du_dy = Real(0);
+                        Real dv_dy = Real(0);
+                        Real dp_dy = Real(0);
                         
                         if ((j + num_subghosts_conservative_var[0][1] == 0) ||
                             (j + num_subghosts_conservative_var[1][1] == 0) ||
@@ -1660,7 +1660,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_y_T = double(0);
+                            Real rho_y_T = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_y_T += Q[si][idx_cell_rho_Y_y_T];
@@ -1670,7 +1670,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_y_T;
+                            std::vector<Real> Y_y_T;
                             Y_y_T.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -1681,27 +1681,27 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_y_T_ptr;
+                            std::vector<const Real*> Y_y_T_ptr;
                             Y_y_T_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 Y_y_T_ptr.push_back(&Y_y_T[si]);
                             }
                             
-                            const double u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
-                            const double v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
-                            const double epsilon_y_T = Q[d_num_species + 2][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T);
+                            const Real u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
+                            const Real v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
+                            const Real epsilon_y_T = Q[d_num_species + 2][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T);
                             
-                            double p_y_T = d_equation_of_state_mixing_rules->
+                            Real p_y_T = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_y_T,
                                     &epsilon_y_T,
                                     Y_y_T_ptr);
                             
                             // One-sided derivatives.
-                            du_dy = (u_y_T - u_x_R)/(dx[1]);
-                            dv_dy = (v_y_T - v_x_R)/(dx[1]);
-                            dp_dy = (p_y_T - p_x_R)/(dx[1]);
+                            du_dy = (u_y_T - u_x_R)/Real(dx[1]);
+                            dv_dy = (v_y_T - v_x_R)/Real(dx[1]);
+                            dp_dy = (p_y_T - p_x_R)/Real(dx[1]);
                         }
                         else if ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
                                  (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
@@ -1726,7 +1726,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_y_B = double(0);
+                            Real rho_y_B = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_y_B += Q[si][idx_cell_rho_Y_y_B];
@@ -1736,7 +1736,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_y_B;
+                            std::vector<Real> Y_y_B;
                             Y_y_B.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -1747,27 +1747,27 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_y_B_ptr;
+                            std::vector<const Real*> Y_y_B_ptr;
                             Y_y_B_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 Y_y_B_ptr.push_back(&Y_y_B[si]);
                             }
                             
-                            const double u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
-                            const double v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
-                            const double epsilon_y_B = Q[d_num_species + 2][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B);
+                            const Real u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
+                            const Real v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
+                            const Real epsilon_y_B = Q[d_num_species + 2][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B);
                             
-                            double p_y_B = d_equation_of_state_mixing_rules->
+                            Real p_y_B = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_y_B,
                                     &epsilon_y_B,
                                     Y_y_B_ptr);
                             
                             // One-sided derivatives.
-                            du_dy = (u_x_R - u_y_B)/(dx[1]);
-                            dv_dy = (v_x_R - v_y_B)/(dx[1]);
-                            dp_dy = (p_x_R - p_y_B)/(dx[1]);
+                            du_dy = (u_x_R - u_y_B)/Real(dx[1]);
+                            dv_dy = (v_x_R - v_y_B)/Real(dx[1]);
+                            dp_dy = (p_x_R - p_y_B)/Real(dx[1]);
                         }
                         else
                         {
@@ -1793,8 +1793,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_y_B = double(0);
-                            double rho_y_T = double(0);
+                            Real rho_y_B = Real(0);
+                            Real rho_y_T = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_y_B += Q[si][idx_cell_rho_Y_y_B];
@@ -1805,8 +1805,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_y_B;
-                            std::vector<double> Y_y_T;
+                            std::vector<Real> Y_y_B;
+                            std::vector<Real> Y_y_T;
                             Y_y_B.reserve(d_num_species);
                             Y_y_T.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
@@ -1819,8 +1819,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_y_B_ptr;
-                            std::vector<const double*> Y_y_T_ptr;
+                            std::vector<const Real*> Y_y_B_ptr;
+                            std::vector<const Real*> Y_y_T_ptr;
                             Y_y_B_ptr.reserve(d_num_species);
                             Y_y_T_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
@@ -1829,68 +1829,68 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 Y_y_T_ptr.push_back(&Y_y_T[si]);
                             }
                             
-                            const double u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
-                            const double u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
+                            const Real u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
+                            const Real u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
                             
-                            const double v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
-                            const double v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
+                            const Real v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
+                            const Real v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
                             
-                            const double epsilon_y_B = Q[d_num_species + 2][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B);
-                            const double epsilon_y_T = Q[d_num_species + 2][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T);
+                            const Real epsilon_y_B = Q[d_num_species + 2][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B);
+                            const Real epsilon_y_T = Q[d_num_species + 2][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T);
                             
-                            double p_y_B = d_equation_of_state_mixing_rules->
+                            Real p_y_B = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_y_B,
                                     &epsilon_y_B,
                                     Y_y_B_ptr);
                             
-                            double p_y_T = d_equation_of_state_mixing_rules->
+                            Real p_y_T = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_y_T,
                                     &epsilon_y_T,
                                     Y_y_T_ptr);
                             
                             // Central derivatives.
-                            du_dy = (u_y_T - u_y_B)/(double(2)*dx[1]);
-                            dv_dy = (v_y_T - v_y_B)/(double(2)*dx[1]);
-                            dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
+                            du_dy = (u_y_T - u_y_B)/(Real(2)*Real(dx[1]));
+                            dv_dy = (v_y_T - v_y_B)/(Real(2)*Real(dx[1]));
+                            dp_dy = (p_y_T - p_y_B)/(Real(2)*Real(dx[1]));
                         }
                         
                         // Compute sound speed.
                         
-                        const double Gamma_x_R = d_equation_of_state_mixing_rules->getGruneisenParameter(
+                        const Real Gamma_x_R = d_equation_of_state_mixing_rules->getGruneisenParameter(
                             &rho_x_R,
                             &p_x_R,
                             Y_x_R_ptr);
                         
-                        const std::vector<double> Psi_x_R = d_equation_of_state_mixing_rules->
+                        const std::vector<Real> Psi_x_R = d_equation_of_state_mixing_rules->
                             getPressureDerivativeWithPartialDensities(
                                     &rho_x_R,
                                     &p_x_R,
                                     Y_x_R_ptr);
                         
-                        double c_x_R = Gamma_x_R*p_x_R/rho_x_R;
+                        Real c_x_R = Gamma_x_R*p_x_R/rho_x_R;
                         for (int si = 0; si < d_num_species; si++)
                         {
                             c_x_R += Y_x_R[si]*Psi_x_R[si];
                         }
-                        c_x_R = sqrt(c_x_R);
+                        c_x_R = std::sqrt(c_x_R);
                         
-                        const double lambda_last = u_x_R + c_x_R;
+                        const Real lambda_last = u_x_R + c_x_R;
 
                         // Compute vector Lambda^(-1) * L.
                         
-                        double Lambda_inv_L[d_num_species + 3];
+                        Real Lambda_inv_L[d_num_species + 3];
                         
-                        const double& p_t         = d_bdry_edge_nonreflecting_outflow_p_t[edge_loc];
-                        const double& sigma       = d_bdry_edge_nonreflecting_outflow_sigma[edge_loc];
-                        const double& beta        = d_bdry_edge_nonreflecting_outflow_beta[edge_loc];
-                        const double& length_char = d_bdry_edge_nonreflecting_outflow_length_char[edge_loc];
+                        const Real& p_t         = d_bdry_edge_nonreflecting_outflow_p_t[edge_loc];
+                        const Real& sigma       = d_bdry_edge_nonreflecting_outflow_sigma[edge_loc];
+                        const Real& beta        = d_bdry_edge_nonreflecting_outflow_beta[edge_loc];
+                        const Real& length_char = d_bdry_edge_nonreflecting_outflow_length_char[edge_loc];
                         
-                        const double T_last = v_x_R*(dp_dy + rho_x_R*c_x_R*du_dy) + rho_x_R*c_x_R*c_x_R*dv_dy;
+                        const Real T_last = v_x_R*(dp_dy + rho_x_R*c_x_R*du_dy) + rho_x_R*c_x_R*c_x_R*dv_dy;
                         
-                        const double M_sq = (u_x_R*u_x_R + v_x_R*v_x_R)/(c_x_R*c_x_R);
-                        const double K = sigma*c_x_R*(double(1) - M_sq)/length_char;
+                        const Real M_sq = (u_x_R*u_x_R + v_x_R*v_x_R)/(c_x_R*c_x_R);
+                        const Real K = sigma*c_x_R*(Real(1) - M_sq)/length_char;
                         
                         Lambda_inv_L[0] = dp_dx - rho_x_R*c_x_R*du_dx;
                         for (int si = 0; si < d_num_species; si++)
@@ -1898,14 +1898,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             Lambda_inv_L[si + 1] = c_x_R*c_x_R*drho_Y_dx[si] - Y_x_R[si]*dp_dx;
                         }
                         Lambda_inv_L[d_num_species + 1] = dv_dx;
-                        Lambda_inv_L[d_num_species + 2] = (double(1)/lambda_last)*(K*(p_x_R - p_t) - (double(1) - beta)*T_last);
+                        Lambda_inv_L[d_num_species + 2] = (Real(1)/lambda_last)*(K*(p_x_R - p_t) - (Real(1) - beta)*T_last);
                         
                         // Compute dV_dx.
                         
-                        const double c_sq_inv  = double(1)/(c_x_R*c_x_R);
-                        const double rho_c_inv = double(1)/(rho_x_R*c_x_R);
+                        const Real c_sq_inv  = Real(1)/(c_x_R*c_x_R);
+                        const Real rho_c_inv = Real(1)/(rho_x_R*c_x_R);
                         
-                        double dV_dx[d_num_species + 3];
+                        Real dV_dx[d_num_species + 3];
                         
                         for (int si = 0; si < d_num_species; si++)
                         {
@@ -1916,7 +1916,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         dV_dx[d_num_species + 1] = Lambda_inv_L[d_num_species + 1];
                         dV_dx[d_num_species + 2] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]);
                         
-                        double V_ghost[(d_num_species + 3)*num_ghosts_to_fill];
+                        Real V_ghost[(d_num_species + 3)*num_ghosts_to_fill];
                         
                         for (int i = num_ghosts_to_fill - 1; i >= 0; i--)
                         {
@@ -1936,175 +1936,175 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[i*(d_num_species + 3) + si] = rho_Y_x_RR[si] - double(2)*dx[0]*dV_dx[si];
+                                    V_ghost[i*(d_num_species + 3) + si] = rho_Y_x_RR[si] - Real(2)*Real(dx[0])*dV_dx[si];
                                 }
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species]     = u_x_RR - double(2)*dx[0]*dV_dx[d_num_species];
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = v_x_RR - double(2)*dx[0]*dV_dx[d_num_species + 1];
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = p_x_RR - double(2)*dx[0]*dV_dx[d_num_species + 2];
+                                V_ghost[i*(d_num_species + 3) + d_num_species]     = u_x_RR - Real(2)*Real(dx[0])*dV_dx[d_num_species];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = v_x_RR - Real(2)*Real(dx[0])*dV_dx[d_num_species + 1];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = p_x_RR - Real(2)*Real(dx[0])*dV_dx[d_num_species + 2];
                             }
                             else if (i == num_ghosts_to_fill - 2)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[i*(d_num_species + 3) + si] = -double(2)*rho_Y_x_RR[si] - double(3)*rho_Y_x_R[si] +
-                                        double(6)*V_ghost[(i + 1)*(d_num_species + 3) + si] + double(6)*dx[0]*dV_dx[si];
+                                    V_ghost[i*(d_num_species + 3) + si] = -Real(2)*rho_Y_x_RR[si] - Real(3)*rho_Y_x_R[si] +
+                                        Real(6)*V_ghost[(i + 1)*(d_num_species + 3) + si] + Real(6)*Real(dx[0])*dV_dx[si];
                                 }
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species] = -double(2)*u_x_RR - double(3)*u_x_R +
-                                    double(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species] +
-                                    double(6)*dx[0]*dV_dx[d_num_species];
+                                V_ghost[i*(d_num_species + 3) + d_num_species] = -Real(2)*u_x_RR - Real(3)*u_x_R +
+                                    Real(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species] +
+                                    Real(6)*Real(dx[0])*dV_dx[d_num_species];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = -double(2)*v_x_RR - double(3)*v_x_R +
-                                    double(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(6)*dx[0]*dV_dx[d_num_species + 1];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = -Real(2)*v_x_RR - Real(3)*v_x_R +
+                                    Real(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(6)*Real(dx[0])*dV_dx[d_num_species + 1];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = -double(2)*p_x_RR - double(3)*p_x_R +
-                                    double(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(6)*dx[0]*dV_dx[d_num_species + 2];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = -Real(2)*p_x_RR - Real(3)*p_x_R +
+                                    Real(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(6)*Real(dx[0])*dV_dx[d_num_species + 2];
                             }
                             else if (i == num_ghosts_to_fill - 3)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[i*(d_num_species + 3) + si] = double(3)*rho_Y_x_RR[si] + double(10)*rho_Y_x_R[si] -
-                                        double(18)*V_ghost[(i + 2)*(d_num_species + 3) + si] +
-                                        double(6)*V_ghost[(i + 1)*(d_num_species + 3) + si] -
-                                        double(12)*dx[0]*dV_dx[si];
+                                    V_ghost[i*(d_num_species + 3) + si] = Real(3)*rho_Y_x_RR[si] + Real(10)*rho_Y_x_R[si] -
+                                        Real(18)*V_ghost[(i + 2)*(d_num_species + 3) + si] +
+                                        Real(6)*V_ghost[(i + 1)*(d_num_species + 3) + si] -
+                                        Real(12)*Real(dx[0])*dV_dx[si];
                                 }
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species] = double(3)*u_x_RR + double(10)*u_x_R -
-                                    double(18)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species] +
-                                    double(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species] -
-                                    double(12)*dx[0]*dV_dx[d_num_species];
+                                V_ghost[i*(d_num_species + 3) + d_num_species] = Real(3)*u_x_RR + Real(10)*u_x_R -
+                                    Real(18)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species] +
+                                    Real(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species] -
+                                    Real(12)*Real(dx[0])*dV_dx[d_num_species];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = double(3)*v_x_RR + double(10)*v_x_R -
-                                    double(18)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(12)*dx[0]*dV_dx[d_num_species + 1];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = Real(3)*v_x_RR + Real(10)*v_x_R -
+                                    Real(18)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(12)*Real(dx[0])*dV_dx[d_num_species + 1];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = double(3)*p_x_RR + double(10)*p_x_R -
-                                    double(18)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(12)*dx[0]*dV_dx[d_num_species + 2];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = Real(3)*p_x_RR + Real(10)*p_x_R -
+                                    Real(18)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(12)*Real(dx[0])*dV_dx[d_num_species + 2];
                             }
                             else if (i == num_ghosts_to_fill - 4)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[i*(d_num_species + 3) + si] = -double(4)*rho_Y_x_RR[si] -
-                                        double(65)/double(3)*rho_Y_x_R[si] +
-                                        double(40)*V_ghost[(i + 3)*(d_num_species + 3) + si] -
-                                        double(20)*V_ghost[(i + 2)*(d_num_species + 3) + si] +
-                                        double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 3) + si] +
-                                        double(20)*dx[0]*dV_dx[si];
+                                    V_ghost[i*(d_num_species + 3) + si] = -Real(4)*rho_Y_x_RR[si] -
+                                        Real(65)/Real(3)*rho_Y_x_R[si] +
+                                        Real(40)*V_ghost[(i + 3)*(d_num_species + 3) + si] -
+                                        Real(20)*V_ghost[(i + 2)*(d_num_species + 3) + si] +
+                                        Real(20)/Real(3)*V_ghost[(i + 1)*(d_num_species + 3) + si] +
+                                        Real(20)*Real(dx[0])*dV_dx[si];
                                 }
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species] = -double(4)*u_x_RR -
-                                    double(65)/double(3)*u_x_R +
-                                    double(40)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species] -
-                                    double(20)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species] +
-                                    double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species] +
-                                    double(20)*dx[0]*dV_dx[d_num_species];
+                                V_ghost[i*(d_num_species + 3) + d_num_species] = -Real(4)*u_x_RR -
+                                    Real(65)/Real(3)*u_x_R +
+                                    Real(40)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species] -
+                                    Real(20)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species] +
+                                    Real(20)/Real(3)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species] +
+                                    Real(20)*Real(dx[0])*dV_dx[d_num_species];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = -double(4)*v_x_RR -
-                                    double(65)/double(3)*v_x_R +
-                                    double(40)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(20)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(20)*dx[0]*dV_dx[d_num_species + 1];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = -Real(4)*v_x_RR -
+                                    Real(65)/Real(3)*v_x_R +
+                                    Real(40)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(20)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(20)/Real(3)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(20)*Real(dx[0])*dV_dx[d_num_species + 1];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = -double(4)*p_x_RR -
-                                    double(65)/double(3)*p_x_R +
-                                    double(40)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(20)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(20)*dx[0]*dV_dx[d_num_species + 2];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = -Real(4)*p_x_RR -
+                                    Real(65)/Real(3)*p_x_R +
+                                    Real(40)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(20)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(20)/Real(3)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(20)*Real(dx[0])*dV_dx[d_num_species + 2];
                             }
                             else if (i == num_ghosts_to_fill - 5)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[i*(d_num_species + 3) + si] = double(5)*rho_Y_x_RR[si] +
-                                        double(77)/double(2)*rho_Y_x_R[si] -
-                                        double(75)*V_ghost[(i + 4)*(d_num_species + 3) + si] +
-                                        double(50)*V_ghost[(i + 3)*(d_num_species + 3) + si] -
-                                        double(25)*V_ghost[(i + 2)*(d_num_species + 3) + si] +
-                                        double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 3) + si] -
-                                        double(30)*dx[0]*dV_dx[si];
+                                    V_ghost[i*(d_num_species + 3) + si] = Real(5)*rho_Y_x_RR[si] +
+                                        Real(77)/Real(2)*rho_Y_x_R[si] -
+                                        Real(75)*V_ghost[(i + 4)*(d_num_species + 3) + si] +
+                                        Real(50)*V_ghost[(i + 3)*(d_num_species + 3) + si] -
+                                        Real(25)*V_ghost[(i + 2)*(d_num_species + 3) + si] +
+                                        Real(15)/Real(2)*V_ghost[(i + 1)*(d_num_species + 3) + si] -
+                                        Real(30)*Real(dx[0])*dV_dx[si];
                                 }
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species] = double(5)*u_x_RR +
-                                    double(77)/double(2)*u_x_R -
-                                    double(75)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species] +
-                                    double(50)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species] -
-                                    double(25)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species] +
-                                    double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species] -
-                                    double(30)*dx[0]*dV_dx[d_num_species];
+                                V_ghost[i*(d_num_species + 3) + d_num_species] = Real(5)*u_x_RR +
+                                    Real(77)/Real(2)*u_x_R -
+                                    Real(75)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species] +
+                                    Real(50)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species] -
+                                    Real(25)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species] +
+                                    Real(15)/Real(2)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species] -
+                                    Real(30)*Real(dx[0])*dV_dx[d_num_species];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = double(5)*v_x_RR +
-                                    double(77)/double(2)*v_x_R -
-                                    double(75)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(50)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(25)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(30)*dx[0]*dV_dx[d_num_species + 1];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = Real(5)*v_x_RR +
+                                    Real(77)/Real(2)*v_x_R -
+                                    Real(75)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(50)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(25)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(15)/Real(2)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(30)*Real(dx[0])*dV_dx[d_num_species + 1];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = double(5)*p_x_RR +
-                                    double(77)/double(2)*p_x_R -
-                                    double(75)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(50)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(25)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(30)*dx[0]*dV_dx[d_num_species + 2];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = Real(5)*p_x_RR +
+                                    Real(77)/Real(2)*p_x_R -
+                                    Real(75)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(50)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(25)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(15)/Real(2)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(30)*Real(dx[0])*dV_dx[d_num_species + 2];
                             }
                             else if (i == num_ghosts_to_fill - 6)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[i*(d_num_species + 3) + si] = -double(6)*rho_Y_x_RR[si] -
-                                        double(609)/double(10)*rho_Y_x_R[si] +
-                                        double(126)*V_ghost[(i + 5)*(d_num_species + 3) + si] -
-                                        double(105)*V_ghost[(i + 4)*(d_num_species + 3) + si] +
-                                        double(70)*V_ghost[(i + 3)*(d_num_species + 3) + si] -
-                                        double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 3) + si] +
-                                        double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 3) + si] +
-                                        double(42)*dx[0]*dV_dx[si];
+                                    V_ghost[i*(d_num_species + 3) + si] = -Real(6)*rho_Y_x_RR[si] -
+                                        Real(609)/Real(10)*rho_Y_x_R[si] +
+                                        Real(126)*V_ghost[(i + 5)*(d_num_species + 3) + si] -
+                                        Real(105)*V_ghost[(i + 4)*(d_num_species + 3) + si] +
+                                        Real(70)*V_ghost[(i + 3)*(d_num_species + 3) + si] -
+                                        Real(63)/Real(2)*V_ghost[(i + 2)*(d_num_species + 3) + si] +
+                                        Real(42)/Real(5)*V_ghost[(i + 1)*(d_num_species + 3) + si] +
+                                        Real(42)*Real(dx[0])*dV_dx[si];
                                 }
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species] = -double(6)*u_x_RR -
-                                    double(609)/double(10)*u_x_R +
-                                    double(126)*V_ghost[(i + 5)*(d_num_species + 3) + d_num_species] -
-                                    double(105)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species] +
-                                    double(70)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species] -
-                                    double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species] +
-                                    double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species] +
-                                    double(42)*dx[0]*dV_dx[d_num_species];
+                                V_ghost[i*(d_num_species + 3) + d_num_species] = -Real(6)*u_x_RR -
+                                    Real(609)/Real(10)*u_x_R +
+                                    Real(126)*V_ghost[(i + 5)*(d_num_species + 3) + d_num_species] -
+                                    Real(105)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species] +
+                                    Real(70)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species] -
+                                    Real(63)/Real(2)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species] +
+                                    Real(42)/Real(5)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species] +
+                                    Real(42)*Real(dx[0])*dV_dx[d_num_species];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = -double(6)*v_x_RR -
-                                    double(609)/double(10)*v_x_R +
-                                    double(126)*V_ghost[(i + 5)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(105)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(70)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(42)*dx[0]*dV_dx[d_num_species + 1];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = -Real(6)*v_x_RR -
+                                    Real(609)/Real(10)*v_x_R +
+                                    Real(126)*V_ghost[(i + 5)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(105)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(70)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(63)/Real(2)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(42)/Real(5)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(42)*Real(dx[0])*dV_dx[d_num_species + 1];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = -double(6)*p_x_RR -
-                                    double(609)/double(10)*p_x_R +
-                                    double(126)*V_ghost[(i + 5)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(105)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(70)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(42)*dx[0]*dV_dx[d_num_species + 2];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = -Real(6)*p_x_RR -
+                                    Real(609)/Real(10)*p_x_R +
+                                    Real(126)*V_ghost[(i + 5)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(105)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(70)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(63)/Real(2)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(42)/Real(5)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(42)*Real(dx[0])*dV_dx[d_num_species + 2];
                             }
                             
                             /*
                              * Compute the mixture density.
                              */
                             
-                            double rho_ghost = double(0);
+                            Real rho_ghost = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_ghost += V_ghost[i*(d_num_species + 3) + si];
@@ -2114,7 +2114,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_ghost;
+                            std::vector<Real> Y_ghost;
                             Y_ghost.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -2125,7 +2125,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_ghost_ptr;
+                            std::vector<const Real*> Y_ghost_ptr;
                             Y_ghost_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -2140,13 +2140,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             Q[d_num_species][idx_cell_mom]     = rho_ghost*V_ghost[i*(d_num_species + 3) + d_num_species];
                             Q[d_num_species + 1][idx_cell_mom] = rho_ghost*V_ghost[i*(d_num_species + 3) + d_num_species + 1];
                             
-                            const double epsilon = d_equation_of_state_mixing_rules->
+                            const Real epsilon = d_equation_of_state_mixing_rules->
                                 getInternalEnergy(
                                     &rho_ghost,
                                     &V_ghost[i*(d_num_species + 3) + d_num_species + 2],
                                     Y_ghost_ptr);
                             
-                            const double E = rho_ghost*epsilon +
+                            const Real E = rho_ghost*epsilon +
                                 half*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
                                     Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/
                                     rho_ghost;
@@ -2198,9 +2198,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         const int idx_cell_E_x_LLL = (interior_box_hi_idx[0] - 2 + num_subghosts_conservative_var[2][0]) +
                             (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
 
-                        std::vector<double> rho_Y_x_L;
-                        std::vector<double> rho_Y_x_LL;
-                        std::vector<double> rho_Y_x_LLL;
+                        std::vector<Real> rho_Y_x_L;
+                        std::vector<Real> rho_Y_x_LL;
+                        std::vector<Real> rho_Y_x_LLL;
                         rho_Y_x_L.reserve(d_num_species);
                         rho_Y_x_LL.reserve(d_num_species);
                         rho_Y_x_LLL.reserve(d_num_species);
@@ -2215,9 +2215,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                          * Compute the mixture density.
                          */
                         
-                        double rho_x_L   = double(0);
-                        double rho_x_LL  = double(0);
-                        double rho_x_LLL = double(0);
+                        Real rho_x_L   = Real(0);
+                        Real rho_x_LL  = Real(0);
+                        Real rho_x_LLL = Real(0);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             rho_x_L   += Q[si][idx_cell_rho_Y_x_L];
@@ -2229,9 +2229,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                          * Compute the mass fractions.
                          */
 
-                        std::vector<double> Y_x_L;
-                        std::vector<double> Y_x_LL;
-                        std::vector<double> Y_x_LLL;
+                        std::vector<Real> Y_x_L;
+                        std::vector<Real> Y_x_LL;
+                        std::vector<Real> Y_x_LLL;
                         Y_x_L.reserve(d_num_species);
                         Y_x_LL.reserve(d_num_species);
                         Y_x_LLL.reserve(d_num_species);
@@ -2246,9 +2246,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                          * Get the pointers to the mass fractions.
                          */
 
-                        std::vector<const double*> Y_x_L_ptr;
-                        std::vector<const double*> Y_x_LL_ptr;
-                        std::vector<const double*> Y_x_LLL_ptr;
+                        std::vector<const Real*> Y_x_L_ptr;
+                        std::vector<const Real*> Y_x_LL_ptr;
+                        std::vector<const Real*> Y_x_LLL_ptr;
                         Y_x_L_ptr.reserve(d_num_species);
                         Y_x_LL_ptr.reserve(d_num_species);
                         Y_x_LLL_ptr.reserve(d_num_species);
@@ -2259,32 +2259,32 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             Y_x_LLL_ptr.push_back(&Y_x_LLL[si]);
                         }
                        
-                        const double u_x_L   = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
-                        const double u_x_LL  = Q[d_num_species][idx_cell_mom_x_LL]/rho_x_LL;
-                        const double u_x_LLL = Q[d_num_species][idx_cell_mom_x_LLL]/rho_x_LLL;
+                        const Real u_x_L   = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
+                        const Real u_x_LL  = Q[d_num_species][idx_cell_mom_x_LL]/rho_x_LL;
+                        const Real u_x_LLL = Q[d_num_species][idx_cell_mom_x_LLL]/rho_x_LLL;
                         
-                        const double v_x_L   = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
-                        const double v_x_LL  = Q[d_num_species + 1][idx_cell_mom_x_LL]/rho_x_LL;
-                        const double v_x_LLL = Q[d_num_species + 1][idx_cell_mom_x_LLL]/rho_x_LLL;
+                        const Real v_x_L   = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
+                        const Real v_x_LL  = Q[d_num_species + 1][idx_cell_mom_x_LL]/rho_x_LL;
+                        const Real v_x_LLL = Q[d_num_species + 1][idx_cell_mom_x_LLL]/rho_x_LLL;
                         
-                        const double half = double(1)/double(2);
-                        const double epsilon_x_L   = Q[d_num_species + 2][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L);
-                        const double epsilon_x_LL  = Q[d_num_species + 2][idx_cell_E_x_LL]/rho_x_LL - half*(u_x_LL*u_x_LL + v_x_LL*v_x_LL);
-                        const double epsilon_x_LLL = Q[d_num_species + 2][idx_cell_E_x_LLL]/rho_x_LLL - half*(u_x_LLL*u_x_LLL + v_x_LLL*v_x_LLL);
+                        const Real half = Real(1)/Real(2);
+                        const Real epsilon_x_L   = Q[d_num_species + 2][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L);
+                        const Real epsilon_x_LL  = Q[d_num_species + 2][idx_cell_E_x_LL]/rho_x_LL - half*(u_x_LL*u_x_LL + v_x_LL*v_x_LL);
+                        const Real epsilon_x_LLL = Q[d_num_species + 2][idx_cell_E_x_LLL]/rho_x_LLL - half*(u_x_LLL*u_x_LLL + v_x_LLL*v_x_LLL);
                         
-                        double p_x_L = d_equation_of_state_mixing_rules->
+                        Real p_x_L = d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho_x_L,
                                 &epsilon_x_L,
                                 Y_x_L_ptr);
                         
-                        double p_x_LL = d_equation_of_state_mixing_rules->
+                        Real p_x_LL = d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho_x_LL,
                                 &epsilon_x_LL,
                                 Y_x_LL_ptr);
                         
-                        double p_x_LLL = d_equation_of_state_mixing_rules->
+                        Real p_x_LLL = d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho_x_LLL,
                                 &epsilon_x_LLL,
@@ -2294,24 +2294,24 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                          * Compute derivatives in x-direction.
                          */
                         
-                        std::vector<double> drho_Y_dx;
+                        std::vector<Real> drho_Y_dx;
                         drho_Y_dx.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            drho_Y_dx.push_back((Q[si][idx_cell_rho_Y_x_LLL] - double(4)*Q[si][idx_cell_rho_Y_x_LL] +
-                                double(3)*Q[si][idx_cell_rho_Y_x_L])/(double(2)*dx[0]));
+                            drho_Y_dx.push_back((Q[si][idx_cell_rho_Y_x_LLL] - Real(4)*Q[si][idx_cell_rho_Y_x_LL] +
+                                Real(3)*Q[si][idx_cell_rho_Y_x_L])/(Real(2)*Real(dx[0])));
                         }
-                        const double du_dx   = (u_x_LLL - double(4)*u_x_LL + double(3)*u_x_L)/(double(2)*dx[0]);
-                        const double dv_dx   = (v_x_LLL - double(4)*v_x_LL + double(3)*v_x_L)/(double(2)*dx[0]);
-                        const double dp_dx   = (p_x_LLL - double(4)*p_x_LL + double(3)*p_x_L)/(double(2)*dx[0]);
+                        const Real du_dx   = (u_x_LLL - Real(4)*u_x_LL + Real(3)*u_x_L)/(Real(2)*Real(dx[0]));
+                        const Real dv_dx   = (v_x_LLL - Real(4)*v_x_LL + Real(3)*v_x_L)/(Real(2)*Real(dx[0]));
+                        const Real dp_dx   = (p_x_LLL - Real(4)*p_x_LL + Real(3)*p_x_L)/(Real(2)*Real(dx[0]));
                         
                         /*
                          * Compute derivatives in y-direction.
                          */
                         
-                        double du_dy = double(0);
-                        double dv_dy = double(0);
-                        double dp_dy = double(0);
+                        Real du_dy = Real(0);
+                        Real dv_dy = Real(0);
+                        Real dp_dy = Real(0);
                         
                         if ((j + num_subghosts_conservative_var[0][1] == 0) ||
                             (j + num_subghosts_conservative_var[1][1] == 0) ||
@@ -2336,7 +2336,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_y_T = double(0);
+                            Real rho_y_T = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_y_T += Q[si][idx_cell_rho_Y_y_T];
@@ -2346,7 +2346,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_y_T;
+                            std::vector<Real> Y_y_T;
                             Y_y_T.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -2357,26 +2357,26 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_y_T_ptr;
+                            std::vector<const Real*> Y_y_T_ptr;
                             Y_y_T_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 Y_y_T_ptr.push_back(&Y_y_T[si]);
                             }
-                            const double u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
-                            const double v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
-                            const double epsilon_y_T = Q[d_num_species + 2][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T);
+                            const Real u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
+                            const Real v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
+                            const Real epsilon_y_T = Q[d_num_species + 2][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T);
                             
-                            double p_y_T = d_equation_of_state_mixing_rules->
+                            Real p_y_T = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_y_T,
                                     &epsilon_y_T,
                                     Y_y_T_ptr);
                             
                             // One-sided derivatives.
-                            du_dy = (u_y_T - u_x_L)/(dx[1]);
-                            dv_dy = (v_y_T - v_x_L)/(dx[1]);
-                            dp_dy = (p_y_T - p_x_L)/(dx[1]);
+                            du_dy = (u_y_T - u_x_L)/Real(dx[1]);
+                            dv_dy = (v_y_T - v_x_L)/Real(dx[1]);
+                            dp_dy = (p_y_T - p_x_L)/Real(dx[1]);
                         }
                         else if ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
                                  (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
@@ -2401,7 +2401,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_y_B = double(0);
+                            Real rho_y_B = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_y_B += Q[si][idx_cell_rho_Y_y_B];
@@ -2411,7 +2411,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_y_B;
+                            std::vector<Real> Y_y_B;
                             Y_y_B.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -2422,27 +2422,27 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_y_B_ptr;
+                            std::vector<const Real*> Y_y_B_ptr;
                             Y_y_B_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 Y_y_B_ptr.push_back(&Y_y_B[si]);
                             }
                             
-                            const double u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
-                            const double v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
-                            const double epsilon_y_B = Q[d_num_species + 2][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B);
+                            const Real u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
+                            const Real v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
+                            const Real epsilon_y_B = Q[d_num_species + 2][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B);
                             
-                            double p_y_B = d_equation_of_state_mixing_rules->
+                            Real p_y_B = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_y_B,
                                     &epsilon_y_B,
                                     Y_y_B_ptr);
                             
                             // One-sided derivatives.
-                            du_dy = (u_x_L - u_y_B)/(dx[1]);
-                            dv_dy = (v_x_L - v_y_B)/(dx[1]);
-                            dp_dy = (p_x_L - p_y_B)/(dx[1]);
+                            du_dy = (u_x_L - u_y_B)/Real(dx[1]);
+                            dv_dy = (v_x_L - v_y_B)/Real(dx[1]);
+                            dp_dy = (p_x_L - p_y_B)/Real(dx[1]);
                         }
                         else
                         {
@@ -2468,8 +2468,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_y_B = double(0);
-                            double rho_y_T = double(0);
+                            Real rho_y_B = Real(0);
+                            Real rho_y_T = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_y_B += Q[si][idx_cell_rho_Y_y_B];
@@ -2480,8 +2480,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_y_B;
-                            std::vector<double> Y_y_T;
+                            std::vector<Real> Y_y_B;
+                            std::vector<Real> Y_y_T;
                             Y_y_B.reserve(d_num_species);
                             Y_y_T.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
@@ -2494,8 +2494,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_y_B_ptr;
-                            std::vector<const double*> Y_y_T_ptr;
+                            std::vector<const Real*> Y_y_B_ptr;
+                            std::vector<const Real*> Y_y_T_ptr;
                             Y_y_B_ptr.reserve(d_num_species);
                             Y_y_T_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
@@ -2504,70 +2504,70 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 Y_y_T_ptr.push_back(&Y_y_T[si]);
                             }
                             
-                            const double u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
-                            const double u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
+                            const Real u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
+                            const Real u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
                             
-                            const double v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
-                            const double v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
+                            const Real v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
+                            const Real v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
                             
-                            const double epsilon_y_B = Q[d_num_species + 2][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B);
-                            const double epsilon_y_T = Q[d_num_species + 2][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T);
+                            const Real epsilon_y_B = Q[d_num_species + 2][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B);
+                            const Real epsilon_y_T = Q[d_num_species + 2][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T);
                             
-                            double p_y_B = d_equation_of_state_mixing_rules->
+                            Real p_y_B = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_y_B,
                                     &epsilon_y_B,
                                     Y_y_B_ptr);
                             
-                            double p_y_T = d_equation_of_state_mixing_rules->
+                            Real p_y_T = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_y_T,
                                     &epsilon_y_T,
                                     Y_y_T_ptr);
                             
                             // Central derivatives.
-                            du_dy = (u_y_T - u_y_B)/(double(2)*dx[1]);
-                            dv_dy = (v_y_T - v_y_B)/(double(2)*dx[1]);
-                            dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
+                            du_dy = (u_y_T - u_y_B)/(Real(2)*Real(dx[1]));
+                            dv_dy = (v_y_T - v_y_B)/(Real(2)*Real(dx[1]));
+                            dp_dy = (p_y_T - p_y_B)/(Real(2)*Real(dx[1]));
                         }
                         
                         // Compute sound speed.
                         
-                        const double Gamma_x_L = d_equation_of_state_mixing_rules->getGruneisenParameter(
+                        const Real Gamma_x_L = d_equation_of_state_mixing_rules->getGruneisenParameter(
                             &rho_x_L,
                             &p_x_L,
                             Y_x_L_ptr);
                         
-                        const std::vector<double> Psi_x_L = d_equation_of_state_mixing_rules->
+                        const std::vector<Real> Psi_x_L = d_equation_of_state_mixing_rules->
                             getPressureDerivativeWithPartialDensities(
                                     &rho_x_L,
                                     &p_x_L,
                                     Y_x_L_ptr);
                         
-                        double c_x_L = Gamma_x_L*p_x_L/rho_x_L;
+                        Real c_x_L = Gamma_x_L*p_x_L/rho_x_L;
                         for (int si = 0; si < d_num_species; si++)
                         {
                             c_x_L += Y_x_L[si]*Psi_x_L[si];
                         }
-                        c_x_L = sqrt(c_x_L);
+                        c_x_L = std::sqrt(c_x_L);
                         
-                        const double lambda_1 = u_x_L - c_x_L;
+                        const Real lambda_1 = u_x_L - c_x_L;
                         
                         // Compute vector Lambda^(-1) * L.
                         
-                        double Lambda_inv_L[d_num_species + 3];
+                        Real Lambda_inv_L[d_num_species + 3];
                         
-                        const double& p_t         = d_bdry_edge_nonreflecting_outflow_p_t[edge_loc];
-                        const double& sigma       = d_bdry_edge_nonreflecting_outflow_sigma[edge_loc];
-                        const double& beta        = d_bdry_edge_nonreflecting_outflow_beta[edge_loc];
-                        const double& length_char = d_bdry_edge_nonreflecting_outflow_length_char[edge_loc];
+                        const Real& p_t         = d_bdry_edge_nonreflecting_outflow_p_t[edge_loc];
+                        const Real& sigma       = d_bdry_edge_nonreflecting_outflow_sigma[edge_loc];
+                        const Real& beta        = d_bdry_edge_nonreflecting_outflow_beta[edge_loc];
+                        const Real& length_char = d_bdry_edge_nonreflecting_outflow_length_char[edge_loc];
                         
-                        const double T_1 = v_x_L*(dp_dy - rho_x_L*c_x_L*du_dy) + rho_x_L*c_x_L*c_x_L*dv_dy;
+                        const Real T_1 = v_x_L*(dp_dy - rho_x_L*c_x_L*du_dy) + rho_x_L*c_x_L*c_x_L*dv_dy;
                         
-                        const double M_sq = (u_x_L*u_x_L + v_x_L*v_x_L)/(c_x_L*c_x_L);
-                        const double K = sigma*c_x_L*(double(1) - M_sq)/length_char;
+                        const Real M_sq = (u_x_L*u_x_L + v_x_L*v_x_L)/(c_x_L*c_x_L);
+                        const Real K = sigma*c_x_L*(Real(1) - M_sq)/length_char;
                         
-                        Lambda_inv_L[0] = (double(1)/lambda_1)*(K*(p_x_L - p_t) - (double(1) - beta)*T_1);
+                        Lambda_inv_L[0] = (Real(1)/lambda_1)*(K*(p_x_L - p_t) - (Real(1) - beta)*T_1);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             Lambda_inv_L[si + 1] = c_x_L*c_x_L*drho_Y_dx[si] - Y_x_L[si]*dp_dx;
@@ -2577,10 +2577,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         
                         // Compute dV_dx.
                         
-                        const double c_sq_inv  = double(1)/(c_x_L*c_x_L);
-                        const double rho_c_inv = double(1)/(rho_x_L*c_x_L);
+                        const Real c_sq_inv  = Real(1)/(c_x_L*c_x_L);
+                        const Real rho_c_inv = Real(1)/(rho_x_L*c_x_L);
                         
-                        double dV_dx[d_num_species + 3];
+                        Real dV_dx[d_num_species + 3];
                         
                         for (int si = 0; si < d_num_species; si++)
                         {
@@ -2591,7 +2591,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         dV_dx[d_num_species + 1] = Lambda_inv_L[d_num_species + 1];
                         dV_dx[d_num_species + 2] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]);
                         
-                        double V_ghost[(d_num_species + 3)*num_ghosts_to_fill];
+                        Real V_ghost[(d_num_species + 3)*num_ghosts_to_fill];
                         
                         for (int i = 0; i < num_ghosts_to_fill; i++)
                         {
@@ -2611,175 +2611,175 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[i*(d_num_species + 3) + si] = rho_Y_x_LL[si] + double(2)*dx[0]*dV_dx[si];
+                                    V_ghost[i*(d_num_species + 3) + si] = rho_Y_x_LL[si] + Real(2)*Real(dx[0])*dV_dx[si];
                                 }
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species]     = u_x_LL + double(2)*dx[0]*dV_dx[d_num_species];
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = v_x_LL + double(2)*dx[0]*dV_dx[d_num_species + 1];
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = p_x_LL + double(2)*dx[0]*dV_dx[d_num_species + 2];
+                                V_ghost[i*(d_num_species + 3) + d_num_species]     = u_x_LL + Real(2)*Real(dx[0])*dV_dx[d_num_species];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = v_x_LL + Real(2)*Real(dx[0])*dV_dx[d_num_species + 1];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = p_x_LL + Real(2)*Real(dx[0])*dV_dx[d_num_species + 2];
                             }
                             else if (i == 1)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[i*(d_num_species + 3) + si] = -double(2)*rho_Y_x_LL[si] - double(3)*rho_Y_x_L[si] +
-                                        double(6)*V_ghost[(i - 1)*(d_num_species + 3) + si] - double(6)*dx[0]*dV_dx[si];
+                                    V_ghost[i*(d_num_species + 3) + si] = -Real(2)*rho_Y_x_LL[si] - Real(3)*rho_Y_x_L[si] +
+                                        Real(6)*V_ghost[(i - 1)*(d_num_species + 3) + si] - Real(6)*Real(dx[0])*dV_dx[si];
                                 }
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species] = -double(2)*u_x_LL - double(3)*u_x_L +
-                                    double(6)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species] -
-                                    double(6)*dx[0]*dV_dx[d_num_species];
+                                V_ghost[i*(d_num_species + 3) + d_num_species] = -Real(2)*u_x_LL - Real(3)*u_x_L +
+                                    Real(6)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species] -
+                                    Real(6)*Real(dx[0])*dV_dx[d_num_species];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = -double(2)*v_x_LL - double(3)*v_x_L +
-                                    double(6)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(6)*dx[0]*dV_dx[d_num_species + 1];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = -Real(2)*v_x_LL - Real(3)*v_x_L +
+                                    Real(6)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(6)*Real(dx[0])*dV_dx[d_num_species + 1];
                     
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = -double(2)*p_x_LL - double(3)*p_x_L +
-                                    double(6)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(6)*dx[0]*dV_dx[d_num_species + 2];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = -Real(2)*p_x_LL - Real(3)*p_x_L +
+                                    Real(6)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(6)*Real(dx[0])*dV_dx[d_num_species + 2];
                             }
                             else if (i == 2)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[i*(d_num_species + 3) + si] = double(3)*rho_Y_x_LL[si] + double(10)*rho_Y_x_L[si] -
-                                        double(18)*V_ghost[(i - 2)*(d_num_species + 3) + si] +
-                                        double(6)*V_ghost[(i - 1)*(d_num_species + 3) + si] +
-                                        double(12)*dx[0]*dV_dx[si];
+                                    V_ghost[i*(d_num_species + 3) + si] = Real(3)*rho_Y_x_LL[si] + Real(10)*rho_Y_x_L[si] -
+                                        Real(18)*V_ghost[(i - 2)*(d_num_species + 3) + si] +
+                                        Real(6)*V_ghost[(i - 1)*(d_num_species + 3) + si] +
+                                        Real(12)*Real(dx[0])*dV_dx[si];
                                 }
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species] = double(3)*u_x_LL + double(10)*u_x_L -
-                                    double(18)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species] +
-                                    double(6)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species] +
-                                    double(12)*dx[0]*dV_dx[d_num_species];
+                                V_ghost[i*(d_num_species + 3) + d_num_species] = Real(3)*u_x_LL + Real(10)*u_x_L -
+                                    Real(18)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species] +
+                                    Real(6)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species] +
+                                    Real(12)*Real(dx[0])*dV_dx[d_num_species];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = double(3)*v_x_LL + double(10)*v_x_L -
-                                    double(18)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(6)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(12)*dx[0]*dV_dx[d_num_species + 1];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = Real(3)*v_x_LL + Real(10)*v_x_L -
+                                    Real(18)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(6)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(12)*Real(dx[0])*dV_dx[d_num_species + 1];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = double(3)*p_x_LL + double(10)*p_x_L -
-                                    double(18)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(6)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(12)*dx[0]*dV_dx[d_num_species + 2];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = Real(3)*p_x_LL + Real(10)*p_x_L -
+                                    Real(18)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(6)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(12)*Real(dx[0])*dV_dx[d_num_species + 2];
                             }
                             else if (i == 3)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[i*(d_num_species + 3) + si] = -double(4)*rho_Y_x_LL[si] -
-                                        double(65)/double(3)*rho_Y_x_L[si] +
-                                        double(40)*V_ghost[(i - 3)*(d_num_species + 3) + si] -
-                                        double(20)*V_ghost[(i - 2)*(d_num_species + 3) + si] +
-                                        double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 3) + si] -
-                                        double(20)*dx[0]*dV_dx[si];
+                                    V_ghost[i*(d_num_species + 3) + si] = -Real(4)*rho_Y_x_LL[si] -
+                                        Real(65)/Real(3)*rho_Y_x_L[si] +
+                                        Real(40)*V_ghost[(i - 3)*(d_num_species + 3) + si] -
+                                        Real(20)*V_ghost[(i - 2)*(d_num_species + 3) + si] +
+                                        Real(20)/Real(3)*V_ghost[(i - 1)*(d_num_species + 3) + si] -
+                                        Real(20)*Real(dx[0])*dV_dx[si];
                                 }
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species] = -double(4)*u_x_LL -
-                                    double(65)/double(3)*u_x_L +
-                                    double(40)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species] -
-                                    double(20)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species] +
-                                    double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species] -
-                                    double(20)*dx[0]*dV_dx[d_num_species];
+                                V_ghost[i*(d_num_species + 3) + d_num_species] = -Real(4)*u_x_LL -
+                                    Real(65)/Real(3)*u_x_L +
+                                    Real(40)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species] -
+                                    Real(20)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species] +
+                                    Real(20)/Real(3)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species] -
+                                    Real(20)*Real(dx[0])*dV_dx[d_num_species];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = -double(4)*v_x_LL -
-                                    double(65)/double(3)*v_x_L +
-                                    double(40)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(20)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(20)*dx[0]*dV_dx[d_num_species + 1];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = -Real(4)*v_x_LL -
+                                    Real(65)/Real(3)*v_x_L +
+                                    Real(40)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(20)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(20)/Real(3)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(20)*Real(dx[0])*dV_dx[d_num_species + 1];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = -double(4)*p_x_LL -
-                                    double(65)/double(3)*p_x_L +
-                                    double(40)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(20)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(20)*dx[0]*dV_dx[d_num_species + 2];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = -Real(4)*p_x_LL -
+                                    Real(65)/Real(3)*p_x_L +
+                                    Real(40)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(20)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(20)/Real(3)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(20)*Real(dx[0])*dV_dx[d_num_species + 2];
                             }
                             else if (i == 4)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[i*(d_num_species + 3) + si] = double(5)*rho_Y_x_LL[si] +
-                                        double(77)/double(2)*rho_Y_x_L[si] -
-                                        double(75)*V_ghost[(i - 4)*(d_num_species + 3) + si] +
-                                        double(50)*V_ghost[(i - 3)*(d_num_species + 3) + si] -
-                                        double(25)*V_ghost[(i - 2)*(d_num_species + 3) + si] +
-                                        double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 3) + si] +
-                                        double(30)*dx[0]*dV_dx[si];
+                                    V_ghost[i*(d_num_species + 3) + si] = Real(5)*rho_Y_x_LL[si] +
+                                        Real(77)/Real(2)*rho_Y_x_L[si] -
+                                        Real(75)*V_ghost[(i - 4)*(d_num_species + 3) + si] +
+                                        Real(50)*V_ghost[(i - 3)*(d_num_species + 3) + si] -
+                                        Real(25)*V_ghost[(i - 2)*(d_num_species + 3) + si] +
+                                        Real(15)/Real(2)*V_ghost[(i - 1)*(d_num_species + 3) + si] +
+                                        Real(30)*Real(dx[0])*dV_dx[si];
                                 }
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species] = double(5)*u_x_LL +
-                                    double(77)/double(2)*u_x_L -
-                                    double(75)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species] +
-                                    double(50)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species] -
-                                    double(25)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species] +
-                                    double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species] +
-                                    double(30)*dx[0]*dV_dx[d_num_species];
+                                V_ghost[i*(d_num_species + 3) + d_num_species] = Real(5)*u_x_LL +
+                                    Real(77)/Real(2)*u_x_L -
+                                    Real(75)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species] +
+                                    Real(50)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species] -
+                                    Real(25)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species] +
+                                    Real(15)/Real(2)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species] +
+                                    Real(30)*Real(dx[0])*dV_dx[d_num_species];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = double(5)*v_x_LL +
-                                    double(77)/double(2)*v_x_L -
-                                    double(75)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(50)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(25)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(30)*dx[0]*dV_dx[d_num_species + 1];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = Real(5)*v_x_LL +
+                                    Real(77)/Real(2)*v_x_L -
+                                    Real(75)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(50)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(25)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(15)/Real(2)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(30)*Real(dx[0])*dV_dx[d_num_species + 1];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = double(5)*p_x_LL +
-                                    double(77)/double(2)*p_x_L -
-                                    double(75)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(50)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(25)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(30)*dx[0]*dV_dx[d_num_species + 2];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = Real(5)*p_x_LL +
+                                    Real(77)/Real(2)*p_x_L -
+                                    Real(75)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(50)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(25)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(15)/Real(2)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(30)*Real(dx[0])*dV_dx[d_num_species + 2];
                             }
                             else if (i == 5)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[i*(d_num_species + 3) + si] = -double(6)*rho_Y_x_LL[si] -
-                                        double(609)/double(10)*rho_Y_x_L[si] +
-                                        double(126)*V_ghost[(i - 5)*(d_num_species + 3) + si] -
-                                        double(105)*V_ghost[(i - 4)*(d_num_species + 3) + si] +
-                                        double(70)*V_ghost[(i - 3)*(d_num_species + 3) + si] -
-                                        double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 3) + si] +
-                                        double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 3) + si] -
-                                        double(42)*dx[0]*dV_dx[si];
+                                    V_ghost[i*(d_num_species + 3) + si] = -Real(6)*rho_Y_x_LL[si] -
+                                        Real(609)/Real(10)*rho_Y_x_L[si] +
+                                        Real(126)*V_ghost[(i - 5)*(d_num_species + 3) + si] -
+                                        Real(105)*V_ghost[(i - 4)*(d_num_species + 3) + si] +
+                                        Real(70)*V_ghost[(i - 3)*(d_num_species + 3) + si] -
+                                        Real(63)/Real(2)*V_ghost[(i - 2)*(d_num_species + 3) + si] +
+                                        Real(42)/Real(5)*V_ghost[(i - 1)*(d_num_species + 3) + si] -
+                                        Real(42)*Real(dx[0])*dV_dx[si];
                                 }
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species] = -double(6)*u_x_LL -
-                                    double(609)/double(10)*u_x_L +
-                                    double(126)*V_ghost[(i - 5)*(d_num_species + 3) + d_num_species] -
-                                    double(105)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species] +
-                                    double(70)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species] -
-                                    double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species] +
-                                    double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species] -
-                                    double(42)*dx[0]*dV_dx[d_num_species];
+                                V_ghost[i*(d_num_species + 3) + d_num_species] = -Real(6)*u_x_LL -
+                                    Real(609)/Real(10)*u_x_L +
+                                    Real(126)*V_ghost[(i - 5)*(d_num_species + 3) + d_num_species] -
+                                    Real(105)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species] +
+                                    Real(70)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species] -
+                                    Real(63)/Real(2)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species] +
+                                    Real(42)/Real(5)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species] -
+                                    Real(42)*Real(dx[0])*dV_dx[d_num_species];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = -double(6)*v_x_LL -
-                                    double(609)/double(10)*v_x_L +
-                                    double(126)*V_ghost[(i - 5)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(105)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(70)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(42)*dx[0]*dV_dx[d_num_species + 1];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 1] = -Real(6)*v_x_LL -
+                                    Real(609)/Real(10)*v_x_L +
+                                    Real(126)*V_ghost[(i - 5)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(105)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(70)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(63)/Real(2)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(42)/Real(5)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(42)*Real(dx[0])*dV_dx[d_num_species + 1];
                                 
-                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = -double(6)*p_x_LL -
-                                    double(609)/double(10)*p_x_L +
-                                    double(126)*V_ghost[(i - 5)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(105)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(70)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(42)*dx[0]*dV_dx[d_num_species + 2];
+                                V_ghost[i*(d_num_species + 3) + d_num_species + 2] = -Real(6)*p_x_LL -
+                                    Real(609)/Real(10)*p_x_L +
+                                    Real(126)*V_ghost[(i - 5)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(105)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(70)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(63)/Real(2)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(42)/Real(5)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(42)*Real(dx[0])*dV_dx[d_num_species + 2];
                             }
                             
                             /*
                              * Compute the mixture density.
                              */
                             
-                            double rho_ghost = double(0);
+                            Real rho_ghost = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_ghost += V_ghost[i*(d_num_species + 3) + si];
@@ -2789,7 +2789,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_ghost;
+                            std::vector<Real> Y_ghost;
                             Y_ghost.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -2800,7 +2800,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_ghost_ptr;
+                            std::vector<const Real*> Y_ghost_ptr;
                             Y_ghost_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -2815,13 +2815,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             Q[d_num_species][idx_cell_mom]     = rho_ghost*V_ghost[i*(d_num_species + 3) + d_num_species];
                             Q[d_num_species + 1][idx_cell_mom] = rho_ghost*V_ghost[i*(d_num_species + 3) + d_num_species + 1];
                             
-                            const double epsilon = d_equation_of_state_mixing_rules->
+                            const Real epsilon = d_equation_of_state_mixing_rules->
                                 getInternalEnergy(
                                     &rho_ghost,
                                     &V_ghost[i*(d_num_species + 3) + d_num_species + 2],
                                     Y_ghost_ptr);
                             
-                            const double E = rho_ghost*epsilon +
+                            const Real E = rho_ghost*epsilon +
                                 half*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
                                     Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/
                                     rho_ghost;
@@ -2873,9 +2873,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         const int idx_cell_E_y_TTT = (i + num_subghosts_conservative_var[2][0]) +
                             (interior_box_lo_idx[1] + 2 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
                         
-                        std::vector<double> rho_Y_y_T;
-                        std::vector<double> rho_Y_y_TT;
-                        std::vector<double> rho_Y_y_TTT;
+                        std::vector<Real> rho_Y_y_T;
+                        std::vector<Real> rho_Y_y_TT;
+                        std::vector<Real> rho_Y_y_TTT;
                         rho_Y_y_T.reserve(d_num_species);
                         rho_Y_y_TT.reserve(d_num_species);
                         rho_Y_y_TTT.reserve(d_num_species);
@@ -2890,9 +2890,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                          * Compute the mixture density.
                          */
                         
-                        double rho_y_T   = double(0);
-                        double rho_y_TT  = double(0);
-                        double rho_y_TTT = double(0);
+                        Real rho_y_T   = Real(0);
+                        Real rho_y_TT  = Real(0);
+                        Real rho_y_TTT = Real(0);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             rho_y_T   += Q[si][idx_cell_rho_Y_y_T];
@@ -2904,9 +2904,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                          * Compute the mass fractions.
                          */
                         
-                        std::vector<double> Y_y_T;
-                        std::vector<double> Y_y_TT;
-                        std::vector<double> Y_y_TTT;
+                        std::vector<Real> Y_y_T;
+                        std::vector<Real> Y_y_TT;
+                        std::vector<Real> Y_y_TTT;
                         Y_y_T.reserve(d_num_species);
                         Y_y_TT.reserve(d_num_species);
                         Y_y_TTT.reserve(d_num_species);
@@ -2921,9 +2921,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                          * Get the pointers to the mass fractions.
                          */
                         
-                        std::vector<const double*> Y_y_T_ptr;
-                        std::vector<const double*> Y_y_TT_ptr;
-                        std::vector<const double*> Y_y_TTT_ptr;
+                        std::vector<const Real*> Y_y_T_ptr;
+                        std::vector<const Real*> Y_y_TT_ptr;
+                        std::vector<const Real*> Y_y_TTT_ptr;
                         Y_y_T_ptr.reserve(d_num_species);
                         Y_y_TT_ptr.reserve(d_num_species);
                         Y_y_TTT_ptr.reserve(d_num_species);
@@ -2934,32 +2934,32 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             Y_y_TTT_ptr.push_back(&Y_y_TTT[si]);
                         }
                         
-                        const double u_y_T   = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
-                        const double u_y_TT  = Q[d_num_species][idx_cell_mom_y_TT]/rho_y_TT;
-                        const double u_y_TTT = Q[d_num_species][idx_cell_mom_y_TTT]/rho_y_TTT;
+                        const Real u_y_T   = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
+                        const Real u_y_TT  = Q[d_num_species][idx_cell_mom_y_TT]/rho_y_TT;
+                        const Real u_y_TTT = Q[d_num_species][idx_cell_mom_y_TTT]/rho_y_TTT;
                         
-                        const double v_y_T   = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
-                        const double v_y_TT  = Q[d_num_species + 1][idx_cell_mom_y_TT]/rho_y_TT;
-                        const double v_y_TTT = Q[d_num_species + 1][idx_cell_mom_y_TTT]/rho_y_TTT;
+                        const Real v_y_T   = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
+                        const Real v_y_TT  = Q[d_num_species + 1][idx_cell_mom_y_TT]/rho_y_TT;
+                        const Real v_y_TTT = Q[d_num_species + 1][idx_cell_mom_y_TTT]/rho_y_TTT;
                         
-                        const double half = double(1)/double(2);
-                        const double epsilon_y_T   = Q[d_num_species + 2][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T);
-                        const double epsilon_y_TT  = Q[d_num_species + 2][idx_cell_E_y_TT]/rho_y_TT - half*(u_y_TT*u_y_TT + v_y_TT*v_y_TT);
-                        const double epsilon_y_TTT = Q[d_num_species + 2][idx_cell_E_y_TTT]/rho_y_TTT- half*(u_y_TTT*u_y_TTT + v_y_TTT*v_y_TTT);
+                        const Real half = Real(1)/Real(2);
+                        const Real epsilon_y_T   = Q[d_num_species + 2][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T);
+                        const Real epsilon_y_TT  = Q[d_num_species + 2][idx_cell_E_y_TT]/rho_y_TT - half*(u_y_TT*u_y_TT + v_y_TT*v_y_TT);
+                        const Real epsilon_y_TTT = Q[d_num_species + 2][idx_cell_E_y_TTT]/rho_y_TTT- half*(u_y_TTT*u_y_TTT + v_y_TTT*v_y_TTT);
                         
-                        double p_y_T = d_equation_of_state_mixing_rules->
+                        Real p_y_T = d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho_y_T,
                                 &epsilon_y_T,
                                 Y_y_T_ptr);
                         
-                        double p_y_TT = d_equation_of_state_mixing_rules->
+                        Real p_y_TT = d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho_y_TT,
                                 &epsilon_y_TT,
                                 Y_y_TT_ptr);
                         
-                        double p_y_TTT = d_equation_of_state_mixing_rules->
+                        Real p_y_TTT = d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho_y_TTT,
                                 &epsilon_y_TTT,
@@ -2969,24 +2969,24 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                          * Compute derivatives in y-direction.
                          */
                         
-                        std::vector<double> drho_Y_dy;
+                        std::vector<Real> drho_Y_dy;
                         drho_Y_dy.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            drho_Y_dy.push_back(-(Q[si][idx_cell_rho_Y_y_TTT] - double(4)*Q[si][idx_cell_rho_Y_y_TT] +
-                                double(3)*Q[si][idx_cell_rho_Y_y_T])/(double(2)*dx[1]));
+                            drho_Y_dy.push_back(-(Q[si][idx_cell_rho_Y_y_TTT] - Real(4)*Q[si][idx_cell_rho_Y_y_TT] +
+                                Real(3)*Q[si][idx_cell_rho_Y_y_T])/(Real(2)*Real(dx[1])));
                         }
-                        const double du_dy   = -(u_y_TTT - double(4)*u_y_TT + double(3)*u_y_T)/(double(2)*dx[1]);
-                        const double dv_dy   = -(v_y_TTT - double(4)*v_y_TT + double(3)*v_y_T)/(double(2)*dx[1]);
-                        const double dp_dy   = -(p_y_TTT - double(4)*p_y_TT + double(3)*p_y_T)/(double(2)*dx[1]);
+                        const Real du_dy   = -(u_y_TTT - Real(4)*u_y_TT + Real(3)*u_y_T)/(Real(2)*Real(dx[1]));
+                        const Real dv_dy   = -(v_y_TTT - Real(4)*v_y_TT + Real(3)*v_y_T)/(Real(2)*Real(dx[1]));
+                        const Real dp_dy   = -(p_y_TTT - Real(4)*p_y_TT + Real(3)*p_y_T)/(Real(2)*Real(dx[1]));
                         
                         /*
                          * Compute derivatives in x-direction.
                          */
                         
-                        double du_dx = double(0);
-                        double dv_dx = double(0);
-                        double dp_dx = double(0);
+                        Real du_dx = Real(0);
+                        Real dv_dx = Real(0);
+                        Real dp_dx = Real(0);
                         
                         if ((i + num_subghosts_conservative_var[0][0] == 0) ||
                             (i + num_subghosts_conservative_var[1][0] == 0) ||
@@ -3011,7 +3011,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_x_R = double(0);
+                            Real rho_x_R = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_x_R += Q[si][idx_cell_rho_Y_x_R];
@@ -3021,7 +3021,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_x_R;
+                            std::vector<Real> Y_x_R;
                             Y_x_R.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -3032,27 +3032,27 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_x_R_ptr;
+                            std::vector<const Real*> Y_x_R_ptr;
                             Y_x_R_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 Y_x_R_ptr.push_back(&Y_x_R[si]);
                             }
                             
-                            const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
-                            const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
-                            const double epsilon_x_R = Q[d_num_species + 2][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R);
+                            const Real u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
+                            const Real v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
+                            const Real epsilon_x_R = Q[d_num_species + 2][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R);
                             
-                            double p_x_R = d_equation_of_state_mixing_rules->
+                            Real p_x_R = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_x_R,
                                     &epsilon_x_R,
                                     Y_x_R_ptr);
                             
                             // One-sided derivatives.
-                            du_dx = (u_x_R - u_y_T)/(dx[0]);
-                            dv_dx = (v_x_R - v_y_T)/(dx[0]);
-                            dp_dx = (p_x_R - p_y_T)/(dx[0]);
+                            du_dx = (u_x_R - u_y_T)/Real(dx[0]);
+                            dv_dx = (v_x_R - v_y_T)/Real(dx[0]);
+                            dp_dx = (p_x_R - p_y_T)/Real(dx[0]);
                         }
                         else if ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
                                  (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
@@ -3077,7 +3077,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_x_L = double(0);
+                            Real rho_x_L = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_x_L += Q[si][idx_cell_rho_Y_x_L];
@@ -3087,7 +3087,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_x_L;
+                            std::vector<Real> Y_x_L;
                             Y_x_L.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -3098,27 +3098,27 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_x_L_ptr;
+                            std::vector<const Real*> Y_x_L_ptr;
                             Y_x_L_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 Y_x_L_ptr.push_back(&Y_x_L[si]);
                             }
                             
-                            const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
-                            const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
-                            const double epsilon_x_L = Q[d_num_species + 2][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L);
+                            const Real u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
+                            const Real v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
+                            const Real epsilon_x_L = Q[d_num_species + 2][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L);
 
-                            double p_x_L = d_equation_of_state_mixing_rules->
+                            Real p_x_L = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_x_L,
                                     &epsilon_x_L,
                                     Y_x_L_ptr);
                             
                             // One-sided derivatives.
-                            du_dx = (u_y_T - u_x_L)/(dx[0]);
-                            dv_dx = (v_y_T - v_x_L)/(dx[0]);
-                            dp_dx = (p_y_T - p_x_L)/(dx[0]);
+                            du_dx = (u_y_T - u_x_L)/Real(dx[0]);
+                            dv_dx = (v_y_T - v_x_L)/Real(dx[0]);
+                            dp_dx = (p_y_T - p_x_L)/Real(dx[0]);
                         }
                         else
                         {
@@ -3144,8 +3144,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_x_L = double(0);
-                            double rho_x_R = double(0);
+                            Real rho_x_L = Real(0);
+                            Real rho_x_R = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_x_L += Q[si][idx_cell_rho_Y_x_L];
@@ -3156,8 +3156,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_x_L;
-                            std::vector<double> Y_x_R;
+                            std::vector<Real> Y_x_L;
+                            std::vector<Real> Y_x_R;
                             Y_x_L.reserve(d_num_species);
                             Y_x_R.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
@@ -3170,8 +3170,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_x_L_ptr;
-                            std::vector<const double*> Y_x_R_ptr;
+                            std::vector<const Real*> Y_x_L_ptr;
+                            std::vector<const Real*> Y_x_R_ptr;
                             Y_x_L_ptr.reserve(d_num_species);
                             Y_x_R_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
@@ -3180,68 +3180,68 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 Y_x_R_ptr.push_back(&Y_x_R[si]);
                             }
                             
-                            const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
-                            const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
+                            const Real u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
+                            const Real u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
                             
-                            const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
-                            const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
+                            const Real v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
+                            const Real v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
                             
-                            const double epsilon_x_L = Q[d_num_species + 2][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L);
-                            const double epsilon_x_R = Q[d_num_species + 2][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R);
+                            const Real epsilon_x_L = Q[d_num_species + 2][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L);
+                            const Real epsilon_x_R = Q[d_num_species + 2][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R);
                             
-                            double p_x_L = d_equation_of_state_mixing_rules->
+                            Real p_x_L = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_x_L,
                                     &epsilon_x_L,
                                     Y_x_L_ptr);
                             
-                            double p_x_R = d_equation_of_state_mixing_rules->
+                            Real p_x_R = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_x_R,
                                     &epsilon_x_R,
                                     Y_x_R_ptr);
                             
                             // Central derivatives.
-                            du_dx = (u_x_R - u_x_L)/(double(2)*dx[0]);
-                            dv_dx = (v_x_R - v_x_L)/(double(2)*dx[0]);
-                            dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
+                            du_dx = (u_x_R - u_x_L)/(Real(2)*Real(dx[0]));
+                            dv_dx = (v_x_R - v_x_L)/(Real(2)*Real(dx[0]));
+                            dp_dx = (p_x_R - p_x_L)/(Real(2)*Real(dx[0]));
                         }
                         
                         // Compute sound speed.
                         
-                        const double Gamma_y_T = d_equation_of_state_mixing_rules->getGruneisenParameter(
+                        const Real Gamma_y_T = d_equation_of_state_mixing_rules->getGruneisenParameter(
                             &rho_y_T,
                             &p_y_T,
                             Y_y_T_ptr);
                         
-                        const std::vector<double> Psi_y_T = d_equation_of_state_mixing_rules->
+                        const std::vector<Real> Psi_y_T = d_equation_of_state_mixing_rules->
                             getPressureDerivativeWithPartialDensities(
                                     &rho_y_T,
                                     &p_y_T,
                                     Y_y_T_ptr);
                         
-                        double c_y_T = Gamma_y_T*p_y_T/rho_y_T;
+                        Real c_y_T = Gamma_y_T*p_y_T/rho_y_T;
                         for (int si = 0; si < d_num_species; si++)
                         {
                             c_y_T += Y_y_T[si]*Psi_y_T[si];
                         }
-                        c_y_T = sqrt(c_y_T);
+                        c_y_T = std::sqrt(c_y_T);
                         
-                        const double lambda_last = v_y_T + c_y_T;
+                        const Real lambda_last = v_y_T + c_y_T;
                         
                         // Compute vector Lambda^(-1) * L.
                         
-                        double Lambda_inv_L[d_num_species + 3];
+                        Real Lambda_inv_L[d_num_species + 3];
                         
-                        const double& p_t         = d_bdry_edge_nonreflecting_outflow_p_t[edge_loc];
-                        const double& sigma       = d_bdry_edge_nonreflecting_outflow_sigma[edge_loc];
-                        const double& beta        = d_bdry_edge_nonreflecting_outflow_beta[edge_loc];
-                        const double& length_char = d_bdry_edge_nonreflecting_outflow_length_char[edge_loc];
+                        const Real& p_t         = d_bdry_edge_nonreflecting_outflow_p_t[edge_loc];
+                        const Real& sigma       = d_bdry_edge_nonreflecting_outflow_sigma[edge_loc];
+                        const Real& beta        = d_bdry_edge_nonreflecting_outflow_beta[edge_loc];
+                        const Real& length_char = d_bdry_edge_nonreflecting_outflow_length_char[edge_loc];
                         
-                        const double T_last = u_y_T*(dp_dx + rho_y_T*c_y_T*dv_dx) + rho_y_T*c_y_T*c_y_T*du_dx;
+                        const Real T_last = u_y_T*(dp_dx + rho_y_T*c_y_T*dv_dx) + rho_y_T*c_y_T*c_y_T*du_dx;
                         
-                        const double M_sq = (v_y_T*v_y_T + u_y_T*u_y_T)/(c_y_T*c_y_T);
-                        const double K = sigma*c_y_T*(double(1) - M_sq)/length_char;
+                        const Real M_sq = (v_y_T*v_y_T + u_y_T*u_y_T)/(c_y_T*c_y_T);
+                        const Real K = sigma*c_y_T*(Real(1) - M_sq)/length_char;
                         
                         Lambda_inv_L[0] = dp_dy - rho_y_T*c_y_T*dv_dy;
                         Lambda_inv_L[1] = du_dy;
@@ -3249,14 +3249,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         {
                             Lambda_inv_L[si + 2] = c_y_T*c_y_T*drho_Y_dy[si] - Y_y_T[si]*dp_dy;
                         }
-                        Lambda_inv_L[d_num_species + 2] = (double(1)/lambda_last)*(K*(p_y_T - p_t) - (double(1) - beta)*T_last);
+                        Lambda_inv_L[d_num_species + 2] = (Real(1)/lambda_last)*(K*(p_y_T - p_t) - (Real(1) - beta)*T_last);
                         
                         // Compute dV_dx.
                         
-                        const double c_sq_inv  = double(1)/(c_y_T*c_y_T);
-                        const double rho_c_inv = double(1)/(rho_y_T*c_y_T);
+                        const Real c_sq_inv  = Real(1)/(c_y_T*c_y_T);
+                        const Real rho_c_inv = Real(1)/(rho_y_T*c_y_T);
                         
-                        double dV_dy[d_num_species + 3];
+                        Real dV_dy[d_num_species + 3];
                         
                         for (int si = 0; si < d_num_species; si++)
                         {
@@ -3267,7 +3267,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         dV_dy[d_num_species + 1] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]);
                         dV_dy[d_num_species + 2] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]);
                         
-                        double V_ghost[(d_num_species + 3)*num_ghosts_to_fill];
+                        Real V_ghost[(d_num_species + 3)*num_ghosts_to_fill];
                         
                         for (int j = num_ghosts_to_fill - 1; j >= 0; j--)
                         {
@@ -3287,172 +3287,172 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[j*(d_num_species + 3) + si] = rho_Y_y_TT[si] - double(2)*dx[1]*dV_dy[si];
+                                    V_ghost[j*(d_num_species + 3) + si] = rho_Y_y_TT[si] - Real(2)*Real(dx[1])*dV_dy[si];
                                 }
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species]     = u_y_TT   - double(2)*dx[1]*dV_dy[d_num_species];
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = v_y_TT   - double(2)*dx[1]*dV_dy[d_num_species + 1];
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = p_y_TT   - double(2)*dx[1]*dV_dy[d_num_species + 2];
+                                V_ghost[j*(d_num_species + 3) + d_num_species]     = u_y_TT   - Real(2)*Real(dx[1])*dV_dy[d_num_species];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = v_y_TT   - Real(2)*Real(dx[1])*dV_dy[d_num_species + 1];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = p_y_TT   - Real(2)*Real(dx[1])*dV_dy[d_num_species + 2];
                             }
                             else if (j == num_ghosts_to_fill - 2)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[j*(d_num_species + 3) + si] = -double(2)*rho_Y_y_TT[si] - double(3)*rho_Y_y_T[si] +
-                                        double(6)*V_ghost[(j + 1)*(d_num_species + 3) + si] + double(6)*dx[1]*dV_dy[si];
+                                    V_ghost[j*(d_num_species + 3) + si] = -Real(2)*rho_Y_y_TT[si] - Real(3)*rho_Y_y_T[si] +
+                                        Real(6)*V_ghost[(j + 1)*(d_num_species + 3) + si] + Real(6)*Real(dx[1])*dV_dy[si];
                                 }
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species] = -double(2)*u_y_TT - double(3)*u_y_T +
-                                    double(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] + double(6)*dx[1]*dV_dy[d_num_species];
+                                V_ghost[j*(d_num_species + 3) + d_num_species] = -Real(2)*u_y_TT - Real(3)*u_y_T +
+                                    Real(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] + Real(6)*Real(dx[1])*dV_dy[d_num_species];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -double(2)*v_y_TT - double(3)*v_y_T +
-                                    double(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 1] + double(6)*dx[1]*dV_dy[d_num_species + 1];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -Real(2)*v_y_TT - Real(3)*v_y_T +
+                                    Real(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 1] + Real(6)*Real(dx[1])*dV_dy[d_num_species + 1];
                                 
-                                V_ghost[j*(d_num_species + 3) +d_num_species + 2] = -double(2)*p_y_TT - double(3)*p_y_T +
-                                    double(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] + double(6)*dx[1]*dV_dy[d_num_species + 2];
+                                V_ghost[j*(d_num_species + 3) +d_num_species + 2] = -Real(2)*p_y_TT - Real(3)*p_y_T +
+                                    Real(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] + Real(6)*Real(dx[1])*dV_dy[d_num_species + 2];
                             }
                             else if (j == num_ghosts_to_fill - 3)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[j*(d_num_species + 3) + si] = double(3)*rho_Y_y_TT[si] + double(10)*rho_Y_y_T[si] -
-                                    double(18)*V_ghost[(j + 2)*(d_num_species + 3) + si] +
-                                    double(6)*V_ghost[(j + 1)*(d_num_species + 3) + si] -
-                                    double(12)*dx[1]*dV_dy[si];
+                                    V_ghost[j*(d_num_species + 3) + si] = Real(3)*rho_Y_y_TT[si] + Real(10)*rho_Y_y_T[si] -
+                                    Real(18)*V_ghost[(j + 2)*(d_num_species + 3) + si] +
+                                    Real(6)*V_ghost[(j + 1)*(d_num_species + 3) + si] -
+                                    Real(12)*Real(dx[1])*dV_dy[si];
                                 }
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species] = double(3)*u_y_TT + double(10)*u_y_T -
-                                    double(18)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species] +
-                                    double(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] -
-                                    double(12)*dx[1]*dV_dy[d_num_species];
+                                V_ghost[j*(d_num_species + 3) + d_num_species] = Real(3)*u_y_TT + Real(10)*u_y_T -
+                                    Real(18)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species] +
+                                    Real(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] -
+                                    Real(12)*Real(dx[1])*dV_dy[d_num_species];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = double(3)*v_y_TT + double(10)*v_y_T -
-                                    double(18)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(12)*dx[1]*dV_dy[d_num_species + 1];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = Real(3)*v_y_TT + Real(10)*v_y_T -
+                                    Real(18)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(12)*Real(dx[1])*dV_dy[d_num_species + 1];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = double(3)*p_y_TT + double(10)*p_y_T -
-                                    double(18)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(12)*dx[1]*dV_dy[d_num_species + 2];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = Real(3)*p_y_TT + Real(10)*p_y_T -
+                                    Real(18)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(12)*Real(dx[1])*dV_dy[d_num_species + 2];
                             }
                             else if (j == num_ghosts_to_fill - 4)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[j*(d_num_species + 3) + si] = -double(4)*rho_Y_y_TT[si] -
-                                        double(65)/double(3)*rho_Y_y_T[si] +
-                                        double(40)*V_ghost[(j + 3)*(d_num_species + 3) + si] -
-                                        double(20)*V_ghost[(j + 2)*(d_num_species + 3) + si] +
-                                        double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 3) + si] +
-                                        double(20)*dx[1]*dV_dy[si];
+                                    V_ghost[j*(d_num_species + 3) + si] = -Real(4)*rho_Y_y_TT[si] -
+                                        Real(65)/Real(3)*rho_Y_y_T[si] +
+                                        Real(40)*V_ghost[(j + 3)*(d_num_species + 3) + si] -
+                                        Real(20)*V_ghost[(j + 2)*(d_num_species + 3) + si] +
+                                        Real(20)/Real(3)*V_ghost[(j + 1)*(d_num_species + 3) + si] +
+                                        Real(20)*Real(dx[1])*dV_dy[si];
                                 } 
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species] = -double(4)*u_y_TT -
-                                    double(65)/double(3)*u_y_T +
-                                    double(40)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species] -
-                                    double(20)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species] +
-                                    double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] +
-                                    double(20)*dx[1]*dV_dy[d_num_species];
+                                V_ghost[j*(d_num_species + 3) + d_num_species] = -Real(4)*u_y_TT -
+                                    Real(65)/Real(3)*u_y_T +
+                                    Real(40)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species] -
+                                    Real(20)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species] +
+                                    Real(20)/Real(3)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] +
+                                    Real(20)*Real(dx[1])*dV_dy[d_num_species];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -double(4)*v_y_TT -
-                                    double(65)/double(3)*v_y_T +
-                                    double(40)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(20)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(20)*dx[1]*dV_dy[d_num_species + 1];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -Real(4)*v_y_TT -
+                                    Real(65)/Real(3)*v_y_T +
+                                    Real(40)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(20)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(20)/Real(3)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(20)*Real(dx[1])*dV_dy[d_num_species + 1];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = -double(4)*p_y_TT -
-                                    double(65)/double(3)*p_y_T +
-                                    double(40)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(20)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(20)*dx[1]*dV_dy[d_num_species + 2];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = -Real(4)*p_y_TT -
+                                    Real(65)/Real(3)*p_y_T +
+                                    Real(40)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(20)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(20)/Real(3)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(20)*Real(dx[1])*dV_dy[d_num_species + 2];
                             }
                             else if (j == num_ghosts_to_fill - 5)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[j*(d_num_species + 3) + si] = double(5)*rho_Y_y_TT[si] +
-                                        double(77)/double(2)*rho_Y_y_T[si] -
-                                        double(75)*V_ghost[(j + 4)*(d_num_species + 3) + si] +
-                                        double(50)*V_ghost[(j + 3)*(d_num_species + 3) + si] -
-                                        double(25)*V_ghost[(j + 2)*(d_num_species + 3) + si] +
-                                        double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 3) + si] -
-                                        double(30)*dx[1]*dV_dy[si];
+                                    V_ghost[j*(d_num_species + 3) + si] = Real(5)*rho_Y_y_TT[si] +
+                                        Real(77)/Real(2)*rho_Y_y_T[si] -
+                                        Real(75)*V_ghost[(j + 4)*(d_num_species + 3) + si] +
+                                        Real(50)*V_ghost[(j + 3)*(d_num_species + 3) + si] -
+                                        Real(25)*V_ghost[(j + 2)*(d_num_species + 3) + si] +
+                                        Real(15)/Real(2)*V_ghost[(j + 1)*(d_num_species + 3) + si] -
+                                        Real(30)*Real(dx[1])*dV_dy[si];
                                 }
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species] = double(5)*u_y_TT +
-                                    double(77)/double(2)*u_y_T -
-                                    double(75)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species] +
-                                    double(50)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species] -
-                                    double(25)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species] +
-                                    double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] -
-                                    double(30)*dx[1]*dV_dy[d_num_species];
+                                V_ghost[j*(d_num_species + 3) + d_num_species] = Real(5)*u_y_TT +
+                                    Real(77)/Real(2)*u_y_T -
+                                    Real(75)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species] +
+                                    Real(50)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species] -
+                                    Real(25)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species] +
+                                    Real(15)/Real(2)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] -
+                                    Real(30)*Real(dx[1])*dV_dy[d_num_species];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = double(5)*v_y_TT +
-                                    double(77)/double(2)*v_y_T -
-                                    double(75)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(50)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(25)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(30)*dx[1]*dV_dy[d_num_species + 1];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = Real(5)*v_y_TT +
+                                    Real(77)/Real(2)*v_y_T -
+                                    Real(75)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(50)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(25)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(15)/Real(2)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(30)*Real(dx[1])*dV_dy[d_num_species + 1];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = double(5)*p_y_TT +
-                                    double(77)/double(2)*p_y_T -
-                                    double(75)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(50)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(25)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(30)*dx[1]*dV_dy[d_num_species + 2];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = Real(5)*p_y_TT +
+                                    Real(77)/Real(2)*p_y_T -
+                                    Real(75)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(50)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(25)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(15)/Real(2)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(30)*Real(dx[1])*dV_dy[d_num_species + 2];
                             }
                             else if (j == num_ghosts_to_fill - 6)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[j*(d_num_species + 3) + si] = -double(6)*rho_Y_y_TT[si] -
-                                        double(609)/double(10)*rho_Y_y_T[si] +
-                                        double(126)*V_ghost[(j + 5)*(d_num_species + 3) + si] -
-                                        double(105)*V_ghost[(j + 4)*(d_num_species + 3) + si] +
-                                        double(70)*V_ghost[(j + 3)*(d_num_species + 3) + si] -
-                                        double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 3) + si] +
-                                        double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 3) + si] +
-                                        double(42)*dx[1]*dV_dy[si];
+                                    V_ghost[j*(d_num_species + 3) + si] = -Real(6)*rho_Y_y_TT[si] -
+                                        Real(609)/Real(10)*rho_Y_y_T[si] +
+                                        Real(126)*V_ghost[(j + 5)*(d_num_species + 3) + si] -
+                                        Real(105)*V_ghost[(j + 4)*(d_num_species + 3) + si] +
+                                        Real(70)*V_ghost[(j + 3)*(d_num_species + 3) + si] -
+                                        Real(63)/Real(2)*V_ghost[(j + 2)*(d_num_species + 3) + si] +
+                                        Real(42)/Real(5)*V_ghost[(j + 1)*(d_num_species + 3) + si] +
+                                        Real(42)*Real(dx[1])*dV_dy[si];
                                 }
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species] = -double(6)*u_y_TT -
-                                    double(609)/double(10)*u_y_T +
-                                    double(126)*V_ghost[(j + 5)*(d_num_species + 3) + d_num_species] -
-                                    double(105)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species] +
-                                    double(70)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species] -
-                                    double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species] +
-                                    double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] +
-                                    double(42)*dx[1]*dV_dy[d_num_species];
+                                V_ghost[j*(d_num_species + 3) + d_num_species] = -Real(6)*u_y_TT -
+                                    Real(609)/Real(10)*u_y_T +
+                                    Real(126)*V_ghost[(j + 5)*(d_num_species + 3) + d_num_species] -
+                                    Real(105)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species] +
+                                    Real(70)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species] -
+                                    Real(63)/Real(2)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species] +
+                                    Real(42)/Real(5)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] +
+                                    Real(42)*Real(dx[1])*dV_dy[d_num_species];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -double(6)*v_y_TT -
-                                    double(609)/double(10)*v_y_T +
-                                    double(126)*V_ghost[(j + 5)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(105)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(70)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(42)*dx[1]*dV_dy[d_num_species + 1];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -Real(6)*v_y_TT -
+                                    Real(609)/Real(10)*v_y_T +
+                                    Real(126)*V_ghost[(j + 5)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(105)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(70)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(63)/Real(2)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(42)/Real(5)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(42)*Real(dx[1])*dV_dy[d_num_species + 1];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = -double(6)*p_y_TT -
-                                    double(609)/double(10)*p_y_T +
-                                    double(126)*V_ghost[(j + 5)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(105)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(70)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(42)*dx[1]*dV_dy[d_num_species + 2];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = -Real(6)*p_y_TT -
+                                    Real(609)/Real(10)*p_y_T +
+                                    Real(126)*V_ghost[(j + 5)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(105)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(70)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(63)/Real(2)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(42)/Real(5)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(42)*Real(dx[1])*dV_dy[d_num_species + 2];
                             }
                             
                             /*
                              * Compute the mixture density.
                              */
                             
-                            double rho_ghost = double(0);
+                            Real rho_ghost = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_ghost += V_ghost[j*(d_num_species + 3) + si];
@@ -3462,7 +3462,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_ghost;
+                            std::vector<Real> Y_ghost;
                             Y_ghost.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -3473,7 +3473,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_ghost_ptr;
+                            std::vector<const Real*> Y_ghost_ptr;
                             Y_ghost_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -3488,13 +3488,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             Q[d_num_species][idx_cell_mom]     = rho_ghost*V_ghost[j*(d_num_species + 3) + d_num_species];
                             Q[d_num_species + 1][idx_cell_mom] = rho_ghost*V_ghost[j*(d_num_species + 3) + d_num_species + 1];
                             
-                            const double epsilon = d_equation_of_state_mixing_rules->
+                            const Real epsilon = d_equation_of_state_mixing_rules->
                                 getInternalEnergy(
                                     &rho_ghost,
                                     &V_ghost[j*(d_num_species + 3) + d_num_species + 2],
                                     Y_ghost_ptr);
                             
-                            const double E = rho_ghost*epsilon +
+                            const Real E = rho_ghost*epsilon +
                                 half*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
                                     Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/
                                     rho_ghost;
@@ -3546,9 +3546,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         const int idx_cell_E_y_BBB = (i + num_subghosts_conservative_var[2][0]) + 
                             (interior_box_hi_idx[1] - 2 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
                         
-                        std::vector<double> rho_Y_y_B;
-                        std::vector<double> rho_Y_y_BB;
-                        std::vector<double> rho_Y_y_BBB;
+                        std::vector<Real> rho_Y_y_B;
+                        std::vector<Real> rho_Y_y_BB;
+                        std::vector<Real> rho_Y_y_BBB;
                         rho_Y_y_B.reserve(d_num_species);
                         rho_Y_y_BB.reserve(d_num_species);
                         rho_Y_y_BBB.reserve(d_num_species);
@@ -3563,9 +3563,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                          * Compute the mixture density.
                          */
                         
-                        double rho_y_B   = double(0);
-                        double rho_y_BB  = double(0);
-                        double rho_y_BBB = double(0);
+                        Real rho_y_B   = Real(0);
+                        Real rho_y_BB  = Real(0);
+                        Real rho_y_BBB = Real(0);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             rho_y_B   += Q[si][idx_cell_rho_Y_y_B];
@@ -3577,9 +3577,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                          * Compute the mass fractions.
                          */
                         
-                        std::vector<double> Y_y_B;
-                        std::vector<double> Y_y_BB;
-                        std::vector<double> Y_y_BBB;
+                        std::vector<Real> Y_y_B;
+                        std::vector<Real> Y_y_BB;
+                        std::vector<Real> Y_y_BBB;
                         Y_y_B.reserve(d_num_species);
                         Y_y_BB.reserve(d_num_species);
                         Y_y_BBB.reserve(d_num_species);
@@ -3594,9 +3594,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                          * Get the pointers to the mass fractions.
                          */
                         
-                        std::vector<const double*> Y_y_B_ptr;
-                        std::vector<const double*> Y_y_BB_ptr;
-                        std::vector<const double*> Y_y_BBB_ptr;
+                        std::vector<const Real*> Y_y_B_ptr;
+                        std::vector<const Real*> Y_y_BB_ptr;
+                        std::vector<const Real*> Y_y_BBB_ptr;
                         Y_y_B_ptr.reserve(d_num_species);
                         Y_y_BB_ptr.reserve(d_num_species);
                         Y_y_BBB_ptr.reserve(d_num_species);
@@ -3607,32 +3607,32 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             Y_y_BBB_ptr.push_back(&Y_y_BBB[si]);
                         }
                        
-                        const double u_y_B   = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
-                        const double u_y_BB  = Q[d_num_species][idx_cell_mom_y_BB]/rho_y_BB;
-                        const double u_y_BBB = Q[d_num_species][idx_cell_mom_y_BBB]/rho_y_BBB;
+                        const Real u_y_B   = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
+                        const Real u_y_BB  = Q[d_num_species][idx_cell_mom_y_BB]/rho_y_BB;
+                        const Real u_y_BBB = Q[d_num_species][idx_cell_mom_y_BBB]/rho_y_BBB;
                         
-                        const double v_y_B   = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
-                        const double v_y_BB  = Q[d_num_species + 1][idx_cell_mom_y_BB]/rho_y_BB;
-                        const double v_y_BBB = Q[d_num_species + 1][idx_cell_mom_y_BBB]/rho_y_BBB;
+                        const Real v_y_B   = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
+                        const Real v_y_BB  = Q[d_num_species + 1][idx_cell_mom_y_BB]/rho_y_BB;
+                        const Real v_y_BBB = Q[d_num_species + 1][idx_cell_mom_y_BBB]/rho_y_BBB;
                        
-                        const double half = double(1)/double(2);
-                        const double epsilon_y_B   = Q[d_num_species + 2][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B);
-                        const double epsilon_y_BB  = Q[d_num_species + 2][idx_cell_E_y_BB]/rho_y_BB - half*(u_y_BB*u_y_BB + v_y_BB*v_y_BB);
-                        const double epsilon_y_BBB = Q[d_num_species + 2][idx_cell_E_y_BBB]/rho_y_BBB - half*(u_y_BBB*u_y_BBB + v_y_BBB*v_y_BBB);
+                        const Real half = Real(1)/Real(2);
+                        const Real epsilon_y_B   = Q[d_num_species + 2][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B);
+                        const Real epsilon_y_BB  = Q[d_num_species + 2][idx_cell_E_y_BB]/rho_y_BB - half*(u_y_BB*u_y_BB + v_y_BB*v_y_BB);
+                        const Real epsilon_y_BBB = Q[d_num_species + 2][idx_cell_E_y_BBB]/rho_y_BBB - half*(u_y_BBB*u_y_BBB + v_y_BBB*v_y_BBB);
                         
-                        double p_y_B = d_equation_of_state_mixing_rules->
+                        Real p_y_B = d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho_y_B,
                                 &epsilon_y_B,
                                 Y_y_B_ptr);
                         
-                        double p_y_BB = d_equation_of_state_mixing_rules->
+                        Real p_y_BB = d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho_y_BB,
                                 &epsilon_y_BB,
                                 Y_y_BB_ptr);
                         
-                        double p_y_BBB = d_equation_of_state_mixing_rules->
+                        Real p_y_BBB = d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho_y_BBB,
                                 &epsilon_y_BBB,
@@ -3642,24 +3642,24 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                          * Compute derivatives in y-direction.
                          */
                         
-                        std::vector<double> drho_Y_dy;
+                        std::vector<Real> drho_Y_dy;
                         drho_Y_dy.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            drho_Y_dy.push_back((Q[si][idx_cell_rho_Y_y_BBB] - double(4)*Q[si][idx_cell_rho_Y_y_BB] +
-                                double(3)*Q[si][idx_cell_rho_Y_y_B])/(double(2)*dx[1]));
+                            drho_Y_dy.push_back((Q[si][idx_cell_rho_Y_y_BBB] - Real(4)*Q[si][idx_cell_rho_Y_y_BB] +
+                                Real(3)*Q[si][idx_cell_rho_Y_y_B])/(Real(2)*Real(dx[1])));
                         }
-                        const double du_dy   = (u_y_BBB - double(4)*u_y_BB + double(3)*u_y_B)/(double(2)*dx[1]);
-                        const double dv_dy   = (v_y_BBB - double(4)*v_y_BB + double(3)*v_y_B)/(double(2)*dx[1]);
-                        const double dp_dy   = (p_y_BBB - double(4)*p_y_BB + double(3)*p_y_B)/(double(2)*dx[1]);
+                        const Real du_dy   = (u_y_BBB - Real(4)*u_y_BB + Real(3)*u_y_B)/(Real(2)*Real(dx[1]));
+                        const Real dv_dy   = (v_y_BBB - Real(4)*v_y_BB + Real(3)*v_y_B)/(Real(2)*Real(dx[1]));
+                        const Real dp_dy   = (p_y_BBB - Real(4)*p_y_BB + Real(3)*p_y_B)/(Real(2)*Real(dx[1]));
                         
                         /*
                          * Compute derivatives in x-direction.
                          */
                         
-                        double du_dx = double(0);
-                        double dv_dx = double(0);
-                        double dp_dx = double(0);
+                        Real du_dx = Real(0);
+                        Real dv_dx = Real(0);
+                        Real dp_dx = Real(0);
                         
                         if ((i + num_subghosts_conservative_var[0][0] == 0) ||
                             (i + num_subghosts_conservative_var[1][0] == 0) ||
@@ -3684,7 +3684,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_x_R = double(0);
+                            Real rho_x_R = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_x_R += Q[si][idx_cell_rho_Y_x_R];
@@ -3694,7 +3694,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_x_R;
+                            std::vector<Real> Y_x_R;
                             Y_x_R.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -3705,27 +3705,27 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_x_R_ptr;
+                            std::vector<const Real*> Y_x_R_ptr;
                             Y_x_R_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 Y_x_R_ptr.push_back(&Y_x_R[si]);
                             }
                             
-                            const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
-                            const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
-                            const double epsilon_x_R = Q[d_num_species + 2][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R);
+                            const Real u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
+                            const Real v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
+                            const Real epsilon_x_R = Q[d_num_species + 2][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R);
                             
-                            double p_x_R = d_equation_of_state_mixing_rules->
+                            Real p_x_R = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_x_R,
                                     &epsilon_x_R,
                                     Y_x_R_ptr);
                             
                             // One-sided derivatives.
-                            du_dx = (u_x_R - u_y_B)/(dx[0]);
-                            dv_dx = (v_x_R - v_y_B)/(dx[0]);
-                            dp_dx = (p_x_R - p_y_B)/(dx[0]);
+                            du_dx = (u_x_R - u_y_B)/Real(dx[0]);
+                            dv_dx = (v_x_R - v_y_B)/Real(dx[0]);
+                            dp_dx = (p_x_R - p_y_B)/Real(dx[0]);
                         }
                         else if ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
                                  (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
@@ -3750,7 +3750,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_x_L = double(0);
+                            Real rho_x_L = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_x_L += Q[si][idx_cell_rho_Y_x_L];
@@ -3760,7 +3760,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_x_L;
+                            std::vector<Real> Y_x_L;
                             Y_x_L.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -3771,27 +3771,27 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_x_L_ptr;
+                            std::vector<const Real*> Y_x_L_ptr;
                             Y_x_L_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 Y_x_L_ptr.push_back(&Y_x_L[si]);
                             }
                             
-                            const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
-                            const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
-                            const double epsilon_x_L = Q[d_num_species + 2][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L);
+                            const Real u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
+                            const Real v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
+                            const Real epsilon_x_L = Q[d_num_species + 2][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L);
                             
-                            double p_x_L = d_equation_of_state_mixing_rules->
+                            Real p_x_L = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_x_L,
                                     &epsilon_x_L,
                                     Y_x_L_ptr);
                             
                             // One-sided derivatives.
-                            du_dx = (u_y_B - u_x_L)/(dx[0]);
-                            dv_dx = (v_y_B - v_x_L)/(dx[0]);
-                            dp_dx = (p_y_B - p_x_L)/(dx[0]);
+                            du_dx = (u_y_B - u_x_L)/Real(dx[0]);
+                            dv_dx = (v_y_B - v_x_L)/Real(dx[0]);
+                            dp_dx = (p_y_B - p_x_L)/Real(dx[0]);
                         }
                         else
                         {
@@ -3817,8 +3817,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_x_L = double(0);
-                            double rho_x_R = double(0);
+                            Real rho_x_L = Real(0);
+                            Real rho_x_R = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_x_L += Q[si][idx_cell_rho_Y_x_L];
@@ -3829,8 +3829,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_x_L;
-                            std::vector<double> Y_x_R;
+                            std::vector<Real> Y_x_L;
+                            std::vector<Real> Y_x_R;
                             Y_x_L.reserve(d_num_species);
                             Y_x_R.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
@@ -3843,8 +3843,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_x_L_ptr;
-                            std::vector<const double*> Y_x_R_ptr;
+                            std::vector<const Real*> Y_x_L_ptr;
+                            std::vector<const Real*> Y_x_R_ptr;
                             Y_x_L_ptr.reserve(d_num_species);
                             Y_x_R_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
@@ -3853,70 +3853,70 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 Y_x_R_ptr.push_back(&Y_x_R[si]);
                             }
                             
-                            const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
-                            const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
+                            const Real u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
+                            const Real u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
                             
-                            const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
-                            const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
+                            const Real v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
+                            const Real v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
                             
-                            const double epsilon_x_L = Q[d_num_species + 2][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L);
-                            const double epsilon_x_R = Q[d_num_species + 2][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R);
+                            const Real epsilon_x_L = Q[d_num_species + 2][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L);
+                            const Real epsilon_x_R = Q[d_num_species + 2][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R);
                             
-                            double p_x_L = d_equation_of_state_mixing_rules->
+                            Real p_x_L = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_x_L,
                                     &epsilon_x_L,
                                     Y_x_L_ptr);
                             
-                            double p_x_R = d_equation_of_state_mixing_rules->
+                            Real p_x_R = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_x_R,
                                     &epsilon_x_R,
                                     Y_x_R_ptr);
                             
                             // Central derivatives.
-                            du_dx = (u_x_R - u_x_L)/(double(2)*dx[0]);
-                            dv_dx = (v_x_R - v_x_L)/(double(2)*dx[0]);
-                            dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
+                            du_dx = (u_x_R - u_x_L)/(Real(2)*Real(dx[0]));
+                            dv_dx = (v_x_R - v_x_L)/(Real(2)*Real(dx[0]));
+                            dp_dx = (p_x_R - p_x_L)/(Real(2)*Real(dx[0]));
                         }
                         
                         // Compute sound speed.
                         
-                        const double Gamma_y_B = d_equation_of_state_mixing_rules->getGruneisenParameter(
+                        const Real Gamma_y_B = d_equation_of_state_mixing_rules->getGruneisenParameter(
                             &rho_y_B,
                             &p_y_B,
                             Y_y_B_ptr);
                         
-                        const std::vector<double> Psi_y_B = d_equation_of_state_mixing_rules->
+                        const std::vector<Real> Psi_y_B = d_equation_of_state_mixing_rules->
                             getPressureDerivativeWithPartialDensities(
                                     &rho_y_B,
                                     &p_y_B,
                                     Y_y_B_ptr);
                         
-                        double c_y_B = Gamma_y_B*p_y_B/rho_y_B;
+                        Real c_y_B = Gamma_y_B*p_y_B/rho_y_B;
                         for (int si = 0; si < d_num_species; si++)
                         {
                             c_y_B += Y_y_B[si]*Psi_y_B[si];
                         }
-                        c_y_B = sqrt(c_y_B);
+                        c_y_B = std::sqrt(c_y_B);
                         
-                        const double lambda_1 = v_y_B - c_y_B;
+                        const Real lambda_1 = v_y_B - c_y_B;
                         
                         // Compute vector Lambda^(-1) * L.
                         
-                        double Lambda_inv_L[d_num_species + 3];
+                        Real Lambda_inv_L[d_num_species + 3];
                         
-                        const double& p_t         = d_bdry_edge_nonreflecting_outflow_p_t[edge_loc];
-                        const double& sigma       = d_bdry_edge_nonreflecting_outflow_sigma[edge_loc];
-                        const double& beta        = d_bdry_edge_nonreflecting_outflow_beta[edge_loc];
-                        const double& length_char = d_bdry_edge_nonreflecting_outflow_length_char[edge_loc];
+                        const Real& p_t         = d_bdry_edge_nonreflecting_outflow_p_t[edge_loc];
+                        const Real& sigma       = d_bdry_edge_nonreflecting_outflow_sigma[edge_loc];
+                        const Real& beta        = d_bdry_edge_nonreflecting_outflow_beta[edge_loc];
+                        const Real& length_char = d_bdry_edge_nonreflecting_outflow_length_char[edge_loc];
                         
-                        const double T_1 = u_y_B*(dp_dx - rho_y_B*c_y_B*dv_dx) + rho_y_B*c_y_B*c_y_B*du_dx;
+                        const Real T_1 = u_y_B*(dp_dx - rho_y_B*c_y_B*dv_dx) + rho_y_B*c_y_B*c_y_B*du_dx;
                         
-                        const double M_sq = (v_y_B*v_y_B + u_y_B*u_y_B)/(c_y_B*c_y_B);
-                        const double K = sigma*c_y_B*(double(1) - M_sq)/length_char;
+                        const Real M_sq = (v_y_B*v_y_B + u_y_B*u_y_B)/(c_y_B*c_y_B);
+                        const Real K = sigma*c_y_B*(Real(1) - M_sq)/length_char;
                         
-                        Lambda_inv_L[0] = (double(1)/lambda_1)*(K*(p_y_B - p_t) - (double(1) - beta)*T_1);
+                        Lambda_inv_L[0] = (Real(1)/lambda_1)*(K*(p_y_B - p_t) - (Real(1) - beta)*T_1);
                         Lambda_inv_L[1] = du_dy;
                         for (int si = 0; si < d_num_species; si++)
                         {
@@ -3926,10 +3926,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         
                        // Compute dV_dy.
                         
-                        const double c_sq_inv  = double(1)/(c_y_B*c_y_B);
-                        const double rho_c_inv = double(1)/(rho_y_B*c_y_B);
+                        const Real c_sq_inv  = Real(1)/(c_y_B*c_y_B);
+                        const Real rho_c_inv = Real(1)/(rho_y_B*c_y_B);
                         
-                        double dV_dy[d_num_species + 3];
+                        Real dV_dy[d_num_species + 3];
                         
                         for (int si = 0; si < d_num_species; si++)
                         {
@@ -3940,7 +3940,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         dV_dy[d_num_species + 1] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]);
                         dV_dy[d_num_species + 2] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]); 
                         
-                        double V_ghost[(d_num_species + 3)*num_ghosts_to_fill];
+                        Real V_ghost[(d_num_species + 3)*num_ghosts_to_fill];
                         
                         for (int j = 0; j < num_ghosts_to_fill; j++)
                         {
@@ -3960,172 +3960,172 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[j*(d_num_species + 3) + si] = rho_Y_y_BB[si] + double(2)*dx[1]*dV_dy[si];
+                                    V_ghost[j*(d_num_species + 3) + si] = rho_Y_y_BB[si] + Real(2)*Real(dx[1])*dV_dy[si];
                                 }
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species]     = u_y_BB   + double(2)*dx[1]*dV_dy[d_num_species];
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = v_y_BB   + double(2)*dx[1]*dV_dy[d_num_species + 1];
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = p_y_BB   + double(2)*dx[1]*dV_dy[d_num_species + 2];
+                                V_ghost[j*(d_num_species + 3) + d_num_species]     = u_y_BB   + Real(2)*Real(dx[1])*dV_dy[d_num_species];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = v_y_BB   + Real(2)*Real(dx[1])*dV_dy[d_num_species + 1];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = p_y_BB   + Real(2)*Real(dx[1])*dV_dy[d_num_species + 2];
                             }
                             else if (j == 1)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[j*(d_num_species + 3) + si] = -double(2)*rho_Y_y_BB[si] - double(3)*rho_Y_y_B[si] +
-                                        double(6)*V_ghost[(j - 1)*(d_num_species + 3) + si] - double(6)*dx[1]*dV_dy[si];
+                                    V_ghost[j*(d_num_species + 3) + si] = -Real(2)*rho_Y_y_BB[si] - Real(3)*rho_Y_y_B[si] +
+                                        Real(6)*V_ghost[(j - 1)*(d_num_species + 3) + si] - Real(6)*Real(dx[1])*dV_dy[si];
                                 }
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species] = -double(2)*u_y_BB - double(3)*u_y_B +
-                                    double(6)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species] - double(6)*dx[1]*dV_dy[d_num_species];
+                                V_ghost[j*(d_num_species + 3) + d_num_species] = -Real(2)*u_y_BB - Real(3)*u_y_B +
+                                    Real(6)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species] - Real(6)*Real(dx[1])*dV_dy[d_num_species];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -double(2)*v_y_BB - double(3)*v_y_B +
-                                    double(6)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 1] - double(6)*dx[1]*dV_dy[d_num_species + 1];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -Real(2)*v_y_BB - Real(3)*v_y_B +
+                                    Real(6)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 1] - Real(6)*Real(dx[1])*dV_dy[d_num_species + 1];
                                 
-                                V_ghost[j*(d_num_species + 3) +d_num_species + 2] = -double(2)*p_y_BB - double(3)*p_y_B +
-                                    double(6)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 2] - double(6)*dx[1]*dV_dy[d_num_species + 2];
+                                V_ghost[j*(d_num_species + 3) +d_num_species + 2] = -Real(2)*p_y_BB - Real(3)*p_y_B +
+                                    Real(6)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 2] - Real(6)*Real(dx[1])*dV_dy[d_num_species + 2];
                             }
                             else if (j == 2)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[j*(d_num_species + 3) + si] = double(3)*rho_Y_y_BB[si] + double(10)*rho_Y_y_B[si] -
-                                    double(18)*V_ghost[(j - 2)*(d_num_species + 3) + si] +
-                                    double(6)*V_ghost[(j - 1)*(d_num_species + 3) + si] +
-                                    double(12)*dx[1]*dV_dy[si];
+                                    V_ghost[j*(d_num_species + 3) + si] = Real(3)*rho_Y_y_BB[si] + Real(10)*rho_Y_y_B[si] -
+                                    Real(18)*V_ghost[(j - 2)*(d_num_species + 3) + si] +
+                                    Real(6)*V_ghost[(j - 1)*(d_num_species + 3) + si] +
+                                    Real(12)*Real(dx[1])*dV_dy[si];
                                 }
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species] = double(3)*u_y_BB + double(10)*u_y_B -
-                                    double(18)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species] +
-                                    double(6)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species] +
-                                    double(12)*dx[1]*dV_dy[d_num_species];
+                                V_ghost[j*(d_num_species + 3) + d_num_species] = Real(3)*u_y_BB + Real(10)*u_y_B -
+                                    Real(18)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species] +
+                                    Real(6)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species] +
+                                    Real(12)*Real(dx[1])*dV_dy[d_num_species];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = double(3)*v_y_BB + double(10)*v_y_B -
-                                    double(18)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(6)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(12)*dx[1]*dV_dy[d_num_species + 1];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = Real(3)*v_y_BB + Real(10)*v_y_B -
+                                    Real(18)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(6)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(12)*Real(dx[1])*dV_dy[d_num_species + 1];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = double(3)*p_y_BB + double(10)*p_y_B -
-                                    double(18)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(6)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(12)*dx[1]*dV_dy[d_num_species + 2];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = Real(3)*p_y_BB + Real(10)*p_y_B -
+                                    Real(18)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(6)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(12)*Real(dx[1])*dV_dy[d_num_species + 2];
                             }
                             else if (j == 3)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[j*(d_num_species + 3) + si] = -double(4)*rho_Y_y_BB[si] -
-                                        double(65)/double(3)*rho_Y_y_B[si] +
-                                        double(40)*V_ghost[(j - 3)*(d_num_species + 3) + si] -
-                                        double(20)*V_ghost[(j - 2)*(d_num_species + 3) + si] +
-                                        double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 3) + si] -
-                                        double(20)*dx[1]*dV_dy[si];
+                                    V_ghost[j*(d_num_species + 3) + si] = -Real(4)*rho_Y_y_BB[si] -
+                                        Real(65)/Real(3)*rho_Y_y_B[si] +
+                                        Real(40)*V_ghost[(j - 3)*(d_num_species + 3) + si] -
+                                        Real(20)*V_ghost[(j - 2)*(d_num_species + 3) + si] +
+                                        Real(20)/Real(3)*V_ghost[(j - 1)*(d_num_species + 3) + si] -
+                                        Real(20)*Real(dx[1])*dV_dy[si];
                                 } 
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species] = -double(4)*u_y_BB -
-                                    double(65)/double(3)*u_y_B +
-                                    double(40)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species] -
-                                    double(20)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species] +
-                                    double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species] -
-                                    double(20)*dx[1]*dV_dy[d_num_species];
+                                V_ghost[j*(d_num_species + 3) + d_num_species] = -Real(4)*u_y_BB -
+                                    Real(65)/Real(3)*u_y_B +
+                                    Real(40)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species] -
+                                    Real(20)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species] +
+                                    Real(20)/Real(3)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species] -
+                                    Real(20)*Real(dx[1])*dV_dy[d_num_species];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -double(4)*v_y_BB -
-                                    double(65)/double(3)*v_y_B +
-                                    double(40)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(20)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(20)*dx[1]*dV_dy[d_num_species + 1];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -Real(4)*v_y_BB -
+                                    Real(65)/Real(3)*v_y_B +
+                                    Real(40)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(20)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(20)/Real(3)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(20)*Real(dx[1])*dV_dy[d_num_species + 1];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = -double(4)*p_y_BB -
-                                    double(65)/double(3)*p_y_B +
-                                    double(40)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(20)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(20)*dx[1]*dV_dy[d_num_species + 2];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = -Real(4)*p_y_BB -
+                                    Real(65)/Real(3)*p_y_B +
+                                    Real(40)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(20)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(20)/Real(3)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(20)*Real(dx[1])*dV_dy[d_num_species + 2];
                             }
                             else if (j == 4)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[j*(d_num_species + 3) + si] = double(5)*rho_Y_y_BB[si] +
-                                        double(77)/double(2)*rho_Y_y_B[si] -
-                                        double(75)*V_ghost[(j - 4)*(d_num_species + 3) + si] +
-                                        double(50)*V_ghost[(j - 3)*(d_num_species + 3) + si] -
-                                        double(25)*V_ghost[(j - 2)*(d_num_species + 3) + si] +
-                                        double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 3) + si] +
-                                        double(30)*dx[1]*dV_dy[si];
+                                    V_ghost[j*(d_num_species + 3) + si] = Real(5)*rho_Y_y_BB[si] +
+                                        Real(77)/Real(2)*rho_Y_y_B[si] -
+                                        Real(75)*V_ghost[(j - 4)*(d_num_species + 3) + si] +
+                                        Real(50)*V_ghost[(j - 3)*(d_num_species + 3) + si] -
+                                        Real(25)*V_ghost[(j - 2)*(d_num_species + 3) + si] +
+                                        Real(15)/Real(2)*V_ghost[(j - 1)*(d_num_species + 3) + si] +
+                                        Real(30)*Real(dx[1])*dV_dy[si];
                                 }
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species] = double(5)*u_y_BB +
-                                    double(77)/double(2)*u_y_B -
-                                    double(75)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species] +
-                                    double(50)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species] -
-                                    double(25)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species] +
-                                    double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species] +
-                                    double(30)*dx[1]*dV_dy[d_num_species];
+                                V_ghost[j*(d_num_species + 3) + d_num_species] = Real(5)*u_y_BB +
+                                    Real(77)/Real(2)*u_y_B -
+                                    Real(75)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species] +
+                                    Real(50)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species] -
+                                    Real(25)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species] +
+                                    Real(15)/Real(2)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species] +
+                                    Real(30)*Real(dx[1])*dV_dy[d_num_species];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = double(5)*v_y_BB +
-                                    double(77)/double(2)*v_y_B -
-                                    double(75)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(50)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(25)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(30)*dx[1]*dV_dy[d_num_species + 1];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = Real(5)*v_y_BB +
+                                    Real(77)/Real(2)*v_y_B -
+                                    Real(75)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(50)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(25)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(15)/Real(2)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(30)*Real(dx[1])*dV_dy[d_num_species + 1];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = double(5)*p_y_BB +
-                                    double(77)/double(2)*p_y_B -
-                                    double(75)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(50)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(25)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(30)*dx[1]*dV_dy[d_num_species + 2];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = Real(5)*p_y_BB +
+                                    Real(77)/Real(2)*p_y_B -
+                                    Real(75)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(50)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(25)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(15)/Real(2)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(30)*Real(dx[1])*dV_dy[d_num_species + 2];
                             }
                             else if (j == 5)
                             {
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    V_ghost[j*(d_num_species + 3) + si] = -double(6)*rho_Y_y_BB[si] -
-                                        double(609)/double(10)*rho_Y_y_B[si] +
-                                        double(126)*V_ghost[(j - 5)*(d_num_species + 3) + si] -
-                                        double(105)*V_ghost[(j - 4)*(d_num_species + 3) + si] +
-                                        double(70)*V_ghost[(j - 3)*(d_num_species + 3) + si] -
-                                        double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 3) + si] +
-                                        double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 3) + si] -
-                                        double(42)*dx[1]*dV_dy[si];
+                                    V_ghost[j*(d_num_species + 3) + si] = -Real(6)*rho_Y_y_BB[si] -
+                                        Real(609)/Real(10)*rho_Y_y_B[si] +
+                                        Real(126)*V_ghost[(j - 5)*(d_num_species + 3) + si] -
+                                        Real(105)*V_ghost[(j - 4)*(d_num_species + 3) + si] +
+                                        Real(70)*V_ghost[(j - 3)*(d_num_species + 3) + si] -
+                                        Real(63)/Real(2)*V_ghost[(j - 2)*(d_num_species + 3) + si] +
+                                        Real(42)/Real(5)*V_ghost[(j - 1)*(d_num_species + 3) + si] -
+                                        Real(42)*Real(dx[1])*dV_dy[si];
                                 }
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species] = -double(6)*u_y_BB -
-                                    double(609)/double(10)*u_y_B +
-                                    double(126)*V_ghost[(j - 5)*(d_num_species + 3) + d_num_species] -
-                                    double(105)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species] +
-                                    double(70)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species] -
-                                    double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species] +
-                                    double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species] -
-                                    double(42)*dx[1]*dV_dy[d_num_species];
+                                V_ghost[j*(d_num_species + 3) + d_num_species] = -Real(6)*u_y_BB -
+                                    Real(609)/Real(10)*u_y_B +
+                                    Real(126)*V_ghost[(j - 5)*(d_num_species + 3) + d_num_species] -
+                                    Real(105)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species] +
+                                    Real(70)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species] -
+                                    Real(63)/Real(2)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species] +
+                                    Real(42)/Real(5)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species] -
+                                    Real(42)*Real(dx[1])*dV_dy[d_num_species];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -double(6)*v_y_BB -
-                                    double(609)/double(10)*v_y_B +
-                                    double(126)*V_ghost[(j - 5)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(105)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(70)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 1] +
-                                    double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 1] -
-                                    double(42)*dx[1]*dV_dy[d_num_species + 1];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -Real(6)*v_y_BB -
+                                    Real(609)/Real(10)*v_y_B +
+                                    Real(126)*V_ghost[(j - 5)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(105)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(70)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(63)/Real(2)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 1] +
+                                    Real(42)/Real(5)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 1] -
+                                    Real(42)*Real(dx[1])*dV_dy[d_num_species + 1];
                                 
-                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = -double(6)*p_y_BB -
-                                    double(609)/double(10)*p_y_B +
-                                    double(126)*V_ghost[(j - 5)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(105)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(70)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 2] +
-                                    double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 2] -
-                                    double(42)*dx[1]*dV_dy[d_num_species + 2];
+                                V_ghost[j*(d_num_species + 3) + d_num_species + 2] = -Real(6)*p_y_BB -
+                                    Real(609)/Real(10)*p_y_B +
+                                    Real(126)*V_ghost[(j - 5)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(105)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(70)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(63)/Real(2)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 2] +
+                                    Real(42)/Real(5)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 2] -
+                                    Real(42)*Real(dx[1])*dV_dy[d_num_species + 2];
                             }
                             
                             /*
                              * Compute the mixture density.
                              */
                             
-                            double rho_ghost = double(0);
+                            Real rho_ghost = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_ghost += V_ghost[j*(d_num_species + 3) + si];
@@ -4135,7 +4135,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_ghost;
+                            std::vector<Real> Y_ghost;
                             Y_ghost.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -4146,7 +4146,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_ghost_ptr;
+                            std::vector<const Real*> Y_ghost_ptr;
                             Y_ghost_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -4161,13 +4161,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             Q[d_num_species][idx_cell_mom]     = rho_ghost*V_ghost[j*(d_num_species + 3) + d_num_species];
                             Q[d_num_species + 1][idx_cell_mom] = rho_ghost*V_ghost[j*(d_num_species + 3) + d_num_species + 1];
                             
-                            const double epsilon = d_equation_of_state_mixing_rules->
+                            const Real epsilon = d_equation_of_state_mixing_rules->
                                 getInternalEnergy(
                                     &rho_ghost,
                                     &V_ghost[j*(d_num_species + 3) + d_num_species + 2],
                                     Y_ghost_ptr);
                             
-                            const double E = rho_ghost*epsilon +
+                            const Real E = rho_ghost*epsilon +
                                 half*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
                                     Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/
                                     rho_ghost;
@@ -4209,11 +4209,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
  */
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_node_locs,
     const std::vector<int>& bdry_node_conds,
-    const std::vector<std::vector<double> >& bdry_edge_values,
+    const std::vector<std::vector<Real> >& bdry_edge_values,
     const hier::IntVector& ghost_width_to_fill)
 {
     TBOX_ASSERT(static_cast<int>(conservative_var_data.size()) == 3);
@@ -4358,7 +4358,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                  * the conservative variables.
                  */
                 
-                std::vector<double*> Q;
+                std::vector<Real*> Q;
                 Q.reserve(d_num_eqn);
                 
                 std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -4452,7 +4452,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Compute the mixture density of the pivot.
                              */
                             
-                            double rho_pivot = 0.0;
+                            Real rho_pivot = 0.0;
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -4462,7 +4462,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Compute the mass fractions of the pivot.
                              */
                             
-                            std::vector<double> Y_pivot;
+                            std::vector<Real> Y_pivot;
                             Y_pivot.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -4473,7 +4473,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Get the pointers to the mass fractions of the pivot.
                              */
                             
-                            std::vector<const double*> Y_pivot_ptr;
+                            std::vector<const Real*> Y_pivot_ptr;
                             Y_pivot_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -4489,42 +4489,42 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                                 Q[si][idx_cell_rho_Y] = Q[si][idx_cell_pivot_rho_Y];
                             }
                             Q[d_num_species][idx_cell_mom] = -Q[d_num_species][idx_cell_pivot_mom] +
-                                2.0*rho_pivot*d_bdry_edge_adiabatic_no_slip_vel[edge_loc_0*2];
+                                Real(2)*rho_pivot*d_bdry_edge_adiabatic_no_slip_vel[edge_loc_0*2];
                             Q[d_num_species + 1][idx_cell_mom] = -Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                2.0*rho_pivot*d_bdry_edge_adiabatic_no_slip_vel[edge_loc_0*2 + 1];
+                                Real(2)*rho_pivot*d_bdry_edge_adiabatic_no_slip_vel[edge_loc_0*2 + 1];
                             
                             /*
                              * Set the values for total internal energy.
                              */
                             
-                            double epsilon_pivot = (Q[d_num_species + 2][idx_cell_pivot_E] -
-                                0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                     Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom])/
+                            Real epsilon_pivot = (Q[d_num_species + 2][idx_cell_pivot_E] -
+                                Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom])/
                                 rho_pivot)/rho_pivot;
                             
-                            double p_pivot = d_equation_of_state_mixing_rules->
+                            Real p_pivot = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_pivot,
                                     &epsilon_pivot,
                                     Y_pivot_ptr);
                             
-                            double T_pivot = d_equation_of_state_mixing_rules->
+                            Real T_pivot = d_equation_of_state_mixing_rules->
                                 getTemperature(
                                     &rho_pivot,
                                     &p_pivot,
                                     Y_pivot_ptr);
                             
-                            double T = T_pivot;
+                            Real T = T_pivot;
                             
-                            double epsilon = d_equation_of_state_mixing_rules->
+                            Real epsilon = d_equation_of_state_mixing_rules->
                                 getInternalEnergyFromTemperature(
                                     &rho_pivot,
                                     &T,
                                     Y_pivot_ptr);
                             
-                            double E = rho_pivot*epsilon +
-                                0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
-                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/rho_pivot;
+                            Real E = rho_pivot*epsilon +
+                                Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
+                                Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/rho_pivot;
                             
                             Q[d_num_species + 2][idx_cell_E] = E;
                         }
@@ -4595,7 +4595,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Compute the mixture density of the pivot.
                              */
                             
-                            double rho_pivot = 0.0;
+                            Real rho_pivot = 0.0;
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -4605,7 +4605,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Compute the mass fractions of the pivot.
                              */
                             
-                            std::vector<double> Y_pivot;
+                            std::vector<Real> Y_pivot;
                             Y_pivot.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -4616,7 +4616,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Get the pointers to the mass fractions of the pivot.
                              */
                             
-                            std::vector<const double*> Y_pivot_ptr;
+                            std::vector<const Real*> Y_pivot_ptr;
                             Y_pivot_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -4632,42 +4632,42 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                                 Q[si][idx_cell_rho_Y] = Q[si][idx_cell_pivot_rho_Y];
                             }
                             Q[d_num_species][idx_cell_mom] = -Q[d_num_species][idx_cell_pivot_mom] +
-                                2.0*rho_pivot*d_bdry_edge_adiabatic_no_slip_vel[edge_loc_1*2];
+                                Real(2)*rho_pivot*d_bdry_edge_adiabatic_no_slip_vel[edge_loc_1*2];
                             Q[d_num_species + 1][idx_cell_mom] = -Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                2.0*rho_pivot*d_bdry_edge_adiabatic_no_slip_vel[edge_loc_1*2 + 1];
+                                Real(2)*rho_pivot*d_bdry_edge_adiabatic_no_slip_vel[edge_loc_1*2 + 1];
                             
                             /*
                              * Set the values for total internal energy.
                              */
                             
-                            double epsilon_pivot = (Q[d_num_species + 2][idx_cell_pivot_E] -
-                                0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                     Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom])/
+                            Real epsilon_pivot = (Q[d_num_species + 2][idx_cell_pivot_E] -
+                                Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom])/
                                 rho_pivot)/rho_pivot;
                             
-                            double p_pivot = d_equation_of_state_mixing_rules->
+                            Real p_pivot = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_pivot,
                                     &epsilon_pivot,
                                     Y_pivot_ptr);
                             
-                            double T_pivot = d_equation_of_state_mixing_rules->
+                            Real T_pivot = d_equation_of_state_mixing_rules->
                                 getTemperature(
                                     &rho_pivot,
                                     &p_pivot,
                                     Y_pivot_ptr);
                             
-                            double T = T_pivot;
+                            Real T = T_pivot;
                             
-                            double epsilon = d_equation_of_state_mixing_rules->
+                            Real epsilon = d_equation_of_state_mixing_rules->
                                 getInternalEnergyFromTemperature(
                                     &rho_pivot,
                                     &T,
                                     Y_pivot_ptr);
                             
-                            double E = rho_pivot*epsilon +
-                                0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
-                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/rho_pivot;
+                            Real E = rho_pivot*epsilon +
+                                Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
+                                Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/rho_pivot;
                             
                             Q[d_num_species + 2][idx_cell_E] = E;
                         }
@@ -4738,7 +4738,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Compute the mixture density of the pivot.
                              */
                             
-                            double rho_pivot = 0.0;
+                            Real rho_pivot = 0.0;
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -4748,7 +4748,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Compute the mass fractions of the pivot.
                              */
                             
-                            std::vector<double> Y_pivot;
+                            std::vector<Real> Y_pivot;
                             Y_pivot.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -4759,7 +4759,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Get the pointers to the mass fractions of the pivot.
                              */
                             
-                            std::vector<const double*> Y_pivot_ptr;
+                            std::vector<const Real*> Y_pivot_ptr;
                             Y_pivot_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -4770,37 +4770,37 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Set the values for partial densities, momentum and total internal energy.
                              */
                             
-                            double epsilon_pivot = (Q[d_num_species + 2][idx_cell_pivot_E] -
-                                0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                     Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom])/
+                            Real epsilon_pivot = (Q[d_num_species + 2][idx_cell_pivot_E] -
+                                Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom])/
                                 rho_pivot)/rho_pivot;
                             
-                            double p_pivot = d_equation_of_state_mixing_rules->
+                            Real p_pivot = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_pivot,
                                     &epsilon_pivot,
                                     Y_pivot_ptr);
                             
-                            double p = p_pivot;
+                            Real p = p_pivot;
                             
-                            double T_pivot = d_equation_of_state_mixing_rules->
+                            Real T_pivot = d_equation_of_state_mixing_rules->
                                 getTemperature(
                                     &rho_pivot,
                                     &p_pivot,
                                     Y_pivot_ptr);
                             
-                            double T = -T_pivot + 2.0*d_bdry_edge_isothermal_no_slip_T[edge_loc_0];
+                            Real T = -T_pivot + Real(2)*d_bdry_edge_isothermal_no_slip_T[edge_loc_0];
                             
-                            double rho = d_equation_of_state_mixing_rules->
+                            Real rho = d_equation_of_state_mixing_rules->
                                 getMixtureDensity(
                                     &p,
                                     &T,
                                     Y_pivot_ptr);
                             
-                            double u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
-                                2.0*d_bdry_edge_isothermal_no_slip_vel[edge_loc_0*2];
-                            double v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
-                                2.0*d_bdry_edge_isothermal_no_slip_vel[edge_loc_0*2 + 1];
+                            Real u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
+                                Real(2)*d_bdry_edge_isothermal_no_slip_vel[edge_loc_0*2];
+                            Real v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
+                                Real(2)*d_bdry_edge_isothermal_no_slip_vel[edge_loc_0*2 + 1];
                             
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -4809,15 +4809,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                             Q[d_num_species][idx_cell_mom] = rho*u;
                             Q[d_num_species + 1][idx_cell_mom] = rho*v;
                             
-                            double epsilon = d_equation_of_state_mixing_rules->
+                            Real epsilon = d_equation_of_state_mixing_rules->
                                 getInternalEnergyFromTemperature(
                                     &rho,
                                     &T,
                                     Y_pivot_ptr);
                             
-                            double E = rho*epsilon +
-                                0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] + 
-                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/rho;
+                            Real E = rho*epsilon +
+                                Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] + 
+                                Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/rho;
                             
                             Q[d_num_species + 2][idx_cell_E] = E;
                         }
@@ -4888,7 +4888,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Compute the mixture density of the pivot.
                              */
                             
-                            double rho_pivot = 0.0;
+                            Real rho_pivot = 0.0;
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -4898,7 +4898,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Compute the mass fractions of the pivot.
                              */
                             
-                            std::vector<double> Y_pivot;
+                            std::vector<Real> Y_pivot;
                             Y_pivot.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -4909,7 +4909,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Get the pointers to the mass fractions of the pivot.
                              */
                             
-                            std::vector<const double*> Y_pivot_ptr;
+                            std::vector<const Real*> Y_pivot_ptr;
                             Y_pivot_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -4920,37 +4920,37 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Set the values for partial densities, momentum and total internal energy.
                              */
                             
-                            double epsilon_pivot = (Q[d_num_species + 2][idx_cell_pivot_E] -
-                                0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                     Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom])/
+                            Real epsilon_pivot = (Q[d_num_species + 2][idx_cell_pivot_E] -
+                                Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom])/
                                 rho_pivot)/rho_pivot;
                             
-                            double p_pivot = d_equation_of_state_mixing_rules->
+                            Real p_pivot = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_pivot,
                                     &epsilon_pivot,
                                     Y_pivot_ptr);
                             
-                            double p = p_pivot;
+                            Real p = p_pivot;
                             
-                            double T_pivot = d_equation_of_state_mixing_rules->
+                            Real T_pivot = d_equation_of_state_mixing_rules->
                                 getTemperature(
                                     &rho_pivot,
                                     &p_pivot,
                                     Y_pivot_ptr);
                             
-                            double T = -T_pivot + 2.0*d_bdry_edge_isothermal_no_slip_T[edge_loc_1];
+                            Real T = -T_pivot + Real(2)*d_bdry_edge_isothermal_no_slip_T[edge_loc_1];
                             
-                            double rho = d_equation_of_state_mixing_rules->
+                            Real rho = d_equation_of_state_mixing_rules->
                                 getMixtureDensity(
                                     &p,
                                     &T,
                                     Y_pivot_ptr);
                             
-                            double u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
-                                2.0*d_bdry_edge_isothermal_no_slip_vel[edge_loc_1*2];
-                            double v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
-                                2.0*d_bdry_edge_isothermal_no_slip_vel[edge_loc_1*2 + 1];
+                            Real u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
+                                Real(2)*d_bdry_edge_isothermal_no_slip_vel[edge_loc_1*2];
+                            Real v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
+                                Real(2)*d_bdry_edge_isothermal_no_slip_vel[edge_loc_1*2 + 1];
                             
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -4959,15 +4959,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                             Q[d_num_species][idx_cell_mom] = rho*u;
                             Q[d_num_species + 1][idx_cell_mom] = rho*v;
                             
-                            double epsilon = d_equation_of_state_mixing_rules->
+                            Real epsilon = d_equation_of_state_mixing_rules->
                                 getInternalEnergyFromTemperature(
                                     &rho,
                                     &T,
                                     Y_pivot_ptr);
                             
-                            double E = rho*epsilon +
-                                0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] + 
-                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/rho;
+                            Real E = rho*epsilon +
+                                Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] + 
+                                Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/rho;
                             
                             Q[d_num_species + 2][idx_cell_E] = E;
                         }
@@ -5006,11 +5006,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
  */
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_face_locs,
     const std::vector<int>& bdry_face_conds,
-    const std::vector<std::vector<double> >& bdry_face_values,
+    const std::vector<std::vector<Real> >& bdry_face_values,
     const hier::IntVector& ghost_width_to_fill)
 {
     TBOX_ASSERT(static_cast<int>(conservative_var_data.size()) == 3);
@@ -5126,7 +5126,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                  * the conservative variables.
                  */
                 
-                std::vector<double*> Q;
+                std::vector<Real*> Q;
                 Q.reserve(d_num_eqn);
                 
                 std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -5353,7 +5353,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                double rho_pivot = 0.0;
+                                Real rho_pivot = 0.0;
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -5363,7 +5363,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<double> Y_pivot;
+                                std::vector<Real> Y_pivot;
                                 Y_pivot.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -5374,7 +5374,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<const double*> Y_pivot_ptr;
+                                std::vector<const Real*> Y_pivot_ptr;
                                 Y_pivot_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -5390,46 +5390,46 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Q[si][idx_cell_rho_Y] = Q[si][idx_cell_pivot_rho_Y];
                                 }
                                 Q[d_num_species][idx_cell_mom] = -Q[d_num_species][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc*3];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc*3];
                                 Q[d_num_species + 1][idx_cell_mom] = -Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc*3 + 1];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc*3 + 1];
                                 Q[d_num_species + 2][idx_cell_mom] = -Q[d_num_species + 2][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc*3 + 2];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc*3 + 2];
                                 
                                 /*
                                  * Set the values for total internal energy.
                                  */
                                 
-                                double epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
-                                    0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
+                                Real epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
                                     rho_pivot)/rho_pivot;
                                 
-                                double p_pivot = d_equation_of_state_mixing_rules->
+                                Real p_pivot = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_pivot,
                                         &epsilon_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T_pivot = d_equation_of_state_mixing_rules->
+                                Real T_pivot = d_equation_of_state_mixing_rules->
                                     getTemperature(
                                         &rho_pivot,
                                         &p_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T = T_pivot;
+                                Real T = T_pivot;
                                 
-                                double epsilon = d_equation_of_state_mixing_rules->
+                                Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergyFromTemperature(
                                         &rho_pivot,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double E = rho_pivot*epsilon +
-                                    0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
-                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
-                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
+                                Real E = rho_pivot*epsilon +
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
+                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
+                                    Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
                                     rho_pivot;
                                 
                                 Q[d_num_species + 3][idx_cell_E] = E;
@@ -5635,7 +5635,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                double rho_pivot = 0.0;
+                                Real rho_pivot = 0.0;
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -5645,7 +5645,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<double> Y_pivot;
+                                std::vector<Real> Y_pivot;
                                 Y_pivot.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -5656,7 +5656,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<const double*> Y_pivot_ptr;
+                                std::vector<const Real*> Y_pivot_ptr;
                                 Y_pivot_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -5667,40 +5667,40 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Set the values for partial densities, momentum and total internal energy.
                                  */
                                 
-                                double epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
-                                    0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
+                                Real epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
                                     rho_pivot)/rho_pivot;
                                 
-                                double p_pivot = d_equation_of_state_mixing_rules->
+                                Real p_pivot = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_pivot,
                                         &epsilon_pivot,
                                         Y_pivot_ptr);
                                 
-                                double p = p_pivot;
+                                Real p = p_pivot;
                                 
-                                double T_pivot = d_equation_of_state_mixing_rules->
+                                Real T_pivot = d_equation_of_state_mixing_rules->
                                     getTemperature(
                                         &rho_pivot,
                                         &p_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T = -T_pivot + 2.0*d_bdry_face_isothermal_no_slip_T[face_loc];
+                                Real T = -T_pivot + Real(2)*d_bdry_face_isothermal_no_slip_T[face_loc];
                                 
-                                double rho = d_equation_of_state_mixing_rules->
+                                Real rho = d_equation_of_state_mixing_rules->
                                     getMixtureDensity(
                                         &p,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_face_isothermal_no_slip_vel[face_loc*3];
-                                double v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_face_isothermal_no_slip_vel[face_loc*3 + 1];
-                                double w = -Q[d_num_species + 2][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_face_isothermal_no_slip_vel[face_loc*3 + 2];
+                                Real u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_face_isothermal_no_slip_vel[face_loc*3];
+                                Real v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_face_isothermal_no_slip_vel[face_loc*3 + 1];
+                                Real w = -Q[d_num_species + 2][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_face_isothermal_no_slip_vel[face_loc*3 + 2];
                                 
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -5710,16 +5710,16 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 Q[d_num_species + 1][idx_cell_mom] = rho*v;
                                 Q[d_num_species + 2][idx_cell_mom] = rho*w;
                                 
-                                double epsilon = d_equation_of_state_mixing_rules->
+                                Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergyFromTemperature(
                                         &rho,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double E = rho*epsilon +
-                                    0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
-                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
-                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/rho;
+                                Real E = rho*epsilon +
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
+                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
+                                    Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/rho;
                                 
                                 Q[d_num_species + 3][idx_cell_E] = E;
                             }
@@ -5774,7 +5774,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                  * the conservative variables.
                  */
                 
-                std::vector<double*> Q;
+                std::vector<Real*> Q;
                 Q.reserve(d_num_eqn);
                 
                 std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -5870,9 +5870,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                     subghostcell_dims_conservative_var[2][1];
                             
-                            std::vector<double> rho_Y_x_R;
-                            std::vector<double> rho_Y_x_RR;
-                            std::vector<double> rho_Y_x_RRR;
+                            std::vector<Real> rho_Y_x_R;
+                            std::vector<Real> rho_Y_x_RR;
+                            std::vector<Real> rho_Y_x_RRR;
                             rho_Y_x_R.reserve(d_num_species);
                             rho_Y_x_RR.reserve(d_num_species);
                             rho_Y_x_RRR.reserve(d_num_species);
@@ -5887,9 +5887,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_x_R   = double(0);
-                            double rho_x_RR  = double(0);
-                            double rho_x_RRR = double(0);
+                            Real rho_x_R   = Real(0);
+                            Real rho_x_RR  = Real(0);
+                            Real rho_x_RRR = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_x_R   += Q[si][idx_cell_rho_Y_x_R];
@@ -5901,9 +5901,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_x_R;
-                            std::vector<double> Y_x_RR;
-                            std::vector<double> Y_x_RRR;
+                            std::vector<Real> Y_x_R;
+                            std::vector<Real> Y_x_RR;
+                            std::vector<Real> Y_x_RRR;
                             Y_x_R.reserve(d_num_species);
                             Y_x_RR.reserve(d_num_species);
                             Y_x_RRR.reserve(d_num_species);
@@ -5918,9 +5918,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_x_R_ptr;
-                            std::vector<const double*> Y_x_RR_ptr;
-                            std::vector<const double*> Y_x_RRR_ptr;
+                            std::vector<const Real*> Y_x_R_ptr;
+                            std::vector<const Real*> Y_x_RR_ptr;
+                            std::vector<const Real*> Y_x_RRR_ptr;
                             Y_x_R_ptr.reserve(d_num_species);
                             Y_x_RR_ptr.reserve(d_num_species);
                             Y_x_RRR_ptr.reserve(d_num_species);
@@ -5931,36 +5931,36 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 Y_x_RRR_ptr.push_back(&Y_x_RRR[si]);
                             }
                             
-                            const double u_x_R   = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
-                            const double u_x_RR  = Q[d_num_species][idx_cell_mom_x_RR]/rho_x_RR;
-                            const double u_x_RRR = Q[d_num_species][idx_cell_mom_x_RRR]/rho_x_RRR;
+                            const Real u_x_R   = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
+                            const Real u_x_RR  = Q[d_num_species][idx_cell_mom_x_RR]/rho_x_RR;
+                            const Real u_x_RRR = Q[d_num_species][idx_cell_mom_x_RRR]/rho_x_RRR;
                             
-                            const double v_x_R   = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
-                            const double v_x_RR  = Q[d_num_species + 1][idx_cell_mom_x_RR]/rho_x_RR;
-                            const double v_x_RRR = Q[d_num_species + 1][idx_cell_mom_x_RRR]/rho_x_RRR;
+                            const Real v_x_R   = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
+                            const Real v_x_RR  = Q[d_num_species + 1][idx_cell_mom_x_RR]/rho_x_RR;
+                            const Real v_x_RRR = Q[d_num_species + 1][idx_cell_mom_x_RRR]/rho_x_RRR;
                             
-                            const double w_x_R   = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
-                            const double w_x_RR  = Q[d_num_species + 2][idx_cell_mom_x_RR]/rho_x_RR;
-                            const double w_x_RRR = Q[d_num_species + 2][idx_cell_mom_x_RRR]/rho_x_RRR;
+                            const Real w_x_R   = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
+                            const Real w_x_RR  = Q[d_num_species + 2][idx_cell_mom_x_RR]/rho_x_RR;
+                            const Real w_x_RRR = Q[d_num_species + 2][idx_cell_mom_x_RRR]/rho_x_RRR;
                             
-                            const double half = double(1)/double(2);
-                            const double epsilon_x_R   = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
-                            const double epsilon_x_RR  = Q[d_num_species + 3][idx_cell_E_x_RR]/rho_x_RR - half*(u_x_RR*u_x_RR + v_x_RR*v_x_RR + w_x_RR*w_x_RR);
-                            const double epsilon_x_RRR = Q[d_num_species + 3][idx_cell_E_x_RRR]/rho_x_RRR - half*(u_x_RRR*u_x_RRR + v_x_RRR*v_x_RRR + w_x_RRR*w_x_RRR);
+                            const Real half = Real(1)/Real(2);
+                            const Real epsilon_x_R   = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
+                            const Real epsilon_x_RR  = Q[d_num_species + 3][idx_cell_E_x_RR]/rho_x_RR - half*(u_x_RR*u_x_RR + v_x_RR*v_x_RR + w_x_RR*w_x_RR);
+                            const Real epsilon_x_RRR = Q[d_num_species + 3][idx_cell_E_x_RRR]/rho_x_RRR - half*(u_x_RRR*u_x_RRR + v_x_RRR*v_x_RRR + w_x_RRR*w_x_RRR);
                             
-                            double p_x_R = d_equation_of_state_mixing_rules->
+                            Real p_x_R = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_x_R,
                                     &epsilon_x_R,
                                     Y_x_R_ptr);
                             
-                            double p_x_RR = d_equation_of_state_mixing_rules->
+                            Real p_x_RR = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_x_RR,
                                     &epsilon_x_RR,
                                     Y_x_RR_ptr);
                             
-                            double p_x_RRR = d_equation_of_state_mixing_rules->
+                            Real p_x_RRR = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_x_RRR,
                                     &epsilon_x_RRR,
@@ -5970,26 +5970,26 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute derivatives in x-direction.
                              */
                             
-                            std::vector<double> drho_Y_dx;
+                            std::vector<Real> drho_Y_dx;
                             drho_Y_dx.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                drho_Y_dx.push_back(-(Q[si][idx_cell_rho_Y_x_RRR] - double(4)*Q[si][idx_cell_rho_Y_x_RR] +
-                                    double(3)*Q[si][idx_cell_rho_Y_x_R])/(double(2)*dx[0]));
+                                drho_Y_dx.push_back(-(Q[si][idx_cell_rho_Y_x_RRR] - Real(4)*Q[si][idx_cell_rho_Y_x_RR] +
+                                    Real(3)*Q[si][idx_cell_rho_Y_x_R])/(Real(2)*Real(dx[0])));
                             }
-                            const double du_dx = -(u_x_RRR - double(4)*u_x_RR + double(3)*u_x_R)/(double(2)*dx[0]);
-                            const double dv_dx = -(v_x_RRR - double(4)*v_x_RR + double(3)*v_x_R)/(double(2)*dx[0]);
-                            const double dw_dx = -(w_x_RRR - double(4)*w_x_RR + double(3)*w_x_R)/(double(2)*dx[0]);
-                            const double dp_dx = -(p_x_RRR - double(4)*p_x_RR + double(3)*p_x_R)/(double(2)*dx[0]);
+                            const Real du_dx = -(u_x_RRR - Real(4)*u_x_RR + Real(3)*u_x_R)/(Real(2)*Real(dx[0]));
+                            const Real dv_dx = -(v_x_RRR - Real(4)*v_x_RR + Real(3)*v_x_R)/(Real(2)*Real(dx[0]));
+                            const Real dw_dx = -(w_x_RRR - Real(4)*w_x_RR + Real(3)*w_x_R)/(Real(2)*Real(dx[0]));
+                            const Real dp_dx = -(p_x_RRR - Real(4)*p_x_RR + Real(3)*p_x_R)/(Real(2)*Real(dx[0]));
                             
                             /*
                              * Compute derivatives in y-direction.
                              */
                             
-                            double du_dy = double(0);
-                            double dv_dy = double(0);
-                            // double dw_dy = double(0);
-                            double dp_dy = double(0);
+                            Real du_dy = Real(0);
+                            Real dv_dy = Real(0);
+                            // Real dw_dy = Real(0);
+                            Real dp_dy = Real(0);
                             
                             if ((j + num_subghosts_conservative_var[0][1] == 0) ||
                                 (j + num_subghosts_conservative_var[1][1] == 0) ||
@@ -6020,7 +6020,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_y_T = double(0);
+                                Real rho_y_T = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_y_T += Q[si][idx_cell_rho_Y_y_T];
@@ -6030,7 +6030,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_y_T;
+                                std::vector<Real> Y_y_T;
                                 Y_y_T.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -6041,29 +6041,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                             
-                                std::vector<const double*> Y_y_T_ptr;
+                                std::vector<const Real*> Y_y_T_ptr;
                                 Y_y_T_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_y_T_ptr.push_back(&Y_y_T[si]);
                                 }
                                 
-                                const double u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
-                                const double v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
-                                const double w_y_T = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
-                                const double epsilon_y_T = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
+                                const Real u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
+                                const Real v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
+                                const Real w_y_T = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
+                                const Real epsilon_y_T = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
                                 
-                                double p_y_T = d_equation_of_state_mixing_rules->
+                                Real p_y_T = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_y_T,
                                         &epsilon_y_T,
                                         Y_y_T_ptr);
                                 
                                 // One-sided derivatives.
-                                du_dy = (u_y_T - u_x_R)/(dx[1]);
-                                dv_dy = (v_y_T - v_x_R)/(dx[1]);
-                                // dw_dy = (w_y_T - w_x_R)/(dx[1]);
-                                dp_dy = (p_y_T - p_x_R)/(dx[1]);
+                                du_dy = (u_y_T - u_x_R)/Real(dx[1]);
+                                dv_dy = (v_y_T - v_x_R)/Real(dx[1]);
+                                // dw_dy = (w_y_T - w_x_R)/Real(dx[1]);
+                                dp_dy = (p_y_T - p_x_R)/Real(dx[1]);
                             }
                             else if ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
                                      (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
@@ -6093,7 +6093,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_y_B = double(0);
+                                Real rho_y_B = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_y_B += Q[si][idx_cell_rho_Y_y_B];
@@ -6103,7 +6103,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_y_B;
+                                std::vector<Real> Y_y_B;
                                 Y_y_B.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -6114,29 +6114,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_y_B_ptr;
+                                std::vector<const Real*> Y_y_B_ptr;
                                 Y_y_B_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_y_B_ptr.push_back(&Y_y_B[si]);
                                 }
                                 
-                                const double u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
-                                const double v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
-                                const double w_y_B = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
-                                const double epsilon_y_B = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
+                                const Real u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
+                                const Real v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
+                                const Real w_y_B = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
+                                const Real epsilon_y_B = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
                                 
-                                double p_y_B = d_equation_of_state_mixing_rules->
+                                Real p_y_B = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_y_B,
                                         &epsilon_y_B,
                                         Y_y_B_ptr);
                                 
                                 // One-sided derivatives.
-                                du_dy = (u_x_R - u_y_B)/(dx[1]);
-                                dv_dy = (v_x_R - v_y_B)/(dx[1]);
-                                // dw_dy = (w_x_R - w_y_B)/(dx[1]);
-                                dp_dy = (p_x_R - p_y_B)/(dx[1]);
+                                du_dy = (u_x_R - u_y_B)/Real(dx[1]);
+                                dv_dy = (v_x_R - v_y_B)/Real(dx[1]);
+                                // dw_dy = (w_x_R - w_y_B)/Real(dx[1]);
+                                dp_dy = (p_x_R - p_y_B)/Real(dx[1]);
                             }
                             else
                             {
@@ -6174,8 +6174,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_y_B = double(0);
-                                double rho_y_T = double(0);
+                                Real rho_y_B = Real(0);
+                                Real rho_y_T = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_y_B += Q[si][idx_cell_rho_Y_y_B];
@@ -6186,8 +6186,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_y_B;
-                                std::vector<double> Y_y_T;
+                                std::vector<Real> Y_y_B;
+                                std::vector<Real> Y_y_T;
                                 Y_y_B.reserve(d_num_species);
                                 Y_y_T.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -6200,8 +6200,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_y_B_ptr;
-                                std::vector<const double*> Y_y_T_ptr;
+                                std::vector<const Real*> Y_y_B_ptr;
+                                std::vector<const Real*> Y_y_T_ptr;
                                 Y_y_B_ptr.reserve(d_num_species);
                                 Y_y_T_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -6210,45 +6210,45 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_y_T_ptr.push_back(&Y_y_T[si]);
                                 }
                                 
-                                const double u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
-                                const double u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
+                                const Real u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
+                                const Real u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
                                 
-                                const double v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
-                                const double v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
+                                const Real v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
+                                const Real v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
                                 
-                                const double w_y_B = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
-                                const double w_y_T = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
+                                const Real w_y_B = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
+                                const Real w_y_T = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
                                 
-                                const double epsilon_y_B = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
-                                const double epsilon_y_T = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
+                                const Real epsilon_y_B = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
+                                const Real epsilon_y_T = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
                                 
-                                double p_y_B = d_equation_of_state_mixing_rules->
+                                Real p_y_B = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_y_B,
                                         &epsilon_y_B,
                                         Y_y_B_ptr);
                             
-                                double p_y_T = d_equation_of_state_mixing_rules->
+                                Real p_y_T = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_y_T,
                                         &epsilon_y_T,
                                         Y_y_T_ptr);
                                 
                                 // Central derivatives.
-                                du_dy = (u_y_T - u_y_B)/(double(2)*dx[1]);
-                                dv_dy = (v_y_T - v_y_B)/(double(2)*dx[1]);
-                                // dw_dy = (w_y_T - w_y_B)/(double(2)*dx[1]);
-                                dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
+                                du_dy = (u_y_T - u_y_B)/(Real(2)*Real(dx[1]));
+                                dv_dy = (v_y_T - v_y_B)/(Real(2)*Real(dx[1]));
+                                // dw_dy = (w_y_T - w_y_B)/(Real(2)*Real(dx[1]));
+                                dp_dy = (p_y_T - p_y_B)/(Real(2)*Real(dx[1]));
                             }
                             
                             /*
                              * Compute derivatives in z-direction.
                              */
                             
-                            double du_dz = double(0);
-                            // double dv_dz = double(0);
-                            double dw_dz = double(0);
-                            double dp_dz = double(0);
+                            Real du_dz = Real(0);
+                            // Real dv_dz = Real(0);
+                            Real dw_dz = Real(0);
+                            Real dp_dz = Real(0);
                             
                             if ((k + num_subghosts_conservative_var[0][2] == 0) ||
                                 (k + num_subghosts_conservative_var[1][2] == 0) ||
@@ -6279,7 +6279,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_z_F = double(0);
+                                Real rho_z_F = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_z_F += Q[si][idx_cell_rho_Y_z_F];
@@ -6289,7 +6289,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_z_F;
+                                std::vector<Real> Y_z_F;
                                 Y_z_F.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -6300,29 +6300,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_z_F_ptr;
+                                std::vector<const Real*> Y_z_F_ptr;
                                 Y_z_F_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_z_F_ptr.push_back(&Y_z_F[si]);
                                 }
                                 
-                                const double u_z_F = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
-                                const double v_z_F = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
-                                const double w_z_F = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
-                                const double epsilon_z_F = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
+                                const Real u_z_F = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
+                                const Real v_z_F = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
+                                const Real w_z_F = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
+                                const Real epsilon_z_F = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
                                 
-                                double p_z_F = d_equation_of_state_mixing_rules->
+                                Real p_z_F = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_F,
                                         &epsilon_z_F,
                                         Y_z_F_ptr);
                                 
                                 // One-sided derivatives.
-                                du_dz = (u_z_F - u_x_R)/(dx[2]);
-                                // dv_dz = (v_z_F - v_x_R)/(dx[2]);
-                                dw_dz = (w_z_F - w_x_R)/(dx[2]);
-                                dp_dz = (p_z_F - p_x_R)/(dx[2]);
+                                du_dz = (u_z_F - u_x_R)/Real(dx[2]);
+                                // dv_dz = (v_z_F - v_x_R)/Real(dx[2]);
+                                dw_dz = (w_z_F - w_x_R)/Real(dx[2]);
+                                dp_dz = (p_z_F - p_x_R)/Real(dx[2]);
                             }
                             else if ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
                                      (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
@@ -6352,7 +6352,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_z_B = double(0);
+                                Real rho_z_B = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_z_B += Q[si][idx_cell_rho_Y_z_B];
@@ -6362,7 +6362,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_z_B;
+                                std::vector<Real> Y_z_B;
                                 Y_z_B.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -6373,29 +6373,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_z_B_ptr;
+                                std::vector<const Real*> Y_z_B_ptr;
                                 Y_z_B_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_z_B_ptr.push_back(&Y_z_B[si]);
                                 }
                                 
-                                const double u_z_B = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
-                                const double v_z_B = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
-                                const double w_z_B = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
-                                const double epsilon_z_B = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
+                                const Real u_z_B = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
+                                const Real v_z_B = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
+                                const Real w_z_B = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
+                                const Real epsilon_z_B = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
                                 
-                                double p_z_B = d_equation_of_state_mixing_rules->
+                                Real p_z_B = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_B,
                                         &epsilon_z_B,
                                         Y_z_B_ptr);
                                 
                                 // One-sided derivatives.
-                                du_dz = (u_x_R - u_z_B)/(dx[2]);
-                                // dv_dz = (v_x_R - v_z_B)/(dx[2]);
-                                dw_dz = (w_x_R - w_z_B)/(dx[2]);
-                                dp_dz = (p_x_R - p_z_B)/(dx[2]);
+                                du_dz = (u_x_R - u_z_B)/Real(dx[2]);
+                                // dv_dz = (v_x_R - v_z_B)/Real(dx[2]);
+                                dw_dz = (w_x_R - w_z_B)/Real(dx[2]);
+                                dp_dz = (p_x_R - p_z_B)/Real(dx[2]);
                             }
                             else
                             {
@@ -6433,8 +6433,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_z_B = double(0);
-                                double rho_z_F = double(0);
+                                Real rho_z_B = Real(0);
+                                Real rho_z_F = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_z_B += Q[si][idx_cell_rho_Y_z_B];
@@ -6445,8 +6445,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_z_B;
-                                std::vector<double> Y_z_F;
+                                std::vector<Real> Y_z_B;
+                                std::vector<Real> Y_z_F;
                                 Y_z_B.reserve(d_num_species);
                                 Y_z_F.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -6459,8 +6459,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_z_B_ptr;
-                                std::vector<const double*> Y_z_F_ptr;
+                                std::vector<const Real*> Y_z_B_ptr;
+                                std::vector<const Real*> Y_z_F_ptr;
                                 Y_z_B_ptr.reserve(d_num_species);
                                 Y_z_F_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -6469,73 +6469,73 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_z_F_ptr.push_back(&Y_z_F[si]);
                                 }
                                 
-                                const double u_z_B = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
-                                const double u_z_F = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
+                                const Real u_z_B = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
+                                const Real u_z_F = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
                                 
-                                const double v_z_B = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
-                                const double v_z_F = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
+                                const Real v_z_B = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
+                                const Real v_z_F = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
                                 
-                                const double w_z_B = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
-                                const double w_z_F = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
+                                const Real w_z_B = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
+                                const Real w_z_F = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
                                 
-                                const double epsilon_z_B = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
-                                const double epsilon_z_F = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
+                                const Real epsilon_z_B = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
+                                const Real epsilon_z_F = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
                                 
-                                double p_z_B = d_equation_of_state_mixing_rules->
+                                Real p_z_B = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_B,
                                         &epsilon_z_B,
                                         Y_z_B_ptr);
                                 
-                                double p_z_F = d_equation_of_state_mixing_rules->
+                                Real p_z_F = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_F,
                                         &epsilon_z_F,
                                         Y_z_F_ptr);
                                 
                                 // Central derivatives.
-                                du_dz = (u_z_F - u_z_B)/(double(2)*dx[2]);
-                                // dv_dz = (v_z_F - v_z_B)/(double(2)*dx[2]);
-                                dw_dz = (w_z_F - w_z_B)/(double(2)*dx[2]);
-                                dp_dz = (p_z_F - p_z_B)/(double(2)*dx[2]);
+                                du_dz = (u_z_F - u_z_B)/(Real(2)*Real(dx[2]));
+                                // dv_dz = (v_z_F - v_z_B)/(Real(2)*Real(dx[2]));
+                                dw_dz = (w_z_F - w_z_B)/(Real(2)*Real(dx[2]));
+                                dp_dz = (p_z_F - p_z_B)/(Real(2)*Real(dx[2]));
                             }
                             
                             // Compute sound speed.
                             
-                            const double Gamma_x_R = d_equation_of_state_mixing_rules->getGruneisenParameter(
+                            const Real Gamma_x_R = d_equation_of_state_mixing_rules->getGruneisenParameter(
                                 &rho_x_R,
                                 &p_x_R,
                                 Y_x_R_ptr);
                             
-                            const std::vector<double> Psi_x_R = d_equation_of_state_mixing_rules->
+                            const std::vector<Real> Psi_x_R = d_equation_of_state_mixing_rules->
                                 getPressureDerivativeWithPartialDensities(
                                         &rho_x_R,
                                         &p_x_R,
                                         Y_x_R_ptr);
                             
-                            double c_x_R = Gamma_x_R*p_x_R/rho_x_R;
+                            Real c_x_R = Gamma_x_R*p_x_R/rho_x_R;
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 c_x_R += Y_x_R[si]*Psi_x_R[si];
                             }
-                            c_x_R = sqrt(c_x_R);
+                            c_x_R = std::sqrt(c_x_R);
                             
-                            const double lambda_last = u_x_R + c_x_R;
+                            const Real lambda_last = u_x_R + c_x_R;
                             
                             // Compute vector Lambda^(-1) * L.
                             
-                            double Lambda_inv_L[d_num_species + 4];
+                            Real Lambda_inv_L[d_num_species + 4];
                             
-                            const double& p_t         = d_bdry_face_nonreflecting_outflow_p_t[face_loc];
-                            const double& sigma       = d_bdry_face_nonreflecting_outflow_sigma[face_loc];
-                            const double& beta        = d_bdry_face_nonreflecting_outflow_beta[face_loc];
-                            const double& length_char = d_bdry_face_nonreflecting_outflow_length_char[face_loc];
+                            const Real& p_t         = d_bdry_face_nonreflecting_outflow_p_t[face_loc];
+                            const Real& sigma       = d_bdry_face_nonreflecting_outflow_sigma[face_loc];
+                            const Real& beta        = d_bdry_face_nonreflecting_outflow_beta[face_loc];
+                            const Real& length_char = d_bdry_face_nonreflecting_outflow_length_char[face_loc];
                             
-                            const double T_last = v_x_R*(dp_dy + rho_x_R*c_x_R*du_dy) + rho_x_R*c_x_R*c_x_R*dv_dy + 
+                            const Real T_last = v_x_R*(dp_dy + rho_x_R*c_x_R*du_dy) + rho_x_R*c_x_R*c_x_R*dv_dy + 
                             w_x_R*(dp_dz + rho_x_R*c_x_R*du_dz) + rho_x_R*c_x_R*c_x_R*dw_dz;
                             
-                            const double M_sq = (u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R)/(c_x_R*c_x_R);
-                            const double K = sigma*c_x_R*(double(1) - M_sq)/length_char;
+                            const Real M_sq = (u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R)/(c_x_R*c_x_R);
+                            const Real K = sigma*c_x_R*(Real(1) - M_sq)/length_char;
                             
                             Lambda_inv_L[0] = dp_dx - rho_x_R*c_x_R*du_dx;
                             for (int si = 0; si < d_num_species; si++)
@@ -6544,14 +6544,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             }
                             Lambda_inv_L[d_num_species + 1] = dv_dx;
                             Lambda_inv_L[d_num_species + 2] = dw_dx;
-                            Lambda_inv_L[d_num_species + 3] = (double(1)/lambda_last)*(K*(p_x_R - p_t) - (double(1) - beta)*T_last);
+                            Lambda_inv_L[d_num_species + 3] = (Real(1)/lambda_last)*(K*(p_x_R - p_t) - (Real(1) - beta)*T_last);
                             
                             // Compute dV_dx.
                             
-                            const double c_sq_inv  = double(1)/(c_x_R*c_x_R);
-                            const double rho_c_inv = double(1)/(rho_x_R*c_x_R);
+                            const Real c_sq_inv  = Real(1)/(c_x_R*c_x_R);
+                            const Real rho_c_inv = Real(1)/(rho_x_R*c_x_R);
                             
-                            double dV_dx[d_num_species + 4];
+                            Real dV_dx[d_num_species + 4];
                             
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -6563,7 +6563,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             dV_dx[d_num_species + 2] = Lambda_inv_L[d_num_species + 2];
                             dV_dx[d_num_species + 3] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
                             
-                            double V_ghost[(d_num_species + 4)*num_ghosts_to_fill];
+                            Real V_ghost[(d_num_species + 4)*num_ghosts_to_fill];
                             
                             for (int i = num_ghosts_to_fill - 1; i >= 0; i--)
                             {
@@ -6586,209 +6586,209 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[i*(d_num_species + 4) + si] = rho_Y_x_RR[si] - double(2)*dx[0]*dV_dx[si];
+                                        V_ghost[i*(d_num_species + 4) + si] = rho_Y_x_RR[si] - Real(2)*Real(dx[0])*dV_dx[si];
                                     }
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species]     = u_x_RR - double(2)*dx[0]*dV_dx[d_num_species];
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = v_x_RR - double(2)*dx[0]*dV_dx[d_num_species + 1];
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = w_x_RR - double(2)*dx[0]*dV_dx[d_num_species + 2];
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = p_x_RR - double(2)*dx[0]*dV_dx[d_num_species + 3];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species]     = u_x_RR - Real(2)*Real(dx[0])*dV_dx[d_num_species];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = v_x_RR - Real(2)*Real(dx[0])*dV_dx[d_num_species + 1];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = w_x_RR - Real(2)*Real(dx[0])*dV_dx[d_num_species + 2];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = p_x_RR - Real(2)*Real(dx[0])*dV_dx[d_num_species + 3];
                                 }
                                 else if (i == num_ghosts_to_fill - 2)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[i*(d_num_species + 4) + si] = -double(2)*rho_Y_x_RR[si] - double(3)*rho_Y_x_R[si] +
-                                            double(6)*V_ghost[(i + 1)*(d_num_species + 4) + si] + double(6)*dx[0]*dV_dx[si];
+                                        V_ghost[i*(d_num_species + 4) + si] = -Real(2)*rho_Y_x_RR[si] - Real(3)*rho_Y_x_R[si] +
+                                            Real(6)*V_ghost[(i + 1)*(d_num_species + 4) + si] + Real(6)*Real(dx[0])*dV_dx[si];
                                     }
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species] = -double(2)*u_x_RR - double(3)*u_x_R +
-                                        double(6)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species] +
-                                        double(6)*dx[0]*dV_dx[d_num_species];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species] = -Real(2)*u_x_RR - Real(3)*u_x_R +
+                                        Real(6)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species] +
+                                        Real(6)*Real(dx[0])*dV_dx[d_num_species];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -double(2)*v_x_RR - double(3)*v_x_R +
-                                        double(6)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(6)*dx[0]*dV_dx[d_num_species + 1];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -Real(2)*v_x_RR - Real(3)*v_x_R +
+                                        Real(6)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(6)*Real(dx[0])*dV_dx[d_num_species + 1];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -double(2)*w_x_RR - double(3)*w_x_R +
-                                        double(6)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(6)*dx[0]*dV_dx[d_num_species + 2];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -Real(2)*w_x_RR - Real(3)*w_x_R +
+                                        Real(6)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(6)*Real(dx[0])*dV_dx[d_num_species + 2];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -double(2)*p_x_RR - double(3)*p_x_R +
-                                        double(6)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(6)*dx[0]*dV_dx[d_num_species + 3];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -Real(2)*p_x_RR - Real(3)*p_x_R +
+                                        Real(6)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(6)*Real(dx[0])*dV_dx[d_num_species + 3];
                                 }
                                 else if (i == num_ghosts_to_fill - 3)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[i*(d_num_species + 4) + si] = double(3)*rho_Y_x_RR[si] + double(10)*rho_Y_x_R[si] -
-                                            double(18)*V_ghost[(i + 2)*(d_num_species + 4) + si] +
-                                            double(6)*V_ghost[(i + 1)*(d_num_species + 4) + si] -
-                                            double(12)*dx[0]*dV_dx[si];
+                                        V_ghost[i*(d_num_species + 4) + si] = Real(3)*rho_Y_x_RR[si] + Real(10)*rho_Y_x_R[si] -
+                                            Real(18)*V_ghost[(i + 2)*(d_num_species + 4) + si] +
+                                            Real(6)*V_ghost[(i + 1)*(d_num_species + 4) + si] -
+                                            Real(12)*Real(dx[0])*dV_dx[si];
                                     }
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species] = double(3)*u_x_RR + double(10)*u_x_R -
-                                        double(18)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species] +
-                                        double(6)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species] -
-                                        double(12)*dx[0]*dV_dx[d_num_species];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species] = Real(3)*u_x_RR + Real(10)*u_x_R -
+                                        Real(18)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(6)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species] -
+                                        Real(12)*Real(dx[0])*dV_dx[d_num_species];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = double(3)*v_x_RR + double(10)*v_x_R -
-                                        double(18)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(6)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(12)*dx[0]*dV_dx[d_num_species + 1];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = Real(3)*v_x_RR + Real(10)*v_x_R -
+                                        Real(18)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(6)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(12)*Real(dx[0])*dV_dx[d_num_species + 1];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = double(3)*w_x_RR + double(10)*w_x_R -
-                                        double(18)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(6)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(12)*dx[0]*dV_dx[d_num_species + 2];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = Real(3)*w_x_RR + Real(10)*w_x_R -
+                                        Real(18)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(6)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(12)*Real(dx[0])*dV_dx[d_num_species + 2];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = double(3)*p_x_RR + double(10)*p_x_R -
-                                        double(18)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(6)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(12)*dx[0]*dV_dx[d_num_species + 3];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = Real(3)*p_x_RR + Real(10)*p_x_R -
+                                        Real(18)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(6)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(12)*Real(dx[0])*dV_dx[d_num_species + 3];
                                 }
                                 else if (i == num_ghosts_to_fill - 4)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[i*(d_num_species + 4) + si] = -double(4)*rho_Y_x_RR[si] -
-                                            double(65)/double(3)*rho_Y_x_R[si] +
-                                            double(40)*V_ghost[(i + 3)*(d_num_species + 4) + si] -
-                                            double(20)*V_ghost[(i + 2)*(d_num_species + 4) + si] +
-                                            double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 4) + si] +
-                                            double(20)*dx[0]*dV_dx[si];
+                                        V_ghost[i*(d_num_species + 4) + si] = -Real(4)*rho_Y_x_RR[si] -
+                                            Real(65)/Real(3)*rho_Y_x_R[si] +
+                                            Real(40)*V_ghost[(i + 3)*(d_num_species + 4) + si] -
+                                            Real(20)*V_ghost[(i + 2)*(d_num_species + 4) + si] +
+                                            Real(20)/Real(3)*V_ghost[(i + 1)*(d_num_species + 4) + si] +
+                                            Real(20)*Real(dx[0])*dV_dx[si];
                                     }
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species] = -double(4)*u_x_RR -
-                                        double(65)/double(3)*u_x_R +
-                                        double(40)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species] -
-                                        double(20)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species] +
-                                        double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species] +
-                                        double(20)*dx[0]*dV_dx[d_num_species];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species] = -Real(4)*u_x_RR -
+                                        Real(65)/Real(3)*u_x_R +
+                                        Real(40)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(20)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(20)/Real(3)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species] +
+                                        Real(20)*Real(dx[0])*dV_dx[d_num_species];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -double(4)*v_x_RR -
-                                        double(65)/double(3)*v_x_R +
-                                        double(40)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(20)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(20)*dx[0]*dV_dx[d_num_species + 1];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -Real(4)*v_x_RR -
+                                        Real(65)/Real(3)*v_x_R +
+                                        Real(40)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(20)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(20)/Real(3)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(20)*Real(dx[0])*dV_dx[d_num_species + 1];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -double(4)*w_x_RR -
-                                        double(65)/double(3)*w_x_R +
-                                        double(40)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(20)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(20)*dx[0]*dV_dx[d_num_species + 2];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -Real(4)*w_x_RR -
+                                        Real(65)/Real(3)*w_x_R +
+                                        Real(40)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(20)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(20)/Real(3)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(20)*Real(dx[0])*dV_dx[d_num_species + 2];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -double(4)*p_x_RR -
-                                        double(65)/double(3)*p_x_R +
-                                        double(40)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(20)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(20)*dx[0]*dV_dx[d_num_species + 3];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -Real(4)*p_x_RR -
+                                        Real(65)/Real(3)*p_x_R +
+                                        Real(40)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(20)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(20)/Real(3)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(20)*Real(dx[0])*dV_dx[d_num_species + 3];
                                 }
                                 else if (i == num_ghosts_to_fill - 5)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[i*(d_num_species + 4) + si] = double(5)*rho_Y_x_RR[si] +
-                                            double(77)/double(2)*rho_Y_x_R[si] -
-                                            double(75)*V_ghost[(i + 4)*(d_num_species + 4) + si] +
-                                            double(50)*V_ghost[(i + 3)*(d_num_species + 4) + si] -
-                                            double(25)*V_ghost[(i + 2)*(d_num_species + 4) + si] +
-                                            double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 4) + si] -
-                                            double(30)*dx[0]*dV_dx[si];
+                                        V_ghost[i*(d_num_species + 4) + si] = Real(5)*rho_Y_x_RR[si] +
+                                            Real(77)/Real(2)*rho_Y_x_R[si] -
+                                            Real(75)*V_ghost[(i + 4)*(d_num_species + 4) + si] +
+                                            Real(50)*V_ghost[(i + 3)*(d_num_species + 4) + si] -
+                                            Real(25)*V_ghost[(i + 2)*(d_num_species + 4) + si] +
+                                            Real(15)/Real(2)*V_ghost[(i + 1)*(d_num_species + 4) + si] -
+                                            Real(30)*Real(dx[0])*dV_dx[si];
                                     }
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species] = double(5)*u_x_RR +
-                                        double(77)/double(2)*u_x_R -
-                                        double(75)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species] +
-                                        double(50)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species] -
-                                        double(25)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species] +
-                                        double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species] -
-                                        double(30)*dx[0]*dV_dx[d_num_species];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species] = Real(5)*u_x_RR +
+                                        Real(77)/Real(2)*u_x_R -
+                                        Real(75)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species] +
+                                        Real(50)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(25)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(15)/Real(2)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species] -
+                                        Real(30)*Real(dx[0])*dV_dx[d_num_species];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = double(5)*v_x_RR +
-                                        double(77)/double(2)*v_x_R -
-                                        double(75)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(50)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(25)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(30)*dx[0]*dV_dx[d_num_species + 1];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = Real(5)*v_x_RR +
+                                        Real(77)/Real(2)*v_x_R -
+                                        Real(75)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(50)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(25)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(15)/Real(2)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(30)*Real(dx[0])*dV_dx[d_num_species + 1];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = double(5)*w_x_RR +
-                                        double(77)/double(2)*w_x_R -
-                                        double(75)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(50)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(25)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(30)*dx[0]*dV_dx[d_num_species + 2];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = Real(5)*w_x_RR +
+                                        Real(77)/Real(2)*w_x_R -
+                                        Real(75)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(50)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(25)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(15)/Real(2)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(30)*Real(dx[0])*dV_dx[d_num_species + 2];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = double(5)*p_x_RR +
-                                        double(77)/double(2)*p_x_R -
-                                        double(75)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(50)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(25)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(30)*dx[0]*dV_dx[d_num_species + 3];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = Real(5)*p_x_RR +
+                                        Real(77)/Real(2)*p_x_R -
+                                        Real(75)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(50)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(25)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(15)/Real(2)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(30)*Real(dx[0])*dV_dx[d_num_species + 3];
                                 }
                                 else if (i == num_ghosts_to_fill - 6)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[i*(d_num_species + 4) + si] = -double(6)*rho_Y_x_RR[si] -
-                                            double(609)/double(10)*rho_Y_x_R[si] +
-                                            double(126)*V_ghost[(i + 5)*(d_num_species + 4) + si] -
-                                            double(105)*V_ghost[(i + 4)*(d_num_species + 4) + si] +
-                                            double(70)*V_ghost[(i + 3)*(d_num_species + 4) + si] -
-                                            double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 4) + si] +
-                                            double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 4) + si] +
-                                            double(42)*dx[0]*dV_dx[si];
+                                        V_ghost[i*(d_num_species + 4) + si] = -Real(6)*rho_Y_x_RR[si] -
+                                            Real(609)/Real(10)*rho_Y_x_R[si] +
+                                            Real(126)*V_ghost[(i + 5)*(d_num_species + 4) + si] -
+                                            Real(105)*V_ghost[(i + 4)*(d_num_species + 4) + si] +
+                                            Real(70)*V_ghost[(i + 3)*(d_num_species + 4) + si] -
+                                            Real(63)/Real(2)*V_ghost[(i + 2)*(d_num_species + 4) + si] +
+                                            Real(42)/Real(5)*V_ghost[(i + 1)*(d_num_species + 4) + si] +
+                                            Real(42)*Real(dx[0])*dV_dx[si];
                                     }
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species] = -double(6)*u_x_RR -
-                                        double(609)/double(10)*u_x_R +
-                                        double(126)*V_ghost[(i + 5)*(d_num_species + 4) + d_num_species] -
-                                        double(105)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species] +
-                                        double(70)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species] -
-                                        double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species] +
-                                        double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species] +
-                                        double(42)*dx[0]*dV_dx[d_num_species];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species] = -Real(6)*u_x_RR -
+                                        Real(609)/Real(10)*u_x_R +
+                                        Real(126)*V_ghost[(i + 5)*(d_num_species + 4) + d_num_species] -
+                                        Real(105)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species] +
+                                        Real(70)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(63)/Real(2)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(42)/Real(5)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species] +
+                                        Real(42)*Real(dx[0])*dV_dx[d_num_species];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -double(6)*v_x_RR -
-                                        double(609)/double(10)*v_x_R +
-                                        double(126)*V_ghost[(i + 5)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(105)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(70)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(42)*dx[0]*dV_dx[d_num_species + 1];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -Real(6)*v_x_RR -
+                                        Real(609)/Real(10)*v_x_R +
+                                        Real(126)*V_ghost[(i + 5)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(105)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(70)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(63)/Real(2)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(42)/Real(5)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(42)*Real(dx[0])*dV_dx[d_num_species + 1];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -double(6)*w_x_RR -
-                                        double(609)/double(10)*w_x_R +
-                                        double(126)*V_ghost[(i + 5)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(105)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(70)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(42)*dx[0]*dV_dx[d_num_species + 2];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -Real(6)*w_x_RR -
+                                        Real(609)/Real(10)*w_x_R +
+                                        Real(126)*V_ghost[(i + 5)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(105)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(70)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(63)/Real(2)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(42)/Real(5)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(42)*Real(dx[0])*dV_dx[d_num_species + 2];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -double(6)*p_x_RR -
-                                        double(609)/double(10)*p_x_R +
-                                        double(126)*V_ghost[(i + 5)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(105)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(70)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(42)*dx[0]*dV_dx[d_num_species + 3];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -Real(6)*p_x_RR -
+                                        Real(609)/Real(10)*p_x_R +
+                                        Real(126)*V_ghost[(i + 5)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(105)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(70)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(63)/Real(2)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(42)/Real(5)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(42)*Real(dx[0])*dV_dx[d_num_species + 3];
                                 }
                                 
                                 /*
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_ghost = double(0);
+                                Real rho_ghost = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_ghost += V_ghost[i*(d_num_species + 4) + si];
@@ -6798,7 +6798,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_ghost;
+                                std::vector<Real> Y_ghost;
                                 Y_ghost.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -6809,7 +6809,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_ghost_ptr;
+                                std::vector<const Real*> Y_ghost_ptr;
                                 Y_ghost_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -6825,13 +6825,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 Q[d_num_species + 1][idx_cell_mom] = rho_ghost*V_ghost[i*(d_num_species + 4) + d_num_species + 1];
                                 Q[d_num_species + 2][idx_cell_mom] = rho_ghost*V_ghost[i*(d_num_species + 4) + d_num_species + 2];
                                 
-                                const double epsilon = d_equation_of_state_mixing_rules->
+                                const Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergy(
                                         &rho_ghost,
                                         &V_ghost[i*(d_num_species + 4) + d_num_species + 3],
                                         Y_ghost_ptr);
                                 
-                                const double E = rho_ghost*epsilon +
+                                const Real E = rho_ghost*epsilon +
                                     half*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
@@ -6905,9 +6905,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                     subghostcell_dims_conservative_var[2][1];
                             
-                            std::vector<double> rho_Y_x_L;
-                            std::vector<double> rho_Y_x_LL;
-                            std::vector<double> rho_Y_x_LLL;
+                            std::vector<Real> rho_Y_x_L;
+                            std::vector<Real> rho_Y_x_LL;
+                            std::vector<Real> rho_Y_x_LLL;
                             rho_Y_x_L.reserve(d_num_species);
                             rho_Y_x_LL.reserve(d_num_species);
                             rho_Y_x_LLL.reserve(d_num_species);
@@ -6922,9 +6922,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_x_L   = double(0);
-                            double rho_x_LL  = double(0);
-                            double rho_x_LLL = double(0);
+                            Real rho_x_L   = Real(0);
+                            Real rho_x_LL  = Real(0);
+                            Real rho_x_LLL = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_x_L   += Q[si][idx_cell_rho_Y_x_L];
@@ -6936,9 +6936,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_x_L;
-                            std::vector<double> Y_x_LL;
-                            std::vector<double> Y_x_LLL;
+                            std::vector<Real> Y_x_L;
+                            std::vector<Real> Y_x_LL;
+                            std::vector<Real> Y_x_LLL;
                             Y_x_L.reserve(d_num_species);
                             Y_x_LL.reserve(d_num_species);
                             Y_x_LLL.reserve(d_num_species);
@@ -6953,9 +6953,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_x_L_ptr;
-                            std::vector<const double*> Y_x_LL_ptr;
-                            std::vector<const double*> Y_x_LLL_ptr;
+                            std::vector<const Real*> Y_x_L_ptr;
+                            std::vector<const Real*> Y_x_LL_ptr;
+                            std::vector<const Real*> Y_x_LLL_ptr;
                             Y_x_L_ptr.reserve(d_num_species);
                             Y_x_LL_ptr.reserve(d_num_species);
                             Y_x_LLL_ptr.reserve(d_num_species);
@@ -6966,36 +6966,36 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 Y_x_LLL_ptr.push_back(&Y_x_LLL[si]);
                             }
                             
-                            const double u_x_L   = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
-                            const double u_x_LL  = Q[d_num_species][idx_cell_mom_x_LL]/rho_x_LL;
-                            const double u_x_LLL = Q[d_num_species][idx_cell_mom_x_LLL]/rho_x_LLL;
+                            const Real u_x_L   = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
+                            const Real u_x_LL  = Q[d_num_species][idx_cell_mom_x_LL]/rho_x_LL;
+                            const Real u_x_LLL = Q[d_num_species][idx_cell_mom_x_LLL]/rho_x_LLL;
                             
-                            const double v_x_L   = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
-                            const double v_x_LL  = Q[d_num_species + 1][idx_cell_mom_x_LL]/rho_x_LL;
-                            const double v_x_LLL = Q[d_num_species + 1][idx_cell_mom_x_LLL]/rho_x_LLL;
+                            const Real v_x_L   = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
+                            const Real v_x_LL  = Q[d_num_species + 1][idx_cell_mom_x_LL]/rho_x_LL;
+                            const Real v_x_LLL = Q[d_num_species + 1][idx_cell_mom_x_LLL]/rho_x_LLL;
                             
-                            const double w_x_L   = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
-                            const double w_x_LL  = Q[d_num_species + 2][idx_cell_mom_x_LL]/rho_x_LL;
-                            const double w_x_LLL = Q[d_num_species + 2][idx_cell_mom_x_LLL]/rho_x_LLL;
+                            const Real w_x_L   = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
+                            const Real w_x_LL  = Q[d_num_species + 2][idx_cell_mom_x_LL]/rho_x_LL;
+                            const Real w_x_LLL = Q[d_num_species + 2][idx_cell_mom_x_LLL]/rho_x_LLL;
                             
-                            const double half = double(1)/double(2);
-                            const double epsilon_x_L   = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
-                            const double epsilon_x_LL  = Q[d_num_species + 3][idx_cell_E_x_LL]/rho_x_LL - half*(u_x_LL*u_x_LL + v_x_LL*v_x_LL + w_x_LL*w_x_LL);
-                            const double epsilon_x_LLL = Q[d_num_species + 3][idx_cell_E_x_LLL]/rho_x_LLL - half*(u_x_LLL*u_x_LLL + v_x_LLL*v_x_LLL + w_x_LLL*w_x_LLL);
+                            const Real half = Real(1)/Real(2);
+                            const Real epsilon_x_L   = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
+                            const Real epsilon_x_LL  = Q[d_num_species + 3][idx_cell_E_x_LL]/rho_x_LL - half*(u_x_LL*u_x_LL + v_x_LL*v_x_LL + w_x_LL*w_x_LL);
+                            const Real epsilon_x_LLL = Q[d_num_species + 3][idx_cell_E_x_LLL]/rho_x_LLL - half*(u_x_LLL*u_x_LLL + v_x_LLL*v_x_LLL + w_x_LLL*w_x_LLL);
 
-                            double p_x_L = d_equation_of_state_mixing_rules->
+                            Real p_x_L = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_x_L,
                                     &epsilon_x_L,
                                     Y_x_L_ptr);
                             
-                            double p_x_LL = d_equation_of_state_mixing_rules->
+                            Real p_x_LL = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_x_LL,
                                     &epsilon_x_LL,
                                     Y_x_LL_ptr);
                             
-                            double p_x_LLL = d_equation_of_state_mixing_rules->
+                            Real p_x_LLL = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_x_LLL,
                                     &epsilon_x_LLL,
@@ -7005,26 +7005,26 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute derivatives in x-direction.
                              */
                             
-                            std::vector<double> drho_Y_dx;
+                            std::vector<Real> drho_Y_dx;
                             drho_Y_dx.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                drho_Y_dx.push_back((Q[si][idx_cell_rho_Y_x_LLL] - double(4)*Q[si][idx_cell_rho_Y_x_LL] +
-                                    double(3)*Q[si][idx_cell_rho_Y_x_L])/(double(2)*dx[0]));
+                                drho_Y_dx.push_back((Q[si][idx_cell_rho_Y_x_LLL] - Real(4)*Q[si][idx_cell_rho_Y_x_LL] +
+                                    Real(3)*Q[si][idx_cell_rho_Y_x_L])/(Real(2)*Real(dx[0])));
                             }
-                            const double du_dx   = (u_x_LLL - double(4)*u_x_LL + double(3)*u_x_L)/(double(2)*dx[0]);
-                            const double dv_dx   = (v_x_LLL - double(4)*v_x_LL + double(3)*v_x_L)/(double(2)*dx[0]);
-                            const double dw_dx   = (w_x_LLL - double(4)*w_x_LL + double(3)*w_x_L)/(double(2)*dx[0]);
-                            const double dp_dx   = (p_x_LLL - double(4)*p_x_LL + double(3)*p_x_L)/(double(2)*dx[0]);
+                            const Real du_dx   = (u_x_LLL - Real(4)*u_x_LL + Real(3)*u_x_L)/(Real(2)*Real(dx[0]));
+                            const Real dv_dx   = (v_x_LLL - Real(4)*v_x_LL + Real(3)*v_x_L)/(Real(2)*Real(dx[0]));
+                            const Real dw_dx   = (w_x_LLL - Real(4)*w_x_LL + Real(3)*w_x_L)/(Real(2)*Real(dx[0]));
+                            const Real dp_dx   = (p_x_LLL - Real(4)*p_x_LL + Real(3)*p_x_L)/(Real(2)*Real(dx[0]));
                             
                             /*
                              * Compute derivatives in y-direction.
                              */
                             
-                            double du_dy = double(0);
-                            double dv_dy = double(0);
-                            // double dw_dy = double(0);
-                            double dp_dy = double(0);
+                            Real du_dy = Real(0);
+                            Real dv_dy = Real(0);
+                            // Real dw_dy = Real(0);
+                            Real dp_dy = Real(0);
                             
                             if ((j + num_subghosts_conservative_var[0][1] == 0) ||
                                 (j + num_subghosts_conservative_var[1][1] == 0) ||
@@ -7055,7 +7055,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_y_T = double(0);
+                                Real rho_y_T = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_y_T += Q[si][idx_cell_rho_Y_y_T];
@@ -7065,7 +7065,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_y_T;
+                                std::vector<Real> Y_y_T;
                                 Y_y_T.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -7076,29 +7076,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                             
-                                std::vector<const double*> Y_y_T_ptr;
+                                std::vector<const Real*> Y_y_T_ptr;
                                 Y_y_T_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_y_T_ptr.push_back(&Y_y_T[si]);
                                 }
                                 
-                                const double u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
-                                const double v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
-                                const double w_y_T = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
-                                const double epsilon_y_T = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
+                                const Real u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
+                                const Real v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
+                                const Real w_y_T = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
+                                const Real epsilon_y_T = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
                                 
-                                double p_y_T = d_equation_of_state_mixing_rules->
+                                Real p_y_T = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_y_T,
                                         &epsilon_y_T,
                                         Y_y_T_ptr);
                                 
                                 // One-sided derivatives.
-                                du_dy = (u_y_T - u_x_L)/(dx[1]);
-                                dv_dy = (v_y_T - v_x_L)/(dx[1]);
-                                // dw_dy = (w_y_T - w_x_L)/(dx[1]);
-                                dp_dy = (p_y_T - p_x_L)/(dx[1]);
+                                du_dy = (u_y_T - u_x_L)/Real(dx[1]);
+                                dv_dy = (v_y_T - v_x_L)/Real(dx[1]);
+                                // dw_dy = (w_y_T - w_x_L)/Real(dx[1]);
+                                dp_dy = (p_y_T - p_x_L)/Real(dx[1]);
                             }
                             else if ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
                                      (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
@@ -7129,7 +7129,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_y_B = double(0);
+                                Real rho_y_B = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_y_B += Q[si][idx_cell_rho_Y_y_B];
@@ -7139,7 +7139,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_y_B;
+                                std::vector<Real> Y_y_B;
                                 Y_y_B.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -7150,29 +7150,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_y_B_ptr;
+                                std::vector<const Real*> Y_y_B_ptr;
                                 Y_y_B_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_y_B_ptr.push_back(&Y_y_B[si]);
                                 }
                                 
-                                const double u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
-                                const double v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
-                                const double w_y_B = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
-                                const double epsilon_y_B = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
+                                const Real u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
+                                const Real v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
+                                const Real w_y_B = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
+                                const Real epsilon_y_B = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
                                 
-                                double p_y_B = d_equation_of_state_mixing_rules->
+                                Real p_y_B = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_y_B,
                                         &epsilon_y_B,
                                         Y_y_B_ptr);
                                 
                                 // One-sided derivatives.
-                                du_dy = (u_x_L - u_y_B)/(dx[1]);
-                                dv_dy = (v_x_L - v_y_B)/(dx[1]);
-                                // dw_dy = (w_x_L - w_y_B)/(dx[1]);
-                                dp_dy = (p_x_L - p_y_B)/(dx[1]);
+                                du_dy = (u_x_L - u_y_B)/Real(dx[1]);
+                                dv_dy = (v_x_L - v_y_B)/Real(dx[1]);
+                                // dw_dy = (w_x_L - w_y_B)/Real(dx[1]);
+                                dp_dy = (p_x_L - p_y_B)/Real(dx[1]);
                             }
                             else
                             {
@@ -7210,8 +7210,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_y_B = double(0);
-                                double rho_y_T = double(0);
+                                Real rho_y_B = Real(0);
+                                Real rho_y_T = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_y_B += Q[si][idx_cell_rho_Y_y_B];
@@ -7222,8 +7222,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_y_B;
-                                std::vector<double> Y_y_T;
+                                std::vector<Real> Y_y_B;
+                                std::vector<Real> Y_y_T;
                                 Y_y_B.reserve(d_num_species);
                                 Y_y_T.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -7236,8 +7236,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_y_B_ptr;
-                                std::vector<const double*> Y_y_T_ptr;
+                                std::vector<const Real*> Y_y_B_ptr;
+                                std::vector<const Real*> Y_y_T_ptr;
                                 Y_y_B_ptr.reserve(d_num_species);
                                 Y_y_T_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -7246,45 +7246,45 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_y_T_ptr.push_back(&Y_y_T[si]);
                                 }
                                 
-                                const double u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
-                                const double u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
+                                const Real u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
+                                const Real u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
                                 
-                                const double v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
-                                const double v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
+                                const Real v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
+                                const Real v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
                                 
-                                const double w_y_B = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
-                                const double w_y_T = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
+                                const Real w_y_B = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
+                                const Real w_y_T = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
                                 
-                                const double epsilon_y_B = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
-                                const double epsilon_y_T = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
+                                const Real epsilon_y_B = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
+                                const Real epsilon_y_T = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
                                 
-                                double p_y_B = d_equation_of_state_mixing_rules->
+                                Real p_y_B = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_y_B,
                                         &epsilon_y_B,
                                         Y_y_B_ptr);
                             
-                                double p_y_T = d_equation_of_state_mixing_rules->
+                                Real p_y_T = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_y_T,
                                         &epsilon_y_T,
                                         Y_y_T_ptr);
                                 
                                 // Central derivatives.
-                                du_dy = (u_y_T - u_y_B)/(double(2)*dx[1]);
-                                dv_dy = (v_y_T - v_y_B)/(double(2)*dx[1]);
-                                // dw_dy = (w_y_T - w_y_B)/(double(2)*dx[1]);
-                                dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
+                                du_dy = (u_y_T - u_y_B)/(Real(2)*Real(dx[1]));
+                                dv_dy = (v_y_T - v_y_B)/(Real(2)*Real(dx[1]));
+                                // dw_dy = (w_y_T - w_y_B)/(Real(2)*Real(dx[1]));
+                                dp_dy = (p_y_T - p_y_B)/(Real(2)*Real(dx[1]));
                             }
                             
                             /*
                              * Compute derivatives in z-direction.
                              */
                             
-                            double du_dz = double(0);
-                            // double dv_dz = double(0);
-                            double dw_dz = double(0);
-                            double dp_dz = double(0);
+                            Real du_dz = Real(0);
+                            // Real dv_dz = Real(0);
+                            Real dw_dz = Real(0);
+                            Real dp_dz = Real(0);
                             
                             if ((k + num_subghosts_conservative_var[0][2] == 0) ||
                                 (k + num_subghosts_conservative_var[1][2] == 0) ||
@@ -7315,7 +7315,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_z_F = double(0);
+                                Real rho_z_F = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_z_F += Q[si][idx_cell_rho_Y_z_F];
@@ -7325,7 +7325,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_z_F;
+                                std::vector<Real> Y_z_F;
                                 Y_z_F.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -7336,29 +7336,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_z_F_ptr;
+                                std::vector<const Real*> Y_z_F_ptr;
                                 Y_z_F_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_z_F_ptr.push_back(&Y_z_F[si]);
                                 }
                                 
-                                const double u_z_F = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
-                                const double v_z_F = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
-                                const double w_z_F = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
-                                const double epsilon_z_F = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
+                                const Real u_z_F = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
+                                const Real v_z_F = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
+                                const Real w_z_F = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
+                                const Real epsilon_z_F = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
                                 
-                                double p_z_F = d_equation_of_state_mixing_rules->
+                                Real p_z_F = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_F,
                                         &epsilon_z_F,
                                         Y_z_F_ptr);
                                 
                                 // One-sided derivatives.
-                                du_dz = (u_z_F - u_x_L)/(dx[2]);
-                                // dv_dz = (v_z_F - v_x_L)/(dx[2]);
-                                dw_dz = (w_z_F - w_x_L)/(dx[2]);
-                                dp_dz = (p_z_F - p_x_L)/(dx[2]);
+                                du_dz = (u_z_F - u_x_L)/Real(dx[2]);
+                                // dv_dz = (v_z_F - v_x_L)/Real(dx[2]);
+                                dw_dz = (w_z_F - w_x_L)/Real(dx[2]);
+                                dp_dz = (p_z_F - p_x_L)/Real(dx[2]);
                             }
                             else if ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
                                      (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
@@ -7389,7 +7389,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_z_B = double(0);
+                                Real rho_z_B = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_z_B += Q[si][idx_cell_rho_Y_z_B];
@@ -7399,7 +7399,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_z_B;
+                                std::vector<Real> Y_z_B;
                                 Y_z_B.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -7410,29 +7410,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_z_B_ptr;
+                                std::vector<const Real*> Y_z_B_ptr;
                                 Y_z_B_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_z_B_ptr.push_back(&Y_z_B[si]);
                                 }
                                 
-                                const double u_z_B = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
-                                const double v_z_B = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
-                                const double w_z_B = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
-                                const double epsilon_z_B = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
+                                const Real u_z_B = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
+                                const Real v_z_B = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
+                                const Real w_z_B = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
+                                const Real epsilon_z_B = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
                                 
-                                double p_z_B = d_equation_of_state_mixing_rules->
+                                Real p_z_B = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_B,
                                         &epsilon_z_B,
                                         Y_z_B_ptr);
                                 
                                 // One-sided derivatives.
-                                du_dz = (u_x_L - u_z_B)/(dx[2]);
-                                // dv_dz = (v_x_L - v_z_B)/(dx[2]);
-                                dw_dz = (w_x_L - w_z_B)/(dx[2]);
-                                dp_dz = (p_x_L - p_z_B)/(dx[2]);
+                                du_dz = (u_x_L - u_z_B)/Real(dx[2]);
+                                // dv_dz = (v_x_L - v_z_B)/Real(dx[2]);
+                                dw_dz = (w_x_L - w_z_B)/Real(dx[2]);
+                                dp_dz = (p_x_L - p_z_B)/Real(dx[2]);
                             }
                             else
                             {
@@ -7470,8 +7470,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_z_B = double(0);
-                                double rho_z_F = double(0);
+                                Real rho_z_B = Real(0);
+                                Real rho_z_F = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_z_B += Q[si][idx_cell_rho_Y_z_B];
@@ -7482,8 +7482,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_z_B;
-                                std::vector<double> Y_z_F;
+                                std::vector<Real> Y_z_B;
+                                std::vector<Real> Y_z_F;
                                 Y_z_B.reserve(d_num_species);
                                 Y_z_F.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -7496,8 +7496,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_z_B_ptr;
-                                std::vector<const double*> Y_z_F_ptr;
+                                std::vector<const Real*> Y_z_B_ptr;
+                                std::vector<const Real*> Y_z_F_ptr;
                                 Y_z_B_ptr.reserve(d_num_species);
                                 Y_z_F_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -7506,75 +7506,75 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_z_F_ptr.push_back(&Y_z_F[si]);
                                 }
                                 
-                                const double u_z_B = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
-                                const double u_z_F = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
+                                const Real u_z_B = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
+                                const Real u_z_F = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
                                 
-                                const double v_z_B = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
-                                const double v_z_F = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
+                                const Real v_z_B = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
+                                const Real v_z_F = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
                                 
-                                const double w_z_B = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
-                                const double w_z_F = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
+                                const Real w_z_B = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
+                                const Real w_z_F = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
                                 
-                                const double epsilon_z_B = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
-                                const double epsilon_z_F = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
+                                const Real epsilon_z_B = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
+                                const Real epsilon_z_F = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
                                 
-                                double p_z_B = d_equation_of_state_mixing_rules->
+                                Real p_z_B = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_B,
                                         &epsilon_z_B,
                                         Y_z_B_ptr);
                                 
-                                double p_z_F = d_equation_of_state_mixing_rules->
+                                Real p_z_F = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_F,
                                         &epsilon_z_F,
                                         Y_z_F_ptr);
                                 
                                 // Central derivatives.
-                                du_dz = (u_z_F - u_z_B)/(double(2)*dx[2]);
-                                // dv_dz = (v_z_F - v_z_B)/(double(2)*dx[2]);
-                                dw_dz = (w_z_F - w_z_B)/(double(2)*dx[2]);
-                                dp_dz = (p_z_F - p_z_B)/(double(2)*dx[2]);
+                                du_dz = (u_z_F - u_z_B)/(Real(2)*Real(dx[2]));
+                                // dv_dz = (v_z_F - v_z_B)/(Real(2)*Real(dx[2]));
+                                dw_dz = (w_z_F - w_z_B)/(Real(2)*Real(dx[2]));
+                                dp_dz = (p_z_F - p_z_B)/(Real(2)*Real(dx[2]));
                             }
                             
                             // Compute sound speed.
                             
-                            const double Gamma_x_L = d_equation_of_state_mixing_rules->getGruneisenParameter(
+                            const Real Gamma_x_L = d_equation_of_state_mixing_rules->getGruneisenParameter(
                                 &rho_x_L,
                                 &p_x_L,
                                 Y_x_L_ptr);
                             
-                            const std::vector<double> Psi_x_L = d_equation_of_state_mixing_rules->
+                            const std::vector<Real> Psi_x_L = d_equation_of_state_mixing_rules->
                                 getPressureDerivativeWithPartialDensities(
                                         &rho_x_L,
                                         &p_x_L,
                                         Y_x_L_ptr);
                             
-                            double c_x_L = Gamma_x_L*p_x_L/rho_x_L;
+                            Real c_x_L = Gamma_x_L*p_x_L/rho_x_L;
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 c_x_L += Y_x_L[si]*Psi_x_L[si];
                             }
-                            c_x_L = sqrt(c_x_L);
+                            c_x_L = std::sqrt(c_x_L);
                             
-                            const double lambda_1 = u_x_L - c_x_L;
+                            const Real lambda_1 = u_x_L - c_x_L;
                             
                             // Compute vector Lambda^(-1) * L.
                             
-                            double Lambda_inv_L[d_num_species + 4];
+                            Real Lambda_inv_L[d_num_species + 4];
                             
-                            const double& p_t         = d_bdry_face_nonreflecting_outflow_p_t[face_loc];
-                            const double& sigma       = d_bdry_face_nonreflecting_outflow_sigma[face_loc];
-                            const double& beta        = d_bdry_face_nonreflecting_outflow_beta[face_loc];
-                            const double& length_char = d_bdry_face_nonreflecting_outflow_length_char[face_loc];
+                            const Real& p_t         = d_bdry_face_nonreflecting_outflow_p_t[face_loc];
+                            const Real& sigma       = d_bdry_face_nonreflecting_outflow_sigma[face_loc];
+                            const Real& beta        = d_bdry_face_nonreflecting_outflow_beta[face_loc];
+                            const Real& length_char = d_bdry_face_nonreflecting_outflow_length_char[face_loc];
                             
-                            const double T_1 = v_x_L*(dp_dy - rho_x_L*c_x_L*du_dy) + rho_x_L*c_x_L*c_x_L*dv_dy +
+                            const Real T_1 = v_x_L*(dp_dy - rho_x_L*c_x_L*du_dy) + rho_x_L*c_x_L*c_x_L*dv_dy +
                                 w_x_L*(dp_dz - rho_x_L*c_x_L*du_dz) + rho_x_L*c_x_L*c_x_L*dw_dz;
                             
-                            const double M_sq = (u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L)/(c_x_L*c_x_L);
-                            const double K = sigma*c_x_L*(double(1) - M_sq)/length_char;
+                            const Real M_sq = (u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L)/(c_x_L*c_x_L);
+                            const Real K = sigma*c_x_L*(Real(1) - M_sq)/length_char;
                             
-                            Lambda_inv_L[0] = (double(1)/lambda_1)*(K*(p_x_L - p_t) - (double(1) - beta)*T_1);
+                            Lambda_inv_L[0] = (Real(1)/lambda_1)*(K*(p_x_L - p_t) - (Real(1) - beta)*T_1);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 Lambda_inv_L[si + 1] = c_x_L*c_x_L*drho_Y_dx[si] - Y_x_L[si]*dp_dx;
@@ -7585,10 +7585,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             
                             // Compute dV_dx.
                             
-                            const double c_sq_inv  = double(1)/(c_x_L*c_x_L);
-                            const double rho_c_inv = double(1)/(rho_x_L*c_x_L);
+                            const Real c_sq_inv  = Real(1)/(c_x_L*c_x_L);
+                            const Real rho_c_inv = Real(1)/(rho_x_L*c_x_L);
                             
-                            double dV_dx[d_num_species + 4];
+                            Real dV_dx[d_num_species + 4];
                             
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -7600,7 +7600,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             dV_dx[d_num_species + 2] = Lambda_inv_L[d_num_species + 2];
                             dV_dx[d_num_species + 3] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
                             
-                            double V_ghost[(d_num_species + 4)*num_ghosts_to_fill];
+                            Real V_ghost[(d_num_species + 4)*num_ghosts_to_fill];
                             
                             for (int i = 0; i < num_ghosts_to_fill; i++)
                             {
@@ -7623,209 +7623,209 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[i*(d_num_species + 4) + si] = rho_Y_x_LL[si] + double(2)*dx[0]*dV_dx[si];
+                                        V_ghost[i*(d_num_species + 4) + si] = rho_Y_x_LL[si] + Real(2)*Real(dx[0])*dV_dx[si];
                                     }
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species]     = u_x_LL + double(2)*dx[0]*dV_dx[d_num_species];
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = v_x_LL + double(2)*dx[0]*dV_dx[d_num_species + 1];
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = w_x_LL + double(2)*dx[0]*dV_dx[d_num_species + 2];
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = p_x_LL + double(2)*dx[0]*dV_dx[d_num_species + 3];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species]     = u_x_LL + Real(2)*Real(dx[0])*dV_dx[d_num_species];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = v_x_LL + Real(2)*Real(dx[0])*dV_dx[d_num_species + 1];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = w_x_LL + Real(2)*Real(dx[0])*dV_dx[d_num_species + 2];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = p_x_LL + Real(2)*Real(dx[0])*dV_dx[d_num_species + 3];
                                 }
                                 else if (i == 1)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[i*(d_num_species + 4) + si] = -double(2)*rho_Y_x_LL[si] - double(3)*rho_Y_x_L[si] +
-                                            double(6)*V_ghost[(i - 1)*(d_num_species + 4) + si] - double(6)*dx[0]*dV_dx[si];
+                                        V_ghost[i*(d_num_species + 4) + si] = -Real(2)*rho_Y_x_LL[si] - Real(3)*rho_Y_x_L[si] +
+                                            Real(6)*V_ghost[(i - 1)*(d_num_species + 4) + si] - Real(6)*Real(dx[0])*dV_dx[si];
                                     }
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species] = -double(2)*u_x_LL - double(3)*u_x_L +
-                                        double(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species] -
-                                        double(6)*dx[0]*dV_dx[d_num_species];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species] = -Real(2)*u_x_LL - Real(3)*u_x_L +
+                                        Real(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species] -
+                                        Real(6)*Real(dx[0])*dV_dx[d_num_species];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -double(2)*v_x_LL - double(3)*v_x_L +
-                                        double(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(6)*dx[0]*dV_dx[d_num_species + 1];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -Real(2)*v_x_LL - Real(3)*v_x_L +
+                                        Real(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(6)*Real(dx[0])*dV_dx[d_num_species + 1];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -double(2)*w_x_LL - double(3)*w_x_L +
-                                        double(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(6)*dx[0]*dV_dx[d_num_species + 2];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -Real(2)*w_x_LL - Real(3)*w_x_L +
+                                        Real(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(6)*Real(dx[0])*dV_dx[d_num_species + 2];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -double(2)*p_x_LL - double(3)*p_x_L +
-                                        double(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(6)*dx[0]*dV_dx[d_num_species + 3];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -Real(2)*p_x_LL - Real(3)*p_x_L +
+                                        Real(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(6)*Real(dx[0])*dV_dx[d_num_species + 3];
                                 }
                                 else if (i == 2)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[i*(d_num_species + 4) + si] = double(3)*rho_Y_x_LL[si] + double(10)*rho_Y_x_L[si] -
-                                            double(18)*V_ghost[(i - 2)*(d_num_species + 4) + si] +
-                                            double(6)*V_ghost[(i - 1)*(d_num_species + 4) + si] +
-                                            double(12)*dx[0]*dV_dx[si];
+                                        V_ghost[i*(d_num_species + 4) + si] = Real(3)*rho_Y_x_LL[si] + Real(10)*rho_Y_x_L[si] -
+                                            Real(18)*V_ghost[(i - 2)*(d_num_species + 4) + si] +
+                                            Real(6)*V_ghost[(i - 1)*(d_num_species + 4) + si] +
+                                            Real(12)*Real(dx[0])*dV_dx[si];
                                     }
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species] = double(3)*u_x_LL + double(10)*u_x_L -
-                                        double(18)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species] +
-                                        double(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species] +
-                                        double(12)*dx[0]*dV_dx[d_num_species];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species] = Real(3)*u_x_LL + Real(10)*u_x_L -
+                                        Real(18)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species] +
+                                        Real(12)*Real(dx[0])*dV_dx[d_num_species];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = double(3)*v_x_LL + double(10)*v_x_L -
-                                        double(18)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(12)*dx[0]*dV_dx[d_num_species + 1];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = Real(3)*v_x_LL + Real(10)*v_x_L -
+                                        Real(18)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(12)*Real(dx[0])*dV_dx[d_num_species + 1];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = double(3)*w_x_LL + double(10)*w_x_L -
-                                        double(18)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(12)*dx[0]*dV_dx[d_num_species + 2];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = Real(3)*w_x_LL + Real(10)*w_x_L -
+                                        Real(18)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(12)*Real(dx[0])*dV_dx[d_num_species + 2];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = double(3)*p_x_LL + double(10)*p_x_L -
-                                        double(18)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(12)*dx[0]*dV_dx[d_num_species + 3];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = Real(3)*p_x_LL + Real(10)*p_x_L -
+                                        Real(18)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(12)*Real(dx[0])*dV_dx[d_num_species + 3];
                                 }
                                 else if (i == 3)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[i*(d_num_species + 4) + si] = -double(4)*rho_Y_x_LL[si] -
-                                            double(65)/double(3)*rho_Y_x_L[si] +
-                                            double(40)*V_ghost[(i - 3)*(d_num_species + 4) + si] -
-                                            double(20)*V_ghost[(i - 2)*(d_num_species + 4) + si] +
-                                            double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + si] -
-                                            double(20)*dx[0]*dV_dx[si];
+                                        V_ghost[i*(d_num_species + 4) + si] = -Real(4)*rho_Y_x_LL[si] -
+                                            Real(65)/Real(3)*rho_Y_x_L[si] +
+                                            Real(40)*V_ghost[(i - 3)*(d_num_species + 4) + si] -
+                                            Real(20)*V_ghost[(i - 2)*(d_num_species + 4) + si] +
+                                            Real(20)/Real(3)*V_ghost[(i - 1)*(d_num_species + 4) + si] -
+                                            Real(20)*Real(dx[0])*dV_dx[si];
                                     }
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species] = -double(4)*u_x_LL -
-                                        double(65)/double(3)*u_x_L +
-                                        double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species] -
-                                        double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species] +
-                                        double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species] -
-                                        double(20)*dx[0]*dV_dx[d_num_species];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species] = -Real(4)*u_x_LL -
+                                        Real(65)/Real(3)*u_x_L +
+                                        Real(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(20)/Real(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species] -
+                                        Real(20)*Real(dx[0])*dV_dx[d_num_species];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -double(4)*v_x_LL -
-                                        double(65)/double(3)*v_x_L +
-                                        double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(20)*dx[0]*dV_dx[d_num_species + 1];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -Real(4)*v_x_LL -
+                                        Real(65)/Real(3)*v_x_L +
+                                        Real(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(20)/Real(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(20)*Real(dx[0])*dV_dx[d_num_species + 1];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -double(4)*v_x_LL -
-                                        double(65)/double(3)*v_x_L +
-                                        double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(20)*dx[0]*dV_dx[d_num_species + 2];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -Real(4)*v_x_LL -
+                                        Real(65)/Real(3)*v_x_L +
+                                        Real(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(20)/Real(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(20)*Real(dx[0])*dV_dx[d_num_species + 2];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -double(4)*p_x_LL -
-                                        double(65)/double(3)*p_x_L +
-                                        double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(20)*dx[0]*dV_dx[d_num_species + 3];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -Real(4)*p_x_LL -
+                                        Real(65)/Real(3)*p_x_L +
+                                        Real(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(20)/Real(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(20)*Real(dx[0])*dV_dx[d_num_species + 3];
                                 }
                                 else if (i == 4)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[i*(d_num_species + 4) + si] = double(5)*rho_Y_x_LL[si] +
-                                            double(77)/double(2)*rho_Y_x_L[si] -
-                                            double(75)*V_ghost[(i - 4)*(d_num_species + 4) + si] +
-                                            double(50)*V_ghost[(i - 3)*(d_num_species + 4) + si] -
-                                            double(25)*V_ghost[(i - 2)*(d_num_species + 4) + si] +
-                                            double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 4) + si] +
-                                            double(30)*dx[0]*dV_dx[si];
+                                        V_ghost[i*(d_num_species + 4) + si] = Real(5)*rho_Y_x_LL[si] +
+                                            Real(77)/Real(2)*rho_Y_x_L[si] -
+                                            Real(75)*V_ghost[(i - 4)*(d_num_species + 4) + si] +
+                                            Real(50)*V_ghost[(i - 3)*(d_num_species + 4) + si] -
+                                            Real(25)*V_ghost[(i - 2)*(d_num_species + 4) + si] +
+                                            Real(15)/Real(2)*V_ghost[(i - 1)*(d_num_species + 4) + si] +
+                                            Real(30)*Real(dx[0])*dV_dx[si];
                                     }
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species] = double(5)*u_x_LL +
-                                        double(77)/double(2)*u_x_L -
-                                        double(75)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species] +
-                                        double(50)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species] -
-                                        double(25)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species] +
-                                        double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species] +
-                                        double(30)*dx[0]*dV_dx[d_num_species];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species] = Real(5)*u_x_LL +
+                                        Real(77)/Real(2)*u_x_L -
+                                        Real(75)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species] +
+                                        Real(50)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(25)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(15)/Real(2)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species] +
+                                        Real(30)*Real(dx[0])*dV_dx[d_num_species];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = double(5)*v_x_LL +
-                                        double(77)/double(2)*v_x_L -
-                                        double(75)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(50)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(25)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(30)*dx[0]*dV_dx[d_num_species + 1];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = Real(5)*v_x_LL +
+                                        Real(77)/Real(2)*v_x_L -
+                                        Real(75)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(50)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(25)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(15)/Real(2)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(30)*Real(dx[0])*dV_dx[d_num_species + 1];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = double(5)*w_x_LL +
-                                        double(77)/double(2)*w_x_L -
-                                        double(75)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(50)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(25)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(30)*dx[0]*dV_dx[d_num_species + 2];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = Real(5)*w_x_LL +
+                                        Real(77)/Real(2)*w_x_L -
+                                        Real(75)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(50)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(25)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(15)/Real(2)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(30)*Real(dx[0])*dV_dx[d_num_species + 2];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = double(5)*p_x_LL +
-                                        double(77)/double(2)*p_x_L -
-                                        double(75)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(50)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(25)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(30)*dx[0]*dV_dx[d_num_species + 3];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = Real(5)*p_x_LL +
+                                        Real(77)/Real(2)*p_x_L -
+                                        Real(75)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(50)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(25)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(15)/Real(2)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(30)*Real(dx[0])*dV_dx[d_num_species + 3];
                                 }
                                 else if (i == 5)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[i*(d_num_species + 4) + si] = -double(6)*rho_Y_x_LL[si] -
-                                            double(609)/double(10)*rho_Y_x_L[si] +
-                                            double(126)*V_ghost[(i - 5)*(d_num_species + 4) + si] -
-                                            double(105)*V_ghost[(i - 4)*(d_num_species + 4) + si] +
-                                            double(70)*V_ghost[(i - 3)*(d_num_species + 4) + si] -
-                                            double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 4) + si] +
-                                            double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 4) + si] -
-                                            double(42)*dx[0]*dV_dx[si];
+                                        V_ghost[i*(d_num_species + 4) + si] = -Real(6)*rho_Y_x_LL[si] -
+                                            Real(609)/Real(10)*rho_Y_x_L[si] +
+                                            Real(126)*V_ghost[(i - 5)*(d_num_species + 4) + si] -
+                                            Real(105)*V_ghost[(i - 4)*(d_num_species + 4) + si] +
+                                            Real(70)*V_ghost[(i - 3)*(d_num_species + 4) + si] -
+                                            Real(63)/Real(2)*V_ghost[(i - 2)*(d_num_species + 4) + si] +
+                                            Real(42)/Real(5)*V_ghost[(i - 1)*(d_num_species + 4) + si] -
+                                            Real(42)*Real(dx[0])*dV_dx[si];
                                     }
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species] = -double(6)*u_x_LL -
-                                        double(609)/double(10)*u_x_L +
-                                        double(126)*V_ghost[(i - 5)*(d_num_species + 4) + d_num_species] -
-                                        double(105)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species] +
-                                        double(70)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species] -
-                                        double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species] +
-                                        double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species] -
-                                        double(42)*dx[0]*dV_dx[d_num_species];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species] = -Real(6)*u_x_LL -
+                                        Real(609)/Real(10)*u_x_L +
+                                        Real(126)*V_ghost[(i - 5)*(d_num_species + 4) + d_num_species] -
+                                        Real(105)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species] +
+                                        Real(70)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(63)/Real(2)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(42)/Real(5)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species] -
+                                        Real(42)*Real(dx[0])*dV_dx[d_num_species];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -double(6)*v_x_LL -
-                                        double(609)/double(10)*v_x_L +
-                                        double(126)*V_ghost[(i - 5)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(105)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(70)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(42)*dx[0]*dV_dx[d_num_species + 1];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -Real(6)*v_x_LL -
+                                        Real(609)/Real(10)*v_x_L +
+                                        Real(126)*V_ghost[(i - 5)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(105)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(70)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(63)/Real(2)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(42)/Real(5)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(42)*Real(dx[0])*dV_dx[d_num_species + 1];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -double(6)*w_x_LL -
-                                        double(609)/double(10)*w_x_L +
-                                        double(126)*V_ghost[(i - 5)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(105)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(70)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(42)*dx[0]*dV_dx[d_num_species + 2];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -Real(6)*w_x_LL -
+                                        Real(609)/Real(10)*w_x_L +
+                                        Real(126)*V_ghost[(i - 5)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(105)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(70)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(63)/Real(2)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(42)/Real(5)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(42)*Real(dx[0])*dV_dx[d_num_species + 2];
                                     
-                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -double(6)*p_x_LL -
-                                        double(609)/double(10)*p_x_L +
-                                        double(126)*V_ghost[(i - 5)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(105)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(70)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(42)*dx[0]*dV_dx[d_num_species + 3];
+                                    V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -Real(6)*p_x_LL -
+                                        Real(609)/Real(10)*p_x_L +
+                                        Real(126)*V_ghost[(i - 5)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(105)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(70)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(63)/Real(2)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(42)/Real(5)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(42)*Real(dx[0])*dV_dx[d_num_species + 3];
                                 }
                                 
                                 /*
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_ghost = double(0);
+                                Real rho_ghost = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_ghost += V_ghost[i*(d_num_species + 4) + si];
@@ -7835,7 +7835,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_ghost;
+                                std::vector<Real> Y_ghost;
                                 Y_ghost.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -7846,7 +7846,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_ghost_ptr;
+                                std::vector<const Real*> Y_ghost_ptr;
                                 Y_ghost_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -7862,13 +7862,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 Q[d_num_species + 1][idx_cell_mom] = rho_ghost*V_ghost[i*(d_num_species + 4) + d_num_species + 1];
                                 Q[d_num_species + 2][idx_cell_mom] = rho_ghost*V_ghost[i*(d_num_species + 4) + d_num_species + 2];
                                 
-                                const double epsilon = d_equation_of_state_mixing_rules->
+                                const Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergy(
                                         &rho_ghost,
                                         &V_ghost[i*(d_num_species + 4) + d_num_species + 3],
                                         Y_ghost_ptr);
                                 
-                                const double E = rho_ghost*epsilon +
+                                const Real E = rho_ghost*epsilon +
                                     half*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
@@ -7942,9 +7942,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                     subghostcell_dims_conservative_var[2][1];
                             
-                            std::vector<double> rho_Y_y_T;
-                            std::vector<double> rho_Y_y_TT;
-                            std::vector<double> rho_Y_y_TTT;
+                            std::vector<Real> rho_Y_y_T;
+                            std::vector<Real> rho_Y_y_TT;
+                            std::vector<Real> rho_Y_y_TTT;
                             rho_Y_y_T.reserve(d_num_species);
                             rho_Y_y_TT.reserve(d_num_species);
                             rho_Y_y_TTT.reserve(d_num_species);
@@ -7959,9 +7959,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_y_T   = double(0);
-                            double rho_y_TT  = double(0);
-                            double rho_y_TTT = double(0);
+                            Real rho_y_T   = Real(0);
+                            Real rho_y_TT  = Real(0);
+                            Real rho_y_TTT = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_y_T   += Q[si][idx_cell_rho_Y_y_T];
@@ -7973,9 +7973,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_y_T;
-                            std::vector<double> Y_y_TT;
-                            std::vector<double> Y_y_TTT;
+                            std::vector<Real> Y_y_T;
+                            std::vector<Real> Y_y_TT;
+                            std::vector<Real> Y_y_TTT;
                             Y_y_T.reserve(d_num_species);
                             Y_y_TT.reserve(d_num_species);
                             Y_y_TTT.reserve(d_num_species);
@@ -7990,9 +7990,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_y_T_ptr;
-                            std::vector<const double*> Y_y_TT_ptr;
-                            std::vector<const double*> Y_y_TTT_ptr;
+                            std::vector<const Real*> Y_y_T_ptr;
+                            std::vector<const Real*> Y_y_TT_ptr;
+                            std::vector<const Real*> Y_y_TTT_ptr;
                             Y_y_T_ptr.reserve(d_num_species);
                             Y_y_TT_ptr.reserve(d_num_species);
                             Y_y_TTT_ptr.reserve(d_num_species);
@@ -8003,36 +8003,36 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 Y_y_TTT_ptr.push_back(&Y_y_TTT[si]);
                             }
                             
-                            const double u_y_T   = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
-                            const double u_y_TT  = Q[d_num_species][idx_cell_mom_y_TT]/rho_y_TT;
-                            const double u_y_TTT = Q[d_num_species][idx_cell_mom_y_TTT]/rho_y_TTT;
+                            const Real u_y_T   = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
+                            const Real u_y_TT  = Q[d_num_species][idx_cell_mom_y_TT]/rho_y_TT;
+                            const Real u_y_TTT = Q[d_num_species][idx_cell_mom_y_TTT]/rho_y_TTT;
                             
-                            const double v_y_T   = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
-                            const double v_y_TT  = Q[d_num_species + 1][idx_cell_mom_y_TT]/rho_y_TT;
-                            const double v_y_TTT = Q[d_num_species + 1][idx_cell_mom_y_TTT]/rho_y_TTT;
+                            const Real v_y_T   = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
+                            const Real v_y_TT  = Q[d_num_species + 1][idx_cell_mom_y_TT]/rho_y_TT;
+                            const Real v_y_TTT = Q[d_num_species + 1][idx_cell_mom_y_TTT]/rho_y_TTT;
                             
-                            const double w_y_T   = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
-                            const double w_y_TT  = Q[d_num_species + 2][idx_cell_mom_y_TT]/rho_y_TT;
-                            const double w_y_TTT = Q[d_num_species + 2][idx_cell_mom_y_TTT]/rho_y_TTT;
+                            const Real w_y_T   = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
+                            const Real w_y_TT  = Q[d_num_species + 2][idx_cell_mom_y_TT]/rho_y_TT;
+                            const Real w_y_TTT = Q[d_num_species + 2][idx_cell_mom_y_TTT]/rho_y_TTT;
                             
-                            const double half = double(1)/double(2);
-                            const double epsilon_y_T   = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
-                            const double epsilon_y_TT  = Q[d_num_species + 3][idx_cell_E_y_TT]/rho_y_TT - half*(u_y_TT*u_y_TT + v_y_TT*v_y_TT + w_y_TT*w_y_TT);
-                            const double epsilon_y_TTT = Q[d_num_species + 3][idx_cell_E_y_TTT]/rho_y_TTT - half*(u_y_TTT*u_y_TTT + v_y_TTT*v_y_TTT + w_y_TTT*w_y_TTT);
+                            const Real half = Real(1)/Real(2);
+                            const Real epsilon_y_T   = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
+                            const Real epsilon_y_TT  = Q[d_num_species + 3][idx_cell_E_y_TT]/rho_y_TT - half*(u_y_TT*u_y_TT + v_y_TT*v_y_TT + w_y_TT*w_y_TT);
+                            const Real epsilon_y_TTT = Q[d_num_species + 3][idx_cell_E_y_TTT]/rho_y_TTT - half*(u_y_TTT*u_y_TTT + v_y_TTT*v_y_TTT + w_y_TTT*w_y_TTT);
 
-                            double p_y_T = d_equation_of_state_mixing_rules->
+                            Real p_y_T = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_y_T,
                                     &epsilon_y_T,
                                     Y_y_T_ptr);
                             
-                            double p_y_TT = d_equation_of_state_mixing_rules->
+                            Real p_y_TT = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_y_TT,
                                     &epsilon_y_TT,
                                     Y_y_TT_ptr);
                             
-                            double p_y_TTT = d_equation_of_state_mixing_rules->
+                            Real p_y_TTT = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_y_TTT,
                                     &epsilon_y_TTT,
@@ -8042,26 +8042,26 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute derivatives in y-direction.
                              */
                             
-                            std::vector<double> drho_Y_dy;
+                            std::vector<Real> drho_Y_dy;
                             drho_Y_dy.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                drho_Y_dy.push_back(-(Q[si][idx_cell_rho_Y_y_TTT] - double(4)*Q[si][idx_cell_rho_Y_y_TT] +
-                                    double(3)*Q[si][idx_cell_rho_Y_y_T])/(double(2)*dx[1]));
+                                drho_Y_dy.push_back(-(Q[si][idx_cell_rho_Y_y_TTT] - Real(4)*Q[si][idx_cell_rho_Y_y_TT] +
+                                    Real(3)*Q[si][idx_cell_rho_Y_y_T])/(Real(2)*Real(dx[1])));
                             }
-                            const double du_dy   = -(u_y_TTT - double(4)*u_y_TT + double(3)*u_y_T)/(double(2)*dx[1]);
-                            const double dv_dy   = -(v_y_TTT - double(4)*v_y_TT + double(3)*v_y_T)/(double(2)*dx[1]);
-                            const double dw_dy   = -(w_y_TTT - double(4)*w_y_TT + double(3)*w_y_T)/(double(2)*dx[1]);
-                            const double dp_dy   = -(p_y_TTT - double(4)*p_y_TT + double(3)*p_y_T)/(double(2)*dx[1]);
+                            const Real du_dy   = -(u_y_TTT - Real(4)*u_y_TT + Real(3)*u_y_T)/(Real(2)*Real(dx[1]));
+                            const Real dv_dy   = -(v_y_TTT - Real(4)*v_y_TT + Real(3)*v_y_T)/(Real(2)*Real(dx[1]));
+                            const Real dw_dy   = -(w_y_TTT - Real(4)*w_y_TT + Real(3)*w_y_T)/(Real(2)*Real(dx[1]));
+                            const Real dp_dy   = -(p_y_TTT - Real(4)*p_y_TT + Real(3)*p_y_T)/(Real(2)*Real(dx[1]));
                             
                             /*
                              * Compute derivatives in x-direction.
                              */
                             
-                            double du_dx = double(0);
-                            double dv_dx = double(0);
-                            // double dw_dx = double(0);
-                            double dp_dx = double(0);
+                            Real du_dx = Real(0);
+                            Real dv_dx = Real(0);
+                            // Real dw_dx = Real(0);
+                            Real dp_dx = Real(0);
                             
                             if ((i + num_subghosts_conservative_var[0][0] == 0) ||
                                 (i + num_subghosts_conservative_var[1][0] == 0) ||
@@ -8092,7 +8092,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_x_R = double(0);
+                                Real rho_x_R = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_x_R += Q[si][idx_cell_rho_Y_x_R];
@@ -8102,7 +8102,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_x_R;
+                                std::vector<Real> Y_x_R;
                                 Y_x_R.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -8113,29 +8113,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                             
-                                std::vector<const double*> Y_x_R_ptr;
+                                std::vector<const Real*> Y_x_R_ptr;
                                 Y_x_R_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_x_R_ptr.push_back(&Y_x_R[si]);
                                 }
                                 
-                                const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
-                                const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
-                                const double w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
-                                const double epsilon_x_R = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
+                                const Real u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
+                                const Real v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
+                                const Real w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
+                                const Real epsilon_x_R = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
                                 
-                                double p_x_R = d_equation_of_state_mixing_rules->
+                                Real p_x_R = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_R,
                                         &epsilon_x_R,
                                         Y_x_R_ptr);
                                 
                                 // One-sided derivatives.
-                                du_dx = (u_x_R - u_y_T)/(dx[0]);
-                                dv_dx = (v_x_R - v_y_T)/(dx[0]);
-                                // dw_dx = (w_x_R - w_y_T)/(dx[0]);
-                                dp_dx = (p_x_R - p_y_T)/(dx[0]);
+                                du_dx = (u_x_R - u_y_T)/Real(dx[0]);
+                                dv_dx = (v_x_R - v_y_T)/Real(dx[0]);
+                                // dw_dx = (w_x_R - w_y_T)/Real(dx[0]);
+                                dp_dx = (p_x_R - p_y_T)/Real(dx[0]);
                             }
                             else if ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
                                      (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
@@ -8166,7 +8166,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_x_L = double(0);
+                                Real rho_x_L = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_x_L += Q[si][idx_cell_rho_Y_x_L];
@@ -8176,7 +8176,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_x_L;
+                                std::vector<Real> Y_x_L;
                                 Y_x_L.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -8187,29 +8187,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_x_L_ptr;
+                                std::vector<const Real*> Y_x_L_ptr;
                                 Y_x_L_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_x_L_ptr.push_back(&Y_x_L[si]);
                                 }
                                 
-                                const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
-                                const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
-                                const double w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
-                                const double epsilon_x_L = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
+                                const Real u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
+                                const Real v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
+                                const Real w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
+                                const Real epsilon_x_L = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
                                 
-                                double p_x_L = d_equation_of_state_mixing_rules->
+                                Real p_x_L = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_L,
                                         &epsilon_x_L,
                                         Y_x_L_ptr);
                                 
                                 // One-sided derivatives.
-                                du_dx = (u_y_T - u_x_L)/(dx[0]);
-                                dv_dx = (v_y_T - v_x_L)/(dx[0]);
-                                // dw_dx = (w_y_T - w_x_L)/(dx[0]);
-                                dp_dx = (p_y_T - p_x_L)/(dx[0]);
+                                du_dx = (u_y_T - u_x_L)/Real(dx[0]);
+                                dv_dx = (v_y_T - v_x_L)/Real(dx[0]);
+                                // dw_dx = (w_y_T - w_x_L)/Real(dx[0]);
+                                dp_dx = (p_y_T - p_x_L)/Real(dx[0]);
                             }
                             else
                             {
@@ -8247,8 +8247,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_x_L = double(0);
-                                double rho_x_R = double(0);
+                                Real rho_x_L = Real(0);
+                                Real rho_x_R = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_x_L += Q[si][idx_cell_rho_Y_x_L];
@@ -8259,8 +8259,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_x_L;
-                                std::vector<double> Y_x_R;
+                                std::vector<Real> Y_x_L;
+                                std::vector<Real> Y_x_R;
                                 Y_x_L.reserve(d_num_species);
                                 Y_x_R.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -8273,8 +8273,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_x_L_ptr;
-                                std::vector<const double*> Y_x_R_ptr;
+                                std::vector<const Real*> Y_x_L_ptr;
+                                std::vector<const Real*> Y_x_R_ptr;
                                 
                                 Y_x_L_ptr.reserve(d_num_species);
                                 Y_x_R_ptr.reserve(d_num_species);
@@ -8284,45 +8284,45 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_x_R_ptr.push_back(&Y_x_R[si]);
                                 }
                                 
-                                const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
-                                const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
+                                const Real u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
+                                const Real u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
                                 
-                                const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
-                                const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
+                                const Real v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
+                                const Real v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
                                 
-                                const double w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
-                                const double w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
+                                const Real w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
+                                const Real w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
                                 
-                                const double epsilon_x_L = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
-                                const double epsilon_x_R = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
+                                const Real epsilon_x_L = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
+                                const Real epsilon_x_R = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
                                 
-                                double p_x_L = d_equation_of_state_mixing_rules->
+                                Real p_x_L = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_L,
                                         &epsilon_x_L,
                                         Y_x_L_ptr);
                                 
-                                double p_x_R = d_equation_of_state_mixing_rules->
+                                Real p_x_R = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_R,
                                         &epsilon_x_R,
                                         Y_x_R_ptr);
                                 
                                 // Central derivatives.
-                                du_dx = (u_x_R - u_x_L)/(double(2)*dx[0]);
-                                dv_dx = (v_x_R - v_x_L)/(double(2)*dx[0]);
-                                // dw_dx = (w_x_R - w_x_L)/(double(2)*dx[0]);
-                                dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
+                                du_dx = (u_x_R - u_x_L)/(Real(2)*Real(dx[0]));
+                                dv_dx = (v_x_R - v_x_L)/(Real(2)*Real(dx[0]));
+                                // dw_dx = (w_x_R - w_x_L)/(Real(2)*Real(dx[0]));
+                                dp_dx = (p_x_R - p_x_L)/(Real(2)*Real(dx[0]));
                             }
                             
                             /*
                              * Compute derivatives in z-direction.
                              */
                             
-                            // double du_dz = double(0);
-                            double dv_dz = double(0);
-                            double dw_dz = double(0);
-                            double dp_dz = double(0);
+                            // Real du_dz = Real(0);
+                            Real dv_dz = Real(0);
+                            Real dw_dz = Real(0);
+                            Real dp_dz = Real(0);
                             
                             if ((k + num_subghosts_conservative_var[0][2] == 0) ||
                                 (k + num_subghosts_conservative_var[1][2] == 0) ||
@@ -8353,7 +8353,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_z_F = double(0);
+                                Real rho_z_F = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_z_F += Q[si][idx_cell_rho_Y_z_F];
@@ -8363,7 +8363,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_z_F;
+                                std::vector<Real> Y_z_F;
                                 Y_z_F.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -8374,29 +8374,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_z_F_ptr;
+                                std::vector<const Real*> Y_z_F_ptr;
                                 Y_z_F_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_z_F_ptr.push_back(&Y_z_F[si]);
                                 }
                                 
-                                const double u_z_F = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
-                                const double v_z_F = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
-                                const double w_z_F = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
-                                const double epsilon_z_F = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
+                                const Real u_z_F = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
+                                const Real v_z_F = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
+                                const Real w_z_F = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
+                                const Real epsilon_z_F = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
                                 
-                                double p_z_F = d_equation_of_state_mixing_rules->
+                                Real p_z_F = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_F,
                                         &epsilon_z_F,
                                         Y_z_F_ptr);
                                 
                                 // One-sided derivatives.
-                                // du_dz = (u_z_F - u_y_T)/(dx[2]);
-                                dv_dz = (v_z_F - v_y_T)/(dx[2]);
-                                dw_dz = (w_z_F - w_y_T)/(dx[2]);
-                                dp_dz = (p_z_F - p_y_T)/(dx[2]);
+                                // du_dz = (u_z_F - u_y_T)/Real(dx[2]);
+                                dv_dz = (v_z_F - v_y_T)/Real(dx[2]);
+                                dw_dz = (w_z_F - w_y_T)/Real(dx[2]);
+                                dp_dz = (p_z_F - p_y_T)/Real(dx[2]);
                             }
                             else if ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
                                      (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
@@ -8427,7 +8427,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_z_B = double(0);
+                                Real rho_z_B = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_z_B += Q[si][idx_cell_rho_Y_z_B];
@@ -8437,7 +8437,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_z_B;
+                                std::vector<Real> Y_z_B;
                                 Y_z_B.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -8448,29 +8448,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_z_B_ptr;
+                                std::vector<const Real*> Y_z_B_ptr;
                                 Y_z_B_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_z_B_ptr.push_back(&Y_z_B[si]);
                                 }
                                 
-                                const double u_z_B = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
-                                const double v_z_B = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
-                                const double w_z_B = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
-                                const double epsilon_z_B = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
+                                const Real u_z_B = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
+                                const Real v_z_B = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
+                                const Real w_z_B = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
+                                const Real epsilon_z_B = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
                                 
-                                double p_z_B = d_equation_of_state_mixing_rules->
+                                Real p_z_B = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_B,
                                         &epsilon_z_B,
                                         Y_z_B_ptr);
                                 
                                 // One-sided derivatives.
-                                // du_dz = (u_y_T - u_z_B)/(dx[2]);
-                                dv_dz = (v_y_T - v_z_B)/(dx[2]);
-                                dw_dz = (w_y_T - w_z_B)/(dx[2]);
-                                dp_dz = (p_y_T - p_z_B)/(dx[2]);
+                                // du_dz = (u_y_T - u_z_B)/Real(dx[2]);
+                                dv_dz = (v_y_T - v_z_B)/Real(dx[2]);
+                                dw_dz = (w_y_T - w_z_B)/Real(dx[2]);
+                                dp_dz = (p_y_T - p_z_B)/Real(dx[2]);
                             }
                             else
                             {
@@ -8508,8 +8508,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_z_B = double(0);
-                                double rho_z_F = double(0);
+                                Real rho_z_B = Real(0);
+                                Real rho_z_F = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_z_B += Q[si][idx_cell_rho_Y_z_B];
@@ -8520,8 +8520,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_z_B;
-                                std::vector<double> Y_z_F;
+                                std::vector<Real> Y_z_B;
+                                std::vector<Real> Y_z_F;
                                 Y_z_B.reserve(d_num_species);
                                 Y_z_F.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -8534,8 +8534,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_z_B_ptr;
-                                std::vector<const double*> Y_z_F_ptr;
+                                std::vector<const Real*> Y_z_B_ptr;
+                                std::vector<const Real*> Y_z_F_ptr;
                                 Y_z_B_ptr.reserve(d_num_species);
                                 Y_z_F_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -8544,73 +8544,73 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_z_F_ptr.push_back(&Y_z_F[si]);
                                 }
                                 
-                                const double u_z_B = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
-                                const double u_z_F = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
+                                const Real u_z_B = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
+                                const Real u_z_F = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
                                 
-                                const double v_z_B = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
-                                const double v_z_F = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
+                                const Real v_z_B = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
+                                const Real v_z_F = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
                                 
-                                const double w_z_B = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
-                                const double w_z_F = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
+                                const Real w_z_B = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
+                                const Real w_z_F = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
                                 
-                                const double epsilon_z_B = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
-                                const double epsilon_z_F = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
+                                const Real epsilon_z_B = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
+                                const Real epsilon_z_F = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
                                 
-                                double p_z_B = d_equation_of_state_mixing_rules->
+                                Real p_z_B = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_B,
                                         &epsilon_z_B,
                                         Y_z_B_ptr);
                                 
-                                double p_z_F = d_equation_of_state_mixing_rules->
+                                Real p_z_F = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_F,
                                         &epsilon_z_F,
                                         Y_z_F_ptr);
                                 
                                 // Central derivatives.
-                                // du_dz = (u_z_F - u_z_B)/(double(2)*dx[2]);
-                                dv_dz = (v_z_F - v_z_B)/(double(2)*dx[2]);
-                                dw_dz = (w_z_F - w_z_B)/(double(2)*dx[2]);
-                                dp_dz = (p_z_F - p_z_B)/(double(2)*dx[2]);
+                                // du_dz = (u_z_F - u_z_B)/(Real(2)*Real(dx[2]));
+                                dv_dz = (v_z_F - v_z_B)/(Real(2)*Real(dx[2]));
+                                dw_dz = (w_z_F - w_z_B)/(Real(2)*Real(dx[2]));
+                                dp_dz = (p_z_F - p_z_B)/(Real(2)*Real(dx[2]));
                             }
                             
                             // Compute sound speed.
                             
-                            const double Gamma_y_T = d_equation_of_state_mixing_rules->getGruneisenParameter(
+                            const Real Gamma_y_T = d_equation_of_state_mixing_rules->getGruneisenParameter(
                                 &rho_y_T,
                                 &p_y_T,
                                 Y_y_T_ptr);
                             
-                            const std::vector<double> Psi_y_T = d_equation_of_state_mixing_rules->
+                            const std::vector<Real> Psi_y_T = d_equation_of_state_mixing_rules->
                                 getPressureDerivativeWithPartialDensities(
                                         &rho_y_T,
                                         &p_y_T,
                                         Y_y_T_ptr);
                             
-                            double c_y_T = Gamma_y_T*p_y_T/rho_y_T;
+                            Real c_y_T = Gamma_y_T*p_y_T/rho_y_T;
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 c_y_T += Y_y_T[si]*Psi_y_T[si];
                             }
-                            c_y_T = sqrt(c_y_T);
+                            c_y_T = std::sqrt(c_y_T);
                             
-                            const double lambda_last = v_y_T + c_y_T;
+                            const Real lambda_last = v_y_T + c_y_T;
                             
                             // Compute vector Lambda^(-1) * L.
                             
-                            double Lambda_inv_L[d_num_species + 4];
+                            Real Lambda_inv_L[d_num_species + 4];
                             
-                            const double& p_t         = d_bdry_face_nonreflecting_outflow_p_t[face_loc];
-                            const double& sigma       = d_bdry_face_nonreflecting_outflow_sigma[face_loc];
-                            const double& beta        = d_bdry_face_nonreflecting_outflow_beta[face_loc];
-                            const double& length_char = d_bdry_face_nonreflecting_outflow_length_char[face_loc];
+                            const Real& p_t         = d_bdry_face_nonreflecting_outflow_p_t[face_loc];
+                            const Real& sigma       = d_bdry_face_nonreflecting_outflow_sigma[face_loc];
+                            const Real& beta        = d_bdry_face_nonreflecting_outflow_beta[face_loc];
+                            const Real& length_char = d_bdry_face_nonreflecting_outflow_length_char[face_loc];
                             
-                            const double T_last = u_y_T*(dp_dx + rho_y_T*c_y_T*dv_dx) + rho_y_T*c_y_T*c_y_T*du_dx + 
+                            const Real T_last = u_y_T*(dp_dx + rho_y_T*c_y_T*dv_dx) + rho_y_T*c_y_T*c_y_T*du_dx + 
                                 w_y_T*(dp_dz + rho_y_T*c_y_T*dv_dz) + rho_y_T*c_y_T*c_y_T*dw_dz;
                             
-                            const double M_sq = (u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T)/(c_y_T*c_y_T);
-                            const double K = sigma*c_y_T*(double(1) - M_sq)/length_char;
+                            const Real M_sq = (u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T)/(c_y_T*c_y_T);
+                            const Real K = sigma*c_y_T*(Real(1) - M_sq)/length_char;
                             
                             Lambda_inv_L[0] = dp_dy - rho_y_T*c_y_T*dv_dy;
                             Lambda_inv_L[1] = du_dy;
@@ -8619,14 +8619,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 Lambda_inv_L[si + 2] = c_y_T*c_y_T*drho_Y_dy[si] - Y_y_T[si]*dp_dy;
                             }
                             Lambda_inv_L[d_num_species + 2] = dw_dy;
-                            Lambda_inv_L[d_num_species + 3] = (double(1)/lambda_last)*(K*(p_y_T - p_t) - (double(1) - beta)*T_last);
+                            Lambda_inv_L[d_num_species + 3] = (Real(1)/lambda_last)*(K*(p_y_T - p_t) - (Real(1) - beta)*T_last);
                             
                             // Compute dV_dy.
                             
-                            const double c_sq_inv  = double(1)/(c_y_T*c_y_T);
-                            const double rho_c_inv = double(1)/(rho_y_T*c_y_T);
+                            const Real c_sq_inv  = Real(1)/(c_y_T*c_y_T);
+                            const Real rho_c_inv = Real(1)/(rho_y_T*c_y_T);
                             
-                            double dV_dy[d_num_species + 4];
+                            Real dV_dy[d_num_species + 4];
 
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -8638,7 +8638,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             dV_dy[d_num_species + 2] = Lambda_inv_L[d_num_species + 2];
                             dV_dy[d_num_species + 3] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
                             
-                            double V_ghost[(d_num_species + 4)*num_ghosts_to_fill];
+                            Real V_ghost[(d_num_species + 4)*num_ghosts_to_fill];
                             
                             for (int j = num_ghosts_to_fill - 1; j >= 0; j--)
                             {
@@ -8661,209 +8661,209 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[j*(d_num_species + 4) + si] = rho_Y_y_TT[si] - double(2)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 4) + si] = rho_Y_y_TT[si] - Real(2)*Real(dx[1])*dV_dy[si];
                                     }
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species]     = u_y_TT - double(2)*dx[1]*dV_dy[d_num_species];
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = v_y_TT - double(2)*dx[1]*dV_dy[d_num_species + 1];
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = w_y_TT - double(2)*dx[1]*dV_dy[d_num_species + 2];
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = p_y_TT - double(2)*dx[1]*dV_dy[d_num_species + 3];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species]     = u_y_TT - Real(2)*Real(dx[1])*dV_dy[d_num_species];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = v_y_TT - Real(2)*Real(dx[1])*dV_dy[d_num_species + 1];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = w_y_TT - Real(2)*Real(dx[1])*dV_dy[d_num_species + 2];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = p_y_TT - Real(2)*Real(dx[1])*dV_dy[d_num_species + 3];
                                 }
                                 else if (j == num_ghosts_to_fill - 2)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[j*(d_num_species + 4) + si] = -double(2)*rho_Y_y_TT[si] - double(3)*rho_Y_y_T[si] +
-                                            double(6)*V_ghost[(j + 1)*(d_num_species + 4) + si] + double(6)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 4) + si] = -Real(2)*rho_Y_y_TT[si] - Real(3)*rho_Y_y_T[si] +
+                                            Real(6)*V_ghost[(j + 1)*(d_num_species + 4) + si] + Real(6)*Real(dx[1])*dV_dy[si];
                                     }
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species] = -double(2)*u_y_TT - double(3)*u_y_T +
-                                        double(6)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species] +
-                                        double(6)*dx[1]*dV_dy[d_num_species];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species] = -Real(2)*u_y_TT - Real(3)*u_y_T +
+                                        Real(6)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species] +
+                                        Real(6)*Real(dx[1])*dV_dy[d_num_species];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = -double(2)*v_y_TT - double(3)*v_y_T +
-                                        double(6)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(6)*dx[1]*dV_dy[d_num_species + 1];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = -Real(2)*v_y_TT - Real(3)*v_y_T +
+                                        Real(6)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(6)*Real(dx[1])*dV_dy[d_num_species + 1];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = -double(2)*w_y_TT - double(3)*w_y_T +
-                                        double(6)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(6)*dx[1]*dV_dy[d_num_species + 2];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = -Real(2)*w_y_TT - Real(3)*w_y_T +
+                                        Real(6)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(6)*Real(dx[1])*dV_dy[d_num_species + 2];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = -double(2)*p_y_TT - double(3)*p_y_T +
-                                        double(6)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(6)*dx[1]*dV_dy[d_num_species + 3];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = -Real(2)*p_y_TT - Real(3)*p_y_T +
+                                        Real(6)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(6)*Real(dx[1])*dV_dy[d_num_species + 3];
                                 }
                                 else if (j == num_ghosts_to_fill - 3)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[j*(d_num_species + 4) + si] = double(3)*rho_Y_y_TT[si] + double(10)*rho_Y_y_T[si] -
-                                            double(18)*V_ghost[(j + 2)*(d_num_species + 4) + si] +
-                                            double(6)*V_ghost[(j + 1)*(d_num_species + 4) + si] -
-                                            double(12)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 4) + si] = Real(3)*rho_Y_y_TT[si] + Real(10)*rho_Y_y_T[si] -
+                                            Real(18)*V_ghost[(j + 2)*(d_num_species + 4) + si] +
+                                            Real(6)*V_ghost[(j + 1)*(d_num_species + 4) + si] -
+                                            Real(12)*Real(dx[1])*dV_dy[si];
                                     }
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species] = double(3)*u_y_TT + double(10)*u_y_T -
-                                        double(18)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species] +
-                                        double(6)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species] -
-                                        double(12)*dx[1]*dV_dy[d_num_species];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species] = Real(3)*u_y_TT + Real(10)*u_y_T -
+                                        Real(18)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(6)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species] -
+                                        Real(12)*Real(dx[1])*dV_dy[d_num_species];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = double(3)*v_y_TT + double(10)*v_y_T -
-                                        double(18)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(6)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(12)*dx[1]*dV_dy[d_num_species + 1];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = Real(3)*v_y_TT + Real(10)*v_y_T -
+                                        Real(18)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(6)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(12)*Real(dx[1])*dV_dy[d_num_species + 1];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = double(3)*w_y_TT + double(10)*w_y_T -
-                                        double(18)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(6)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(12)*dx[1]*dV_dy[d_num_species + 2];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = Real(3)*w_y_TT + Real(10)*w_y_T -
+                                        Real(18)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(6)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(12)*Real(dx[1])*dV_dy[d_num_species + 2];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = double(3)*p_y_TT + double(10)*p_y_T -
-                                        double(18)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(6)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(12)*dx[1]*dV_dy[d_num_species + 3];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = Real(3)*p_y_TT + Real(10)*p_y_T -
+                                        Real(18)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(6)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(12)*Real(dx[1])*dV_dy[d_num_species + 3];
                                 }
                                 else if (j == num_ghosts_to_fill - 4)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[j*(d_num_species + 4) + si] = -double(4)*rho_Y_y_TT[si] -
-                                            double(65)/double(3)*rho_Y_y_T[si] +
-                                            double(40)*V_ghost[(j + 3)*(d_num_species + 4) + si] -
-                                            double(20)*V_ghost[(j + 2)*(d_num_species + 4) + si] +
-                                            double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 4) + si] +
-                                            double(20)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 4) + si] = -Real(4)*rho_Y_y_TT[si] -
+                                            Real(65)/Real(3)*rho_Y_y_T[si] +
+                                            Real(40)*V_ghost[(j + 3)*(d_num_species + 4) + si] -
+                                            Real(20)*V_ghost[(j + 2)*(d_num_species + 4) + si] +
+                                            Real(20)/Real(3)*V_ghost[(j + 1)*(d_num_species + 4) + si] +
+                                            Real(20)*Real(dx[1])*dV_dy[si];
                                     }
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species] = -double(4)*u_y_TT -
-                                        double(65)/double(3)*u_y_T +
-                                        double(40)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species] -
-                                        double(20)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species] +
-                                        double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species] +
-                                        double(20)*dx[1]*dV_dy[d_num_species];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species] = -Real(4)*u_y_TT -
+                                        Real(65)/Real(3)*u_y_T +
+                                        Real(40)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(20)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(20)/Real(3)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species] +
+                                        Real(20)*Real(dx[1])*dV_dy[d_num_species];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = -double(4)*v_y_TT -
-                                        double(65)/double(3)*v_y_T +
-                                        double(40)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(20)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(20)*dx[1]*dV_dy[d_num_species + 1];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = -Real(4)*v_y_TT -
+                                        Real(65)/Real(3)*v_y_T +
+                                        Real(40)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(20)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(20)/Real(3)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(20)*Real(dx[1])*dV_dy[d_num_species + 1];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = -double(4)*w_y_TT -
-                                        double(65)/double(3)*w_y_T +
-                                        double(40)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(20)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(20)*dx[1]*dV_dy[d_num_species + 2];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = -Real(4)*w_y_TT -
+                                        Real(65)/Real(3)*w_y_T +
+                                        Real(40)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(20)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(20)/Real(3)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(20)*Real(dx[1])*dV_dy[d_num_species + 2];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = -double(4)*p_y_TT -
-                                        double(65)/double(3)*p_y_T +
-                                        double(40)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(20)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(20)*dx[1]*dV_dy[d_num_species + 3];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = -Real(4)*p_y_TT -
+                                        Real(65)/Real(3)*p_y_T +
+                                        Real(40)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(20)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(20)/Real(3)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(20)*Real(dx[1])*dV_dy[d_num_species + 3];
                                 }
                                 else if (j == num_ghosts_to_fill - 5)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[j*(d_num_species + 4) + si] = double(5)*rho_Y_y_TT[si] +
-                                            double(77)/double(2)*rho_Y_y_T[si] -
-                                            double(75)*V_ghost[(j + 4)*(d_num_species + 4) + si] +
-                                            double(50)*V_ghost[(j + 3)*(d_num_species + 4) + si] -
-                                            double(25)*V_ghost[(j + 2)*(d_num_species + 4) + si] +
-                                            double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 4) + si] -
-                                            double(30)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 4) + si] = Real(5)*rho_Y_y_TT[si] +
+                                            Real(77)/Real(2)*rho_Y_y_T[si] -
+                                            Real(75)*V_ghost[(j + 4)*(d_num_species + 4) + si] +
+                                            Real(50)*V_ghost[(j + 3)*(d_num_species + 4) + si] -
+                                            Real(25)*V_ghost[(j + 2)*(d_num_species + 4) + si] +
+                                            Real(15)/Real(2)*V_ghost[(j + 1)*(d_num_species + 4) + si] -
+                                            Real(30)*Real(dx[1])*dV_dy[si];
                                     }
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species] = double(5)*u_y_TT +
-                                        double(77)/double(2)*u_y_T -
-                                        double(75)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species] +
-                                        double(50)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species] -
-                                        double(25)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species] +
-                                        double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species] -
-                                        double(30)*dx[1]*dV_dy[d_num_species];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species] = Real(5)*u_y_TT +
+                                        Real(77)/Real(2)*u_y_T -
+                                        Real(75)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species] +
+                                        Real(50)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(25)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(15)/Real(2)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species] -
+                                        Real(30)*Real(dx[1])*dV_dy[d_num_species];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = double(5)*v_y_TT +
-                                        double(77)/double(2)*v_y_T -
-                                        double(75)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(50)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(25)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(30)*dx[1]*dV_dy[d_num_species + 1];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = Real(5)*v_y_TT +
+                                        Real(77)/Real(2)*v_y_T -
+                                        Real(75)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(50)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(25)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(15)/Real(2)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(30)*Real(dx[1])*dV_dy[d_num_species + 1];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = double(5)*w_y_TT +
-                                        double(77)/double(2)*w_y_T -
-                                        double(75)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(50)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(25)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(30)*dx[1]*dV_dy[d_num_species + 2];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = Real(5)*w_y_TT +
+                                        Real(77)/Real(2)*w_y_T -
+                                        Real(75)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(50)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(25)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(15)/Real(2)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(30)*Real(dx[1])*dV_dy[d_num_species + 2];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = double(5)*p_y_TT +
-                                        double(77)/double(2)*p_y_T -
-                                        double(75)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(50)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(25)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(30)*dx[1]*dV_dy[d_num_species + 3];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = Real(5)*p_y_TT +
+                                        Real(77)/Real(2)*p_y_T -
+                                        Real(75)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(50)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(25)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(15)/Real(2)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(30)*Real(dx[1])*dV_dy[d_num_species + 3];
                                 }
                                 else if (j == num_ghosts_to_fill - 6)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[j*(d_num_species + 4) + si] = -double(6)*rho_Y_y_TT[si] -
-                                            double(609)/double(10)*rho_Y_y_T[si] +
-                                            double(126)*V_ghost[(j + 5)*(d_num_species + 4) + si] -
-                                            double(105)*V_ghost[(j + 4)*(d_num_species + 4) + si] +
-                                            double(70)*V_ghost[(j + 3)*(d_num_species + 4) + si] -
-                                            double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 4) + si] +
-                                            double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 4) + si] +
-                                            double(42)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 4) + si] = -Real(6)*rho_Y_y_TT[si] -
+                                            Real(609)/Real(10)*rho_Y_y_T[si] +
+                                            Real(126)*V_ghost[(j + 5)*(d_num_species + 4) + si] -
+                                            Real(105)*V_ghost[(j + 4)*(d_num_species + 4) + si] +
+                                            Real(70)*V_ghost[(j + 3)*(d_num_species + 4) + si] -
+                                            Real(63)/Real(2)*V_ghost[(j + 2)*(d_num_species + 4) + si] +
+                                            Real(42)/Real(5)*V_ghost[(j + 1)*(d_num_species + 4) + si] +
+                                            Real(42)*Real(dx[1])*dV_dy[si];
                                     }
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species] = -double(6)*u_y_TT -
-                                        double(609)/double(10)*u_y_T +
-                                        double(126)*V_ghost[(j + 5)*(d_num_species + 4) + d_num_species] -
-                                        double(105)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species] +
-                                        double(70)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species] -
-                                        double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species] +
-                                        double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species] +
-                                        double(42)*dx[1]*dV_dy[d_num_species];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species] = -Real(6)*u_y_TT -
+                                        Real(609)/Real(10)*u_y_T +
+                                        Real(126)*V_ghost[(j + 5)*(d_num_species + 4) + d_num_species] -
+                                        Real(105)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species] +
+                                        Real(70)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(63)/Real(2)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(42)/Real(5)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species] +
+                                        Real(42)*Real(dx[1])*dV_dy[d_num_species];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = -double(6)*v_y_TT -
-                                        double(609)/double(10)*v_y_T +
-                                        double(126)*V_ghost[(j + 5)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(105)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(70)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(42)*dx[1]*dV_dy[d_num_species + 1];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = -Real(6)*v_y_TT -
+                                        Real(609)/Real(10)*v_y_T +
+                                        Real(126)*V_ghost[(j + 5)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(105)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(70)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(63)/Real(2)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(42)/Real(5)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(42)*Real(dx[1])*dV_dy[d_num_species + 1];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = -double(6)*w_y_TT -
-                                        double(609)/double(10)*w_y_T +
-                                        double(126)*V_ghost[(j + 5)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(105)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(70)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(42)*dx[1]*dV_dy[d_num_species + 2];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = -Real(6)*w_y_TT -
+                                        Real(609)/Real(10)*w_y_T +
+                                        Real(126)*V_ghost[(j + 5)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(105)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(70)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(63)/Real(2)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(42)/Real(5)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(42)*Real(dx[1])*dV_dy[d_num_species + 2];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = -double(6)*p_y_TT -
-                                        double(609)/double(10)*p_y_T +
-                                        double(126)*V_ghost[(j + 5)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(105)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(70)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(42)*dx[1]*dV_dy[d_num_species + 3];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = -Real(6)*p_y_TT -
+                                        Real(609)/Real(10)*p_y_T +
+                                        Real(126)*V_ghost[(j + 5)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(105)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(70)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(63)/Real(2)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(42)/Real(5)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(42)*Real(dx[1])*dV_dy[d_num_species + 3];
                                 }
                                 
                                 /*
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_ghost = double(0);
+                                Real rho_ghost = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_ghost += V_ghost[j*(d_num_species + 4) + si];
@@ -8873,7 +8873,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_ghost;
+                                std::vector<Real> Y_ghost;
                                 Y_ghost.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -8884,7 +8884,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_ghost_ptr;
+                                std::vector<const Real*> Y_ghost_ptr;
                                 Y_ghost_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -8900,13 +8900,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 Q[d_num_species + 1][idx_cell_mom] = rho_ghost*V_ghost[j*(d_num_species + 4) + d_num_species + 1];
                                 Q[d_num_species + 2][idx_cell_mom] = rho_ghost*V_ghost[j*(d_num_species + 4) + d_num_species + 2];
                                 
-                                const double epsilon = d_equation_of_state_mixing_rules->
+                                const Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergy(
                                         &rho_ghost,
                                         &V_ghost[j*(d_num_species + 4) + d_num_species + 3],
                                         Y_ghost_ptr);
                                 
-                                const double E = rho_ghost*epsilon +
+                                const Real E = rho_ghost*epsilon +
                                     half*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
@@ -8980,9 +8980,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                     subghostcell_dims_conservative_var[2][1];
                             
-                            std::vector<double> rho_Y_y_B;
-                            std::vector<double> rho_Y_y_BB;
-                            std::vector<double> rho_Y_y_BBB;
+                            std::vector<Real> rho_Y_y_B;
+                            std::vector<Real> rho_Y_y_BB;
+                            std::vector<Real> rho_Y_y_BBB;
                             rho_Y_y_B.reserve(d_num_species);
                             rho_Y_y_BB.reserve(d_num_species);
                             rho_Y_y_BBB.reserve(d_num_species);
@@ -8997,9 +8997,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_y_B   = double(0);
-                            double rho_y_BB  = double(0);
-                            double rho_y_BBB = double(0);
+                            Real rho_y_B   = Real(0);
+                            Real rho_y_BB  = Real(0);
+                            Real rho_y_BBB = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_y_B   += Q[si][idx_cell_rho_Y_y_B];
@@ -9011,9 +9011,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_y_B;
-                            std::vector<double> Y_y_BB;
-                            std::vector<double> Y_y_BBB;
+                            std::vector<Real> Y_y_B;
+                            std::vector<Real> Y_y_BB;
+                            std::vector<Real> Y_y_BBB;
                             Y_y_B.reserve(d_num_species);
                             Y_y_BB.reserve(d_num_species);
                             Y_y_BBB.reserve(d_num_species);
@@ -9028,9 +9028,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_y_B_ptr;
-                            std::vector<const double*> Y_y_BB_ptr;
-                            std::vector<const double*> Y_y_BBB_ptr;
+                            std::vector<const Real*> Y_y_B_ptr;
+                            std::vector<const Real*> Y_y_BB_ptr;
+                            std::vector<const Real*> Y_y_BBB_ptr;
                             Y_y_B_ptr.reserve(d_num_species);
                             Y_y_BB_ptr.reserve(d_num_species);
                             Y_y_BBB_ptr.reserve(d_num_species);
@@ -9041,36 +9041,36 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 Y_y_BBB_ptr.push_back(&Y_y_BBB[si]);
                             }
                             
-                            const double u_y_B   = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
-                            const double u_y_BB  = Q[d_num_species][idx_cell_mom_y_BB]/rho_y_BB;
-                            const double u_y_BBB = Q[d_num_species][idx_cell_mom_y_BBB]/rho_y_BBB;
+                            const Real u_y_B   = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
+                            const Real u_y_BB  = Q[d_num_species][idx_cell_mom_y_BB]/rho_y_BB;
+                            const Real u_y_BBB = Q[d_num_species][idx_cell_mom_y_BBB]/rho_y_BBB;
                             
-                            const double v_y_B   = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
-                            const double v_y_BB  = Q[d_num_species + 1][idx_cell_mom_y_BB]/rho_y_BB;
-                            const double v_y_BBB = Q[d_num_species + 1][idx_cell_mom_y_BBB]/rho_y_BBB;
+                            const Real v_y_B   = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
+                            const Real v_y_BB  = Q[d_num_species + 1][idx_cell_mom_y_BB]/rho_y_BB;
+                            const Real v_y_BBB = Q[d_num_species + 1][idx_cell_mom_y_BBB]/rho_y_BBB;
                             
-                            const double w_y_B   = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
-                            const double w_y_BB  = Q[d_num_species + 2][idx_cell_mom_y_BB]/rho_y_BB;
-                            const double w_y_BBB = Q[d_num_species + 2][idx_cell_mom_y_BBB]/rho_y_BBB;
+                            const Real w_y_B   = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
+                            const Real w_y_BB  = Q[d_num_species + 2][idx_cell_mom_y_BB]/rho_y_BB;
+                            const Real w_y_BBB = Q[d_num_species + 2][idx_cell_mom_y_BBB]/rho_y_BBB;
                             
-                            const double half = double(1)/double(2);
-                            const double epsilon_y_B   = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
-                            const double epsilon_y_BB  = Q[d_num_species + 3][idx_cell_E_y_BB]/rho_y_BB - half*(u_y_BB*u_y_BB + v_y_BB*v_y_BB + w_y_BB*w_y_BB);
-                            const double epsilon_y_BBB = Q[d_num_species + 3][idx_cell_E_y_BBB]/rho_y_BBB - half*(u_y_BBB*u_y_BBB + v_y_BBB*v_y_BBB + w_y_BBB*w_y_BBB);
+                            const Real half = Real(1)/Real(2);
+                            const Real epsilon_y_B   = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
+                            const Real epsilon_y_BB  = Q[d_num_species + 3][idx_cell_E_y_BB]/rho_y_BB - half*(u_y_BB*u_y_BB + v_y_BB*v_y_BB + w_y_BB*w_y_BB);
+                            const Real epsilon_y_BBB = Q[d_num_species + 3][idx_cell_E_y_BBB]/rho_y_BBB - half*(u_y_BBB*u_y_BBB + v_y_BBB*v_y_BBB + w_y_BBB*w_y_BBB);
 
-                            double p_y_B = d_equation_of_state_mixing_rules->
+                            Real p_y_B = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_y_B,
                                     &epsilon_y_B,
                                     Y_y_B_ptr);
                             
-                            double p_y_BB = d_equation_of_state_mixing_rules->
+                            Real p_y_BB = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_y_BB,
                                     &epsilon_y_BB,
                                     Y_y_BB_ptr);
                             
-                            double p_y_BBB = d_equation_of_state_mixing_rules->
+                            Real p_y_BBB = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_y_BBB,
                                     &epsilon_y_BBB,
@@ -9080,26 +9080,26 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute derivatives in y-direction.
                              */
                             
-                            std::vector<double> drho_Y_dy;
+                            std::vector<Real> drho_Y_dy;
                             drho_Y_dy.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                drho_Y_dy.push_back((Q[si][idx_cell_rho_Y_y_BBB] - double(4)*Q[si][idx_cell_rho_Y_y_BB] +
-                                    double(3)*Q[si][idx_cell_rho_Y_y_B])/(double(2)*dx[1]));
+                                drho_Y_dy.push_back((Q[si][idx_cell_rho_Y_y_BBB] - Real(4)*Q[si][idx_cell_rho_Y_y_BB] +
+                                    Real(3)*Q[si][idx_cell_rho_Y_y_B])/(Real(2)*Real(dx[1])));
                             }
-                            const double du_dy   = (u_y_BBB - double(4)*u_y_BB + double(3)*u_y_B)/(double(2)*dx[1]);
-                            const double dv_dy   = (v_y_BBB - double(4)*v_y_BB + double(3)*v_y_B)/(double(2)*dx[1]);
-                            const double dw_dy   = (w_y_BBB - double(4)*w_y_BB + double(3)*w_y_B)/(double(2)*dx[1]);
-                            const double dp_dy   = (p_y_BBB - double(4)*p_y_BB + double(3)*p_y_B)/(double(2)*dx[1]);
+                            const Real du_dy   = (u_y_BBB - Real(4)*u_y_BB + Real(3)*u_y_B)/(Real(2)*Real(dx[1]));
+                            const Real dv_dy   = (v_y_BBB - Real(4)*v_y_BB + Real(3)*v_y_B)/(Real(2)*Real(dx[1]));
+                            const Real dw_dy   = (w_y_BBB - Real(4)*w_y_BB + Real(3)*w_y_B)/(Real(2)*Real(dx[1]));
+                            const Real dp_dy   = (p_y_BBB - Real(4)*p_y_BB + Real(3)*p_y_B)/(Real(2)*Real(dx[1]));
                             
                             /*
                              * Compute derivatives in x-direction.
                              */
                             
-                            double du_dx = double(0);
-                            double dv_dx = double(0);
-                            // double dw_dx = double(0);
-                            double dp_dx = double(0);
+                            Real du_dx = Real(0);
+                            Real dv_dx = Real(0);
+                            // Real dw_dx = Real(0);
+                            Real dp_dx = Real(0);
                             
                             if ((i + num_subghosts_conservative_var[0][0] == 0) ||
                                 (i + num_subghosts_conservative_var[1][0] == 0) ||
@@ -9130,7 +9130,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_x_R = double(0);
+                                Real rho_x_R = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_x_R += Q[si][idx_cell_rho_Y_x_R];
@@ -9140,7 +9140,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_x_R;
+                                std::vector<Real> Y_x_R;
                                 Y_x_R.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -9151,29 +9151,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_x_R_ptr;
+                                std::vector<const Real*> Y_x_R_ptr;
                                 Y_x_R_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_x_R_ptr.push_back(&Y_x_R[si]);
                                 }
                                 
-                                const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
-                                const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
-                                const double w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
-                                const double epsilon_x_R = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
+                                const Real u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
+                                const Real v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
+                                const Real w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
+                                const Real epsilon_x_R = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
                                 
-                                double p_x_R = d_equation_of_state_mixing_rules->
+                                Real p_x_R = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_R,
                                         &epsilon_x_R,
                                         Y_x_R_ptr);
                                 
                                 // One-sided derivatives.
-                                du_dx = (u_x_R - u_y_B)/(dx[0]);
-                                dv_dx = (v_x_R - v_y_B)/(dx[0]);
-                                // dw_dx = (w_x_R - w_y_B)/(dx[0]);
-                                dp_dx = (p_x_R - p_y_B)/(dx[0]);
+                                du_dx = (u_x_R - u_y_B)/Real(dx[0]);
+                                dv_dx = (v_x_R - v_y_B)/Real(dx[0]);
+                                // dw_dx = (w_x_R - w_y_B)/Real(dx[0]);
+                                dp_dx = (p_x_R - p_y_B)/Real(dx[0]);
                             }
                             else if ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
                                      (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
@@ -9204,7 +9204,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_x_L = double(0);
+                                Real rho_x_L = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_x_L += Q[si][idx_cell_rho_Y_x_L];
@@ -9214,7 +9214,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_x_L;
+                                std::vector<Real> Y_x_L;
                                 Y_x_L.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -9225,29 +9225,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                             
-                                std::vector<const double*> Y_x_L_ptr;
+                                std::vector<const Real*> Y_x_L_ptr;
                                 Y_x_L_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_x_L_ptr.push_back(&Y_x_L[si]);
                                 }
                                 
-                                const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
-                                const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
-                                const double w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
-                                const double epsilon_x_L = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
+                                const Real u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
+                                const Real v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
+                                const Real w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
+                                const Real epsilon_x_L = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
                                 
-                                double p_x_L = d_equation_of_state_mixing_rules->
+                                Real p_x_L = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_L,
                                         &epsilon_x_L,
                                         Y_x_L_ptr);
                                 
                                 // One-sided derivatives.
-                                du_dx = (u_y_B - u_x_L)/(dx[0]);
-                                dv_dx = (v_y_B - v_x_L)/(dx[0]);
-                                // dw_dx = (w_y_B - w_x_L)/(dx[0]);
-                                dp_dx = (p_y_B - p_x_L)/(dx[0]);
+                                du_dx = (u_y_B - u_x_L)/Real(dx[0]);
+                                dv_dx = (v_y_B - v_x_L)/Real(dx[0]);
+                                // dw_dx = (w_y_B - w_x_L)/Real(dx[0]);
+                                dp_dx = (p_y_B - p_x_L)/Real(dx[0]);
                             }
                             else
                             {
@@ -9285,8 +9285,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_x_L = double(0);
-                                double rho_x_R = double(0);
+                                Real rho_x_L = Real(0);
+                                Real rho_x_R = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_x_L += Q[si][idx_cell_rho_Y_x_L];
@@ -9297,8 +9297,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_x_L;
-                                std::vector<double> Y_x_R;
+                                std::vector<Real> Y_x_L;
+                                std::vector<Real> Y_x_R;
                                 Y_x_L.reserve(d_num_species);
                                 Y_x_R.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -9311,8 +9311,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_x_L_ptr;
-                                std::vector<const double*> Y_x_R_ptr;
+                                std::vector<const Real*> Y_x_L_ptr;
+                                std::vector<const Real*> Y_x_R_ptr;
                                                                     
                                 Y_x_L_ptr.reserve(d_num_species);
                                 Y_x_R_ptr.reserve(d_num_species);
@@ -9322,45 +9322,45 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_x_R_ptr.push_back(&Y_x_R[si]);
                                 }
                                 
-                                const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
-                                const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
+                                const Real u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
+                                const Real u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
 
-                                const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
-                                const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
+                                const Real v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
+                                const Real v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
 
-                                const double w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
-                                const double w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
+                                const Real w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
+                                const Real w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
                                 
-                                const double epsilon_x_L = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
-                                const double epsilon_x_R = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
+                                const Real epsilon_x_L = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
+                                const Real epsilon_x_R = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
                                 
-                                double p_x_L = d_equation_of_state_mixing_rules->
+                                Real p_x_L = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_L,
                                         &epsilon_x_L,
                                         Y_x_L_ptr);
                             
-                                double p_x_R = d_equation_of_state_mixing_rules->
+                                Real p_x_R = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_R,
                                         &epsilon_x_R,
                                         Y_x_R_ptr);
 
                                 // Central derivatives.
-                                du_dx = (u_x_R - u_x_L)/(double(2)*dx[0]);
-                                dv_dx = (v_x_R - v_x_L)/(double(2)*dx[0]);
-                                // dw_dx = (w_x_R - w_x_L)/(double(2)*dx[0]);
-                                dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
+                                du_dx = (u_x_R - u_x_L)/(Real(2)*Real(dx[0]));
+                                dv_dx = (v_x_R - v_x_L)/(Real(2)*Real(dx[0]));
+                                // dw_dx = (w_x_R - w_x_L)/(Real(2)*Real(dx[0]));
+                                dp_dx = (p_x_R - p_x_L)/(Real(2)*Real(dx[0]));
                             }
                             
                             /*
                              * Compute derivatives in z-direction.
                              */
                             
-                            // double du_dz = double(0);
-                            double dv_dz = double(0);
-                            double dw_dz = double(0);
-                            double dp_dz = double(0);
+                            // Real du_dz = Real(0);
+                            Real dv_dz = Real(0);
+                            Real dw_dz = Real(0);
+                            Real dp_dz = Real(0);
                             
                             if (((k + num_subghosts_conservative_var[0][2] == 0) ||
                                 (k + num_subghosts_conservative_var[1][2] == 0) ||
@@ -9391,7 +9391,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_z_F = double(0);
+                                Real rho_z_F = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_z_F += Q[si][idx_cell_rho_Y_z_F];
@@ -9401,7 +9401,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_z_F;
+                                std::vector<Real> Y_z_F;
                                 Y_z_F.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -9412,29 +9412,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_z_F_ptr;
+                                std::vector<const Real*> Y_z_F_ptr;
                                 Y_z_F_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_z_F_ptr.push_back(&Y_z_F[si]);
                                 }
                                 
-                                const double u_z_F = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
-                                const double v_z_F = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
-                                const double w_z_F = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
-                                const double epsilon_z_F = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
+                                const Real u_z_F = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
+                                const Real v_z_F = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
+                                const Real w_z_F = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
+                                const Real epsilon_z_F = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
                                 
-                                double p_z_F = d_equation_of_state_mixing_rules->
+                                Real p_z_F = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_F,
                                         &epsilon_z_F,
                                         Y_z_F_ptr);
                                 
                                 // One-sided derivatives.
-                                // du_dz = (u_z_F - u_y_B)/(dx[2]);
-                                dv_dz = (v_z_F - v_y_B)/(dx[2]);
-                                dw_dz = (w_z_F - w_y_B)/(dx[2]);
-                                dp_dz = (p_z_F - p_y_B)/(dx[2]);
+                                // du_dz = (u_z_F - u_y_B)/Real(dx[2]);
+                                dv_dz = (v_z_F - v_y_B)/Real(dx[2]);
+                                dw_dz = (w_z_F - w_y_B)/Real(dx[2]);
+                                dp_dz = (p_z_F - p_y_B)/Real(dx[2]);
                             }
                             else if ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
                                      (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
@@ -9465,7 +9465,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_z_B = double(0);
+                                Real rho_z_B = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_z_B += Q[si][idx_cell_rho_Y_z_B];
@@ -9475,7 +9475,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_z_B;
+                                std::vector<Real> Y_z_B;
                                 Y_z_B.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -9486,29 +9486,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_z_B_ptr;
+                                std::vector<const Real*> Y_z_B_ptr;
                                 Y_z_B_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_z_B_ptr.push_back(&Y_z_B[si]);
                                 }
                                 
-                                const double u_z_B = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
-                                const double v_z_B = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
-                                const double w_z_B = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
-                                const double epsilon_z_B = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
+                                const Real u_z_B = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
+                                const Real v_z_B = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
+                                const Real w_z_B = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
+                                const Real epsilon_z_B = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
                                 
-                                double p_z_B = d_equation_of_state_mixing_rules->
+                                Real p_z_B = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_B,
                                         &epsilon_z_B,
                                         Y_z_B_ptr);
                                 
                                 // One-sided derivatives.
-                                // du_dz = (u_y_B - u_z_B)/(dx[2]);
-                                dv_dz = (v_y_B - v_z_B)/(dx[2]);
-                                dw_dz = (w_y_B - w_z_B)/(dx[2]);
-                                dp_dz = (p_y_B - p_z_B)/(dx[2]);
+                                // du_dz = (u_y_B - u_z_B)/Real(dx[2]);
+                                dv_dz = (v_y_B - v_z_B)/Real(dx[2]);
+                                dw_dz = (w_y_B - w_z_B)/Real(dx[2]);
+                                dp_dz = (p_y_B - p_z_B)/Real(dx[2]);
                             }
                             else
                             {
@@ -9546,8 +9546,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_z_B = double(0);
-                                double rho_z_F = double(0);
+                                Real rho_z_B = Real(0);
+                                Real rho_z_F = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_z_B += Q[si][idx_cell_rho_Y_z_B];
@@ -9558,8 +9558,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_z_B;
-                                std::vector<double> Y_z_F;
+                                std::vector<Real> Y_z_B;
+                                std::vector<Real> Y_z_F;
                                 Y_z_B.reserve(d_num_species);
                                 Y_z_F.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -9572,8 +9572,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_z_B_ptr;
-                                std::vector<const double*> Y_z_F_ptr;
+                                std::vector<const Real*> Y_z_B_ptr;
+                                std::vector<const Real*> Y_z_F_ptr;
                                 Y_z_B_ptr.reserve(d_num_species);
                                 Y_z_F_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -9582,75 +9582,75 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_z_F_ptr.push_back(&Y_z_F[si]);
                                 }
                                 
-                                const double u_z_B = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
-                                const double u_z_F = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
+                                const Real u_z_B = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
+                                const Real u_z_F = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
                                 
-                                const double v_z_B = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
-                                const double v_z_F = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
+                                const Real v_z_B = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
+                                const Real v_z_F = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
                                 
-                                const double w_z_B = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
-                                const double w_z_F = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
+                                const Real w_z_B = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
+                                const Real w_z_F = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
                                 
-                                const double epsilon_z_B = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
-                                const double epsilon_z_F = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
+                                const Real epsilon_z_B = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
+                                const Real epsilon_z_F = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
                                 
-                                double p_z_B = d_equation_of_state_mixing_rules->
+                                Real p_z_B = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_B,
                                         &epsilon_z_B,
                                         Y_z_B_ptr);
                                 
-                                double p_z_F = d_equation_of_state_mixing_rules->
+                                Real p_z_F = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_F,
                                         &epsilon_z_F,
                                         Y_z_F_ptr);
                                 
                                 // Central derivatives.
-                                // du_dz = (u_z_F - u_z_B)/(double(2)*dx[2]);
-                                dv_dz = (v_z_F - v_z_B)/(double(2)*dx[2]);
-                                dw_dz = (w_z_F - w_z_B)/(double(2)*dx[2]);
-                                dp_dz = (p_z_F - p_z_B)/(double(2)*dx[2]);
+                                // du_dz = (u_z_F - u_z_B)/(Real(2)*Real(dx[2]));
+                                dv_dz = (v_z_F - v_z_B)/(Real(2)*Real(dx[2]));
+                                dw_dz = (w_z_F - w_z_B)/(Real(2)*Real(dx[2]));
+                                dp_dz = (p_z_F - p_z_B)/(Real(2)*Real(dx[2]));
                             }
                             
                             // Compute sound speed.
                             
-                            const double Gamma_y_B = d_equation_of_state_mixing_rules->getGruneisenParameter(
+                            const Real Gamma_y_B = d_equation_of_state_mixing_rules->getGruneisenParameter(
                                 &rho_y_B,
                                 &p_y_B,
                                 Y_y_B_ptr);
                             
-                            const std::vector<double> Psi_y_B = d_equation_of_state_mixing_rules->
+                            const std::vector<Real> Psi_y_B = d_equation_of_state_mixing_rules->
                                 getPressureDerivativeWithPartialDensities(
                                         &rho_y_B,
                                         &p_y_B,
                                         Y_y_B_ptr);
                             
-                            double c_y_B = Gamma_y_B*p_y_B/rho_y_B;
+                            Real c_y_B = Gamma_y_B*p_y_B/rho_y_B;
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 c_y_B += Y_y_B[si]*Psi_y_B[si];
                             }
-                            c_y_B = sqrt(c_y_B);
+                            c_y_B = std::sqrt(c_y_B);
                             
-                            const double lambda_1 = v_y_B - c_y_B;
+                            const Real lambda_1 = v_y_B - c_y_B;
 
                             // Compute vector Lambda^(-1) * L.
                             
-                            double Lambda_inv_L[d_num_species + 4];
+                            Real Lambda_inv_L[d_num_species + 4];
                             
-                            const double& p_t         = d_bdry_face_nonreflecting_outflow_p_t[face_loc];
-                            const double& sigma       = d_bdry_face_nonreflecting_outflow_sigma[face_loc];
-                            const double& beta        = d_bdry_face_nonreflecting_outflow_beta[face_loc];
-                            const double& length_char = d_bdry_face_nonreflecting_outflow_length_char[face_loc];
+                            const Real& p_t         = d_bdry_face_nonreflecting_outflow_p_t[face_loc];
+                            const Real& sigma       = d_bdry_face_nonreflecting_outflow_sigma[face_loc];
+                            const Real& beta        = d_bdry_face_nonreflecting_outflow_beta[face_loc];
+                            const Real& length_char = d_bdry_face_nonreflecting_outflow_length_char[face_loc];
                             
-                            const double T_1 = u_y_B*(dp_dx - rho_y_B*c_y_B*dv_dx) + rho_y_B*c_y_B*c_y_B*du_dx + 
+                            const Real T_1 = u_y_B*(dp_dx - rho_y_B*c_y_B*dv_dx) + rho_y_B*c_y_B*c_y_B*du_dx + 
                                 w_y_B*(dp_dz - rho_y_B*c_y_B*dv_dz) + rho_y_B*c_y_B*c_y_B*dw_dz;
                             
-                            const double M_sq = (u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B)/(c_y_B*c_y_B);
-                            const double K = sigma*c_y_B*(double(1) - M_sq)/length_char;
+                            const Real M_sq = (u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B)/(c_y_B*c_y_B);
+                            const Real K = sigma*c_y_B*(Real(1) - M_sq)/length_char;
                             
-                            Lambda_inv_L[0] = (double(1)/lambda_1)*(K*(p_y_B - p_t) - (double(1) - beta)*T_1);
+                            Lambda_inv_L[0] = (Real(1)/lambda_1)*(K*(p_y_B - p_t) - (Real(1) - beta)*T_1);
                             Lambda_inv_L[1] = du_dy;
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -9661,10 +9661,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             
                             // Compute dV_dy.
                             
-                            const double c_sq_inv  = double(1)/(c_y_B*c_y_B);
-                            const double rho_c_inv = double(1)/(rho_y_B*c_y_B);
+                            const Real c_sq_inv  = Real(1)/(c_y_B*c_y_B);
+                            const Real rho_c_inv = Real(1)/(rho_y_B*c_y_B);
                             
-                            double dV_dy[d_num_species + 4];
+                            Real dV_dy[d_num_species + 4];
                             
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -9676,7 +9676,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             dV_dy[d_num_species + 2] = Lambda_inv_L[d_num_species + 2];
                             dV_dy[d_num_species + 3] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
                             
-                            double V_ghost[(d_num_species + 4)*num_ghosts_to_fill];
+                            Real V_ghost[(d_num_species + 4)*num_ghosts_to_fill];
                             
                             for (int j = 0; j < num_ghosts_to_fill; j++)
                             {
@@ -9699,209 +9699,209 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[j*(d_num_species + 4) + si] = rho_Y_y_BB[si] + double(2)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 4) + si] = rho_Y_y_BB[si] + Real(2)*Real(dx[1])*dV_dy[si];
                                     }
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species]     = u_y_BB + double(2)*dx[1]*dV_dy[d_num_species];
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = v_y_BB + double(2)*dx[1]*dV_dy[d_num_species + 1];
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = w_y_BB + double(2)*dx[1]*dV_dy[d_num_species + 2];
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = p_y_BB + double(2)*dx[1]*dV_dy[d_num_species + 3];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species]     = u_y_BB + Real(2)*Real(dx[1])*dV_dy[d_num_species];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = v_y_BB + Real(2)*Real(dx[1])*dV_dy[d_num_species + 1];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = w_y_BB + Real(2)*Real(dx[1])*dV_dy[d_num_species + 2];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = p_y_BB + Real(2)*Real(dx[1])*dV_dy[d_num_species + 3];
                                 }
                                 else if (j == 1)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[j*(d_num_species + 4) + si] = -double(2)*rho_Y_y_BB[si] - double(3)*rho_Y_y_B[si] +
-                                            double(6)*V_ghost[(j - 1)*(d_num_species + 4) + si] - double(6)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 4) + si] = -Real(2)*rho_Y_y_BB[si] - Real(3)*rho_Y_y_B[si] +
+                                            Real(6)*V_ghost[(j - 1)*(d_num_species + 4) + si] - Real(6)*Real(dx[1])*dV_dy[si];
                                     }
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species] = -double(2)*u_y_BB - double(3)*u_y_B +
-                                        double(6)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species] -
-                                        double(6)*dx[1]*dV_dy[d_num_species];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species] = -Real(2)*u_y_BB - Real(3)*u_y_B +
+                                        Real(6)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species] -
+                                        Real(6)*Real(dx[1])*dV_dy[d_num_species];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = -double(2)*v_y_BB - double(3)*v_y_B +
-                                        double(6)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(6)*dx[1]*dV_dy[d_num_species + 1];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = -Real(2)*v_y_BB - Real(3)*v_y_B +
+                                        Real(6)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(6)*Real(dx[1])*dV_dy[d_num_species + 1];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = -double(2)*w_y_BB - double(3)*w_y_B +
-                                        double(6)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(6)*dx[1]*dV_dy[d_num_species + 2];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = -Real(2)*w_y_BB - Real(3)*w_y_B +
+                                        Real(6)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(6)*Real(dx[1])*dV_dy[d_num_species + 2];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = -double(2)*p_y_BB - double(3)*p_y_B +
-                                        double(6)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(6)*dx[1]*dV_dy[d_num_species + 3];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = -Real(2)*p_y_BB - Real(3)*p_y_B +
+                                        Real(6)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(6)*Real(dx[1])*dV_dy[d_num_species + 3];
                                 }
                                 else if (j == 2)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[j*(d_num_species + 4) + si] = double(3)*rho_Y_y_BB[si] + double(10)*rho_Y_y_B[si] -
-                                            double(18)*V_ghost[(j - 2)*(d_num_species + 4) + si] +
-                                            double(6)*V_ghost[(j - 1)*(d_num_species + 4) + si] +
-                                            double(12)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 4) + si] = Real(3)*rho_Y_y_BB[si] + Real(10)*rho_Y_y_B[si] -
+                                            Real(18)*V_ghost[(j - 2)*(d_num_species + 4) + si] +
+                                            Real(6)*V_ghost[(j - 1)*(d_num_species + 4) + si] +
+                                            Real(12)*Real(dx[1])*dV_dy[si];
                                     }
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species] = double(3)*u_y_BB + double(10)*u_y_B -
-                                        double(18)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species] +
-                                        double(6)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species] +
-                                        double(12)*dx[1]*dV_dy[d_num_species];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species] = Real(3)*u_y_BB + Real(10)*u_y_B -
+                                        Real(18)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(6)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species] +
+                                        Real(12)*Real(dx[1])*dV_dy[d_num_species];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = double(3)*v_y_BB + double(10)*v_y_B -
-                                        double(18)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(6)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(12)*dx[1]*dV_dy[d_num_species + 1];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = Real(3)*v_y_BB + Real(10)*v_y_B -
+                                        Real(18)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(6)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(12)*Real(dx[1])*dV_dy[d_num_species + 1];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = double(3)*w_y_BB + double(10)*w_y_B -
-                                        double(18)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(6)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(12)*dx[1]*dV_dy[d_num_species + 2];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = Real(3)*w_y_BB + Real(10)*w_y_B -
+                                        Real(18)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(6)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(12)*Real(dx[1])*dV_dy[d_num_species + 2];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = double(3)*p_y_BB + double(10)*p_y_B -
-                                        double(18)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(6)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(12)*dx[1]*dV_dy[d_num_species + 3];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = Real(3)*p_y_BB + Real(10)*p_y_B -
+                                        Real(18)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(6)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(12)*Real(dx[1])*dV_dy[d_num_species + 3];
                                 }
                                 else if (j == 3)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[j*(d_num_species + 4) + si] = -double(4)*rho_Y_y_BB[si] -
-                                            double(65)/double(3)*rho_Y_y_B[si] +
-                                            double(40)*V_ghost[(j - 3)*(d_num_species + 4) + si] -
-                                            double(20)*V_ghost[(j - 2)*(d_num_species + 4) + si] +
-                                            double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 4) + si] -
-                                            double(20)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 4) + si] = -Real(4)*rho_Y_y_BB[si] -
+                                            Real(65)/Real(3)*rho_Y_y_B[si] +
+                                            Real(40)*V_ghost[(j - 3)*(d_num_species + 4) + si] -
+                                            Real(20)*V_ghost[(j - 2)*(d_num_species + 4) + si] +
+                                            Real(20)/Real(3)*V_ghost[(j - 1)*(d_num_species + 4) + si] -
+                                            Real(20)*Real(dx[1])*dV_dy[si];
                                     }
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species] = -double(4)*u_y_BB -
-                                        double(65)/double(3)*u_y_B +
-                                        double(40)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species] -
-                                        double(20)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species] +
-                                        double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species] -
-                                        double(20)*dx[1]*dV_dy[d_num_species];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species] = -Real(4)*u_y_BB -
+                                        Real(65)/Real(3)*u_y_B +
+                                        Real(40)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(20)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(20)/Real(3)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species] -
+                                        Real(20)*Real(dx[1])*dV_dy[d_num_species];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = -double(4)*v_y_BB -
-                                        double(65)/double(3)*v_y_B +
-                                        double(40)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(20)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(20)*dx[1]*dV_dy[d_num_species + 1];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = -Real(4)*v_y_BB -
+                                        Real(65)/Real(3)*v_y_B +
+                                        Real(40)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(20)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(20)/Real(3)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(20)*Real(dx[1])*dV_dy[d_num_species + 1];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = -double(4)*w_y_BB -
-                                        double(65)/double(3)*w_y_B +
-                                        double(40)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(20)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(20)*dx[1]*dV_dy[d_num_species + 2];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = -Real(4)*w_y_BB -
+                                        Real(65)/Real(3)*w_y_B +
+                                        Real(40)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(20)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(20)/Real(3)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(20)*Real(dx[1])*dV_dy[d_num_species + 2];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = -double(4)*p_y_BB -
-                                        double(65)/double(3)*p_y_B +
-                                        double(40)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(20)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(20)*dx[1]*dV_dy[d_num_species + 3];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = -Real(4)*p_y_BB -
+                                        Real(65)/Real(3)*p_y_B +
+                                        Real(40)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(20)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(20)/Real(3)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(20)*Real(dx[1])*dV_dy[d_num_species + 3];
                                 }
                                 else if (j == 4)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[j*(d_num_species + 4) + si] = double(5)*rho_Y_y_BB[si] +
-                                            double(77)/double(2)*rho_Y_y_B[si] -
-                                            double(75)*V_ghost[(j - 4)*(d_num_species + 4) + si] +
-                                            double(50)*V_ghost[(j - 3)*(d_num_species + 4) + si] -
-                                            double(25)*V_ghost[(j - 2)*(d_num_species + 4) + si] +
-                                            double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 4) + si] +
-                                            double(30)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 4) + si] = Real(5)*rho_Y_y_BB[si] +
+                                            Real(77)/Real(2)*rho_Y_y_B[si] -
+                                            Real(75)*V_ghost[(j - 4)*(d_num_species + 4) + si] +
+                                            Real(50)*V_ghost[(j - 3)*(d_num_species + 4) + si] -
+                                            Real(25)*V_ghost[(j - 2)*(d_num_species + 4) + si] +
+                                            Real(15)/Real(2)*V_ghost[(j - 1)*(d_num_species + 4) + si] +
+                                            Real(30)*Real(dx[1])*dV_dy[si];
                                     }
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species] = double(5)*u_y_BB +
-                                        double(77)/double(2)*u_y_B -
-                                        double(75)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species] +
-                                        double(50)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species] -
-                                        double(25)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species] +
-                                        double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species] +
-                                        double(30)*dx[1]*dV_dy[d_num_species];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species] = Real(5)*u_y_BB +
+                                        Real(77)/Real(2)*u_y_B -
+                                        Real(75)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species] +
+                                        Real(50)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(25)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(15)/Real(2)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species] +
+                                        Real(30)*Real(dx[1])*dV_dy[d_num_species];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = double(5)*v_y_BB +
-                                        double(77)/double(2)*v_y_B -
-                                        double(75)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(50)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(25)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(30)*dx[1]*dV_dy[d_num_species + 1];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = Real(5)*v_y_BB +
+                                        Real(77)/Real(2)*v_y_B -
+                                        Real(75)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(50)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(25)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(15)/Real(2)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(30)*Real(dx[1])*dV_dy[d_num_species + 1];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = double(5)*w_y_BB +
-                                        double(77)/double(2)*w_y_B -
-                                        double(75)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(50)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(25)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(30)*dx[1]*dV_dy[d_num_species + 2];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = Real(5)*w_y_BB +
+                                        Real(77)/Real(2)*w_y_B -
+                                        Real(75)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(50)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(25)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(15)/Real(2)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(30)*Real(dx[1])*dV_dy[d_num_species + 2];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = double(5)*p_y_BB +
-                                        double(77)/double(2)*p_y_B -
-                                        double(75)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(50)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(25)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(30)*dx[1]*dV_dy[d_num_species + 3];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = Real(5)*p_y_BB +
+                                        Real(77)/Real(2)*p_y_B -
+                                        Real(75)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(50)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(25)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(15)/Real(2)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(30)*Real(dx[1])*dV_dy[d_num_species + 3];
                                 }
                                 else if (j == 5)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[j*(d_num_species + 4) + si] = -double(6)*rho_Y_y_BB[si] -
-                                            double(609)/double(10)*rho_Y_y_B[si] +
-                                            double(126)*V_ghost[(j - 5)*(d_num_species + 4) + si] -
-                                            double(105)*V_ghost[(j - 4)*(d_num_species + 4) + si] +
-                                            double(70)*V_ghost[(j - 3)*(d_num_species + 4) + si] -
-                                            double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 4) + si] +
-                                            double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 4) + si] -
-                                            double(42)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 4) + si] = -Real(6)*rho_Y_y_BB[si] -
+                                            Real(609)/Real(10)*rho_Y_y_B[si] +
+                                            Real(126)*V_ghost[(j - 5)*(d_num_species + 4) + si] -
+                                            Real(105)*V_ghost[(j - 4)*(d_num_species + 4) + si] +
+                                            Real(70)*V_ghost[(j - 3)*(d_num_species + 4) + si] -
+                                            Real(63)/Real(2)*V_ghost[(j - 2)*(d_num_species + 4) + si] +
+                                            Real(42)/Real(5)*V_ghost[(j - 1)*(d_num_species + 4) + si] -
+                                            Real(42)*Real(dx[1])*dV_dy[si];
                                     }
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species] = -double(6)*u_y_BB -
-                                        double(609)/double(10)*u_y_B +
-                                        double(126)*V_ghost[(j - 5)*(d_num_species + 4) + d_num_species] -
-                                        double(105)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species] +
-                                        double(70)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species] -
-                                        double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species] +
-                                        double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species] -
-                                        double(42)*dx[1]*dV_dy[d_num_species];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species] = -Real(6)*u_y_BB -
+                                        Real(609)/Real(10)*u_y_B +
+                                        Real(126)*V_ghost[(j - 5)*(d_num_species + 4) + d_num_species] -
+                                        Real(105)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species] +
+                                        Real(70)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(63)/Real(2)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(42)/Real(5)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species] -
+                                        Real(42)*Real(dx[1])*dV_dy[d_num_species];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = -double(6)*v_y_BB -
-                                        double(609)/double(10)*v_y_B +
-                                        double(126)*V_ghost[(j - 5)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(105)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(70)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(42)*dx[1]*dV_dy[d_num_species + 1];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 1] = -Real(6)*v_y_BB -
+                                        Real(609)/Real(10)*v_y_B +
+                                        Real(126)*V_ghost[(j - 5)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(105)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(70)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(63)/Real(2)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(42)/Real(5)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(42)*Real(dx[1])*dV_dy[d_num_species + 1];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = -double(6)*w_y_BB -
-                                        double(609)/double(10)*w_y_B +
-                                        double(126)*V_ghost[(j - 5)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(105)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(70)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(42)*dx[1]*dV_dy[d_num_species + 2];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 2] = -Real(6)*w_y_BB -
+                                        Real(609)/Real(10)*w_y_B +
+                                        Real(126)*V_ghost[(j - 5)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(105)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(70)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(63)/Real(2)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(42)/Real(5)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(42)*Real(dx[1])*dV_dy[d_num_species + 2];
                                     
-                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = -double(6)*p_y_BB -
-                                        double(609)/double(10)*p_y_B +
-                                        double(126)*V_ghost[(j - 5)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(105)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(70)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(42)*dx[1]*dV_dy[d_num_species + 3];
+                                    V_ghost[j*(d_num_species + 4) + d_num_species + 3] = -Real(6)*p_y_BB -
+                                        Real(609)/Real(10)*p_y_B +
+                                        Real(126)*V_ghost[(j - 5)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(105)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(70)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(63)/Real(2)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(42)/Real(5)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(42)*Real(dx[1])*dV_dy[d_num_species + 3];
                                 }
                                 
                                 /*
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_ghost = double(0);
+                                Real rho_ghost = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_ghost += V_ghost[j*(d_num_species + 4) + si];
@@ -9911,7 +9911,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_ghost;
+                                std::vector<Real> Y_ghost;
                                 Y_ghost.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -9922,7 +9922,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_ghost_ptr;
+                                std::vector<const Real*> Y_ghost_ptr;
                                 Y_ghost_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -9938,13 +9938,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 Q[d_num_species + 1][idx_cell_mom] = rho_ghost*V_ghost[j*(d_num_species + 4) + d_num_species + 1];
                                 Q[d_num_species + 2][idx_cell_mom] = rho_ghost*V_ghost[j*(d_num_species + 4) + d_num_species + 2];
                                 
-                                const double epsilon = d_equation_of_state_mixing_rules->
+                                const Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergy(
                                         &rho_ghost,
                                         &V_ghost[j*(d_num_species + 4) + d_num_species + 3],
                                         Y_ghost_ptr);
                                 
-                                const double E = rho_ghost*epsilon +
+                                const Real E = rho_ghost*epsilon +
                                     half*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
@@ -10018,9 +10018,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 (interior_box_lo_idx[2] + 2 + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                     subghostcell_dims_conservative_var[2][1];
                             
-                            std::vector<double> rho_Y_z_F;
-                            std::vector<double> rho_Y_z_FF;
-                            std::vector<double> rho_Y_z_FFF;
+                            std::vector<Real> rho_Y_z_F;
+                            std::vector<Real> rho_Y_z_FF;
+                            std::vector<Real> rho_Y_z_FFF;
                             rho_Y_z_F.reserve(d_num_species);
                             rho_Y_z_FF.reserve(d_num_species);
                             rho_Y_z_FFF.reserve(d_num_species);
@@ -10035,9 +10035,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_z_F   = double(0);
-                            double rho_z_FF  = double(0);
-                            double rho_z_FFF = double(0);
+                            Real rho_z_F   = Real(0);
+                            Real rho_z_FF  = Real(0);
+                            Real rho_z_FFF = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_z_F   += Q[si][idx_cell_rho_Y_z_F];
@@ -10049,9 +10049,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_z_F;
-                            std::vector<double> Y_z_FF;
-                            std::vector<double> Y_z_FFF;
+                            std::vector<Real> Y_z_F;
+                            std::vector<Real> Y_z_FF;
+                            std::vector<Real> Y_z_FFF;
                             Y_z_F.reserve(d_num_species);
                             Y_z_FF.reserve(d_num_species);
                             Y_z_FFF.reserve(d_num_species);
@@ -10066,9 +10066,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_z_F_ptr;
-                            std::vector<const double*> Y_z_FF_ptr;
-                            std::vector<const double*> Y_z_FFF_ptr;
+                            std::vector<const Real*> Y_z_F_ptr;
+                            std::vector<const Real*> Y_z_FF_ptr;
+                            std::vector<const Real*> Y_z_FFF_ptr;
                             Y_z_F_ptr.reserve(d_num_species);
                             Y_z_FF_ptr.reserve(d_num_species);
                             Y_z_FFF_ptr.reserve(d_num_species);
@@ -10079,36 +10079,36 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 Y_z_FFF_ptr.push_back(&Y_z_FFF[si]);
                             }
                             
-                            const double u_z_F   = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
-                            const double u_z_FF  = Q[d_num_species][idx_cell_mom_z_FF]/rho_z_FF;
-                            const double u_z_FFF = Q[d_num_species][idx_cell_mom_z_FFF]/rho_z_FFF;
+                            const Real u_z_F   = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
+                            const Real u_z_FF  = Q[d_num_species][idx_cell_mom_z_FF]/rho_z_FF;
+                            const Real u_z_FFF = Q[d_num_species][idx_cell_mom_z_FFF]/rho_z_FFF;
                             
-                            const double v_z_F   = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
-                            const double v_z_FF  = Q[d_num_species + 1][idx_cell_mom_z_FF]/rho_z_FF;
-                            const double v_z_FFF = Q[d_num_species + 1][idx_cell_mom_z_FFF]/rho_z_FFF;
+                            const Real v_z_F   = Q[d_num_species + 1][idx_cell_mom_z_F]/rho_z_F;
+                            const Real v_z_FF  = Q[d_num_species + 1][idx_cell_mom_z_FF]/rho_z_FF;
+                            const Real v_z_FFF = Q[d_num_species + 1][idx_cell_mom_z_FFF]/rho_z_FFF;
                             
-                            const double w_z_F   = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
-                            const double w_z_FF  = Q[d_num_species + 2][idx_cell_mom_z_FF]/rho_z_FF;
-                            const double w_z_FFF = Q[d_num_species + 2][idx_cell_mom_z_FFF]/rho_z_FFF;
+                            const Real w_z_F   = Q[d_num_species + 2][idx_cell_mom_z_F]/rho_z_F;
+                            const Real w_z_FF  = Q[d_num_species + 2][idx_cell_mom_z_FF]/rho_z_FF;
+                            const Real w_z_FFF = Q[d_num_species + 2][idx_cell_mom_z_FFF]/rho_z_FFF;
                             
-                            const double half = double(1)/double(2);
-                            const double epsilon_z_F   = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
-                            const double epsilon_z_FF  = Q[d_num_species + 3][idx_cell_E_z_FF]/rho_z_FF - half*(u_z_FF*u_z_FF + v_z_FF*v_z_FF + w_z_FF*w_z_FF);
-                            const double epsilon_z_FFF = Q[d_num_species + 3][idx_cell_E_z_FFF]/rho_z_FFF - half*(u_z_FFF*u_z_FFF + v_z_FFF*v_z_FFF + w_z_FFF*w_z_FFF);
+                            const Real half = Real(1)/Real(2);
+                            const Real epsilon_z_F   = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
+                            const Real epsilon_z_FF  = Q[d_num_species + 3][idx_cell_E_z_FF]/rho_z_FF - half*(u_z_FF*u_z_FF + v_z_FF*v_z_FF + w_z_FF*w_z_FF);
+                            const Real epsilon_z_FFF = Q[d_num_species + 3][idx_cell_E_z_FFF]/rho_z_FFF - half*(u_z_FFF*u_z_FFF + v_z_FFF*v_z_FFF + w_z_FFF*w_z_FFF);
                             
-                            double p_z_F = d_equation_of_state_mixing_rules->
+                            Real p_z_F = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_z_F,
                                     &epsilon_z_F,
                                     Y_z_F_ptr);
                             
-                            double p_z_FF = d_equation_of_state_mixing_rules->
+                            Real p_z_FF = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_z_FF,
                                     &epsilon_z_FF,
                                     Y_z_FF_ptr);
                             
-                            double p_z_FFF = d_equation_of_state_mixing_rules->
+                            Real p_z_FFF = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_z_FFF,
                                     &epsilon_z_FFF,
@@ -10118,26 +10118,26 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute derivatives in z-direction.
                              */
                             
-                            std::vector<double> drho_Y_dz;
+                            std::vector<Real> drho_Y_dz;
                             drho_Y_dz.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                drho_Y_dz.push_back(-(Q[si][idx_cell_rho_Y_z_FFF] - double(4)*Q[si][idx_cell_rho_Y_z_FF] +
-                                    double(3)*Q[si][idx_cell_rho_Y_z_F])/(double(2)*dx[2]));
+                                drho_Y_dz.push_back(-(Q[si][idx_cell_rho_Y_z_FFF] - Real(4)*Q[si][idx_cell_rho_Y_z_FF] +
+                                    Real(3)*Q[si][idx_cell_rho_Y_z_F])/(Real(2)*Real(dx[2])));
                             }
-                            const double du_dz   = -(u_z_FFF - double(4)*u_z_FF + double(3)*u_z_F)/(double(2)*dx[2]);
-                            const double dv_dz   = -(v_z_FFF - double(4)*v_z_FF + double(3)*v_z_F)/(double(2)*dx[2]);
-                            const double dw_dz   = -(w_z_FFF - double(4)*w_z_FF + double(3)*w_z_F)/(double(2)*dx[2]);
-                            const double dp_dz   = -(p_z_FFF - double(4)*p_z_FF + double(3)*p_z_F)/(double(2)*dx[2]);
+                            const Real du_dz   = -(u_z_FFF - Real(4)*u_z_FF + Real(3)*u_z_F)/(Real(2)*Real(dx[2]));
+                            const Real dv_dz   = -(v_z_FFF - Real(4)*v_z_FF + Real(3)*v_z_F)/(Real(2)*Real(dx[2]));
+                            const Real dw_dz   = -(w_z_FFF - Real(4)*w_z_FF + Real(3)*w_z_F)/(Real(2)*Real(dx[2]));
+                            const Real dp_dz   = -(p_z_FFF - Real(4)*p_z_FF + Real(3)*p_z_F)/(Real(2)*Real(dx[2]));
                             
                             /*
                              * Compute derivatives in x-direction.
                              */
                             
-                            double du_dx = double(0);
-                            // double dv_dx = double(0);
-                            double dw_dx = double(0);
-                            double dp_dx = double(0);
+                            Real du_dx = Real(0);
+                            // Real dv_dx = Real(0);
+                            Real dw_dx = Real(0);
+                            Real dp_dx = Real(0);
                             
                             if ((i + num_subghosts_conservative_var[0][0] == 0) ||
                                 (i + num_subghosts_conservative_var[1][0] == 0) ||
@@ -10168,7 +10168,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_x_R = double(0);
+                                Real rho_x_R = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_x_R += Q[si][idx_cell_rho_Y_x_R];
@@ -10178,7 +10178,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_x_R;
+                                std::vector<Real> Y_x_R;
                                 Y_x_R.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -10189,29 +10189,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                             
-                                std::vector<const double*> Y_x_R_ptr;
+                                std::vector<const Real*> Y_x_R_ptr;
                                 Y_x_R_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_x_R_ptr.push_back(&Y_x_R[si]);
                                 }
                                 
-                                const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
-                                const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
-                                const double w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
-                                const double epsilon_x_R = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
+                                const Real u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
+                                const Real v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
+                                const Real w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
+                                const Real epsilon_x_R = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
                                 
-                                double p_x_R = d_equation_of_state_mixing_rules->
+                                Real p_x_R = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_R,
                                         &epsilon_x_R,
                                         Y_x_R_ptr);
                                 
                                 // One-sided derivatives.
-                                du_dx = (u_x_R - u_z_F)/(dx[0]);
-                                // dv_dx = (v_x_R - v_z_F)/(dx[0]);
-                                dw_dx = (w_x_R - w_z_F)/(dx[0]);
-                                dp_dx = (p_x_R - p_z_F)/(dx[0]);
+                                du_dx = (u_x_R - u_z_F)/Real(dx[0]);
+                                // dv_dx = (v_x_R - v_z_F)/Real(dx[0]);
+                                dw_dx = (w_x_R - w_z_F)/Real(dx[0]);
+                                dp_dx = (p_x_R - p_z_F)/Real(dx[0]);
                             }
                             else if ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
                                      (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
@@ -10242,7 +10242,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_x_L = double(0);
+                                Real rho_x_L = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_x_L += Q[si][idx_cell_rho_Y_x_L];
@@ -10252,7 +10252,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_x_L;
+                                std::vector<Real> Y_x_L;
                                 Y_x_L.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -10263,29 +10263,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                             
-                                std::vector<const double*> Y_x_L_ptr;
+                                std::vector<const Real*> Y_x_L_ptr;
                                 Y_x_L_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_x_L_ptr.push_back(&Y_x_L[si]);
                                 }
                                 
-                                const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
-                                const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
-                                const double w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
-                                const double epsilon_x_L = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
+                                const Real u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
+                                const Real v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
+                                const Real w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
+                                const Real epsilon_x_L = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
                                 
-                                double p_x_L = d_equation_of_state_mixing_rules->
+                                Real p_x_L = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_L,
                                         &epsilon_x_L,
                                         Y_x_L_ptr);
                                 
                                 // One-sided derivatives.
-                                du_dx = (u_z_F - u_x_L)/(dx[0]);
-                                // dv_dx = (v_z_F - v_x_L)/(dx[0]);
-                                dw_dx = (w_z_F - w_x_L)/(dx[0]);
-                                dp_dx = (p_z_F - p_x_L)/(dx[0]);
+                                du_dx = (u_z_F - u_x_L)/Real(dx[0]);
+                                // dv_dx = (v_z_F - v_x_L)/Real(dx[0]);
+                                dw_dx = (w_z_F - w_x_L)/Real(dx[0]);
+                                dp_dx = (p_z_F - p_x_L)/Real(dx[0]);
                             }
                             else
                             {
@@ -10323,8 +10323,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_x_L = double(0);
-                                double rho_x_R = double(0);
+                                Real rho_x_L = Real(0);
+                                Real rho_x_R = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_x_L += Q[si][idx_cell_rho_Y_x_L];
@@ -10335,8 +10335,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_x_L;
-                                std::vector<double> Y_x_R;
+                                std::vector<Real> Y_x_L;
+                                std::vector<Real> Y_x_R;
                                 Y_x_L.reserve(d_num_species);
                                 Y_x_R.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -10349,8 +10349,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_x_L_ptr;
-                                std::vector<const double*> Y_x_R_ptr;
+                                std::vector<const Real*> Y_x_L_ptr;
+                                std::vector<const Real*> Y_x_R_ptr;
                                                                     
                                 Y_x_L_ptr.reserve(d_num_species);
                                 Y_x_R_ptr.reserve(d_num_species);
@@ -10360,45 +10360,45 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_x_R_ptr.push_back(&Y_x_R[si]);
                                 }
                                 
-                                const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
-                                const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
+                                const Real u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
+                                const Real u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
                                 
-                                const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
-                                const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
+                                const Real v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
+                                const Real v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
                                 
-                                const double w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
-                                const double w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
+                                const Real w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
+                                const Real w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
                                 
-                                const double epsilon_x_L = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
-                                const double epsilon_x_R = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
+                                const Real epsilon_x_L = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
+                                const Real epsilon_x_R = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
                                 
-                                double p_x_L = d_equation_of_state_mixing_rules->
+                                Real p_x_L = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_L,
                                         &epsilon_x_L,
                                         Y_x_L_ptr);
                             
-                                double p_x_R = d_equation_of_state_mixing_rules->
+                                Real p_x_R = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_R,
                                         &epsilon_x_R,
                                         Y_x_R_ptr);
                                 
                                 // Central derivatives.
-                                du_dx = (u_x_R - u_x_L)/(double(2)*dx[0]);
-                                // dv_dx = (v_x_R - v_x_L)/(double(2)*dx[0]);
-                                dw_dx = (w_x_R - w_x_L)/(double(2)*dx[0]);
-                                dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
+                                du_dx = (u_x_R - u_x_L)/(Real(2)*Real(dx[0]));
+                                // dv_dx = (v_x_R - v_x_L)/(Real(2)*Real(dx[0]));
+                                dw_dx = (w_x_R - w_x_L)/(Real(2)*Real(dx[0]));
+                                dp_dx = (p_x_R - p_x_L)/(Real(2)*Real(dx[0]));
                             }
                             
                             /*
                              * Compute derivatives in y-direction.
                              */
                             
-                            // double du_dy = double(0);
-                            double dv_dy = double(0);
-                            double dw_dy = double(0);
-                            double dp_dy = double(0);
+                            // Real du_dy = Real(0);
+                            Real dv_dy = Real(0);
+                            Real dw_dy = Real(0);
+                            Real dp_dy = Real(0);
                             
                             if ((j + num_subghosts_conservative_var[0][1] == 0) ||
                                 (j + num_subghosts_conservative_var[1][1] == 0) ||
@@ -10429,7 +10429,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_y_T = double(0);
+                                Real rho_y_T = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_y_T += Q[si][idx_cell_rho_Y_y_T];
@@ -10439,7 +10439,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_y_T;
+                                std::vector<Real> Y_y_T;
                                 Y_y_T.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -10450,29 +10450,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_y_T_ptr;
+                                std::vector<const Real*> Y_y_T_ptr;
                                 Y_y_T_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_y_T_ptr.push_back(&Y_y_T[si]);
                                 }
                                 
-                                const double u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
-                                const double v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
-                                const double w_y_T = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
-                                const double epsilon_y_T = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
+                                const Real u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
+                                const Real v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
+                                const Real w_y_T = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
+                                const Real epsilon_y_T = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
                                 
-                                double p_y_T = d_equation_of_state_mixing_rules->
+                                Real p_y_T = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_y_T,
                                         &epsilon_y_T,
                                         Y_y_T_ptr);
                                 
                                 // One-sided derivatives.
-                                //du_dy = (u_y_T - u_z_F)/(dx[1]);
-                                dv_dy = (v_y_T - v_z_F)/(dx[1]);
-                                dw_dy = (w_y_T - w_z_F)/(dx[1]);
-                                dp_dy = (p_y_T - p_z_F)/(dx[1]);
+                                //du_dy = (u_y_T - u_z_F)/Real(dx[1]);
+                                dv_dy = (v_y_T - v_z_F)/Real(dx[1]);
+                                dw_dy = (w_y_T - w_z_F)/Real(dx[1]);
+                                dp_dy = (p_y_T - p_z_F)/Real(dx[1]);
                             }
                             else if ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
                                      (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
@@ -10503,7 +10503,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_y_B = double(0);
+                                Real rho_y_B = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_y_B += Q[si][idx_cell_rho_Y_y_B];
@@ -10513,7 +10513,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_y_B;
+                                std::vector<Real> Y_y_B;
                                 Y_y_B.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -10524,29 +10524,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_y_B_ptr;
+                                std::vector<const Real*> Y_y_B_ptr;
                                 Y_y_B_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_y_B_ptr.push_back(&Y_y_B[si]);
                                 }
                                 
-                                const double u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
-                                const double v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
-                                const double w_y_B = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
-                                const double epsilon_y_B = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
+                                const Real u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
+                                const Real v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
+                                const Real w_y_B = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
+                                const Real epsilon_y_B = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
                                 
-                                double p_y_B = d_equation_of_state_mixing_rules->
+                                Real p_y_B = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_y_B,
                                         &epsilon_y_B,
                                         Y_y_B_ptr);
                                 
                                 // One-sided derivatives.
-                                //du_dy = (u_z_F - u_y_B)/(dx[1]);
-                                dv_dy = (v_z_F - v_y_B)/(dx[1]);
-                                dw_dy = (w_z_F - w_y_B)/(dx[1]);
-                                dp_dy = (p_z_F - p_y_B)/(dx[1]);
+                                //du_dy = (u_z_F - u_y_B)/Real(dx[1]);
+                                dv_dy = (v_z_F - v_y_B)/Real(dx[1]);
+                                dw_dy = (w_z_F - w_y_B)/Real(dx[1]);
+                                dp_dy = (p_z_F - p_y_B)/Real(dx[1]);
                             }
                             else
                             {
@@ -10584,8 +10584,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_y_B = double(0);
-                                double rho_y_T = double(0);
+                                Real rho_y_B = Real(0);
+                                Real rho_y_T = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_y_B += Q[si][idx_cell_rho_Y_y_B];
@@ -10596,8 +10596,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_y_B;
-                                std::vector<double> Y_y_T;
+                                std::vector<Real> Y_y_B;
+                                std::vector<Real> Y_y_T;
                                 Y_y_B.reserve(d_num_species);
                                 Y_y_T.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -10610,8 +10610,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_y_B_ptr;
-                                std::vector<const double*> Y_y_T_ptr;
+                                std::vector<const Real*> Y_y_B_ptr;
+                                std::vector<const Real*> Y_y_T_ptr;
                                 Y_y_B_ptr.reserve(d_num_species);
                                 Y_y_T_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -10620,73 +10620,73 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_y_T_ptr.push_back(&Y_y_T[si]);
                                 }
                                 
-                                const double u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
-                                const double u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
+                                const Real u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
+                                const Real u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
                                 
-                                const double v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
-                                const double v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
+                                const Real v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
+                                const Real v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
                                 
-                                const double w_y_B = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
-                                const double w_y_T = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
+                                const Real w_y_B = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
+                                const Real w_y_T = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
                                 
-                                const double epsilon_y_B = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
-                                const double epsilon_y_T = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
+                                const Real epsilon_y_B = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
+                                const Real epsilon_y_T = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
                                 
-                                double p_y_B = d_equation_of_state_mixing_rules->
+                                Real p_y_B = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_y_B,
                                         &epsilon_y_B,
                                         Y_y_B_ptr);
                                 
-                                double p_y_T = d_equation_of_state_mixing_rules->
+                                Real p_y_T = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_y_T,
                                         &epsilon_y_T,
                                         Y_y_T_ptr);
                                 
                                 // Central derivatives.
-                                // du_dy = (u_y_T - u_y_B)/(double(2)*dx[1]);
-                                dv_dy = (v_y_T - v_y_B)/(double(2)*dx[1]);
-                                dw_dy = (w_y_T - w_y_B)/(double(2)*dx[1]);
-                                dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
+                                // du_dy = (u_y_T - u_y_B)/(Real(2)*Real(dx[1]));
+                                dv_dy = (v_y_T - v_y_B)/(Real(2)*Real(dx[1]));
+                                dw_dy = (w_y_T - w_y_B)/(Real(2)*Real(dx[1]));
+                                dp_dy = (p_y_T - p_y_B)/(Real(2)*Real(dx[1]));
                             }
                             
                             // Compute sound speed.
                             
-                            const double Gamma_z_F = d_equation_of_state_mixing_rules->getGruneisenParameter(
+                            const Real Gamma_z_F = d_equation_of_state_mixing_rules->getGruneisenParameter(
                                 &rho_z_F,
                                 &p_z_F,
                                 Y_z_F_ptr);
 
-                            const std::vector<double> Psi_z_F = d_equation_of_state_mixing_rules->
+                            const std::vector<Real> Psi_z_F = d_equation_of_state_mixing_rules->
                                 getPressureDerivativeWithPartialDensities(
                                         &rho_z_F,
                                         &p_z_F,
                                         Y_z_F_ptr);
                             
-                            double c_z_F = Gamma_z_F*p_z_F/rho_z_F;
+                            Real c_z_F = Gamma_z_F*p_z_F/rho_z_F;
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 c_z_F += Y_z_F[si]*Psi_z_F[si];
                             }
-                            c_z_F = sqrt(c_z_F);
+                            c_z_F = std::sqrt(c_z_F);
                             
-                            const double lambda_last = w_z_F + c_z_F;
+                            const Real lambda_last = w_z_F + c_z_F;
                             
                             // Compute vector Lambda^(-1) * L.
                             
-                            double Lambda_inv_L[d_num_species + 4];
+                            Real Lambda_inv_L[d_num_species + 4];
                             
-                            const double& p_t         = d_bdry_face_nonreflecting_outflow_p_t[face_loc];
-                            const double& sigma       = d_bdry_face_nonreflecting_outflow_sigma[face_loc];
-                            const double& beta        = d_bdry_face_nonreflecting_outflow_beta[face_loc];
-                            const double& length_char = d_bdry_face_nonreflecting_outflow_length_char[face_loc];
+                            const Real& p_t         = d_bdry_face_nonreflecting_outflow_p_t[face_loc];
+                            const Real& sigma       = d_bdry_face_nonreflecting_outflow_sigma[face_loc];
+                            const Real& beta        = d_bdry_face_nonreflecting_outflow_beta[face_loc];
+                            const Real& length_char = d_bdry_face_nonreflecting_outflow_length_char[face_loc];
                             
-                            const double T_last = u_z_F*(dp_dx + rho_z_F*c_z_F*dw_dx) + rho_z_F*c_z_F*c_z_F*du_dx +
+                            const Real T_last = u_z_F*(dp_dx + rho_z_F*c_z_F*dw_dx) + rho_z_F*c_z_F*c_z_F*du_dx +
                                 v_z_F*(dp_dy + rho_z_F*c_z_F*dw_dy) + rho_z_F*c_z_F*c_z_F*dv_dy;
                             
-                            const double M_sq = (u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F)/(c_z_F*c_z_F);
-                            const double K = sigma*c_z_F*(double(1) - M_sq)/length_char;
+                            const Real M_sq = (u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F)/(c_z_F*c_z_F);
+                            const Real K = sigma*c_z_F*(Real(1) - M_sq)/length_char;
                             
                             Lambda_inv_L[0] = dp_dz - rho_z_F*c_z_F*dw_dz;
                             Lambda_inv_L[1] = du_dz;
@@ -10695,14 +10695,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             {
                                 Lambda_inv_L[si + 3] = c_z_F*c_z_F*drho_Y_dz[si] - Y_z_F[si]*dp_dz;
                             }
-                            Lambda_inv_L[d_num_species + 3] = (double(1)/lambda_last)*(K*(p_z_F - p_t) - (double(1) - beta)*T_last);
+                            Lambda_inv_L[d_num_species + 3] = (Real(1)/lambda_last)*(K*(p_z_F - p_t) - (Real(1) - beta)*T_last);
                             
                             // Compute dV_dz.
                             
-                            const double c_sq_inv  = double(1)/(c_z_F*c_z_F);
-                            const double rho_c_inv = double(1)/(rho_z_F*c_z_F);
+                            const Real c_sq_inv  = Real(1)/(c_z_F*c_z_F);
+                            const Real rho_c_inv = Real(1)/(rho_z_F*c_z_F);
                             
-                            double dV_dz[d_num_species + 4];
+                            Real dV_dz[d_num_species + 4];
                             
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -10714,7 +10714,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             dV_dz[d_num_species + 2] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
                             dV_dz[d_num_species + 3] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
                             
-                            double V_ghost[(d_num_species + 4)*num_ghosts_to_fill];
+                            Real V_ghost[(d_num_species + 4)*num_ghosts_to_fill];
                             
                             for (int k = num_ghosts_to_fill - 1; k >= 0; k--)
                             {
@@ -10737,209 +10737,209 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[k*(d_num_species + 4) + si] = rho_Y_z_FF[si] - double(2)*dx[2]*dV_dz[si];
+                                        V_ghost[k*(d_num_species + 4) + si] = rho_Y_z_FF[si] - Real(2)*Real(dx[2])*dV_dz[si];
                                     }
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species]     = u_z_FF - double(2)*dx[2]*dV_dz[d_num_species];
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = v_z_FF - double(2)*dx[2]*dV_dz[d_num_species + 1];
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = w_z_FF - double(2)*dx[2]*dV_dz[d_num_species + 2];
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = p_z_FF - double(2)*dx[2]*dV_dz[d_num_species + 3];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species]     = u_z_FF - Real(2)*Real(dx[2])*dV_dz[d_num_species];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = v_z_FF - Real(2)*Real(dx[2])*dV_dz[d_num_species + 1];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = w_z_FF - Real(2)*Real(dx[2])*dV_dz[d_num_species + 2];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = p_z_FF - Real(2)*Real(dx[2])*dV_dz[d_num_species + 3];
                                 }
                                 else if (k == num_ghosts_to_fill - 2)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[k*(d_num_species + 4) + si] = -double(2)*rho_Y_z_FF[si] - double(3)*rho_Y_z_F[si] +
-                                            double(6)*V_ghost[(k + 1)*(d_num_species + 4) + si] + double(6)*dx[2]*dV_dz[si];
+                                        V_ghost[k*(d_num_species + 4) + si] = -Real(2)*rho_Y_z_FF[si] - Real(3)*rho_Y_z_F[si] +
+                                            Real(6)*V_ghost[(k + 1)*(d_num_species + 4) + si] + Real(6)*Real(dx[2])*dV_dz[si];
                                     }
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species] = -double(2)*u_z_FF - double(3)*u_z_F +
-                                        double(6)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species] +
-                                        double(6)*dx[2]*dV_dz[d_num_species];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species] = -Real(2)*u_z_FF - Real(3)*u_z_F +
+                                        Real(6)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species] +
+                                        Real(6)*Real(dx[2])*dV_dz[d_num_species];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = -double(2)*v_z_FF - double(3)*v_z_F +
-                                        double(6)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(6)*dx[2]*dV_dz[d_num_species + 1];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = -Real(2)*v_z_FF - Real(3)*v_z_F +
+                                        Real(6)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(6)*Real(dx[2])*dV_dz[d_num_species + 1];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = -double(2)*w_z_FF - double(3)*w_z_F +
-                                        double(6)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(6)*dx[2]*dV_dz[d_num_species + 2];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = -Real(2)*w_z_FF - Real(3)*w_z_F +
+                                        Real(6)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(6)*Real(dx[2])*dV_dz[d_num_species + 2];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = -double(2)*p_z_FF - double(3)*p_z_F +
-                                        double(6)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(6)*dx[2]*dV_dz[d_num_species + 3];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = -Real(2)*p_z_FF - Real(3)*p_z_F +
+                                        Real(6)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(6)*Real(dx[2])*dV_dz[d_num_species + 3];
                                 }
                                 else if (k == num_ghosts_to_fill - 3)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[k*(d_num_species + 4) + si] = double(3)*rho_Y_z_FF[si] + double(10)*rho_Y_z_F[si] -
-                                            double(18)*V_ghost[(k + 2)*(d_num_species + 4) + si] +
-                                            double(6)*V_ghost[(k + 1)*(d_num_species + 4) + si] -
-                                            double(12)*dx[2]*dV_dz[si];
+                                        V_ghost[k*(d_num_species + 4) + si] = Real(3)*rho_Y_z_FF[si] + Real(10)*rho_Y_z_F[si] -
+                                            Real(18)*V_ghost[(k + 2)*(d_num_species + 4) + si] +
+                                            Real(6)*V_ghost[(k + 1)*(d_num_species + 4) + si] -
+                                            Real(12)*Real(dx[2])*dV_dz[si];
                                     }
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species] = double(3)*u_z_FF + double(10)*u_z_F -
-                                        double(18)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species] +
-                                        double(6)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species] -
-                                        double(12)*dx[2]*dV_dz[d_num_species];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species] = Real(3)*u_z_FF + Real(10)*u_z_F -
+                                        Real(18)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(6)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species] -
+                                        Real(12)*Real(dx[2])*dV_dz[d_num_species];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = double(3)*v_z_FF + double(10)*v_z_F -
-                                        double(18)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(6)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(12)*dx[2]*dV_dz[d_num_species + 1];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = Real(3)*v_z_FF + Real(10)*v_z_F -
+                                        Real(18)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(6)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(12)*Real(dx[2])*dV_dz[d_num_species + 1];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = double(3)*w_z_FF + double(10)*w_z_F -
-                                        double(18)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(6)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(12)*dx[2]*dV_dz[d_num_species + 2];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = Real(3)*w_z_FF + Real(10)*w_z_F -
+                                        Real(18)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(6)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(12)*Real(dx[2])*dV_dz[d_num_species + 2];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = double(3)*p_z_FF + double(10)*p_z_F -
-                                        double(18)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(6)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(12)*dx[2]*dV_dz[d_num_species + 3];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = Real(3)*p_z_FF + Real(10)*p_z_F -
+                                        Real(18)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(6)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(12)*Real(dx[2])*dV_dz[d_num_species + 3];
                                 }
                                 else if (k == num_ghosts_to_fill - 4)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[k*(d_num_species + 4) + si] = -double(4)*rho_Y_z_FF[si] -
-                                            double(65)/double(3)*rho_Y_z_F[si] +
-                                            double(40)*V_ghost[(k + 3)*(d_num_species + 4) + si] -
-                                            double(20)*V_ghost[(k + 2)*(d_num_species + 4) + si] +
-                                            double(20)/double(3)*V_ghost[(k + 1)*(d_num_species + 4) + si] +
-                                            double(20)*dx[2]*dV_dz[si];
+                                        V_ghost[k*(d_num_species + 4) + si] = -Real(4)*rho_Y_z_FF[si] -
+                                            Real(65)/Real(3)*rho_Y_z_F[si] +
+                                            Real(40)*V_ghost[(k + 3)*(d_num_species + 4) + si] -
+                                            Real(20)*V_ghost[(k + 2)*(d_num_species + 4) + si] +
+                                            Real(20)/Real(3)*V_ghost[(k + 1)*(d_num_species + 4) + si] +
+                                            Real(20)*Real(dx[2])*dV_dz[si];
                                     }
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species] = -double(4)*u_z_FF -
-                                        double(65)/double(3)*u_z_F +
-                                        double(40)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species] -
-                                        double(20)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species] +
-                                        double(20)/double(3)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species] +
-                                        double(20)*dx[2]*dV_dz[d_num_species];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species] = -Real(4)*u_z_FF -
+                                        Real(65)/Real(3)*u_z_F +
+                                        Real(40)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(20)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(20)/Real(3)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species] +
+                                        Real(20)*Real(dx[2])*dV_dz[d_num_species];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = -double(4)*v_z_FF -
-                                        double(65)/double(3)*v_z_F +
-                                        double(40)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(20)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(20)/double(3)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(20)*dx[2]*dV_dz[d_num_species + 1];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = -Real(4)*v_z_FF -
+                                        Real(65)/Real(3)*v_z_F +
+                                        Real(40)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(20)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(20)/Real(3)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(20)*Real(dx[2])*dV_dz[d_num_species + 1];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = -double(4)*w_z_FF -
-                                        double(65)/double(3)*w_z_F +
-                                        double(40)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(20)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(20)/double(3)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(20)*dx[2]*dV_dz[d_num_species + 2];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = -Real(4)*w_z_FF -
+                                        Real(65)/Real(3)*w_z_F +
+                                        Real(40)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(20)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(20)/Real(3)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(20)*Real(dx[2])*dV_dz[d_num_species + 2];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = -double(4)*p_z_FF -
-                                        double(65)/double(3)*p_z_F +
-                                        double(40)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(20)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(20)/double(3)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(20)*dx[2]*dV_dz[d_num_species + 3];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = -Real(4)*p_z_FF -
+                                        Real(65)/Real(3)*p_z_F +
+                                        Real(40)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(20)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(20)/Real(3)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(20)*Real(dx[2])*dV_dz[d_num_species + 3];
                                 }
                                 else if (k == num_ghosts_to_fill - 5)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[k*(d_num_species + 4) + si] = double(5)*rho_Y_z_FF[si] +
-                                            double(77)/double(2)*rho_Y_z_F[si] -
-                                            double(75)*V_ghost[(k + 4)*(d_num_species + 4) + si] +
-                                            double(50)*V_ghost[(k + 3)*(d_num_species + 4) + si] -
-                                            double(25)*V_ghost[(k + 2)*(d_num_species + 4) + si] +
-                                            double(15)/double(2)*V_ghost[(k + 1)*(d_num_species + 4) + si] -
-                                            double(30)*dx[2]*dV_dz[si];
+                                        V_ghost[k*(d_num_species + 4) + si] = Real(5)*rho_Y_z_FF[si] +
+                                            Real(77)/Real(2)*rho_Y_z_F[si] -
+                                            Real(75)*V_ghost[(k + 4)*(d_num_species + 4) + si] +
+                                            Real(50)*V_ghost[(k + 3)*(d_num_species + 4) + si] -
+                                            Real(25)*V_ghost[(k + 2)*(d_num_species + 4) + si] +
+                                            Real(15)/Real(2)*V_ghost[(k + 1)*(d_num_species + 4) + si] -
+                                            Real(30)*Real(dx[2])*dV_dz[si];
                                     }
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species] = double(5)*u_z_FF +
-                                        double(77)/double(2)*u_z_F -
-                                        double(75)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species] +
-                                        double(50)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species] -
-                                        double(25)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species] +
-                                        double(15)/double(2)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species] -
-                                        double(30)*dx[2]*dV_dz[d_num_species];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species] = Real(5)*u_z_FF +
+                                        Real(77)/Real(2)*u_z_F -
+                                        Real(75)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species] +
+                                        Real(50)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(25)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(15)/Real(2)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species] -
+                                        Real(30)*Real(dx[2])*dV_dz[d_num_species];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = double(5)*v_z_FF +
-                                        double(77)/double(2)*v_z_F -
-                                        double(75)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(50)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(25)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(15)/double(2)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(30)*dx[2]*dV_dz[d_num_species + 1];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = Real(5)*v_z_FF +
+                                        Real(77)/Real(2)*v_z_F -
+                                        Real(75)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(50)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(25)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(15)/Real(2)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(30)*Real(dx[2])*dV_dz[d_num_species + 1];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = double(5)*w_z_FF +
-                                        double(77)/double(2)*w_z_F -
-                                        double(75)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(50)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(25)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(15)/double(2)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(30)*dx[2]*dV_dz[d_num_species + 2];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = Real(5)*w_z_FF +
+                                        Real(77)/Real(2)*w_z_F -
+                                        Real(75)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(50)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(25)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(15)/Real(2)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(30)*Real(dx[2])*dV_dz[d_num_species + 2];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = double(5)*p_z_FF +
-                                        double(77)/double(2)*p_z_F -
-                                        double(75)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(50)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(25)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(15)/double(2)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(30)*dx[2]*dV_dz[d_num_species + 3];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = Real(5)*p_z_FF +
+                                        Real(77)/Real(2)*p_z_F -
+                                        Real(75)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(50)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(25)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(15)/Real(2)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(30)*Real(dx[2])*dV_dz[d_num_species + 3];
                                 }
                                 else if (k == num_ghosts_to_fill - 6)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[k*(d_num_species + 4) + si] = -double(6)*rho_Y_z_FF[si] -
-                                            double(609)/double(10)*rho_Y_z_F[si] +
-                                            double(126)*V_ghost[(k + 5)*(d_num_species + 4) + si] -
-                                            double(105)*V_ghost[(k + 4)*(d_num_species + 4) + si] +
-                                            double(70)*V_ghost[(k + 3)*(d_num_species + 4) + si] -
-                                            double(63)/double(2)*V_ghost[(k + 2)*(d_num_species + 4) + si] +
-                                            double(42)/double(5)*V_ghost[(k + 1)*(d_num_species + 4) + si] +
-                                            double(42)*dx[2]*dV_dz[si];
+                                        V_ghost[k*(d_num_species + 4) + si] = -Real(6)*rho_Y_z_FF[si] -
+                                            Real(609)/Real(10)*rho_Y_z_F[si] +
+                                            Real(126)*V_ghost[(k + 5)*(d_num_species + 4) + si] -
+                                            Real(105)*V_ghost[(k + 4)*(d_num_species + 4) + si] +
+                                            Real(70)*V_ghost[(k + 3)*(d_num_species + 4) + si] -
+                                            Real(63)/Real(2)*V_ghost[(k + 2)*(d_num_species + 4) + si] +
+                                            Real(42)/Real(5)*V_ghost[(k + 1)*(d_num_species + 4) + si] +
+                                            Real(42)*Real(dx[2])*dV_dz[si];
                                     }
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species] = -double(6)*u_z_FF -
-                                        double(609)/double(10)*u_z_F +
-                                        double(126)*V_ghost[(k + 5)*(d_num_species + 4) + d_num_species] -
-                                        double(105)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species] +
-                                        double(70)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species] -
-                                        double(63)/double(2)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species] +
-                                        double(42)/double(5)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species] +
-                                        double(42)*dx[2]*dV_dz[d_num_species];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species] = -Real(6)*u_z_FF -
+                                        Real(609)/Real(10)*u_z_F +
+                                        Real(126)*V_ghost[(k + 5)*(d_num_species + 4) + d_num_species] -
+                                        Real(105)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species] +
+                                        Real(70)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(63)/Real(2)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(42)/Real(5)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species] +
+                                        Real(42)*Real(dx[2])*dV_dz[d_num_species];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = -double(6)*v_z_FF -
-                                        double(609)/double(10)*v_z_F +
-                                        double(126)*V_ghost[(k + 5)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(105)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(70)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(63)/double(2)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(42)/double(5)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(42)*dx[2]*dV_dz[d_num_species + 1];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = -Real(6)*v_z_FF -
+                                        Real(609)/Real(10)*v_z_F +
+                                        Real(126)*V_ghost[(k + 5)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(105)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(70)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(63)/Real(2)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(42)/Real(5)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(42)*Real(dx[2])*dV_dz[d_num_species + 1];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = -double(6)*w_z_FF -
-                                        double(609)/double(10)*w_z_F +
-                                        double(126)*V_ghost[(k + 5)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(105)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(70)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(63)/double(2)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(42)/double(5)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(42)*dx[2]*dV_dz[d_num_species + 2];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = -Real(6)*w_z_FF -
+                                        Real(609)/Real(10)*w_z_F +
+                                        Real(126)*V_ghost[(k + 5)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(105)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(70)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(63)/Real(2)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(42)/Real(5)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(42)*Real(dx[2])*dV_dz[d_num_species + 2];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = -double(6)*p_z_FF -
-                                        double(609)/double(10)*p_z_F +
-                                        double(126)*V_ghost[(k + 5)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(105)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(70)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(63)/double(2)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(42)/double(5)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(42)*dx[2]*dV_dz[d_num_species + 3];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = -Real(6)*p_z_FF -
+                                        Real(609)/Real(10)*p_z_F +
+                                        Real(126)*V_ghost[(k + 5)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(105)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(70)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(63)/Real(2)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(42)/Real(5)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(42)*Real(dx[2])*dV_dz[d_num_species + 3];
                                 }
                                 
                                 /*
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_ghost = double(0);
+                                Real rho_ghost = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_ghost += V_ghost[k*(d_num_species + 4) + si];
@@ -10949,7 +10949,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_ghost;
+                                std::vector<Real> Y_ghost;
                                 Y_ghost.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -10960,7 +10960,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_ghost_ptr;
+                                std::vector<const Real*> Y_ghost_ptr;
                                 Y_ghost_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -10976,13 +10976,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 Q[d_num_species + 1][idx_cell_mom] = rho_ghost*V_ghost[k*(d_num_species + 4) + d_num_species + 1];
                                 Q[d_num_species + 2][idx_cell_mom] = rho_ghost*V_ghost[k*(d_num_species + 4) + d_num_species + 2];
                                 
-                                const double epsilon = d_equation_of_state_mixing_rules->
+                                const Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergy(
                                         &rho_ghost,
                                         &V_ghost[k*(d_num_species + 4) + d_num_species + 3],
                                         Y_ghost_ptr);
                                 
-                                const double E = rho_ghost*epsilon +
+                                const Real E = rho_ghost*epsilon +
                                     half*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
@@ -11056,9 +11056,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 (interior_box_hi_idx[2] - 2 + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                     subghostcell_dims_conservative_var[2][1];
                             
-                            std::vector<double> rho_Y_z_B;
-                            std::vector<double> rho_Y_z_BB;
-                            std::vector<double> rho_Y_z_BBB;
+                            std::vector<Real> rho_Y_z_B;
+                            std::vector<Real> rho_Y_z_BB;
+                            std::vector<Real> rho_Y_z_BBB;
                             rho_Y_z_B.reserve(d_num_species);
                             rho_Y_z_BB.reserve(d_num_species);
                             rho_Y_z_BBB.reserve(d_num_species);
@@ -11073,9 +11073,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute the mixture density.
                              */
                             
-                            double rho_z_B   = double(0);
-                            double rho_z_BB  = double(0);
-                            double rho_z_BBB = double(0);
+                            Real rho_z_B   = Real(0);
+                            Real rho_z_BB  = Real(0);
+                            Real rho_z_BBB = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_z_B   += Q[si][idx_cell_rho_Y_z_B];
@@ -11087,9 +11087,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute the mass fractions.
                              */
                             
-                            std::vector<double> Y_z_B;
-                            std::vector<double> Y_z_BB;
-                            std::vector<double> Y_z_BBB;
+                            std::vector<Real> Y_z_B;
+                            std::vector<Real> Y_z_BB;
+                            std::vector<Real> Y_z_BBB;
                             Y_z_B.reserve(d_num_species);
                             Y_z_BB.reserve(d_num_species);
                             Y_z_BBB.reserve(d_num_species);
@@ -11104,9 +11104,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Get the pointers to the mass fractions.
                              */
                             
-                            std::vector<const double*> Y_z_B_ptr;
-                            std::vector<const double*> Y_z_BB_ptr;
-                            std::vector<const double*> Y_z_BBB_ptr;
+                            std::vector<const Real*> Y_z_B_ptr;
+                            std::vector<const Real*> Y_z_BB_ptr;
+                            std::vector<const Real*> Y_z_BBB_ptr;
                             Y_z_B_ptr.reserve(d_num_species);
                             Y_z_BB_ptr.reserve(d_num_species);
                             Y_z_BBB_ptr.reserve(d_num_species);
@@ -11117,36 +11117,36 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 Y_z_BBB_ptr.push_back(&Y_z_BBB[si]);
                             }
                             
-                            const double u_z_B   = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
-                            const double u_z_BB  = Q[d_num_species][idx_cell_mom_z_BB]/rho_z_BB;
-                            const double u_z_BBB = Q[d_num_species][idx_cell_mom_z_BBB]/rho_z_BBB;
+                            const Real u_z_B   = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
+                            const Real u_z_BB  = Q[d_num_species][idx_cell_mom_z_BB]/rho_z_BB;
+                            const Real u_z_BBB = Q[d_num_species][idx_cell_mom_z_BBB]/rho_z_BBB;
                             
-                            const double v_z_B   = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
-                            const double v_z_BB  = Q[d_num_species + 1][idx_cell_mom_z_BB]/rho_z_BB;
-                            const double v_z_BBB = Q[d_num_species + 1][idx_cell_mom_z_BBB]/rho_z_BBB;
+                            const Real v_z_B   = Q[d_num_species + 1][idx_cell_mom_z_B]/rho_z_B;
+                            const Real v_z_BB  = Q[d_num_species + 1][idx_cell_mom_z_BB]/rho_z_BB;
+                            const Real v_z_BBB = Q[d_num_species + 1][idx_cell_mom_z_BBB]/rho_z_BBB;
                             
-                            const double w_z_B   = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
-                            const double w_z_BB  = Q[d_num_species + 2][idx_cell_mom_z_BB]/rho_z_BB;
-                            const double w_z_BBB = Q[d_num_species + 2][idx_cell_mom_z_BBB]/rho_z_BBB;
+                            const Real w_z_B   = Q[d_num_species + 2][idx_cell_mom_z_B]/rho_z_B;
+                            const Real w_z_BB  = Q[d_num_species + 2][idx_cell_mom_z_BB]/rho_z_BB;
+                            const Real w_z_BBB = Q[d_num_species + 2][idx_cell_mom_z_BBB]/rho_z_BBB;
                             
-                            const double half = double(1)/double(2);
-                            const double epsilon_z_B   = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
-                            const double epsilon_z_BB  = Q[d_num_species + 3][idx_cell_E_z_BB]/rho_z_BB - half*(u_z_BB*u_z_BB + v_z_BB*v_z_BB + w_z_BB*w_z_BB);
-                            const double epsilon_z_BBB = Q[d_num_species + 3][idx_cell_E_z_BBB]/rho_z_BBB - half*(u_z_BBB*u_z_BBB + v_z_BBB*v_z_BBB + w_z_BBB*w_z_BBB);
+                            const Real half = Real(1)/Real(2);
+                            const Real epsilon_z_B   = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
+                            const Real epsilon_z_BB  = Q[d_num_species + 3][idx_cell_E_z_BB]/rho_z_BB - half*(u_z_BB*u_z_BB + v_z_BB*v_z_BB + w_z_BB*w_z_BB);
+                            const Real epsilon_z_BBB = Q[d_num_species + 3][idx_cell_E_z_BBB]/rho_z_BBB - half*(u_z_BBB*u_z_BBB + v_z_BBB*v_z_BBB + w_z_BBB*w_z_BBB);
                             
-                            double p_z_B = d_equation_of_state_mixing_rules->
+                            Real p_z_B = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_z_B,
                                     &epsilon_z_B,
                                     Y_z_B_ptr);
                             
-                            double p_z_BB = d_equation_of_state_mixing_rules->
+                            Real p_z_BB = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_z_BB,
                                     &epsilon_z_BB,
                                     Y_z_BB_ptr);
                             
-                            double p_z_BBB = d_equation_of_state_mixing_rules->
+                            Real p_z_BBB = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_z_BBB,
                                     &epsilon_z_BBB,
@@ -11156,26 +11156,26 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                              * Compute derivatives in z-direction.
                              */
                             
-                            std::vector<double> drho_Y_dz;
+                            std::vector<Real> drho_Y_dz;
                             drho_Y_dz.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                drho_Y_dz.push_back((Q[si][idx_cell_rho_Y_z_BBB] - double(4)*Q[si][idx_cell_rho_Y_z_BB] +
-                                    double(3)*Q[si][idx_cell_rho_Y_z_B])/(double(2)*dx[2]));
+                                drho_Y_dz.push_back((Q[si][idx_cell_rho_Y_z_BBB] - Real(4)*Q[si][idx_cell_rho_Y_z_BB] +
+                                    Real(3)*Q[si][idx_cell_rho_Y_z_B])/(Real(2)*Real(dx[2])));
                             }
-                            const double du_dz   = (u_z_BBB - double(4)*u_z_BB + double(3)*u_z_B)/(double(2)*dx[2]);
-                            const double dv_dz   = (v_z_BBB - double(4)*v_z_BB + double(3)*v_z_B)/(double(2)*dx[2]);
-                            const double dw_dz   = (w_z_BBB - double(4)*w_z_BB + double(3)*w_z_B)/(double(2)*dx[2]);
-                            const double dp_dz   = (p_z_BBB - double(4)*p_z_BB + double(3)*p_z_B)/(double(2)*dx[2]);
+                            const Real du_dz   = (u_z_BBB - Real(4)*u_z_BB + Real(3)*u_z_B)/(Real(2)*Real(dx[2]));
+                            const Real dv_dz   = (v_z_BBB - Real(4)*v_z_BB + Real(3)*v_z_B)/(Real(2)*Real(dx[2]));
+                            const Real dw_dz   = (w_z_BBB - Real(4)*w_z_BB + Real(3)*w_z_B)/(Real(2)*Real(dx[2]));
+                            const Real dp_dz   = (p_z_BBB - Real(4)*p_z_BB + Real(3)*p_z_B)/(Real(2)*Real(dx[2]));
                             
                             /*
                              * Compute derivatives in x-direction.
                              */
                             
-                            double du_dx = double(0);
-                            // double dv_dx = double(0);
-                            double dw_dx = double(0);
-                            double dp_dx = double(0);
+                            Real du_dx = Real(0);
+                            // Real dv_dx = Real(0);
+                            Real dw_dx = Real(0);
+                            Real dp_dx = Real(0);
                             
                             if ((i + num_subghosts_conservative_var[0][0] == 0) ||
                                 (i + num_subghosts_conservative_var[1][0] == 0) ||
@@ -11206,7 +11206,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_x_R = double(0);
+                                Real rho_x_R = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_x_R += Q[si][idx_cell_rho_Y_x_R];
@@ -11216,7 +11216,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_x_R;
+                                std::vector<Real> Y_x_R;
                                 Y_x_R.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -11227,29 +11227,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_x_R_ptr;
+                                std::vector<const Real*> Y_x_R_ptr;
                                 Y_x_R_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_x_R_ptr.push_back(&Y_x_R[si]);
                                 }
                                 
-                                const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
-                                const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
-                                const double w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
-                                const double epsilon_x_R = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
+                                const Real u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
+                                const Real v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
+                                const Real w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
+                                const Real epsilon_x_R = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
                                 
-                                double p_x_R = d_equation_of_state_mixing_rules->
+                                Real p_x_R = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_R,
                                         &epsilon_x_R,
                                         Y_x_R_ptr);
                                 
                                 // One-sided derivatives.
-                                du_dx = (u_x_R - u_z_B)/(dx[0]);
-                                // dv_dx = (v_x_R - v_z_B)/(dx[0]);
-                                dw_dx = (w_x_R - w_z_B)/(dx[0]);
-                                dp_dx = (p_x_R - p_z_B)/(dx[0]);
+                                du_dx = (u_x_R - u_z_B)/Real(dx[0]);
+                                // dv_dx = (v_x_R - v_z_B)/Real(dx[0]);
+                                dw_dx = (w_x_R - w_z_B)/Real(dx[0]);
+                                dp_dx = (p_x_R - p_z_B)/Real(dx[0]);
                             }
                             else if ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
                                      (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
@@ -11280,7 +11280,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_x_L = double(0);
+                                Real rho_x_L = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_x_L += Q[si][idx_cell_rho_Y_x_L];
@@ -11290,7 +11290,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_x_L;
+                                std::vector<Real> Y_x_L;
                                 Y_x_L.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -11301,29 +11301,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                             
-                                std::vector<const double*> Y_x_L_ptr;
+                                std::vector<const Real*> Y_x_L_ptr;
                                 Y_x_L_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_x_L_ptr.push_back(&Y_x_L[si]);
                                 }
                                 
-                                const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
-                                const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
-                                const double w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
-                                const double epsilon_x_L = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
+                                const Real u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
+                                const Real v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
+                                const Real w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
+                                const Real epsilon_x_L = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
                                 
-                                double p_x_L = d_equation_of_state_mixing_rules->
+                                Real p_x_L = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_L,
                                         &epsilon_x_L,
                                         Y_x_L_ptr);
                                 
                                 // One-sided derivatives.
-                                du_dx = (u_z_B - u_x_L)/(dx[0]);
-                                // dv_dx = (v_z_B - v_x_L)/(dx[0]);
-                                dw_dx = (w_z_B - w_x_L)/(dx[0]);
-                                dp_dx = (p_z_B - p_x_L)/(dx[0]);
+                                du_dx = (u_z_B - u_x_L)/Real(dx[0]);
+                                // dv_dx = (v_z_B - v_x_L)/Real(dx[0]);
+                                dw_dx = (w_z_B - w_x_L)/Real(dx[0]);
+                                dp_dx = (p_z_B - p_x_L)/Real(dx[0]);
                             }
                             else
                             {
@@ -11361,8 +11361,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_x_L = double(0);
-                                double rho_x_R = double(0);
+                                Real rho_x_L = Real(0);
+                                Real rho_x_R = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_x_L += Q[si][idx_cell_rho_Y_x_L];
@@ -11373,8 +11373,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_x_L;
-                                std::vector<double> Y_x_R;
+                                std::vector<Real> Y_x_L;
+                                std::vector<Real> Y_x_R;
                                 Y_x_L.reserve(d_num_species);
                                 Y_x_R.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -11387,8 +11387,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_x_L_ptr;
-                                std::vector<const double*> Y_x_R_ptr;
+                                std::vector<const Real*> Y_x_L_ptr;
+                                std::vector<const Real*> Y_x_R_ptr;
                                                                     
                                 Y_x_L_ptr.reserve(d_num_species);
                                 Y_x_R_ptr.reserve(d_num_species);
@@ -11398,45 +11398,45 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_x_R_ptr.push_back(&Y_x_R[si]);
                                 }
                                 
-                                const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
-                                const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
+                                const Real u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
+                                const Real u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
 
-                                const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
-                                const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
+                                const Real v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
+                                const Real v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
 
-                                const double w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
-                                const double w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
+                                const Real w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
+                                const Real w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
                                 
-                                const double epsilon_x_L = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
-                                const double epsilon_x_R = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
+                                const Real epsilon_x_L = Q[d_num_species + 3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
+                                const Real epsilon_x_R = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
                                 
-                                double p_x_L = d_equation_of_state_mixing_rules->
+                                Real p_x_L = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_L,
                                         &epsilon_x_L,
                                         Y_x_L_ptr);
                             
-                                double p_x_R = d_equation_of_state_mixing_rules->
+                                Real p_x_R = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_R,
                                         &epsilon_x_R,
                                         Y_x_R_ptr);
                                 
                                 // Central derivatives.
-                                du_dx = (u_x_R - u_x_L)/(double(2)*dx[0]);
-                                // dv_dx = (v_x_R - v_x_L)/(double(2)*dx[0]);
-                                dw_dx = (w_x_R - w_x_L)/(double(2)*dx[0]);
-                                dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
+                                du_dx = (u_x_R - u_x_L)/(Real(2)*Real(dx[0]));
+                                // dv_dx = (v_x_R - v_x_L)/(Real(2)*Real(dx[0]));
+                                dw_dx = (w_x_R - w_x_L)/(Real(2)*Real(dx[0]));
+                                dp_dx = (p_x_R - p_x_L)/(Real(2)*Real(dx[0]));
                             }
                             
                             /*
                              * Compute derivatives in y-direction.
                              */
                             
-                            // double du_dy = double(0);
-                            double dv_dy = double(0);
-                            double dw_dy = double(0);
-                            double dp_dy = double(0);
+                            // Real du_dy = Real(0);
+                            Real dv_dy = Real(0);
+                            Real dw_dy = Real(0);
+                            Real dp_dy = Real(0);
                             
                             if ((j + num_subghosts_conservative_var[0][1] == 0) ||
                                 (j + num_subghosts_conservative_var[1][1] == 0) ||
@@ -11467,7 +11467,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_y_T = double(0);
+                                Real rho_y_T = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_y_T += Q[si][idx_cell_rho_Y_y_T];
@@ -11477,7 +11477,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_y_T;
+                                std::vector<Real> Y_y_T;
                                 Y_y_T.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -11488,29 +11488,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_y_T_ptr;
+                                std::vector<const Real*> Y_y_T_ptr;
                                 Y_y_T_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_y_T_ptr.push_back(&Y_y_T[si]);
                                 }
                                 
-                                const double u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
-                                const double v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
-                                const double w_y_T = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
-                                const double epsilon_y_T = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
+                                const Real u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
+                                const Real v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
+                                const Real w_y_T = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
+                                const Real epsilon_y_T = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
                                 
-                                double p_y_T = d_equation_of_state_mixing_rules->
+                                Real p_y_T = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_y_T,
                                         &epsilon_y_T,
                                         Y_y_T_ptr);
                                 
                                 // One-sided derivatives.
-                                // du_dy = (u_y_T - u_z_B)/(dx[1]);
-                                dv_dy = (v_y_T - v_z_B)/(dx[1]);
-                                dw_dy = (w_y_T - w_z_B)/(dx[1]);
-                                dp_dy = (p_y_T - p_z_B)/(dx[1]);
+                                // du_dy = (u_y_T - u_z_B)/Real(dx[1]);
+                                dv_dy = (v_y_T - v_z_B)/Real(dx[1]);
+                                dw_dy = (w_y_T - w_z_B)/Real(dx[1]);
+                                dp_dy = (p_y_T - p_z_B)/Real(dx[1]);
                             }
                             else if ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
                                      (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
@@ -11541,7 +11541,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_y_B = double(0);
+                                Real rho_y_B = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_y_B += Q[si][idx_cell_rho_Y_y_B];
@@ -11551,7 +11551,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_y_B;
+                                std::vector<Real> Y_y_B;
                                 Y_y_B.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -11562,29 +11562,29 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_y_B_ptr;
+                                std::vector<const Real*> Y_y_B_ptr;
                                 Y_y_B_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     Y_y_B_ptr.push_back(&Y_y_B[si]);
                                 }
                                 
-                                const double u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
-                                const double v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
-                                const double w_y_B = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
-                                const double epsilon_y_B = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
+                                const Real u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
+                                const Real v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
+                                const Real w_y_B = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
+                                const Real epsilon_y_B = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
                                 
-                                double p_y_B = d_equation_of_state_mixing_rules->
+                                Real p_y_B = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_y_B,
                                         &epsilon_y_B,
                                         Y_y_B_ptr);
                                 
                                 // One-sided derivatives.
-                                // du_dy = (u_z_B - u_y_B)/(dx[1]);
-                                dv_dy = (v_z_B - v_y_B)/(dx[1]);
-                                dw_dy = (w_z_B - w_y_B)/(dx[1]);
-                                dp_dy = (p_z_B - p_y_B)/(dx[1]);
+                                // du_dy = (u_z_B - u_y_B)/Real(dx[1]);
+                                dv_dy = (v_z_B - v_y_B)/Real(dx[1]);
+                                dw_dy = (w_z_B - w_y_B)/Real(dx[1]);
+                                dp_dy = (p_z_B - p_y_B)/Real(dx[1]);
                             }
                             else
                             {
@@ -11622,8 +11622,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_y_B = double(0);
-                                double rho_y_T = double(0);
+                                Real rho_y_B = Real(0);
+                                Real rho_y_T = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_y_B += Q[si][idx_cell_rho_Y_y_B];
@@ -11634,8 +11634,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_y_B;
-                                std::vector<double> Y_y_T;
+                                std::vector<Real> Y_y_B;
+                                std::vector<Real> Y_y_T;
                                 Y_y_B.reserve(d_num_species);
                                 Y_y_T.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -11648,8 +11648,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_y_B_ptr;
-                                std::vector<const double*> Y_y_T_ptr;
+                                std::vector<const Real*> Y_y_B_ptr;
+                                std::vector<const Real*> Y_y_T_ptr;
                                 Y_y_B_ptr.reserve(d_num_species);
                                 Y_y_T_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -11658,75 +11658,75 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_y_T_ptr.push_back(&Y_y_T[si]);
                                 }
                                 
-                                const double u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
-                                const double u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
+                                const Real u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
+                                const Real u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
                                 
-                                const double v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
-                                const double v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
+                                const Real v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
+                                const Real v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
                                 
-                                const double w_y_B = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
-                                const double w_y_T = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
+                                const Real w_y_B = Q[d_num_species + 2][idx_cell_mom_y_B]/rho_y_B;
+                                const Real w_y_T = Q[d_num_species + 2][idx_cell_mom_y_T]/rho_y_T;
                                 
-                                const double epsilon_y_B = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
-                                const double epsilon_y_T = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
+                                const Real epsilon_y_B = Q[d_num_species + 3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
+                                const Real epsilon_y_T = Q[d_num_species + 3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
                                 
-                                double p_y_B = d_equation_of_state_mixing_rules->
+                                Real p_y_B = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_y_B,
                                         &epsilon_y_B,
                                         Y_y_B_ptr);
                             
-                                double p_y_T = d_equation_of_state_mixing_rules->
+                                Real p_y_T = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_y_T,
                                         &epsilon_y_T,
                                         Y_y_T_ptr);
                                 
                                 // Central derivatives.
-                                // du_dy = (u_y_T - u_y_B)/(double(2)*dx[1]);
-                                dv_dy = (v_y_T - v_y_B)/(double(2)*dx[1]);
-                                dw_dy = (w_y_T - w_y_B)/(double(2)*dx[1]);
-                                dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
+                                // du_dy = (u_y_T - u_y_B)/(Real(2)*Real(dx[1]));
+                                dv_dy = (v_y_T - v_y_B)/(Real(2)*Real(dx[1]));
+                                dw_dy = (w_y_T - w_y_B)/(Real(2)*Real(dx[1]));
+                                dp_dy = (p_y_T - p_y_B)/(Real(2)*Real(dx[1]));
                             }
                             
                             // Compute sound speed.
                             
-                            const double Gamma_z_B = d_equation_of_state_mixing_rules->getGruneisenParameter(
+                            const Real Gamma_z_B = d_equation_of_state_mixing_rules->getGruneisenParameter(
                                 &rho_z_B,
                                 &p_z_B,
                                 Y_z_B_ptr);
                             
-                            const std::vector<double> Psi_z_B = d_equation_of_state_mixing_rules->
+                            const std::vector<Real> Psi_z_B = d_equation_of_state_mixing_rules->
                                 getPressureDerivativeWithPartialDensities(
                                         &rho_z_B,
                                         &p_z_B,
                                         Y_z_B_ptr);
                             
-                            double c_z_B = Gamma_z_B*p_z_B/rho_z_B;
+                            Real c_z_B = Gamma_z_B*p_z_B/rho_z_B;
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 c_z_B += Y_z_B[si]*Psi_z_B[si];
                             }
-                            c_z_B = sqrt(c_z_B);
+                            c_z_B = std::sqrt(c_z_B);
                             
-                            const double lambda_1 = w_z_B - c_z_B;
+                            const Real lambda_1 = w_z_B - c_z_B;
                             
                             // Compute vector Lambda^(-1) * L.
                             
-                            double Lambda_inv_L[d_num_species + 4];
+                            Real Lambda_inv_L[d_num_species + 4];
                             
-                            const double& p_t         = d_bdry_face_nonreflecting_outflow_p_t[face_loc];
-                            const double& sigma       = d_bdry_face_nonreflecting_outflow_sigma[face_loc];
-                            const double& beta        = d_bdry_face_nonreflecting_outflow_beta[face_loc];
-                            const double& length_char = d_bdry_face_nonreflecting_outflow_length_char[face_loc];
+                            const Real& p_t         = d_bdry_face_nonreflecting_outflow_p_t[face_loc];
+                            const Real& sigma       = d_bdry_face_nonreflecting_outflow_sigma[face_loc];
+                            const Real& beta        = d_bdry_face_nonreflecting_outflow_beta[face_loc];
+                            const Real& length_char = d_bdry_face_nonreflecting_outflow_length_char[face_loc];
                             
-                            const double T_1 = u_z_B*(dp_dx - rho_z_B*c_z_B*dw_dx) + rho_z_B*c_z_B*c_z_B*du_dx +
+                            const Real T_1 = u_z_B*(dp_dx - rho_z_B*c_z_B*dw_dx) + rho_z_B*c_z_B*c_z_B*du_dx +
                                 v_z_B*(dp_dy - rho_z_B*c_z_B*dw_dy) + rho_z_B*c_z_B*c_z_B*dv_dy;
                             
-                            const double M_sq = (u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B)/(c_z_B*c_z_B);
-                            const double K = sigma*c_z_B*(double(1) - M_sq)/length_char;
+                            const Real M_sq = (u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B)/(c_z_B*c_z_B);
+                            const Real K = sigma*c_z_B*(Real(1) - M_sq)/length_char;
                             
-                            Lambda_inv_L[0] = (double(1)/lambda_1)*(K*(p_z_B - p_t) - (double(1) - beta)*T_1);
+                            Lambda_inv_L[0] = (Real(1)/lambda_1)*(K*(p_z_B - p_t) - (Real(1) - beta)*T_1);
                             Lambda_inv_L[1] = du_dz;
                             Lambda_inv_L[2] = dv_dz;
                             for (int si = 0; si < d_num_species; si++)
@@ -11737,10 +11737,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             
                             // Compute dV_dz.
                             
-                            const double c_sq_inv  = double(1)/(c_z_B*c_z_B);
-                            const double rho_c_inv = double(1)/(rho_z_B*c_z_B);
+                            const Real c_sq_inv  = Real(1)/(c_z_B*c_z_B);
+                            const Real rho_c_inv = Real(1)/(rho_z_B*c_z_B);
                             
-                            double dV_dz[d_num_species + 4];
+                            Real dV_dz[d_num_species + 4];
                             
                             for (int si = 0; si < d_num_species; si++)
                             {
@@ -11752,7 +11752,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             dV_dz[d_num_species + 2] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
                             dV_dz[d_num_species + 3] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
                             
-                            double V_ghost[(d_num_species + 4)*num_ghosts_to_fill];
+                            Real V_ghost[(d_num_species + 4)*num_ghosts_to_fill];
                             
                             for (int k = 0; k < num_ghosts_to_fill; k++)
                             {
@@ -11775,209 +11775,209 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[k*(d_num_species + 4) + si] = rho_Y_z_BB[si] + double(2)*dx[2]*dV_dz[si];
+                                        V_ghost[k*(d_num_species + 4) + si] = rho_Y_z_BB[si] + Real(2)*Real(dx[2])*dV_dz[si];
                                     }
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species]     = u_z_BB + double(2)*dx[2]*dV_dz[d_num_species];
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = v_z_BB + double(2)*dx[2]*dV_dz[d_num_species + 1];
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = w_z_BB + double(2)*dx[2]*dV_dz[d_num_species + 2];
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = p_z_BB + double(2)*dx[2]*dV_dz[d_num_species + 3];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species]     = u_z_BB + Real(2)*Real(dx[2])*dV_dz[d_num_species];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = v_z_BB + Real(2)*Real(dx[2])*dV_dz[d_num_species + 1];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = w_z_BB + Real(2)*Real(dx[2])*dV_dz[d_num_species + 2];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = p_z_BB + Real(2)*Real(dx[2])*dV_dz[d_num_species + 3];
                                 }
                                 else if (k == 1)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[k*(d_num_species + 4) + si] = -double(2)*rho_Y_z_BB[si] - double(3)*rho_Y_z_B[si] +
-                                            double(6)*V_ghost[(k - 1)*(d_num_species + 4) + si] - double(6)*dx[2]*dV_dz[si];
+                                        V_ghost[k*(d_num_species + 4) + si] = -Real(2)*rho_Y_z_BB[si] - Real(3)*rho_Y_z_B[si] +
+                                            Real(6)*V_ghost[(k - 1)*(d_num_species + 4) + si] - Real(6)*Real(dx[2])*dV_dz[si];
                                     }
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species] = -double(2)*u_z_BB - double(3)*u_z_B +
-                                        double(6)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species] -
-                                        double(6)*dx[2]*dV_dz[d_num_species];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species] = -Real(2)*u_z_BB - Real(3)*u_z_B +
+                                        Real(6)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species] -
+                                        Real(6)*Real(dx[2])*dV_dz[d_num_species];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = -double(2)*v_z_BB - double(3)*v_z_B +
-                                        double(6)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(6)*dx[2]*dV_dz[d_num_species + 1];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = -Real(2)*v_z_BB - Real(3)*v_z_B +
+                                        Real(6)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(6)*Real(dx[2])*dV_dz[d_num_species + 1];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = -double(2)*w_z_BB - double(3)*w_z_B +
-                                        double(6)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(6)*dx[2]*dV_dz[d_num_species + 2];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = -Real(2)*w_z_BB - Real(3)*w_z_B +
+                                        Real(6)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(6)*Real(dx[2])*dV_dz[d_num_species + 2];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = -double(2)*p_z_BB - double(3)*p_z_B +
-                                        double(6)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(6)*dx[2]*dV_dz[d_num_species + 3];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = -Real(2)*p_z_BB - Real(3)*p_z_B +
+                                        Real(6)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(6)*Real(dx[2])*dV_dz[d_num_species + 3];
                                 }
                                 else if (k == 2)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[k*(d_num_species + 4) + si] = double(3)*rho_Y_z_BB[si] + double(10)*rho_Y_z_B[si] -
-                                            double(18)*V_ghost[(k - 2)*(d_num_species + 4) + si] +
-                                            double(6)*V_ghost[(k - 1)*(d_num_species + 4) + si] +
-                                            double(12)*dx[2]*dV_dz[si];
+                                        V_ghost[k*(d_num_species + 4) + si] = Real(3)*rho_Y_z_BB[si] + Real(10)*rho_Y_z_B[si] -
+                                            Real(18)*V_ghost[(k - 2)*(d_num_species + 4) + si] +
+                                            Real(6)*V_ghost[(k - 1)*(d_num_species + 4) + si] +
+                                            Real(12)*Real(dx[2])*dV_dz[si];
                                     }
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species] = double(3)*u_z_BB + double(10)*u_z_B -
-                                        double(18)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species] +
-                                        double(6)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species] +
-                                        double(12)*dx[2]*dV_dz[d_num_species];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species] = Real(3)*u_z_BB + Real(10)*u_z_B -
+                                        Real(18)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(6)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species] +
+                                        Real(12)*Real(dx[2])*dV_dz[d_num_species];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = double(3)*v_z_BB + double(10)*v_z_B -
-                                        double(18)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(6)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(12)*dx[2]*dV_dz[d_num_species + 1];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = Real(3)*v_z_BB + Real(10)*v_z_B -
+                                        Real(18)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(6)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(12)*Real(dx[2])*dV_dz[d_num_species + 1];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = double(3)*w_z_BB + double(10)*w_z_B -
-                                        double(18)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(6)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(12)*dx[2]*dV_dz[d_num_species + 2];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = Real(3)*w_z_BB + Real(10)*w_z_B -
+                                        Real(18)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(6)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(12)*Real(dx[2])*dV_dz[d_num_species + 2];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = double(3)*p_z_BB + double(10)*p_z_B -
-                                        double(18)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(6)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(12)*dx[2]*dV_dz[d_num_species + 3];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = Real(3)*p_z_BB + Real(10)*p_z_B -
+                                        Real(18)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(6)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(12)*Real(dx[2])*dV_dz[d_num_species + 3];
                                 }
                                 else if (k == 3)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[k*(d_num_species + 4) + si] = -double(4)*rho_Y_z_BB[si] -
-                                            double(65)/double(3)*rho_Y_z_B[si] +
-                                            double(40)*V_ghost[(k - 3)*(d_num_species + 4) + si] -
-                                            double(20)*V_ghost[(k - 2)*(d_num_species + 4) + si] +
-                                            double(20)/double(3)*V_ghost[(k - 1)*(d_num_species + 4) + si] -
-                                            double(20)*dx[2]*dV_dz[si];
+                                        V_ghost[k*(d_num_species + 4) + si] = -Real(4)*rho_Y_z_BB[si] -
+                                            Real(65)/Real(3)*rho_Y_z_B[si] +
+                                            Real(40)*V_ghost[(k - 3)*(d_num_species + 4) + si] -
+                                            Real(20)*V_ghost[(k - 2)*(d_num_species + 4) + si] +
+                                            Real(20)/Real(3)*V_ghost[(k - 1)*(d_num_species + 4) + si] -
+                                            Real(20)*Real(dx[2])*dV_dz[si];
                                     }
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species] = -double(4)*u_z_BB -
-                                        double(65)/double(3)*u_z_B +
-                                        double(40)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species] -
-                                        double(20)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species] +
-                                        double(20)/double(3)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species] -
-                                        double(20)*dx[2]*dV_dz[d_num_species];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species] = -Real(4)*u_z_BB -
+                                        Real(65)/Real(3)*u_z_B +
+                                        Real(40)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(20)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(20)/Real(3)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species] -
+                                        Real(20)*Real(dx[2])*dV_dz[d_num_species];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = -double(4)*v_z_BB -
-                                        double(65)/double(3)*v_z_B +
-                                        double(40)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(20)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(20)/double(3)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(20)*dx[2]*dV_dz[d_num_species + 1];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = -Real(4)*v_z_BB -
+                                        Real(65)/Real(3)*v_z_B +
+                                        Real(40)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(20)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(20)/Real(3)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(20)*Real(dx[2])*dV_dz[d_num_species + 1];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = -double(4)*w_z_BB -
-                                        double(65)/double(3)*w_z_B +
-                                        double(40)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(20)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(20)/double(3)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(20)*dx[2]*dV_dz[d_num_species + 2];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = -Real(4)*w_z_BB -
+                                        Real(65)/Real(3)*w_z_B +
+                                        Real(40)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(20)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(20)/Real(3)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(20)*Real(dx[2])*dV_dz[d_num_species + 2];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = -double(4)*p_z_BB -
-                                        double(65)/double(3)*p_z_B +
-                                        double(40)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(20)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(20)/double(3)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(20)*dx[2]*dV_dz[d_num_species + 3];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = -Real(4)*p_z_BB -
+                                        Real(65)/Real(3)*p_z_B +
+                                        Real(40)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(20)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(20)/Real(3)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(20)*Real(dx[2])*dV_dz[d_num_species + 3];
                                 }
                                 else if (k == 4)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[k*(d_num_species + 4) + si] = double(5)*rho_Y_z_BB[si] +
-                                            double(77)/double(2)*rho_Y_z_B[si] -
-                                            double(75)*V_ghost[(k - 4)*(d_num_species + 4) + si] +
-                                            double(50)*V_ghost[(k - 3)*(d_num_species + 4) + si] -
-                                            double(25)*V_ghost[(k - 2)*(d_num_species + 4) + si] +
-                                            double(15)/double(2)*V_ghost[(k - 1)*(d_num_species + 4) + si] +
-                                            double(30)*dx[2]*dV_dz[si];
+                                        V_ghost[k*(d_num_species + 4) + si] = Real(5)*rho_Y_z_BB[si] +
+                                            Real(77)/Real(2)*rho_Y_z_B[si] -
+                                            Real(75)*V_ghost[(k - 4)*(d_num_species + 4) + si] +
+                                            Real(50)*V_ghost[(k - 3)*(d_num_species + 4) + si] -
+                                            Real(25)*V_ghost[(k - 2)*(d_num_species + 4) + si] +
+                                            Real(15)/Real(2)*V_ghost[(k - 1)*(d_num_species + 4) + si] +
+                                            Real(30)*Real(dx[2])*dV_dz[si];
                                     }
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species] = double(5)*u_z_BB +
-                                        double(77)/double(2)*u_z_B -
-                                        double(75)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species] +
-                                        double(50)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species] -
-                                        double(25)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species] +
-                                        double(15)/double(2)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species] +
-                                        double(30)*dx[2]*dV_dz[d_num_species];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species] = Real(5)*u_z_BB +
+                                        Real(77)/Real(2)*u_z_B -
+                                        Real(75)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species] +
+                                        Real(50)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(25)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(15)/Real(2)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species] +
+                                        Real(30)*Real(dx[2])*dV_dz[d_num_species];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = double(5)*v_z_BB +
-                                        double(77)/double(2)*v_z_B -
-                                        double(75)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(50)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(25)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(15)/double(2)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(30)*dx[2]*dV_dz[d_num_species + 1];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = Real(5)*v_z_BB +
+                                        Real(77)/Real(2)*v_z_B -
+                                        Real(75)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(50)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(25)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(15)/Real(2)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(30)*Real(dx[2])*dV_dz[d_num_species + 1];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = double(5)*w_z_BB +
-                                        double(77)/double(2)*w_z_B -
-                                        double(75)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(50)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(25)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(15)/double(2)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(30)*dx[2]*dV_dz[d_num_species + 2];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = Real(5)*w_z_BB +
+                                        Real(77)/Real(2)*w_z_B -
+                                        Real(75)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(50)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(25)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(15)/Real(2)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(30)*Real(dx[2])*dV_dz[d_num_species + 2];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = double(5)*p_z_BB +
-                                        double(77)/double(2)*p_z_B -
-                                        double(75)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(50)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(25)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(15)/double(2)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(30)*dx[2]*dV_dz[d_num_species + 3];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = Real(5)*p_z_BB +
+                                        Real(77)/Real(2)*p_z_B -
+                                        Real(75)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(50)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(25)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(15)/Real(2)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(30)*Real(dx[2])*dV_dz[d_num_species + 3];
                                 }
                                 else if (k == 5)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        V_ghost[k*(d_num_species + 4) + si] = -double(6)*rho_Y_z_BB[si] -
-                                            double(609)/double(10)*rho_Y_z_B[si] +
-                                            double(126)*V_ghost[(k - 5)*(d_num_species + 4) + si] -
-                                            double(105)*V_ghost[(k - 4)*(d_num_species + 4) + si] +
-                                            double(70)*V_ghost[(k - 3)*(d_num_species + 4) + si] -
-                                            double(63)/double(2)*V_ghost[(k - 2)*(d_num_species + 4) + si] +
-                                            double(42)/double(5)*V_ghost[(k - 1)*(d_num_species + 4) + si] -
-                                            double(42)*dx[2]*dV_dz[si];
+                                        V_ghost[k*(d_num_species + 4) + si] = -Real(6)*rho_Y_z_BB[si] -
+                                            Real(609)/Real(10)*rho_Y_z_B[si] +
+                                            Real(126)*V_ghost[(k - 5)*(d_num_species + 4) + si] -
+                                            Real(105)*V_ghost[(k - 4)*(d_num_species + 4) + si] +
+                                            Real(70)*V_ghost[(k - 3)*(d_num_species + 4) + si] -
+                                            Real(63)/Real(2)*V_ghost[(k - 2)*(d_num_species + 4) + si] +
+                                            Real(42)/Real(5)*V_ghost[(k - 1)*(d_num_species + 4) + si] -
+                                            Real(42)*Real(dx[2])*dV_dz[si];
                                     }
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species] = -double(6)*u_z_BB -
-                                        double(609)/double(10)*u_z_B +
-                                        double(126)*V_ghost[(k - 5)*(d_num_species + 4) + d_num_species] -
-                                        double(105)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species] +
-                                        double(70)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species] -
-                                        double(63)/double(2)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species] +
-                                        double(42)/double(5)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species] -
-                                        double(42)*dx[2]*dV_dz[d_num_species];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species] = -Real(6)*u_z_BB -
+                                        Real(609)/Real(10)*u_z_B +
+                                        Real(126)*V_ghost[(k - 5)*(d_num_species + 4) + d_num_species] -
+                                        Real(105)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species] +
+                                        Real(70)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species] -
+                                        Real(63)/Real(2)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species] +
+                                        Real(42)/Real(5)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species] -
+                                        Real(42)*Real(dx[2])*dV_dz[d_num_species];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = -double(6)*v_z_BB -
-                                        double(609)/double(10)*v_z_B +
-                                        double(126)*V_ghost[(k - 5)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(105)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(70)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(63)/double(2)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 1] +
-                                        double(42)/double(5)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 1] -
-                                        double(42)*dx[2]*dV_dz[d_num_species + 1];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 1] = -Real(6)*v_z_BB -
+                                        Real(609)/Real(10)*v_z_B +
+                                        Real(126)*V_ghost[(k - 5)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(105)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(70)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(63)/Real(2)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                        Real(42)/Real(5)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 1] -
+                                        Real(42)*Real(dx[2])*dV_dz[d_num_species + 1];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = -double(6)*w_z_BB -
-                                        double(609)/double(10)*w_z_B +
-                                        double(126)*V_ghost[(k - 5)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(105)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(70)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(63)/double(2)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 2] +
-                                        double(42)/double(5)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 2] -
-                                        double(42)*dx[2]*dV_dz[d_num_species + 2];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 2] = -Real(6)*w_z_BB -
+                                        Real(609)/Real(10)*w_z_B +
+                                        Real(126)*V_ghost[(k - 5)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(105)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(70)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(63)/Real(2)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                        Real(42)/Real(5)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 2] -
+                                        Real(42)*Real(dx[2])*dV_dz[d_num_species + 2];
                                     
-                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = -double(6)*p_z_BB -
-                                        double(609)/double(10)*p_z_B +
-                                        double(126)*V_ghost[(k - 5)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(105)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(70)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(63)/double(2)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 3] +
-                                        double(42)/double(5)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 3] -
-                                        double(42)*dx[2]*dV_dz[d_num_species + 3];
+                                    V_ghost[k*(d_num_species + 4) + d_num_species + 3] = -Real(6)*p_z_BB -
+                                        Real(609)/Real(10)*p_z_B +
+                                        Real(126)*V_ghost[(k - 5)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(105)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(70)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(63)/Real(2)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                        Real(42)/Real(5)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 3] -
+                                        Real(42)*Real(dx[2])*dV_dz[d_num_species + 3];
                                 }
                                 
                                 /*
                                  * Compute the mixture density.
                                  */
                                 
-                                double rho_ghost = double(0);
+                                Real rho_ghost = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_ghost += V_ghost[k*(d_num_species + 4) + si];
@@ -11987,7 +11987,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mass fractions.
                                  */
                                 
-                                std::vector<double> Y_ghost;
+                                std::vector<Real> Y_ghost;
                                 Y_ghost.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -11998,7 +11998,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Get the pointers to the mass fractions.
                                  */
                                 
-                                std::vector<const double*> Y_ghost_ptr;
+                                std::vector<const Real*> Y_ghost_ptr;
                                 Y_ghost_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -12014,13 +12014,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 Q[d_num_species + 1][idx_cell_mom] = rho_ghost*V_ghost[k*(d_num_species + 4) + d_num_species + 1];
                                 Q[d_num_species + 2][idx_cell_mom] = rho_ghost*V_ghost[k*(d_num_species + 4) + d_num_species + 2];
                                 
-                                const double epsilon = d_equation_of_state_mixing_rules->
+                                const Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergy(
                                         &rho_ghost,
                                         &V_ghost[k*(d_num_species + 4) + d_num_species + 3],
                                         Y_ghost_ptr);
                                 
-                                const double E = rho_ghost*epsilon +
+                                const Real E = rho_ghost*epsilon +
                                     half*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
@@ -12064,11 +12064,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
  */
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_edge_locs,
     const std::vector<int>& bdry_edge_conds,
-    const std::vector<std::vector<double> >& bdry_face_values,
+    const std::vector<std::vector<Real> >& bdry_face_values,
     const hier::IntVector& ghost_width_to_fill)
 {
     TBOX_ASSERT(static_cast<int>(conservative_var_data.size()) == 3);
@@ -12272,7 +12272,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                  * the conservative variables.
                  */
                 
-                std::vector<double*> Q;
+                std::vector<Real*> Q;
                 Q.reserve(d_num_eqn);
                 
                 std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -12395,7 +12395,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                double rho_pivot = 0.0;
+                                Real rho_pivot = 0.0;
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -12405,7 +12405,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<double> Y_pivot;
+                                std::vector<Real> Y_pivot;
                                 Y_pivot.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -12416,7 +12416,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Get the pointers to the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<const double*> Y_pivot_ptr;
+                                std::vector<const Real*> Y_pivot_ptr;
                                 Y_pivot_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -12432,46 +12432,46 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                     Q[si][idx_cell_rho_Y] = Q[si][idx_cell_pivot_rho_Y];
                                 }
                                 Q[d_num_species][idx_cell_mom] = -Q[d_num_species][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3];
                                 Q[d_num_species + 1][idx_cell_mom] = -Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3 + 1];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3 + 1];
                                 Q[d_num_species + 2][idx_cell_mom] = -Q[d_num_species + 2][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3 + 2];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3 + 2];
                                 
                                 /*
                                  * Set the values for total internal energy.
                                  */
                                 
-                                double epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
-                                    0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
+                                Real epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
                                     rho_pivot)/rho_pivot;
                                 
-                                double p_pivot = d_equation_of_state_mixing_rules->
+                                Real p_pivot = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_pivot,
                                         &epsilon_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T_pivot = d_equation_of_state_mixing_rules->
+                                Real T_pivot = d_equation_of_state_mixing_rules->
                                     getTemperature(
                                         &rho_pivot,
                                         &p_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T = T_pivot;
+                                Real T = T_pivot;
                                 
-                                double epsilon = d_equation_of_state_mixing_rules->
+                                Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergyFromTemperature(
                                         &rho_pivot,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double E = rho_pivot*epsilon +
-                                    0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] + 
-                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
-                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
+                                Real E = rho_pivot*epsilon +
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] + 
+                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
+                                    Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
                                     rho_pivot;
                                 
                                 Q[d_num_species + 3][idx_cell_E] = E;
@@ -12573,7 +12573,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                double rho_pivot = 0.0;
+                                Real rho_pivot = 0.0;
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -12583,7 +12583,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<double> Y_pivot;
+                                std::vector<Real> Y_pivot;
                                 Y_pivot.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -12594,7 +12594,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Get the pointers to the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<const double*> Y_pivot_ptr;
+                                std::vector<const Real*> Y_pivot_ptr;
                                 Y_pivot_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -12610,46 +12610,46 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                     Q[si][idx_cell_rho_Y] = Q[si][idx_cell_pivot_rho_Y];
                                 }
                                 Q[d_num_species][idx_cell_mom] = -Q[d_num_species][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3];
                                 Q[d_num_species + 1][idx_cell_mom] = -Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3 + 1];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3 + 1];
                                 Q[d_num_species + 2][idx_cell_mom] = -Q[d_num_species + 2][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3 + 2];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3 + 2];
                                 
                                 /*
                                  * Set the values for total internal energy.
                                  */
                                 
-                                double epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
-                                    0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
+                                Real epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
                                     rho_pivot)/rho_pivot;
                                 
-                                double p_pivot = d_equation_of_state_mixing_rules->
+                                Real p_pivot = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_pivot,
                                         &epsilon_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T_pivot = d_equation_of_state_mixing_rules->
+                                Real T_pivot = d_equation_of_state_mixing_rules->
                                     getTemperature(
                                         &rho_pivot,
                                         &p_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T = T_pivot;
+                                Real T = T_pivot;
                                 
-                                double epsilon = d_equation_of_state_mixing_rules->
+                                Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergyFromTemperature(
                                         &rho_pivot,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double E = rho_pivot*epsilon +
-                                    0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] + 
-                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
-                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
+                                Real E = rho_pivot*epsilon +
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] + 
+                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
+                                    Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
                                     rho_pivot;
                                 
                                 Q[d_num_species + 3][idx_cell_E] = E;
@@ -12751,7 +12751,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                double rho_pivot = 0.0;
+                                Real rho_pivot = 0.0;
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -12761,7 +12761,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<double> Y_pivot;
+                                std::vector<Real> Y_pivot;
                                 Y_pivot.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -12772,7 +12772,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Get the pointers to the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<const double*> Y_pivot_ptr;
+                                std::vector<const Real*> Y_pivot_ptr;
                                 Y_pivot_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -12788,46 +12788,46 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                     Q[si][idx_cell_rho_Y] = Q[si][idx_cell_pivot_rho_Y];
                                 }
                                 Q[d_num_species][idx_cell_mom] = -Q[d_num_species][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3];
                                 Q[d_num_species + 1][idx_cell_mom] = -Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3 + 1];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3 + 1];
                                 Q[d_num_species + 2][idx_cell_mom] = -Q[d_num_species + 2][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3 + 2];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3 + 2];
                                 
                                 /*
                                  * Set the values for total internal energy.
                                  */
                                 
-                                double epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
-                                    0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
+                                Real epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
                                     rho_pivot)/rho_pivot;
                                 
-                                double p_pivot = d_equation_of_state_mixing_rules->
+                                Real p_pivot = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_pivot,
                                         &epsilon_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T_pivot = d_equation_of_state_mixing_rules->
+                                Real T_pivot = d_equation_of_state_mixing_rules->
                                     getTemperature(
                                         &rho_pivot,
                                         &p_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T = T_pivot;
+                                Real T = T_pivot;
                                 
-                                double epsilon = d_equation_of_state_mixing_rules->
+                                Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergyFromTemperature(
                                         &rho_pivot,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double E = rho_pivot*epsilon +
-                                    0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] + 
-                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
-                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
+                                Real E = rho_pivot*epsilon +
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] + 
+                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
+                                    Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
                                     rho_pivot;
                                 
                                 Q[d_num_species + 3][idx_cell_E] = E;
@@ -12929,7 +12929,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                double rho_pivot = 0.0;
+                                Real rho_pivot = 0.0;
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -12939,7 +12939,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<double> Y_pivot;
+                                std::vector<Real> Y_pivot;
                                 Y_pivot.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -12950,7 +12950,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Get the pointers to the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<const double*> Y_pivot_ptr;
+                                std::vector<const Real*> Y_pivot_ptr;
                                 Y_pivot_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -12961,40 +12961,40 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Set the values for partial densities, momentum and total internal energy.
                                  */
                                 
-                                double epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
-                                    0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
+                                Real epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
                                     rho_pivot)/rho_pivot;
                                 
-                                double p_pivot = d_equation_of_state_mixing_rules->
+                                Real p_pivot = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_pivot,
                                         &epsilon_pivot,
                                         Y_pivot_ptr);
                                 
-                                double p = p_pivot;
+                                Real p = p_pivot;
                                 
-                                double T_pivot = d_equation_of_state_mixing_rules->
+                                Real T_pivot = d_equation_of_state_mixing_rules->
                                     getTemperature(
                                         &rho_pivot,
                                         &p_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T = -T_pivot + 2.0*d_bdry_face_isothermal_no_slip_T[face_loc_0];
+                                Real T = -T_pivot + Real(2)*d_bdry_face_isothermal_no_slip_T[face_loc_0];
                                 
-                                double rho = d_equation_of_state_mixing_rules->
+                                Real rho = d_equation_of_state_mixing_rules->
                                     getMixtureDensity(
                                         &p,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3];
-                                double v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3 + 1];
-                                double w = -Q[d_num_species + 2][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3 + 2];
+                                Real u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3];
+                                Real v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3 + 1];
+                                Real w = -Q[d_num_species + 2][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3 + 2];
                                 
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -13004,16 +13004,16 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                 Q[d_num_species + 1][idx_cell_mom] = rho*v;
                                 Q[d_num_species + 2][idx_cell_mom] = rho*w;
                                 
-                                double epsilon = d_equation_of_state_mixing_rules->
+                                Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergyFromTemperature(
                                         &rho,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double E = rho*epsilon +
-                                    0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
-                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
-                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/rho;
+                                Real E = rho*epsilon +
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
+                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
+                                    Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/rho;
                                 
                                 Q[d_num_species + 3][idx_cell_E] = E;
                             }
@@ -13114,7 +13114,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                double rho_pivot = 0.0;
+                                Real rho_pivot = 0.0;
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -13124,7 +13124,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<double> Y_pivot;
+                                std::vector<Real> Y_pivot;
                                 Y_pivot.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -13135,7 +13135,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Get the pointers to the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<const double*> Y_pivot_ptr;
+                                std::vector<const Real*> Y_pivot_ptr;
                                 Y_pivot_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -13146,40 +13146,40 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Set the values for partial densities, momentum and total internal energy.
                                  */
                                 
-                                double epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
-                                    0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
+                                Real epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
                                     rho_pivot)/rho_pivot;
                                 
-                                double p_pivot = d_equation_of_state_mixing_rules->
+                                Real p_pivot = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_pivot,
                                         &epsilon_pivot,
                                         Y_pivot_ptr);
                                 
-                                double p = p_pivot;
+                                Real p = p_pivot;
                                 
-                                double T_pivot = d_equation_of_state_mixing_rules->
+                                Real T_pivot = d_equation_of_state_mixing_rules->
                                     getTemperature(
                                         &rho_pivot,
                                         &p_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T = -T_pivot + 2.0*d_bdry_face_isothermal_no_slip_T[face_loc_1];
+                                Real T = -T_pivot + Real(2)*d_bdry_face_isothermal_no_slip_T[face_loc_1];
                                 
-                                double rho = d_equation_of_state_mixing_rules->
+                                Real rho = d_equation_of_state_mixing_rules->
                                     getMixtureDensity(
                                         &p,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3];
-                                double v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3 + 1];
-                                double w = -Q[d_num_species + 2][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3 + 2];
+                                Real u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3];
+                                Real v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3 + 1];
+                                Real w = -Q[d_num_species + 2][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3 + 2];
                                 
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -13189,16 +13189,16 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                 Q[d_num_species + 1][idx_cell_mom] = rho*v;
                                 Q[d_num_species + 2][idx_cell_mom] = rho*w;
                                 
-                                double epsilon = d_equation_of_state_mixing_rules->
+                                Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergyFromTemperature(
                                         &rho,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double E = rho*epsilon +
-                                    0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
-                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
-                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/rho;
+                                Real E = rho*epsilon +
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
+                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
+                                    Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/rho;
                                 
                                 Q[d_num_species + 3][idx_cell_E] = E;
                             }
@@ -13299,7 +13299,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                double rho_pivot = 0.0;
+                                Real rho_pivot = 0.0;
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -13309,7 +13309,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<double> Y_pivot;
+                                std::vector<Real> Y_pivot;
                                 Y_pivot.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -13320,7 +13320,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Get the pointers to the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<const double*> Y_pivot_ptr;
+                                std::vector<const Real*> Y_pivot_ptr;
                                 Y_pivot_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -13331,40 +13331,40 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Set the values for partial densities, momentum and total internal energy.
                                  */
                                 
-                                double epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
-                                    0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
+                                Real epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
                                     rho_pivot)/rho_pivot;
                                 
-                                double p_pivot = d_equation_of_state_mixing_rules->
+                                Real p_pivot = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_pivot,
                                         &epsilon_pivot,
                                         Y_pivot_ptr);
                                 
-                                double p = p_pivot;
+                                Real p = p_pivot;
                                 
-                                double T_pivot = d_equation_of_state_mixing_rules->
+                                Real T_pivot = d_equation_of_state_mixing_rules->
                                     getTemperature(
                                         &rho_pivot,
                                         &p_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T = -T_pivot + 2.0*d_bdry_face_isothermal_no_slip_T[face_loc_2];
+                                Real T = -T_pivot + Real(2)*d_bdry_face_isothermal_no_slip_T[face_loc_2];
                                 
-                                double rho = d_equation_of_state_mixing_rules->
+                                Real rho = d_equation_of_state_mixing_rules->
                                     getMixtureDensity(
                                         &p,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3];
-                                double v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3 + 1];
-                                double w = -Q[d_num_species + 2][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3 + 2];
+                                Real u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3];
+                                Real v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3 + 1];
+                                Real w = -Q[d_num_species + 2][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3 + 2];
                                 
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -13374,16 +13374,16 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                 Q[d_num_species + 1][idx_cell_mom] = rho*v;
                                 Q[d_num_species + 2][idx_cell_mom] = rho*w;
                                 
-                                double epsilon = d_equation_of_state_mixing_rules->
+                                Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergyFromTemperature(
                                         &rho,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double E = rho*epsilon +
-                                    0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
-                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
-                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/rho;
+                                Real E = rho*epsilon +
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
+                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
+                                    Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/rho;
                                 
                                 Q[d_num_species + 3][idx_cell_E] = E;
                             }
@@ -13423,11 +13423,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
  */
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_node_locs,
     const std::vector<int>& bdry_node_conds,
-    const std::vector<std::vector<double> >& bdry_face_values,
+    const std::vector<std::vector<Real> >& bdry_face_values,
     const hier::IntVector& ghost_width_to_fill)
 {
     TBOX_ASSERT(static_cast<int>(conservative_var_data.size()) == 3);
@@ -13610,7 +13610,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                  * the conservative variables.
                  */
                 
-                std::vector<double*> Q;
+                std::vector<Real*> Q;
                 Q.reserve(d_num_eqn);
                 
                 std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -13733,7 +13733,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                double rho_pivot = 0.0;
+                                Real rho_pivot = 0.0;
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -13743,7 +13743,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<double> Y_pivot;
+                                std::vector<Real> Y_pivot;
                                 Y_pivot.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -13754,7 +13754,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Get the pointers to the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<const double*> Y_pivot_ptr;
+                                std::vector<const Real*> Y_pivot_ptr;
                                 Y_pivot_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -13770,46 +13770,46 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                     Q[si][idx_cell_rho_Y] = Q[si][idx_cell_pivot_rho_Y];
                                 }
                                 Q[d_num_species][idx_cell_mom] = -Q[d_num_species][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3];
                                 Q[d_num_species + 1][idx_cell_mom] = -Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3 + 1];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3 + 1];
                                 Q[d_num_species + 2][idx_cell_mom] = -Q[d_num_species + 2][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3 + 2];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3 + 2];
                                 
                                 /*
                                  * Set the values for total internal energy.
                                  */
                                 
-                                double epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
-                                    0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
+                                Real epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
                                     rho_pivot)/rho_pivot;
                                 
-                                double p_pivot = d_equation_of_state_mixing_rules->
+                                Real p_pivot = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_pivot,
                                         &epsilon_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T_pivot = d_equation_of_state_mixing_rules->
+                                Real T_pivot = d_equation_of_state_mixing_rules->
                                     getTemperature(
                                         &rho_pivot,
                                         &p_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T = T_pivot;
+                                Real T = T_pivot;
                                 
-                                double epsilon = d_equation_of_state_mixing_rules->
+                                Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergyFromTemperature(
                                         &rho_pivot,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double E = rho_pivot*epsilon +
-                                    0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
-                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
-                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
+                                Real E = rho_pivot*epsilon +
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
+                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
+                                    Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
                                     rho_pivot;
                                 
                                 Q[d_num_species + 3][idx_cell_E] = E;
@@ -13911,7 +13911,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                double rho_pivot = 0.0;
+                                Real rho_pivot = 0.0;
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -13921,7 +13921,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<double> Y_pivot;
+                                std::vector<Real> Y_pivot;
                                 Y_pivot.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -13932,7 +13932,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Get the pointers to the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<const double*> Y_pivot_ptr;
+                                std::vector<const Real*> Y_pivot_ptr;
                                 Y_pivot_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -13948,46 +13948,46 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                     Q[si][idx_cell_rho_Y] = Q[si][idx_cell_pivot_rho_Y];
                                 }
                                 Q[d_num_species][idx_cell_mom] = -Q[d_num_species][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3];
                                 Q[d_num_species + 1][idx_cell_mom] = -Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3 + 1];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3 + 1];
                                 Q[d_num_species + 2][idx_cell_mom] = -Q[d_num_species + 2][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3 + 2];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3 + 2];
                                 
                                 /*
                                  * Set the values for total internal energy.
                                  */
                                 
-                                double epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
-                                    0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
+                                Real epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
                                     rho_pivot)/rho_pivot;
                                 
-                                double p_pivot = d_equation_of_state_mixing_rules->
+                                Real p_pivot = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_pivot,
                                         &epsilon_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T_pivot = d_equation_of_state_mixing_rules->
+                                Real T_pivot = d_equation_of_state_mixing_rules->
                                     getTemperature(
                                         &rho_pivot,
                                         &p_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T = T_pivot;
+                                Real T = T_pivot;
                                 
-                                double epsilon = d_equation_of_state_mixing_rules->
+                                Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergyFromTemperature(
                                         &rho_pivot,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double E = rho_pivot*epsilon +
-                                    0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
-                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
-                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
+                                Real E = rho_pivot*epsilon +
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
+                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
+                                    Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
                                     rho_pivot;
                                 
                                 Q[d_num_species + 3][idx_cell_E] = E;
@@ -14089,7 +14089,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                double rho_pivot = 0.0;
+                                Real rho_pivot = 0.0;
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -14099,7 +14099,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<double> Y_pivot;
+                                std::vector<Real> Y_pivot;
                                 Y_pivot.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -14110,7 +14110,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Get the pointers to the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<const double*> Y_pivot_ptr;
+                                std::vector<const Real*> Y_pivot_ptr;
                                 Y_pivot_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -14126,46 +14126,46 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                     Q[si][idx_cell_rho_Y] = Q[si][idx_cell_pivot_rho_Y];
                                 }
                                 Q[d_num_species][idx_cell_mom] = -Q[d_num_species][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3];
                                 Q[d_num_species + 1][idx_cell_mom] = -Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3 + 1];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3 + 1];
                                 Q[d_num_species + 2][idx_cell_mom] = -Q[d_num_species + 2][idx_cell_pivot_mom] +
-                                    2.0*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3 + 2];
+                                    Real(2)*rho_pivot*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3 + 2];
                                 
                                 /*
                                  * Set the values for total internal energy.
                                  */
                                 
-                                double epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
-                                    0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
+                                Real epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
                                     rho_pivot)/rho_pivot;
                                 
-                                double p_pivot = d_equation_of_state_mixing_rules->
+                                Real p_pivot = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_pivot,
                                         &epsilon_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T_pivot = d_equation_of_state_mixing_rules->
+                                Real T_pivot = d_equation_of_state_mixing_rules->
                                     getTemperature(
                                         &rho_pivot,
                                         &p_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T = T_pivot;
+                                Real T = T_pivot;
                                 
-                                double epsilon = d_equation_of_state_mixing_rules->
+                                Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergyFromTemperature(
                                         &rho_pivot,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double E = rho_pivot*epsilon +
-                                    0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
-                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
-                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
+                                Real E = rho_pivot*epsilon +
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
+                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
+                                    Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/
                                     rho_pivot;
                                 
                                 Q[d_num_species + 3][idx_cell_E] = E;
@@ -14267,7 +14267,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                double rho_pivot = 0.0;
+                                Real rho_pivot = 0.0;
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -14277,7 +14277,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<double> Y_pivot;
+                                std::vector<Real> Y_pivot;
                                 Y_pivot.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -14288,7 +14288,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Get the pointers to the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<const double*> Y_pivot_ptr;
+                                std::vector<const Real*> Y_pivot_ptr;
                                 Y_pivot_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -14299,40 +14299,40 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Set the values for partial densities, momentum and total internal energy.
                                  */
                                 
-                                double epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
-                                    0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
+                                Real epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
                                     rho_pivot)/rho_pivot;
                                 
-                                double p_pivot = d_equation_of_state_mixing_rules->
+                                Real p_pivot = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_pivot,
                                         &epsilon_pivot,
                                         Y_pivot_ptr);
                                 
-                                double p = p_pivot;
+                                Real p = p_pivot;
                                 
-                                double T_pivot = d_equation_of_state_mixing_rules->
+                                Real T_pivot = d_equation_of_state_mixing_rules->
                                     getTemperature(
                                         &rho_pivot,
                                         &p_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T = -T_pivot + 2.0*d_bdry_face_isothermal_no_slip_T[face_loc_0];
+                                Real T = -T_pivot + Real(2)*d_bdry_face_isothermal_no_slip_T[face_loc_0];
                                 
-                                double rho = d_equation_of_state_mixing_rules->
+                                Real rho = d_equation_of_state_mixing_rules->
                                     getMixtureDensity(
                                         &p,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3];
-                                double v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3 + 1];
-                                double w = -Q[d_num_species + 2][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3 + 2];
+                                Real u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3];
+                                Real v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3 + 1];
+                                Real w = -Q[d_num_species + 2][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3 + 2];
                                 
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -14342,16 +14342,16 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                 Q[d_num_species + 1][idx_cell_mom] = rho*v;
                                 Q[d_num_species + 2][idx_cell_mom] = rho*w;
                                 
-                                double epsilon = d_equation_of_state_mixing_rules->
+                                Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergyFromTemperature(
                                         &rho,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double E = rho*epsilon +
-                                    0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
-                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
-                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/rho;
+                                Real E = rho*epsilon +
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
+                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
+                                    Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/rho;
                                 
                                 Q[d_num_species + 3][idx_cell_E] = E;
                             }
@@ -14452,7 +14452,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                double rho_pivot = 0.0;
+                                Real rho_pivot = 0.0;
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -14462,7 +14462,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<double> Y_pivot;
+                                std::vector<Real> Y_pivot;
                                 Y_pivot.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -14473,7 +14473,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Get the pointers to the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<const double*> Y_pivot_ptr;
+                                std::vector<const Real*> Y_pivot_ptr;
                                 Y_pivot_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -14484,40 +14484,40 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Set the values for partial densities, momentum and total internal energy.
                                  */
                                 
-                                double epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
-                                    0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
+                                Real epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
                                     rho_pivot)/rho_pivot;
                                 
-                                double p_pivot = d_equation_of_state_mixing_rules->
+                                Real p_pivot = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_pivot,
                                         &epsilon_pivot,
                                         Y_pivot_ptr);
                                 
-                                double p = p_pivot;
+                                Real p = p_pivot;
                                 
-                                double T_pivot = d_equation_of_state_mixing_rules->
+                                Real T_pivot = d_equation_of_state_mixing_rules->
                                     getTemperature(
                                         &rho_pivot,
                                         &p_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T = -T_pivot + 2.0*d_bdry_face_isothermal_no_slip_T[face_loc_1];
+                                Real T = -T_pivot + Real(2)*d_bdry_face_isothermal_no_slip_T[face_loc_1];
                                 
-                                double rho = d_equation_of_state_mixing_rules->
+                                Real rho = d_equation_of_state_mixing_rules->
                                     getMixtureDensity(
                                         &p,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3];
-                                double v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3 + 1];
-                                double w = -Q[d_num_species + 2][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3 + 2];
+                                Real u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3];
+                                Real v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3 + 1];
+                                Real w = -Q[d_num_species + 2][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3 + 2];
                                 
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -14527,16 +14527,16 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                 Q[d_num_species + 1][idx_cell_mom] = rho*v;
                                 Q[d_num_species + 2][idx_cell_mom] = rho*w;
                                 
-                                double epsilon = d_equation_of_state_mixing_rules->
+                                Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergyFromTemperature(
                                         &rho,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double E = rho*epsilon +
-                                    0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
-                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
-                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/rho;
+                                Real E = rho*epsilon +
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
+                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
+                                    Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/rho;
                                 
                                 Q[d_num_species + 3][idx_cell_E] = E;
                             }
@@ -14637,7 +14637,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                double rho_pivot = 0.0;
+                                Real rho_pivot = 0.0;
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -14647,7 +14647,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<double> Y_pivot;
+                                std::vector<Real> Y_pivot;
                                 Y_pivot.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -14658,7 +14658,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Get the pointers to the mass fractions of the pivot.
                                  */
                                 
-                                std::vector<const double*> Y_pivot_ptr;
+                                std::vector<const Real*> Y_pivot_ptr;
                                 Y_pivot_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -14669,40 +14669,40 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Set the values for partial densities, momentum and total internal energy.
                                  */
                                 
-                                double epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
-                                    0.5*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
-                                         Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
+                                Real epsilon_pivot = (Q[d_num_species + 3][idx_cell_pivot_E] -
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_pivot_mom]*Q[d_num_species][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 1][idx_cell_pivot_mom]*Q[d_num_species + 1][idx_cell_pivot_mom] +
+                                    Q[d_num_species + 2][idx_cell_pivot_mom]*Q[d_num_species + 2][idx_cell_pivot_mom])/
                                     rho_pivot)/rho_pivot;
                                 
-                                double p_pivot = d_equation_of_state_mixing_rules->
+                                Real p_pivot = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_pivot,
                                         &epsilon_pivot,
                                         Y_pivot_ptr);
                                 
-                                double p = p_pivot;
+                                Real p = p_pivot;
                                 
-                                double T_pivot = d_equation_of_state_mixing_rules->
+                                Real T_pivot = d_equation_of_state_mixing_rules->
                                     getTemperature(
                                         &rho_pivot,
                                         &p_pivot,
                                         Y_pivot_ptr);
                                 
-                                double T = -T_pivot + 2.0*d_bdry_face_isothermal_no_slip_T[face_loc_2];
+                                Real T = -T_pivot + Real(2)*d_bdry_face_isothermal_no_slip_T[face_loc_2];
                                 
-                                double rho = d_equation_of_state_mixing_rules->
+                                Real rho = d_equation_of_state_mixing_rules->
                                     getMixtureDensity(
                                         &p,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3];
-                                double v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3 + 1];
-                                double w = -Q[d_num_species + 2][idx_cell_pivot_mom]/rho_pivot +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3 + 2];
+                                Real u = -Q[d_num_species][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3];
+                                Real v = -Q[d_num_species + 1][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3 + 1];
+                                Real w = -Q[d_num_species + 2][idx_cell_pivot_mom]/rho_pivot +
+                                    Real(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3 + 2];
                                 
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -14712,16 +14712,16 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                 Q[d_num_species + 1][idx_cell_mom] = rho*v;
                                 Q[d_num_species + 2][idx_cell_mom] = rho*w;
                                 
-                                double epsilon = d_equation_of_state_mixing_rules->
+                                Real epsilon = d_equation_of_state_mixing_rules->
                                     getInternalEnergyFromTemperature(
                                         &rho,
                                         &T,
                                         Y_pivot_ptr);
                                 
-                                double E = rho*epsilon +
-                                    0.5*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
-                                         Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
-                                         Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/rho;
+                                Real E = rho*epsilon +
+                                    Real(1)/Real(2)*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
+                                    Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom] +
+                                    Q[d_num_species + 2][idx_cell_mom]*Q[d_num_species + 2][idx_cell_mom])/rho;
                                 
                                 Q[d_num_species + 3][idx_cell_E] = E;
                             }
@@ -14961,7 +14961,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read2dBdryEdges(
                     
                     edge_locs[ei] = BOGUS_BDRY_LOC;
                     
-                    if (d_bdry_edge_nonreflecting_outflow_beta[s] != double(1))
+                    if (d_bdry_edge_nonreflecting_outflow_beta[s] != Real(1))
                     {
                         d_use_transverse_derivatives_bc |= true;
                         d_num_ghosts_transverse_derivatives_bc = hier::IntVector::max(
@@ -15296,7 +15296,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryFaces(
                     
                     face_locs[fi] = BOGUS_BDRY_LOC;
                     
-                    if (d_bdry_face_nonreflecting_outflow_beta[s] != double(1))
+                    if (d_bdry_face_nonreflecting_outflow_beta[s] != Real(1))
                     {
                         d_use_transverse_derivatives_bc |= true;
                         d_num_ghosts_transverse_derivatives_bc = hier::IntVector::max(
@@ -15953,11 +15953,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::readAdiabaticNoSlip(
     TBOX_ASSERT(db);
     TBOX_ASSERT(!db_name.empty());
     
-    std::vector<double> data_vel;
+    std::vector<Real> data_vel;
     
     if (db->keyExists("velocity"))
     {
-        data_vel = db->getDoubleVector("velocity");
+        data_vel = db->getRealVector("velocity");
     }
     else
     {
@@ -16026,12 +16026,12 @@ FlowModelBoundaryUtilitiesFourEqnConservative::readIsothermalNoSlip(
     TBOX_ASSERT(db);
     TBOX_ASSERT(!db_name.empty());
     
-    double data_T = 0.0;
-    std::vector<double> data_vel;
+    Real data_T = 0.0;
+    std::vector<Real> data_vel;
     
     if (db->keyExists("temperature"))
     {
-        data_T = db->getDouble("temperature");
+        data_T = db->getFloat("temperature");
     }
     else
     {
@@ -16045,7 +16045,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::readIsothermalNoSlip(
     
     if (db->keyExists("velocity"))
     {
-        data_vel = db->getDoubleVector("velocity");
+        data_vel = db->getRealVector("velocity");
     }
     else
     {
@@ -16117,14 +16117,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::readNonreflectingOutflow(
     TBOX_ASSERT(db);
     TBOX_ASSERT(!db_name.empty());
 
-    double p_t = 0.0;
-    double sigma = double(1)/double(4); // 0.25
-    double beta = 0.0;
-    double length_char = 0.0;
+    Real p_t = 0.0;
+    Real sigma = Real(1)/Real(4); // 0.25
+    Real beta = 0.0;
+    Real length_char = 0.0;
 
     if (db->keyExists("pressure_target"))
     {
-        p_t = db->getDouble("pressure_target");
+        p_t = db->getFloat("pressure_target");
     }
     else
     {
@@ -16138,12 +16138,12 @@ FlowModelBoundaryUtilitiesFourEqnConservative::readNonreflectingOutflow(
 
     if (db->keyExists("sigma"))
     {
-        sigma = db->getDouble("sigma");
+        sigma = db->getFloat("sigma");
     }
 
     if (db->keyExists("beta"))
     {
-        beta = db->getDouble("beta");
+        beta = db->getFloat("beta");
     }
     else
     {
@@ -16157,7 +16157,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::readNonreflectingOutflow(
 
     if (db->keyExists("length_char"))
     {
-        length_char = db->getDouble("length_char");
+        length_char = db->getFloat("length_char");
     }
     else
     {

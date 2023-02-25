@@ -7,12 +7,12 @@
 /*
  * Compute centroid in x-direction.
  */
-double FlowModelMPIHelperCentroid::getCentroidInXDirection(
+Real FlowModelMPIHelperCentroid::getCentroidInXDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    double x_c = tbox::MathUtilities<double>::getMax();
+    Real x_c = tbox::MathUtilities<Real>::getMax();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -29,13 +29,13 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
     
     if (d_dim == tbox::Dimension(1))
     {
-        double num_local  = double(0);
-        double num_global = double(0);
+        Real num_local  = Real(0);
+        Real num_global = Real(0);
         
-        double den_local  = double(0);
-        double den_global = double(0);
+        Real den_local  = Real(0);
+        Real den_global = Real(0);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -90,10 +90,10 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -109,8 +109,8 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                 
                 const int num_ghosts_0_quantity = num_ghosts_quantity[0];
                 
-                double num_to_add = double(0);
-                double den_to_add = double(0);
+                Real num_to_add = Real(0);
+                Real den_to_add = Real(0);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -157,15 +157,15 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                        const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                         
-                        num_to_add += x*u[idx]/((double) n_overlapped);
-                        den_to_add += u[idx]/((double) n_overlapped);
+                        num_to_add += x*u[idx]/((Real) n_overlapped);
+                        den_to_add += u[idx]/((Real) n_overlapped);
                     }
                 }
                 
-                num_to_add = num_to_add*dx[0];
-                den_to_add = den_to_add*dx[0];
+                num_to_add = num_to_add*Real(dx[0]);
+                den_to_add = den_to_add*Real(dx[0]);
                 
                 num_local += num_to_add;
                 den_local += den_to_add;
@@ -200,13 +200,13 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double num_local  = double(0);
-        double num_global = double(0);
+        Real num_local  = Real(0);
+        Real num_global = Real(0);
         
-        double den_local  = double(0);
-        double den_global = double(0);
+        Real den_local  = Real(0);
+        Real den_global = Real(0);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -261,10 +261,10 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -283,8 +283,8 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                 const int num_ghosts_1_quantity = num_ghosts_quantity[1];
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 
-                double num_to_add = double(0);
-                double den_to_add = double(0);
+                Real num_to_add = Real(0);
+                Real den_to_add = Real(0);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -337,16 +337,16 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                            const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                             
-                            num_to_add += x*u[idx]/((double) n_overlapped);
-                            den_to_add += u[idx]/((double) n_overlapped);
+                            num_to_add += x*u[idx]/((Real) n_overlapped);
+                            den_to_add += u[idx]/((Real) n_overlapped);
                         }
                     }
                 }
                 
-                num_to_add = num_to_add*dx[0]*dx[1];
-                den_to_add = den_to_add*dx[0]*dx[1];
+                num_to_add = num_to_add*Real(dx[0]*dx[1]);
+                den_to_add = den_to_add*Real(dx[0]*dx[1]);
                 
                 num_local += num_to_add;
                 den_local += den_to_add;
@@ -381,13 +381,13 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double num_local  = double(0);
-        double num_global = double(0);
+        Real num_local  = Real(0);
+        Real num_global = Real(0);
         
-        double den_local  = double(0);
-        double den_global = double(0);
+        Real den_local  = Real(0);
+        Real den_global = Real(0);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -442,10 +442,10 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -466,8 +466,8 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
                 
-                double num_to_add = double(0);
-                double den_to_add = double(0);
+                Real num_to_add = Real(0);
+                Real den_to_add = Real(0);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -527,17 +527,17 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                                const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                                 
-                                num_to_add += x*u[idx]/((double) n_overlapped);
-                                den_to_add += u[idx]/((double) n_overlapped);
+                                num_to_add += x*u[idx]/((Real) n_overlapped);
+                                den_to_add += u[idx]/((Real) n_overlapped);
                             }
                         }
                     }
                 }
                 
-                num_to_add = num_to_add*dx[0]*dx[1]*dx[2];
-                den_to_add = den_to_add*dx[0]*dx[1]*dx[2];
+                num_to_add = num_to_add*Real(dx[0]*dx[1]*dx[2]);
+                den_to_add = den_to_add*Real(dx[0]*dx[1]*dx[2]);
                 
                 num_local += num_to_add;
                 den_local += den_to_add;
@@ -578,12 +578,12 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
 /*
  * Compute centroid in y-direction.
  */
-double FlowModelMPIHelperCentroid::getCentroidInYDirection(
+Real FlowModelMPIHelperCentroid::getCentroidInYDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    double y_c = tbox::MathUtilities<double>::getMax();
+    Real y_c = tbox::MathUtilities<Real>::getMax();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -607,13 +607,13 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double num_local  = double(0);
-        double num_global = double(0);
+        Real num_local  = Real(0);
+        Real num_global = Real(0);
         
-        double den_local  = double(0);
-        double den_global = double(0);
+        Real den_local  = Real(0);
+        Real den_global = Real(0);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -668,10 +668,10 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -690,8 +690,8 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
                 const int num_ghosts_1_quantity = num_ghosts_quantity[1];
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 
-                double num_to_add = double(0);
-                double den_to_add = double(0);
+                Real num_to_add = Real(0);
+                Real den_to_add = Real(0);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -744,16 +744,16 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
+                            const Real y = (Real(relative_idx_lo_1 + j) + half)*Real(dx[1]) + Real(x_lo_patch[1]);
                             
-                            num_to_add += y*u[idx]/((double) n_overlapped);
-                            den_to_add += u[idx]/((double) n_overlapped);
+                            num_to_add += y*u[idx]/((Real) n_overlapped);
+                            den_to_add += u[idx]/((Real) n_overlapped);
                         }
                     }
                 }
                 
-                num_to_add = num_to_add*dx[0]*dx[1];
-                den_to_add = den_to_add*dx[0]*dx[1];
+                num_to_add = num_to_add*Real(dx[0]*dx[1]);
+                den_to_add = den_to_add*Real(dx[0]*dx[1]);
                 
                 num_local += num_to_add;
                 den_local += den_to_add;
@@ -788,13 +788,13 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double num_local  = double(0);
-        double num_global = double(0);
+        Real num_local  = Real(0);
+        Real num_global = Real(0);
         
-        double den_local  = double(0);
-        double den_global = double(0);
+        Real den_local  = Real(0);
+        Real den_global = Real(0);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -849,10 +849,10 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -873,8 +873,8 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
                 
-                double num_to_add = double(0);
-                double den_to_add = double(0);
+                Real num_to_add = Real(0);
+                Real den_to_add = Real(0);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -934,17 +934,17 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
+                                const Real y = (Real(relative_idx_lo_1 + j) + half)*Real(dx[1]) + Real(x_lo_patch[1]);
                                 
-                                num_to_add += y*u[idx]/((double) n_overlapped);
-                                den_to_add += u[idx]/((double) n_overlapped);
+                                num_to_add += y*u[idx]/((Real) n_overlapped);
+                                den_to_add += u[idx]/((Real) n_overlapped);
                             }
                         }
                     }
                 }
                 
-                num_to_add = num_to_add*dx[0]*dx[1]*dx[2];
-                den_to_add = den_to_add*dx[0]*dx[1]*dx[2];
+                num_to_add = num_to_add*Real(dx[0]*dx[1]*dx[2]);
+                den_to_add = den_to_add*Real(dx[0]*dx[1]*dx[2]);
                 
                 num_local += num_to_add;
                 den_local += den_to_add;
@@ -985,12 +985,12 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
 /*
  * Compute centroid in z-direction.
  */
-double FlowModelMPIHelperCentroid::getCentroidInZDirection(
+Real FlowModelMPIHelperCentroid::getCentroidInZDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    double z_c = tbox::MathUtilities<double>::getMax();
+    Real z_c = tbox::MathUtilities<Real>::getMax();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -1021,13 +1021,13 @@ double FlowModelMPIHelperCentroid::getCentroidInZDirection(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double num_local  = double(0);
-        double num_global = double(0);
+        Real num_local  = Real(0);
+        Real num_global = Real(0);
         
-        double den_local  = double(0);
-        double den_global = double(0);
+        Real den_local  = Real(0);
+        Real den_global = Real(0);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -1082,10 +1082,10 @@ double FlowModelMPIHelperCentroid::getCentroidInZDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -1106,8 +1106,8 @@ double FlowModelMPIHelperCentroid::getCentroidInZDirection(
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
                 
-                double num_to_add = double(0);
-                double den_to_add = double(0);
+                Real num_to_add = Real(0);
+                Real den_to_add = Real(0);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -1167,17 +1167,17 @@ double FlowModelMPIHelperCentroid::getCentroidInZDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double z = (relative_idx_lo_2 + k + half)*dx[2] + x_lo_patch[2];
+                                const Real z = (Real(relative_idx_lo_2 + k) + half)*Real(dx[2]) + Real(x_lo_patch[2]);
                                 
-                                num_to_add += z*u[idx]/((double) n_overlapped);
-                                den_to_add += u[idx]/((double) n_overlapped);
+                                num_to_add += z*u[idx]/((Real) n_overlapped);
+                                den_to_add += u[idx]/((Real) n_overlapped);
                             }
                         }
                     }
                 }
                 
-                num_to_add = num_to_add*dx[0]*dx[1]*dx[2];
-                den_to_add = den_to_add*dx[0]*dx[1]*dx[2];
+                num_to_add = num_to_add*Real(dx[0]*dx[1]*dx[2]);
+                den_to_add = den_to_add*Real(dx[0]*dx[1]*dx[2]);
                 
                 num_local += num_to_add;
                 den_local += den_to_add;

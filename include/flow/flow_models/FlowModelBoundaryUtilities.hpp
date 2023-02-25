@@ -168,11 +168,11 @@ class FlowModelBoundaryUtilities
          */
         virtual void
         fill1dNodeBoundaryData(
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
-            const std::vector<std::vector<double> >& bdry_node_values,
+            const std::vector<std::vector<Real> >& bdry_node_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(1))) = 0;
         
         /*
@@ -181,11 +181,11 @@ class FlowModelBoundaryUtilities
          */
         virtual void
         fill2dEdgeBoundaryData(
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_edge_locs,
             const std::vector<int>& bdry_edge_conds,
-            const std::vector<std::vector<double> >& bdry_edge_values,
+            const std::vector<std::vector<Real> >& bdry_edge_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(2))) = 0;
         
         /*
@@ -194,11 +194,11 @@ class FlowModelBoundaryUtilities
          */
         virtual void
         fill2dNodeBoundaryData(
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
-            const std::vector<std::vector<double> >& bdry_edge_values,
+            const std::vector<std::vector<Real> >& bdry_edge_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(2))) = 0;
         
         /*
@@ -207,11 +207,11 @@ class FlowModelBoundaryUtilities
          */
         virtual void
         fill3dFaceBoundaryData(
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_face_locs,
             const std::vector<int>& bdry_face_conds,
-            const std::vector<std::vector<double> >& bdry_face_values,
+            const std::vector<std::vector<Real> >& bdry_face_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(3))) = 0;
         
         /*
@@ -220,11 +220,11 @@ class FlowModelBoundaryUtilities
          */
         virtual void
         fill3dEdgeBoundaryData(
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_edge_locs,
             const std::vector<int>& bdry_edge_conds,
-            const std::vector<std::vector<double> >& bdry_face_values,
+            const std::vector<std::vector<Real> >& bdry_face_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(3))) = 0;
         
         /*
@@ -233,11 +233,11 @@ class FlowModelBoundaryUtilities
          */
         virtual void
         fill3dNodeBoundaryData(
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
-            const std::vector<std::vector<double> >& bdry_face_values,
+            const std::vector<std::vector<Real> >& bdry_face_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(3))) = 0;
         
         bool
