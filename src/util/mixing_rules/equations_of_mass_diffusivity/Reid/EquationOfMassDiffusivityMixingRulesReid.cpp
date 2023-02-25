@@ -28,7 +28,7 @@ EquationOfMassDiffusivityMixingRulesReid::EquationOfMassDiffusivityMixingRulesRe
         if (static_cast<int>(species_epsilon_by_k_array_size) == d_num_species)
         {
             d_species_epsilon_by_k =
-                equation_of_mass_diffusivity_mixing_rules_db->getDoubleVector("species_epsilon_by_k");
+                equation_of_mass_diffusivity_mixing_rules_db->getRealVector("species_epsilon_by_k");
         }
         else
         {
@@ -45,7 +45,7 @@ EquationOfMassDiffusivityMixingRulesReid::EquationOfMassDiffusivityMixingRulesRe
         if (static_cast<int>(species_epsilon_by_k_array_size) == d_num_species)
         {
             d_species_epsilon_by_k =
-                equation_of_mass_diffusivity_mixing_rules_db->getDoubleVector("d_species_epsilon_by_k");
+                equation_of_mass_diffusivity_mixing_rules_db->getRealVector("d_species_epsilon_by_k");
         }
         else
         {
@@ -75,7 +75,7 @@ EquationOfMassDiffusivityMixingRulesReid::EquationOfMassDiffusivityMixingRulesRe
         if (static_cast<int>(species_sigma_array_size) == d_num_species)
         {
             d_species_sigma =
-                equation_of_mass_diffusivity_mixing_rules_db->getDoubleVector("species_sigma");
+                equation_of_mass_diffusivity_mixing_rules_db->getRealVector("species_sigma");
         }
         else
         {
@@ -92,7 +92,7 @@ EquationOfMassDiffusivityMixingRulesReid::EquationOfMassDiffusivityMixingRulesRe
         if (static_cast<int>(species_sigma_array_size) == d_num_species)
         {
             d_species_sigma =
-                equation_of_mass_diffusivity_mixing_rules_db->getDoubleVector("d_species_sigma");
+                equation_of_mass_diffusivity_mixing_rules_db->getRealVector("d_species_sigma");
         }
         else
         {
@@ -122,7 +122,7 @@ EquationOfMassDiffusivityMixingRulesReid::EquationOfMassDiffusivityMixingRulesRe
         if (static_cast<int>(species_M_array_size) == d_num_species)
         {
             d_species_M =
-                equation_of_mass_diffusivity_mixing_rules_db->getDoubleVector("species_M");
+                equation_of_mass_diffusivity_mixing_rules_db->getRealVector("species_M");
         }
         else
         {
@@ -139,7 +139,7 @@ EquationOfMassDiffusivityMixingRulesReid::EquationOfMassDiffusivityMixingRulesRe
         if (static_cast<int>(species_M_array_size) == d_num_species)
         {
             d_species_M =
-                equation_of_mass_diffusivity_mixing_rules_db->getDoubleVector("d_species_M");
+                equation_of_mass_diffusivity_mixing_rules_db->getRealVector("d_species_M");
         }
         else
         {
@@ -229,9 +229,9 @@ void
 EquationOfMassDiffusivityMixingRulesReid::putToRestart(
     const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
-    restart_db->putDoubleVector("d_species_epsilon_by_k", d_species_epsilon_by_k);
-    restart_db->putDoubleVector("d_species_sigma", d_species_sigma);
-    restart_db->putDoubleVector("d_species_M", d_species_M);
+    restart_db->putRealVector("d_species_epsilon_by_k", d_species_epsilon_by_k);
+    restart_db->putRealVector("d_species_sigma", d_species_sigma);
+    restart_db->putRealVector("d_species_M", d_species_M);
 }
 
 
@@ -240,10 +240,10 @@ EquationOfMassDiffusivityMixingRulesReid::putToRestart(
  */
 void
 EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
-    std::vector<double*>& mass_diffusivities,
-    const double* const pressure,
-    const double* const temperature,
-    const std::vector<const double*>& mass_fractions) const
+    std::vector<Real*>& mass_diffusivities,
+    const Real* const pressure,
+    const Real* const temperature,
+    const std::vector<const Real*>& mass_fractions) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
@@ -261,12 +261,12 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
          * of species i and j.
          */
         
-        std::vector<double> species_molecular_properties_i;
-        std::vector<double> species_molecular_properties_j;
-        std::vector<double*> species_molecular_properties_ptr_i;
-        std::vector<double*> species_molecular_properties_ptr_j;
-        std::vector<const double*> species_molecular_properties_const_ptr_i;
-        std::vector<const double*> species_molecular_properties_const_ptr_j;
+        std::vector<Real> species_molecular_properties_i;
+        std::vector<Real> species_molecular_properties_j;
+        std::vector<Real*> species_molecular_properties_ptr_i;
+        std::vector<Real*> species_molecular_properties_ptr_j;
+        std::vector<const Real*> species_molecular_properties_const_ptr_i;
+        std::vector<const Real*> species_molecular_properties_const_ptr_j;
         
         const int num_molecular_properties = getNumberOfSpeciesMolecularProperties();
         
@@ -289,7 +289,7 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
          * Get the binary mass diffusivity for each pair of species.
          */
         
-        std::vector<double> D_ij((d_num_species - 1)*d_num_species/2);
+        std::vector<Real> D_ij((d_num_species - 1)*d_num_species/2);
         
         for (int i = 0; i < d_num_species; i++)
         {
@@ -315,10 +315,10 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
          * Compute the mole fractions.
          */
         
-        std::vector<double> X;
+        std::vector<Real> X;
         X.reserve(d_num_species);
         
-        double sum = double(0);
+        Real sum = Real(0);
         
         if (static_cast<int>(mass_fractions.size()) == d_num_species)
         {
@@ -326,19 +326,19 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
             {
                 getSpeciesMolecularProperties(species_molecular_properties_ptr_i, si);
                 X.push_back((*(mass_fractions[si]))/(species_molecular_properties_i[2]));
-                X[si] = std::max(double(0), X[si]);
+                X[si] = std::max(Real(0), X[si]);
                 sum += X[si];
             }
         }
         else if (static_cast<int>(mass_fractions.size()) == d_num_species - 1)
         {
-            double Y_last = double(1);
+            Real Y_last = Real(1);
             
             for (int si = 0; si < d_num_species - 1; si++)
             {
                 getSpeciesMolecularProperties(species_molecular_properties_ptr_i, si);
                 X.push_back((*(mass_fractions[si]))/(species_molecular_properties_i[2]));
-                X[si] = std::max(double(0), X[si]);
+                X[si] = std::max(Real(0), X[si]);
                 sum += X[si];
                 
                 // Compute the mass fraction of the last species.
@@ -347,7 +347,7 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
             
             getSpeciesMolecularProperties(species_molecular_properties_ptr_i, d_num_species - 1);
             X.push_back(Y_last/(species_molecular_properties_i[2]));
-            X[d_num_species - 1] = std::max(double(0), X[d_num_species - 1]);
+            X[d_num_species - 1] = std::max(Real(0), X[d_num_species - 1]);
             sum += X[d_num_species - 1];
         }
         else
@@ -370,8 +370,8 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
         
         for (int si = 0; si < d_num_species; si++)
         {
-            double& D = *(mass_diffusivities[si]);
-            D = double(0);
+            Real& D = *(mass_diffusivities[si]);
+            D = Real(0);
             
             for (int sj = 0; sj < d_num_species; sj++)
             {
@@ -391,16 +391,16 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
                             (si - (sj + 1));
                     }
                     
-                    D += (X[sj] + double(EPSILON))/(D_ij[idx] + double(EPSILON));
+                    D += (X[sj] + Real(EPSILON))/(D_ij[idx] + Real(EPSILON));
                 }
             }
             
-            D = (double(1) - X[si] + double(EPSILON))/D;
+            D = (Real(1) - X[si] + Real(EPSILON))/D;
         }
     }
     else
     {
-        *(mass_diffusivities[0]) = double(0);
+        *(mass_diffusivities[0]) = Real(0);
     }
 }
 
@@ -410,10 +410,10 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
  */
 void
 EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_diffusivities,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_diffusivities,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -429,7 +429,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     {
         if (domain.empty())
         {
-            data_mass_diffusivities->fillAll(double(0));
+            data_mass_diffusivities->fillAll(Real(0));
         }
         else
         {
@@ -437,7 +437,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             TBOX_ASSERT(data_mass_diffusivities->getGhostBox().contains(domain));
 #endif
             
-            data_mass_diffusivities->fillAll(double(0), domain);
+            data_mass_diffusivities->fillAll(Real(0), domain);
         }
         
         return;
@@ -457,12 +457,12 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     const hier::IntVector ghostcell_dims_mass_fractions = ghost_box_mass_fractions.numberCells();
     
     // Delcare data containers for binary mass diffusivities and mole fractions.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_binary_mass_diffusivities;
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_mole_fractions;
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_sum;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_binary_mass_diffusivities;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_mole_fractions;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_sum;
     
     // Declare data container for last volume fraction.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions_last;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_mass_fractions_last;
     
     /*
      * Get the local lower index and number of cells in each direction of the domain.
@@ -525,18 +525,18 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         
         ghostcell_dims_min = interior_dims + num_ghosts_min*2;
         
-        data_binary_mass_diffusivities = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_binary_mass_diffusivities = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             interior_box, (d_num_species - 1)*d_num_species/2, num_ghosts_min);
         
-        data_mole_fractions = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_mole_fractions = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             interior_box, d_num_species, num_ghosts_min);
         
-        data_sum = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_sum = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             interior_box, 1, num_ghosts_min);
         
         if (data_mass_fractions->getDepth() == d_num_species - 1)
         {
-            data_mass_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+            data_mass_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
                 interior_box, 1, num_ghosts_min);
         }
     }
@@ -560,73 +560,73 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         
         ghostcell_dims_min = domain_dims;
         
-        data_binary_mass_diffusivities = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_binary_mass_diffusivities = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             domain, (d_num_species - 1)*d_num_species/2, hier::IntVector::getZero(d_dim));
         
-        data_mole_fractions = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_mole_fractions = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             domain, d_num_species, hier::IntVector::getZero(d_dim));
         
-        data_sum = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_sum = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             domain, 1, hier::IntVector::getZero(d_dim));
         
         if (data_mass_fractions->getDepth() == d_num_species - 1)
         {
-            data_mass_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+            data_mass_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
                 domain, 1, hier::IntVector::getZero(d_dim));
         }
     }
     
-    data_sum->fillAll(double(0));
+    data_sum->fillAll(Real(0));
     
     /*
      * Get the pointers to the cell data.
      */
     
-    std::vector<double*> D;
+    std::vector<Real*> D;
     D.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
         D.push_back(data_mass_diffusivities->getPointer(si));
     }
-    double* p = data_pressure->getPointer(0);
-    double* T = data_temperature->getPointer(0);
-    std::vector<double*> D_ij;
+    Real* p = data_pressure->getPointer(0);
+    Real* T = data_temperature->getPointer(0);
+    std::vector<Real*> D_ij;
     D_ij.reserve((d_num_species - 1)*d_num_species/2);
     for (int si = 0; si < (d_num_species - 1)*d_num_species/2; si++)
     {
         D_ij.push_back(data_binary_mass_diffusivities->getPointer(si));
     }
-    std::vector<double*> X;
+    std::vector<Real*> X;
     X.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
         X.push_back(data_mole_fractions->getPointer(si));
     }
-    double* sum = data_sum->getPointer(0);
+    Real* sum = data_sum->getPointer(0);
     
     /*
      * Compute the binary mass diffusivities.
      */
     
     {
-        const double A = double(1.06036);
-        const double B = double(-0.1561);
-        const double C = double(0.19300);
-        const double D = double(-0.47635);
-        const double E = double(1.03587);
-        const double F = double(-1.52996);
-        const double G = double(1.76474);
-        const double H = double(-3.89411);
+        const Real A = Real(1.06036);
+        const Real B = Real(-0.1561);
+        const Real C = Real(0.19300);
+        const Real D = Real(-0.47635);
+        const Real E = Real(1.03587);
+        const Real F = Real(-1.52996);
+        const Real G = Real(1.76474);
+        const Real H = Real(-3.89411);
         
         /*
          * Initialize the containers and pointers to the containers for the molecular properties of
          * species i and j.
          */
         
-        std::vector<double> species_molecular_properties_i;
-        std::vector<double> species_molecular_properties_j;
-        std::vector<double*> species_molecular_properties_ptr_i;
-        std::vector<double*> species_molecular_properties_ptr_j;
+        std::vector<Real> species_molecular_properties_i;
+        std::vector<Real> species_molecular_properties_j;
+        std::vector<Real*> species_molecular_properties_ptr_i;
+        std::vector<Real*> species_molecular_properties_ptr_j;
         
         const int num_molecular_properties = getNumberOfSpeciesMolecularProperties();
         
@@ -645,23 +645,23 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         {
             getSpeciesMolecularProperties(species_molecular_properties_ptr_i, si);
             
-            const double& epsilon_by_k_i = species_molecular_properties_i[0];
-            const double& sigma_i = species_molecular_properties_i[1];
-            const double& M_i = species_molecular_properties_i[2];
+            const Real& epsilon_by_k_i = species_molecular_properties_i[0];
+            const Real& sigma_i = species_molecular_properties_i[1];
+            const Real& M_i = species_molecular_properties_i[2];
             
             for (int sj = si + 1; sj < d_num_species; sj++)
             {
                 getSpeciesMolecularProperties(species_molecular_properties_ptr_j, sj);
                 
-                const double& epsilon_by_k_j = species_molecular_properties_j[0];
-                const double& sigma_j = species_molecular_properties_j[1];
-                const double& M_j = species_molecular_properties_j[2];
+                const Real& epsilon_by_k_j = species_molecular_properties_j[0];
+                const Real& sigma_j = species_molecular_properties_j[1];
+                const Real& M_j = species_molecular_properties_j[2];
                 
-                const double T_epsilon_ij = sqrt(epsilon_by_k_i*epsilon_by_k_j);
-                const double sigma_ij = double(1)/double(2)*(sigma_i + sigma_j);
-                const double sigma_ij_sq = sigma_ij*sigma_ij;
-                const double M_ij = double(2)/(double(1)/M_i + double(1)/M_j);
-                const double M_ij_sqrt = sqrt(M_ij);
+                const Real T_epsilon_ij = std::sqrt(epsilon_by_k_i*epsilon_by_k_j);
+                const Real sigma_ij = Real(1)/Real(2)*(sigma_i + sigma_j);
+                const Real sigma_ij_sq = sigma_ij*sigma_ij;
+                const Real M_ij = Real(2)/(Real(1)/M_i + Real(1)/M_j);
+                const Real M_ij_sqrt = std::sqrt(M_ij);
                 
                 const int idx_ij = (d_num_species - 1)*d_num_species/2 -
                     (d_num_species - 1 - si)*(d_num_species - si)/2 +
@@ -688,11 +688,11 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                         const int idx_pressure = i + offset_0_pressure;
                         const int idx_temperature = i + offset_0_temperature;
                         
-                        const double T_star_ij = T[idx_temperature]/T_epsilon_ij;
-                        const double Omega_D_ij = A*pow(T_star_ij, B) + C*exp(D*T_star_ij) + E*exp(F*T_star_ij) +
-                            G*exp(H*T_star_ij);
+                        const Real T_star_ij = T[idx_temperature]/T_epsilon_ij;
+                        const Real Omega_D_ij = A*std::pow(T_star_ij, B) + C*std::exp(D*T_star_ij) + E*std::exp(F*T_star_ij) +
+                            G*std::exp(H*T_star_ij);
                         
-                        D_ij[idx_ij][idx_min] = double(0.0266)*pow(T[idx_temperature], double(3)/double(2))/
+                        D_ij[idx_ij][idx_min] = Real(0.0266)*std::pow(T[idx_temperature], Real(3)/Real(2))/
                             (Omega_D_ij*p[idx_pressure]*M_ij_sqrt*sigma_ij_sq);
                     }
                 }
@@ -734,11 +734,11 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                             const int idx_temperature = (i + offset_0_temperature) +
                                 (j + offset_1_temperature)*ghostcell_dim_0_temperature;
                             
-                            const double T_star_ij = T[idx_temperature]/T_epsilon_ij;
-                            const double Omega_D_ij = A*pow(T_star_ij, B) + C*exp(D*T_star_ij) + E*exp(F*T_star_ij) +
-                                G*exp(H*T_star_ij);
+                            const Real T_star_ij = T[idx_temperature]/T_epsilon_ij;
+                            const Real Omega_D_ij = A*std::pow(T_star_ij, B) + C*std::exp(D*T_star_ij) + E*std::exp(F*T_star_ij) +
+                                G*std::exp(H*T_star_ij);
                             
-                            D_ij[idx_ij][idx_min] = double(0.0266)*pow(T[idx_temperature], double(3)/double(2))/
+                            D_ij[idx_ij][idx_min] = Real(0.0266)*std::pow(T[idx_temperature], Real(3)/Real(2))/
                                 (Omega_D_ij*p[idx_pressure]*M_ij_sqrt*sigma_ij_sq);
                         }
                     }
@@ -797,11 +797,11 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                                     (k + offset_2_temperature)*ghostcell_dim_0_temperature*
                                         ghostcell_dim_1_temperature;
                                 
-                                const double T_star_ij = T[idx_temperature]/T_epsilon_ij;
-                                const double Omega_D_ij = A*pow(T_star_ij, B) + C*exp(D*T_star_ij) +
-                                    E*exp(F*T_star_ij) + G*exp(H*T_star_ij);
+                                const Real T_star_ij = T[idx_temperature]/T_epsilon_ij;
+                                const Real Omega_D_ij = A*std::pow(T_star_ij, B) + C*std::exp(D*T_star_ij) +
+                                    E*std::exp(F*T_star_ij) + G*std::exp(H*T_star_ij);
                                 
-                                D_ij[idx_ij][idx_min] = double(0.0266)*pow(T[idx_temperature], double(3)/double(2))/
+                                D_ij[idx_ij][idx_min] = Real(0.0266)*std::pow(T[idx_temperature], Real(3)/Real(2))/
                                     (Omega_D_ij*p[idx_pressure]*M_ij_sqrt*sigma_ij_sq);
                             }
                         }
@@ -821,7 +821,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
          * Get the pointers to the cell data of mass fractions.
          */
         
-        std::vector<double*> Y;
+        std::vector<Real*> Y;
         Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
@@ -832,8 +832,8 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
          * Initialize the container and pointer to the container for the molecular properties.
          */
         
-        std::vector<double> species_molecular_properties;
-        std::vector<double*> species_molecular_properties_ptr;
+        std::vector<Real> species_molecular_properties;
+        std::vector<Real*> species_molecular_properties_ptr;
         
         const int num_molecular_properties = getNumberOfSpeciesMolecularProperties();
         
@@ -869,7 +869,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     const int idx_mass_fractions = i + offset_0_mass_fractions;
                     
                     X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
-                    X[si][idx_min] = std::max(double(0), X[si][idx_min]);
+                    X[si][idx_min] = std::max(Real(0), X[si][idx_min]);
                     sum[idx_min] += X[si][idx_min];
                 }
             }
@@ -910,7 +910,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                             (j + offset_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                         
                         X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
-                        X[si][idx_min] = std::max(double(0), X[si][idx_min]);
+                        X[si][idx_min] = std::max(Real(0), X[si][idx_min]);
                         sum[idx_min] += X[si][idx_min];
                     }
                 }
@@ -964,7 +964,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                                     ghostcell_dim_1_mass_fractions;
                             
                             X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
-                            X[si][idx_min] = std::max(double(0), X[si][idx_min]);
+                            X[si][idx_min] = std::max(Real(0), X[si][idx_min]);
                             sum[idx_min] += X[si][idx_min];
                         }
                     }
@@ -974,27 +974,27 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     }
     else if (data_mass_fractions->getDepth() == d_num_species - 1)
     {
-        data_mass_fractions_last->fillAll(double(1));
+        data_mass_fractions_last->fillAll(Real(1));
         
         /*
          * Get the pointers to the cell data of mass fractions.
          */
         
-        std::vector<double*> Y;
+        std::vector<Real*> Y;
         Y.reserve(d_num_species - 1);
         for (int si = 0; si < d_num_species - 1; si++)
         {
             Y.push_back(data_mass_fractions->getPointer(si));
         }
         
-        double* Y_last = data_mass_fractions_last->getPointer(0);
+        Real* Y_last = data_mass_fractions_last->getPointer(0);
         
         /*
          * Initialize the container and pointer to the container for the molecular properties.
          */
         
-        std::vector<double> species_molecular_properties;
-        std::vector<double*> species_molecular_properties_ptr;
+        std::vector<Real> species_molecular_properties;
+        std::vector<Real*> species_molecular_properties_ptr;
         
         const int num_molecular_properties = getNumberOfSpeciesMolecularProperties();
         
@@ -1030,7 +1030,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     const int idx_mass_fractions = i + offset_0_mass_fractions;
                     
                     X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
-                    X[si][idx_min] = std::max(double(0), X[si][idx_min]);
+                    X[si][idx_min] = std::max(Real(0), X[si][idx_min]);
                     sum[idx_min] += X[si][idx_min];
                     
                     // Compute the mass fraction of the last species.
@@ -1047,7 +1047,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 const int idx_min = i + offset_0_min;
                 
                 X[d_num_species - 1][idx_min] = Y_last[idx_min]/species_molecular_properties[2];
-                X[d_num_species - 1][idx_min] = std::max(double(0), X[d_num_species - 1][idx_min]);
+                X[d_num_species - 1][idx_min] = std::max(Real(0), X[d_num_species - 1][idx_min]);
                 sum[idx_min] += X[d_num_species - 1][idx_min];
             }
         }
@@ -1087,7 +1087,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                             (j + offset_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                         
                         X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
-                        X[si][idx_min] = std::max(double(0), X[si][idx_min]);
+                        X[si][idx_min] = std::max(Real(0), X[si][idx_min]);
                         sum[idx_min] += X[si][idx_min];
                         
                         // Compute the mass fraction of the last species.
@@ -1108,7 +1108,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                         (j + offset_1_min)*ghostcell_dim_0_min;
                     
                     X[d_num_species - 1][idx_min] = Y_last[idx_min]/species_molecular_properties[2];
-                    X[d_num_species - 1][idx_min] = std::max(double(0), X[d_num_species - 1][idx_min]);
+                    X[d_num_species - 1][idx_min] = std::max(Real(0), X[d_num_species - 1][idx_min]);
                     sum[idx_min] += X[d_num_species - 1][idx_min];
                 }
             }
@@ -1161,7 +1161,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                                     ghostcell_dim_1_mass_fractions;
                             
                             X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
-                            X[si][idx_min] = std::max(double(0), X[si][idx_min]);
+                            X[si][idx_min] = std::max(Real(0), X[si][idx_min]);
                             sum[idx_min] += X[si][idx_min];
                             
                             // Compute the mass fraction of the last species.
@@ -1187,7 +1187,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                                 ghostcell_dim_1_min;
                         
                         X[d_num_species - 1][idx_min] = Y_last[idx_min]/species_molecular_properties[2];
-                        X[d_num_species - 1][idx_min] = std::max(double(0), X[d_num_species - 1][idx_min]);
+                        X[d_num_species - 1][idx_min] = std::max(Real(0), X[d_num_species - 1][idx_min]);
                         sum[idx_min] += X[d_num_species - 1][idx_min];
                     }
                 }
@@ -1304,11 +1304,11 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     
     if (domain.empty())
     {
-        data_mass_diffusivities->fillAll(double(0));
+        data_mass_diffusivities->fillAll(Real(0));
     }
     else
     {
-        data_mass_diffusivities->fillAll(double(0), domain);
+        data_mass_diffusivities->fillAll(Real(0), domain);
     }
     
     if (d_dim == tbox::Dimension(1))
@@ -1350,8 +1350,8 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                         const int idx_mass_diffusivities = i + offset_0_mass_diffusivities;
                         const int idx_min = i + offset_0_min;
                         
-                        D[si][idx_mass_diffusivities] += (X[sj][idx_min] + double(EPSILON))/
-                            (D_ij[idx_ij][idx_min] + double(EPSILON));
+                        D[si][idx_mass_diffusivities] += (X[sj][idx_min] + Real(EPSILON))/
+                            (D_ij[idx_ij][idx_min] + Real(EPSILON));
                     }
                 }
             }
@@ -1363,7 +1363,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 const int idx_mass_diffusivities = i + offset_0_mass_diffusivities;
                 const int idx_min = i + offset_0_min;
                 
-                D[si][idx_mass_diffusivities] = (double(1) - X[si][idx_min] + double(EPSILON))/
+                D[si][idx_mass_diffusivities] = (Real(1) - X[si][idx_min] + Real(EPSILON))/
                     D[si][idx_mass_diffusivities];
             }
         }
@@ -1419,8 +1419,8 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                             const int idx_min = (i + offset_0_min) +
                                 (j + offset_1_min)*ghostcell_dim_0_min;
                             
-                            D[si][idx_mass_diffusivities] += (X[sj][idx_min] + double(EPSILON))/
-                                (D_ij[idx_ij][idx_min] + double(EPSILON));
+                            D[si][idx_mass_diffusivities] += (X[sj][idx_min] + Real(EPSILON))/
+                                (D_ij[idx_ij][idx_min] + Real(EPSILON));
                         }
                     }
                 }
@@ -1438,7 +1438,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     const int idx_min = (i + offset_0_min) +
                         (j + offset_1_min)*ghostcell_dim_0_min;
                     
-                    D[si][idx_mass_diffusivities] = (double(1) - X[si][idx_min] + double(EPSILON))/
+                    D[si][idx_mass_diffusivities] = (Real(1) - X[si][idx_min] + Real(EPSILON))/
                         D[si][idx_mass_diffusivities];
                 }
             }
@@ -1507,8 +1507,8 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                                     (k + offset_2_min)*ghostcell_dim_0_min*
                                         ghostcell_dim_1_min;
                                 
-                                D[si][idx_mass_diffusivities] += (X[sj][idx_min] + double(EPSILON))/
-                                    (D_ij[idx_ij][idx_min] + double(EPSILON));
+                                D[si][idx_mass_diffusivities] += (X[sj][idx_min] + Real(EPSILON))/
+                                    (D_ij[idx_ij][idx_min] + Real(EPSILON));
                             }
                         }
                     }
@@ -1533,7 +1533,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                             (k + offset_2_min)*ghostcell_dim_0_min*
                                 ghostcell_dim_1_min;
                         
-                        D[si][idx_mass_diffusivities] = (double(1) - X[si][idx_min] + double(EPSILON))/
+                        D[si][idx_mass_diffusivities] = (Real(1) - X[si][idx_min] + Real(EPSILON))/
                             D[si][idx_mass_diffusivities];
                     }
                 }
@@ -1548,7 +1548,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
  */
 void
 EquationOfMassDiffusivityMixingRulesReid::getSpeciesMolecularProperties(
-    std::vector<double*>& species_molecular_properties,
+    std::vector<Real*>& species_molecular_properties,
     const int species_index) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -1566,46 +1566,46 @@ EquationOfMassDiffusivityMixingRulesReid::getSpeciesMolecularProperties(
 /*
  * Compute the mass diffusivity of a binary mixture.
  */
-double
+Real
 EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivity(
-    const double* const pressure,
-    const double* const temperature,
-    const std::vector<const double*>& molecular_properties_1,
-    const std::vector<const double*>& molecular_properties_2) const
+    const Real* const pressure,
+    const Real* const temperature,
+    const std::vector<const Real*>& molecular_properties_1,
+    const std::vector<const Real*>& molecular_properties_2) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(molecular_properties_1.size()) >= 3);
     TBOX_ASSERT(static_cast<int>(molecular_properties_2.size()) >= 3);
 #endif
     
-    const double A = double(1.06036);
-    const double B = double(-0.1561);
-    const double C = double(0.19300);
-    const double D = double(-0.47635);
-    const double E = double(1.03587);
-    const double F = double(-1.52996);
-    const double G = double(1.76474);
-    const double H = double(-3.89411);
+    const Real A = Real(1.06036);
+    const Real B = Real(-0.1561);
+    const Real C = Real(0.19300);
+    const Real D = Real(-0.47635);
+    const Real E = Real(1.03587);
+    const Real F = Real(-1.52996);
+    const Real G = Real(1.76474);
+    const Real H = Real(-3.89411);
     
-    const double& epsilon_by_k_1 = *(molecular_properties_1[0]);
-    const double& sigma_1 = *(molecular_properties_1[1]);
-    const double& M_1 = *(molecular_properties_1[2]);
+    const Real& epsilon_by_k_1 = *(molecular_properties_1[0]);
+    const Real& sigma_1 = *(molecular_properties_1[1]);
+    const Real& M_1 = *(molecular_properties_1[2]);
     
-    const double& epsilon_by_k_2 = *(molecular_properties_2[0]);
-    const double& sigma_2 = *(molecular_properties_2[1]);
-    const double& M_2 = *(molecular_properties_2[2]);
+    const Real& epsilon_by_k_2 = *(molecular_properties_2[0]);
+    const Real& sigma_2 = *(molecular_properties_2[1]);
+    const Real& M_2 = *(molecular_properties_2[2]);
     
-    const double T_epsilon_12 = sqrt(epsilon_by_k_1*epsilon_by_k_2);
-    const double sigma_12 = double(1)/double(2)*(sigma_1 + sigma_2);
-    const double M_12 = double(2)/(double(1)/M_1 + double(1)/M_2);
+    const Real T_epsilon_12 = std::sqrt(epsilon_by_k_1*epsilon_by_k_2);
+    const Real sigma_12 = Real(1)/Real(2)*(sigma_1 + sigma_2);
+    const Real M_12 = Real(2)/(Real(1)/M_1 + Real(1)/M_2);
     
-    const double& p = *pressure;
-    const double& T = *temperature;
+    const Real& p = *pressure;
+    const Real& T = *temperature;
     
-    const double T_star_12 = T/T_epsilon_12;
-    const double Omega_D_12 = A*pow(T_star_12, B) + C*exp(D*T_star_12) + E*exp(F*T_star_12) + G*exp(H*T_star_12);
+    const Real T_star_12 = T/T_epsilon_12;
+    const Real Omega_D_12 = A*std::pow(T_star_12, B) + C*std::exp(D*T_star_12) + E*std::exp(F*T_star_12) + G*std::exp(H*T_star_12);
     
-    double D_12 = double(0.0266)*pow(T, double(3)/double(2))/(Omega_D_12*p*sqrt(M_12)*sigma_12*sigma_12);
+    Real D_12 = Real(0.0266)*std::pow(T, Real(3)/Real(2))/(Omega_D_12*p*std::sqrt(M_12)*sigma_12*sigma_12);
     
     return D_12;
 }

@@ -13,7 +13,13 @@
 #cmakedefine HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
 
 /* Define real data type*/
-typedef double Real;
+typedef float Real;
+#define getReal getFloat
+#define putReal putFloat
+#define getRealVector getFloatVector
+#define putRealVector putFloatVector
+#define getRealWithDefault getFloatWithDefault
+#define putRealWithDefault putFloatWithDefault
 
 /* Define epsilon to prevent divisoin by zero */
 #define HAMERS_EPSILON 1.0e-15

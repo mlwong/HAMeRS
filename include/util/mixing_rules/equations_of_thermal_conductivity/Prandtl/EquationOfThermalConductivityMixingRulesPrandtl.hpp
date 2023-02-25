@@ -45,21 +45,21 @@ class EquationOfThermalConductivityMixingRulesPrandtl: public EquationOfThermalC
         /*
          * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
-        double
+        Real
         getThermalConductivity(
-            const double* const pressure,
-            const double* const temperature,
-            const std::vector<const double*>& mass_fractions) const;
+            const Real* const pressure,
+            const Real* const temperature,
+            const std::vector<const Real*>& mass_fractions) const;
         
         /*
          * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeThermalConductivity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermal_conductivity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermal_conductivity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -79,24 +79,24 @@ class EquationOfThermalConductivityMixingRulesPrandtl: public EquationOfThermalC
          */
         void
         getSpeciesMolecularProperties(
-            std::vector<double*>& species_molecular_properties,
+            std::vector<Real*>& species_molecular_properties,
             const int species_index = 0) const;
         
     private:
         /*
          * Specific heats at constant pressure of different species.
          */
-        std::vector<double> d_species_c_p;
+        std::vector<Real> d_species_c_p;
         
         /*
          * Prandtl number of different species.
          */
-        std::vector<double> d_species_Pr;
+        std::vector<Real> d_species_Pr;
         
         /*
          * Molecular weight of different species.
          */
-        std::vector<double> d_species_M;
+        std::vector<Real> d_species_M;
         
         /*
          * A string variable to describe the equation of shear viscosity used.

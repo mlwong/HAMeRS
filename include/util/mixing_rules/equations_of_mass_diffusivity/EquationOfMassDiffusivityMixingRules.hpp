@@ -53,20 +53,20 @@ class EquationOfMassDiffusivityMixingRules
          */
         virtual void
         getMassDiffusivities(
-            std::vector<double*>& mass_diffusivities,
-            const double* const pressure,
-            const double* const temperature,
-            const std::vector<const double*>& mass_fractions) const = 0;
+            std::vector<Real*>& mass_diffusivities,
+            const Real* const pressure,
+            const Real* const temperature,
+            const std::vector<const Real*>& mass_fractions) const = 0;
         
         /*
          * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeMassDiffusivities(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_diffusivities,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_diffusivities,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computeMassDiffusivities(
@@ -82,10 +82,10 @@ class EquationOfMassDiffusivityMixingRules
          */
         virtual void
         computeMassDiffusivities(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_diffusivities,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_diffusivities,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -99,7 +99,7 @@ class EquationOfMassDiffusivityMixingRules
          */
         virtual void
         getSpeciesMolecularProperties(
-            std::vector<double*>& species_molecular_properties,
+            std::vector<Real*>& species_molecular_properties,
             const int species_index = 0) const = 0;
         
     protected:

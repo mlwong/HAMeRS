@@ -53,21 +53,21 @@ class EquationOfShearViscosityMixingRules
         /*
          * Compute the shear viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
-        virtual double
+        virtual Real
         getShearViscosity(
-            const double* const pressure,
-            const double* const temperature,
-            const std::vector<const double*>& mass_fractions) const = 0;
+            const Real* const pressure,
+            const Real* const temperature,
+            const std::vector<const Real*>& mass_fractions) const = 0;
         
         /*
          * Compute the shear viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeShearViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_shear_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_shear_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computeShearViscosity(
@@ -83,32 +83,32 @@ class EquationOfShearViscosityMixingRules
          */
         virtual void
         computeShearViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_shear_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_shear_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
             const hier::Box& domain) const = 0;
         
         /*
          * Compute the shear viscosity of the mixture with isobaric equilibrium assumption.
          */
-        virtual double
+        virtual Real
         getShearViscosity(
-            const double* const pressure,
-            const std::vector<const double*>& species_temperatures,
-            const std::vector<const double*>& mass_fractions,
-            const std::vector<const double*>& volume_fractions) const = 0;
+            const Real* const pressure,
+            const std::vector<const Real*>& species_temperatures,
+            const std::vector<const Real*>& mass_fractions,
+            const std::vector<const Real*>& volume_fractions) const = 0;
         
         /*
          * Compute the shear viscosity of the mixture with isobaric equilibrium assumption.
          */
         void
         computeShearViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_shear_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_species_temperatures,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_shear_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& data_species_temperatures,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computeShearViscosity(
@@ -126,11 +126,11 @@ class EquationOfShearViscosityMixingRules
          */
         virtual void
         computeShearViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_shear_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_species_temperatures,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_shear_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& data_species_temperatures,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -144,7 +144,7 @@ class EquationOfShearViscosityMixingRules
          */
         virtual void
         getSpeciesMolecularProperties(
-            std::vector<double*>& species_molecular_properties,
+            std::vector<Real*>& species_molecular_properties,
             const int species_index = 0) const = 0;
         
     protected:

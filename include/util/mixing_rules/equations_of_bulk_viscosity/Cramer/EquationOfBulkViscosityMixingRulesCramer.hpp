@@ -43,43 +43,43 @@ class EquationOfBulkViscosityMixingRulesCramer: public EquationOfBulkViscosityMi
         /*
          * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
-        double
+        Real
         getBulkViscosity(
-            const double* const pressure,
-            const double* const temperature,
-            const std::vector<const double*>& mass_fractions) const;
+            const Real* const pressure,
+            const Real* const temperature,
+            const std::vector<const Real*>& mass_fractions) const;
         
         /*
          * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeBulkViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_bulk_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
             const hier::Box& domain) const;
         
         /*
          * Compute the bulk viscosity of the mixture with isobaric equilibrium assumption.
          */
-        double
+        Real
         getBulkViscosity(
-            const double* const pressure,
-            const std::vector<const double*>& species_temperatures,
-            const std::vector<const double*>& mass_fractions,
-            const std::vector<const double*>& volume_fractions) const;
+            const Real* const pressure,
+            const std::vector<const Real*>& species_temperatures,
+            const std::vector<const Real*>& mass_fractions,
+            const std::vector<const Real*>& volume_fractions) const;
         
         /*
          * Compute the bulk viscosity of the mixture with isobaric equilibrium assumption.
          */
         void
         computeBulkViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_species_temperatures,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_bulk_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& data_species_temperatures,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -97,33 +97,33 @@ class EquationOfBulkViscosityMixingRulesCramer: public EquationOfBulkViscosityMi
          */
         void
         getSpeciesMolecularProperties(
-            std::vector<double*>& species_molecular_properties,
+            std::vector<Real*>& species_molecular_properties,
             const int species_index = 0) const;
         
     private:
         /*
          * Ratio of specific heats of different species.
          */
-        std::vector<double> d_species_gamma;
+        std::vector<Real> d_species_gamma;
         
         /*
          * Parameters for rotational mode.
          */
-        std::vector<double> d_species_A_r;
-        std::vector<double> d_species_B_r;
+        std::vector<Real> d_species_A_r;
+        std::vector<Real> d_species_B_r;
         
         /*
          * Parameters for vibrational mode.
          */
-        std::vector<double> d_species_c_v_v;
-        std::vector<double> d_species_A_v;
-        std::vector<double> d_species_B_v;
-        std::vector<double> d_species_C_v;
+        std::vector<Real> d_species_c_v_v;
+        std::vector<Real> d_species_A_v;
+        std::vector<Real> d_species_B_v;
+        std::vector<Real> d_species_C_v;
         
         /*
          * Molecular weights of different species.
          */
-        std::vector<double> d_species_M;
+        std::vector<Real> d_species_M;
         
         /*
          * HAMERS_SHARED_PTR to EquationOfBulkViscosity.

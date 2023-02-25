@@ -26,7 +26,7 @@ EquationOfStateMixingRulesStiffenedGas::EquationOfStateMixingRulesStiffenedGas(
         size_t species_gamma_array_size = equation_of_state_mixing_rules_db->getArraySize("species_gamma");
         if (static_cast<int>(species_gamma_array_size) == d_num_species)
         {
-            d_species_gamma = equation_of_state_mixing_rules_db->getDoubleVector("species_gamma");
+            d_species_gamma = equation_of_state_mixing_rules_db->getRealVector("species_gamma");
         }
         else
         {
@@ -41,7 +41,7 @@ EquationOfStateMixingRulesStiffenedGas::EquationOfStateMixingRulesStiffenedGas(
         size_t species_gamma_array_size = equation_of_state_mixing_rules_db->getArraySize("d_species_gamma");
         if (static_cast<int>(species_gamma_array_size) == d_num_species)
         {
-            d_species_gamma = equation_of_state_mixing_rules_db->getDoubleVector("d_species_gamma");
+            d_species_gamma = equation_of_state_mixing_rules_db->getRealVector("d_species_gamma");
         }
         else
         {
@@ -69,7 +69,7 @@ EquationOfStateMixingRulesStiffenedGas::EquationOfStateMixingRulesStiffenedGas(
         size_t species_p_inf_array_size = equation_of_state_mixing_rules_db->getArraySize("species_p_inf");
         if (static_cast<int>(species_p_inf_array_size) == d_num_species)
         {
-            d_species_p_inf = equation_of_state_mixing_rules_db->getDoubleVector("species_p_inf");
+            d_species_p_inf = equation_of_state_mixing_rules_db->getRealVector("species_p_inf");
         }
         else
         {
@@ -84,7 +84,7 @@ EquationOfStateMixingRulesStiffenedGas::EquationOfStateMixingRulesStiffenedGas(
         size_t species_p_inf_array_size = equation_of_state_mixing_rules_db->getArraySize("d_species_p_inf");
         if (static_cast<int>(species_p_inf_array_size) == d_num_species)
         {
-            d_species_p_inf = equation_of_state_mixing_rules_db->getDoubleVector("d_species_p_inf");
+            d_species_p_inf = equation_of_state_mixing_rules_db->getRealVector("d_species_p_inf");
         }
         else
         {
@@ -112,7 +112,7 @@ EquationOfStateMixingRulesStiffenedGas::EquationOfStateMixingRulesStiffenedGas(
         size_t species_c_v_array_size = equation_of_state_mixing_rules_db->getArraySize("species_c_v");
         if (static_cast<int>(species_c_v_array_size) == d_num_species)
         {
-            d_species_c_v = equation_of_state_mixing_rules_db->getDoubleVector("species_c_v");
+            d_species_c_v = equation_of_state_mixing_rules_db->getRealVector("species_c_v");
         }
         else
         {
@@ -127,7 +127,7 @@ EquationOfStateMixingRulesStiffenedGas::EquationOfStateMixingRulesStiffenedGas(
         size_t species_c_v_array_size = equation_of_state_mixing_rules_db->getArraySize("d_species_c_v");
         if (static_cast<int>(species_c_v_array_size) == d_num_species)
         {
-            d_species_c_v = equation_of_state_mixing_rules_db->getDoubleVector("d_species_c_v");
+            d_species_c_v = equation_of_state_mixing_rules_db->getRealVector("d_species_c_v");
         }
         else
         {
@@ -155,7 +155,7 @@ EquationOfStateMixingRulesStiffenedGas::EquationOfStateMixingRulesStiffenedGas(
         size_t species_M_array_size = equation_of_state_mixing_rules_db->getArraySize("species_M");
         if (static_cast<int>(species_M_array_size) == d_num_species)
         {
-            d_species_M = equation_of_state_mixing_rules_db->getDoubleVector("species_M");
+            d_species_M = equation_of_state_mixing_rules_db->getRealVector("species_M");
         }
         else
         {
@@ -170,7 +170,7 @@ EquationOfStateMixingRulesStiffenedGas::EquationOfStateMixingRulesStiffenedGas(
         size_t species_M_array_size = equation_of_state_mixing_rules_db->getArraySize("d_species_M");
         if (static_cast<int>(species_M_array_size) == d_num_species)
         {
-            d_species_M = equation_of_state_mixing_rules_db->getDoubleVector("d_species_M");
+            d_species_M = equation_of_state_mixing_rules_db->getRealVector("d_species_M");
         }
         else
         {
@@ -282,21 +282,21 @@ void
 EquationOfStateMixingRulesStiffenedGas::putToRestart(
     const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
-    restart_db->putDoubleVector("d_species_gamma", d_species_gamma);
-    restart_db->putDoubleVector("d_species_p_inf", d_species_p_inf);
-    restart_db->putDoubleVector("d_species_c_v", d_species_c_v);
-    restart_db->putDoubleVector("d_species_M", d_species_M);
+    restart_db->putRealVector("d_species_gamma", d_species_gamma);
+    restart_db->putRealVector("d_species_p_inf", d_species_p_inf);
+    restart_db->putRealVector("d_species_c_v", d_species_c_v);
+    restart_db->putRealVector("d_species_M", d_species_M);
 }
 
 
 /*
  * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
  */
-double
+Real
 EquationOfStateMixingRulesStiffenedGas::getPressure(
-    const double* const density,
-    const double* const internal_energy,
-    const std::vector<const double*>& mass_fractions) const
+    const Real* const density,
+    const Real* const internal_energy,
+    const std::vector<const Real*>& mass_fractions) const
 {
     TBOX_ERROR(d_object_name
         << ": EquationOfStateMixingRulesStiffenedGas::getPressure()\n"
@@ -304,7 +304,7 @@ EquationOfStateMixingRulesStiffenedGas::getPressure(
         << " is not yet implemented."
         << std::endl);
     
-    return double(0);
+    return Real(0);
 }
 
 
@@ -313,10 +313,10 @@ EquationOfStateMixingRulesStiffenedGas::getPressure(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computePressure(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
     const hier::Box& domain) const
 {
     TBOX_ERROR(d_object_name
@@ -332,10 +332,10 @@ EquationOfStateMixingRulesStiffenedGas::computePressure(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computePressure(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -350,12 +350,12 @@ EquationOfStateMixingRulesStiffenedGas::computePressure(
 /*
  * Compute the pressure of the mixture with isobaric equilibrium assumption.
  */
-double
+Real
 EquationOfStateMixingRulesStiffenedGas::getPressure(
-    const double* const density,
-    const double* const internal_energy,
-    const std::vector<const double*>& mass_fractions,
-    const std::vector<const double*>& volume_fractions) const
+    const Real* const density,
+    const Real* const internal_energy,
+    const std::vector<const Real*>& mass_fractions,
+    const std::vector<const Real*>& volume_fractions) const
 {
     NULL_USE(mass_fractions);
     
@@ -366,9 +366,9 @@ EquationOfStateMixingRulesStiffenedGas::getPressure(
 #endif
     
     // Get the mixture thermodynamic properties.
-    std::vector<double> mixture_thermo_properties;
-    std::vector<double*> mixture_thermo_properties_ptr;
-    std::vector<const double*> mixture_thermo_properties_const_ptr;
+    std::vector<Real> mixture_thermo_properties;
+    std::vector<Real*> mixture_thermo_properties_ptr;
+    std::vector<const Real*> mixture_thermo_properties_const_ptr;
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
@@ -398,11 +398,11 @@ EquationOfStateMixingRulesStiffenedGas::getPressure(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computePressure(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions,
     const hier::Box& domain) const
 {
     NULL_USE(data_mass_fractions);
@@ -426,7 +426,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressure(
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
     // Declare data container for mixture thermodyanmic properties.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_mixture_thermo_properties;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_mixture_thermo_properties;
     
     if (domain.empty())
     {
@@ -456,7 +456,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressure(
         num_ghosts_min = hier::IntVector::min(num_ghosts_internal_energy, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
@@ -468,7 +468,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressure(
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
@@ -491,11 +491,11 @@ EquationOfStateMixingRulesStiffenedGas::computePressure(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computePressure(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_volume_fractions,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -532,7 +532,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressure(
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
     // Declare data container for mixture thermodyanmic properties.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_mixture_thermo_properties;
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_mixture_thermo_properties;
     
     if (domain.empty())
     {
@@ -562,7 +562,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressure(
         num_ghosts_min = hier::IntVector::min(num_ghosts_internal_energy, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
             interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
@@ -574,7 +574,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressure(
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
@@ -597,11 +597,11 @@ EquationOfStateMixingRulesStiffenedGas::computePressure(
 /*
  * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
  */
-double
+Real
 EquationOfStateMixingRulesStiffenedGas::getInternalEnergy(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& mass_fractions) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& mass_fractions) const
 {
     TBOX_ERROR(d_object_name
         << ": EquationOfStateMixingRulesStiffenedGas::getInternalEnergy()\n"
@@ -609,7 +609,7 @@ EquationOfStateMixingRulesStiffenedGas::getInternalEnergy(
         << " is not yet implemented."
         << std::endl);
     
-    return double(0);
+    return Real(0);
 }
 
 
@@ -618,10 +618,10 @@ EquationOfStateMixingRulesStiffenedGas::getInternalEnergy(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
     const hier::Box& domain) const
 {
     TBOX_ERROR(d_object_name
@@ -637,10 +637,10 @@ EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -655,12 +655,12 @@ EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
 /*
  * Compute the specific internal energy of the mixture with isobaric equilibrium assumption.
  */
-double
+Real
 EquationOfStateMixingRulesStiffenedGas::getInternalEnergy(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& mass_fractions,
-    const std::vector<const double*>& volume_fractions) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& mass_fractions,
+    const std::vector<const Real*>& volume_fractions) const
 {
     NULL_USE(mass_fractions);
     
@@ -671,9 +671,9 @@ EquationOfStateMixingRulesStiffenedGas::getInternalEnergy(
 #endif
     
     // Get the mixture thermodynamic properties.
-    std::vector<double> mixture_thermo_properties;
-    std::vector<double*> mixture_thermo_properties_ptr;
-    std::vector<const double*> mixture_thermo_properties_const_ptr;
+    std::vector<Real> mixture_thermo_properties;
+    std::vector<Real*> mixture_thermo_properties_ptr;
+    std::vector<const Real*> mixture_thermo_properties_const_ptr;
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
@@ -703,11 +703,11 @@ EquationOfStateMixingRulesStiffenedGas::getInternalEnergy(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions,
     const hier::Box& domain) const
 {
     NULL_USE(data_mass_fractions);
@@ -731,7 +731,7 @@ EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
     // Declare data container for mixture thermodyanmic properties.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_mixture_thermo_properties;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_mixture_thermo_properties;
     
     if (domain.empty())
     {
@@ -761,7 +761,7 @@ EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
@@ -773,7 +773,7 @@ EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
@@ -796,11 +796,11 @@ EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_volume_fractions,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -837,7 +837,7 @@ EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
     // Declare data container for mixture thermodyanmic properties.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_mixture_thermo_properties;
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_mixture_thermo_properties;
     
     if (domain.empty())
     {
@@ -867,7 +867,7 @@ EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
             interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
@@ -879,7 +879,7 @@ EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
@@ -902,11 +902,11 @@ EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
 /*
  * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
  */
-double
+Real
 EquationOfStateMixingRulesStiffenedGas::getTemperature(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& mass_fractions) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& mass_fractions) const
 {
     TBOX_ERROR(d_object_name
         << ": EquationOfStateMixingRulesStiffenedGas::getTemperature()\n"
@@ -914,7 +914,7 @@ EquationOfStateMixingRulesStiffenedGas::getTemperature(
         << " is not yet implemented."
         << std::endl);
     
-    return double(0);
+    return Real(0);
 }
 
 
@@ -923,10 +923,10 @@ EquationOfStateMixingRulesStiffenedGas::getTemperature(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeTemperature(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
     const hier::Box& domain) const
 {
     TBOX_ERROR(d_object_name
@@ -942,10 +942,10 @@ EquationOfStateMixingRulesStiffenedGas::computeTemperature(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeTemperature(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -961,11 +961,11 @@ EquationOfStateMixingRulesStiffenedGas::computeTemperature(
  * Compute the specific internal energy of the mixture from temperature with isothermal
  * and isobaric equilibrium assumptions.
  */
-double
+Real
 EquationOfStateMixingRulesStiffenedGas::getInternalEnergyFromTemperature(
-    const double* const density,
-    const double* const temperature,
-    const std::vector<const double*>& mass_fractions) const
+    const Real* const density,
+    const Real* const temperature,
+    const std::vector<const Real*>& mass_fractions) const
 {
     TBOX_ERROR(d_object_name
         << ": EquationOfStateMixingRulesStiffenedGas::getInternalEnergyFromTemperature()\n"
@@ -973,7 +973,7 @@ EquationOfStateMixingRulesStiffenedGas::getInternalEnergyFromTemperature(
         << " is not yet implemented."
         << std::endl);
     
-    return double(0);
+    return Real(0);
 }
 
 
@@ -983,10 +983,10 @@ EquationOfStateMixingRulesStiffenedGas::getInternalEnergyFromTemperature(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeInternalEnergyFromTemperature(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
     const hier::Box& domain) const
 {
     TBOX_ERROR(d_object_name
@@ -1003,10 +1003,10 @@ EquationOfStateMixingRulesStiffenedGas::computeInternalEnergyFromTemperature(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeInternalEnergyFromTemperature(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -1022,11 +1022,11 @@ EquationOfStateMixingRulesStiffenedGas::computeInternalEnergyFromTemperature(
  * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric equilibrium
  * assumptions.
  */
-double
+Real
 EquationOfStateMixingRulesStiffenedGas::getIsochoricSpecificHeatCapacity(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& mass_fractions) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& mass_fractions) const
 {
     TBOX_ERROR(d_object_name
         << ": EquationOfStateMixingRulesStiffenedGas::getIsochoricSpecificHeatCapacity()\n"
@@ -1034,7 +1034,7 @@ EquationOfStateMixingRulesStiffenedGas::getIsochoricSpecificHeatCapacity(
         << " is not yet implemented."
         << std::endl);
     
-    return double(0);
+    return Real(0);
 }
 
 
@@ -1044,10 +1044,10 @@ EquationOfStateMixingRulesStiffenedGas::getIsochoricSpecificHeatCapacity(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeIsochoricSpecificHeatCapacity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isochoric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
     const hier::Box& domain) const
 {
     TBOX_ERROR(d_object_name
@@ -1064,10 +1064,10 @@ EquationOfStateMixingRulesStiffenedGas::computeIsochoricSpecificHeatCapacity(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeIsochoricSpecificHeatCapacity(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isochoric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -1083,11 +1083,11 @@ EquationOfStateMixingRulesStiffenedGas::computeIsochoricSpecificHeatCapacity(
  * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibrium
  * assumptions.
  */
-double
+Real
 EquationOfStateMixingRulesStiffenedGas::getIsobaricSpecificHeatCapacity(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& mass_fractions) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& mass_fractions) const
 {
     TBOX_ERROR(d_object_name
         << ": EquationOfStateMixingRulesStiffenedGas::getIsobaricSpecificHeatCapacity()\n"
@@ -1095,7 +1095,7 @@ EquationOfStateMixingRulesStiffenedGas::getIsobaricSpecificHeatCapacity(
         << " is not yet implemented."
         << std::endl);
     
-    return double(0);
+    return Real(0);
 }
 
 
@@ -1105,10 +1105,10 @@ EquationOfStateMixingRulesStiffenedGas::getIsobaricSpecificHeatCapacity(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeIsobaricSpecificHeatCapacity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isobaric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
     const hier::Box& domain) const
 {
     TBOX_ERROR(d_object_name
@@ -1125,10 +1125,10 @@ EquationOfStateMixingRulesStiffenedGas::computeIsobaricSpecificHeatCapacity(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeIsobaricSpecificHeatCapacity(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isobaric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -1145,11 +1145,11 @@ EquationOfStateMixingRulesStiffenedGas::computeIsobaricSpecificHeatCapacity(
  * (partial derivative of pressure w.r.t. specific internal energy under constant partial densities
  * divided by mixture density).
  */
-double
+Real
 EquationOfStateMixingRulesStiffenedGas::getGruneisenParameter(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& mass_fractions) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& mass_fractions) const
 {
     TBOX_ERROR(d_object_name
         << ": EquationOfStateMixingRulesStiffenedGas::getGruneisenParameter()\n"
@@ -1157,7 +1157,7 @@ EquationOfStateMixingRulesStiffenedGas::getGruneisenParameter(
         << " is not yet implemented."
         << std::endl);
     
-    return double(0);
+    return Real(0);
 }
 
 
@@ -1168,10 +1168,10 @@ EquationOfStateMixingRulesStiffenedGas::getGruneisenParameter(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_gruneisen_parameter,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
     const hier::Box& domain) const
 {
     TBOX_ERROR(d_object_name
@@ -1189,10 +1189,10 @@ EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_gruneisen_parameter,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -1209,12 +1209,12 @@ EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
  * (partial derivative of pressure w.r.t. specific internal energy under constant partial densities
  * and volume fractions divided by mixture density).
  */
-double
+Real
 EquationOfStateMixingRulesStiffenedGas::getGruneisenParameter(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& mass_fractions,
-    const std::vector<const double*>& volume_fractions) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& mass_fractions,
+    const std::vector<const Real*>& volume_fractions) const
 {
     NULL_USE(mass_fractions);
     
@@ -1225,9 +1225,9 @@ EquationOfStateMixingRulesStiffenedGas::getGruneisenParameter(
 #endif
     
     // Get the mixture thermodynamic properties.
-    std::vector<double> mixture_thermo_properties;
-    std::vector<double*> mixture_thermo_properties_ptr;
-    std::vector<const double*> mixture_thermo_properties_const_ptr;
+    std::vector<Real> mixture_thermo_properties;
+    std::vector<Real*> mixture_thermo_properties_ptr;
+    std::vector<const Real*> mixture_thermo_properties_const_ptr;
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
@@ -1259,11 +1259,11 @@ EquationOfStateMixingRulesStiffenedGas::getGruneisenParameter(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_gruneisen_parameter,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions,
     const hier::Box& domain) const
 {
     NULL_USE(data_mass_fractions);
@@ -1287,7 +1287,7 @@ EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
     // Declare data container for mixture thermodyanmic properties.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_mixture_thermo_properties;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_mixture_thermo_properties;
     
     if (domain.empty())
     {
@@ -1317,7 +1317,7 @@ EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
@@ -1329,7 +1329,7 @@ EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
@@ -1354,11 +1354,11 @@ EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_gruneisen_parameter,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_volume_fractions,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -1395,7 +1395,7 @@ EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
     // Get the box that covers the interior of patch.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_mixture_thermo_properties;
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_mixture_thermo_properties;
     
     if (domain.empty())
     {
@@ -1425,7 +1425,7 @@ EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
             interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
@@ -1436,7 +1436,7 @@ EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
         TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
@@ -1460,11 +1460,11 @@ EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
  * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
  * internal energy with isothermal and isobaric equilibrium assumptions.
  */
-std::vector<double>
+std::vector<Real>
 EquationOfStateMixingRulesStiffenedGas::getPressureDerivativeWithPartialDensities(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& mass_fractions) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& mass_fractions) const
 {
     TBOX_ERROR(d_object_name
         << ": EquationOfStateMixingRulesStiffenedGas::getPressureDerivativeWithPartialDensities()\n"
@@ -1472,11 +1472,11 @@ EquationOfStateMixingRulesStiffenedGas::getPressureDerivativeWithPartialDensitie
         << " assumptions is not yet implemented."
         << std::endl);
     
-    std::vector<double> Psi;
+    std::vector<Real> Psi;
     Psi.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
-        Psi.push_back(double(0));
+        Psi.push_back(Real(0));
     }
     
     return Psi;
@@ -1489,10 +1489,10 @@ EquationOfStateMixingRulesStiffenedGas::getPressureDerivativeWithPartialDensitie
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDensities(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_pressure_partial_partial_densities,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
     const hier::Box& domain) const
 {
     TBOX_ERROR(d_object_name
@@ -1509,10 +1509,10 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDensities(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_pressure_partial_partial_densities,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -1528,12 +1528,12 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
  * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
  * internal energy and volume fractions with isobaric equilibrium assumption.
  */
-std::vector<double>
+std::vector<Real>
 EquationOfStateMixingRulesStiffenedGas::getPressureDerivativeWithPartialDensities(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& mass_fractions,
-    const std::vector<const double*>& volume_fractions) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& mass_fractions,
+    const std::vector<const Real*>& volume_fractions) const
 {
     NULL_USE(mass_fractions);
     
@@ -1544,8 +1544,8 @@ EquationOfStateMixingRulesStiffenedGas::getPressureDerivativeWithPartialDensitie
 #endif
     
     // Get the mixture thermodynamic properties.
-    std::vector<double> mixture_thermo_properties;
-    std::vector<double*> mixture_thermo_properties_ptr;
+    std::vector<Real> mixture_thermo_properties;
+    std::vector<Real*> mixture_thermo_properties_ptr;
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
@@ -1561,17 +1561,17 @@ EquationOfStateMixingRulesStiffenedGas::getPressureDerivativeWithPartialDensitie
         mixture_thermo_properties_ptr,
         volume_fractions);
     
-    const double& gamma = mixture_thermo_properties[0];
-    const double& p_inf = mixture_thermo_properties[1];
+    const Real& gamma = mixture_thermo_properties[0];
+    const Real& p_inf = mixture_thermo_properties[1];
     
-    const double& rho = *density;
-    const double& p   = *pressure;
+    const Real& rho = *density;
+    const Real& p   = *pressure;
     
-    std::vector<double> Psi;
+    std::vector<Real> Psi;
     Psi.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
-        double Psi_i = (p + gamma*p_inf)/rho;
+        Real Psi_i = (p + gamma*p_inf)/rho;
         Psi.push_back(Psi_i);
     }
     
@@ -1585,11 +1585,11 @@ EquationOfStateMixingRulesStiffenedGas::getPressureDerivativeWithPartialDensitie
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDensities(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_pressure_partial_partial_densities,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions,
     const hier::Box& domain) const
 {
     NULL_USE(data_mass_fractions);
@@ -1635,7 +1635,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
     hier::IntVector offset_pressure(d_dim);
     hier::IntVector offset_min(d_dim);
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_mixture_thermo_properties;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_mixture_thermo_properties;
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
@@ -1683,7 +1683,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
         offset_pressure = num_ghosts_pressure;
         offset_min = num_ghosts_min;
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
@@ -1707,7 +1707,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
         offset_pressure = domain.lower() - ghost_box_pressure.lower();
         offset_min = hier::IntVector::getZero(d_dim);
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
@@ -1720,16 +1720,16 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
      * Get the pointers to the cell data.
      */
     
-    double* const rho = data_density->getPointer(0);
-    double* const p   = data_pressure->getPointer(0);
-    double* const gamma = data_mixture_thermo_properties->getPointer(0);
-    double* const p_inf = data_mixture_thermo_properties->getPointer(1);
+    Real* const rho = data_density->getPointer(0);
+    Real* const p   = data_pressure->getPointer(0);
+    Real* const gamma = data_mixture_thermo_properties->getPointer(0);
+    Real* const p_inf = data_mixture_thermo_properties->getPointer(1);
     
     /*
      * Get the partial derivative.
      */
     
-    std::vector<double*> Psi;
+    std::vector<Real*> Psi;
     Psi.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
@@ -1761,11 +1761,11 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDensities(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_pressure_partial_partial_densities,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_volume_fractions,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -1824,7 +1824,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
     hier::IntVector offset_pressure(d_dim);
     hier::IntVector offset_min(d_dim);
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_mixture_thermo_properties;
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_mixture_thermo_properties;
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
@@ -1872,7 +1872,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
         offset_pressure = num_ghosts_pressure;
         offset_min = num_ghosts_min;
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
             interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
@@ -1896,7 +1896,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
         offset_pressure = domain.lower() - ghost_box_pressure.lower();
         offset_min = hier::IntVector::getZero(d_dim);
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
@@ -1916,16 +1916,16 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
      * Get the pointers to the cell data.
      */
     
-    double* const rho = data_density->getPointer(side_normal, 0);
-    double* const p   = data_pressure->getPointer(side_normal, 0);
-    double* const gamma = data_mixture_thermo_properties->getPointer(side_normal, 0);
-    double* const p_inf = data_mixture_thermo_properties->getPointer(side_normal, 1);
+    Real* const rho = data_density->getPointer(side_normal, 0);
+    Real* const p   = data_pressure->getPointer(side_normal, 0);
+    Real* const gamma = data_mixture_thermo_properties->getPointer(side_normal, 0);
+    Real* const p_inf = data_mixture_thermo_properties->getPointer(side_normal, 1);
     
     /*
      * Get the partial derivative.
      */
     
-    std::vector<double*> Psi;
+    std::vector<Real*> Psi;
     Psi.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
@@ -1955,12 +1955,12 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
  * Compute the mixture partial derivative of pressure w.r.t. volume fractions under constant specific
  * internal energy and partial densities with isobaric equilibrium assumption.
  */
-std::vector<double>
+std::vector<Real>
 EquationOfStateMixingRulesStiffenedGas::getPressureDerivativeWithVolumeFractions(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& mass_fractions,
-    const std::vector<const double*>& volume_fractions) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& mass_fractions,
+    const std::vector<const Real*>& volume_fractions) const
 {
     NULL_USE(mass_fractions);
     
@@ -1971,8 +1971,8 @@ EquationOfStateMixingRulesStiffenedGas::getPressureDerivativeWithVolumeFractions
 #endif
     
     // Get the mixture thermodynamic properties.
-    std::vector<double> mixture_thermo_properties;
-    std::vector<double*> mixture_thermo_properties_ptr;
+    std::vector<Real> mixture_thermo_properties;
+    std::vector<Real*> mixture_thermo_properties_ptr;
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
@@ -1988,19 +1988,19 @@ EquationOfStateMixingRulesStiffenedGas::getPressureDerivativeWithVolumeFractions
         mixture_thermo_properties_ptr,
         volume_fractions);
     
-    const double& gamma = mixture_thermo_properties[0];
+    const Real& gamma = mixture_thermo_properties[0];
     
-    const double& p   = *pressure;
+    const Real& p   = *pressure;
     
-    const double tmp = (p + d_species_gamma[d_num_species - 1]*d_species_p_inf[d_num_species - 1])/
-        (d_species_gamma[d_num_species - 1] - double(1));
+    const Real tmp = (p + d_species_gamma[d_num_species - 1]*d_species_p_inf[d_num_species - 1])/
+        (d_species_gamma[d_num_species - 1] - Real(1));
     
-    std::vector<double> M;
+    std::vector<Real> M;
     M.reserve(d_num_species - 1);
     for (int si = 0; si < d_num_species - 1; si++)
     {
-        double M_i = (tmp - (p + d_species_gamma[si]*d_species_p_inf[si])/(d_species_gamma[si] - double(1)))*
-            (gamma - double(1));
+        Real M_i = (tmp - (p + d_species_gamma[si]*d_species_p_inf[si])/(d_species_gamma[si] - Real(1)))*
+            (gamma - Real(1));
         M.push_back(M_i);
     }
     
@@ -2014,11 +2014,11 @@ EquationOfStateMixingRulesStiffenedGas::getPressureDerivativeWithVolumeFractions
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFractions(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_volume_fractions,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_pressure_partial_volume_fractions,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions,
     const hier::Box& domain) const
 {
     NULL_USE(data_density);
@@ -2060,7 +2060,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
     hier::IntVector offset_pressure(d_dim);
     hier::IntVector offset_min(d_dim);
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_mixture_thermo_properties;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_mixture_thermo_properties;
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
@@ -2104,7 +2104,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
         offset_pressure = num_ghosts_pressure;
         offset_min = num_ghosts_min;
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
@@ -2126,7 +2126,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
         offset_pressure = domain.lower() - ghost_box_pressure.lower();
         offset_min = hier::IntVector::getZero(d_dim);
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
@@ -2140,14 +2140,14 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
      * Get the pointers to the cell data.
      */
     
-    double* const p     = data_pressure->getPointer(0);
-    double* const gamma = data_mixture_thermo_properties->getPointer(0);
+    Real* const p     = data_pressure->getPointer(0);
+    Real* const gamma = data_mixture_thermo_properties->getPointer(0);
     
     /*
      * Get the partial derivative.
      */
     
-    std::vector<double*> M;
+    std::vector<Real*> M;
     M.reserve(d_num_species - 1);
     for (int si = 0; si < d_num_species - 1; si++)
     {
@@ -2175,11 +2175,11 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFractions(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_volume_fractions,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_pressure_partial_volume_fractions,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_volume_fractions,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -2233,7 +2233,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
     hier::IntVector offset_pressure(d_dim);
     hier::IntVector offset_min(d_dim);
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_mixture_thermo_properties;
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_mixture_thermo_properties;
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
@@ -2277,7 +2277,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
         offset_pressure = num_ghosts_pressure;
         offset_min = num_ghosts_min;
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
             interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
@@ -2299,7 +2299,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
         offset_pressure = domain.lower() - ghost_box_pressure.lower();
         offset_min = hier::IntVector::getZero(d_dim);
         
-        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
@@ -2319,14 +2319,14 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
      * Get the pointers to the cell data.
      */
     
-    double* const p     = data_pressure->getPointer(side_normal, 0);
-    double* const gamma = data_mixture_thermo_properties->getPointer(side_normal, 0);
+    Real* const p     = data_pressure->getPointer(side_normal, 0);
+    Real* const gamma = data_mixture_thermo_properties->getPointer(side_normal, 0);
     
     /*
      * Get the partial derivative.
      */
     
-    std::vector<double*> M;
+    std::vector<Real*> M;
     M.reserve(d_num_species - 1);
     for (int si = 0; si < d_num_species - 1; si++)
     {
@@ -2351,11 +2351,11 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
 /*
  * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
  */
-double
+Real
 EquationOfStateMixingRulesStiffenedGas::getMixtureDensity(
-    const double* const pressure,
-    const double* const temperature,
-    const std::vector<const double*>& mass_fractions) const
+    const Real* const pressure,
+    const Real* const temperature,
+    const std::vector<const Real*>& mass_fractions) const
 {
     TBOX_ERROR(d_object_name
         << ": EquationOfStateMixingRulesStiffenedGas::getMixtureDensity()\n"
@@ -2363,7 +2363,7 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureDensity(
         << " is not yet implemented."
         << std::endl);
     
-    return double(0);
+    return Real(0);
 }
 
 
@@ -2372,10 +2372,10 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureDensity(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeMixtureDensity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mixture_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mixture_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
     const hier::Box& domain) const
 {
     TBOX_ERROR(d_object_name
@@ -2391,10 +2391,10 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureDensity(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeMixtureDensity(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mixture_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mixture_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -2411,7 +2411,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureDensity(
  */
 void
 EquationOfStateMixingRulesStiffenedGas::getSpeciesThermodynamicProperties(
-    std::vector<double*>& species_thermo_properties,
+    std::vector<Real*>& species_thermo_properties,
     const int species_index) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -2421,12 +2421,12 @@ EquationOfStateMixingRulesStiffenedGas::getSpeciesThermodynamicProperties(
 #endif
     
     // Get references to gamma and p_inf of species.
-    double& gamma = *(species_thermo_properties[0]);
-    double& p_inf = *(species_thermo_properties[1]);
+    Real& gamma = *(species_thermo_properties[0]);
+    Real& p_inf = *(species_thermo_properties[1]);
     
     // Get references to c_p and c_v of species.
-    double& c_p = *(species_thermo_properties[2]);
-    double& c_v = *(species_thermo_properties[3]);
+    Real& c_p = *(species_thermo_properties[2]);
+    Real& c_v = *(species_thermo_properties[3]);
     
     gamma = d_species_gamma[species_index];
     p_inf = d_species_p_inf[species_index];
@@ -2475,50 +2475,50 @@ EquationOfStateMixingRulesStiffenedGas::getNumberOfMixtureThermodynamicPropertie
  */
 void
 EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVolumeFractions(
-    std::vector<double*>& mixture_thermo_properties,
-    const std::vector<const double*>& volume_fractions) const
+    std::vector<Real*>& mixture_thermo_properties,
+    const std::vector<const Real*>& volume_fractions) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(mixture_thermo_properties.size()) == 2);
 #endif
     
     // Get reference to gamma and p_inf of mixture.
-    double& gamma = *(mixture_thermo_properties[0]);
-    double& p_inf = *(mixture_thermo_properties[1]);
+    Real& gamma = *(mixture_thermo_properties[0]);
+    Real& p_inf = *(mixture_thermo_properties[1]);
     
     // Compute gamma and p_inf of mixture.
     
-    double tmp_1 = double(0);
-    double tmp_2 = double(0);
+    Real tmp_1 = Real(0);
+    Real tmp_2 = Real(0);
     
     if (static_cast<int>(volume_fractions.size()) == d_num_species)
     {
         for (int si = 0; si < d_num_species; si++)
         {
-            tmp_1 += *(volume_fractions[si])/(d_species_gamma[si] - double(1));
+            tmp_1 += *(volume_fractions[si])/(d_species_gamma[si] - Real(1));
             
             tmp_2 += (*(volume_fractions[si])*d_species_gamma[si]*d_species_p_inf[si])/
-                (d_species_gamma[si] - double(1));
+                (d_species_gamma[si] - Real(1));
         }
     }
     else if (static_cast<int>(volume_fractions.size()) == d_num_species - 1)
     {
-        double Z_last = double(1);
+        Real Z_last = Real(1);
         
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            tmp_1 += *(volume_fractions[si])/(d_species_gamma[si] - double(1));
+            tmp_1 += *(volume_fractions[si])/(d_species_gamma[si] - Real(1));
             
             tmp_2 += (*(volume_fractions[si])*d_species_gamma[si]*d_species_p_inf[si])/
-                (d_species_gamma[si] - double(1));
+                (d_species_gamma[si] - Real(1));
             
             // Compute the volume fraction of the last species.
             Z_last -= *(volume_fractions[si]);
         }
         
         // Add the contributions from the last species.
-        tmp_1 += Z_last/(d_species_gamma.back() - double(1));
-        tmp_2 += (Z_last*d_species_gamma.back()*d_species_p_inf.back())/(d_species_gamma.back() - double(1));
+        tmp_1 += Z_last/(d_species_gamma.back() - Real(1));
+        tmp_2 += (Z_last*d_species_gamma.back()*d_species_p_inf.back())/(d_species_gamma.back() - Real(1));
     }
     else
     {
@@ -2529,8 +2529,8 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
             << std::endl);
     }
     
-    gamma = double(1)/tmp_1 + double(1);
-    p_inf = (gamma - double(1))/gamma*tmp_2;
+    gamma = Real(1)/tmp_1 + Real(1);
+    p_inf = (gamma - Real(1))/gamma*tmp_2;
 }
 
 
@@ -2539,8 +2539,8 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWithVolumeFractions(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mixture_thermo_properties,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mixture_thermo_properties,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -2611,8 +2611,8 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
      * Get the pointers to the cell data of mixture thermodynamic properties.
      */
     
-    double* const gamma = data_mixture_thermo_properties->getPointer(0);
-    double* const p_inf = data_mixture_thermo_properties->getPointer(1);
+    Real* const gamma = data_mixture_thermo_properties->getPointer(0);
+    Real* const p_inf = data_mixture_thermo_properties->getPointer(1);
     
     /*
      * Fill zeros for gamma and p_inf.
@@ -2620,13 +2620,13 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
     
     if (domain.empty())
     {
-        data_mixture_thermo_properties->fill(double(0), 0);
-        data_mixture_thermo_properties->fill(double(0), 1);
+        data_mixture_thermo_properties->fill(Real(0), 0);
+        data_mixture_thermo_properties->fill(Real(0), 1);
     }
     else
     {
-        data_mixture_thermo_properties->fill(double(0), domain, 0);
-        data_mixture_thermo_properties->fill(double(0), domain, 1);
+        data_mixture_thermo_properties->fill(Real(0), domain, 0);
+        data_mixture_thermo_properties->fill(Real(0), domain, 1);
     }
     
     if (data_volume_fractions->getDepth() == d_num_species)
@@ -2635,7 +2635,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
          * Get the pointers to the cell data of volume fractions.
          */
         
-        std::vector<const double*> Z;
+        std::vector<const Real*> Z;
         Z.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
@@ -2655,7 +2655,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
     }
     else if (data_volume_fractions->getDepth() == d_num_species - 1)
     {
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions_last;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_volume_fractions_last;
         
         hier::IntVector offset_volume_fractions_last(d_dim);
         
@@ -2665,19 +2665,19 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
             
             offset_volume_fractions_last = data_volume_fractions->getGhostCellWidth();
             
-            data_volume_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+            data_volume_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
                 interior_box, 1, data_volume_fractions->getGhostCellWidth());
             
-            data_volume_fractions_last->fillAll(double(1));
+            data_volume_fractions_last->fillAll(Real(1));
         }
         else
         {
             offset_volume_fractions_last = hier::IntVector::getZero(d_dim);
             
-            data_volume_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+            data_volume_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
                 domain, 1, hier::IntVector::getZero(d_dim));
             
-            data_volume_fractions_last->fillAll(double(1), domain);
+            data_volume_fractions_last->fillAll(Real(1), domain);
         }
         
         /*
@@ -2685,14 +2685,14 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
          * last volume fraction.
          */
         
-        std::vector<const double*> Z;
+        std::vector<const Real*> Z;
         Z.reserve(d_num_species - 1);
         for (int si = 0; si < d_num_species - 1; si++)
         {
             Z.push_back(data_volume_fractions->getPointer(si));
         }
         
-        double* const Z_last = data_volume_fractions_last->getPointer(0);
+        Real* const Z_last = data_volume_fractions_last->getPointer(0);
         
         const hier::Box ghost_box_volume_fractions_last = data_volume_fractions_last->getGhostBox();
         const hier::IntVector ghostcell_dims_volume_fractions_last = ghost_box_volume_fractions_last.numberCells();
@@ -2727,8 +2727,8 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWithVolumeFractions(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mixture_thermo_properties,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mixture_thermo_properties,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_volume_fractions,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -2811,8 +2811,8 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
      * Get the pointers to the cell data of mixture thermodynamic properties.
      */
     
-    double* const gamma = data_mixture_thermo_properties->getPointer(side_normal, 0);
-    double* const p_inf = data_mixture_thermo_properties->getPointer(side_normal, 1);
+    Real* const gamma = data_mixture_thermo_properties->getPointer(side_normal, 0);
+    Real* const p_inf = data_mixture_thermo_properties->getPointer(side_normal, 1);
     
     /*
      * Fill zeros for gamma and p_inf.
@@ -2820,13 +2820,13 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
     
     if (domain.empty())
     {
-        data_mixture_thermo_properties->fill(double(0), 0);
-        data_mixture_thermo_properties->fill(double(0), 1);
+        data_mixture_thermo_properties->fill(Real(0), 0);
+        data_mixture_thermo_properties->fill(Real(0), 1);
     }
     else
     {
-        data_mixture_thermo_properties->fill(double(0), domain, 0);
-        data_mixture_thermo_properties->fill(double(0), domain, 1);
+        data_mixture_thermo_properties->fill(Real(0), domain, 0);
+        data_mixture_thermo_properties->fill(Real(0), domain, 1);
     }
     
     if (data_volume_fractions->getDepth() == d_num_species)
@@ -2835,7 +2835,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
          * Get the pointers to the cell data of volume fractions.
          */
         
-        std::vector<const double*> Z;
+        std::vector<const Real*> Z;
         Z.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
@@ -2858,7 +2858,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         hier::IntVector direction = hier::IntVector::getZero(d_dim);
         direction[side_normal] = 1;
         
-        HAMERS_SHARED_PTR<pdat::SideData<double> > data_volume_fractions_last;
+        HAMERS_SHARED_PTR<pdat::SideData<Real> > data_volume_fractions_last;
         
         hier::IntVector offset_volume_fractions_last(d_dim);
         
@@ -2868,19 +2868,19 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
             
             offset_volume_fractions_last = data_volume_fractions->getGhostCellWidth();
             
-            data_volume_fractions_last = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+            data_volume_fractions_last = HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                 interior_box, 1, data_volume_fractions->getGhostCellWidth(), direction);
         
-            data_volume_fractions_last->fillAll(double(1));
+            data_volume_fractions_last->fillAll(Real(1));
         }
         else
         {
             offset_volume_fractions_last = hier::IntVector::getZero(d_dim);
             
-            data_volume_fractions_last = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+            data_volume_fractions_last = HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                 domain, 1, hier::IntVector::getZero(d_dim), direction);
             
-            data_volume_fractions_last->fillAll(double(1), domain);
+            data_volume_fractions_last->fillAll(Real(1), domain);
         }
         
         /*
@@ -2888,14 +2888,14 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
          * last volume fraction.
          */
         
-        std::vector<const double*> Z;
+        std::vector<const Real*> Z;
         Z.reserve(d_num_species - 1);
         for (int si = 0; si < d_num_species - 1; si++)
         {
             Z.push_back(data_volume_fractions->getPointer(side_normal, si));
         }
         
-        double* const Z_last = data_volume_fractions_last->getPointer(side_normal, 0);
+        Real* const Z_last = data_volume_fractions_last->getPointer(side_normal, 0);
         
         const hier::Box ghost_box_volume_fractions_last = data_volume_fractions_last->getGhostBox();
         hier::IntVector ghostcell_dims_volume_fractions_last = ghost_box_volume_fractions_last.numberCells();
@@ -2932,11 +2932,11 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDensities(
-    std::vector<double*>& Psi,
-    const double* const rho,
-    const double* const p,
-    const double* const gamma,
-    const double* const p_inf,
+    std::vector<Real*>& Psi,
+    const Real* const rho,
+    const Real* const p,
+    const Real* const gamma,
+    const Real* const p_inf,
     const hier::IntVector& offset_partial_pressure_partial_partial_densities,
     const hier::IntVector& offset_density,
     const hier::IntVector& offset_pressure,
@@ -2966,7 +2966,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
         // Compute Psi.
         for (int si = 0; si < d_num_species; si++)
         {
-            double* Psi_i = Psi[si];
+            Real* Psi_i = Psi[si];
             
             HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
@@ -3020,7 +3020,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
         // Compute Psi.
         for (int si = 0; si < d_num_species; si++)
         {
-            double* Psi_i = Psi[si];
+            Real* Psi_i = Psi[si];
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
@@ -3094,7 +3094,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
         // Compute Psi.
         for (int si = 0; si < d_num_species; si++)
         {
-            double* Psi_i = Psi[si];
+            Real* Psi_i = Psi[si];
             
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -3144,9 +3144,9 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFractions(
-    std::vector<double*>& M,
-    const double* const p,
-    const double* const gamma,
+    std::vector<Real*>& M,
+    const Real* const p,
+    const Real* const gamma,
     const hier::IntVector& offset_partial_pressure_partial_volume_fractions,
     const hier::IntVector& offset_pressure,
     const hier::IntVector& offset_mixture_thermo_properties,
@@ -3173,7 +3173,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
         // Compute M.
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            double* M_i = M[si];
+            Real* M_i = M[si];
             
             HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
@@ -3187,11 +3187,11 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
                 const int idx_mixture_thermo_properties = i + offset_0_mixture_thermo_properties;
                 
                 M_i[idx_partial_pressure_partial_volume_fractions] =
-                    (gamma[idx_mixture_thermo_properties] - double(1))*
+                    (gamma[idx_mixture_thermo_properties] - Real(1))*
                     ((p[idx_pressure] + d_species_gamma[d_num_species - 1]*d_species_p_inf[d_num_species - 1])/
-                        (d_species_gamma[d_num_species - 1] - double(1)) -
+                        (d_species_gamma[d_num_species - 1] - Real(1)) -
                     (p[idx_pressure] + d_species_gamma[si]*d_species_p_inf[si])/
-                        (d_species_gamma[si] - double(1)));
+                        (d_species_gamma[si] - Real(1)));
             }
         }
     }
@@ -3224,7 +3224,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
         // Compute M.
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            double* M_i = M[si];
+            Real* M_i = M[si];
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
@@ -3244,11 +3244,11 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
                         (j + offset_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
                     
                     M_i[idx_partial_pressure_partial_volume_fractions] =
-                        (gamma[idx_mixture_thermo_properties] - double(1))*
+                        (gamma[idx_mixture_thermo_properties] - Real(1))*
                         ((p[idx_pressure] + d_species_gamma[d_num_species - 1]*d_species_p_inf[d_num_species - 1])/
-                            (d_species_gamma[d_num_species - 1] - double(1)) -
+                            (d_species_gamma[d_num_species - 1] - Real(1)) -
                         (p[idx_pressure] + d_species_gamma[si]*d_species_p_inf[si])/
-                            (d_species_gamma[si] - double(1)));
+                            (d_species_gamma[si] - Real(1)));
                 }
             }
         }
@@ -3292,7 +3292,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
         // Compute M.
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            double* M_i = M[si];
+            Real* M_i = M[si];
             
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -3321,11 +3321,11 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
                                 ghostcell_dim_1_mixture_thermo_properties;
                         
                         M_i[idx_partial_pressure_partial_volume_fractions] =
-                            (gamma[idx_mixture_thermo_properties] - double(1))*
+                            (gamma[idx_mixture_thermo_properties] - Real(1))*
                             ((p[idx_pressure] + d_species_gamma[d_num_species - 1]*d_species_p_inf[d_num_species - 1])/
-                                (d_species_gamma[d_num_species - 1] - double(1)) -
+                                (d_species_gamma[d_num_species - 1] - Real(1)) -
                             (p[idx_pressure] + d_species_gamma[si]*d_species_p_inf[si])/
-                                (d_species_gamma[si] - double(1)));
+                                (d_species_gamma[si] - Real(1)));
                     }
                 }
             }
@@ -3339,9 +3339,9 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWithVolumeFractions(
-    double* const gamma,
-    double* const p_inf,
-    const std::vector<const double*>& Z,
+    Real* const gamma,
+    Real* const p_inf,
+    const std::vector<const Real*>& Z,
     const hier::IntVector& offset_mixture_thermo_properties,
     const hier::IntVector& offset_volume_fractions,
     const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
@@ -3364,8 +3364,8 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         // Compute temporary variables and store them in the data of gamma of p_inf temporarily.
         for (int si = 0; si < d_num_species; si++)
         {
-            const double tmp_1 = double(1)/(d_species_gamma[si] - double(1));
-            const double tmp_2 = d_species_gamma[si]*d_species_p_inf[si]/(d_species_gamma[si] - double(1));
+            const Real tmp_1 = Real(1)/(d_species_gamma[si] - Real(1));
+            const Real tmp_2 = d_species_gamma[si]*d_species_p_inf[si]/(d_species_gamma[si] - Real(1));
             
             HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
@@ -3386,9 +3386,9 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
             // Compute the linear index.
             const int idx_mixture_thermo_properties = i + offset_0_mixture_thermo_properties;
             
-            gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
+            gamma[idx_mixture_thermo_properties] = Real(1)/gamma[idx_mixture_thermo_properties] + Real(1);
             
-            p_inf[idx_mixture_thermo_properties] = (gamma[idx_mixture_thermo_properties] - double(1))/
+            p_inf[idx_mixture_thermo_properties] = (gamma[idx_mixture_thermo_properties] - Real(1))/
                 gamma[idx_mixture_thermo_properties]*p_inf[idx_mixture_thermo_properties];
         }
     }
@@ -3414,8 +3414,8 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         // Compute temporary variables and store them in the data of gamma of p_inf temporarily.
         for (int si = 0; si < d_num_species; si++)
         {
-            const double tmp_1 = double(1)/(d_species_gamma[si] - double(1));
-            const double tmp_2 = d_species_gamma[si]*d_species_p_inf[si]/(d_species_gamma[si] - double(1));
+            const Real tmp_1 = Real(1)/(d_species_gamma[si] - Real(1));
+            const Real tmp_2 = d_species_gamma[si]*d_species_p_inf[si]/(d_species_gamma[si] - Real(1));
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
@@ -3445,9 +3445,9 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
                 const int idx_mixture_thermo_properties = (i + offset_0_mixture_thermo_properties) +
                     (j + offset_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
                 
-                gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
+                gamma[idx_mixture_thermo_properties] = Real(1)/gamma[idx_mixture_thermo_properties] + Real(1);
                 
-                p_inf[idx_mixture_thermo_properties] = (gamma[idx_mixture_thermo_properties] - double(1))/
+                p_inf[idx_mixture_thermo_properties] = (gamma[idx_mixture_thermo_properties] - Real(1))/
                     gamma[idx_mixture_thermo_properties]*p_inf[idx_mixture_thermo_properties];
             }
         }
@@ -3480,8 +3480,8 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         // Compute temporary variables and store them in the data of gamma of p_inf temporarily.
         for (int si = 0; si < d_num_species; si++)
         {
-            const double tmp_1 = double(1)/(d_species_gamma[si] - double(1));
-            const double tmp_2 = d_species_gamma[si]*d_species_p_inf[si]/(d_species_gamma[si] - double(1));
+            const Real tmp_1 = Real(1)/(d_species_gamma[si] - Real(1));
+            const Real tmp_2 = d_species_gamma[si]*d_species_p_inf[si]/(d_species_gamma[si] - Real(1));
             
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -3522,9 +3522,9 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
                         (k + offset_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
                             ghostcell_dim_1_mixture_thermo_properties;
                     
-                    gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
+                    gamma[idx_mixture_thermo_properties] = Real(1)/gamma[idx_mixture_thermo_properties] + Real(1);
                     
-                    p_inf[idx_mixture_thermo_properties] = (gamma[idx_mixture_thermo_properties] - double(1))/
+                    p_inf[idx_mixture_thermo_properties] = (gamma[idx_mixture_thermo_properties] - Real(1))/
                         gamma[idx_mixture_thermo_properties]*p_inf[idx_mixture_thermo_properties];
                 }
             }
@@ -3538,10 +3538,10 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWithVolumeFractions(
-    double* const gamma,
-    double* const p_inf,
-    double* const Z_last,
-    const std::vector<const double*>& Z,
+    Real* const gamma,
+    Real* const p_inf,
+    Real* const Z_last,
+    const std::vector<const Real*>& Z,
     const hier::IntVector& offset_mixture_thermo_properties,
     const hier::IntVector& offset_volume_fractions_last,
     const hier::IntVector& offset_volume_fractions,
@@ -3567,8 +3567,8 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         // Compute temporary variables and store them in the data of gamma of p_inf temporarily.
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            const double tmp_1 = double(1)/(d_species_gamma[si] - double(1));
-            const double tmp_2 = d_species_gamma[si]*d_species_p_inf[si]/(d_species_gamma[si] - double(1));
+            const Real tmp_1 = Real(1)/(d_species_gamma[si] - Real(1));
+            const Real tmp_2 = d_species_gamma[si]*d_species_p_inf[si]/(d_species_gamma[si] - Real(1));
             
             HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
@@ -3588,8 +3588,8 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         
         // Add the contribution from the last species and compute gamma and p_inf.
         
-        const double tmp_1 = double(1)/(d_species_gamma.back() - double(1));
-        const double tmp_2 = d_species_gamma.back()*d_species_p_inf.back()/(d_species_gamma.back() - double(1));
+        const Real tmp_1 = Real(1)/(d_species_gamma.back() - Real(1));
+        const Real tmp_2 = d_species_gamma.back()*d_species_p_inf.back()/(d_species_gamma.back() - Real(1));
         
         HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
@@ -3601,9 +3601,9 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
             gamma[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions_last]*tmp_1;
             p_inf[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions_last]*tmp_2;
             
-            gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
+            gamma[idx_mixture_thermo_properties] = Real(1)/gamma[idx_mixture_thermo_properties] + Real(1);
             
-            p_inf[idx_mixture_thermo_properties] = (gamma[idx_mixture_thermo_properties] - double(1))/
+            p_inf[idx_mixture_thermo_properties] = (gamma[idx_mixture_thermo_properties] - Real(1))/
                 gamma[idx_mixture_thermo_properties]*p_inf[idx_mixture_thermo_properties];
         }
     }
@@ -3633,8 +3633,8 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         // Compute temporary variables and store them in the data of gamma of p_inf temporarily.
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            const double tmp_1 = double(1)/(d_species_gamma[si] - double(1));
-            const double tmp_2 = d_species_gamma[si]*d_species_p_inf[si]/(d_species_gamma[si] - double(1));
+            const Real tmp_1 = Real(1)/(d_species_gamma[si] - Real(1));
+            const Real tmp_2 = d_species_gamma[si]*d_species_p_inf[si]/(d_species_gamma[si] - Real(1));
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
@@ -3662,8 +3662,8 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         
         // Add the contribution from the last species and compute gamma and p_inf.
         
-        const double tmp_1 = double(1)/(d_species_gamma.back() - double(1));
-        const double tmp_2 = d_species_gamma.back()*d_species_p_inf.back()/(d_species_gamma.back() - double(1));
+        const Real tmp_1 = Real(1)/(d_species_gamma.back() - Real(1));
+        const Real tmp_2 = d_species_gamma.back()*d_species_p_inf.back()/(d_species_gamma.back() - Real(1));
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
@@ -3680,9 +3680,9 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
                 gamma[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions_last]*tmp_1;
                 p_inf[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions_last]*tmp_2;
                 
-                gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
+                gamma[idx_mixture_thermo_properties] = Real(1)/gamma[idx_mixture_thermo_properties] + Real(1);
                 
-                p_inf[idx_mixture_thermo_properties] = (gamma[idx_mixture_thermo_properties] - double(1))/
+                p_inf[idx_mixture_thermo_properties] = (gamma[idx_mixture_thermo_properties] - Real(1))/
                     gamma[idx_mixture_thermo_properties]*p_inf[idx_mixture_thermo_properties];
             }
         }
@@ -3721,8 +3721,8 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         // Compute temporary variables and store them in the data of gamma of p_inf temporarily.
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            const double tmp_1 = double(1)/(d_species_gamma[si] - double(1));
-            const double tmp_2 = d_species_gamma[si]*d_species_p_inf[si]/(d_species_gamma[si] - double(1));
+            const Real tmp_1 = Real(1)/(d_species_gamma[si] - Real(1));
+            const Real tmp_2 = d_species_gamma[si]*d_species_p_inf[si]/(d_species_gamma[si] - Real(1));
             
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -3759,8 +3759,8 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         
         // Add the contribution from the last species and compute gamma and p_inf.
         
-        const double tmp_1 = double(1)/(d_species_gamma.back() - double(1));
-        const double tmp_2 = d_species_gamma.back()*d_species_p_inf.back()/(d_species_gamma.back() - double(1));
+        const Real tmp_1 = Real(1)/(d_species_gamma.back() - Real(1));
+        const Real tmp_2 = d_species_gamma.back()*d_species_p_inf.back()/(d_species_gamma.back() - Real(1));
         
         for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
         {
@@ -3783,9 +3783,9 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
                     gamma[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions_last]*tmp_1;
                     p_inf[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions_last]*tmp_2;
                     
-                    gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
+                    gamma[idx_mixture_thermo_properties] = Real(1)/gamma[idx_mixture_thermo_properties] + Real(1);
                     
-                    p_inf[idx_mixture_thermo_properties] = (gamma[idx_mixture_thermo_properties] - double(1))/
+                    p_inf[idx_mixture_thermo_properties] = (gamma[idx_mixture_thermo_properties] - Real(1))/
                         gamma[idx_mixture_thermo_properties]*p_inf[idx_mixture_thermo_properties];
                 }
             }
