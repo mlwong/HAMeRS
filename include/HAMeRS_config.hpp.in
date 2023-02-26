@@ -13,27 +13,27 @@
 #cmakedefine HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
 
 /* Define real data type */
-typedef float Real;
-#define getReal getFloat
-#define putReal putFloat
-#define getRealVector getFloatVector
-#define putRealVector putFloatVector
-#define getRealWithDefault getFloatWithDefault
-#define putRealWithDefault putFloatWithDefault
-#define HAMERS_EPSILON Real(1.0e-8)
-#define HAMERS_MPI_REAL MPI_FLOAT
-#define HAMERS_REAL_EPSILON FLT_EPSILON
+// typedef float Real;
+// #define getReal getFloat
+// #define putReal putFloat
+// #define getRealVector getFloatVector
+// #define putRealVector putFloatVector
+// #define getRealWithDefault getFloatWithDefault
+// #define putRealWithDefault putFloatWithDefault
+// #define HAMERS_EPSILON Real(1.0e-8)
+// #define HAMERS_MPI_REAL MPI_FLOAT
+// #define HAMERS_REAL_EPSILON FLT_EPSILON
 
-// typedef double Real;
-// #define getReal getDouble
-// #define putReal putDouble
-// #define getRealVector getDoubleVector
-// #define putRealVector putDoubleVector
-// #define getRealWithDefault getDoubleWithDefault
-// #define putRealWithDefault putDoubleWithDefault
-// #define HAMERS_EPSILON 1.0e-15
-// #define HAMERS_MPI_REAL MPI_DOUBLE
-// #define HAMERS_REAL_EPSILON DBL_EPSILON
+typedef double Real;
+#define getReal getDouble
+#define putReal putDouble
+#define getRealVector getDoubleVector
+#define putRealVector putDoubleVector
+#define getRealWithDefault getDoubleWithDefault
+#define putRealWithDefault putDoubleWithDefault
+#define HAMERS_EPSILON 1.0e-15
+#define HAMERS_MPI_REAL MPI_DOUBLE
+#define HAMERS_REAL_EPSILON DBL_EPSILON
 
 /* Enable compilation with Boost library */
 #cmakedefine HAMERS_USE_BOOST
