@@ -164,11 +164,11 @@ BasicCartesianBoundaryUtilities1::removeBoundaryNodeLocations(
 void
 BasicCartesianBoundaryUtilities1::fillNodeBoundaryData(
     const std::string& var_name,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& var_data,
     const hier::Patch& patch,
     const std::vector<int>& bdry_node_locs,
     const std::vector<int>& bdry_node_conds,
-    const std::vector<double>& bdry_node_values,
+    const std::vector<Real>& bdry_node_values,
     const hier::IntVector& ghost_width_to_fill)
 {
     TBOX_ASSERT(!var_name.empty());

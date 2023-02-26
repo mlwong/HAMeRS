@@ -61,9 +61,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::putToRestart(
  */
 void
 NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivativesInX(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_x,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_x_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_x,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivative_x_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_x,
     const std::vector<std::vector<int> >& data_component_idx_x,
     const hier::Patch& patch)
 {
@@ -94,11 +94,11 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_0_inv = double(1)/dx[0];
+    const Real dx_0_inv = Real(1)/Real(dx[0]);
     
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const Real a_n =  Real(3)/Real(4);
+    const Real b_n = -Real(3)/Real(20);
+    const Real c_n =  Real(1)/Real(60);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -123,15 +123,15 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                     == derivative_x_computed.end())
                 {
                     // Get the pointer to variable for derivative.
-                    double* u = data_x[ei][vi]->getPointer(u_idx);
+                    Real* u = data_x[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > derivative(
+                        new pdat::CellData<Real>(
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* dudx = derivative->getPointer(0);
+                    Real* dudx = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width of the variable.
@@ -161,7 +161,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                                         dx_0_inv;
                     }
                     
-                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+                    std::pair<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_pair(
                         u,
                         derivative);
                     
@@ -201,15 +201,15 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                     == derivative_x_computed.end())
                 {
                     // Get the pointer to variable for derivative.
-                    double* u = data_x[ei][vi]->getPointer(u_idx);
+                    Real* u = data_x[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > derivative(
+                        new pdat::CellData<Real>(
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* dudx = derivative->getPointer(0);
+                    Real* dudx = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width and ghost box dimensions of the variable.
@@ -259,7 +259,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                         }
                     }
                     
-                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+                    std::pair<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_pair(
                         u,
                         derivative);
                     
@@ -302,15 +302,15 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                     == derivative_x_computed.end())
                 {
                     // Get the pointer to variable for derivative.
-                    double* u = data_x[ei][vi]->getPointer(u_idx);
+                    Real* u = data_x[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > derivative(
+                        new pdat::CellData<Real>(
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* dudx = derivative->getPointer(0);
+                    Real* dudx = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width and ghost box dimensions of the variable.
@@ -379,7 +379,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                         }
                     }
                     
-                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+                    std::pair<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_pair(
                         u,
                         derivative);
                     
@@ -400,9 +400,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
  */
 void
 NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivativesInY(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_y,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_y_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_y,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivative_y_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_y,
     const std::vector<std::vector<int> >& data_component_idx_y,
     const hier::Patch& patch)
 {
@@ -433,11 +433,11 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_1_inv = double(1)/dx[1];
+    const Real dx_1_inv = Real(1)/Real(dx[1]);
     
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const Real a_n =  Real(3)/Real(4);
+    const Real b_n = -Real(3)/Real(20);
+    const Real c_n =  Real(1)/Real(60);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -474,15 +474,15 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                     == derivative_y_computed.end())
                 {
                     // Get the pointer to variable for derivative.
-                    double* u = data_y[ei][vi]->getPointer(u_idx);
+                    Real* u = data_y[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > derivative(
+                        new pdat::CellData<Real>(
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* dudy = derivative->getPointer(0);
+                    Real* dudy = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width and ghost box dimensions of the variable.
@@ -532,7 +532,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                         }
                     }
                     
-                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+                    std::pair<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_pair(
                         u,
                         derivative);
                     
@@ -575,15 +575,15 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                     == derivative_y_computed.end())
                 {
                     // Get the pointer to variable for derivative.
-                    double* u = data_y[ei][vi]->getPointer(u_idx);
+                    Real* u = data_y[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > derivative(
+                        new pdat::CellData<Real>(
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* dudy = derivative->getPointer(0);
+                    Real* dudy = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width and ghost box dimensions of the variable.
@@ -652,7 +652,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                         }
                     }
                     
-                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+                    std::pair<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_pair(
                         u,
                         derivative);
                     
@@ -673,9 +673,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
  */
 void
 NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivativesInZ(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_z,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_z_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_z,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivative_z_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_z,
     const std::vector<std::vector<int> >& data_component_idx_z,
     const hier::Patch& patch)
 {
@@ -706,11 +706,11 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_2_inv = double(1)/dx[2];
+    const Real dx_2_inv = Real(1)/Real(dx[2]);
     
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const Real a_n =  Real(3)/Real(4);
+    const Real b_n = -Real(3)/Real(20);
+    const Real c_n =  Real(1)/Real(60);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -758,15 +758,15 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                     == derivative_z_computed.end())
                 {
                     // Get the pointer to variable for derivative.
-                    double* u = data_z[ei][vi]->getPointer(u_idx);
+                    Real* u = data_z[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > derivative(
+                        new pdat::CellData<Real>(
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* dudz = derivative->getPointer(0);
+                    Real* dudz = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width and ghost box dimensions of the variable.
@@ -835,7 +835,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                         }
                     }
                     
-                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+                    std::pair<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_pair(
                         u,
                         derivative);
                     
@@ -856,9 +856,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
  */
 void
 NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativesInX(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_x,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_x_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_x,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivative_x_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_x,
     const std::vector<std::vector<int> >& data_component_idx_x,
     const hier::Patch& patch)
 {
@@ -889,12 +889,12 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_sq_inv = double(1)/(dx[0]*dx[0]);
+    const Real dx_sq_inv = Real(1)/Real(dx[0]*dx[0]);
     
-    const double a_n = -double(49)/double(18);
-    const double b_n =  double(3)/double(2);
-    const double c_n = -double(3)/double(20);
-    const double d_n =  double(1)/double(90);
+    const Real a_n = -Real(49)/Real(18);
+    const Real b_n =  Real(3)/Real(2);
+    const Real c_n = -Real(3)/Real(20);
+    const Real d_n =  Real(1)/Real(90);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -919,15 +919,15 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                     == derivative_x_computed.end())
                 {
                     // Get the pointer to variable for derivative.
-                    double* u = data_x[ei][vi]->getPointer(u_idx);
+                    Real* u = data_x[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > derivative(
+                        new pdat::CellData<Real>(
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* d2udx2 = derivative->getPointer(0);
+                    Real* d2udx2 = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width of the variable.
@@ -959,7 +959,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                                         dx_sq_inv;
                     }
                     
-                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+                    std::pair<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_pair(
                         u,
                         derivative);
                     
@@ -999,15 +999,15 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                     == derivative_x_computed.end())
                 {
                     // Get the pointer to variable for derivative.
-                    double* u = data_x[ei][vi]->getPointer(u_idx);
+                    Real* u = data_x[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > derivative(
+                        new pdat::CellData<Real>(
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* d2udx2 = derivative->getPointer(0);
+                    Real* d2udx2 = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width and ghost box dimensions of the variable.
@@ -1061,7 +1061,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                         }
                     }
                     
-                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+                    std::pair<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_pair(
                         u,
                         derivative);
                     
@@ -1104,15 +1104,15 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                     == derivative_x_computed.end())
                 {
                     // Get the pointer to variable for derivative.
-                    double* u = data_x[ei][vi]->getPointer(u_idx);
+                    Real* u = data_x[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > derivative(
+                        new pdat::CellData<Real>(
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* d2udx2 = derivative->getPointer(0);
+                    Real* d2udx2 = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width and ghost box dimensions of the variable.
@@ -1187,7 +1187,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                         }
                     }
                     
-                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+                    std::pair<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_pair(
                         u,
                         derivative);
                     
@@ -1208,9 +1208,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
  */
 void
 NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativesInY(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_y,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_y_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_y,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivative_y_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_y,
     const std::vector<std::vector<int> >& data_component_idx_y,
     const hier::Patch& patch)
 {
@@ -1241,12 +1241,12 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
     
     const double* const dx = patch_geom->getDx();
     
-    const double dy_sq_inv = double(1)/(dx[1]*dx[1]);
+    const Real dy_sq_inv = Real(1)/Real(dx[1]*dx[1]);
     
-    const double a_n = -double(49)/double(18);
-    const double b_n =  double(3)/double(2);
-    const double c_n = -double(3)/double(20);
-    const double d_n =  double(1)/double(90);
+    const Real a_n = -Real(49)/Real(18);
+    const Real b_n =  Real(3)/Real(2);
+    const Real c_n = -Real(3)/Real(20);
+    const Real d_n =  Real(1)/Real(90);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -1283,15 +1283,15 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                     == derivative_y_computed.end())
                 {
                     // Get the pointer to variable for derivative.
-                    double* u = data_y[ei][vi]->getPointer(u_idx);
+                    Real* u = data_y[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > derivative(
+                        new pdat::CellData<Real>(
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* d2udy2 = derivative->getPointer(0);
+                    Real* d2udy2 = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width and ghost box dimensions of the variable.
@@ -1345,7 +1345,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                         }
                     }
                     
-                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+                    std::pair<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_pair(
                         u,
                         derivative);
                     
@@ -1388,15 +1388,15 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                     == derivative_y_computed.end())
                 {
                     // Get the pointer to variable for derivative.
-                    double* u = data_y[ei][vi]->getPointer(u_idx);
+                    Real* u = data_y[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > derivative(
+                        new pdat::CellData<Real>(
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* d2udy2 = derivative->getPointer(0);
+                    Real* d2udy2 = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width and ghost box dimensions of the variable.
@@ -1471,7 +1471,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                         }
                     }
                     
-                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+                    std::pair<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_pair(
                         u,
                         derivative);
                     
@@ -1492,9 +1492,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
  */
 void
 NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativesInZ(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_z,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_z_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_z,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivative_z_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_z,
     const std::vector<std::vector<int> >& data_component_idx_z,
     const hier::Patch& patch)
 {
@@ -1525,12 +1525,12 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
     
     const double* const dx = patch_geom->getDx();
     
-    const double dz_sq_inv = double(1)/(dx[2]*dx[2]);
+    const Real dz_sq_inv = Real(1)/Real(dx[2]*dx[2]);
     
-    const double a_n = -double(49)/double(18);
-    const double b_n =  double(3)/double(2);
-    const double c_n = -double(3)/double(20);
-    const double d_n =  double(1)/double(90);
+    const Real a_n = -Real(49)/Real(18);
+    const Real b_n =  Real(3)/Real(2);
+    const Real c_n = -Real(3)/Real(20);
+    const Real d_n =  Real(1)/Real(90);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -1578,15 +1578,15 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                     == derivative_z_computed.end())
                 {
                     // Get the pointer to variable for derivative.
-                    double* u = data_z[ei][vi]->getPointer(u_idx);
+                    Real* u = data_z[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > derivative(
+                        new pdat::CellData<Real>(
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* d2udz2 = derivative->getPointer(0);
+                    Real* d2udz2 = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width and ghost box dimensions of the variable.
@@ -1661,7 +1661,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                         }
                     }
                     
-                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+                    std::pair<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_pair(
                         u,
                         derivative);
                     

@@ -44,43 +44,43 @@ class EquationOfShearViscosityMixingRulesConstant: public EquationOfShearViscosi
         /*
          * Compute the shear viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
-        double
+        Real
         getShearViscosity(
-            const double* const pressure,
-            const double* const temperature,
-            const std::vector<const double*>& mass_fractions) const;
+            const Real* const pressure,
+            const Real* const temperature,
+            const std::vector<const Real*>& mass_fractions) const;
         
         /*
          * Compute the shear viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeShearViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_shear_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_shear_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
             const hier::Box& domain) const;
         
         /*
          * Compute the shear viscosity of the mixture with isobaric equilibrium assumption.
          */
-        double
+        Real
         getShearViscosity(
-            const double* const pressure,
-            const std::vector<const double*>& species_temperatures,
-            const std::vector<const double*>& mass_fractions,
-            const std::vector<const double*>& volume_fractions) const;
+            const Real* const pressure,
+            const std::vector<const Real*>& species_temperatures,
+            const std::vector<const Real*>& mass_fractions,
+            const std::vector<const Real*>& volume_fractions) const;
         
         /*
          * Compute the shear viscosity of the mixture with isobaric equilibrium assumption.
          */
         void
         computeShearViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_shear_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_species_temperatures,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_shear_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& data_species_temperatures,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -98,24 +98,24 @@ class EquationOfShearViscosityMixingRulesConstant: public EquationOfShearViscosi
          */
         void
         getSpeciesMolecularProperties(
-            std::vector<double*>& species_molecular_properties,
+            std::vector<Real*>& species_molecular_properties,
             const int species_index = 0) const;
         
     private:
         /*
          * Dynamic shear viscosities of different species.
          */
-        std::vector<double> d_species_mu;
+        std::vector<Real> d_species_mu;
         
         /*
          * Kinematic shear viscosities of different species.
          */
-        std::vector<double> d_species_nu;
+        std::vector<Real> d_species_nu;
         
         /*
          * Molecular weights of different species.
          */
-        std::vector<double> d_species_M;
+        std::vector<Real> d_species_M;
         
         /*
          * HAMERS_SHARED_PTR to EquationOfShearViscosity.
@@ -130,7 +130,7 @@ class EquationOfShearViscosityMixingRulesConstant: public EquationOfShearViscosi
         /*
          * Universal gas constant.
          */
-        double d_R_u;
+        Real d_R_u;
         
 };
 

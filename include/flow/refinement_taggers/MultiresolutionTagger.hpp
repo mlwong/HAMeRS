@@ -107,17 +107,17 @@ class MultiresolutionTagger
         tagCellsOnPatchWithWaveletSensor(
             hier::Patch& patch,
             const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& wavelet_coeffs,
-            const std::vector<double>& wavelet_coeffs_maxs,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& variable_local_means,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& Lipschitz_exponent,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& wavelet_coeffs,
+            const std::vector<Real>& wavelet_coeffs_maxs,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& variable_local_means,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& Lipschitz_exponent,
             const std::string& sensor_key,
             const bool uses_global_tol,
             const bool uses_local_tol,
             const bool uses_alpha_tol,
-            const double global_tol,
-            const double local_tol,
-            const double alpha_tol);
+            const Real global_tol,
+            const Real local_tol,
+            const Real alpha_tol);
         
         /*
          * Compute the Lipschitz's exponent on a patch. There are two steps:
@@ -127,8 +127,8 @@ class MultiresolutionTagger
         void
         computeLipschitzExponentOnPatch(
             hier::Patch& patch,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& Lipschitz_exponent,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& wavelet_coeffs,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& Lipschitz_exponent,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& wavelet_coeffs,
             const std::string& sensor_key);
         
         /*
@@ -176,9 +176,9 @@ class MultiresolutionTagger
          * Variables, tolerances and settings for the multiresolution sensors.
          */
         std::vector<std::string> d_Harten_wavelet_variables;
-        std::vector<double> d_Harten_wavelet_global_tol;
-        std::vector<double> d_Harten_wavelet_local_tol;
-        std::vector<double> d_Harten_wavelet_alpha_tol;
+        std::vector<Real> d_Harten_wavelet_global_tol;
+        std::vector<Real> d_Harten_wavelet_local_tol;
+        std::vector<Real> d_Harten_wavelet_alpha_tol;
         std::vector<bool> d_Harten_wavelet_uses_global_tol;
         std::vector<bool> d_Harten_wavelet_uses_local_tol;
         std::vector<bool> d_Harten_wavelet_uses_alpha_tol;
@@ -186,24 +186,24 @@ class MultiresolutionTagger
         /*
          * HAMERS_SHARED_PTR to wavelet coefficients at different levels.
          */
-        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > d_Harten_wavelet_coeffs_density;
-        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > d_Harten_wavelet_coeffs_total_energy;
-        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > d_Harten_wavelet_coeffs_pressure;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > d_Harten_wavelet_coeffs_density;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > d_Harten_wavelet_coeffs_total_energy;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > d_Harten_wavelet_coeffs_pressure;
         
         /*
          * Statistics of sensor values.
          */
-        std::vector<double> d_Harten_wavelet_coeffs_maxs_density;
-        std::vector<double> d_Harten_wavelet_coeffs_maxs_total_energy;
-        std::vector<double> d_Harten_wavelet_coeffs_maxs_pressure;
+        std::vector<Real> d_Harten_wavelet_coeffs_maxs_density;
+        std::vector<Real> d_Harten_wavelet_coeffs_maxs_total_energy;
+        std::vector<Real> d_Harten_wavelet_coeffs_maxs_pressure;
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > d_Harten_local_means_density;
-        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > d_Harten_local_means_total_energy;
-        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > d_Harten_local_means_pressure;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > d_Harten_local_means_density;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > d_Harten_local_means_total_energy;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > d_Harten_local_means_pressure;
         
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_Harten_Lipschitz_exponent_density;
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_Harten_Lipschitz_exponent_total_energy;
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_Harten_Lipschitz_exponent_pressure;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_Harten_Lipschitz_exponent_density;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_Harten_Lipschitz_exponent_total_energy;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_Harten_Lipschitz_exponent_pressure;
         
 };
 

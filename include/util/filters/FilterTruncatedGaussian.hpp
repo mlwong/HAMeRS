@@ -24,8 +24,8 @@ class FilterTruncatedGaussian: public Filter
          */
         void
         applyFilter(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& filtered_cell_data,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& filtered_cell_data,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& cell_data,
             const int depth_filtered_cell_data,
             const int depth_cell_data)
         {
@@ -43,8 +43,8 @@ class FilterTruncatedGaussian: public Filter
          */
         void
         applyFilter(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& filtered_cell_data,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& filtered_cell_data,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& cell_data,
             const int depth_filtered_cell_data,
             const int depth_cell_data,
             const hier::Box& domain);
@@ -53,7 +53,7 @@ class FilterTruncatedGaussian: public Filter
         /*
          * Coefficients for truncated Gaussian filter.
          */
-        const double a_G, b_G, c_G, d_G, e_G;
+        const Real a_G, b_G, c_G, d_G, e_G;
         
 };
 

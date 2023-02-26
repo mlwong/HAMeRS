@@ -59,7 +59,7 @@ class FlowModelMPIHelper: public MPIHelper
         /*
          * Get the cell data of one cell variable in the registered patch.
          */
-        HAMERS_SHARED_PTR<pdat::CellData<double> > getCellData(const std::string& variable_key);
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > getCellData(const std::string& variable_key);
         
         /*
          * Unregister the registered patch in the flow model.

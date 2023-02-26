@@ -34,21 +34,21 @@ class EquationOfShearViscosity
         /*
          * Compute the shear viscosity.
          */
-        virtual double
+        virtual Real
         getShearViscosity(
-            const double* const pressure,
-            const double* const temperature,
-            const std::vector<const double*>& molecular_properties) const = 0;
+            const Real* const pressure,
+            const Real* const temperature,
+            const std::vector<const Real*>& molecular_properties) const = 0;
         
         /*
          * Compute the shear viscosity.
          */
         void
         computeShearViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_shear_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const std::vector<const double*>& molecular_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_shear_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const std::vector<const Real*>& molecular_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeShearViscosity(
@@ -64,10 +64,10 @@ class EquationOfShearViscosity
          */
         virtual void
         computeShearViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_shear_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const std::vector<const double*>& molecular_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_shear_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const std::vector<const Real*>& molecular_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -75,10 +75,10 @@ class EquationOfShearViscosity
          */
         void
         computeShearViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_shear_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_molecular_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_shear_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_molecular_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeShearViscosity(
@@ -94,10 +94,10 @@ class EquationOfShearViscosity
          */
         virtual void
         computeShearViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_shear_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_molecular_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_shear_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_molecular_properties,
             const hier::Box& domain) const = 0;
         
     protected:

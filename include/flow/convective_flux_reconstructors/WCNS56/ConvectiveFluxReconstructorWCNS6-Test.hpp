@@ -41,8 +41,8 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
         void
         computeConvectiveFluxAndSourceOnPatch(
             hier::Patch& patch,
-            const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_convective_flux,
-            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+            const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double time,
             const double dt,
@@ -54,17 +54,17 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
          */
         void
         performWENOInterpolation(
-            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& variables_minus,
-            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& variables_plus,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& variables);
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& variables_minus,
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& variables_plus,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& variables);
         
         /*
          * Constants used by the scheme.
          */
         int    d_constant_p;
         int    d_constant_q;
-        double d_constant_C;
-        double d_constant_alpha_tau;
+        Real d_constant_C;
+        Real d_constant_alpha_tau;
         
         /*
          * Forms of equations.

@@ -24,7 +24,7 @@ EquationOfMassDiffusivityMixingRulesConstant::EquationOfMassDiffusivityMixingRul
         if (static_cast<int>(species_D_array_size) == d_num_species)
         {
             d_species_D =
-                equation_of_mass_diffusivity_mixing_rules_db->getDoubleVector("species_D");
+                equation_of_mass_diffusivity_mixing_rules_db->getRealVector("species_D");
         }
         else
         {
@@ -41,7 +41,7 @@ EquationOfMassDiffusivityMixingRulesConstant::EquationOfMassDiffusivityMixingRul
         if (static_cast<int>(species_D_array_size) == d_num_species)
         {
             d_species_D =
-                equation_of_mass_diffusivity_mixing_rules_db->getDoubleVector("d_species_D");
+                equation_of_mass_diffusivity_mixing_rules_db->getRealVector("d_species_D");
         }
         else
         {
@@ -107,7 +107,7 @@ void
 EquationOfMassDiffusivityMixingRulesConstant::putToRestart(
     const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
-    restart_db->putDoubleVector("d_species_D", d_species_D);
+    restart_db->putRealVector("d_species_D", d_species_D);
 }
 
 
@@ -116,10 +116,10 @@ EquationOfMassDiffusivityMixingRulesConstant::putToRestart(
  */
 void
 EquationOfMassDiffusivityMixingRulesConstant::getMassDiffusivities(
-    std::vector<double*>& mass_diffusivities,
-    const double* const pressure,
-    const double* const temperature,
-    const std::vector<const double*>& mass_fractions) const
+    std::vector<Real*>& mass_diffusivities,
+    const Real* const pressure,
+    const Real* const temperature,
+    const std::vector<const Real*>& mass_fractions) const
 {
     NULL_USE(pressure);
     NULL_USE(temperature);
@@ -144,10 +144,10 @@ EquationOfMassDiffusivityMixingRulesConstant::getMassDiffusivities(
  */
 void
 EquationOfMassDiffusivityMixingRulesConstant::computeMassDiffusivities(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_diffusivities,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_diffusivities,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
     const hier::Box& domain) const
 {
     NULL_USE(data_pressure);
@@ -186,7 +186,7 @@ EquationOfMassDiffusivityMixingRulesConstant::computeMassDiffusivities(
  */
 void
 EquationOfMassDiffusivityMixingRulesConstant::getSpeciesMolecularProperties(
-    std::vector<double*>& species_molecular_properties,
+    std::vector<Real*>& species_molecular_properties,
     const int species_index) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS

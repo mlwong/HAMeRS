@@ -43,7 +43,7 @@ class MPIHelper
         /*
          * Get grid spacing of the coarsest domain.
          */
-        const std::vector<double>&
+        const std::vector<Real>&
         getCoarsestDomainGridSpacing() const
         {
             return d_dx_coarsest_level_dims;
@@ -61,7 +61,7 @@ class MPIHelper
         /*
          * Get grid spacing of the finest refined domain.
          */
-        const std::vector<double>&
+        const std::vector<Real>&
         getFinestRefinedDomainGridSpacing() const
         {
             return d_dx_finest_level_dims;
@@ -106,7 +106,7 @@ class MPIHelper
         /*
          * Grid spacing of the coarsest domain.
          */
-        std::vector<double> d_dx_coarsest_level_dims;
+        std::vector<Real> d_dx_coarsest_level_dims;
         
         /*
          * Number of points in the finest refined domain.
@@ -116,7 +116,7 @@ class MPIHelper
         /*
          * Grid spacing of the finest refined domain.
          */
-        std::vector<double> d_dx_finest_level_dims;
+        std::vector<Real> d_dx_finest_level_dims;
         
 };
 

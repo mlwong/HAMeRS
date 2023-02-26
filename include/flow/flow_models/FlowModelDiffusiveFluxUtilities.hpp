@@ -81,13 +81,13 @@ class FlowModelDiffusiveFluxUtilities
         /*
          * Get the cell data of one cell variable related to this class in the registered patch.
          */
-        virtual HAMERS_SHARED_PTR<pdat::CellData<double> >
+        virtual HAMERS_SHARED_PTR<pdat::CellData<Real> >
         getCellData(const std::string& variable_key);
         
         /*
          * Get the cell data of different cell variables related to this class in the registered patch.
          */
-        virtual std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+        virtual std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
         getCellData(
             const std::vector<std::string>& variable_keys);
         
@@ -96,7 +96,7 @@ class FlowModelDiffusiveFluxUtilities
          */
         virtual void
         getCellDataOfDiffusiveFluxVariablesForDerivative(
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_var_data,
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_var_data,
             std::vector<std::vector<int> >& derivative_var_component_idx,
             const DIRECTION::TYPE& flux_direction,
             const DIRECTION::TYPE& derivative_direction);
@@ -106,7 +106,7 @@ class FlowModelDiffusiveFluxUtilities
          */
         virtual void
         getCellDataOfDiffusiveFluxDiffusivities(
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& diffusivities_data,
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& diffusivities_data,
             std::vector<std::vector<int> >& diffusivities_component_idx,
             const DIRECTION::TYPE& flux_direction,
             const DIRECTION::TYPE& derivative_direction);
@@ -117,7 +117,7 @@ class FlowModelDiffusiveFluxUtilities
          */
         virtual void
         getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities(
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& var_data_for_diffusivities,
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& var_data_for_diffusivities,
             std::vector<int>& var_data_for_diffusivities_component_idx);
         
         /*
@@ -125,14 +125,14 @@ class FlowModelDiffusiveFluxUtilities
          */
         void
         virtual computeSideDataOfDiffusiveFluxDiffusivities(
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_data_for_diffusivities);
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& var_data_for_diffusivities);
         
         /*
          * Get the side data of the diffusivities in the diffusive fluxa.
          */
         void
         virtual getSideDataOfDiffusiveFluxDiffusivities(
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& diffusivities_data,
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& diffusivities_data,
             std::vector<std::vector<int> >& diffusivities_component_idx,
             const DIRECTION::TYPE& flux_direction,
             const DIRECTION::TYPE& derivative_direction);
@@ -147,7 +147,7 @@ class FlowModelDiffusiveFluxUtilities
          */
         void
         getCellDataOfVariablesForSideDerivativeForSubgridScaleViscosity(
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_var_data,
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivative_var_data,
             std::vector<int>& derivative_var_component_idx,
             const DIRECTION::TYPE& side_direction,
             const DIRECTION::TYPE& derivative_direction);
@@ -157,8 +157,8 @@ class FlowModelDiffusiveFluxUtilities
          */
         void
         updateSideDataOfDiffusiveFluxDiffusivitiesWithSubgridScaleModel(
-            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_data_for_diffusivities,
-            const std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives,
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& var_data_for_diffusivities,
+            const std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& derivatives,
             const DIRECTION::TYPE& side_direction);
         
         /*
@@ -217,7 +217,7 @@ class FlowModelDiffusiveFluxUtilities
         /*
          * HAMERS_SHARED_PTR to cell data of diffusivities.
          */
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_diffusivities;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_diffusivities;
         
         /*
          * Whether cell data of diffusivities is computed.
@@ -227,7 +227,7 @@ class FlowModelDiffusiveFluxUtilities
         /*
          * HAMERS_SHARED_PTR to side data of diffusivities.
          */
-        HAMERS_SHARED_PTR<pdat::SideData<double> > d_side_data_diffusivities;
+        HAMERS_SHARED_PTR<pdat::SideData<Real> > d_side_data_diffusivities;
         
         /*
          * Whether side data of diffusivities is computed.

@@ -218,21 +218,21 @@ MultiresolutionTagger::MultiresolutionTagger(
                             << std::endl);
                     }
                     
-                    num_true = std::count(d_Harten_wavelet_uses_global_tol.begin(),
+                    num_true = int(std::count(d_Harten_wavelet_uses_global_tol.begin(),
                         d_Harten_wavelet_uses_global_tol.end(),
-                        true);
+                        true));
                     
                     if (num_true > 0)
                     {
                         if (sensor_db->keyExists("Harten_wavelet_global_tol"))
                         {
                             d_Harten_wavelet_global_tol =
-                                sensor_db->getDoubleVector("Harten_wavelet_global_tol");
+                                sensor_db->getRealVector("Harten_wavelet_global_tol");
                         }
                         else if (sensor_db->keyExists("d_Harten_wavelet_global_tol"))
                         {
                             d_Harten_wavelet_global_tol =
-                                sensor_db->getDoubleVector("d_Harten_wavelet_global_tol");
+                                sensor_db->getRealVector("d_Harten_wavelet_global_tol");
                         }
                         else
                         {
@@ -297,21 +297,21 @@ MultiresolutionTagger::MultiresolutionTagger(
                             << std::endl);
                     }
                     
-                    num_true = std::count(d_Harten_wavelet_uses_local_tol.begin(),
+                    num_true = int(std::count(d_Harten_wavelet_uses_local_tol.begin(),
                         d_Harten_wavelet_uses_local_tol.end(),
-                        true);
+                        true));
                     
                     if (num_true > 0)
                     {
                         if (sensor_db->keyExists("Harten_wavelet_local_tol"))
                         {
                             d_Harten_wavelet_local_tol =
-                                sensor_db->getDoubleVector("Harten_wavelet_local_tol");
+                                sensor_db->getRealVector("Harten_wavelet_local_tol");
                         }
                         else if (sensor_db->keyExists("d_Harten_wavelet_local_tol"))
                         {
                             d_Harten_wavelet_local_tol =
-                                sensor_db->getDoubleVector("d_Harten_wavelet_local_tol");
+                                sensor_db->getRealVector("d_Harten_wavelet_local_tol");
                         }
                         else
                         {
@@ -376,21 +376,21 @@ MultiresolutionTagger::MultiresolutionTagger(
                             << std::endl);
                     }
                     
-                    num_true = std::count(d_Harten_wavelet_uses_alpha_tol.begin(),
+                    num_true = int(std::count(d_Harten_wavelet_uses_alpha_tol.begin(),
                         d_Harten_wavelet_uses_alpha_tol.end(),
-                        true);
+                        true));
                     
                     if (num_true > 0)
                     {
                         if (sensor_db->keyExists("Harten_wavelet_alpha_tol"))
                         {
                             d_Harten_wavelet_alpha_tol =
-                                sensor_db->getDoubleVector("Harten_wavelet_alpha_tol");
+                                sensor_db->getRealVector("Harten_wavelet_alpha_tol");
                         }
                         else if (sensor_db->keyExists("d_Harten_wavelet_alpha_tol"))
                         {
                             d_Harten_wavelet_alpha_tol =
-                                sensor_db->getDoubleVector("d_Harten_wavelet_alpha_tol");
+                                sensor_db->getRealVector("d_Harten_wavelet_alpha_tol");
                         }
                         else
                         {
@@ -494,7 +494,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         d_Harten_wavelet_coeffs_density.push_back(
-                            HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
+                            HAMERS_MAKE_SHARED<pdat::CellVariable<Real> >(
                                 d_dim,
                                 "Harten wavelet coefficient of density at level " +
                                     std::to_string(li),
@@ -502,13 +502,13 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         
                         if (d_Harten_wavelet_uses_global_tol[vi])
                         {
-                            d_Harten_wavelet_coeffs_maxs_density.push_back(0.0);
+                            d_Harten_wavelet_coeffs_maxs_density.push_back(Real(0));
                         }
                         
                         if (d_Harten_wavelet_uses_local_tol[vi])
                         {
                             d_Harten_local_means_density.push_back(
-                                HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
+                                HAMERS_MAKE_SHARED<pdat::CellVariable<Real> >(
                                     d_dim,
                                     "Harten local mean of density at level " +
                                         std::to_string(li),
@@ -519,8 +519,8 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     if (d_Harten_wavelet_uses_alpha_tol[vi])
                     {
                         d_Harten_Lipschitz_exponent_density =
-                            HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
-                                new pdat::CellVariable<double>(
+                            HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
+                                new pdat::CellVariable<Real>(
                                     d_dim,
                                     "Harten Lipschitz's exponent of density",
                                     1));
@@ -531,7 +531,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         d_Harten_wavelet_coeffs_total_energy.push_back(
-                            HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
+                            HAMERS_MAKE_SHARED<pdat::CellVariable<Real> >(
                                 d_dim,
                                 "Harten wavelet coefficient of total energy at level " +
                                     std::to_string(li),
@@ -539,13 +539,13 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         
                         if (d_Harten_wavelet_uses_global_tol[vi])
                         {
-                            d_Harten_wavelet_coeffs_maxs_total_energy.push_back(0.0);
+                            d_Harten_wavelet_coeffs_maxs_total_energy.push_back(Real(0));
                         }
                         
                         if (d_Harten_wavelet_uses_local_tol[vi])
                         {
                             d_Harten_local_means_total_energy.push_back(
-                                HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
+                                HAMERS_MAKE_SHARED<pdat::CellVariable<Real> >(
                                     d_dim,
                                     "Harten local mean of total energy at level " +
                                         std::to_string(li),
@@ -556,8 +556,8 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     if (d_Harten_wavelet_uses_alpha_tol[vi])
                     {
                         d_Harten_Lipschitz_exponent_total_energy =
-                            HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
-                                new pdat::CellVariable<double>(
+                            HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
+                                new pdat::CellVariable<Real>(
                                     d_dim,
                                     "Harten Lipschitz's exponent of total energy",
                                     1));
@@ -568,7 +568,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         d_Harten_wavelet_coeffs_pressure.push_back(
-                            HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
+                            HAMERS_MAKE_SHARED<pdat::CellVariable<Real> >(
                                 d_dim,
                                 "Harten wavelet coefficient of pressure at level " +
                                     std::to_string(li),
@@ -576,13 +576,13 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         
                         if (d_Harten_wavelet_uses_global_tol[vi])
                         {
-                            d_Harten_wavelet_coeffs_maxs_pressure.push_back(0.0);
+                            d_Harten_wavelet_coeffs_maxs_pressure.push_back(Real(0));
                         }
                         
                         if (d_Harten_wavelet_uses_local_tol[vi])
                         {
                             d_Harten_local_means_pressure.push_back(
-                                HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
+                                HAMERS_MAKE_SHARED<pdat::CellVariable<Real> >(
                                     d_dim,
                                     "Harten local mean of pressure at level " +
                                         std::to_string(li),
@@ -593,8 +593,8 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     if (d_Harten_wavelet_uses_alpha_tol[vi])
                     {
                         d_Harten_Lipschitz_exponent_pressure =
-                            HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
-                                new pdat::CellVariable<double>(
+                            HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
+                                new pdat::CellVariable<Real>(
                                     d_dim,
                                     "Harten Lipschitz's exponent of pressure",
                                     1));
@@ -996,30 +996,30 @@ MultiresolutionTagger::putToRestart(
             
             int num_true = 0;
             
-            num_true = std::count(d_Harten_wavelet_uses_global_tol.begin(),
+            num_true = int(std::count(d_Harten_wavelet_uses_global_tol.begin(),
                 d_Harten_wavelet_uses_global_tol.end(),
-                true);
+                true));
             if (num_true > 0)
             {
-                sensor_db->putDoubleVector("d_Harten_wavelet_global_tol",
+                sensor_db->putRealVector("d_Harten_wavelet_global_tol",
                     d_Harten_wavelet_global_tol);
             }
             
-            num_true = std::count(d_Harten_wavelet_uses_local_tol.begin(),
+            num_true = int(std::count(d_Harten_wavelet_uses_local_tol.begin(),
                 d_Harten_wavelet_uses_local_tol.end(),
-                true);
+                true));
             if (num_true > 0)
             {
-                sensor_db->putDoubleVector("d_Harten_wavelet_local_tol",
+                sensor_db->putRealVector("d_Harten_wavelet_local_tol",
                     d_Harten_wavelet_local_tol);
             }
             
-            num_true = std::count(d_Harten_wavelet_uses_alpha_tol.begin(),
+            num_true = int(std::count(d_Harten_wavelet_uses_alpha_tol.begin(),
                 d_Harten_wavelet_uses_alpha_tol.end(),
-                true);
+                true));
             if (num_true > 0)
             {
-                sensor_db->putDoubleVector("d_Harten_wavelet_alpha_tol",
+                sensor_db->putRealVector("d_Harten_wavelet_alpha_tol",
                     d_Harten_wavelet_alpha_tol);
             }
         }
@@ -1069,14 +1069,14 @@ MultiresolutionTagger::computeMultiresolutionSensorValuesOnPatch(
                     d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to density data inside the flow model.
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > data_density = d_flow_model->getCellData("DENSITY");
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_density = d_flow_model->getCellData("DENSITY");
                     
                     // Get the wavelet coefficients.
-                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > wavelet_coeffs;
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         wavelet_coeffs.push_back(
-                            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                                 patch.getPatchData(
                                     d_Harten_wavelet_coeffs_density[li],
                                     data_context)));
@@ -1086,11 +1086,11 @@ MultiresolutionTagger::computeMultiresolutionSensorValuesOnPatch(
                     if (d_Harten_wavelet_uses_local_tol[vi])
                     {
                         // Get the local means.
-                        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > variable_local_means;
+                        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > variable_local_means;
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
                             variable_local_means.push_back(
-                                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                                HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                                     patch.getPatchData(
                                         d_Harten_local_means_density[li],
                                         data_context)));
@@ -1140,15 +1140,15 @@ MultiresolutionTagger::computeMultiresolutionSensorValuesOnPatch(
                     d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to total energy data inside the flow model.
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_total_energy =
                         d_flow_model->getCellData("TOTAL_ENERGY");
                     
                     // Get the wavelet coefficients.
-                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > wavelet_coeffs;
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         wavelet_coeffs.push_back(
-                            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                                 patch.getPatchData(
                                     d_Harten_wavelet_coeffs_total_energy[li],
                                     data_context)));
@@ -1158,11 +1158,11 @@ MultiresolutionTagger::computeMultiresolutionSensorValuesOnPatch(
                     if (d_Harten_wavelet_uses_local_tol[vi])
                     {
                         // Get the local means.
-                        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > variable_local_means;
+                        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > variable_local_means;
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
                             variable_local_means.push_back(
-                                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                                HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                                     patch.getPatchData(
                                         d_Harten_local_means_total_energy[li],
                                         data_context)));
@@ -1212,14 +1212,14 @@ MultiresolutionTagger::computeMultiresolutionSensorValuesOnPatch(
                     d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to pressure data inside the flow model.
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure = d_flow_model->getCellData("PRESSURE");
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_pressure = d_flow_model->getCellData("PRESSURE");
                     
                     // Get the wavelet coefficients.
-                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > wavelet_coeffs;
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         wavelet_coeffs.push_back(
-                                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                                HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                                     patch.getPatchData(
                                         d_Harten_wavelet_coeffs_pressure[li],
                                         data_context)));
@@ -1229,11 +1229,11 @@ MultiresolutionTagger::computeMultiresolutionSensorValuesOnPatch(
                     if (d_Harten_wavelet_uses_local_tol[vi])
                     {
                         // Get the local means.
-                        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > variable_local_means;
+                        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > variable_local_means;
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
                             variable_local_means.push_back(
-                                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                                         patch.getPatchData(
                                             d_Harten_local_means_pressure[li],
                                             data_context)));
@@ -1287,7 +1287,7 @@ MultiresolutionTagger::getSensorValueStatistics(
 {
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    math::HierarchyCellDataOpsReal<double> cell_double_operator(patch_hierarchy, level_number, level_number);
+    math::HierarchyCellDataOpsReal<Real> cell_double_operator(patch_hierarchy, level_number, level_number);
     
     hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
     
@@ -1313,14 +1313,14 @@ MultiresolutionTagger::getSensorValueStatistics(
                                 d_Harten_wavelet_coeffs_density[li],
                                 data_context);
                             
-                            double w_max_rho_local = cell_double_operator.max(w_rho_id);
-                            d_Harten_wavelet_coeffs_maxs_density[li] = 0.0;
+                            Real w_max_rho_local = cell_double_operator.max(w_rho_id);
+                            d_Harten_wavelet_coeffs_maxs_density[li] = Real(0);
                             
                             mpi.Allreduce(
                                 &w_max_rho_local,
                                 &d_Harten_wavelet_coeffs_maxs_density[li],
                                 1,
-                                MPI_DOUBLE,
+                                HAMERS_MPI_REAL,
                                 MPI_MAX);
                         }
                     }
@@ -1332,14 +1332,14 @@ MultiresolutionTagger::getSensorValueStatistics(
                                 d_Harten_wavelet_coeffs_total_energy[li],
                                 data_context);
                             
-                            double w_E_max_local = cell_double_operator.max(w_E_id);
-                            d_Harten_wavelet_coeffs_maxs_total_energy[li] = 0.0;
+                            Real w_E_max_local = cell_double_operator.max(w_E_id);
+                            d_Harten_wavelet_coeffs_maxs_total_energy[li] = Real(0);
                             
                             mpi.Allreduce(
                                 &w_E_max_local,
                                 &d_Harten_wavelet_coeffs_maxs_total_energy[li],
                                 1,
-                                MPI_DOUBLE,
+                                HAMERS_MPI_REAL,
                                 MPI_MAX);
                         }
                     }
@@ -1351,14 +1351,14 @@ MultiresolutionTagger::getSensorValueStatistics(
                                 d_Harten_wavelet_coeffs_pressure[li],
                                 data_context);
                             
-                            double w_p_max_local = cell_double_operator.max(w_p_id);
-                            d_Harten_wavelet_coeffs_maxs_pressure[li] = 0.0;
+                            Real w_p_max_local = cell_double_operator.max(w_p_id);
+                            d_Harten_wavelet_coeffs_maxs_pressure[li] = Real(0);
                             
                             mpi.Allreduce(
                                 &w_p_max_local,
                                 &d_Harten_wavelet_coeffs_maxs_pressure[li],
                                 1,
-                                MPI_DOUBLE,
+                                HAMERS_MPI_REAL,
                                 MPI_MAX);
                         }
                     }
@@ -1399,9 +1399,9 @@ MultiresolutionTagger::tagCellsOnPatch(
                 bool uses_local_tol = d_Harten_wavelet_uses_local_tol[vi];
                 bool uses_alpha_tol = d_Harten_wavelet_uses_alpha_tol[vi];
                 
-                double global_tol = 0.0;
-                double local_tol = 0.0;
-                double alpha_tol = 0.0;
+                Real global_tol = Real(0);
+                Real local_tol = Real(0);
+                Real alpha_tol = Real(0);
                 
                 if (uses_global_tol)
                 {
@@ -1428,35 +1428,35 @@ MultiresolutionTagger::tagCellsOnPatch(
                 
                 if (variable_key == "DENSITY")
                 {
-                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > wavelet_coeffs;
                     
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         wavelet_coeffs.push_back(
-                            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                                 patch.getPatchData(
                                     d_Harten_wavelet_coeffs_density[li],
                                     data_context)));
                     }
                     
-                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > variable_local_means;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > variable_local_means;
                     if (uses_local_tol)
                     {
                         // Get the local means.
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
                             variable_local_means.push_back(
-                                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                                HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                                     patch.getPatchData(
                                         d_Harten_local_means_density[li],
                                         data_context)));
                         }
                     }
                     
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > Lipschitz_exponent;
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > Lipschitz_exponent;
                     if (uses_alpha_tol)
                     {
-                        Lipschitz_exponent = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                        Lipschitz_exponent = HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                             patch.getPatchData(
                                 d_Harten_Lipschitz_exponent_density,
                                 data_context));
@@ -1479,35 +1479,35 @@ MultiresolutionTagger::tagCellsOnPatch(
                 }
                 else if (variable_key == "TOTAL_ENERGY")
                 {
-                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > wavelet_coeffs;
                     
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         wavelet_coeffs.push_back(
-                                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                                HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                                     patch.getPatchData(
                                         d_Harten_wavelet_coeffs_total_energy[li],
                                         data_context)));
                     }
                     
-                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > variable_local_means;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > variable_local_means;
                     if (uses_local_tol)
                     {
                         // Get the local means.
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
                             variable_local_means.push_back(
-                                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                                         patch.getPatchData(
                                             d_Harten_local_means_total_energy[li],
                                             data_context)));
                         }
                     }
                     
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > Lipschitz_exponent;
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > Lipschitz_exponent;
                     if (uses_alpha_tol)
                     {
-                        Lipschitz_exponent = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                        Lipschitz_exponent = HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                             patch.getPatchData(
                                 d_Harten_Lipschitz_exponent_total_energy,
                                 data_context));
@@ -1530,35 +1530,35 @@ MultiresolutionTagger::tagCellsOnPatch(
                 }
                 else if (variable_key == "PRESSURE")
                 {
-                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > wavelet_coeffs;
                     
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         wavelet_coeffs.push_back(
-                                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                                HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                                     patch.getPatchData(
                                         d_Harten_wavelet_coeffs_pressure[li],
                                         data_context)));
                     }
                     
-                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > variable_local_means;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > variable_local_means;
                     if (uses_local_tol)
                     {
                         // Get the local means.
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
                             variable_local_means.push_back(
-                                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                                         patch.getPatchData(
                                             d_Harten_local_means_pressure[li],
                                             data_context)));
                         }
                     }
                     
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > Lipschitz_exponent;
+                    HAMERS_SHARED_PTR<pdat::CellData<Real> > Lipschitz_exponent;
                     if (uses_alpha_tol)
                     {
-                        Lipschitz_exponent = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                        Lipschitz_exponent = HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                             patch.getPatchData(
                                 d_Harten_Lipschitz_exponent_pressure,
                                 data_context));
@@ -1602,8 +1602,8 @@ MultiresolutionTagger::tagCellsOnPatch(
 void
 MultiresolutionTagger::computeLipschitzExponentOnPatch(
     hier::Patch& patch,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& Lipschitz_exponent,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& wavelet_coeffs,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& Lipschitz_exponent,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& wavelet_coeffs,
     const std::string& sensor_key)
 {
     // Get the dimensions of box that covers the interior of patch.
@@ -1617,7 +1617,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
          */
         
         // Get the pointers to the wavelet coefficients.
-        std::vector<double*> w;
+        std::vector<Real*> w;
         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
         {
             w.push_back(wavelet_coeffs[li]->getPointer(0));
@@ -1629,15 +1629,15 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
         const hier::IntVector ghostcell_dims_wavelet_coeffs = wavelet_coeffs[0]->getGhostBox().numberCells();
         
         // Create a vector of maximum wavelet coefficients in domain of dependence.
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs_local_max;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > wavelet_coeffs_local_max;
         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
         {
-            wavelet_coeffs_local_max.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+            wavelet_coeffs_local_max.push_back(HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
         }
         
         // Get the pointers to the maximum wavelet coefficients in the domain of dependence.
-        std::vector<double*> r;
+        std::vector<Real*> r;
         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
         {
             r.push_back(wavelet_coeffs_local_max[li]->getPointer(0));
@@ -1662,13 +1662,13 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                     const int idx = i + num_ghosts_0_wavelet_coeffs;
                     
                     // Find the maximum wavelet coefficient over the domain of dependence.
-                    r[li][idx] = 0.0;
-                    for (int ii = -p*pow(2, li+1); ii <= q*pow(2, li+1); ii++)
+                    r[li][idx] = Real(0);
+                    for (int ii = -p*int(pow(Real(2), Real(li+1))); ii <= q*int(pow(Real(2), Real(li+1))); ii++)
                     {
                         // Compute the index.
                         const int idx_s = i + ii + num_ghosts_0_wavelet_coeffs;
                         
-                        r[li][idx] = fmax(r[li][idx], w[li][idx_s]);
+                        r[li][idx] = std::max(r[li][idx], w[li][idx_s]);
                     }
                 }
             }
@@ -1691,22 +1691,22 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                             (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                         
                         // Find the maximum wavelet coefficient over the domain of dependence.
-                        r[li][idx] = 0.0;
-                        for (int ii = -p*pow(2, li+1); ii <= q*pow(2, li+1); ii++)
+                        r[li][idx] = Real(0);
+                        for (int ii = -p*int(pow(Real(2), Real(li+1))); ii <= q*int(pow(Real(2), Real(li+1))); ii++)
                         {
                             // Compute the index.
                             const int idx_s = (i + ii + num_ghosts_0_wavelet_coeffs) +
                                 (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            r[li][idx] = fmax(r[li][idx], w[li][idx_s]);
+                            r[li][idx] = std::max(r[li][idx], w[li][idx_s]);
                         }
-                        for (int jj = -p*pow(2, li+1); jj <= q*pow(2, li+1); jj++)
+                        for (int jj = -p*int(pow(Real(2), Real(li+1))); jj <= q*int(pow(Real(2), Real(li+1))); jj++)
                         {
                             // Compute the index.
                             const int idx_s = (i + num_ghosts_0_wavelet_coeffs) +
                                 (j + jj + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            r[li][idx] = fmax(r[li][idx], w[li][idx_s]);
+                            r[li][idx] = std::max(r[li][idx], w[li][idx_s]);
                         }
                     }
                 }
@@ -1737,8 +1737,8 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                                     ghostcell_dim_1_wavelet_coeffs;
                             
                             // Find the maximum wavelet coefficient over the domain of dependence.
-                            r[li][idx] = 0.0;
-                            for (int ii = -p*pow(2, li+1); ii <= q*pow(2, li+1); ii++)
+                            r[li][idx] = Real(0);
+                            for (int ii = -p*int(pow(Real(2), Real(li+1))); ii <= q*int(pow(Real(2), Real(li+1))); ii++)
                             {
                                 // Compute the index.
                                 const int idx_s = (i + ii + num_ghosts_0_wavelet_coeffs) +
@@ -1746,9 +1746,9 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                                     (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
                                         ghostcell_dim_1_wavelet_coeffs;
                                 
-                                r[li][idx] = fmax(r[li][idx], w[li][idx_s]);
+                                r[li][idx] = std::max(r[li][idx], w[li][idx_s]);
                             }
-                            for (int jj = -p*pow(2, li+1); jj <= q*pow(2, li+1); jj++)
+                            for (int jj = -p*int(pow(Real(2), Real(li+1))); jj <= q*int(pow(Real(2), Real(li+1))); jj++)
                             {
                                 // Compute the index.
                                 const int idx_s = (i + num_ghosts_0_wavelet_coeffs) +
@@ -1756,9 +1756,9 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                                     (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
                                         ghostcell_dim_1_wavelet_coeffs;
                                 
-                                r[li][idx] = fmax(r[li][idx], w[li][idx_s]);
+                                r[li][idx] = std::max(r[li][idx], w[li][idx_s]);
                             }
-                            for (int kk = -p*pow(2, li+1); kk <=q*pow(2, li+1); kk++)
+                            for (int kk = -p*int(pow(Real(2), Real(li+1))); kk <=q*int(pow(Real(2), Real(li+1))); kk++)
                             {
                                 // Compute the index.
                                 const int idx_s = (i + num_ghosts_0_wavelet_coeffs) +
@@ -1766,7 +1766,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                                     (k + kk + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
                                         ghostcell_dim_1_wavelet_coeffs;
                                 
-                                r[li][idx] = fmax(r[li][idx], w[li][idx_s]);
+                                r[li][idx] = std::max(r[li][idx], w[li][idx_s]);
                             }
                         }
                     }
@@ -1778,7 +1778,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
          * 2. Compute Lipschitz's exponent.
          */
         
-        double* alpha = Lipschitz_exponent->getPointer(0);
+        Real* alpha = Lipschitz_exponent->getPointer(0);
         
         switch (d_Harten_wavelet_num_level)
         {
@@ -1799,13 +1799,13 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                         if ((r[0][idx] > 1.0e-8) &&
                             (r[1][idx] > 1.0e-8))
                         {
-                            alpha[idx] = fmin(
-                                log2(r[1][idx]/r[0][idx]),
-                                (double) d_Harten_wavelet_num_vanishing_moments);
+                            alpha[idx] = std::min(
+                                std::log2(r[1][idx]/r[0][idx]),
+                                (Real) d_Harten_wavelet_num_vanishing_moments);
                         }
                         else
                         {
-                            alpha[idx] = (double) d_Harten_wavelet_num_vanishing_moments;
+                            alpha[idx] = (Real) d_Harten_wavelet_num_vanishing_moments;
                         }
                     }
                 }
@@ -1830,13 +1830,13 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                             if ((r[0][idx] > 1.0e-8) &&
                                 (r[1][idx] > 1.0e-8))
                             {
-                                alpha[idx] = fmin(
-                                    log2(r[1][idx]/r[0][idx]),
-                                    (double) d_Harten_wavelet_num_vanishing_moments);
+                                alpha[idx] = std::min(
+                                    std::log2(r[1][idx]/r[0][idx]),
+                                    (Real) d_Harten_wavelet_num_vanishing_moments);
                             }
                             else
                             {
-                                alpha[idx] = (double) d_Harten_wavelet_num_vanishing_moments;
+                                alpha[idx] = (Real) d_Harten_wavelet_num_vanishing_moments;
                             }
                         }
                     }
@@ -1869,13 +1869,13 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                                 if ((r[0][idx] > 1.0e-8) &&
                                     (r[1][idx] > 1.0e-8))
                                 {
-                                    alpha[idx] = fmin(
-                                        log2(r[1][idx]/r[0][idx]),
-                                        (double) d_Harten_wavelet_num_vanishing_moments);
+                                    alpha[idx] = std::min(
+                                        std::log2(r[1][idx]/r[0][idx]),
+                                        (Real) d_Harten_wavelet_num_vanishing_moments);
                                 }
                                 else
                                 {
-                                    alpha[idx] = (double) d_Harten_wavelet_num_vanishing_moments;
+                                    alpha[idx] = (Real) d_Harten_wavelet_num_vanishing_moments;
                                 }
                             }
                         }
@@ -1902,13 +1902,13 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                             (r[1][idx] > 1.0e-8) &&
                             (r[2][idx] > 1.0e-8))
                         {
-                            alpha[idx] = fmin(
-                                0.5*log2(r[2][idx]/r[0][idx]),
-                                (double) d_Harten_wavelet_num_vanishing_moments);
+                            alpha[idx] = std::min(
+                                Real(1)/Real(2)*std::log2(r[2][idx]/r[0][idx]),
+                                (Real) d_Harten_wavelet_num_vanishing_moments);
                         }
                         else
                         {
-                            alpha[idx] = (double) d_Harten_wavelet_num_vanishing_moments;
+                            alpha[idx] = (Real) d_Harten_wavelet_num_vanishing_moments;
                         }
                     }
                 }
@@ -1934,13 +1934,13 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                                 (r[1][idx] > 1.0e-8) &&
                                 (r[2][idx] > 1.0e-8))
                             {
-                                alpha[idx] = fmin(
-                                    0.5*log2(r[2][idx]/r[0][idx]),
-                                    (double) d_Harten_wavelet_num_vanishing_moments);
+                                alpha[idx] = std::min(
+                                    Real(1)/Real(2)*std::log2(r[2][idx]/r[0][idx]),
+                                    (Real) d_Harten_wavelet_num_vanishing_moments);
                             }
                             else
                             {
-                                alpha[idx] = (double) d_Harten_wavelet_num_vanishing_moments;
+                                alpha[idx] = (Real) d_Harten_wavelet_num_vanishing_moments;
                             }
                         }
                     }
@@ -1974,13 +1974,13 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                                     (r[1][idx] > 1.0e-8) &&
                                     (r[2][idx] > 1.0e-8))
                                 {
-                                    alpha[idx] = fmin(
-                                        0.5*log2(r[2][idx]/r[0][idx]),
-                                        (double) d_Harten_wavelet_num_vanishing_moments);
+                                    alpha[idx] = std::min(
+                                        Real(1)/Real(2)*std::log2(r[2][idx]/r[0][idx]),
+                                        (Real) d_Harten_wavelet_num_vanishing_moments);
                                 }
                                 else
                                 {
-                                    alpha[idx] = (double) d_Harten_wavelet_num_vanishing_moments;
+                                    alpha[idx] = (Real) d_Harten_wavelet_num_vanishing_moments;
                                 }
                             }
                         }
@@ -2008,14 +2008,14 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                             (r[2][idx] > 1.0e-8) &&
                             (r[3][idx] > 1.0e-8))
                         {
-                            alpha[idx] = fmin(
-                                (3.0/10.0*log2(r[3][idx]/r[0][idx]) +
-                                    1.0/10.0*log2(r[2][idx]/r[1][idx])),
-                                (double) d_Harten_wavelet_num_vanishing_moments);
+                            alpha[idx] = std::min(
+                                (Real(3)/Real(10)*std::log2(r[3][idx]/r[0][idx]) +
+                                    Real(1)/Real(10)*std::log2(r[2][idx]/r[1][idx])),
+                                (Real) d_Harten_wavelet_num_vanishing_moments);
                         }
                         else
                         {
-                            alpha[idx] = (double) d_Harten_wavelet_num_vanishing_moments;
+                            alpha[idx] = (Real) d_Harten_wavelet_num_vanishing_moments;
                         }
                     }
                 }
@@ -2042,14 +2042,14 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                                 (r[2][idx] > 1.0e-8) &&
                                 (r[3][idx] > 1.0e-8))
                             {
-                                alpha[idx] = fmin(
-                                    (3.0/10.0*log2(r[3][idx]/r[0][idx]) +
-                                        1.0/10.0*log2(r[2][idx]/r[1][idx])),
-                                    (double) d_Harten_wavelet_num_vanishing_moments);
+                                alpha[idx] = std::min(
+                                    (Real(3)/Real(10)*std::log2(r[3][idx]/r[0][idx]) +
+                                        Real(1)/Real(10)*std::log2(r[2][idx]/r[1][idx])),
+                                    (Real) d_Harten_wavelet_num_vanishing_moments);
                             }
                             else
                             {
-                                alpha[idx] = (double) d_Harten_wavelet_num_vanishing_moments;
+                                alpha[idx] = (Real) d_Harten_wavelet_num_vanishing_moments;
                             }
                         }
                     }
@@ -2084,14 +2084,14 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
                                     (r[2][idx] > 1.0e-8) &&
                                     (r[3][idx] > 1.0e-8))
                                 {
-                                    alpha[idx] = fmin(
-                                        (3.0/10.0*log2(r[3][idx]/r[0][idx]) +
-                                            1.0/10.0*log2(r[2][idx]/r[1][idx])),
-                                        (double) d_Harten_wavelet_num_vanishing_moments);
+                                    alpha[idx] = std::min(
+                                        (Real(3)/Real(10)*std::log2(r[3][idx]/r[0][idx]) +
+                                            Real(1)/Real(10)*std::log2(r[2][idx]/r[1][idx])),
+                                        (Real) d_Harten_wavelet_num_vanishing_moments);
                                 }
                                 else
                                 {
-                                    alpha[idx] = (double) d_Harten_wavelet_num_vanishing_moments;
+                                    alpha[idx] = (Real) d_Harten_wavelet_num_vanishing_moments;
                                 }
                             }
                         }
@@ -2124,17 +2124,17 @@ void
 MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
     hier::Patch& patch,
     const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& wavelet_coeffs,
-    const std::vector<double>& wavelet_coeffs_maxs,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& variable_local_means,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& Lipschitz_exponent,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& wavelet_coeffs,
+    const std::vector<Real>& wavelet_coeffs_maxs,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& variable_local_means,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& Lipschitz_exponent,
     const std::string& sensor_key,
     const bool uses_global_tol,
     const bool uses_local_tol,
     const bool uses_alpha_tol,
-    const double global_tol,
-    const double local_tol,
-    const double alpha_tol)
+    const Real global_tol,
+    const Real local_tol,
+    const Real alpha_tol)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
@@ -2160,14 +2160,14 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
     int* tag_ptr = tags->getPointer(0);
     
     // Get the pointers to the wavelet coefficients.
-    std::vector<double*> w;
+    std::vector<Real*> w;
     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
     {
         w.push_back(wavelet_coeffs[li]->getPointer(0));
     }
     
     // Get the pointers to the variable local means.
-    std::vector<double*> u_mean;
+    std::vector<Real*> u_mean;
     if (uses_local_tol)
     {
         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
@@ -2177,7 +2177,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
     }
     
     // Declare pointer to the Lipschitz's exponent.
-    double* alpha = NULL;    
+    Real* alpha = NULL;    
     
     if (uses_alpha_tol)
     {

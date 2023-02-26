@@ -6,9 +6,9 @@
 /*
  * Interger based power function.
  */
-static inline __attribute__((always_inline)) double ipow(double base, const int& exp)
+static inline __attribute__((always_inline)) Real ipow(Real base, const int& exp)
 {
-    double result = base;
+    Real result = base;
     for (int i = 1; i < exp; i++)
     {
         result *= base;
@@ -22,26 +22,26 @@ static inline __attribute__((always_inline)) double ipow(double base, const int&
  * Compute local beta's.
  */
 static inline __attribute__((always_inline)) void computeLocalBeta(
-    double& beta_0,
-    double& beta_1,
-    double& beta_2,
-    double** U_array,
+    Real& beta_0,
+    Real& beta_1,
+    Real& beta_2,
+    Real** U_array,
     const int& idx_side)
 {
-    beta_0 = double(1)/double(3)*(U_array[0][idx_side]*(double(4)*U_array[0][idx_side] -
-         double(19)*U_array[1][idx_side] + double(11)*U_array[2][idx_side]) +
-         U_array[1][idx_side]*(double(25)*U_array[1][idx_side] - double(31)*U_array[2][idx_side]) +
-         double(10)*U_array[2][idx_side]*U_array[2][idx_side]);
+    beta_0 = Real(1)/Real(3)*(U_array[0][idx_side]*(Real(4)*U_array[0][idx_side] -
+         Real(19)*U_array[1][idx_side] + Real(11)*U_array[2][idx_side]) +
+         U_array[1][idx_side]*(Real(25)*U_array[1][idx_side] - Real(31)*U_array[2][idx_side]) +
+         Real(10)*U_array[2][idx_side]*U_array[2][idx_side]);
     
-    beta_1 = double(1)/double(3)*(U_array[1][idx_side]*(double(4)*U_array[1][idx_side] -
-         double(13)*U_array[2][idx_side] + double(5)*U_array[3][idx_side]) +
-         double(13)*U_array[2][idx_side]*(U_array[2][idx_side] - U_array[3][idx_side]) +
-         double(4)*U_array[3][idx_side]*U_array[3][idx_side]);
+    beta_1 = Real(1)/Real(3)*(U_array[1][idx_side]*(Real(4)*U_array[1][idx_side] -
+         Real(13)*U_array[2][idx_side] + Real(5)*U_array[3][idx_side]) +
+         Real(13)*U_array[2][idx_side]*(U_array[2][idx_side] - U_array[3][idx_side]) +
+         Real(4)*U_array[3][idx_side]*U_array[3][idx_side]);
     
-    beta_2 = double(1)/double(3)*(U_array[2][idx_side]*(double(10)*U_array[2][idx_side] -
-         double(31)*U_array[3][idx_side] + double(11)*U_array[4][idx_side]) +
-         U_array[3][idx_side]*(double(25)*U_array[3][idx_side] - double(19)*U_array[4][idx_side]) +
-         double(4)*U_array[4][idx_side]*U_array[4][idx_side]);
+    beta_2 = Real(1)/Real(3)*(U_array[2][idx_side]*(Real(10)*U_array[2][idx_side] -
+         Real(31)*U_array[3][idx_side] + Real(11)*U_array[4][idx_side]) +
+         U_array[3][idx_side]*(Real(25)*U_array[3][idx_side] - Real(19)*U_array[4][idx_side]) +
+         Real(4)*U_array[4][idx_side]*U_array[4][idx_side]);
 }
 
 
@@ -49,26 +49,26 @@ static inline __attribute__((always_inline)) void computeLocalBeta(
  * Compute local beta_tilde's.
  */
 static inline __attribute__((always_inline)) void computeLocalBetaTilde(
-    double& beta_tilde_0,
-    double& beta_tilde_1,
-    double& beta_tilde_2,
-    double** U_array,
+    Real& beta_tilde_0,
+    Real& beta_tilde_1,
+    Real& beta_tilde_2,
+    Real** U_array,
     const int& idx_side)
 {
-    beta_tilde_0 = double(1)/double(3)*(U_array[5][idx_side]*(double(4)*U_array[5][idx_side] -
-         double(19)*U_array[4][idx_side] + double(11)*U_array[3][idx_side]) +
-         U_array[4][idx_side]*(double(25)*U_array[4][idx_side] - double(31)*U_array[3][idx_side]) +
-         double(10)*U_array[3][idx_side]*U_array[3][idx_side]);
+    beta_tilde_0 = Real(1)/Real(3)*(U_array[5][idx_side]*(Real(4)*U_array[5][idx_side] -
+         Real(19)*U_array[4][idx_side] + Real(11)*U_array[3][idx_side]) +
+         U_array[4][idx_side]*(Real(25)*U_array[4][idx_side] - Real(31)*U_array[3][idx_side]) +
+         Real(10)*U_array[3][idx_side]*U_array[3][idx_side]);
     
-    beta_tilde_1 = double(1)/double(3)*(U_array[4][idx_side]*(double(4)*U_array[4][idx_side] -
-         double(13)*U_array[3][idx_side] + double(5)*U_array[2][idx_side]) +
-         double(13)*U_array[3][idx_side]*(U_array[3][idx_side] - U_array[2][idx_side]) +
-         double(4)*U_array[2][idx_side]*U_array[2][idx_side]);
+    beta_tilde_1 = Real(1)/Real(3)*(U_array[4][idx_side]*(Real(4)*U_array[4][idx_side] -
+         Real(13)*U_array[3][idx_side] + Real(5)*U_array[2][idx_side]) +
+         Real(13)*U_array[3][idx_side]*(U_array[3][idx_side] - U_array[2][idx_side]) +
+         Real(4)*U_array[2][idx_side]*U_array[2][idx_side]);
     
-    beta_tilde_2 = double(1)/double(3)*(U_array[3][idx_side]*(double(10)*U_array[3][idx_side] -
-         double(31)*U_array[2][idx_side] + double(11)*U_array[1][idx_side]) +
-         U_array[2][idx_side]*(double(25)*U_array[2][idx_side] - double(19)*U_array[1][idx_side]) +
-         double(4)*U_array[1][idx_side]*U_array[1][idx_side]);
+    beta_tilde_2 = Real(1)/Real(3)*(U_array[3][idx_side]*(Real(10)*U_array[3][idx_side] -
+         Real(31)*U_array[2][idx_side] + Real(11)*U_array[1][idx_side]) +
+         U_array[2][idx_side]*(Real(25)*U_array[2][idx_side] - Real(19)*U_array[1][idx_side]) +
+         Real(4)*U_array[1][idx_side]*U_array[1][idx_side]);
 }
 
 
@@ -76,8 +76,8 @@ static inline __attribute__((always_inline)) void computeLocalBetaTilde(
  * Perform local WENO interpolation of U_minus.
  */
 static inline __attribute__((always_inline)) void performLocalWENOInterpolationMinus(
-    double* U_minus,
-    double** U_array,
+    Real* U_minus,
+    Real** U_array,
     const int& idx_side,
     const int& p)
 {
@@ -85,7 +85,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
      * Compute beta's.
      */
     
-    double beta_0, beta_1, beta_2;
+    Real beta_0, beta_1, beta_2;
     
     computeLocalBeta(beta_0, beta_1, beta_2, U_array, idx_side);
     
@@ -93,13 +93,13 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
      * Compute the weights omega.
      */
     
-    double omega_0, omega_1, omega_2;
+    Real omega_0, omega_1, omega_2;
     
-    omega_0 = double(1.0)/double(16)/ipow((beta_0 + EPSILON), p);
-    omega_1 = double(5.0)/double(8)/ipow((beta_1 + EPSILON), p);
-    omega_2 = double(5.0)/double(16)/ipow((beta_2 + EPSILON), p);
+    omega_0 = Real(1.0)/Real(16)/ipow((beta_0 + EPSILON), p);
+    omega_1 = Real(5.0)/Real(8)/ipow((beta_1 + EPSILON), p);
+    omega_2 = Real(5.0)/Real(16)/ipow((beta_2 + EPSILON), p);
     
-    double omega_sum = omega_0 + omega_1 + omega_2;
+    Real omega_sum = omega_0 + omega_1 + omega_2;
     
     omega_0 = omega_0/omega_sum;
     omega_1 = omega_1/omega_sum;
@@ -109,12 +109,12 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
      * Compute U_minus.
      */
     
-    U_minus[idx_side] = double(3)/double(8)*omega_0*U_array[0][idx_side] +
-        (-double(10)/double(8)*omega_0 - double(1)/double(8)*omega_1)*U_array[1][idx_side] +
-        (double(15)/double(8)*omega_0 + double(6)/double(8)*omega_1 +
-        double(3)/double(8)*omega_2)*U_array[2][idx_side] +
-        (double(3)/double(8)*omega_1 + double(6)/double(8)*omega_2)*U_array[3][idx_side] -
-        double(1)/double(8)*omega_2*U_array[4][idx_side];
+    U_minus[idx_side] = Real(3)/Real(8)*omega_0*U_array[0][idx_side] +
+        (-Real(10)/Real(8)*omega_0 - Real(1)/Real(8)*omega_1)*U_array[1][idx_side] +
+        (Real(15)/Real(8)*omega_0 + Real(6)/Real(8)*omega_1 +
+        Real(3)/Real(8)*omega_2)*U_array[2][idx_side] +
+        (Real(3)/Real(8)*omega_1 + Real(6)/Real(8)*omega_2)*U_array[3][idx_side] -
+        Real(1)/Real(8)*omega_2*U_array[4][idx_side];
 }
 
 
@@ -122,8 +122,8 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
  * Perform local WENO interpolation of U_plus.
  */
 static inline __attribute__((always_inline)) void performLocalWENOInterpolationPlus(
-    double* U_plus,
-    double** U_array,
+    Real* U_plus,
+    Real** U_array,
     const int& idx_side,
     const int& p)
 {
@@ -131,7 +131,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationP
      * Compute beta_tilde's.
      */
     
-    double beta_tilde_0, beta_tilde_1, beta_tilde_2;
+    Real beta_tilde_0, beta_tilde_1, beta_tilde_2;
     
     computeLocalBetaTilde(beta_tilde_0, beta_tilde_1, beta_tilde_2, U_array, idx_side);
     
@@ -139,13 +139,13 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationP
      * Compute the weights omega_tilde.
      */
     
-    double omega_tilde_0, omega_tilde_1, omega_tilde_2;
+    Real omega_tilde_0, omega_tilde_1, omega_tilde_2;
     
-    omega_tilde_0 = double(1)/double(16)/ipow((beta_tilde_0 + EPSILON), p);
-    omega_tilde_1 = double(5)/double(8)/ipow((beta_tilde_1 + EPSILON), p);
-    omega_tilde_2 = double(5)/double(16)/ipow((beta_tilde_2 + EPSILON), p);
+    omega_tilde_0 = Real(1)/Real(16)/ipow((beta_tilde_0 + EPSILON), p);
+    omega_tilde_1 = Real(5)/Real(8)/ipow((beta_tilde_1 + EPSILON), p);
+    omega_tilde_2 = Real(5)/Real(16)/ipow((beta_tilde_2 + EPSILON), p);
     
-    double omega_tilde_sum = omega_tilde_0 + omega_tilde_1 + omega_tilde_2;
+    Real omega_tilde_sum = omega_tilde_0 + omega_tilde_1 + omega_tilde_2;
     
     omega_tilde_0 = omega_tilde_0/omega_tilde_sum;
     omega_tilde_1 = omega_tilde_1/omega_tilde_sum;
@@ -155,12 +155,12 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationP
      * Compute U_plus.
      */
     
-    U_plus[idx_side] = double(3)/double(8)*omega_tilde_0*U_array[5][idx_side] +
-        (-double(10)/double(8)*omega_tilde_0 - double(1)/double(8)*omega_tilde_1)*U_array[4][idx_side] +
-        (double(15)/double(8)*omega_tilde_0 + double(6)/double(8)*omega_tilde_1 +
-        double(3)/double(8)*omega_tilde_2)*U_array[3][idx_side] +
-        (double(3)/double(8)*omega_tilde_1 + double(6)/double(8)*omega_tilde_2)*U_array[2][idx_side] -
-        double(1)/double(8)*omega_tilde_2*U_array[1][idx_side];
+    U_plus[idx_side] = Real(3)/Real(8)*omega_tilde_0*U_array[5][idx_side] +
+        (-Real(10)/Real(8)*omega_tilde_0 - Real(1)/Real(8)*omega_tilde_1)*U_array[4][idx_side] +
+        (Real(15)/Real(8)*omega_tilde_0 + Real(6)/Real(8)*omega_tilde_1 +
+        Real(3)/Real(8)*omega_tilde_2)*U_array[3][idx_side] +
+        (Real(3)/Real(8)*omega_tilde_1 + Real(6)/Real(8)*omega_tilde_2)*U_array[2][idx_side] -
+        Real(1)/Real(8)*omega_tilde_2*U_array[1][idx_side];
 }
 
 
@@ -233,9 +233,9 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::putToRestart(
  */
 void
 ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& variables_minus,
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& variables_plus,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& variables)
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& variables_minus,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& variables_plus,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& variables)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(variables_minus.size()) == d_num_eqn);
@@ -288,7 +288,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            std::vector<double*> U_array;
+            std::vector<Real*> U_array;
             U_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
@@ -296,7 +296,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
                 U_array.push_back(variables[m][ei]->getPointer(0));
             }
             
-            double* U_L = variables_minus[ei]->getPointer(0);
+            Real* U_L = variables_minus[ei]->getPointer(0);
             
             HAMERS_PRAGMA_SIMD
             for (int i = -1; i < interior_dim_0 + 2; i++)
@@ -314,7 +314,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            std::vector<double*> U_array;
+            std::vector<Real*> U_array;
             U_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
@@ -322,7 +322,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
                 U_array.push_back(variables[m][ei]->getPointer(0));
             }
             
-            double* U_R = variables_plus[ei]->getPointer(0);
+            Real* U_R = variables_plus[ei]->getPointer(0);
             
             HAMERS_PRAGMA_SIMD
             for (int i = -1; i < interior_dim_0 + 2; i++)
@@ -354,7 +354,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            std::vector<double*> U_array;
+            std::vector<Real*> U_array;
             U_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
@@ -362,7 +362,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
                 U_array.push_back(variables[m][ei]->getPointer(0));
             }
             
-            double* U_L = variables_minus[ei]->getPointer(0);
+            Real* U_L = variables_minus[ei]->getPointer(0);
             
             for (int j = 0; j < interior_dim_1; j++)
             {
@@ -384,7 +384,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            std::vector<double*> U_array;
+            std::vector<Real*> U_array;
             U_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
@@ -392,7 +392,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
                 U_array.push_back(variables[m][ei]->getPointer(0));
             }
             
-            double* U_R = variables_plus[ei]->getPointer(0);
+            Real* U_R = variables_plus[ei]->getPointer(0);
             
             for (int j = 0; j < interior_dim_1; j++)
             {
@@ -418,7 +418,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            std::vector<double*> U_array;
+            std::vector<Real*> U_array;
             U_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
@@ -426,7 +426,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
                 U_array.push_back(variables[m][ei]->getPointer(1));
             }
             
-            double* U_B = variables_minus[ei]->getPointer(1);
+            Real* U_B = variables_minus[ei]->getPointer(1);
             
             for (int j = -1; j < interior_dim_1 + 2; j++)
             {
@@ -448,7 +448,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            std::vector<double*> U_array;
+            std::vector<Real*> U_array;
             U_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
@@ -456,7 +456,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
                 U_array.push_back(variables[m][ei]->getPointer(1));
             }
             
-            double* U_T = variables_plus[ei]->getPointer(1);
+            Real* U_T = variables_plus[ei]->getPointer(1);
             
             for (int j = -1; j < interior_dim_1 + 2; j++)
             {
@@ -493,7 +493,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            std::vector<double*> U_array;
+            std::vector<Real*> U_array;
             U_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
@@ -501,7 +501,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
                 U_array.push_back(variables[m][ei]->getPointer(0));
             }
             
-            double* U_L = variables_minus[ei]->getPointer(0);
+            Real* U_L = variables_minus[ei]->getPointer(0);
             
             for (int k = 0; k < interior_dim_2; k++)
             {
@@ -528,7 +528,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            std::vector<double*> U_array;
+            std::vector<Real*> U_array;
             U_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
@@ -536,7 +536,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
                 U_array.push_back(variables[m][ei]->getPointer(0));
             }
             
-            double* U_R = variables_plus[ei]->getPointer(0);
+            Real* U_R = variables_plus[ei]->getPointer(0);
             
             for (int k = 0; k < interior_dim_2; k++)
             {
@@ -567,7 +567,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            std::vector<double*> U_array;
+            std::vector<Real*> U_array;
             U_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
@@ -575,7 +575,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
                 U_array.push_back(variables[m][ei]->getPointer(1));
             }
             
-            double* U_B = variables_minus[ei]->getPointer(1);
+            Real* U_B = variables_minus[ei]->getPointer(1);
             
             for (int k = 0; k < interior_dim_2; k++)
             {
@@ -602,7 +602,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            std::vector<double*> U_array;
+            std::vector<Real*> U_array;
             U_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
@@ -610,7 +610,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
                 U_array.push_back(variables[m][ei]->getPointer(1));
             }
             
-            double* U_T = variables_plus[ei]->getPointer(1);
+            Real* U_T = variables_plus[ei]->getPointer(1);
             
             for (int k = 0; k < interior_dim_2; k++)
             {
@@ -641,7 +641,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            std::vector<double*> U_array;
+            std::vector<Real*> U_array;
             U_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
@@ -649,7 +649,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
                 U_array.push_back(variables[m][ei]->getPointer(2));
             }
             
-            double* U_B = variables_minus[ei]->getPointer(2);
+            Real* U_B = variables_minus[ei]->getPointer(2);
             
             for (int k = -1; k < interior_dim_2 + 2; k++)
             {
@@ -676,7 +676,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            std::vector<double*> U_array;
+            std::vector<Real*> U_array;
             U_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
@@ -684,7 +684,7 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
                 U_array.push_back(variables[m][ei]->getPointer(2));
             }
             
-            double* U_F = variables_plus[ei]->getPointer(2);
+            Real* U_F = variables_plus[ei]->getPointer(2);
             
             for (int k = -1; k < interior_dim_2 + 2; k++)
             {

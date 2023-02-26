@@ -25,21 +25,21 @@ EquationOfThermalConductivityPrandtl::printClassData(
 /*
  * Compute the thermal conductivity.
  */
-double
+Real
 EquationOfThermalConductivityPrandtl::getThermalConductivity(
-    const double* const pressure,
-    const double* const temperature,
-    const std::vector<const double*>& molecular_properties) const
+    const Real* const pressure,
+    const Real* const temperature,
+    const std::vector<const Real*>& molecular_properties) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(molecular_properties.size()) >= 4);
 #endif
     
-    const double& c_p = *(molecular_properties[0]);
-    const double& Pr = *(molecular_properties[1]);
+    const Real& c_p = *(molecular_properties[0]);
+    const Real& Pr = *(molecular_properties[1]);
     
-    std::vector<double> mu_molecular_properties;
-    std::vector<const double*> mu_molecular_properties_const_ptr;
+    std::vector<Real> mu_molecular_properties;
+    std::vector<const Real*> mu_molecular_properties_const_ptr;
     
     mu_molecular_properties.reserve(static_cast<int>(molecular_properties.size()) - 3);
     mu_molecular_properties_const_ptr.reserve(static_cast<int>(molecular_properties.size()) - 3);
@@ -54,7 +54,7 @@ EquationOfThermalConductivityPrandtl::getThermalConductivity(
         mu_molecular_properties_const_ptr.push_back(&mu_molecular_properties[mi]);
     }
     
-    const double mu = d_equation_of_shear_viscosity->
+    const Real mu = d_equation_of_shear_viscosity->
         getShearViscosity(
             pressure,
             temperature,
@@ -69,10 +69,10 @@ EquationOfThermalConductivityPrandtl::getThermalConductivity(
  */
 void
 EquationOfThermalConductivityPrandtl::computeThermalConductivity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermal_conductivity,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const std::vector<const double*>& molecular_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermal_conductivity,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const std::vector<const Real*>& molecular_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -88,7 +88,7 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
     const hier::IntVector ghostcell_dims_thermal_conductivity = ghost_box_thermal_conductivity.numberCells();
     
     // Delcare data container for shear viscosity.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_shear_viscosity;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_shear_viscosity;
     
     /*
      * Get the local lower index and number of cells in each direction of the domain.
@@ -142,7 +142,7 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
         
         ghostcell_dims_min = interior_dims + num_ghosts_min*2;
         
-        data_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        data_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(interior_box, 1, num_ghosts_min);
     }
     else
     {
@@ -160,15 +160,15 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
         
         ghostcell_dims_min = domain_dims;
         
-        data_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        data_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(domain, 1, hier::IntVector::getZero(d_dim));
     }
     
     /*
      * Compute the shear viscosity.
      */
     
-    std::vector<double> mu_molecular_properties;
-    std::vector<const double*> mu_molecular_properties_const_ptr;
+    std::vector<Real> mu_molecular_properties;
+    std::vector<const Real*> mu_molecular_properties_const_ptr;
     
     mu_molecular_properties.reserve(static_cast<int>(molecular_properties.size()) - 3);
     mu_molecular_properties_const_ptr.reserve(static_cast<int>(molecular_properties.size()) - 3);
@@ -194,11 +194,11 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
      * Get the pointers to the cell data.
      */
     
-    double* kappa = data_thermal_conductivity->getPointer(0);
-    double* mu = data_shear_viscosity->getPointer(0);
+    Real* kappa = data_thermal_conductivity->getPointer(0);
+    Real* mu = data_shear_viscosity->getPointer(0);
     
-    const double& c_p = *(molecular_properties[0]);
-    const double& Pr = *(molecular_properties[1]);
+    const Real& c_p = *(molecular_properties[0]);
+    const Real& Pr = *(molecular_properties[1]);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -313,10 +313,10 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
  */
 void
 EquationOfThermalConductivityPrandtl::computeThermalConductivity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermal_conductivity,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_molecular_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermal_conductivity,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_molecular_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -336,8 +336,8 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
     const hier::IntVector ghostcell_dims_molecular_properties = ghost_box_molecular_properties.numberCells();
     
     // Delcare data containers for shear viscosity and molecular properties.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_shear_viscosity;
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_molecular_properties_shear_viscosity;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_shear_viscosity;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_molecular_properties_shear_viscosity;
     
     /*
      * Get the local lower index and number of cells in each direction of the domain.
@@ -396,9 +396,9 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
         
         ghostcell_dims_min = interior_dims + num_ghosts_min*2;
         
-        data_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        data_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(interior_box, 1, num_ghosts_min);
         
-        data_molecular_properties_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_molecular_properties_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             interior_box, data_molecular_properties->getDepth() - 3, num_ghosts_min);
     }
     else
@@ -419,9 +419,9 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
         
         ghostcell_dims_min = domain_dims;
         
-        data_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        data_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(domain, 1, hier::IntVector::getZero(d_dim));
         
-        data_molecular_properties_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+        data_molecular_properties_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(
             domain, data_molecular_properties->getDepth() - 3, hier::IntVector::getZero(d_dim));
     }
     
@@ -445,11 +445,11 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
      * Get the pointers to the cell data.
      */
     
-    double* kappa = data_thermal_conductivity->getPointer(0);
-    double* mu = data_shear_viscosity->getPointer(0);
+    Real* kappa = data_thermal_conductivity->getPointer(0);
+    Real* mu = data_shear_viscosity->getPointer(0);
     
-    double* c_p = data_molecular_properties->getPointer(0);
-    double* Pr = data_molecular_properties->getPointer(1);
+    Real* c_p = data_molecular_properties->getPointer(0);
+    Real* Pr = data_molecular_properties->getPointer(1);
     
     if (d_dim == tbox::Dimension(1))
     {

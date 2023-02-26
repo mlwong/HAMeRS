@@ -72,7 +72,7 @@ class DiffusiveFluxReconstructor
         virtual void
         computeDiffusiveFluxOnPatch(
             hier::Patch& patch,
-            const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_diffusive_flux,
+            const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_diffusive_flux,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double time,
             const double dt,

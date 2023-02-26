@@ -39,8 +39,8 @@ ConvectiveFluxReconstructorWCNS56::ConvectiveFluxReconstructorWCNS56(
 void
 ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
     hier::Patch& patch,
-    const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_convective_flux,
-    const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+    const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
+    const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double time,
     const double dt,
@@ -73,13 +73,13 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
     const double* const dx = patch_geom->getDx();
     
     // Get the side data of convective flux.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux(
-        HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux(
+        HAMERS_SHARED_PTR_CAST<pdat::SideData<Real>, hier::PatchData>(
             patch.getPatchData(variable_convective_flux, data_context)));
     
     // Get the cell data of source.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > source(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > source(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(variable_source, data_context)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -91,45 +91,45 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
 #endif
     
     // Allocate temporary patch data.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity_midpoint;
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity_midpoint;
     
     if (d_has_advective_eqn_form)
     {
-        velocity_midpoint.reset(new pdat::SideData<double>(
+        velocity_midpoint.reset(new pdat::SideData<Real>(
             interior_box, d_dim.getValue(), hier::IntVector::getOne(d_dim)));
     }
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux_midpoint(
-        new pdat::SideData<double>(interior_box, d_num_eqn, hier::IntVector::getOne(d_dim)));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux_midpoint(
+        new pdat::SideData<Real>(interior_box, d_num_eqn, hier::IntVector::getOne(d_dim)));
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux_midpoint_HLLC(
-        new pdat::SideData<double>(interior_box, d_num_eqn, hier::IntVector::getOne(d_dim)));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux_midpoint_HLLC(
+        new pdat::SideData<Real>(interior_box, d_num_eqn, hier::IntVector::getOne(d_dim)));
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux_midpoint_HLLC_HLL;
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux_midpoint_HLLC_HLL;
     
     if (d_dim > tbox::Dimension(1))
     {
-        convective_flux_midpoint_HLLC_HLL.reset(new pdat::SideData<double>(
+        convective_flux_midpoint_HLLC_HLL.reset(new pdat::SideData<Real>(
             interior_box, d_num_eqn, hier::IntVector::getOne(d_dim)));
     }
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > velocity_derivatives;
-    HAMERS_SHARED_PTR<pdat::CellData<double> > dilatation;
-    HAMERS_SHARED_PTR<pdat::CellData<double> > vorticity_magnitude;
-    HAMERS_SHARED_PTR<pdat::SideData<double> > shock_sensor;;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity_derivatives;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > dilatation;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > vorticity_magnitude;
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > shock_sensor;;
     
     if (d_dim > tbox::Dimension(1))
     {
-        velocity_derivatives.reset(new pdat::CellData<double>(
+        velocity_derivatives.reset(new pdat::CellData<Real>(
             interior_box, d_dim.getValue()*d_dim.getValue(), hier::IntVector::getOne(d_dim)*2));
         
-        dilatation.reset(new pdat::CellData<double>(
+        dilatation.reset(new pdat::CellData<Real>(
             interior_box, 1, hier::IntVector::getOne(d_dim)*2));
         
-        vorticity_magnitude.reset(new pdat::CellData<double>(
+        vorticity_magnitude.reset(new pdat::CellData<Real>(
             interior_box, 1, hier::IntVector::getOne(d_dim)*2));
         
-        shock_sensor.reset(new pdat::SideData<double>(
+        shock_sensor.reset(new pdat::SideData<Real>(
             interior_box, 1, hier::IntVector::getOne(d_dim)));
     }
     
@@ -168,9 +168,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity = d_flow_model->getCellData("VELOCITY");
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > convective_flux_node(1);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > convective_flux_node(1);
         convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
         
         hier::IntVector num_subghosts_velocity = velocity->getGhostCellWidth();
@@ -179,16 +179,16 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         const int num_subghosts_0_velocity = num_subghosts_velocity[0];
         const int num_subghosts_0_convective_flux_x = num_subghosts_convective_flux_x[0];
         
-        double* u = velocity->getPointer(0);
+        Real* u = velocity->getPointer(0);
         
-        std::vector<double*> F_node_x;
+        std::vector<Real*> F_node_x;
         F_node_x.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
             F_node_x.push_back(convective_flux_node[0]->getPointer(ei));
         }
         
-        std::vector<double*> F_midpoint_x;
+        std::vector<Real*> F_midpoint_x;
         F_midpoint_x.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -200,10 +200,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells are also determined.
          */
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_variables =
             d_flow_model->getCellDataOfConservativeVariables();
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > primitive_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > primitive_variables =
             d_flow_model->getCellDataOfPrimitiveVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -212,10 +212,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         std::vector<hier::IntVector> num_subghosts_primitive_var;
         num_subghosts_primitive_var.reserve(d_num_eqn);
         
-        std::vector<double*> Q;
+        std::vector<Real*> Q;
         Q.reserve(d_num_eqn);
         
-        std::vector<double*> V;
+        std::vector<Real*> V;
         V.reserve(d_num_eqn);
         
         int count_eqn = 0;
@@ -262,15 +262,15 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * Declare temporary data containers for WENO interpolation.
          */
         
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > projection_variables;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > projection_variables;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > characteristic_variables;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > characteristic_variables;
         
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > characteristic_variables_minus;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > characteristic_variables_plus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > characteristic_variables_minus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > characteristic_variables_plus;
         
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > primitive_variables_minus;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > primitive_variables_plus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > primitive_variables_minus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > primitive_variables_plus;
         
         HAMERS_SHARED_PTR<pdat::SideData<int> > bounded_flag_minus;
         HAMERS_SHARED_PTR<pdat::SideData<int> > bounded_flag_plus;
@@ -284,7 +284,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int vi = 0; vi < num_projection_var; vi++)
         {
-            projection_variables.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+            projection_variables.push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
@@ -295,7 +295,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             characteristic_variables[m].reserve(d_num_eqn);
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                characteristic_variables[m].push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+                characteristic_variables[m].push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                     interior_box, 1, hier::IntVector::getOne(d_dim)));
             }
         }
@@ -307,16 +307,16 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            characteristic_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+            characteristic_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            characteristic_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+            characteristic_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+            primitive_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+            primitive_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
@@ -374,8 +374,8 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * Declare containers to store pointers for computing mid-point fluxes.
          */
         
-        std::vector<double*> V_minus;
-        std::vector<double*> V_plus;
+        std::vector<Real*> V_minus;
+        std::vector<Real*> V_plus;
         V_minus.resize(d_num_eqn);
         V_plus.resize(d_num_eqn);
         
@@ -458,7 +458,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            double* F_face_x = convective_flux->getPointer(0, ei);
+            Real* F_face_x = convective_flux->getPointer(0, ei);
             
             HAMERS_PRAGMA_SIMD
             for (int i = 0; i < interior_dim_0 + 1; i++)
@@ -471,12 +471,12 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                 const int idx_node_L = i - 1 + num_subghosts_0_convective_flux_x;
                 const int idx_node_R = i + num_subghosts_0_convective_flux_x;
                 
-                F_face_x[idx_face_x] = dt*(
-                    double(1)/double(30)*(F_midpoint_x[ei][idx_midpoint_x_R] +
+                F_face_x[idx_face_x] = Real(dt)*(
+                    Real(1)/Real(30)*(F_midpoint_x[ei][idx_midpoint_x_R] +
                         F_midpoint_x[ei][idx_midpoint_x_L]) -
-                    double(3)/double(10)*(F_node_x[ei][idx_node_R] +
+                    Real(3)/Real(10)*(F_node_x[ei][idx_node_R] +
                         F_node_x[ei][idx_node_L]) +
-                    double(23)/double(15)*F_midpoint_x[ei][idx_midpoint_x]);
+                    Real(23)/Real(15)*F_midpoint_x[ei][idx_midpoint_x]);
             }
         }
         
@@ -486,13 +486,13 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            double* u_midpoint_x = velocity_midpoint->getPointer(0, 0);
+            Real* u_midpoint_x = velocity_midpoint->getPointer(0, 0);
             
             for (int ei = 0; ei < d_num_eqn; ei ++)
             {
                 if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
                 {
-                    double* S = source->getPointer(ei);
+                    Real* S = source->getPointer(ei);
                     
                     const int num_subghosts_0_conservative_var = num_subghosts_conservative_var[ei][0];
                     
@@ -516,13 +516,13 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                         
                         const int idx_midpoint_x_RR = i + 3;
                         
-                        S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
-                            (double(3)/double(2)*(u_midpoint_x[idx_midpoint_x_R] -
+                        S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                            (Real(3)/Real(2)*(u_midpoint_x[idx_midpoint_x_R] -
                                  u_midpoint_x[idx_midpoint_x_L]) -
-                             double(3)/double(10)*(u[idx_cell_wghost_x_R] -
+                             Real(3)/Real(10)*(u[idx_cell_wghost_x_R] -
                                  u[idx_cell_wghost_x_L]) +
-                             double(1)/double(30)*(u_midpoint_x[idx_midpoint_x_RR] -
-                                 u_midpoint_x[idx_midpoint_x_LL]))/dx[0]);
+                             Real(1)/Real(30)*(u_midpoint_x[idx_midpoint_x_RR] -
+                                 u_midpoint_x[idx_midpoint_x_LL]))/Real(dx[0]));
                     }
                 }
             }
@@ -572,9 +572,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity = d_flow_model->getCellData("VELOCITY");
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > convective_flux_node(2);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > convective_flux_node(2);
         convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
         convective_flux_node[1] = d_flow_model->getCellData("CONVECTIVE_FLUX_Y");
         
@@ -599,15 +599,15 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         const int num_subghosts_1_convective_flux_y = num_subghosts_convective_flux_y[1];
         const int subghostcell_dim_0_convective_flux_y = subghostcell_dims_convective_flux_y[0];
         
-        double* u     = velocity->getPointer(0);
-        double* v     = velocity->getPointer(1);
-        double* theta = dilatation->getPointer(0);
-        double* Omega = vorticity_magnitude->getPointer(0);
-        double* s_x   = shock_sensor->getPointer(0);
-        double* s_y   = shock_sensor->getPointer(1);
+        Real* u     = velocity->getPointer(0);
+        Real* v     = velocity->getPointer(1);
+        Real* theta = dilatation->getPointer(0);
+        Real* Omega = vorticity_magnitude->getPointer(0);
+        Real* s_x   = shock_sensor->getPointer(0);
+        Real* s_y   = shock_sensor->getPointer(1);
         
-        std::vector<double*> F_node_x;
-        std::vector<double*> F_node_y;
+        std::vector<Real*> F_node_x;
+        std::vector<Real*> F_node_y;
         F_node_x.reserve(d_num_eqn);
         F_node_y.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
@@ -616,12 +616,12 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             F_node_y.push_back(convective_flux_node[1]->getPointer(ei));
         }
         
-        std::vector<double*> F_midpoint_x;
-        std::vector<double*> F_midpoint_y;
-        std::vector<double*> F_midpoint_HLLC_x;
-        std::vector<double*> F_midpoint_HLLC_y;
-        std::vector<double*> F_midpoint_HLLC_HLL_x;
-        std::vector<double*> F_midpoint_HLLC_HLL_y;
+        std::vector<Real*> F_midpoint_x;
+        std::vector<Real*> F_midpoint_y;
+        std::vector<Real*> F_midpoint_HLLC_x;
+        std::vector<Real*> F_midpoint_HLLC_y;
+        std::vector<Real*> F_midpoint_HLLC_HLL_x;
+        std::vector<Real*> F_midpoint_HLLC_HLL_y;
         F_midpoint_x.reserve(d_num_eqn);
         F_midpoint_y.reserve(d_num_eqn);
         F_midpoint_HLLC_x.reserve(d_num_eqn);
@@ -658,7 +658,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         derivative_first_order_x->computeDerivative(
             velocity_derivatives,
             velocity,
-            dx[0],
+            Real(dx[0]),
             0,
             0);
         
@@ -666,7 +666,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         derivative_first_order_y->computeDerivative(
             velocity_derivatives,
             velocity,
-            dx[1],
+            Real(dx[1]),
             1,
             0);
         
@@ -674,7 +674,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         derivative_first_order_x->computeDerivative(
             velocity_derivatives,
             velocity,
-            dx[0],
+            Real(dx[0]),
             2,
             1);
         
@@ -682,15 +682,15 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         derivative_first_order_y->computeDerivative(
             velocity_derivatives,
             velocity,
-            dx[1],
+            Real(dx[1]),
             3,
             1);
         
         // Get the pointers to the cell data of velocity derivatives.
-        double* dudx = velocity_derivatives->getPointer(0);
-        double* dudy = velocity_derivatives->getPointer(1);
-        double* dvdx = velocity_derivatives->getPointer(2);
-        double* dvdy = velocity_derivatives->getPointer(3);
+        Real* dudx = velocity_derivatives->getPointer(0);
+        Real* dudy = velocity_derivatives->getPointer(1);
+        Real* dvdx = velocity_derivatives->getPointer(2);
+        Real* dvdy = velocity_derivatives->getPointer(3);
         
         // Compute the dilatation.
         for (int j = -2; j < interior_dim_1 + 2; j++)
@@ -716,7 +716,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                 const int idx = (i + 2) +
                     (j + 2)*(interior_dim_0 + 4);
                 
-                Omega[idx] = fabs(dvdx[idx] - dudy[idx]);
+                Omega[idx] = std::abs(dvdx[idx] - dudy[idx]);
             }
         }
         
@@ -725,10 +725,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_variables =
             d_flow_model->getCellDataOfConservativeVariables();
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > primitive_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > primitive_variables =
             d_flow_model->getCellDataOfPrimitiveVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -743,10 +743,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         std::vector<hier::IntVector> subghostcell_dims_primitive_var;
         subghostcell_dims_primitive_var.reserve(d_num_eqn);
         
-        std::vector<double*> Q;
+        std::vector<Real*> Q;
         Q.reserve(d_num_eqn);
         
-        std::vector<double*> V;
+        std::vector<Real*> V;
         V.reserve(d_num_eqn);
         
         int count_eqn = 0;
@@ -797,15 +797,15 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * Declare temporary data containers for WENO interpolation.
          */
         
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > projection_variables;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > projection_variables;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > characteristic_variables;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > characteristic_variables;
         
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > characteristic_variables_minus;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > characteristic_variables_plus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > characteristic_variables_minus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > characteristic_variables_plus;
         
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > primitive_variables_minus;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > primitive_variables_plus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > primitive_variables_minus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > primitive_variables_plus;
         
         HAMERS_SHARED_PTR<pdat::SideData<int> > bounded_flag_minus;
         HAMERS_SHARED_PTR<pdat::SideData<int> > bounded_flag_plus;
@@ -819,7 +819,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int vi = 0; vi < num_projection_var; vi++)
         {
-            projection_variables.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+            projection_variables.push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
@@ -830,7 +830,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             characteristic_variables[m].reserve(d_num_eqn);
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                characteristic_variables[m].push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+                characteristic_variables[m].push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                     interior_box, 1, hier::IntVector::getOne(d_dim)));
             }
         }
@@ -842,16 +842,16 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            characteristic_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+            characteristic_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            characteristic_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+            characteristic_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+            primitive_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+            primitive_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
@@ -909,8 +909,8 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * Declare containers to store pointers for computing mid-point fluxes.
          */
         
-        std::vector<double*> V_minus;
-        std::vector<double*> V_plus;
+        std::vector<Real*> V_minus;
+        std::vector<Real*> V_plus;
         V_minus.resize(d_num_eqn);
         V_plus.resize(d_num_eqn);
         
@@ -1064,10 +1064,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                 const int idx_R = (i + 2) +
                     (j + 2)*(interior_dim_0 + 4);
                 
-                double theta_avg = 0.5*(theta[idx_L] + theta[idx_R]);
-                double Omega_avg = 0.5*(Omega[idx_L] + Omega[idx_R]);
+                Real theta_avg = Real(1)/Real(2)*(theta[idx_L] + theta[idx_R]);
+                Real Omega_avg = Real(1)/Real(2)*(Omega[idx_L] + Omega[idx_R]);
                 
-                s_x[idx_midpoint_x] = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                s_x[idx_midpoint_x] = -theta_avg/(std::abs(theta_avg) + Omega_avg + EPSILON);
             }
         }
         
@@ -1141,10 +1141,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                 const int idx_T = (i + 2) +
                     (j + 2)*(interior_dim_0 + 4);
                 
-                double theta_avg = 0.5*(theta[idx_B] + theta[idx_T]);
-                double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_T]);
+                Real theta_avg = Real(1)/Real(2)*(theta[idx_B] + theta[idx_T]);
+                Real Omega_avg = Real(1)/Real(2)*(Omega[idx_B] + Omega[idx_T]);
                 
-                s_y[idx_midpoint_y] = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                s_y[idx_midpoint_y] = -theta_avg/(std::abs(theta_avg) + Omega_avg + EPSILON);
             }
         }
         
@@ -1177,7 +1177,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            double* F_face_x = convective_flux->getPointer(0, ei);
+            Real* F_face_x = convective_flux->getPointer(0, ei);
             
             for (int j = 0; j < interior_dim_1; j++)
             {
@@ -1203,12 +1203,12 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                     const int idx_node_R = (i + num_subghosts_0_convective_flux_x) +
                         (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
                     
-                    F_face_x[idx_face_x] = dt*(
-                        double(1)/double(30)*(F_midpoint_x[ei][idx_midpoint_x_R] +
+                    F_face_x[idx_face_x] = Real(dt)*(
+                        Real(1)/Real(30)*(F_midpoint_x[ei][idx_midpoint_x_R] +
                             F_midpoint_x[ei][idx_midpoint_x_L]) -
-                        double(3)/double(10)*(F_node_x[ei][idx_node_R] +
+                        Real(3)/Real(10)*(F_node_x[ei][idx_node_R] +
                             F_node_x[ei][idx_node_L]) +
-                        double(23)/double(15)*F_midpoint_x[ei][idx_midpoint_x]);
+                        Real(23)/Real(15)*F_midpoint_x[ei][idx_midpoint_x]);
                 }
             }
         }
@@ -1219,7 +1219,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            double* F_face_y = convective_flux->getPointer(1, ei);
+            Real* F_face_y = convective_flux->getPointer(1, ei);
             
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
@@ -1245,12 +1245,12 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                     const int idx_node_T = (i + num_subghosts_0_convective_flux_y) +
                         (j + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
                     
-                    F_face_y[idx_face_y] = dt*(
-                        double(1)/double(30)*(F_midpoint_y[ei][idx_midpoint_y_T] +
+                    F_face_y[idx_face_y] = Real(dt)*(
+                        Real(1)/Real(30)*(F_midpoint_y[ei][idx_midpoint_y_T] +
                             F_midpoint_y[ei][idx_midpoint_y_B]) -
-                        double(3)/double(10)*(F_node_y[ei][idx_node_T] +
+                        Real(3)/Real(10)*(F_node_y[ei][idx_node_T] +
                             F_node_y[ei][idx_node_B]) +
-                        double(23)/double(15)*F_midpoint_y[ei][idx_midpoint_y]);
+                        Real(23)/Real(15)*F_midpoint_y[ei][idx_midpoint_y]);
                 }
             }
         }
@@ -1261,14 +1261,14 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            double* u_midpoint_x = velocity_midpoint->getPointer(0, 0);
-            double* v_midpoint_y = velocity_midpoint->getPointer(1, 1);
+            Real* u_midpoint_x = velocity_midpoint->getPointer(0, 0);
+            Real* v_midpoint_y = velocity_midpoint->getPointer(1, 1);
             
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
                 if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
                 {
-                    double* S = source->getPointer(ei);
+                    Real* S = source->getPointer(ei);
                     
                     const int num_subghosts_0_conservative_var = num_subghosts_conservative_var[ei][0];
                     const int num_subghosts_1_conservative_var = num_subghosts_conservative_var[ei][1];
@@ -1321,19 +1321,19 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                             const int idx_midpoint_y_TT = (i + 1) +
                                 (j + 3)*(interior_dim_0 + 2);
                             
-                            S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
-                                (double(3)/double(2)*(u_midpoint_x[idx_midpoint_x_R] -
+                            S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                (Real(3)/Real(2)*(u_midpoint_x[idx_midpoint_x_R] -
                                      u_midpoint_x[idx_midpoint_x_L]) -
-                                 double(3)/double(10)*(u[idx_cell_wghost_x_R] -
+                                 Real(3)/Real(10)*(u[idx_cell_wghost_x_R] -
                                      u[idx_cell_wghost_x_L]) +
-                                 double(1)/double(30)*(u_midpoint_x[idx_midpoint_x_RR] -
-                                     u_midpoint_x[idx_midpoint_x_LL]))/dx[0] +
-                                (double(3)/double(2)*(v_midpoint_y[idx_midpoint_y_T] -
+                                 Real(1)/Real(30)*(u_midpoint_x[idx_midpoint_x_RR] -
+                                     u_midpoint_x[idx_midpoint_x_LL]))/Real(dx[0]) +
+                                (Real(3)/Real(2)*(v_midpoint_y[idx_midpoint_y_T] -
                                      v_midpoint_y[idx_midpoint_y_B]) -
-                                 double(3)/double(10)*(v[idx_cell_wghost_y_T] -
+                                 Real(3)/Real(10)*(v[idx_cell_wghost_y_T] -
                                      v[idx_cell_wghost_y_B]) +
-                                 double(1)/double(30)*(v_midpoint_y[idx_midpoint_y_TT] -
-                                     v_midpoint_y[idx_midpoint_y_BB]))/dx[1]);
+                                 Real(1)/Real(30)*(v_midpoint_y[idx_midpoint_y_TT] -
+                                     v_midpoint_y[idx_midpoint_y_BB]))/Real(dx[1]));
                         }
                     }
                 }
@@ -1386,9 +1386,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity = d_flow_model->getCellData("VELOCITY");
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > convective_flux_node(3);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > convective_flux_node(3);
         convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
         convective_flux_node[1] = d_flow_model->getCellData("CONVECTIVE_FLUX_Y");
         convective_flux_node[2] = d_flow_model->getCellData("CONVECTIVE_FLUX_Z");
@@ -1429,18 +1429,18 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         const int subghostcell_dim_0_convective_flux_z = subghostcell_dims_convective_flux_z[0];
         const int subghostcell_dim_1_convective_flux_z = subghostcell_dims_convective_flux_z[1];
         
-        double* u     = velocity->getPointer(0);
-        double* v     = velocity->getPointer(1);
-        double* w     = velocity->getPointer(2);
-        double* theta = dilatation->getPointer(0);
-        double* Omega = vorticity_magnitude->getPointer(0);
-        double* s_x   = shock_sensor->getPointer(0);
-        double* s_y   = shock_sensor->getPointer(1);
-        double* s_z   = shock_sensor->getPointer(2);
+        Real* u     = velocity->getPointer(0);
+        Real* v     = velocity->getPointer(1);
+        Real* w     = velocity->getPointer(2);
+        Real* theta = dilatation->getPointer(0);
+        Real* Omega = vorticity_magnitude->getPointer(0);
+        Real* s_x   = shock_sensor->getPointer(0);
+        Real* s_y   = shock_sensor->getPointer(1);
+        Real* s_z   = shock_sensor->getPointer(2);
         
-        std::vector<double*> F_node_x;
-        std::vector<double*> F_node_y;
-        std::vector<double*> F_node_z;
+        std::vector<Real*> F_node_x;
+        std::vector<Real*> F_node_y;
+        std::vector<Real*> F_node_z;
         F_node_x.reserve(d_num_eqn);
         F_node_y.reserve(d_num_eqn);
         F_node_z.reserve(d_num_eqn);
@@ -1451,15 +1451,15 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             F_node_z.push_back(convective_flux_node[2]->getPointer(ei));
         }
         
-        std::vector<double*> F_midpoint_x;
-        std::vector<double*> F_midpoint_y;
-        std::vector<double*> F_midpoint_z;
-        std::vector<double*> F_midpoint_HLLC_x;
-        std::vector<double*> F_midpoint_HLLC_y;
-        std::vector<double*> F_midpoint_HLLC_z;
-        std::vector<double*> F_midpoint_HLLC_HLL_x;
-        std::vector<double*> F_midpoint_HLLC_HLL_y;
-        std::vector<double*> F_midpoint_HLLC_HLL_z;
+        std::vector<Real*> F_midpoint_x;
+        std::vector<Real*> F_midpoint_y;
+        std::vector<Real*> F_midpoint_z;
+        std::vector<Real*> F_midpoint_HLLC_x;
+        std::vector<Real*> F_midpoint_HLLC_y;
+        std::vector<Real*> F_midpoint_HLLC_z;
+        std::vector<Real*> F_midpoint_HLLC_HLL_x;
+        std::vector<Real*> F_midpoint_HLLC_HLL_y;
+        std::vector<Real*> F_midpoint_HLLC_HLL_z;
         F_midpoint_x.reserve(d_num_eqn);
         F_midpoint_y.reserve(d_num_eqn);
         F_midpoint_z.reserve(d_num_eqn);
@@ -1505,7 +1505,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         derivative_first_order_x->computeDerivative(
             velocity_derivatives,
             velocity,
-            dx[0],
+            Real(dx[0]),
             0,
             0);
         
@@ -1513,7 +1513,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         derivative_first_order_y->computeDerivative(
             velocity_derivatives,
             velocity,
-            dx[1],
+            Real(dx[1]),
             1,
             0);
         
@@ -1521,7 +1521,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         derivative_first_order_z->computeDerivative(
             velocity_derivatives,
             velocity,
-            dx[2],
+            Real(dx[2]),
             2,
             0);
         
@@ -1529,7 +1529,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         derivative_first_order_x->computeDerivative(
             velocity_derivatives,
             velocity,
-            dx[0],
+            Real(dx[0]),
             3,
             1);
         
@@ -1537,7 +1537,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         derivative_first_order_y->computeDerivative(
             velocity_derivatives,
             velocity,
-            dx[1],
+            Real(dx[1]),
             4,
             1);
         
@@ -1545,7 +1545,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         derivative_first_order_z->computeDerivative(
             velocity_derivatives,
             velocity,
-            dx[2],
+            Real(dx[2]),
             5,
             1);
         
@@ -1553,7 +1553,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         derivative_first_order_x->computeDerivative(
             velocity_derivatives,
             velocity,
-            dx[0],
+            Real(dx[0]),
             6,
             2);
         
@@ -1561,7 +1561,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         derivative_first_order_y->computeDerivative(
             velocity_derivatives,
             velocity,
-            dx[1],
+            Real(dx[1]),
             7,
             2);
         
@@ -1569,20 +1569,20 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         derivative_first_order_z->computeDerivative(
             velocity_derivatives,
             velocity,
-            dx[2],
+            Real(dx[2]),
             8,
             2);
         
         // Get the pointers to the cell data of velocity derivatives.
-        double* dudx = velocity_derivatives->getPointer(0);
-        double* dudy = velocity_derivatives->getPointer(1);
-        double* dudz = velocity_derivatives->getPointer(2);
-        double* dvdx = velocity_derivatives->getPointer(3);
-        double* dvdy = velocity_derivatives->getPointer(4);
-        double* dvdz = velocity_derivatives->getPointer(5);
-        double* dwdx = velocity_derivatives->getPointer(6);
-        double* dwdy = velocity_derivatives->getPointer(7);
-        double* dwdz = velocity_derivatives->getPointer(8);
+        Real* dudx = velocity_derivatives->getPointer(0);
+        Real* dudy = velocity_derivatives->getPointer(1);
+        Real* dudz = velocity_derivatives->getPointer(2);
+        Real* dvdx = velocity_derivatives->getPointer(3);
+        Real* dvdy = velocity_derivatives->getPointer(4);
+        Real* dvdz = velocity_derivatives->getPointer(5);
+        Real* dwdx = velocity_derivatives->getPointer(6);
+        Real* dwdy = velocity_derivatives->getPointer(7);
+        Real* dwdz = velocity_derivatives->getPointer(8);
         
         // Compute the dilatation.
         for (int k = -2; k < interior_dim_2 + 2; k++)
@@ -1617,11 +1617,11 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                         (k + 2)*(interior_dim_0 + 4)*
                             (interior_dim_1 + 4);
                     
-                    const double omega_x = dwdy[idx] - dvdz[idx];
-                    const double omega_y = dudz[idx] - dwdx[idx];
-                    const double omega_z = dvdx[idx] - dudy[idx];
+                    const Real omega_x = dwdy[idx] - dvdz[idx];
+                    const Real omega_y = dudz[idx] - dwdx[idx];
+                    const Real omega_z = dvdx[idx] - dudy[idx];
                     
-                    Omega[idx] = sqrt(omega_x*omega_x + omega_y*omega_y + omega_z*omega_z);
+                    Omega[idx] = std::sqrt(omega_x*omega_x + omega_y*omega_y + omega_z*omega_z);
                 }
             }
         }
@@ -1631,10 +1631,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_variables =
             d_flow_model->getCellDataOfConservativeVariables();
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > primitive_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > primitive_variables =
             d_flow_model->getCellDataOfPrimitiveVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -1649,10 +1649,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         std::vector<hier::IntVector> subghostcell_dims_primitive_var;
         subghostcell_dims_primitive_var.reserve(d_num_eqn);
         
-        std::vector<double*> Q;
+        std::vector<Real*> Q;
         Q.reserve(d_num_eqn);
         
-        std::vector<double*> V;
+        std::vector<Real*> V;
         V.reserve(d_num_eqn);
         
         int count_eqn = 0;
@@ -1703,15 +1703,15 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * Declare temporary data containers for WENO interpolation.
          */
         
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > projection_variables;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > projection_variables;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > characteristic_variables;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > characteristic_variables;
         
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > characteristic_variables_minus;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > characteristic_variables_plus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > characteristic_variables_minus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > characteristic_variables_plus;
         
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > primitive_variables_minus;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > primitive_variables_plus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > primitive_variables_minus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > primitive_variables_plus;
         
         HAMERS_SHARED_PTR<pdat::SideData<int> > bounded_flag_minus;
         HAMERS_SHARED_PTR<pdat::SideData<int> > bounded_flag_plus;
@@ -1725,7 +1725,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int vi = 0; vi < num_projection_var; vi++)
         {
-            projection_variables.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+            projection_variables.push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
@@ -1736,7 +1736,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             characteristic_variables[m].reserve(d_num_eqn);
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                characteristic_variables[m].push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+                characteristic_variables[m].push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                     interior_box, 1, hier::IntVector::getOne(d_dim)));
             }
         }
@@ -1748,16 +1748,16 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            characteristic_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+            characteristic_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            characteristic_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+            characteristic_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+            primitive_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
+            primitive_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<Real> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
@@ -1815,8 +1815,8 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * Declare containers to store pointers for computing mid-point fluxes.
          */
         
-        std::vector<double*> V_minus;
-        std::vector<double*> V_plus;
+        std::vector<Real*> V_minus;
+        std::vector<Real*> V_plus;
         V_minus.resize(d_num_eqn);
         V_plus.resize(d_num_eqn);
         
@@ -2055,10 +2055,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                         (k + 2)*(interior_dim_0 + 4)*
                             (interior_dim_1 + 4);
                     
-                    double theta_avg = 0.5*(theta[idx_L] + theta[idx_R]);
-                    double Omega_avg = 0.5*(Omega[idx_L] + Omega[idx_R]);
+                    Real theta_avg = Real(1)/Real(2)*(theta[idx_L] + theta[idx_R]);
+                    Real Omega_avg = Real(1)/Real(2)*(Omega[idx_L] + Omega[idx_R]);
                     
-                    s_x[idx_midpoint_x] = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                    s_x[idx_midpoint_x] = -theta_avg/(std::abs(theta_avg) + Omega_avg + EPSILON);
                 }
             }
         }
@@ -2146,10 +2146,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                         (k + 2)*(interior_dim_0 + 4)*
                             (interior_dim_1 + 4);
                     
-                    double theta_avg = 0.5*(theta[idx_B] + theta[idx_T]);
-                    double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_T]);
+                    Real theta_avg = Real(1)/Real(2)*(theta[idx_B] + theta[idx_T]);
+                    Real Omega_avg = Real(1)/Real(2)*(Omega[idx_B] + Omega[idx_T]);
                     
-                    s_y[idx_midpoint_y] = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                    s_y[idx_midpoint_y] = -theta_avg/(std::abs(theta_avg) + Omega_avg + EPSILON);
                 }
             }
         }
@@ -2237,10 +2237,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                         (k + 2)*(interior_dim_0 + 4)*
                             (interior_dim_1 + 4);
                     
-                    double theta_avg = 0.5*(theta[idx_B] + theta[idx_F]);
-                    double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_F]);
+                    Real theta_avg = Real(1)/Real(2)*(theta[idx_B] + theta[idx_F]);
+                    Real Omega_avg = Real(1)/Real(2)*(Omega[idx_B] + Omega[idx_F]);
                     
-                    s_z[idx_midpoint_z] = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                    s_z[idx_midpoint_z] = -theta_avg/(std::abs(theta_avg) + Omega_avg + EPSILON);
                 }
             }
         }
@@ -2279,7 +2279,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            double* F_face_x = convective_flux->getPointer(0, ei);
+            Real* F_face_x = convective_flux->getPointer(0, ei);
             
             for (int k = 0; k < interior_dim_2; k++)
             {
@@ -2315,12 +2315,12 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                             (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
                                 subghostcell_dim_1_convective_flux_x;
                         
-                        F_face_x[idx_face_x] = dt*(
-                            double(1)/double(30)*(F_midpoint_x[ei][idx_midpoint_x_R] +
+                        F_face_x[idx_face_x] = Real(dt)*(
+                            Real(1)/Real(30)*(F_midpoint_x[ei][idx_midpoint_x_R] +
                                 F_midpoint_x[ei][idx_midpoint_x_L]) -
-                            double(3)/double(10)*(F_node_x[ei][idx_node_R] +
+                            Real(3)/Real(10)*(F_node_x[ei][idx_node_R] +
                                 F_node_x[ei][idx_node_L]) +
-                            double(23)/double(15)*F_midpoint_x[ei][idx_midpoint_x]);
+                            Real(23)/Real(15)*F_midpoint_x[ei][idx_midpoint_x]);
                     }
                 }
             }
@@ -2332,7 +2332,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            double* F_face_y = convective_flux->getPointer(1, ei);
+            Real* F_face_y = convective_flux->getPointer(1, ei);
             
             for (int k = 0; k < interior_dim_2; k++)
             {
@@ -2368,12 +2368,12 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                             (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
                                 subghostcell_dim_1_convective_flux_y;
                         
-                        F_face_y[idx_face_y] = dt*(
-                            double(1)/double(30)*(F_midpoint_y[ei][idx_midpoint_y_T] +
+                        F_face_y[idx_face_y] = Real(dt)*(
+                            Real(1)/Real(30)*(F_midpoint_y[ei][idx_midpoint_y_T] +
                                 F_midpoint_y[ei][idx_midpoint_y_B]) -
-                            double(3)/double(10)*(F_node_y[ei][idx_node_T] +
+                            Real(3)/Real(10)*(F_node_y[ei][idx_node_T] +
                                 F_node_y[ei][idx_node_B]) +
-                            double(23)/double(15)*F_midpoint_y[ei][idx_midpoint_y]);
+                            Real(23)/Real(15)*F_midpoint_y[ei][idx_midpoint_y]);
                     }
                 }
             }
@@ -2385,7 +2385,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            double* F_face_z = convective_flux->getPointer(2, ei);
+            Real* F_face_z = convective_flux->getPointer(2, ei);
             
             for (int k = 0; k < interior_dim_2 + 1; k++)
             {
@@ -2421,12 +2421,12 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                             (k + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
                                 subghostcell_dim_1_convective_flux_z;
                         
-                        F_face_z[idx_face_z] = dt*(
-                            double(1)/double(30)*(F_midpoint_z[ei][idx_midpoint_z_F] +
+                        F_face_z[idx_face_z] = Real(dt)*(
+                            Real(1)/Real(30)*(F_midpoint_z[ei][idx_midpoint_z_F] +
                                 F_midpoint_z[ei][idx_midpoint_z_B]) -
-                            double(3)/double(10)*(F_node_z[ei][idx_node_F] +
+                            Real(3)/Real(10)*(F_node_z[ei][idx_node_F] +
                                 F_node_z[ei][idx_node_B]) +
-                            double(23)/double(15)*F_midpoint_z[ei][idx_midpoint_z]);
+                            Real(23)/Real(15)*F_midpoint_z[ei][idx_midpoint_z]);
                     }
                 }
             }
@@ -2438,15 +2438,15 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            double* u_midpoint_x = velocity_midpoint->getPointer(0, 0);
-            double* v_midpoint_y = velocity_midpoint->getPointer(1, 1);
-            double* w_midpoint_z = velocity_midpoint->getPointer(2, 2);
+            Real* u_midpoint_x = velocity_midpoint->getPointer(0, 0);
+            Real* v_midpoint_y = velocity_midpoint->getPointer(1, 1);
+            Real* w_midpoint_z = velocity_midpoint->getPointer(2, 2);
             
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
                 if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
                 {
-                    double* S = source->getPointer(ei);
+                    Real* S = source->getPointer(ei);
                     
                     const int num_subghosts_0_conservative_var = num_subghosts_conservative_var[ei][0];
                     const int num_subghosts_1_conservative_var = num_subghosts_conservative_var[ei][1];
@@ -2562,25 +2562,25 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                                     (k + 3)*(interior_dim_0 + 2)*
                                         (interior_dim_1 + 2);
                                 
-                                S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
-                                    (double(3)/double(2)*(u_midpoint_x[idx_midpoint_x_R] -
+                                S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                    (Real(3)/Real(2)*(u_midpoint_x[idx_midpoint_x_R] -
                                          u_midpoint_x[idx_midpoint_x_L]) -
-                                     double(3)/double(10)*(u[idx_cell_wghost_x_R] -
+                                     Real(3)/Real(10)*(u[idx_cell_wghost_x_R] -
                                          u[idx_cell_wghost_x_L]) +
-                                     double(1)/double(30)*(u_midpoint_x[idx_midpoint_x_RR] -
-                                         u_midpoint_x[idx_midpoint_x_LL]))/dx[0] +
-                                    (double(3)/double(2)*(v_midpoint_y[idx_midpoint_y_T] -
+                                     Real(1)/Real(30)*(u_midpoint_x[idx_midpoint_x_RR] -
+                                         u_midpoint_x[idx_midpoint_x_LL]))/Real(dx[0]) +
+                                    (Real(3)/Real(2)*(v_midpoint_y[idx_midpoint_y_T] -
                                          v_midpoint_y[idx_midpoint_y_B]) -
-                                     double(3)/double(10)*(v[idx_cell_wghost_y_T] -
+                                     Real(3)/Real(10)*(v[idx_cell_wghost_y_T] -
                                          v[idx_cell_wghost_y_B]) +
-                                     double(1)/double(30)*(v_midpoint_y[idx_midpoint_y_TT] -
-                                         v_midpoint_y[idx_midpoint_y_BB]))/dx[1] +
-                                    (double(3)/double(2)*(w_midpoint_z[idx_midpoint_z_F] -
+                                     Real(1)/Real(30)*(v_midpoint_y[idx_midpoint_y_TT] -
+                                         v_midpoint_y[idx_midpoint_y_BB]))/Real(dx[1]) +
+                                    (Real(3)/Real(2)*(w_midpoint_z[idx_midpoint_z_F] -
                                          w_midpoint_z[idx_midpoint_z_B]) -
-                                     double(3)/double(10)*(w[idx_cell_wghost_z_F] -
+                                     Real(3)/Real(10)*(w[idx_cell_wghost_z_F] -
                                          w[idx_cell_wghost_z_B]) +
-                                     double(1)/double(30)*(w_midpoint_z[idx_midpoint_z_FF] -
-                                         w_midpoint_z[idx_midpoint_z_BB]))/dx[2]);
+                                     Real(1)/Real(30)*(w_midpoint_z[idx_midpoint_z_FF] -
+                                         w_midpoint_z[idx_midpoint_z_BB]))/Real(dx[2]));
                             }
                         }
                     }

@@ -123,8 +123,8 @@ class FlowModelImmersedBoundaryMethod
          * HAMERS_SHARED_PTR to registered cell variables of immersed boundary methods.
          */
         static HAMERS_SHARED_PTR<pdat::CellVariable<int> > s_variable_mask;
-        static HAMERS_SHARED_PTR<pdat::CellVariable<double> > s_variable_wall_distance;
-        static HAMERS_SHARED_PTR<pdat::CellVariable<double> > s_variable_surface_normal;
+        static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_wall_distance;
+        static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_surface_normal;
         
 };
 

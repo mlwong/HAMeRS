@@ -23,29 +23,29 @@ class MPIHelperGrid: public MPIHelper
         /*
          * Compute number of cells.
          */
-        double getNumberOfCells() const;
+        Real getNumberOfCells() const;
         
         /*
          * Compute weighted number of cells.
          */
-        double getWeightedNumberOfCells() const;
+        Real getWeightedNumberOfCells() const;
         
         /*
          * Compute averaged grid level number with only x-direction as inhomogeneous direction.
          */
-        std::vector<double>
+        std::vector<Real>
         getAveragedGridLevelNumberWithInhomogeneousXDirection() const;
         
         /*
          * Compute averaged grid level number with only y-direction as inhomogeneous direction.
          */
-        std::vector<double>
+        std::vector<Real>
         getAveragedGridLevelNumberWithInhomogeneousYDirection() const;
         
         /*
          * Compute averaged grid level number with only z-direction as inhomogeneous direction.
          */
-        std::vector<double>
+        std::vector<Real>
         getAveragedGridLevelNumberWithInhomogeneousZDirection() const;
         
     private:

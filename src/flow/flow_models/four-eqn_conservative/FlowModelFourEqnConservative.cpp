@@ -9,9 +9,9 @@
 #include "flow/flow_models/four-eqn_conservative/FlowModelSourceUtilitiesFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelStatisticsUtilitiesFourEqnConservative.hpp"
 
-HAMERS_SHARED_PTR<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_partial_densities;
-HAMERS_SHARED_PTR<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_momentum;
-HAMERS_SHARED_PTR<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_total_energy;
+HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelFourEqnConservative::s_variable_partial_densities;
+HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelFourEqnConservative::s_variable_momentum;
+HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelFourEqnConservative::s_variable_total_energy;
 
 FlowModelFourEqnConservative::FlowModelFourEqnConservative(
     const std::string& object_name,
@@ -122,14 +122,14 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
      * Initialize the conservative variables.
      */
     
-    s_variable_partial_densities = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(d_dim, "partial densities", d_num_species));
+    s_variable_partial_densities = HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
+        new pdat::CellVariable<Real>(d_dim, "partial densities", d_num_species));
     
-    s_variable_momentum = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(d_dim, "momentum", d_dim.getValue()));
+    s_variable_momentum = HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
+        new pdat::CellVariable<Real>(d_dim, "momentum", d_dim.getValue()));
     
-    s_variable_total_energy = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(d_dim, "total energy", 1));
+    s_variable_total_energy = HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
+        new pdat::CellVariable<Real>(d_dim, "total energy", 1));
     
     /*
      * Initialize d_equation_of_state_mixing_rules_manager and get the equation of state mixing rules object.
@@ -751,10 +751,10 @@ FlowModelFourEqnConservative::getVariableTypesOfPrimitiveVariables()
 /*
  * Get the conservative variables.
  */
-std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > >
 FlowModelFourEqnConservative::getConservativeVariables()
 {
-    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > conservative_variables;
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > conservative_variables;
     conservative_variables.reserve(3);
     
     conservative_variables.push_back(s_variable_partial_densities);
@@ -790,8 +790,8 @@ FlowModelFourEqnConservative::registerPatchWithDataContext(
      * Set the number of ghost cells of conservative variables.
      */
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             d_patch->getPatchData(s_variable_partial_densities, getDataContext())));
     
     d_num_ghosts = data_partial_densities->getGhostCellWidth();
@@ -1148,7 +1148,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of density.
                 d_data_density.reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_density));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_density));
             }
         }
         else
@@ -1168,7 +1168,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of mass fractions.
                 d_data_mass_fractions.reset(
-                    new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_mass_fractions));
+                    new pdat::CellData<Real>(d_interior_box, d_num_species, d_num_subghosts_mass_fractions));
             }
         }
         else
@@ -1188,7 +1188,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of mole fractions.
                 d_data_mole_fractions.reset(
-                    new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_mole_fractions));
+                    new pdat::CellData<Real>(d_interior_box, d_num_species, d_num_subghosts_mole_fractions));
             }
         }
         else
@@ -1208,7 +1208,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of volume fractions.
                 d_data_volume_fractions.reset(
-                    new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_volume_fractions));
+                    new pdat::CellData<Real>(d_interior_box, d_num_species, d_num_subghosts_volume_fractions));
             }
         }
         else
@@ -1228,7 +1228,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of velocity.
                 d_data_velocity.reset(
-                    new pdat::CellData<double>(d_interior_box, d_dim.getValue(), d_num_subghosts_velocity));
+                    new pdat::CellData<Real>(d_interior_box, d_dim.getValue(), d_num_subghosts_velocity));
             }
         }
         else
@@ -1248,7 +1248,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of internal energy.
                 d_data_internal_energy.reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_internal_energy));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_internal_energy));
             }
         }
         else
@@ -1268,7 +1268,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of pressure.
                 d_data_pressure.reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_pressure));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_pressure));
             }
         }
         else
@@ -1288,7 +1288,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of sound speed.
                 d_data_sound_speed.reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_sound_speed));
             }
         }
         else
@@ -1308,7 +1308,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of temperature.
                 d_data_temperature.reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_temperature));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_temperature));
             }
         }
         else
@@ -1328,7 +1328,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of convective flux in the x-direction.
                 d_data_convective_flux_x.reset(
-                    new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_x));
+                    new pdat::CellData<Real>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_x));
             }
         }
         else
@@ -1348,7 +1348,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of convective flux in the y-direction.
                 d_data_convective_flux_y.reset(
-                    new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_y));
+                    new pdat::CellData<Real>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_y));
             }
         }
         else
@@ -1368,7 +1368,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of convective flux in the z-direction.
                 d_data_convective_flux_z.reset(
-                    new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_z));
+                    new pdat::CellData<Real>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_z));
             }
         }
         else
@@ -1388,7 +1388,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of maximum wave speed in the x-direction.
                 d_data_max_wave_speed_x.reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_x));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_max_wave_speed_x));
             }
         }
         else
@@ -1408,7 +1408,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of maximum wave speed in the y-direction.
                 d_data_max_wave_speed_y.reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_y));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_max_wave_speed_y));
             }
         }
         else
@@ -1428,7 +1428,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of maximum wave speed in the z-direction.
                 d_data_max_wave_speed_z.reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_z));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_max_wave_speed_z));
             }
         }
         else
@@ -1448,7 +1448,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of maximum diffusivity.
                 d_data_max_diffusivity.reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
             }
         }
         else
@@ -1470,7 +1470,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
                 if (!d_data_species_densities[si])
                 {
                     d_data_species_densities[si].reset(
-                        new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_species_densities));
+                        new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_species_densities));
                 }
             }
         }
@@ -1491,7 +1491,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
             for (int si = 0; si < d_num_species; si++)
             {
                 d_data_species_enthalpies[si].reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_species_enthalpies));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_species_enthalpies));
             }
         }
         else
@@ -1721,7 +1721,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
 /*
  * Get the cell data of one cell variable in the registered patch.
  */
-HAMERS_SHARED_PTR<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<Real> >
 FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
 {
     // Check whether a patch is already registered.
@@ -1733,7 +1733,7 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
             << std::endl);
     }
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > cell_data;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > cell_data;
     
     if (variable_key == "PARTIAL_DENSITIES")
     {
@@ -1939,11 +1939,11 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
 /*
  * Get the cell data of different cell variables in the registered patch.
  */
-std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
 FlowModelFourEqnConservative::getCellData(
     const std::vector<std::string>& variable_keys)
 {
-    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > cell_data(
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > cell_data(
         static_cast<int>(variable_keys.size()));
     
     for (int vi = 0; static_cast<int>(variable_keys.size()); vi++)
@@ -1958,7 +1958,7 @@ FlowModelFourEqnConservative::getCellData(
 /*
  * Get the cell data of species cell variables in the registered patch.
  */
-std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
 FlowModelFourEqnConservative::getSpeciesCellData(
     const std::string& variable_key)
 {
@@ -1971,7 +1971,7 @@ FlowModelFourEqnConservative::getSpeciesCellData(
             << std::endl);
     }
     
-    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > species_cell_data;
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > species_cell_data;
     
     if (variable_key == "SPECIES_DENSITIES")
     {
@@ -2049,23 +2049,23 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
         ghostcell_dims_mask = mask_cell_data->getGhostBox().numberCells();
     }
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities = getCellDataOfPartialDensities();
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum = getCellDataOfMomentum();
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy = getCellDataOfTotalEnergy();
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities = getCellDataOfPartialDensities();
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum = getCellDataOfMomentum();
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_total_energy = getCellDataOfTotalEnergy();
     
     // Get the pointers to the conservative variables.
-    std::vector<double*> rho_Y;
+    std::vector<Real*> rho_Y;
     rho_Y.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
         rho_Y.push_back(data_partial_densities->getPointer(si));
     }
-    double* E = data_total_energy->getPointer(0);
+    Real* E = data_total_energy->getPointer(0);
     
     if (d_dim == tbox::Dimension(1))
     {
         // Get the pointer to the momentum component.
-        double* rho_u = data_momentum->getPointer(0);
+        Real* rho_u = data_momentum->getPointer(0);
         
         // Get the dimension and the number of ghost cells.
         
@@ -2088,7 +2088,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
                     
                     if (mask[idx_mask] == mask_valid_value)
                     {
-                        rho_Y[si][idx] = double(0);
+                        rho_Y[si][idx] = Real(0);
                     }
                 }
             }
@@ -2102,8 +2102,8 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
                 
                 if (mask[idx_mask] == mask_valid_value)
                 {
-                    rho_u[idx] = double(0);
-                    E[idx]     = double(0);
+                    rho_u[idx] = Real(0);
+                    E[idx]     = Real(0);
                 }
             }
         }
@@ -2117,7 +2117,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
                     // Compute the linear index.
                     const int idx = i + num_ghosts_0;
                     
-                    rho_Y[si][idx] = double(0);
+                    rho_Y[si][idx] = Real(0);
                 }
             }
             
@@ -2127,16 +2127,16 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
                 // Compute the linear index.
                 const int idx = i + num_ghosts_0;
                 
-                rho_u[idx] = double(0);
-                E[idx]     = double(0);
+                rho_u[idx] = Real(0);
+                E[idx]     = Real(0);
             }
         }
     }
     else if (d_dim == tbox::Dimension(2))
     {
         // Get the pointers to the momentum components.
-        double* rho_u = data_momentum->getPointer(0);
-        double* rho_v = data_momentum->getPointer(1);
+        Real* rho_u = data_momentum->getPointer(0);
+        Real* rho_v = data_momentum->getPointer(1);
         
         // Get the dimensions and the numbers of ghost cells.
         
@@ -2169,7 +2169,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
                         
                         if (mask[idx_mask] == mask_valid_value)
                         {
-                            rho_Y[si][idx] = double(0);
+                            rho_Y[si][idx] = Real(0);
                         }
                     }
                 }
@@ -2189,9 +2189,9 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
                     
                     if (mask[idx_mask] == mask_valid_value)
                     {
-                        rho_u[idx] = double(0);
-                        rho_v[idx] = double(0);
-                        E[idx]     = double(0);
+                        rho_u[idx] = Real(0);
+                        rho_v[idx] = Real(0);
+                        E[idx]     = Real(0);
                     }
                 }
             }
@@ -2209,7 +2209,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
                         const int idx  = (i + num_ghosts_0) +
                             (j + num_ghosts_1)*ghostcell_dim_0;
                         
-                        rho_Y[si][idx] = double(0);
+                        rho_Y[si][idx] = Real(0);
                     }
                 }
             }
@@ -2223,9 +2223,9 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
                     const int idx  = (i + num_ghosts_0) +
                         (j + num_ghosts_1)*ghostcell_dim_0;
                     
-                    rho_u[idx] = double(0);
-                    rho_v[idx] = double(0);
-                    E[idx]     = double(0);
+                    rho_u[idx] = Real(0);
+                    rho_v[idx] = Real(0);
+                    E[idx]     = Real(0);
                 }
             }
         }
@@ -2233,9 +2233,9 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
     else if (d_dim == tbox::Dimension(3))
     {
         // Get the pointers to the momentum components.
-        double* rho_u = data_momentum->getPointer(0);
-        double* rho_v = data_momentum->getPointer(1);
-        double* rho_w = data_momentum->getPointer(2);
+        Real* rho_u = data_momentum->getPointer(0);
+        Real* rho_v = data_momentum->getPointer(1);
+        Real* rho_w = data_momentum->getPointer(2);
         
         // Get the dimensions and the numbers of ghost cells.
         
@@ -2277,7 +2277,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
                             
                             if (mask[idx_mask] == mask_valid_value)
                             {
-                                rho_Y[si][idx] = double(0);
+                                rho_Y[si][idx] = Real(0);
                             }
                         }
                     }
@@ -2302,10 +2302,10 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
                         
                         if (mask[idx_mask] == mask_valid_value)
                         {
-                            rho_u[idx] = double(0);
-                            rho_v[idx] = double(0);
-                            rho_w[idx] = double(0);
-                            E[idx]     = double(0);
+                            rho_u[idx] = Real(0);
+                            rho_v[idx] = Real(0);
+                            rho_w[idx] = Real(0);
+                            E[idx]     = Real(0);
                         }
                     }
                 }
@@ -2327,7 +2327,7 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
                                 (j + num_ghosts_1)*ghostcell_dim_0 +
                                 (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
                             
-                            rho_Y[si][idx] = double(0);
+                            rho_Y[si][idx] = Real(0);
                         }
                     }
                 }
@@ -2345,10 +2345,10 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero(
                             (j + num_ghosts_1)*ghostcell_dim_0 +
                             (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
                         
-                        rho_u[idx] = double(0);
-                        rho_v[idx] = double(0);
-                        rho_w[idx] = double(0);
-                        E[idx]     = double(0);
+                        rho_u[idx] = Real(0);
+                        rho_v[idx] = Real(0);
+                        rho_w[idx] = Real(0);
+                        E[idx]     = Real(0);
                     }
                 }
             }
@@ -2383,7 +2383,7 @@ FlowModelFourEqnConservative::updateCellDataOfConservativeVariables(
 /*
  * Get the cell data of the conservative variables in the registered patch.
  */
-std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
 FlowModelFourEqnConservative::getCellDataOfConservativeVariables()
 {
     // Check whether a patch is already registered.
@@ -2395,7 +2395,7 @@ FlowModelFourEqnConservative::getCellDataOfConservativeVariables()
             << std::endl);
     }
     
-    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > cell_data;
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > cell_data;
     cell_data.reserve(3);
     
     cell_data.push_back(getCellDataOfPartialDensities());
@@ -2409,7 +2409,7 @@ FlowModelFourEqnConservative::getCellDataOfConservativeVariables()
 /*
  * Get the cell data of the primitive variables in the registered patch.
  */
-std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
 FlowModelFourEqnConservative::getCellDataOfPrimitiveVariables()
 {
     // Check whether a patch is already registered.
@@ -2421,7 +2421,7 @@ FlowModelFourEqnConservative::getCellDataOfPrimitiveVariables()
             << std::endl);
     }
     
-    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > cell_data;
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > cell_data;
     cell_data.reserve(3);
     
     cell_data.push_back(getCellDataOfPartialDensities());
@@ -2481,8 +2481,8 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     
     if (variable_name == "density")
     {
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2495,7 +2495,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
-        std::vector<const double*> rho_Y;
+        std::vector<const Real*> rho_Y;
         rho_Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
@@ -2512,14 +2512,14 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                 size_t idx_data = offset_data + i;
                 size_t idx_region = i;
                 
-                std::vector<const double*> rho_Y_ptr;
+                std::vector<const Real*> rho_Y_ptr;
                 rho_Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
                 }
                 
-                buffer[idx_region] = d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr);
+                buffer[idx_region] = double(d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr));
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -2535,14 +2535,14 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                     size_t idx_region = i +
                         j*region_dims[0];
                     
-                    std::vector<const double*> rho_Y_ptr;
+                    std::vector<const Real*> rho_Y_ptr;
                     rho_Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
                         rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
                     }
                     
-                    buffer[idx_region] = d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr);
+                    buffer[idx_region] = double(d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr));
                 }
             }
         }
@@ -2563,14 +2563,14 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                             j*region_dims[0] +
                             k*region_dims[0]*region_dims[1];
                         
-                        std::vector<const double*> rho_Y_ptr;
+                        std::vector<const Real*> rho_Y_ptr;
                         rho_Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
                         }
                         
-                        buffer[idx_region] = d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr);
+                        buffer[idx_region] = double(d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr));
                     }
                 }
             }
@@ -2580,16 +2580,16 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "pressure")
     {
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_momentum, d_plot_context)));
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_total_energy(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2606,16 +2606,16 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to conservative variables
-        std::vector<const double*> rho_Y;
+        std::vector<const Real*> rho_Y;
         rho_Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
             rho_Y.push_back(data_partial_densities->getPointer(si));
         }
-        const double* const rho_u = data_momentum->getPointer(0);
-        const double* const rho_v = d_dim > tbox::Dimension(1) ? data_momentum->getPointer(1) : NULL;
-        const double* const rho_w = d_dim > tbox::Dimension(2) ? data_momentum->getPointer(2) : NULL;
-        const double* const E     = data_total_energy->getPointer(0);
+        const Real* const rho_u = data_momentum->getPointer(0);
+        const Real* const rho_v = d_dim > tbox::Dimension(1) ? data_momentum->getPointer(1) : NULL;
+        const Real* const rho_w = d_dim > tbox::Dimension(2) ? data_momentum->getPointer(2) : NULL;
+        const Real* const E     = data_total_energy->getPointer(0);
         
         size_t offset_data = data_box.offset(region.lower());
         
@@ -2628,34 +2628,34 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                 size_t idx_region = i;
                 
                 // Compute the mixture density.
-                std::vector<const double*> rho_Y_ptr;
+                std::vector<const Real*> rho_Y_ptr;
                 rho_Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     rho_Y_ptr.push_back(&(rho_Y[si][idx_data]));
                 }
-                const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                     rho_Y_ptr);
                 
                 /*
                  * Compute the internal energy.
                  */
-                double epsilon = double(0);
+                Real epsilon = Real(0);
                 if (d_dim == tbox::Dimension(1))
                 {
                     epsilon = (E[idx_data] -
-                        double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                        Real(1)/Real(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                 }
                 else if (d_dim == tbox::Dimension(2))
                 {
                     epsilon = (E[idx_data] -
-                        double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                        Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                         rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
                     epsilon = (E[idx_data] -
-                        double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                        Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                         rho_v[idx_data]*rho_v[idx_data] +
                         rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                 }
@@ -2663,7 +2663,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                 /*
                  * Compute the mass fractions.
                  */
-                double Y[d_num_species];
+                Real Y[d_num_species];
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y[si] = rho_Y[si][idx_data]/rho;
@@ -2672,18 +2672,18 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                 /*
                  * Get the pointers to the mass fractions.
                  */
-                std::vector<const double*> Y_ptr;
+                std::vector<const Real*> Y_ptr;
                 Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y_ptr.push_back(&Y[si]);
                 }
                 
-                buffer[idx_region] = d_equation_of_state_mixing_rules->
+                buffer[idx_region] = double(d_equation_of_state_mixing_rules->
                     getPressure(
                         &rho,
                         &epsilon,
-                        Y_ptr);
+                        Y_ptr));
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -2700,34 +2700,34 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                         j*region_dims[0];
                     
                     // Compute the mixture density.
-                    std::vector<const double*> rho_Y_ptr;
+                    std::vector<const Real*> rho_Y_ptr;
                     rho_Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
                         rho_Y_ptr.push_back(&(rho_Y[si][idx_data]));
                     }
-                    const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                    const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                         rho_Y_ptr);
                     
                     /*
                      * Compute the internal energy.
                      */
-                    double epsilon = double(0);
+                    Real epsilon = Real(0);
                     if (d_dim == tbox::Dimension(1))
                     {
                         epsilon = (E[idx_data] -
-                            double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                            Real(1)/Real(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                     }
                     else if (d_dim == tbox::Dimension(2))
                     {
                         epsilon = (E[idx_data] -
-                            double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                            Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                             rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                     }
                     else if (d_dim == tbox::Dimension(3))
                     {
                         epsilon = (E[idx_data] -
-                            double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                            Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                             rho_v[idx_data]*rho_v[idx_data] +
                             rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                     }
@@ -2735,7 +2735,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                     /*
                      * Compute the mass fractions.
                      */
-                    double Y[d_num_species];
+                    Real Y[d_num_species];
                     for (int si = 0; si < d_num_species; si++)
                     {
                         Y[si] = rho_Y[si][idx_data]/rho;
@@ -2744,18 +2744,18 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                     /*
                      * Get the pointers to the mass fractions.
                      */
-                    std::vector<const double*> Y_ptr;
+                    std::vector<const Real*> Y_ptr;
                     Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
                         Y_ptr.push_back(&Y[si]);
                     }
                     
-                    buffer[idx_region] = d_equation_of_state_mixing_rules->
+                    buffer[idx_region] = double(d_equation_of_state_mixing_rules->
                         getPressure(
                             &rho,
                             &epsilon,
-                            Y_ptr);
+                            Y_ptr));
                 }
             }
         }
@@ -2777,34 +2777,34 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                             k*region_dims[0]*region_dims[1];
                         
                         // Compute the mixture density.
-                        std::vector<const double*> rho_Y_ptr;
+                        std::vector<const Real*> rho_Y_ptr;
                         rho_Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             rho_Y_ptr.push_back(&(rho_Y[si][idx_data]));
                         }
-                        const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                        const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                             rho_Y_ptr);
                         
                         /*
                          * Compute the internal energy.
                          */
-                        double epsilon = double(0);
+                        Real epsilon = Real(0);
                         if (d_dim == tbox::Dimension(1))
                         {
                             epsilon = (E[idx_data] -
-                                double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                                Real(1)/Real(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                         }
                         else if (d_dim == tbox::Dimension(2))
                         {
                             epsilon = (E[idx_data] -
-                                double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                                Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                                 rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                         }
                         else if (d_dim == tbox::Dimension(3))
                         {
                             epsilon = (E[idx_data] -
-                                double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                                Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                                 rho_v[idx_data]*rho_v[idx_data] +
                                 rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                         }
@@ -2812,7 +2812,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                         /*
                          * Compute the mass fractions.
                          */
-                        double Y[d_num_species];
+                        Real Y[d_num_species];
                         for (int si = 0; si < d_num_species; si++)
                         {
                             Y[si] = rho_Y[si][idx_data]/rho;
@@ -2821,18 +2821,18 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                         /*
                          * Get the pointers to the mass fractions.
                          */
-                        std::vector<const double*> Y_ptr;
+                        std::vector<const Real*> Y_ptr;
                         Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             Y_ptr.push_back(&Y[si]);
                         }
                         
-                        buffer[idx_region] = d_equation_of_state_mixing_rules->
+                        buffer[idx_region] = double(d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho,
                                 &epsilon,
-                                Y_ptr);
+                                Y_ptr));
                     }
                 }
             }
@@ -2842,16 +2842,16 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "sound speed")
     {
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_momentum, d_plot_context)));
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_total_energy(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2868,16 +2868,16 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
-        std::vector<const double*> rho_Y;
+        std::vector<const Real*> rho_Y;
         rho_Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
             rho_Y.push_back(data_partial_densities->getPointer(si));
         }
-        const double* const rho_u = data_momentum->getPointer(0);
-        const double* const rho_v = d_dim > tbox::Dimension(1) ? data_momentum->getPointer(1) : NULL;
-        const double* const rho_w = d_dim > tbox::Dimension(2) ? data_momentum->getPointer(2) : NULL;
-        const double* const E     = data_total_energy->getPointer(0);
+        const Real* const rho_u = data_momentum->getPointer(0);
+        const Real* const rho_v = d_dim > tbox::Dimension(1) ? data_momentum->getPointer(1) : NULL;
+        const Real* const rho_w = d_dim > tbox::Dimension(2) ? data_momentum->getPointer(2) : NULL;
+        const Real* const E     = data_total_energy->getPointer(0);
         
         size_t offset_data = data_box.offset(region.lower());
         
@@ -2890,34 +2890,34 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                 size_t idx_region = i;
                 
                 // Compute the mixture density.
-                std::vector<const double*> rho_Y_ptr;
+                std::vector<const Real*> rho_Y_ptr;
                 rho_Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     rho_Y_ptr.push_back(&(rho_Y[si][idx_data]));
                 }
-                const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                     rho_Y_ptr);
                 
                 /*
                  * Compute the internal energy.
                  */
-                double epsilon = double(0);
+                Real epsilon = Real(0);
                 if (d_dim == tbox::Dimension(1))
                 {
                     epsilon = (E[idx_data] -
-                        double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                        Real(1)/Real(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                 }
                 else if (d_dim == tbox::Dimension(2))
                 {
                     epsilon = (E[idx_data] -
-                        double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                        Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                         rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
                     epsilon = (E[idx_data] -
-                        double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                        Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                         rho_v[idx_data]*rho_v[idx_data] +
                         rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                 }
@@ -2925,7 +2925,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                 /*
                  * Compute the mass fractions.
                  */
-                double Y[d_num_species];
+                Real Y[d_num_species];
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y[si] = rho_Y[si][idx_data]/rho;
@@ -2934,14 +2934,14 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                 /*
                  * Get the pointers to the mass fractions.
                  */
-                std::vector<const double*> Y_ptr;
+                std::vector<const Real*> Y_ptr;
                 Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y_ptr.push_back(&Y[si]);
                 }
                 
-                const double p = d_equation_of_state_mixing_rules->
+                const Real p = d_equation_of_state_mixing_rules->
                     getPressure(
                         &rho,
                         &epsilon,
@@ -2950,7 +2950,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                 /*
                  * Compute the Gruneisen parameter.
                  */
-                const double Gamma = d_equation_of_state_mixing_rules->
+                const Real Gamma = d_equation_of_state_mixing_rules->
                     getGruneisenParameter(
                         &rho,
                         &p,
@@ -2959,7 +2959,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                 /*
                  * Compute the partial pressure partial partial densities.
                  */
-                std::vector<double> Psi = d_equation_of_state_mixing_rules->
+                std::vector<Real> Psi = d_equation_of_state_mixing_rules->
                     getPressureDerivativeWithPartialDensities(
                         &rho,
                         &p,
@@ -2968,14 +2968,14 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                 /*
                  * Compute the sound speed.
                  */
-                buffer[idx_region] = Gamma*p/rho;
+                buffer[idx_region] = double(Gamma*p/rho);
                 
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    buffer[idx_region] += Y[si]*Psi[si];
+                    buffer[idx_region] += double(Y[si]*Psi[si]);
                 }
                 
-                buffer[idx_region] = sqrt(buffer[idx_region]);
+                buffer[idx_region] = double(std::sqrt(buffer[idx_region]));
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -2992,34 +2992,34 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                         j*region_dims[0];
                     
                     // Compute the mixture density.
-                    std::vector<const double*> rho_Y_ptr;
+                    std::vector<const Real*> rho_Y_ptr;
                     rho_Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
                         rho_Y_ptr.push_back(&(rho_Y[si][idx_data]));
                     }
-                    const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                    const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                         rho_Y_ptr);
                     
                     /*
                      * Compute the internal energy.
                      */
-                    double epsilon = double(0);
+                    Real epsilon = Real(0);
                     if (d_dim == tbox::Dimension(1))
                     {
                         epsilon = (E[idx_data] -
-                            double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                            Real(1)/Real(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                     }
                     else if (d_dim == tbox::Dimension(2))
                     {
                         epsilon = (E[idx_data] -
-                            double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                            Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                             rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                     }
                     else if (d_dim == tbox::Dimension(3))
                     {
                         epsilon = (E[idx_data] -
-                            double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                            Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                             rho_v[idx_data]*rho_v[idx_data] +
                             rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                     }
@@ -3027,7 +3027,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                     /*
                      * Compute the mass fractions.
                      */
-                    double Y[d_num_species];
+                    Real Y[d_num_species];
                     for (int si = 0; si < d_num_species; si++)
                     {
                         Y[si] = rho_Y[si][idx_data]/rho;
@@ -3036,14 +3036,14 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                     /*
                      * Get the pointers to the mass fractions.
                      */
-                    std::vector<const double*> Y_ptr;
+                    std::vector<const Real*> Y_ptr;
                     Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
                         Y_ptr.push_back(&Y[si]);
                     }
                     
-                    const double p = d_equation_of_state_mixing_rules->
+                    const Real p = d_equation_of_state_mixing_rules->
                         getPressure(
                             &rho,
                             &epsilon,
@@ -3052,7 +3052,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                     /*
                      * Compute the Gruneisen parameter.
                      */
-                    const double Gamma = d_equation_of_state_mixing_rules->
+                    const Real Gamma = d_equation_of_state_mixing_rules->
                         getGruneisenParameter(
                             &rho,
                             &p,
@@ -3061,7 +3061,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                     /*
                      * Compute the partial pressure partial partial densities.
                      */
-                    std::vector<double> Psi = d_equation_of_state_mixing_rules->
+                    std::vector<Real> Psi = d_equation_of_state_mixing_rules->
                         getPressureDerivativeWithPartialDensities(
                             &rho,
                             &p,
@@ -3070,14 +3070,14 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                     /*
                      * Compute the sound speed.
                      */
-                    buffer[idx_region] = Gamma*p/rho;
+                    buffer[idx_region] = double(Gamma*p/rho);
                     
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        buffer[idx_region] += Y[si]*Psi[si];
+                        buffer[idx_region] += double(Y[si]*Psi[si]);
                     }
                     
-                    buffer[idx_region] = sqrt(buffer[idx_region]);
+                    buffer[idx_region] = double(std::sqrt(buffer[idx_region]));
                 }
             }
         }
@@ -3099,34 +3099,34 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                             k*region_dims[0]*region_dims[1];
                         
                         // Compute the mixture density.
-                        std::vector<const double*> rho_Y_ptr;
+                        std::vector<const Real*> rho_Y_ptr;
                         rho_Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             rho_Y_ptr.push_back(&(rho_Y[si][idx_data]));
                         }
-                        const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                        const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                             rho_Y_ptr);
                         
                         /*
                          * Compute the internal energy.
                          */
-                        double epsilon = double(0);
+                        Real epsilon = Real(0);
                         if (d_dim == tbox::Dimension(1))
                         {
                             epsilon = (E[idx_data] -
-                                double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                                Real(1)/Real(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                         }
                         else if (d_dim == tbox::Dimension(2))
                         {
                             epsilon = (E[idx_data] -
-                                double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                                Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                                 rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                         }
                         else if (d_dim == tbox::Dimension(3))
                         {
                             epsilon = (E[idx_data] -
-                                double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                                Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                                 rho_v[idx_data]*rho_v[idx_data] +
                                 rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                         }
@@ -3134,7 +3134,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                         /*
                          * Compute the mass fractions.
                          */
-                        double Y[d_num_species];
+                        Real Y[d_num_species];
                         for (int si = 0; si < d_num_species; si++)
                         {
                             Y[si] = rho_Y[si][idx_data]/rho;
@@ -3143,14 +3143,14 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                         /*
                          * Get the pointers to the mass fractions.
                          */
-                        std::vector<const double*> Y_ptr;
+                        std::vector<const Real*> Y_ptr;
                         Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             Y_ptr.push_back(&Y[si]);
                         }
                         
-                        const double p = d_equation_of_state_mixing_rules->
+                        const Real p = d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho,
                                 &epsilon,
@@ -3159,7 +3159,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                         /*
                          * Compute the Gruneisen parameter.
                          */
-                        const double Gamma = d_equation_of_state_mixing_rules->
+                        const Real Gamma = d_equation_of_state_mixing_rules->
                             getGruneisenParameter(
                                 &rho,
                                 &p,
@@ -3168,7 +3168,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                         /*
                          * Compute the partial pressure partial partial densities.
                          */
-                        std::vector<double> Psi = d_equation_of_state_mixing_rules->
+                        std::vector<Real> Psi = d_equation_of_state_mixing_rules->
                             getPressureDerivativeWithPartialDensities(
                                 &rho,
                                 &p,
@@ -3177,14 +3177,14 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                         /*
                          * Compute the sound speed.
                          */
-                        buffer[idx_region] = Gamma*p/rho;
+                        buffer[idx_region] = double(Gamma*p/rho);
                         
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            buffer[idx_region] += Y[si]*Psi[si];
+                            buffer[idx_region] += double(Y[si]*Psi[si]);
                         }
                         
-                        buffer[idx_region] = sqrt(buffer[idx_region]);
+                        buffer[idx_region] = double(std::sqrt(buffer[idx_region]));
                     }
                 }
             }
@@ -3194,12 +3194,12 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "velocity")
     {
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_momentum, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3214,13 +3214,13 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
-        std::vector<const double*> rho_Y;
+        std::vector<const Real*> rho_Y;
         rho_Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
             rho_Y.push_back(data_partial_densities->getPointer(si));
         }
-        const double* const m = data_momentum->getPointer(depth_id);
+        const Real* const m = data_momentum->getPointer(depth_id);
         
         size_t offset_data = data_box.offset(region.lower());
         
@@ -3232,16 +3232,16 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                 size_t idx_data = offset_data + i;
                 size_t idx_region = i;
                 
-                std::vector<const double*> rho_Y_ptr;
+                std::vector<const Real*> rho_Y_ptr;
                 rho_Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
                 }
                 
-                double rho = d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr);
+                Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr);
                 
-                buffer[idx_region] = m[idx_data]/rho;
+                buffer[idx_region] = double(m[idx_data]/rho);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -3257,16 +3257,16 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                     size_t idx_region = i +
                         j*region_dims[0];
                     
-                    std::vector<const double*> rho_Y_ptr;
+                    std::vector<const Real*> rho_Y_ptr;
                     rho_Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
                         rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
                     }
                     
-                    double rho = d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr);
+                    Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr);
                     
-                    buffer[idx_region] = m[idx_data]/rho;
+                    buffer[idx_region] = double(m[idx_data]/rho);
                 }
             }
         }
@@ -3287,16 +3287,16 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                             j*region_dims[0] +
                             k*region_dims[0]*region_dims[1];
                         
-                        std::vector<const double*> rho_Y_ptr;
+                        std::vector<const Real*> rho_Y_ptr;
                         rho_Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
                         }
                         
-                        double rho = d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr);
+                        Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr);
                         
-                        buffer[idx_region] = m[idx_data]/rho;
+                        buffer[idx_region] = double(m[idx_data]/rho);
                     }
                 }
             }
@@ -3308,8 +3308,8 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     {
         int species_idx = std::stoi(variable_name.substr(14));
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3322,7 +3322,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to conservative variables.
-        std::vector<const double*> rho_Y;
+        std::vector<const Real*> rho_Y;
         rho_Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
@@ -3340,16 +3340,16 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                 
                 size_t idx_region = i;
                 
-                std::vector<const double*> rho_Y_ptr;
+                std::vector<const Real*> rho_Y_ptr;
                 rho_Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
                 }
                 
-                double rho = d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr);
+                Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr);
                 
-                buffer[idx_region] = rho_Y[species_idx][idx_data]/rho;
+                buffer[idx_region] = double(rho_Y[species_idx][idx_data]/rho);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -3365,16 +3365,16 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                     size_t idx_region = i +
                         j*region_dims[0];
                     
-                    std::vector<const double*> rho_Y_ptr;
+                    std::vector<const Real*> rho_Y_ptr;
                     rho_Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
                         rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
                     }
                     
-                    double rho = d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr);
+                    Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr);
                     
-                    buffer[idx_region] = rho_Y[species_idx][idx_data]/rho;
+                    buffer[idx_region] = double(rho_Y[species_idx][idx_data]/rho);
                 }
             }
         }
@@ -3395,16 +3395,16 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                             j*region_dims[0] +
                             k*region_dims[0]*region_dims[1];
                         
-                        std::vector<const double*> rho_Y_ptr;
+                        std::vector<const Real*> rho_Y_ptr;
                         rho_Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
                         }
                         
-                        double rho = d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr);
+                        Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(rho_Y_ptr);
                         
-                        buffer[idx_region] = rho_Y[species_idx][idx_data]/rho;
+                        buffer[idx_region] = double(rho_Y[species_idx][idx_data]/rho);
                     }
                 }
             }
@@ -4182,12 +4182,12 @@ FlowModelFourEqnConservative::setDerivedCellVariableGhostBoxes()
 /*
  * Get the cell data of partial densities in the registered patch.
  */
-HAMERS_SHARED_PTR<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<Real> >
 FlowModelFourEqnConservative::getCellDataOfPartialDensities()
 {
     // Get the cell data of the registered variable partial densities.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             d_patch->getPatchData(s_variable_partial_densities, getDataContext())));
     
     return data_partial_densities;
@@ -4197,12 +4197,12 @@ FlowModelFourEqnConservative::getCellDataOfPartialDensities()
 /*
  * Get the cell data of momentum in the registered patch.
  */
-HAMERS_SHARED_PTR<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<Real> >
 FlowModelFourEqnConservative::getCellDataOfMomentum()
 {
     // Get the cell data of the registered variable momentum.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             d_patch->getPatchData(s_variable_momentum, getDataContext())));
     
     return data_momentum;
@@ -4212,12 +4212,12 @@ FlowModelFourEqnConservative::getCellDataOfMomentum()
 /*
  * Get the cell data of total energy in the registered patch.
  */
-HAMERS_SHARED_PTR<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<Real> >
 FlowModelFourEqnConservative::getCellDataOfTotalEnergy()
 {
     // Get the cell data of the registered variable total energy.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_total_energy(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             d_patch->getPatchData(s_variable_total_energy, getDataContext())));
     
     return data_total_energy;
@@ -4239,7 +4239,7 @@ FlowModelFourEqnConservative::computeCellDataOfDensity(
             TBOX_ASSERT(d_data_density);
 #endif
             // Get the cell data of the variable partial densities.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities =
                 getCellDataOfPartialDensities();
             
             // Compute the density field.
@@ -4299,7 +4299,7 @@ FlowModelFourEqnConservative::computeCellDataOfMassFractionsWithDensity(
             }
             
             // Get the cell data of the variable partial densities.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities =
                 getCellDataOfPartialDensities();
             
             if (!d_cell_data_computed_density)
@@ -4308,14 +4308,14 @@ FlowModelFourEqnConservative::computeCellDataOfMassFractionsWithDensity(
             }
             
             // Get the pointers to the cell data of mass fractions, denisty and partial densities.
-            std::vector<double*> Y;
+            std::vector<Real*> Y;
             Y.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
                 Y.push_back(d_data_mass_fractions->getPointer(si));
             }
-            double* rho = d_data_density->getPointer(0);
-            std::vector<double*> rho_Y;
+            Real* rho = d_data_density->getPointer(0);
+            std::vector<Real*> rho_Y;
             rho_Y.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
@@ -4515,13 +4515,13 @@ FlowModelFourEqnConservative::computeCellDataOfMoleFractionsWithMassFractions(
             }
             
             // Get the pointers to the cell data of mole fractions and mass fractions.
-            std::vector<double*> X;
+            std::vector<Real*> X;
             X.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
                 X.push_back(d_data_mole_fractions->getPointer(si));
             }
-            std::vector<double*> Y;
+            std::vector<Real*> Y;
             Y.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
@@ -4530,15 +4530,15 @@ FlowModelFourEqnConservative::computeCellDataOfMoleFractionsWithMassFractions(
             
             // Compute the molecular weight of the mixture.
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_molecular_weight_mixture(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_mole_fractions));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_molecular_weight_mixture(
+                new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_mole_fractions));
             
             d_equation_of_state_mixing_rules->computeMixtureMolecularWeight(
                 data_molecular_weight_mixture,
                 d_data_mass_fractions,
                 domain);
             
-            double* M = data_molecular_weight_mixture->getPointer(0);
+            Real* M = data_molecular_weight_mixture->getPointer(0);
             
             // Compute the mole fraction of each species.
             
@@ -4557,7 +4557,7 @@ FlowModelFourEqnConservative::computeCellDataOfMoleFractionsWithMassFractions(
                 // Compute the mole fraction field.
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    const double M_i = d_equation_of_state_mixing_rules->
+                    const Real M_i = d_equation_of_state_mixing_rules->
                         getSpeciesMolecularWeight(si);
                     
                     HAMERS_PRAGMA_SIMD
@@ -4593,7 +4593,7 @@ FlowModelFourEqnConservative::computeCellDataOfMoleFractionsWithMassFractions(
                 // Compute the mole fraction field.
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    const double M_i = d_equation_of_state_mixing_rules->
+                    const Real M_i = d_equation_of_state_mixing_rules->
                         getSpeciesMolecularWeight(si);
                     
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -4641,7 +4641,7 @@ FlowModelFourEqnConservative::computeCellDataOfMoleFractionsWithMassFractions(
                 // Compute the mole fraction field.
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    const double M_i = d_equation_of_state_mixing_rules->
+                    const Real M_i = d_equation_of_state_mixing_rules->
                         getSpeciesMolecularWeight(si);
                     
                     for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
@@ -4720,7 +4720,7 @@ FlowModelFourEqnConservative::computeCellDataOfVolumeFractionsWithSpeciesDensiti
             }
             
             // Get the cell data of the variable partial densities.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities =
                 getCellDataOfPartialDensities();
             
             if (!d_cell_data_computed_species_densities)
@@ -4729,19 +4729,19 @@ FlowModelFourEqnConservative::computeCellDataOfVolumeFractionsWithSpeciesDensiti
             }
             
             // Get the pointers to the cell data of volume fractions, partial densities and species densities.
-            std::vector<double*> Z;
+            std::vector<Real*> Z;
             Z.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
                 Z.push_back(d_data_volume_fractions->getPointer(si));
             }
-            std::vector<double*> rho_Y;
+            std::vector<Real*> rho_Y;
             rho_Y.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
                 rho_Y.push_back(data_partial_densities->getPointer(si));
             }
-            std::vector<double*> rho_i;
+            std::vector<Real*> rho_i;
             rho_i.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
@@ -4936,7 +4936,7 @@ FlowModelFourEqnConservative::computeCellDataOfVelocityWithDensity(
             }
             
             // Get the cell data of the variable momentum.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum =
                 getCellDataOfMomentum();
             
             if (!d_cell_data_computed_density)
@@ -4945,7 +4945,7 @@ FlowModelFourEqnConservative::computeCellDataOfVelocityWithDensity(
             }
             
             // Get the pointer to the cell data of density.
-            double* rho = d_data_density->getPointer(0);
+            Real* rho = d_data_density->getPointer(0);
             
             if (d_dim == tbox::Dimension(1))
             {
@@ -4961,10 +4961,10 @@ FlowModelFourEqnConservative::computeCellDataOfVelocityWithDensity(
                 const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
                 
                 // Get the pointer to the cell data of velocity.
-                double* u = d_data_velocity->getPointer(0);
+                Real* u = d_data_velocity->getPointer(0);
                 
                 // Get the pointer to the cell data of momentum.
-                double* rho_u = data_momentum->getPointer(0);
+                Real* rho_u = data_momentum->getPointer(0);
                 
                 // Compute the velocity field.
                 HAMERS_PRAGMA_SIMD
@@ -5002,12 +5002,12 @@ FlowModelFourEqnConservative::computeCellDataOfVelocityWithDensity(
                 const int subghostcell_dim_0_velocity = d_subghostcell_dims_velocity[0];
                 
                 // Get the pointers to the cell data of velocity.
-                double* u = d_data_velocity->getPointer(0);
-                double* v = d_data_velocity->getPointer(1);
+                Real* u = d_data_velocity->getPointer(0);
+                Real* v = d_data_velocity->getPointer(1);
                 
                 // Get the pointers to the cell data of momentum.
-                double* rho_u = data_momentum->getPointer(0);
-                double* rho_v = data_momentum->getPointer(1);
+                Real* rho_u = data_momentum->getPointer(0);
+                Real* rho_v = data_momentum->getPointer(1);
                 
                 // Compute the velocity field.
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -5062,14 +5062,14 @@ FlowModelFourEqnConservative::computeCellDataOfVelocityWithDensity(
                 const int subghostcell_dim_1_velocity = d_subghostcell_dims_velocity[1];
                 
                 // Get the pointers to the cell data of velocity.
-                double* u = d_data_velocity->getPointer(0);
-                double* v = d_data_velocity->getPointer(1);
-                double* w = d_data_velocity->getPointer(2);
+                Real* u = d_data_velocity->getPointer(0);
+                Real* v = d_data_velocity->getPointer(1);
+                Real* w = d_data_velocity->getPointer(2);
                 
                 // Get the pointers to the cell data of momentum.
-                double* rho_u = data_momentum->getPointer(0);
-                double* rho_v = data_momentum->getPointer(1);
-                double* rho_w = data_momentum->getPointer(2);
+                Real* rho_u = data_momentum->getPointer(0);
+                Real* rho_v = data_momentum->getPointer(1);
+                Real* rho_w = data_momentum->getPointer(2);
                 
                 // Compute the velocity field.
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
@@ -5154,7 +5154,7 @@ FlowModelFourEqnConservative::computeCellDataOfInternalEnergyWithDensityAndVeloc
             }
             
             // Get the cell data of the variable total energy.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_total_energy =
                 getCellDataOfTotalEnergy();
             
             if (!d_cell_data_computed_density)
@@ -5168,9 +5168,9 @@ FlowModelFourEqnConservative::computeCellDataOfInternalEnergyWithDensityAndVeloc
             }
             
             // Get the pointers to the cell data of internal energy, total energy and density.
-            double* epsilon = d_data_internal_energy->getPointer(0);
-            double* E = data_total_energy->getPointer(0);
-            double* rho = d_data_density->getPointer(0);
+            Real* epsilon = d_data_internal_energy->getPointer(0);
+            Real* E = data_total_energy->getPointer(0);
+            Real* rho = d_data_density->getPointer(0);
             
             if (d_dim == tbox::Dimension(1))
             {
@@ -5187,7 +5187,7 @@ FlowModelFourEqnConservative::computeCellDataOfInternalEnergyWithDensityAndVeloc
                 const int num_subghosts_0_internal_energy = d_num_subghosts_internal_energy[0];
                 
                 // Get the pointer to cell data of velocity.
-                double* u = d_data_velocity->getPointer(0);
+                Real* u = d_data_velocity->getPointer(0);
                 
                 // Compute the internal energy field.
                 HAMERS_PRAGMA_SIMD
@@ -5200,7 +5200,7 @@ FlowModelFourEqnConservative::computeCellDataOfInternalEnergyWithDensityAndVeloc
                     const int idx_internal_energy = i + num_subghosts_0_internal_energy;
                     
                     epsilon[idx_internal_energy] = E[idx]/rho[idx_density] -
-                        double(1)/double(2)*u[idx_velocity]*u[idx_velocity];
+                        Real(1)/Real(2)*u[idx_velocity]*u[idx_velocity];
                 }
             }
             else if (d_dim == tbox::Dimension(2))
@@ -5231,8 +5231,8 @@ FlowModelFourEqnConservative::computeCellDataOfInternalEnergyWithDensityAndVeloc
                 const int subghostcell_dim_0_internal_energy = d_subghostcell_dims_internal_energy[0];
                 
                 // Get the pointers to the cell data of velocity.
-                double* u = d_data_velocity->getPointer(0);
-                double* v = d_data_velocity->getPointer(1);
+                Real* u = d_data_velocity->getPointer(0);
+                Real* v = d_data_velocity->getPointer(1);
                 
                 // Compute the internal energy field.
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -5254,7 +5254,7 @@ FlowModelFourEqnConservative::computeCellDataOfInternalEnergyWithDensityAndVeloc
                             (j + num_subghosts_1_internal_energy)*subghostcell_dim_0_internal_energy;
                         
                         epsilon[idx_internal_energy] = E[idx]/rho[idx_density] -
-                            double(1)/double(2)*(u[idx_velocity]*u[idx_velocity] + v[idx_velocity]*v[idx_velocity]);
+                            Real(1)/Real(2)*(u[idx_velocity]*u[idx_velocity] + v[idx_velocity]*v[idx_velocity]);
                     }
                 }
             }
@@ -5296,9 +5296,9 @@ FlowModelFourEqnConservative::computeCellDataOfInternalEnergyWithDensityAndVeloc
                 const int subghostcell_dim_1_internal_energy = d_subghostcell_dims_internal_energy[1];
                 
                 // Get the pointers to the cell data of velocity.
-                double* u = d_data_velocity->getPointer(0);
-                double* v = d_data_velocity->getPointer(1);
-                double* w = d_data_velocity->getPointer(2);
+                Real* u = d_data_velocity->getPointer(0);
+                Real* v = d_data_velocity->getPointer(1);
+                Real* w = d_data_velocity->getPointer(2);
                 
                 // Compute the internal energy field.
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
@@ -5329,7 +5329,7 @@ FlowModelFourEqnConservative::computeCellDataOfInternalEnergyWithDensityAndVeloc
                                     subghostcell_dim_1_internal_energy;
                             
                             epsilon[idx_internal_energy] = E[idx]/rho[idx_density] -
-                                double(1)/double(2)*(u[idx_velocity]*u[idx_velocity] + v[idx_velocity]*v[idx_velocity] +
+                                Real(1)/Real(2)*(u[idx_velocity]*u[idx_velocity] + v[idx_velocity]*v[idx_velocity] +
                                     w[idx_velocity]*w[idx_velocity]);
                         }
                     }
@@ -5457,11 +5457,11 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
             }
             
             // Compute the partial derivatives.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_gruneisen_parameter(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_gruneisen_parameter(
+                new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_sound_speed));
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_pressure_partial_partial_densities(
-                new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_sound_speed));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_pressure_partial_partial_densities(
+                new pdat::CellData<Real>(d_interior_box, d_num_species, d_num_subghosts_sound_speed));
             
             d_equation_of_state_mixing_rules->computeGruneisenParameter(
                 data_gruneisen_parameter,
@@ -5479,12 +5479,12 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
             
             // Get the pointers to the cell data of sound speed, density, mass fractions, pressure,
             // Gruneisen parameter and partial pressure partial partial densities.
-            double* c     = d_data_sound_speed->getPointer(0);
-            double* rho   = d_data_density->getPointer(0);
-            double* p     = d_data_pressure->getPointer(0);
-            double* Gamma = data_gruneisen_parameter->getPointer(0);
-            std::vector<double*> Y;
-            std::vector<double*> Psi;
+            Real* c     = d_data_sound_speed->getPointer(0);
+            Real* rho   = d_data_density->getPointer(0);
+            Real* p     = d_data_pressure->getPointer(0);
+            Real* Gamma = data_gruneisen_parameter->getPointer(0);
+            std::vector<Real*> Y;
+            std::vector<Real*> Psi;
             Y.reserve(d_num_species);
             Psi.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
@@ -5539,7 +5539,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                     // Compute the linear index.
                     const int idx_sound_speed = i + num_subghosts_0_sound_speed;
                     
-                    c[idx_sound_speed] = sqrt(c[idx_sound_speed]);
+                    c[idx_sound_speed] = std::sqrt(c[idx_sound_speed]);
                 }
             }
             else if (d_dim == tbox::Dimension(2))
@@ -5616,7 +5616,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                         const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
                             (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
                         
-                        c[idx_sound_speed] = sqrt(c[idx_sound_speed]);
+                        c[idx_sound_speed] = std::sqrt(c[idx_sound_speed]);
                     }
                 }
             }
@@ -5724,7 +5724,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                                 (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
                                     subghostcell_dim_1_sound_speed;
                             
-                            c[idx_sound_speed] = sqrt(c[idx_sound_speed]);
+                            c[idx_sound_speed] = std::sqrt(c[idx_sound_speed]);
                         }
                     }
                 }
@@ -5839,20 +5839,20 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                 }
                 
                 // Get the pointers to the components of the convective flux in the x-direction.
-                std::vector<double*> F_x;
+                std::vector<Real*> F_x;
                 F_x.reserve(d_num_eqn);
                 for (int ei = 0; ei < d_num_eqn; ei++)
                 {
                     F_x.push_back(d_data_convective_flux_x->getPointer(ei));
                 }
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities =
                     getCellDataOfPartialDensities();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum =
                     getCellDataOfMomentum();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_total_energy =
                     getCellDataOfTotalEnergy();
                 
                 if (!d_cell_data_computed_velocity)
@@ -5866,14 +5866,14 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                 }
                 
                 // Get the pointers to the cell data of partial densities, total energy and pressure.
-                std::vector<double*> rho_Y;
+                std::vector<Real*> rho_Y;
                 rho_Y.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     rho_Y.push_back(data_partial_densities->getPointer(si));
                 }
-                double* E = data_total_energy->getPointer(0);
-                double* p = d_data_pressure->getPointer(0);
+                Real* E = data_total_energy->getPointer(0);
+                Real* p = d_data_pressure->getPointer(0);
                 
                 if (d_dim == tbox::Dimension(1))
                 {
@@ -5890,10 +5890,10 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     const int num_subghosts_0_convective_flux_x = d_num_subghosts_convective_flux_x[0];
                     
                     // Get the pointer to the cell data of momentum.
-                    double* rho_u = data_momentum->getPointer(0);
+                    Real* rho_u = data_momentum->getPointer(0);
                     
                     // Get the pointer to the cell data of velocity.
-                    double* u = d_data_velocity->getPointer(0);
+                    Real* u = d_data_velocity->getPointer(0);
                     
                     // Compute the convective flux in the x-direction.
                     for (int si = 0; si < d_num_species; si++)
@@ -5951,11 +5951,11 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     const int subghostcell_dim_0_convective_flux_x = d_subghostcell_dims_convective_flux_x[0];
                     
                     // Get the pointers to the cell data of momentum.
-                    double* rho_u = data_momentum->getPointer(0);
-                    double* rho_v = data_momentum->getPointer(1);
+                    Real* rho_u = data_momentum->getPointer(0);
+                    Real* rho_v = data_momentum->getPointer(1);
                     
                     // Get the pointer to the cell data of velocity.
-                    double* u = d_data_velocity->getPointer(0);
+                    Real* u = d_data_velocity->getPointer(0);
                     
                     // Compute the convective flux in the x-direction.
                     for (int si = 0; si < d_num_species; si++)
@@ -6041,12 +6041,12 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     
                     // Get the pointers to the cell data of momentum.
                     // Get the pointers to the cell data of momentum.
-                    double* rho_u = data_momentum->getPointer(0);
-                    double* rho_v = data_momentum->getPointer(1);
-                    double* rho_w = data_momentum->getPointer(2);
+                    Real* rho_u = data_momentum->getPointer(0);
+                    Real* rho_v = data_momentum->getPointer(1);
+                    Real* rho_w = data_momentum->getPointer(2);
                     
                     // Get the pointer to the cell data of velocity.
-                    double* u = d_data_velocity->getPointer(0);
+                    Real* u = d_data_velocity->getPointer(0);
                     
                     // Compute the convective flux in the x-direction.
                     for (int si = 0; si < d_num_species; si++)
@@ -6160,20 +6160,20 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                 }
                 
                 // Get the pointers to the components of the convective flux in the y-direction.
-                std::vector<double*> F_y;
+                std::vector<Real*> F_y;
                 F_y.reserve(d_num_eqn);
                 for (int ei = 0; ei < d_num_eqn; ei++)
                 {
                     F_y.push_back(d_data_convective_flux_y->getPointer(ei));
                 }
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities =
                     getCellDataOfPartialDensities();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum =
                     getCellDataOfMomentum();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_total_energy =
                     getCellDataOfTotalEnergy();
                 
                 if (!d_cell_data_computed_pressure)
@@ -6188,14 +6188,14 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                 
                 // Get the pointers to the cell data of partial densities, total energy, volume fraction
                 // and pressure.
-                std::vector<double*> rho_Y;
+                std::vector<Real*> rho_Y;
                 rho_Y.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     rho_Y.push_back(data_partial_densities->getPointer(si));
                 }
-                double* E = data_total_energy->getPointer(0);
-                double* p = d_data_pressure->getPointer(0);
+                Real* E = data_total_energy->getPointer(0);
+                Real* p = d_data_pressure->getPointer(0);
                 
                 if (d_dim == tbox::Dimension(1))
                 {
@@ -6233,11 +6233,11 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     const int subghostcell_dim_0_convective_flux_y = d_subghostcell_dims_convective_flux_y[0];
                     
                     // Get the pointers to the cell data of momentum.
-                    double* rho_u = data_momentum->getPointer(0);
-                    double* rho_v = data_momentum->getPointer(1);
+                    Real* rho_u = data_momentum->getPointer(0);
+                    Real* rho_v = data_momentum->getPointer(1);
                     
                     // Get the pointer to the cell data of velocity.
-                    double* v = d_data_velocity->getPointer(1);
+                    Real* v = d_data_velocity->getPointer(1);
                     
                     // Compute the convective flux in the y-direction.
                     for (int si = 0; si < d_num_species; si++)
@@ -6322,12 +6322,12 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     const int subghostcell_dim_1_convective_flux_y = d_subghostcell_dims_convective_flux_y[1];
                     
                     // Get the pointers to the cell data of momentum.
-                    double* rho_u = data_momentum->getPointer(0);
-                    double* rho_v = data_momentum->getPointer(1);
-                    double* rho_w = data_momentum->getPointer(2);
+                    Real* rho_u = data_momentum->getPointer(0);
+                    Real* rho_v = data_momentum->getPointer(1);
+                    Real* rho_w = data_momentum->getPointer(2);
                     
                     // Get the pointer to the cell data of velocity.
-                    double* v = d_data_velocity->getPointer(1);
+                    Real* v = d_data_velocity->getPointer(1);
                     
                     // Compute the convective flux in the y-direction.
                     for (int si = 0; si < d_num_species; si++)
@@ -6441,20 +6441,20 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                 }
                 
                 // Get the pointers to the components of the convective flux in the z-direction.
-                std::vector<double*> F_z;
+                std::vector<Real*> F_z;
                 F_z.reserve(d_num_eqn);
                 for (int ei = 0; ei < d_num_eqn; ei++)
                 {
                     F_z.push_back(d_data_convective_flux_z->getPointer(ei));
                 }
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities =
                     getCellDataOfPartialDensities();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum =
                     getCellDataOfMomentum();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_total_energy =
                     getCellDataOfTotalEnergy();
                 
                 if (!d_cell_data_computed_pressure)
@@ -6469,14 +6469,14 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                 
                 // Get the pointers to the cell data of partial densities, total energy, volume fraction
                 // and pressure.
-                std::vector<double*> rho_Y;
+                std::vector<Real*> rho_Y;
                 rho_Y.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     rho_Y.push_back(data_partial_densities->getPointer(si));
                 }
-                double* E = data_total_energy->getPointer(0);
-                double* p = d_data_pressure->getPointer(0);
+                Real* E = data_total_energy->getPointer(0);
+                Real* p = d_data_pressure->getPointer(0);
                 
                 if (d_dim == tbox::Dimension(1) || d_dim == tbox::Dimension(2))
                 {
@@ -6524,12 +6524,12 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     const int subghostcell_dim_1_convective_flux_z = d_subghostcell_dims_convective_flux_z[1];
                     
                     // Get the pointers to the cell data of momentum.
-                    double* rho_u = data_momentum->getPointer(0);
-                    double* rho_v = data_momentum->getPointer(1);
-                    double* rho_w = data_momentum->getPointer(2);
+                    Real* rho_u = data_momentum->getPointer(0);
+                    Real* rho_v = data_momentum->getPointer(1);
+                    Real* rho_w = data_momentum->getPointer(2);
                     
                     // Get the pointer to the cell data of velocity.
-                    double* w = d_data_velocity->getPointer(2);
+                    Real* w = d_data_velocity->getPointer(2);
                     
                     // Compute the convective flux in the z-direction.
                     for (int si = 0; si < d_num_species; si++)
@@ -6665,9 +6665,9 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                 }
                 
                 // Get the pointers to the cell data of maximum wave speed and velocity in x-direction and sound speed.
-                double* lambda_max_x = d_data_max_wave_speed_x->getPointer(0);
-                double* u            = d_data_velocity->getPointer(0);
-                double* c            = d_data_sound_speed->getPointer(0);
+                Real* lambda_max_x = d_data_max_wave_speed_x->getPointer(0);
+                Real* u            = d_data_velocity->getPointer(0);
+                Real* c            = d_data_sound_speed->getPointer(0);
                 
                 if (d_dim == tbox::Dimension(1))
                 {
@@ -6691,7 +6691,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                         const int idx_velocity = i + num_subghosts_0_velocity;
                         const int idx_max_wave_speed_x = i + num_subghosts_0_max_wave_speed_x;
                         
-                        lambda_max_x[idx_max_wave_speed_x] = fabs(u[idx_velocity]) + c[idx_sound_speed];
+                        lambda_max_x[idx_max_wave_speed_x] = std::abs(u[idx_velocity]) + c[idx_sound_speed];
                     }
                 }
                 else if (d_dim == tbox::Dimension(2))
@@ -6733,7 +6733,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                             const int idx_max_wave_speed_x = (i + num_subghosts_0_max_wave_speed_x) +
                                 (j + num_subghosts_1_max_wave_speed_x)*subghostcell_dim_0_max_wave_speed_x;
                             
-                            lambda_max_x[idx_max_wave_speed_x] = fabs(u[idx_velocity]) + c[idx_sound_speed];
+                            lambda_max_x[idx_max_wave_speed_x] = std::abs(u[idx_velocity]) + c[idx_sound_speed];
                         }
                     }
                 }
@@ -6792,7 +6792,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                                     (k + num_subghosts_2_max_wave_speed_x)*subghostcell_dim_0_max_wave_speed_x*
                                         subghostcell_dim_1_max_wave_speed_x;
                                 
-                                lambda_max_x[idx_max_wave_speed_x] = fabs(u[idx_velocity]) + c[idx_sound_speed];
+                                lambda_max_x[idx_max_wave_speed_x] = std::abs(u[idx_velocity]) + c[idx_sound_speed];
                             }
                         }
                     }
@@ -6853,9 +6853,9 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                 }
                 
                 // Get the pointers to the cell data of maximum wave speed and velocity in y-direction, and sound speed.
-                double* lambda_max_y = d_data_max_wave_speed_y->getPointer(0);
-                double* v            = d_data_velocity->getPointer(1);
-                double* c            = d_data_sound_speed->getPointer(0);
+                Real* lambda_max_y = d_data_max_wave_speed_y->getPointer(0);
+                Real* v            = d_data_velocity->getPointer(1);
+                Real* c            = d_data_sound_speed->getPointer(0);
                 
                 if (d_dim == tbox::Dimension(1))
                 {
@@ -6904,7 +6904,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                             const int idx_max_wave_speed_y = (i + num_subghosts_0_max_wave_speed_y) +
                                 (j + num_subghosts_1_max_wave_speed_y)*subghostcell_dim_0_max_wave_speed_y;
                             
-                            lambda_max_y[idx_max_wave_speed_y] = fabs(v[idx_velocity]) + c[idx_sound_speed];
+                            lambda_max_y[idx_max_wave_speed_y] = std::abs(v[idx_velocity]) + c[idx_sound_speed];
                         }
                     }
                 }
@@ -6963,7 +6963,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                                     (k + num_subghosts_2_max_wave_speed_y)*subghostcell_dim_0_max_wave_speed_y*
                                         subghostcell_dim_1_max_wave_speed_y;
                                 
-                                lambda_max_y[idx_max_wave_speed_y] = fabs(v[idx_velocity]) + c[idx_sound_speed];
+                                lambda_max_y[idx_max_wave_speed_y] = std::abs(v[idx_velocity]) + c[idx_sound_speed];
                             }
                         }
                     }
@@ -7024,9 +7024,9 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                 }
                 
                 // Get the pointers to the cell data of maximum wave speed and velocity in z-direction, and sound speed.
-                double* lambda_max_z = d_data_max_wave_speed_z->getPointer(0);
-                double* w            = d_data_velocity->getPointer(2);
-                double* c            = d_data_sound_speed->getPointer(0);
+                Real* lambda_max_z = d_data_max_wave_speed_z->getPointer(0);
+                Real* w            = d_data_velocity->getPointer(2);
+                Real* c            = d_data_sound_speed->getPointer(0);
                 
                 if (d_dim == tbox::Dimension(1) || d_dim == tbox::Dimension(2))
                 {
@@ -7091,7 +7091,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                                     (k + num_subghosts_2_max_wave_speed_z)*subghostcell_dim_0_max_wave_speed_z*
                                         subghostcell_dim_1_max_wave_speed_z;
                                 
-                                lambda_max_z[idx_max_wave_speed_z] = fabs(w[idx_velocity]) + c[idx_sound_speed];
+                                lambda_max_z[idx_max_wave_speed_z] = std::abs(w[idx_velocity]) + c[idx_sound_speed];
                             }
                         }
                     }
@@ -7188,35 +7188,35 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
              * viscosity, bulk viscosity and thermal conductivity.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_isobaric_specific_heat_capacity(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_isobaric_specific_heat_capacity(
+                new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_diffusivities(
-                new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_max_diffusivity));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_mass_diffusivities(
+                new pdat::CellData<Real>(d_interior_box, d_num_species, d_num_subghosts_max_diffusivity));
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_shear_viscosity(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_shear_viscosity(
+                new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_bulk_viscosity(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_bulk_viscosity(
+                new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_thermal_conductivity(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_thermal_conductivity(
+                new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
             
             // Get the pointers to the cell data of maximum diffusivity, density, isobaric specific heat
             // capacity, mass diffusivities, shear viscosity, bulk viscosity and thermal conductivity.
-            double* D_max = d_data_max_diffusivity->getPointer(0);
-            double* rho   = d_data_density->getPointer(0);
-            double* c_p   = data_isobaric_specific_heat_capacity->getPointer(0);
-            std::vector<double*> D;
+            Real* D_max = d_data_max_diffusivity->getPointer(0);
+            Real* rho   = d_data_density->getPointer(0);
+            Real* c_p   = data_isobaric_specific_heat_capacity->getPointer(0);
+            std::vector<Real*> D;
             D.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
                 D.push_back(data_mass_diffusivities->getPointer(si));
             }
-            double* mu    = data_shear_viscosity->getPointer(0);
-            double* mu_v  = data_bulk_viscosity->getPointer(0);
-            double* kappa = data_thermal_conductivity->getPointer(0);
+            Real* mu    = data_shear_viscosity->getPointer(0);
+            Real* mu_v  = data_bulk_viscosity->getPointer(0);
+            Real* kappa = data_thermal_conductivity->getPointer(0);
             
             // Compute the isobaric specific heat capacity field.
             d_equation_of_state_mixing_rules->computeIsobaricSpecificHeatCapacity(
@@ -7277,10 +7277,10 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
                     const int idx_max_diffusivity = i + num_subghosts_0_max_diffusivity;
                     const int idx_density = i + num_subghosts_0_density;
                     
-                    D_max[idx_max_diffusivity] = fmax(mu[idx_max_diffusivity]/rho[idx_density],
+                    D_max[idx_max_diffusivity] = std::max(mu[idx_max_diffusivity]/rho[idx_density],
                         mu_v[idx_max_diffusivity]/rho[idx_density]);
                     
-                    D_max[idx_max_diffusivity] = fmax(D_max[idx_max_diffusivity],
+                    D_max[idx_max_diffusivity] = std::max(D_max[idx_max_diffusivity],
                         kappa[idx_max_diffusivity]/(rho[idx_density]*c_p[idx_max_diffusivity]));
                 }
                 
@@ -7292,7 +7292,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
                         // Compute the linear index.
                         const int idx_max_diffusivity = i + num_subghosts_0_max_diffusivity;
                         
-                        D_max[idx_max_diffusivity] = fmax(D_max[idx_max_diffusivity],
+                        D_max[idx_max_diffusivity] = std::max(D_max[idx_max_diffusivity],
                             D[si][idx_max_diffusivity]);
                     }
                 }
@@ -7328,10 +7328,10 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
                         const int idx_density = (i + num_subghosts_0_density) +
                             (j + num_subghosts_1_density)*subghostcell_dim_0_density;
                         
-                        D_max[idx_max_diffusivity] = fmax(mu[idx_max_diffusivity]/rho[idx_density],
+                        D_max[idx_max_diffusivity] = std::max(mu[idx_max_diffusivity]/rho[idx_density],
                             mu_v[idx_max_diffusivity]/rho[idx_density]);
                         
-                        D_max[idx_max_diffusivity] = fmax(D_max[idx_max_diffusivity],
+                        D_max[idx_max_diffusivity] = std::max(D_max[idx_max_diffusivity],
                             kappa[idx_max_diffusivity]/(rho[idx_density]*c_p[idx_max_diffusivity]));
                     }
                 }
@@ -7347,7 +7347,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
                             const int idx_max_diffusivity = (i + num_subghosts_0_max_diffusivity) +
                                 (j + num_subghosts_1_max_diffusivity)*subghostcell_dim_0_max_diffusivity;
                             
-                            D_max[idx_max_diffusivity] = fmax(D_max[idx_max_diffusivity],
+                            D_max[idx_max_diffusivity] = std::max(D_max[idx_max_diffusivity],
                                 D[si][idx_max_diffusivity]);
                         }
                     }
@@ -7396,10 +7396,10 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
                                 (k + num_subghosts_2_density)*subghostcell_dim_0_density*
                                     subghostcell_dim_1_density;
                             
-                            D_max[idx_max_diffusivity] = fmax(mu[idx_max_diffusivity]/rho[idx_density],
+                            D_max[idx_max_diffusivity] = std::max(mu[idx_max_diffusivity]/rho[idx_density],
                                 mu_v[idx_max_diffusivity]/rho[idx_density]);
                             
-                            D_max[idx_max_diffusivity] = fmax(D_max[idx_max_diffusivity],
+                            D_max[idx_max_diffusivity] = std::max(D_max[idx_max_diffusivity],
                                 kappa[idx_max_diffusivity]/(rho[idx_density]*c_p[idx_max_diffusivity]));
                         }
                     }
@@ -7420,7 +7420,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
                                     (k + num_subghosts_2_max_diffusivity)*subghostcell_dim_0_max_diffusivity*
                                         subghostcell_dim_1_max_diffusivity;
                                 
-                                D_max[idx_max_diffusivity] = fmax(D_max[idx_max_diffusivity],
+                                D_max[idx_max_diffusivity] = std::max(D_max[idx_max_diffusivity],
                                     D[si][idx_max_diffusivity]);
                             }
                         }
@@ -7481,9 +7481,9 @@ FlowModelFourEqnConservative::computeCellDataOfSpeciesDensitiesWithPressureAndTe
             
             for (int si = 0; si < d_num_species; si++)
             {
-                std::vector<double> species_thermo_properties;
-                std::vector<double*> species_thermo_properties_ptr;
-                std::vector<const double*> species_thermo_properties_const_ptr;
+                std::vector<Real> species_thermo_properties;
+                std::vector<Real*> species_thermo_properties_ptr;
+                std::vector<const Real*> species_thermo_properties_const_ptr;
                 
                 const int num_thermo_properties = d_equation_of_state_mixing_rules->
                     getNumberOfSpeciesThermodynamicProperties(si);
@@ -7564,9 +7564,9 @@ FlowModelFourEqnConservative::computeCellDataOfSpeciesEnthalpiesWithSpeciesDensi
             
             for (int si = 0; si < d_num_species; si++)
             {
-                std::vector<double> species_thermo_properties;
-                std::vector<double*> species_thermo_properties_ptr;
-                std::vector<const double*> species_thermo_properties_const_ptr;
+                std::vector<Real> species_thermo_properties;
+                std::vector<Real*> species_thermo_properties_ptr;
+                std::vector<const Real*> species_thermo_properties_const_ptr;
                 
                 const int num_thermo_properties = d_equation_of_state_mixing_rules->
                     getNumberOfSpeciesThermodynamicProperties(si);

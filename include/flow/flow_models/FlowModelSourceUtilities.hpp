@@ -78,7 +78,7 @@ class FlowModelSourceUtilities
          */
         virtual void
         computeSourceTermsOnPatch(
-            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
             const double time,
             const double dt,
             const int RK_step_number);
@@ -102,7 +102,7 @@ class FlowModelSourceUtilities
          */
         void
         computeSpecialSourceTermsOnPatch(
-            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
             const double time,
             const double dt,
             const int RK_step_number);

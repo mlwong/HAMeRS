@@ -20,26 +20,26 @@ FlowModelSubgridScaleModelFourEqnConservative::FlowModelSubgridScaleModelFourEqn
 {
     if (d_subgrid_scale_model_type == SUBGRID_SCALE_MODEL::VREMAN)
     {
-        d_constant_sgs = double(0.08);
-        d_species_Sc_t = double(0.9);
-        d_species_Pr_t = double(0.9);
+        d_constant_sgs = Real(0.08);
+        d_species_Sc_t = Real(0.9);
+        d_species_Pr_t = Real(0.9);
         
-        d_constant_sgs = subgrid_scale_model_db->getDoubleWithDefault("constant_sgs",   d_constant_sgs);
-        d_constant_sgs = subgrid_scale_model_db->getDoubleWithDefault("d_constant_sgs", d_constant_sgs);
+        d_constant_sgs = subgrid_scale_model_db->getRealWithDefault("constant_sgs",   d_constant_sgs);
+        d_constant_sgs = subgrid_scale_model_db->getRealWithDefault("d_constant_sgs", d_constant_sgs);
         
-        d_species_Sc_t = subgrid_scale_model_db->getDoubleWithDefault("species_Sc_t",   d_species_Sc_t);
-        d_species_Sc_t = subgrid_scale_model_db->getDoubleWithDefault("d_species_Sc_t", d_species_Sc_t);
+        d_species_Sc_t = subgrid_scale_model_db->getRealWithDefault("species_Sc_t",   d_species_Sc_t);
+        d_species_Sc_t = subgrid_scale_model_db->getRealWithDefault("d_species_Sc_t", d_species_Sc_t);
         
-        d_species_Pr_t = subgrid_scale_model_db->getDoubleWithDefault("species_Pr_t",   d_species_Pr_t);
-        d_species_Pr_t = subgrid_scale_model_db->getDoubleWithDefault("d_species_Pr_t", d_species_Pr_t);
+        d_species_Pr_t = subgrid_scale_model_db->getRealWithDefault("species_Pr_t",   d_species_Pr_t);
+        d_species_Pr_t = subgrid_scale_model_db->getRealWithDefault("d_species_Pr_t", d_species_Pr_t);
         
         if (subgrid_scale_model_db->keyExists("species_c_p"))
         {
-            d_species_c_p = subgrid_scale_model_db->getDouble("species_c_p");
+            d_species_c_p = subgrid_scale_model_db->getFloat("species_c_p");
         }
         else if (subgrid_scale_model_db->keyExists("d_species_c_p"))
         {
-            d_species_c_p = subgrid_scale_model_db->getDouble("d_species_c_p");
+            d_species_c_p = subgrid_scale_model_db->getFloat("d_species_c_p");
         }
         else
         {
@@ -137,8 +137,8 @@ FlowModelSubgridScaleModelFourEqnConservative::getCellDataOfVariablesForSideDeri
  */
 void
 FlowModelSubgridScaleModelFourEqnConservative::updateSideDataOfDiffusiveFluxDiffusivities(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_data_for_diffusivities,
-    const std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& var_data_for_diffusivities,
+    const std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& derivatives,
     const DIRECTION::TYPE& side_direction,
     const hier::Patch& patch)
 {
@@ -190,9 +190,9 @@ FlowModelSubgridScaleModelFourEqnConservative::updateSideDataOfDiffusiveFluxDiff
      * Get the derivatives.
      */
     
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_x = derivatives.find(DIRECTION::X_DIRECTION)->second;
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_y = derivatives.find(DIRECTION::Y_DIRECTION)->second;
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_z = derivatives.find(DIRECTION::Z_DIRECTION)->second;
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_x = derivatives.find(DIRECTION::X_DIRECTION)->second;
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_y = derivatives.find(DIRECTION::Y_DIRECTION)->second;
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_z = derivatives.find(DIRECTION::Z_DIRECTION)->second;
     
     /*
      * Get the dimension of the interior box.
@@ -282,7 +282,7 @@ FlowModelSubgridScaleModelFourEqnConservative::updateSideDataOfDiffusiveFluxDiff
     ghostcell_dims_diffus[side_normal]++;
     ghostcell_dims_der[side_normal]++;
     
-    const double delta = dx[side_normal];
+    const Real delta = Real(dx[side_normal]);
     
     domain_lo = hier::IntVector::getZero(d_dim);
     domain_dims = interior_dims;
@@ -291,28 +291,28 @@ FlowModelSubgridScaleModelFourEqnConservative::updateSideDataOfDiffusiveFluxDiff
     domain_dims[side_normal] += 1;
     domain_dims[side_normal] += 2*(num_ghosts_diffus[side_normal]);
     
-    std::vector<double*> D;
+    std::vector<Real*> D;
     D.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
         D.push_back(var_data_for_diffusivities[si]->getPointer(side_normal, 0));
     }
     
-    double* mu    = var_data_for_diffusivities[d_num_species + 0]->getPointer(side_normal, 0);
-    // double* mu_v  = var_data_for_diffusivities[d_num_species + 1]->getPointer(side_normal, 0);
-    double* kappa = var_data_for_diffusivities[d_num_species + 2]->getPointer(side_normal, 0);
+    Real* mu    = var_data_for_diffusivities[d_num_species + 0]->getPointer(side_normal, 0);
+    // Real* mu_v  = var_data_for_diffusivities[d_num_species + 1]->getPointer(side_normal, 0);
+    Real* kappa = var_data_for_diffusivities[d_num_species + 2]->getPointer(side_normal, 0);
     
-    const double* const rho = var_data_for_diffusivities[d_num_species + 3]->getPointer(side_normal, 0);
+    const Real* const rho = var_data_for_diffusivities[d_num_species + 3]->getPointer(side_normal, 0);
     
-    const double* const ddx_u = derivatives_x[0]->getPointer(side_normal, 0);
-    const double* const ddx_v = derivatives_x[1]->getPointer(side_normal, 0);
-    const double* const ddx_w = derivatives_x[2]->getPointer(side_normal, 0);
-    const double* const ddy_u = derivatives_y[0]->getPointer(side_normal, 0);
-    const double* const ddy_v = derivatives_y[1]->getPointer(side_normal, 0);
-    const double* const ddy_w = derivatives_y[2]->getPointer(side_normal, 0);
-    const double* const ddz_u = derivatives_z[0]->getPointer(side_normal, 0);
-    const double* const ddz_v = derivatives_z[1]->getPointer(side_normal, 0);
-    const double* const ddz_w = derivatives_z[2]->getPointer(side_normal, 0);
+    const Real* const ddx_u = derivatives_x[0]->getPointer(side_normal, 0);
+    const Real* const ddx_v = derivatives_x[1]->getPointer(side_normal, 0);
+    const Real* const ddx_w = derivatives_x[2]->getPointer(side_normal, 0);
+    const Real* const ddy_u = derivatives_y[0]->getPointer(side_normal, 0);
+    const Real* const ddy_v = derivatives_y[1]->getPointer(side_normal, 0);
+    const Real* const ddy_w = derivatives_y[2]->getPointer(side_normal, 0);
+    const Real* const ddz_u = derivatives_z[0]->getPointer(side_normal, 0);
+    const Real* const ddz_v = derivatives_z[1]->getPointer(side_normal, 0);
+    const Real* const ddz_w = derivatives_z[2]->getPointer(side_normal, 0);
     
     if (d_subgrid_scale_model_type == SUBGRID_SCALE_MODEL::VREMAN)
     {
@@ -380,26 +380,26 @@ FlowModelSubgridScaleModelFourEqnConservative::putToRestart(
  */
 void
 FlowModelSubgridScaleModelFourEqnConservative::updateSideDataOfDiffusiveFluxDiffusivitiesVreman(
-    std::vector<double*>& D,
-    double* mu,
-    double* kappa,
-    const double* const rho,
-    const double* const ddx_u,
-    const double* const ddx_v,
-    const double* const ddx_w,
-    const double* const ddy_u,
-    const double* const ddy_v,
-    const double* const ddy_w,
-    const double* const ddz_u,
-    const double* const ddz_v,
-    const double* const ddz_w,
+    std::vector<Real*>& D,
+    Real* mu,
+    Real* kappa,
+    const Real* const rho,
+    const Real* const ddx_u,
+    const Real* const ddx_v,
+    const Real* const ddx_w,
+    const Real* const ddy_u,
+    const Real* const ddy_v,
+    const Real* const ddy_w,
+    const Real* const ddz_u,
+    const Real* const ddz_v,
+    const Real* const ddz_w,
     const hier::IntVector& num_ghosts_diffus,
     const hier::IntVector& num_ghosts_der,
     const hier::IntVector& ghostcell_dims_diffus,
     const hier::IntVector& ghostcell_dims_der,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& delta) const
+    const Real& delta) const
 {
     /*
      * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
@@ -442,26 +442,26 @@ FlowModelSubgridScaleModelFourEqnConservative::updateSideDataOfDiffusiveFluxDiff
                     (k + num_ghosts_2_der)*ghostcell_dim_0_der*
                         ghostcell_dim_1_der;
                 
-                const double g_11 = ddx_u[idx_der]*ddx_u[idx_der] + ddx_v[idx_der]*ddx_v[idx_der] + ddx_w[idx_der]*ddx_w[idx_der];
-                const double g_12 = ddx_u[idx_der]*ddy_u[idx_der] + ddx_v[idx_der]*ddy_v[idx_der] + ddx_w[idx_der]*ddy_w[idx_der];
-                const double g_13 = ddx_u[idx_der]*ddz_u[idx_der] + ddx_v[idx_der]*ddz_v[idx_der] + ddx_w[idx_der]*ddz_w[idx_der];
-                const double g_22 = ddy_u[idx_der]*ddy_u[idx_der] + ddy_v[idx_der]*ddy_v[idx_der] + ddy_w[idx_der]*ddy_w[idx_der];
-                const double g_23 = ddy_u[idx_der]*ddz_u[idx_der] + ddy_v[idx_der]*ddz_v[idx_der] + ddy_w[idx_der]*ddz_w[idx_der];
-                const double g_33 = ddz_u[idx_der]*ddz_u[idx_der] + ddz_v[idx_der]*ddz_v[idx_der] + ddz_w[idx_der]*ddz_w[idx_der];
+                const Real g_11 = ddx_u[idx_der]*ddx_u[idx_der] + ddx_v[idx_der]*ddx_v[idx_der] + ddx_w[idx_der]*ddx_w[idx_der];
+                const Real g_12 = ddx_u[idx_der]*ddy_u[idx_der] + ddx_v[idx_der]*ddy_v[idx_der] + ddx_w[idx_der]*ddy_w[idx_der];
+                const Real g_13 = ddx_u[idx_der]*ddz_u[idx_der] + ddx_v[idx_der]*ddz_v[idx_der] + ddx_w[idx_der]*ddz_w[idx_der];
+                const Real g_22 = ddy_u[idx_der]*ddy_u[idx_der] + ddy_v[idx_der]*ddy_v[idx_der] + ddy_w[idx_der]*ddy_w[idx_der];
+                const Real g_23 = ddy_u[idx_der]*ddz_u[idx_der] + ddy_v[idx_der]*ddz_v[idx_der] + ddy_w[idx_der]*ddz_w[idx_der];
+                const Real g_33 = ddz_u[idx_der]*ddz_u[idx_der] + ddz_v[idx_der]*ddz_v[idx_der] + ddz_w[idx_der]*ddz_w[idx_der];
                 
-                double sig_D = g_11*g_22 - g_12*g_12 + g_11*g_33 - g_13*g_13 + g_22*g_33 - g_23*g_23;
-                sig_D = fmax(sig_D, double(0));
+                Real sig_D = g_11*g_22 - g_12*g_12 + g_11*g_33 - g_13*g_13 + g_22*g_33 - g_23*g_23;
+                sig_D = std::max(sig_D, Real(0));
                 sig_D /= (
                     ddx_u[idx_der]*ddx_u[idx_der] + ddy_u[idx_der]*ddy_u[idx_der] + ddz_u[idx_der]*ddz_u[idx_der] +
                     ddx_v[idx_der]*ddx_v[idx_der] + ddy_v[idx_der]*ddy_v[idx_der] + ddz_v[idx_der]*ddz_v[idx_der] +
                     ddx_w[idx_der]*ddx_w[idx_der] + ddy_w[idx_der]*ddy_w[idx_der] + ddz_w[idx_der]*ddz_w[idx_der] +
                     EPSILON);
                 
-                sig_D = d_constant_sgs*sqrt(sig_D + EPSILON);
+                sig_D = d_constant_sgs*std::sqrt(sig_D + EPSILON);
                 
-                const double mu_SGS    = sig_D*delta*delta*rho[idx_diffus];
-                const double D_SGS     = mu_SGS/(d_species_Sc_t*rho[idx_diffus]);
-                const double kappa_SGS = d_species_c_p*mu_SGS/d_species_Pr_t;
+                const Real mu_SGS    = sig_D*delta*delta*rho[idx_diffus];
+                const Real D_SGS     = mu_SGS/(d_species_Sc_t*rho[idx_diffus]);
+                const Real kappa_SGS = d_species_c_p*mu_SGS/d_species_Pr_t;
                 
                 for (int si = 0; si < d_num_species; si++)
                 {

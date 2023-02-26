@@ -64,10 +64,10 @@ void FlowModelMPIHelper::computeDerivedCellData()
 /*
  * Get the cell data of one cell variable in the registered patch.
  */
-HAMERS_SHARED_PTR<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<Real> >
 FlowModelMPIHelper::getCellData(const std::string& variable_key)
 {
-    HAMERS_SHARED_PTR<pdat::CellData<double> > cell_data;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > cell_data;
     
     if (d_use_diffusive_flux_utilities)
     {
