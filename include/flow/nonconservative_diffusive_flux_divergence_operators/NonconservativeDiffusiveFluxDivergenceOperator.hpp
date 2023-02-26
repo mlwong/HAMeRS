@@ -72,7 +72,7 @@ class NonconservativeDiffusiveFluxDivergenceOperator
         void
         computeNonconservativeDiffusiveFluxDivergenceOnPatch(
             hier::Patch& patch,
-            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_diffusive_flux_divergence,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_diffusive_flux_divergence,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double time,
             const double dt,
@@ -83,11 +83,11 @@ class NonconservativeDiffusiveFluxDivergenceOperator
          * Add derivatives to divergence.
          */
         void addDerivativeToDivergence(
-            HAMERS_SHARED_PTR<pdat::CellData<double> > & divergence,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& var_first_derivative,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& var_derivative_cross_derivative,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& diffusivities_data,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& diffusivities_first_derivative,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > & divergence,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& var_first_derivative,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& var_derivative_cross_derivative,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& diffusivities_data,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& diffusivities_first_derivative,
             const std::vector<std::vector<int> >& var_component_idx,
             const std::vector<std::vector<int> >& diffusivities_component_idx,
             const hier::Patch& patch,
@@ -97,9 +97,9 @@ class NonconservativeDiffusiveFluxDivergenceOperator
          * Compute the first derivatives in the x-direction.
          */
         virtual void computeFirstDerivativesInX(
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_x,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_x_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_x,
+            std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivative_x_computed,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_x,
             const std::vector<std::vector<int> >& data_component_idx_x,
             const hier::Patch& patch) = 0;
         
@@ -107,9 +107,9 @@ class NonconservativeDiffusiveFluxDivergenceOperator
          * Compute the first derivatives in the y-direction.
          */
         virtual void computeFirstDerivativesInY(
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_y,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_y_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_y,
+            std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivative_y_computed,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_y,
             const std::vector<std::vector<int> >& data_component_idx_y,
             const hier::Patch& patch) = 0;
         
@@ -117,9 +117,9 @@ class NonconservativeDiffusiveFluxDivergenceOperator
          * Compute the first derivatives in the z-direction.
          */
         virtual void computeFirstDerivativesInZ(
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_z,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_z_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_z,
+            std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivative_z_computed,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_z,
             const std::vector<std::vector<int> >& data_component_idx_z,
             const hier::Patch& patch) = 0;
         
@@ -127,9 +127,9 @@ class NonconservativeDiffusiveFluxDivergenceOperator
          * Compute the second derivatives in the x-direction.
          */
         virtual void computeSecondDerivativesInX(
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_x,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_x_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_x,
+            std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivative_x_computed,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_x,
             const std::vector<std::vector<int> >& data_component_idx_x,
             const hier::Patch& patch) = 0;
         
@@ -137,9 +137,9 @@ class NonconservativeDiffusiveFluxDivergenceOperator
          * Compute the second derivatives in the y-direction.
          */
         virtual void computeSecondDerivativesInY(
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_y,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_y_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_y,
+            std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivative_y_computed,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_y,
             const std::vector<std::vector<int> >& data_component_idx_y,
             const hier::Patch& patch) = 0;
         
@@ -147,9 +147,9 @@ class NonconservativeDiffusiveFluxDivergenceOperator
          * Compute the second derivatives in the z-direction.
          */
         virtual void computeSecondDerivativesInZ(
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_z,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_z_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_z,
+            std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivative_z_computed,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_z,
             const std::vector<std::vector<int> >& data_component_idx_z,
             const hier::Patch& patch) = 0;
         
