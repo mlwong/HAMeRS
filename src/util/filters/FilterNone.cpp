@@ -7,8 +7,8 @@
  */
 void
 FilterNone::applyFilter(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& filtered_cell_data,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& filtered_cell_data,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& cell_data,
     const int depth_filtered_cell_data,
     const int depth_cell_data,
     const hier::Box& domain)
@@ -95,8 +95,8 @@ FilterNone::applyFilter(
     }
     
     // Get the pointers to the depth components of the given cell data.
-    double* f_filtered = filtered_cell_data->getPointer(depth_filtered_cell_data);
-    double* f = cell_data->getPointer(depth_cell_data);
+    Real* f_filtered = filtered_cell_data->getPointer(depth_filtered_cell_data);
+    Real* f = cell_data->getPointer(depth_cell_data);
     
     if (d_direction == DIRECTION::X_DIRECTION)
     {

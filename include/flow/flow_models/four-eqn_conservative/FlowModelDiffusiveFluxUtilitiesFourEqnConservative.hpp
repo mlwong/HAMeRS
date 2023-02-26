@@ -64,13 +64,13 @@ class FlowModelDiffusiveFluxUtilitiesFourEqnConservative: public FlowModelDiffus
         /*
          * Get the cell data of one cell variable related to this class in the registered patch.
          */
-        HAMERS_SHARED_PTR<pdat::CellData<double> >
+        HAMERS_SHARED_PTR<pdat::CellData<Real> >
         getCellData(const std::string& variable_key);
         
         /*
          * Get the cell data of different cell variables related to this class in the registered patch.
          */
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
         getCellData(
             const std::vector<std::string>& variable_keys);
         
@@ -79,7 +79,7 @@ class FlowModelDiffusiveFluxUtilitiesFourEqnConservative: public FlowModelDiffus
          */
         void
         getCellDataOfDiffusiveFluxVariablesForDerivative(
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_var_data,
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_var_data,
             std::vector<std::vector<int> >& derivative_var_component_idx,
             const DIRECTION::TYPE& flux_direction,
             const DIRECTION::TYPE& derivative_direction);
@@ -89,7 +89,7 @@ class FlowModelDiffusiveFluxUtilitiesFourEqnConservative: public FlowModelDiffus
          */
         void
         getCellDataOfDiffusiveFluxDiffusivities(
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& diffusivities_data,
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& diffusivities_data,
             std::vector<std::vector<int> >& diffusivities_component_idx,
             const DIRECTION::TYPE& flux_direction,
             const DIRECTION::TYPE& derivative_direction);
@@ -100,7 +100,7 @@ class FlowModelDiffusiveFluxUtilitiesFourEqnConservative: public FlowModelDiffus
          */
         void
         getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities(
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& var_data_for_diffusivities,
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& var_data_for_diffusivities,
             std::vector<int>& var_data_for_diffusivities_component_idx);
         
         /*
@@ -108,14 +108,14 @@ class FlowModelDiffusiveFluxUtilitiesFourEqnConservative: public FlowModelDiffus
          */
         void
         computeSideDataOfDiffusiveFluxDiffusivities(
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_data_for_diffusivities);
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& var_data_for_diffusivities);
         
         /*
          * Get the side data of the diffusivities in the diffusive fluxa.
          */
         void
         getSideDataOfDiffusiveFluxDiffusivities(
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& diffusivities_data,
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& diffusivities_data,
             std::vector<std::vector<int> >& diffusivities_component_idx,
             const DIRECTION::TYPE& flux_direction,
             const DIRECTION::TYPE& derivative_direction);
@@ -190,10 +190,10 @@ class FlowModelDiffusiveFluxUtilitiesFourEqnConservative: public FlowModelDiffus
         /*
          * HAMERS_SHARED_PTR to derived cell data related to this class.
          */
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_mass_diffusivities;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_shear_viscosity;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_bulk_viscosity;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_thermal_conductivity;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_mass_diffusivities;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_shear_viscosity;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_bulk_viscosity;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_thermal_conductivity;
         
         /*
          * Whether derived cell data related to this class is computed.

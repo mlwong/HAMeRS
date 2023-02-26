@@ -27,21 +27,21 @@ class EquationOfStateStiffenedGas: public EquationOfState
         /*
          * Compute the pressure.
          */
-        double
+        Real
         getPressure(
-            const double* const density,
-            const double* const internal_energy,
-            const std::vector<const double*>& thermo_properties) const;
+            const Real* const density,
+            const Real* const internal_energy,
+            const std::vector<const Real*>& thermo_properties) const;
         
         /*
          * Compute the pressure.
          */
         void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -49,10 +49,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -61,10 +61,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -72,31 +72,31 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
         /*
          * Compute the sound speed.
          */
-        double
+        Real
         getSoundSpeed(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& thermo_properties) const;
         
         /*
          * Compute the sound speed.
          */
         void
         computeSoundSpeed(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_sound_speed,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_sound_speed,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -104,10 +104,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeSoundSpeed(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_sound_speed,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_sound_speed,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -116,10 +116,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeSoundSpeed(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_sound_speed,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_sound_speed,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -127,31 +127,31 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeSoundSpeed(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_sound_speed,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_sound_speed,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
         /*
          * Compute the specific internal energy.
          */
-        double
+        Real
         getInternalEnergy(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& thermo_properties) const;
         
         /*
          * Compute the specific internal energy.
          */
         void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -159,10 +159,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -171,10 +171,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -182,31 +182,31 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
         /*
          * Compute the specific enthalpy.
          */
-        double
+        Real
         getEnthalpy(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& thermo_properties) const;
         
         /*
          * Compute the specific enthalpy.
          */
         void
         computeEnthalpy(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_enthalpy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_enthalpy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -214,10 +214,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeEnthalpy(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_enthalpy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_enthalpy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -226,10 +226,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeEnthalpy(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_enthalpy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_enthalpy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -237,31 +237,31 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeEnthalpy(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_enthalpy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_enthalpy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
         /*
          * Compute the temperature.
          */
-        double
+        Real
         getTemperature(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& thermo_properties) const;
         
         /*
          * Compute the temperature.
          */
         void
         computeTemperature(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -269,10 +269,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeTemperature(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -281,10 +281,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeTemperature(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -292,31 +292,31 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeTemperature(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
         /*
          * Compute the specific internal energy from temperature.
          */
-        double
+        Real
         getInternalEnergyFromTemperature(
-            const double* const density,
-            const double* const temperature,
-            const std::vector<const double*>& thermo_properties) const;
+            const Real* const density,
+            const Real* const temperature,
+            const std::vector<const Real*>& thermo_properties) const;
         
         /*
          * Compute the specific internal energy from temperature.
          */
         void
         computeInternalEnergyFromTemperature(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -324,10 +324,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeInternalEnergyFromTemperature(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -336,10 +336,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeInternalEnergyFromTemperature(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -347,31 +347,31 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeInternalEnergyFromTemperature(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
         /*
          * Compute the isochoric specific heat capacity.
          */
-        double
+        Real
         getIsochoricSpecificHeatCapacity(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& thermo_properties) const;
         
         /*
          * Compute the isochoric specific heat capacity.
          */
         void
         computeIsochoricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -379,10 +379,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeIsochoricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -391,10 +391,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeIsochoricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -402,31 +402,31 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeIsochoricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
         /*
          * Compute the isobaric specific heat capacity.
          */
-        double
+        Real
         getIsobaricSpecificHeatCapacity(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& thermo_properties) const;
         
         /*
          * Compute the isobaric specific heat capacity.
          */
         void
         computeIsobaricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -434,10 +434,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeIsobaricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -446,10 +446,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeIsobaricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -457,10 +457,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeIsobaricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -468,11 +468,11 @@ class EquationOfStateStiffenedGas: public EquationOfState
          * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
          * constant density divided by density).
          */
-        double
+        Real
         getGruneisenParameter(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& thermo_properties) const;
         
         /*
          * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
@@ -480,10 +480,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -492,10 +492,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -505,10 +505,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -517,31 +517,31 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
         /*
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
-        double
+        Real
         getPressureDerivativeWithDensity(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& thermo_properties) const;
         
         /*
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
         computePressureDerivativeWithDensity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_pressure_partial_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -549,10 +549,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computePressureDerivativeWithDensity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_pressure_partial_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -561,10 +561,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computePressureDerivativeWithDensity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_pressure_partial_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -572,31 +572,31 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computePressureDerivativeWithDensity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_pressure_partial_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
         /*
          * Compute the density.
          */
-        double
+        Real
         getDensity(
-            const double* const pressure,
-            const double* const temperature,
-            const std::vector<const double*>& thermo_properties) const;
+            const Real* const pressure,
+            const Real* const temperature,
+            const std::vector<const Real*>& thermo_properties) const;
         
         /*
          * Compute the density.
          */
         void
         computeDensity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -604,10 +604,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeDensity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -616,10 +616,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeDensity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const;
         
         /*
@@ -627,10 +627,10 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeDensity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -640,11 +640,11 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computePressure(
-            double* const p,
-            const double* const rho,
-            const double* const epsilon,
-            const double& gamma,
-            const double& p_inf,
+            Real* const p,
+            const Real* const rho,
+            const Real* const epsilon,
+            const Real& gamma,
+            const Real& p_inf,
             const hier::IntVector& offset_pressure,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_internal_energy,
@@ -659,11 +659,11 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computePressure(
-            double* const p,
-            const double* const rho,
-            const double* const epsilon,
-            const double* const gamma,
-            const double* const p_inf,
+            Real* const p,
+            const Real* const rho,
+            const Real* const epsilon,
+            const Real* const gamma,
+            const Real* const p_inf,
             const hier::IntVector& offset_pressure,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_internal_energy,
@@ -680,11 +680,11 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeSoundSpeed(
-            double* const c,
-            const double* const rho,
-            const double* const p,
-            const double& gamma,
-            const double& p_inf,
+            Real* const c,
+            const Real* const rho,
+            const Real* const p,
+            const Real& gamma,
+            const Real& p_inf,
             const hier::IntVector& offset_sound_speed,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
@@ -699,11 +699,11 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeSoundSpeed(
-            double* const c,
-            const double* const rho,
-            const double* const p,
-            const double* const gamma,
-            const double* const p_inf,
+            Real* const c,
+            const Real* const rho,
+            const Real* const p,
+            const Real* const gamma,
+            const Real* const p_inf,
             const hier::IntVector& offset_sound_speed,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
@@ -720,11 +720,11 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeInternalEnergy(
-            double* const epsilon,
-            const double* const rho,
-            const double* const p,
-            const double& gamma,
-            const double& p_inf,
+            Real* const epsilon,
+            const Real* const rho,
+            const Real* const p,
+            const Real& gamma,
+            const Real& p_inf,
             const hier::IntVector& offset_internal_energy,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
@@ -739,11 +739,11 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeInternalEnergy(
-            double* const epsilon,
-            const double* const rho,
-            const double* const p,
-            const double* const gamma,
-            const double* const p_inf,
+            Real* const epsilon,
+            const Real* const rho,
+            const Real* const p,
+            const Real* const gamma,
+            const Real* const p_inf,
             const hier::IntVector& offset_internal_energy,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
@@ -760,11 +760,11 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeEnthalpy(
-            double* const h,
-            const double* const rho,
-            const double* const p,
-            const double& gamma,
-            const double& p_inf,
+            Real* const h,
+            const Real* const rho,
+            const Real* const p,
+            const Real& gamma,
+            const Real& p_inf,
             const hier::IntVector& offset_enthalpy,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
@@ -779,11 +779,11 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeEnthalpy(
-            double* const h,
-            const double* const rho,
-            const double* const p,
-            const double* const gamma,
-            const double* const p_inf,
+            Real* const h,
+            const Real* const rho,
+            const Real* const p,
+            const Real* const gamma,
+            const Real* const p_inf,
             const hier::IntVector& offset_enthalpy,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
@@ -800,12 +800,12 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeTemperature(
-            double* const T,
-            const double* const rho,
-            const double* const p,
-            const double& gamma,
-            const double& p_inf,
-            const double& c_v,
+            Real* const T,
+            const Real* const rho,
+            const Real* const p,
+            const Real& gamma,
+            const Real& p_inf,
+            const Real& c_v,
             const hier::IntVector& offset_temperature,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
@@ -820,12 +820,12 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeTemperature(
-            double* const T,
-            const double* const rho,
-            const double* const p,
-            const double* const gamma,
-            const double* const p_inf,
-            const double* const c_v,
+            Real* const T,
+            const Real* const rho,
+            const Real* const p,
+            const Real* const gamma,
+            const Real* const p_inf,
+            const Real* const c_v,
             const hier::IntVector& offset_temperature,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
@@ -842,11 +842,11 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeInternalEnergyFromTemperature(
-            double* const epsilon,
-            const double* const rho,
-            const double* const T,
-            const double& p_inf,
-            const double& c_v,
+            Real* const epsilon,
+            const Real* const rho,
+            const Real* const T,
+            const Real& p_inf,
+            const Real& c_v,
             const hier::IntVector& offset_internal_energy,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_temperature,
@@ -861,11 +861,11 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeInternalEnergyFromTemperature(
-            double* const epsilon,
-            const double* const rho,
-            const double* const T,
-            const double* const p_inf,
-            const double* const c_v,
+            Real* const epsilon,
+            const Real* const rho,
+            const Real* const T,
+            const Real* const p_inf,
+            const Real* const c_v,
             const hier::IntVector& offset_internal_energy,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_temperature,
@@ -882,8 +882,8 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeIsochoricSpecificHeatCapacity(
-            double* const c_v,
-            const double& c_v_src,
+            Real* const c_v,
+            const Real& c_v_src,
             const hier::IntVector& offset_isochoric_specific_heat_capacity,
             const hier::IntVector& ghostcell_dims_isochoric_specific_heat_capacity,
             const hier::IntVector& domain_lo,
@@ -894,8 +894,8 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeIsochoricSpecificHeatCapacity(
-            double* const c_v,
-            const double* const c_v_src,
+            Real* const c_v,
+            const Real* const c_v_src,
             const hier::IntVector& offset_isochoric_specific_heat_capacity,
             const hier::IntVector& offset_thermo_properties,
             const hier::IntVector& ghostcell_dims_isochoric_specific_heat_capacity,
@@ -908,8 +908,8 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeIsobaricSpecificHeatCapacity(
-            double* const c_p,
-            const double& c_p_src,
+            Real* const c_p,
+            const Real& c_p_src,
             const hier::IntVector& offset_isobaric_specific_heat_capacity,
             const hier::IntVector& ghostcell_dims_isobaric_specific_heat_capacity,
             const hier::IntVector& domain_lo,
@@ -920,8 +920,8 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeIsobaricSpecificHeatCapacity(
-            double* const c_p,
-            const double* const c_p_src,
+            Real* const c_p,
+            const Real* const c_p_src,
             const hier::IntVector& offset_isobaric_specific_heat_capacity,
             const hier::IntVector& offset_thermo_properties,
             const hier::IntVector& ghostcell_dims_isobaric_specific_heat_capacity,
@@ -935,8 +935,8 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeGruneisenParameter(
-            double* const Gamma,
-            const double& gamma,
+            Real* const Gamma,
+            const Real& gamma,
             const hier::IntVector& offset_gruneisen_parameter,
             const hier::IntVector& ghostcell_dims_gruneisen_parameter,
             const hier::IntVector& domain_lo,
@@ -948,8 +948,8 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeGruneisenParameter(
-            double* const Gamma,
-            const double* const gamma,
+            Real* const Gamma,
+            const Real* const gamma,
             const hier::IntVector& offset_gruneisen_parameter,
             const hier::IntVector& offset_thermo_properties,
             const hier::IntVector& ghostcell_dims_gruneisen_parameter,
@@ -962,11 +962,11 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computePressureDerivativeWithDensity(
-            double* const Psi,
-            const double* const rho,
-            const double* const p,
-            const double& gamma,
-            const double& p_inf,
+            Real* const Psi,
+            const Real* const rho,
+            const Real* const p,
+            const Real& gamma,
+            const Real& p_inf,
             const hier::IntVector& offset_partial_pressure_partial_density,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
@@ -981,11 +981,11 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computePressureDerivativeWithDensity(
-            double* const Psi,
-            const double* const rho,
-            const double* const p,
-            const double* const gamma,
-            const double* const p_inf,
+            Real* const Psi,
+            const Real* const rho,
+            const Real* const p,
+            const Real* const gamma,
+            const Real* const p_inf,
             const hier::IntVector& offset_partial_pressure_partial_density,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
@@ -1002,12 +1002,12 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeDensity(
-            double* const rho,
-            const double* const p,
-            const double* const T,
-            const double& gamma,
-            const double& p_inf,
-            const double& c_v,
+            Real* const rho,
+            const Real* const p,
+            const Real* const T,
+            const Real& gamma,
+            const Real& p_inf,
+            const Real& c_v,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
             const hier::IntVector& offset_temperature,
@@ -1022,12 +1022,12 @@ class EquationOfStateStiffenedGas: public EquationOfState
          */
         void
         computeDensity(
-            double* const rho,
-            const double* const p,
-            const double* const T,
-            const double* const gamma,
-            const double* const p_inf,
-            const double* const c_v,
+            Real* const rho,
+            const Real* const p,
+            const Real* const T,
+            const Real* const gamma,
+            const Real* const p_inf,
+            const Real* const c_v,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
             const hier::IntVector& offset_temperature,

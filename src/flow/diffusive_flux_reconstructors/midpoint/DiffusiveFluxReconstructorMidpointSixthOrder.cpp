@@ -67,19 +67,19 @@ DiffusiveFluxReconstructorMidpointSixthOrder::putToRestart(
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpointX(
-    double* dudx,
-    const double* const u,
+    Real* dudx,
+    const Real* const u,
     const hier::IntVector& num_ghosts_derivative_midpoint,
     const hier::IntVector& num_ghosts_data_node,
     const hier::IntVector& ghostcell_dims_derivative_midpoint,
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_0_inv) const
+    const Real& dx_0_inv) const
 {
-    const double a_n =  double(75)/double(64);
-    const double b_n = -double(25)/double(384);
-    const double c_n =  double(3)/double(640);
+    const Real a_n =  Real(75)/Real(64);
+    const Real b_n = -Real(25)/Real(384);
+    const Real c_n =  Real(3)/Real(640);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -250,19 +250,19 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtMidpoi
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpointY(
-    double* dudy,
-    const double* const u,
+    Real* dudy,
+    const Real* const u,
     const hier::IntVector& num_ghosts_derivative_midpoint,
     const hier::IntVector& num_ghosts_data_node,
     const hier::IntVector& ghostcell_dims_derivative_midpoint,
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_1_inv) const
+    const Real& dx_1_inv) const
 {
-    const double a_n =  double(75)/double(64);
-    const double b_n = -double(25)/double(384);
-    const double c_n =  double(3)/double(640);
+    const Real a_n =  Real(75)/Real(64);
+    const Real b_n = -Real(25)/Real(384);
+    const Real c_n =  Real(3)/Real(640);
     
     if (d_dim == tbox::Dimension(2))
     {
@@ -401,19 +401,19 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtMidpoi
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpointZ(
-    double* dudz,
-    const double* const u,
+    Real* dudz,
+    const Real* const u,
     const hier::IntVector& num_ghosts_derivative_midpoint,
     const hier::IntVector& num_ghosts_data_node,
     const hier::IntVector& ghostcell_dims_derivative_midpoint,
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_2_inv) const
+    const Real& dx_2_inv) const
 {
-    const double a_n =  double(75)/double(64);
-    const double b_n = -double(25)/double(384);
-    const double c_n =  double(3)/double(640);
+    const Real a_n =  Real(75)/Real(64);
+    const Real b_n = -Real(25)/Real(384);
+    const Real c_n =  Real(3)/Real(640);
     
     /*
      * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
@@ -496,19 +496,19 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtMidpoi
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
-    double* dudx,
-    const double* const u,
+    Real* dudx,
+    const Real* const u,
     const hier::IntVector& num_ghosts_derivative_node,
     const hier::IntVector& num_ghosts_data_node,
     const hier::IntVector& ghostcell_dims_derivative_node,
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_0_inv) const
+    const Real& dx_0_inv) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const Real a_n =  Real(3)/Real(4);
+    const Real b_n = -Real(3)/Real(20);
+    const Real c_n =  Real(1)/Real(60);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -680,19 +680,19 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInXAtNode(
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
-    double* dudy,
-    const double* const u,
+    Real* dudy,
+    const Real* const u,
     const hier::IntVector& num_ghosts_derivative_node,
     const hier::IntVector& num_ghosts_data_node,
     const hier::IntVector& ghostcell_dims_derivative_node,
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_1_inv) const
+    const Real& dx_1_inv) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const Real a_n =  Real(3)/Real(4);
+    const Real b_n = -Real(3)/Real(20);
+    const Real c_n =  Real(1)/Real(60);
     
     if (d_dim == tbox::Dimension(2))
     {
@@ -831,19 +831,19 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInYAtNode(
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
-    double* dudz,
-    const double* const u,
+    Real* dudz,
+    const Real* const u,
     const hier::IntVector& num_ghosts_derivative_node,
     const hier::IntVector& num_ghosts_data_node,
     const hier::IntVector& ghostcell_dims_derivative_node,
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_2_inv) const
+    const Real& dx_2_inv) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const Real a_n =  Real(3)/Real(4);
+    const Real b_n = -Real(3)/Real(20);
+    const Real c_n =  Real(1)/Real(60);
     
     /*
      * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
@@ -926,8 +926,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::computeFirstDerivativesInZAtNode(
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointX(
-    double* u_midpoint_x,
-    const double* const u_node,
+    Real* u_midpoint_x,
+    const Real* const u_node,
     const hier::IntVector& num_ghosts_data_midpoint,
     const hier::IntVector& num_ghosts_data_node,
     const hier::IntVector& ghostcell_dims_data_midpoint,
@@ -935,9 +935,9 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointX
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims) const
 {
-    const double a_n =  double(75)/double(128);
-    const double b_n = -double(25)/double(256);
-    const double c_n =  double(3)/double(256);
+    const Real a_n =  Real(75)/Real(128);
+    const Real b_n = -Real(25)/Real(256);
+    const Real c_n =  Real(3)/Real(256);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -1108,8 +1108,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointX
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointY(
-    double* u_midpoint_y,
-    const double* const u_node,
+    Real* u_midpoint_y,
+    const Real* const u_node,
     const hier::IntVector& num_ghosts_data_midpoint,
     const hier::IntVector& num_ghosts_data_node,
     const hier::IntVector& ghostcell_dims_data_midpoint,
@@ -1117,9 +1117,9 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointY
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims) const
 {
-    const double a_n =  double(75)/double(128);
-    const double b_n = -double(25)/double(256);
-    const double c_n =  double(3)/double(256);
+    const Real a_n =  Real(75)/Real(128);
+    const Real b_n = -Real(25)/Real(256);
+    const Real c_n =  Real(3)/Real(256);
     
     if (d_dim == tbox::Dimension(2))
     {
@@ -1258,8 +1258,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointY
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointZ(
-    double* u_midpoint_z,
-    const double* const u_node,
+    Real* u_midpoint_z,
+    const Real* const u_node,
     const hier::IntVector& num_ghosts_data_midpoint,
     const hier::IntVector& num_ghosts_data_node,
     const hier::IntVector& ghostcell_dims_data_midpoint,
@@ -1267,9 +1267,9 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointZ
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims) const
 {
-    const double a_n =  double(75)/double(128);
-    const double b_n = -double(25)/double(256);
-    const double c_n =  double(3)/double(256);
+    const Real a_n =  Real(75)/Real(128);
+    const Real b_n = -Real(25)/Real(256);
+    const Real c_n =  Real(3)/Real(256);
     
     /*
      * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
@@ -1352,8 +1352,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::interpolateDataFromNodeToMidpointZ
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxX(
-    double* F_face_x,
-    const double* const F_midpoint_x,
+    Real* F_face_x,
+    const Real* const F_midpoint_x,
     const hier::IntVector& num_ghosts_flux_midpoint,
     const hier::IntVector& ghostcell_dims_flux_midpoint,
     const hier::IntVector& domain_lo,
@@ -1361,13 +1361,13 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxX(
     const hier::IntVector& interior_dims,
     const double& dt) const
 {
-    const double a_m =  double(75)/double(64);
-    const double b_m = -double(25)/double(384);
-    const double c_m =  double(3)/double(640);
+    const Real a_m =  Real(75)/Real(64);
+    const Real b_m = -Real(25)/Real(384);
+    const Real c_m =  Real(3)/Real(640);
     
-    const double a_r = a_m + b_m + c_m;
-    const double b_r = b_m + c_m;
-    const double c_r = c_m;
+    const Real a_r = a_m + b_m + c_m;
+    const Real b_r = b_m + c_m;
+    const Real c_r = c_m;
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -1392,7 +1392,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxX(
             const int idx_midpoint_R  = i + 1 + num_ghosts_0_flux_midpoint;
             const int idx_midpoint_RR = i + 2 + num_ghosts_0_flux_midpoint;
             
-            F_face_x[idx_face_x] += dt*(
+            F_face_x[idx_face_x] += Real(dt)*(
                 a_r*(F_midpoint_x[idx_midpoint]) +
                 b_r*(F_midpoint_x[idx_midpoint_L]  + F_midpoint_x[idx_midpoint_R]) +
                 c_r*(F_midpoint_x[idx_midpoint_LL] + F_midpoint_x[idx_midpoint_RR])
@@ -1440,7 +1440,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxX(
                 const int idx_midpoint_RR = (i + 2 + num_ghosts_0_flux_midpoint) +
                     (j + num_ghosts_1_flux_midpoint)*(ghostcell_dim_0_flux_midpoint + 1);
                 
-                F_face_x[idx_face_x] += dt*(
+                F_face_x[idx_face_x] += Real(dt)*(
                     a_r*(F_midpoint_x[idx_midpoint]) +
                     b_r*(F_midpoint_x[idx_midpoint_L]  + F_midpoint_x[idx_midpoint_R]) +
                     c_r*(F_midpoint_x[idx_midpoint_LL] + F_midpoint_x[idx_midpoint_RR])
@@ -1507,7 +1507,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxX(
                         (k + num_ghosts_2_flux_midpoint)*(ghostcell_dim_0_flux_midpoint + 1)*
                             ghostcell_dim_1_flux_midpoint;
                     
-                    F_face_x[idx_face_x] += dt*(
+                    F_face_x[idx_face_x] += Real(dt)*(
                         a_r*(F_midpoint_x[idx_midpoint]) +
                         b_r*(F_midpoint_x[idx_midpoint_L]  + F_midpoint_x[idx_midpoint_R]) +
                         c_r*(F_midpoint_x[idx_midpoint_LL] + F_midpoint_x[idx_midpoint_RR])
@@ -1524,8 +1524,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxX(
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxY(
-    double* F_face_y,
-    const double* const F_midpoint_y,
+    Real* F_face_y,
+    const Real* const F_midpoint_y,
     const hier::IntVector& num_ghosts_flux_midpoint,
     const hier::IntVector& ghostcell_dims_flux_midpoint,
     const hier::IntVector& domain_lo,
@@ -1533,13 +1533,13 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxY(
     const hier::IntVector& interior_dims,
     const double& dt) const
 {
-    const double a_m =  double(75)/double(64);
-    const double b_m = -double(25)/double(384);
-    const double c_m =  double(3)/double(640);
+    const Real a_m =  Real(75)/Real(64);
+    const Real b_m = -Real(25)/Real(384);
+    const Real c_m =  Real(3)/Real(640);
     
-    const double a_r = a_m + b_m + c_m;
-    const double b_r = b_m + c_m;
-    const double c_r = c_m;
+    const Real a_r = a_m + b_m + c_m;
+    const Real b_r = b_m + c_m;
+    const Real c_r = c_m;
     
     if (d_dim == tbox::Dimension(2))
     {
@@ -1582,7 +1582,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxY(
                 const int idx_midpoint_TT = (i + num_ghosts_0_flux_midpoint) +
                     (j + 2 + num_ghosts_1_flux_midpoint)*ghostcell_dim_0_flux_midpoint;
                 
-                F_face_y[idx_face_y] += dt*(
+                F_face_y[idx_face_y] += Real(dt)*(
                     a_r*(F_midpoint_y[idx_midpoint]) +
                     b_r*(F_midpoint_y[idx_midpoint_B]  + F_midpoint_y[idx_midpoint_T]) +
                     c_r*(F_midpoint_y[idx_midpoint_BB] + F_midpoint_y[idx_midpoint_TT])
@@ -1649,7 +1649,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxY(
                         (k + num_ghosts_2_flux_midpoint)*ghostcell_dim_0_flux_midpoint*
                             (ghostcell_dim_1_flux_midpoint + 1);
                     
-                    F_face_y[idx_face_y] += dt*(
+                    F_face_y[idx_face_y] += Real(dt)*(
                         a_r*(F_midpoint_y[idx_midpoint]) +
                         b_r*(F_midpoint_y[idx_midpoint_B]  + F_midpoint_y[idx_midpoint_T]) +
                         c_r*(F_midpoint_y[idx_midpoint_BB] + F_midpoint_y[idx_midpoint_TT])
@@ -1666,8 +1666,8 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxY(
  */
 void
 DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxZ(
-    double* F_face_z,
-    const double* const F_midpoint_z,
+    Real* F_face_z,
+    const Real* const F_midpoint_z,
     const hier::IntVector& num_ghosts_flux_midpoint,
     const hier::IntVector& ghostcell_dims_flux_midpoint,
     const hier::IntVector& domain_lo,
@@ -1675,13 +1675,13 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxZ(
     const hier::IntVector& interior_dims,
     const double& dt) const
 {
-    const double a_m =  double(75)/double(64);
-    const double b_m = -double(25)/double(384);
-    const double c_m =  double(3)/double(640);
+    const Real a_m =  Real(75)/Real(64);
+    const Real b_m = -Real(25)/Real(384);
+    const Real c_m =  Real(3)/Real(640);
     
-    const double a_r = a_m + b_m + c_m;
-    const double b_r = b_m + c_m;
-    const double c_r = c_m;
+    const Real a_r = a_m + b_m + c_m;
+    const Real b_r = b_m + c_m;
+    const Real c_r = c_m;
     
     /*
      * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
@@ -1740,7 +1740,7 @@ DiffusiveFluxReconstructorMidpointSixthOrder::reconstructFluxZ(
                     (k + 2 + num_ghosts_2_flux_midpoint)*ghostcell_dim_0_flux_midpoint*
                         ghostcell_dim_1_flux_midpoint;
                 
-                F_face_z[idx_face_z] += dt*(
+                F_face_z[idx_face_z] += Real(dt)*(
                     a_r*(F_midpoint_z[idx_midpoint]) +
                     b_r*(F_midpoint_z[idx_midpoint_B]  + F_midpoint_z[idx_midpoint_F]) +
                     c_r*(F_midpoint_z[idx_midpoint_BB] + F_midpoint_z[idx_midpoint_FF])

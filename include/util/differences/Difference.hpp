@@ -41,8 +41,8 @@ class Difference
          */
         virtual void
         computeDifference(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& difference,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& difference,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& cell_data,
             const int depth = 0) = 0;
         
         /*
@@ -50,8 +50,8 @@ class Difference
          */
         virtual void
         computeDifference(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& difference,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& difference,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& cell_data,
             const hier::Box& domain,
             const int depth = 0) = 0;
         
@@ -60,9 +60,9 @@ class Difference
          */
         virtual void
         computeDifferenceWithVariableLocalMean(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& difference,
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& variable_local_mean,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& difference,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& variable_local_mean,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& cell_data,
             const int depth = 0) = 0;
         
         /*
@@ -70,9 +70,9 @@ class Difference
          */
         virtual void
         computeDifferenceWithVariableLocalMean(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& difference,
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& variable_local_mean,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& difference,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& variable_local_mean,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& cell_data,
             const hier::Box& domain,
             const int depth = 0) = 0;
         

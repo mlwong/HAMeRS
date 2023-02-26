@@ -25,22 +25,22 @@ EquationOfStateIdealGas::printClassData(
 /*
  * Compute the pressure.
  */
-double
+Real
 EquationOfStateIdealGas::getPressure(
-    const double* const density,
-    const double* const internal_energy,
-    const std::vector<const double*>& thermo_properties) const
+    const Real* const density,
+    const Real* const internal_energy,
+    const std::vector<const Real*>& thermo_properties) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
-    const double& gamma = *(thermo_properties[0]);
+    const Real& gamma = *(thermo_properties[0]);
     
-    const double& rho = *density;
-    const double& epsilon = *internal_energy;
+    const Real& rho = *density;
+    const Real& epsilon = *internal_energy;
     
-    return (gamma - double(1))*rho*epsilon; // Return p.
+    return (gamma - Real(1))*rho*epsilon; // Return p.
 }
 
 
@@ -49,10 +49,10 @@ EquationOfStateIdealGas::getPressure(
  */
 void
 EquationOfStateIdealGas::computePressure(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+    const std::vector<const Real*>& thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -136,11 +136,11 @@ EquationOfStateIdealGas::computePressure(
      * Get the pointers to the cell data.
      */
     
-    double* const p = data_pressure->getPointer(0);
-    const double* const rho = data_density->getPointer(0);
-    const double* const epsilon = data_internal_energy->getPointer(0);
+    Real* const p = data_pressure->getPointer(0);
+    const Real* const rho = data_density->getPointer(0);
+    const Real* const epsilon = data_internal_energy->getPointer(0);
     
-    const double& gamma = *(thermo_properties[0]);
+    const Real& gamma = *(thermo_properties[0]);
     
     computePressure(
         p,
@@ -163,10 +163,10 @@ EquationOfStateIdealGas::computePressure(
  */
 void
 EquationOfStateIdealGas::computePressure(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+    const std::vector<const Real*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -264,11 +264,11 @@ EquationOfStateIdealGas::computePressure(
      * Get the pointers to the cell data.
      */
     
-    double* const p = data_pressure->getPointer(side_normal, 0);
-    const double* const rho = data_density->getPointer(side_normal, 0);
-    const double* const epsilon = data_internal_energy->getPointer(side_normal, 0);
+    Real* const p = data_pressure->getPointer(side_normal, 0);
+    const Real* const rho = data_density->getPointer(side_normal, 0);
+    const Real* const epsilon = data_internal_energy->getPointer(side_normal, 0);
     
-    const double& gamma = *(thermo_properties[0]);
+    const Real& gamma = *(thermo_properties[0]);
     
     computePressure(
         p,
@@ -291,10 +291,10 @@ EquationOfStateIdealGas::computePressure(
  */
 void
 EquationOfStateIdealGas::computePressure(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -389,10 +389,10 @@ EquationOfStateIdealGas::computePressure(
      * Get the pointers to the cell data.
      */
     
-    double* p = data_pressure->getPointer(0);
-    const double* const rho = data_density->getPointer(0);
-    const double* const epsilon = data_internal_energy->getPointer(0);
-    const double* const gamma = data_thermo_properties->getPointer(0);
+    Real* p = data_pressure->getPointer(0);
+    const Real* const rho = data_density->getPointer(0);
+    const Real* const epsilon = data_internal_energy->getPointer(0);
+    const Real* const gamma = data_thermo_properties->getPointer(0);
     
     computePressure(
         p,
@@ -417,10 +417,10 @@ EquationOfStateIdealGas::computePressure(
  */
 void
 EquationOfStateIdealGas::computePressure(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -531,10 +531,10 @@ EquationOfStateIdealGas::computePressure(
      * Get the pointers to the cell data.
      */
     
-    double* p = data_pressure->getPointer(side_normal, 0);
-    const double* const rho = data_density->getPointer(side_normal, 0);
-    const double* const epsilon = data_internal_energy->getPointer(side_normal, 0);
-    const double* const gamma = data_thermo_properties->getPointer(side_normal, 0);
+    Real* p = data_pressure->getPointer(side_normal, 0);
+    const Real* const rho = data_density->getPointer(side_normal, 0);
+    const Real* const epsilon = data_internal_energy->getPointer(side_normal, 0);
+    const Real* const gamma = data_thermo_properties->getPointer(side_normal, 0);
     
     computePressure(
         p,
@@ -557,22 +557,22 @@ EquationOfStateIdealGas::computePressure(
 /*
  * Compute the sound speed.
  */
-double
+Real
 EquationOfStateIdealGas::getSoundSpeed(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& thermo_properties) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& thermo_properties) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
-    const double& gamma = *(thermo_properties[0]);
+    const Real& gamma = *(thermo_properties[0]);
     
-    const double& rho = *density;
-    const double& p = *pressure;
+    const Real& rho = *density;
+    const Real& p = *pressure;
     
-    return sqrt(gamma*p/rho); // Return c.
+    return std::sqrt(gamma*p/rho); // Return c.
 }
 
 
@@ -581,10 +581,10 @@ EquationOfStateIdealGas::getSoundSpeed(
  */
 void
 EquationOfStateIdealGas::computeSoundSpeed(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_sound_speed,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_sound_speed,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const std::vector<const Real*>& thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -668,11 +668,11 @@ EquationOfStateIdealGas::computeSoundSpeed(
      * Get the pointers to the cell data.
      */
     
-    double* const c = data_sound_speed->getPointer(0);
-    const double* const rho = data_density->getPointer(0);
-    const double* const p = data_pressure->getPointer(0);
+    Real* const c = data_sound_speed->getPointer(0);
+    const Real* const rho = data_density->getPointer(0);
+    const Real* const p = data_pressure->getPointer(0);
     
-    const double& gamma = *(thermo_properties[0]);
+    const Real& gamma = *(thermo_properties[0]);
     
     computeSoundSpeed(
         c,
@@ -695,10 +695,10 @@ EquationOfStateIdealGas::computeSoundSpeed(
  */
 void
 EquationOfStateIdealGas::computeSoundSpeed(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_sound_speed,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_sound_speed,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const std::vector<const Real*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -796,11 +796,11 @@ EquationOfStateIdealGas::computeSoundSpeed(
      * Get the pointers to the cell data.
      */
     
-    double* const c = data_sound_speed->getPointer(side_normal, 0);
-    const double* const rho = data_density->getPointer(side_normal, 0);
-    const double* const p = data_pressure->getPointer(side_normal, 0);
+    Real* const c = data_sound_speed->getPointer(side_normal, 0);
+    const Real* const rho = data_density->getPointer(side_normal, 0);
+    const Real* const p = data_pressure->getPointer(side_normal, 0);
     
-    const double& gamma = *(thermo_properties[0]);
+    const Real& gamma = *(thermo_properties[0]);
     
     computeSoundSpeed(
         c,
@@ -823,10 +823,10 @@ EquationOfStateIdealGas::computeSoundSpeed(
  */
 void
 EquationOfStateIdealGas::computeSoundSpeed(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_sound_speed,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_sound_speed,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -921,10 +921,10 @@ EquationOfStateIdealGas::computeSoundSpeed(
      * Get the pointers to the cell data.
      */
     
-    double* const c = data_sound_speed->getPointer(0);
-    const double* const rho = data_density->getPointer(0);
-    const double* const p = data_pressure->getPointer(0);
-    const double* const gamma = data_thermo_properties->getPointer(0);
+    Real* const c = data_sound_speed->getPointer(0);
+    const Real* const rho = data_density->getPointer(0);
+    const Real* const p = data_pressure->getPointer(0);
+    const Real* const gamma = data_thermo_properties->getPointer(0);
     
     computeSoundSpeed(
         c,
@@ -949,10 +949,10 @@ EquationOfStateIdealGas::computeSoundSpeed(
  */
 void
 EquationOfStateIdealGas::computeSoundSpeed(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_sound_speed,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_sound_speed,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -1063,10 +1063,10 @@ EquationOfStateIdealGas::computeSoundSpeed(
      * Get the pointers to the cell data.
      */
     
-    double* const c = data_sound_speed->getPointer(side_normal, 0);
-    const double* const rho = data_density->getPointer(side_normal, 0);
-    const double* const p = data_pressure->getPointer(side_normal, 0);
-    const double* const gamma = data_thermo_properties->getPointer(side_normal, 0);
+    Real* const c = data_sound_speed->getPointer(side_normal, 0);
+    const Real* const rho = data_density->getPointer(side_normal, 0);
+    const Real* const p = data_pressure->getPointer(side_normal, 0);
+    const Real* const gamma = data_thermo_properties->getPointer(side_normal, 0);
     
     computeSoundSpeed(
         c,
@@ -1089,22 +1089,22 @@ EquationOfStateIdealGas::computeSoundSpeed(
 /*
  * Compute the specific internal energy.
  */
-double
+Real
 EquationOfStateIdealGas::getInternalEnergy(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& thermo_properties) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& thermo_properties) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
-    const double& gamma = *(thermo_properties[0]);
+    const Real& gamma = *(thermo_properties[0]);
     
-    const double& rho = *density;
-    const double& p = *pressure;
+    const Real& rho = *density;
+    const Real& p = *pressure;
     
-    return p/((gamma - double(1))*rho); // Return epsilon.
+    return p/((gamma - Real(1))*rho); // Return epsilon.
 }
 
 
@@ -1113,10 +1113,10 @@ EquationOfStateIdealGas::getInternalEnergy(
  */
 void
 EquationOfStateIdealGas::computeInternalEnergy(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const std::vector<const Real*>& thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -1200,11 +1200,11 @@ EquationOfStateIdealGas::computeInternalEnergy(
      * Get the pointers to the cell data.
      */
     
-    double* const epsilon = data_internal_energy->getPointer(0);
-    const double* const rho = data_density->getPointer(0);
-    const double* const p = data_pressure->getPointer(0);
+    Real* const epsilon = data_internal_energy->getPointer(0);
+    const Real* const rho = data_density->getPointer(0);
+    const Real* const p = data_pressure->getPointer(0);
     
-    const double& gamma = *(thermo_properties[0]);
+    const Real& gamma = *(thermo_properties[0]);
     
     computeInternalEnergy(
         epsilon,
@@ -1227,10 +1227,10 @@ EquationOfStateIdealGas::computeInternalEnergy(
  */
 void
 EquationOfStateIdealGas::computeInternalEnergy(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const std::vector<const Real*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -1328,11 +1328,11 @@ EquationOfStateIdealGas::computeInternalEnergy(
      * Get the pointers to the cell data.
      */
     
-    double* const epsilon = data_internal_energy->getPointer(side_normal, 0);
-    const double* const rho = data_density->getPointer(side_normal, 0);
-    const double* const p = data_pressure->getPointer(side_normal, 0);
+    Real* const epsilon = data_internal_energy->getPointer(side_normal, 0);
+    const Real* const rho = data_density->getPointer(side_normal, 0);
+    const Real* const p = data_pressure->getPointer(side_normal, 0);
     
-    const double& gamma = *(thermo_properties[0]);
+    const Real& gamma = *(thermo_properties[0]);
     
     computeInternalEnergy(
         epsilon,
@@ -1355,10 +1355,10 @@ EquationOfStateIdealGas::computeInternalEnergy(
  */
 void
 EquationOfStateIdealGas::computeInternalEnergy(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -1453,10 +1453,10 @@ EquationOfStateIdealGas::computeInternalEnergy(
      * Get the pointers to the cell data.
      */
     
-    double* const epsilon = data_internal_energy->getPointer(0);
-    const double* const rho = data_density->getPointer(0);
-    const double* const p = data_pressure->getPointer(0);
-    const double* const gamma = data_thermo_properties->getPointer(0);
+    Real* const epsilon = data_internal_energy->getPointer(0);
+    const Real* const rho = data_density->getPointer(0);
+    const Real* const p = data_pressure->getPointer(0);
+    const Real* const gamma = data_thermo_properties->getPointer(0);
     
     computeInternalEnergy(
         epsilon,
@@ -1481,10 +1481,10 @@ EquationOfStateIdealGas::computeInternalEnergy(
  */
 void
 EquationOfStateIdealGas::computeInternalEnergy(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -1595,10 +1595,10 @@ EquationOfStateIdealGas::computeInternalEnergy(
      * Get the pointers to the cell data.
      */
     
-    double* const epsilon = data_internal_energy->getPointer(side_normal, 0);
-    const double* const rho = data_density->getPointer(side_normal, 0);
-    const double* const p = data_pressure->getPointer(side_normal, 0);
-    const double* const gamma = data_thermo_properties->getPointer(side_normal, 0);
+    Real* const epsilon = data_internal_energy->getPointer(side_normal, 0);
+    const Real* const rho = data_density->getPointer(side_normal, 0);
+    const Real* const p = data_pressure->getPointer(side_normal, 0);
+    const Real* const gamma = data_thermo_properties->getPointer(side_normal, 0);
     
     computeInternalEnergy(
         epsilon,
@@ -1621,22 +1621,22 @@ EquationOfStateIdealGas::computeInternalEnergy(
 /*
  * Compute the specific enthalpy.
  */
-double
+Real
 EquationOfStateIdealGas::getEnthalpy(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& thermo_properties) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& thermo_properties) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
-    const double& gamma = *(thermo_properties[0]);
+    const Real& gamma = *(thermo_properties[0]);
     
-    const double& rho = *density;
-    const double& p = *pressure;
+    const Real& rho = *density;
+    const Real& p = *pressure;
     
-    return gamma*p/((gamma - double(1))*rho); // Return h.
+    return gamma*p/((gamma - Real(1))*rho); // Return h.
 }
 
 
@@ -1645,10 +1645,10 @@ EquationOfStateIdealGas::getEnthalpy(
  */
 void
 EquationOfStateIdealGas::computeEnthalpy(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_enthalpy,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_enthalpy,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const std::vector<const Real*>& thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -1732,11 +1732,11 @@ EquationOfStateIdealGas::computeEnthalpy(
      * Get the pointers to the cell data.
      */
     
-    double* const h = data_enthalpy->getPointer(0);
-    const double* const rho = data_density->getPointer(0);
-    const double* const p = data_pressure->getPointer(0);
+    Real* const h = data_enthalpy->getPointer(0);
+    const Real* const rho = data_density->getPointer(0);
+    const Real* const p = data_pressure->getPointer(0);
     
-    const double& gamma = *(thermo_properties[0]);
+    const Real& gamma = *(thermo_properties[0]);
     
     computeEnthalpy(
         h,
@@ -1759,10 +1759,10 @@ EquationOfStateIdealGas::computeEnthalpy(
  */
 void
 EquationOfStateIdealGas::computeEnthalpy(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_enthalpy,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_enthalpy,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const std::vector<const Real*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -1860,11 +1860,11 @@ EquationOfStateIdealGas::computeEnthalpy(
      * Get the pointers to the cell data.
      */
     
-    double* const h = data_enthalpy->getPointer(side_normal, 0);
-    const double* const rho = data_density->getPointer(side_normal, 0);
-    const double* const p = data_pressure->getPointer(side_normal, 0);
+    Real* const h = data_enthalpy->getPointer(side_normal, 0);
+    const Real* const rho = data_density->getPointer(side_normal, 0);
+    const Real* const p = data_pressure->getPointer(side_normal, 0);
     
-    const double& gamma = *(thermo_properties[0]);
+    const Real& gamma = *(thermo_properties[0]);
     
     computeEnthalpy(
         h,
@@ -1887,10 +1887,10 @@ EquationOfStateIdealGas::computeEnthalpy(
  */
 void
 EquationOfStateIdealGas::computeEnthalpy(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_enthalpy,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_enthalpy,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -1985,10 +1985,10 @@ EquationOfStateIdealGas::computeEnthalpy(
      * Get the pointers to the cell data.
      */
     
-    double* const h = data_enthalpy->getPointer(0);
-    const double* const rho = data_density->getPointer(0);
-    const double* const p = data_pressure->getPointer(0);
-    const double* const gamma = data_thermo_properties->getPointer(0);
+    Real* const h = data_enthalpy->getPointer(0);
+    const Real* const rho = data_density->getPointer(0);
+    const Real* const p = data_pressure->getPointer(0);
+    const Real* const gamma = data_thermo_properties->getPointer(0);
     
     computeEnthalpy(
         h,
@@ -2013,10 +2013,10 @@ EquationOfStateIdealGas::computeEnthalpy(
  */
 void
 EquationOfStateIdealGas::computeEnthalpy(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_enthalpy,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_enthalpy,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -2127,10 +2127,10 @@ EquationOfStateIdealGas::computeEnthalpy(
      * Get the pointers to the cell data.
      */
     
-    double* const h = data_enthalpy->getPointer(side_normal, 0);
-    const double* const rho = data_density->getPointer(side_normal, 0);
-    const double* const p = data_pressure->getPointer(side_normal, 0);
-    const double* const gamma = data_thermo_properties->getPointer(side_normal, 0);
+    Real* const h = data_enthalpy->getPointer(side_normal, 0);
+    const Real* const rho = data_density->getPointer(side_normal, 0);
+    const Real* const p = data_pressure->getPointer(side_normal, 0);
+    const Real* const gamma = data_thermo_properties->getPointer(side_normal, 0);
     
     computeEnthalpy(
         h,
@@ -2153,23 +2153,23 @@ EquationOfStateIdealGas::computeEnthalpy(
 /*
  * Compute the temperature.
  */
-double
+Real
 EquationOfStateIdealGas::getTemperature(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& thermo_properties) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& thermo_properties) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) == 4);
 #endif
     
-    const double& gamma = *(thermo_properties[0]);
-    const double& c_v = *(thermo_properties[3]);
+    const Real& gamma = *(thermo_properties[0]);
+    const Real& c_v = *(thermo_properties[3]);
     
-    const double& rho = *density;
-    const double& p = *pressure;
+    const Real& rho = *density;
+    const Real& p = *pressure;
     
-    return p/((gamma - double(1))*c_v*rho); // Return T.
+    return p/((gamma - Real(1))*c_v*rho); // Return T.
 }
 
 
@@ -2178,10 +2178,10 @@ EquationOfStateIdealGas::getTemperature(
  */
 void
 EquationOfStateIdealGas::computeTemperature(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const std::vector<const Real*>& thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2265,12 +2265,12 @@ EquationOfStateIdealGas::computeTemperature(
      * Get the pointers to the cell data.
      */
     
-    double* const T = data_temperature->getPointer(0);
-    const double* const rho = data_density->getPointer(0);
-    const double* const p = data_pressure->getPointer(0);
+    Real* const T = data_temperature->getPointer(0);
+    const Real* const rho = data_density->getPointer(0);
+    const Real* const p = data_pressure->getPointer(0);
     
-    const double& gamma = *(thermo_properties[0]);
-    const double& c_v = *(thermo_properties[3]);
+    const Real& gamma = *(thermo_properties[0]);
+    const Real& c_v = *(thermo_properties[3]);
     
     computeTemperature(
         T,
@@ -2294,10 +2294,10 @@ EquationOfStateIdealGas::computeTemperature(
  */
 void
 EquationOfStateIdealGas::computeTemperature(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const std::vector<const Real*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -2395,12 +2395,12 @@ EquationOfStateIdealGas::computeTemperature(
      * Get the pointers to the cell data.
      */
     
-    double* const T = data_temperature->getPointer(side_normal, 0);
-    const double* const rho = data_density->getPointer(side_normal, 0);
-    const double* const p = data_pressure->getPointer(side_normal, 0);
+    Real* const T = data_temperature->getPointer(side_normal, 0);
+    const Real* const rho = data_density->getPointer(side_normal, 0);
+    const Real* const p = data_pressure->getPointer(side_normal, 0);
     
-    const double& gamma = *(thermo_properties[0]);
-    const double& c_v = *(thermo_properties[3]);
+    const Real& gamma = *(thermo_properties[0]);
+    const Real& c_v = *(thermo_properties[3]);
     
     computeTemperature(
         T,
@@ -2424,10 +2424,10 @@ EquationOfStateIdealGas::computeTemperature(
  */
 void
 EquationOfStateIdealGas::computeTemperature(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2522,11 +2522,11 @@ EquationOfStateIdealGas::computeTemperature(
      * Get the pointers to the cell data.
      */
     
-    double* const T = data_temperature->getPointer(0);
-    const double* const rho = data_density->getPointer(0);
-    const double* const p = data_pressure->getPointer(0);
-    const double* const gamma = data_thermo_properties->getPointer(0);
-    const double* const c_v = data_thermo_properties->getPointer(3);
+    Real* const T = data_temperature->getPointer(0);
+    const Real* const rho = data_density->getPointer(0);
+    const Real* const p = data_pressure->getPointer(0);
+    const Real* const gamma = data_thermo_properties->getPointer(0);
+    const Real* const c_v = data_thermo_properties->getPointer(3);
     
     computeTemperature(
         T,
@@ -2552,10 +2552,10 @@ EquationOfStateIdealGas::computeTemperature(
  */
 void
 EquationOfStateIdealGas::computeTemperature(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -2666,11 +2666,11 @@ EquationOfStateIdealGas::computeTemperature(
      * Get the pointers to the cell data.
      */
     
-    double* const T = data_temperature->getPointer(side_normal, 0);
-    const double* const rho = data_density->getPointer(side_normal, 0);
-    const double* const p = data_pressure->getPointer(side_normal, 0);
-    const double* const gamma = data_thermo_properties->getPointer(side_normal, 0);
-    const double* const c_v = data_thermo_properties->getPointer(side_normal, 3);
+    Real* const T = data_temperature->getPointer(side_normal, 0);
+    const Real* const rho = data_density->getPointer(side_normal, 0);
+    const Real* const p = data_pressure->getPointer(side_normal, 0);
+    const Real* const gamma = data_thermo_properties->getPointer(side_normal, 0);
+    const Real* const c_v = data_thermo_properties->getPointer(side_normal, 3);
     
     computeTemperature(
         T,
@@ -2694,11 +2694,11 @@ EquationOfStateIdealGas::computeTemperature(
 /*
  * Compute the specific internal energy from temperature.
  */
-double
+Real
 EquationOfStateIdealGas::getInternalEnergyFromTemperature(
-    const double* const density,
-    const double* const temperature,
-    const std::vector<const double*>& thermo_properties) const
+    const Real* const density,
+    const Real* const temperature,
+    const std::vector<const Real*>& thermo_properties) const
 {
     NULL_USE(density);
     
@@ -2706,9 +2706,9 @@ EquationOfStateIdealGas::getInternalEnergyFromTemperature(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) == 4);
 #endif
     
-    const double& c_v = *(thermo_properties[3]);
+    const Real& c_v = *(thermo_properties[3]);
     
-    const double& T = *temperature;
+    const Real& T = *temperature;
     
     return c_v*T; // Return epsilon.
 }
@@ -2719,10 +2719,10 @@ EquationOfStateIdealGas::getInternalEnergyFromTemperature(
  */
 void
 EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const std::vector<const Real*>& thermo_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_density);
@@ -2797,10 +2797,10 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
      * Get the pointers to the cell data.
      */
     
-    double* const epsilon = data_internal_energy->getPointer(0);
-    const double* const T = data_temperature->getPointer(0);
+    Real* const epsilon = data_internal_energy->getPointer(0);
+    const Real* const T = data_temperature->getPointer(0);
     
-    const double& c_v = *(thermo_properties[3]);
+    const Real& c_v = *(thermo_properties[3]);
     
     computeInternalEnergyFromTemperature(
         epsilon,
@@ -2820,10 +2820,10 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
  */
 void
 EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+    const std::vector<const Real*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -2910,10 +2910,10 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
      * Get the pointers to the cell data.
      */
     
-    double* const epsilon = data_internal_energy->getPointer(side_normal, 0);
-    const double* const T = data_temperature->getPointer(side_normal, 0);
+    Real* const epsilon = data_internal_energy->getPointer(side_normal, 0);
+    const Real* const T = data_temperature->getPointer(side_normal, 0);
     
-    const double& c_v = *(thermo_properties[3]);
+    const Real& c_v = *(thermo_properties[3]);
     
     computeInternalEnergyFromTemperature(
         epsilon,
@@ -2933,10 +2933,10 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
  */
 void
 EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_density);
@@ -3022,9 +3022,9 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
      * Get the pointers to the cell data.
      */
     
-    double* const epsilon = data_internal_energy->getPointer(0);
-    const double* const T = data_temperature->getPointer(0);
-    const double* const c_v = data_thermo_properties->getPointer(3);
+    Real* const epsilon = data_internal_energy->getPointer(0);
+    const Real* const T = data_temperature->getPointer(0);
+    const Real* const c_v = data_thermo_properties->getPointer(3);
     
     computeInternalEnergyFromTemperature(
         epsilon,
@@ -3046,10 +3046,10 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
  */
 void
 EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -3149,9 +3149,9 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
      * Get the pointers to the cell data.
      */
     
-    double* const epsilon = data_internal_energy->getPointer(side_normal, 0);
-    const double* const T = data_temperature->getPointer(side_normal, 0);
-    const double* const c_v = data_thermo_properties->getPointer(side_normal, 3);
+    Real* const epsilon = data_internal_energy->getPointer(side_normal, 0);
+    const Real* const T = data_temperature->getPointer(side_normal, 0);
+    const Real* const c_v = data_thermo_properties->getPointer(side_normal, 3);
     
     computeInternalEnergyFromTemperature(
         epsilon,
@@ -3171,11 +3171,11 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
 /*
  * Compute the isochoric specific heat capacity.
  */
-double
+Real
 EquationOfStateIdealGas::getIsochoricSpecificHeatCapacity(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& thermo_properties) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& thermo_properties) const
 {
     NULL_USE(density);
     NULL_USE(pressure);
@@ -3193,10 +3193,10 @@ EquationOfStateIdealGas::getIsochoricSpecificHeatCapacity(
  */
 void
 EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isochoric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const std::vector<const Real*>& thermo_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_density);
@@ -3257,9 +3257,9 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
      * Get the pointer to the cell data.
      */
     
-    double* const c_v = data_isochoric_specific_heat_capacity->getPointer(0);
+    Real* const c_v = data_isochoric_specific_heat_capacity->getPointer(0);
     
-    const double& c_v_src = *(thermo_properties[3]);
+    const Real& c_v_src = *(thermo_properties[3]);
     
     computeIsochoricSpecificHeatCapacity(
         c_v,
@@ -3276,10 +3276,10 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
  */
 void
 EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isochoric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const std::vector<const Real*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -3350,9 +3350,9 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
      * Get the pointer to the cell data.
      */
     
-    double* const c_v = data_isochoric_specific_heat_capacity->getPointer(side_normal, 0);
+    Real* const c_v = data_isochoric_specific_heat_capacity->getPointer(side_normal, 0);
     
-    const double& c_v_src = *(thermo_properties[3]);
+    const Real& c_v_src = *(thermo_properties[3]);
     
     computeIsochoricSpecificHeatCapacity(
         c_v,
@@ -3369,10 +3369,10 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
  */
 void
 EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isochoric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_density);
@@ -3451,8 +3451,8 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
      * Get the pointers to the cell data.
      */
     
-    double* const c_v = data_isochoric_specific_heat_capacity->getPointer(0);
-    const double* const c_v_src = data_thermo_properties->getPointer(3);
+    Real* const c_v = data_isochoric_specific_heat_capacity->getPointer(0);
+    const Real* const c_v_src = data_thermo_properties->getPointer(3);
     
     computeIsochoricSpecificHeatCapacity(
         c_v,
@@ -3471,10 +3471,10 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
  */
 void
 EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isochoric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -3565,8 +3565,8 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
      * Get the pointers to the cell data.
      */
     
-    double* const c_v = data_isochoric_specific_heat_capacity->getPointer(side_normal, 0);
-    const double* const c_v_src = data_thermo_properties->getPointer(side_normal, 3);
+    Real* const c_v = data_isochoric_specific_heat_capacity->getPointer(side_normal, 0);
+    const Real* const c_v_src = data_thermo_properties->getPointer(side_normal, 3);
     
     computeIsochoricSpecificHeatCapacity(
         c_v,
@@ -3583,11 +3583,11 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
 /*
  * Compute the isobaric specific heat capacity.
  */
-double
+Real
 EquationOfStateIdealGas::getIsobaricSpecificHeatCapacity(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& thermo_properties) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& thermo_properties) const
 {
     NULL_USE(density);
     NULL_USE(pressure);
@@ -3605,10 +3605,10 @@ EquationOfStateIdealGas::getIsobaricSpecificHeatCapacity(
  */
 void
 EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isobaric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const std::vector<const Real*>& thermo_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_density);
@@ -3669,9 +3669,9 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
      * Get the pointer to the cell data.
      */
     
-    double* const c_p = data_isobaric_specific_heat_capacity->getPointer(0);
+    Real* const c_p = data_isobaric_specific_heat_capacity->getPointer(0);
     
-    const double& c_p_src = *(thermo_properties[2]);
+    const Real& c_p_src = *(thermo_properties[2]);
     
     computeIsobaricSpecificHeatCapacity(
         c_p,
@@ -3688,10 +3688,10 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
  */
 void
 EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isobaric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const std::vector<const Real*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -3762,9 +3762,9 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
      * Get the pointer to the cell data.
      */
     
-    double* const c_p = data_isobaric_specific_heat_capacity->getPointer(side_normal, 0);
+    Real* const c_p = data_isobaric_specific_heat_capacity->getPointer(side_normal, 0);
     
-    const double& c_p_src = *(thermo_properties[2]);
+    const Real& c_p_src = *(thermo_properties[2]);
     
     computeIsobaricSpecificHeatCapacity(
         c_p,
@@ -3781,10 +3781,10 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
  */
 void
 EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isobaric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_density);
@@ -3863,8 +3863,8 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
      * Get the pointers to the cell data.
      */
     
-    double* const c_p = data_isobaric_specific_heat_capacity->getPointer(0);
-    const double* const c_p_src = data_thermo_properties->getPointer(2);
+    Real* const c_p = data_isobaric_specific_heat_capacity->getPointer(0);
+    const Real* const c_p_src = data_thermo_properties->getPointer(2);
     
     computeIsobaricSpecificHeatCapacity(
         c_p,
@@ -3883,10 +3883,10 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
  */
 void
 EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isobaric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -3977,8 +3977,8 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
      * Get the pointers to the cell data.
      */
     
-    double* const c_p = data_isobaric_specific_heat_capacity->getPointer(side_normal, 0);
-    const double* const c_p_src = data_thermo_properties->getPointer(side_normal, 2);
+    Real* const c_p = data_isobaric_specific_heat_capacity->getPointer(side_normal, 0);
+    const Real* const c_p_src = data_thermo_properties->getPointer(side_normal, 2);
     
     computeIsobaricSpecificHeatCapacity(
         c_p,
@@ -3996,11 +3996,11 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
  * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
  * constant density divided by density).
  */
-double
+Real
 EquationOfStateIdealGas::getGruneisenParameter(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& thermo_properties) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& thermo_properties) const
 {
     NULL_USE(density);
     NULL_USE(pressure);
@@ -4009,9 +4009,9 @@ EquationOfStateIdealGas::getGruneisenParameter(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
-    const double& gamma = *(thermo_properties[0]);
+    const Real& gamma = *(thermo_properties[0]);
     
-    return (gamma - double(1));
+    return (gamma - Real(1));
 }
 
 
@@ -4021,10 +4021,10 @@ EquationOfStateIdealGas::getGruneisenParameter(
  */
 void
 EquationOfStateIdealGas::computeGruneisenParameter(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_gruneisen_parameter,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const std::vector<const Real*>& thermo_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_density);
@@ -4082,9 +4082,9 @@ EquationOfStateIdealGas::computeGruneisenParameter(
      * Get the pointer to the cell data.
      */
     
-    double* const Gamma = data_gruneisen_parameter->getPointer(0);
+    Real* const Gamma = data_gruneisen_parameter->getPointer(0);
     
-    const double& gamma = *(thermo_properties[0]);
+    const Real& gamma = *(thermo_properties[0]);
     
     computeGruneisenParameter(
         Gamma,
@@ -4102,10 +4102,10 @@ EquationOfStateIdealGas::computeGruneisenParameter(
  */
 void
 EquationOfStateIdealGas::computeGruneisenParameter(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_gruneisen_parameter,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const std::vector<const Real*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -4173,9 +4173,9 @@ EquationOfStateIdealGas::computeGruneisenParameter(
      * Get the pointer to the cell data.
      */
     
-    double* const Gamma = data_gruneisen_parameter->getPointer(side_normal, 0);
+    Real* const Gamma = data_gruneisen_parameter->getPointer(side_normal, 0);
     
-    const double& gamma = *(thermo_properties[0]);
+    const Real& gamma = *(thermo_properties[0]);
     
     computeGruneisenParameter(
         Gamma,
@@ -4193,10 +4193,10 @@ EquationOfStateIdealGas::computeGruneisenParameter(
  */
 void
 EquationOfStateIdealGas::computeGruneisenParameter(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_gruneisen_parameter,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_density);
@@ -4272,8 +4272,8 @@ EquationOfStateIdealGas::computeGruneisenParameter(
      * Get the pointers to the cell data.
      */
     
-    double* const Gamma = data_gruneisen_parameter->getPointer(0);
-    const double* const gamma = data_thermo_properties->getPointer(0);
+    Real* const Gamma = data_gruneisen_parameter->getPointer(0);
+    const Real* const gamma = data_thermo_properties->getPointer(0);
     
     computeGruneisenParameter(
         Gamma,
@@ -4293,10 +4293,10 @@ EquationOfStateIdealGas::computeGruneisenParameter(
  */
 void
 EquationOfStateIdealGas::computeGruneisenParameter(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_gruneisen_parameter,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -4384,8 +4384,8 @@ EquationOfStateIdealGas::computeGruneisenParameter(
      * Get the pointers to the cell data.
      */
     
-    double* const Gamma = data_gruneisen_parameter->getPointer(side_normal, 0);
-    const double* const gamma = data_thermo_properties->getPointer(side_normal, 0);
+    Real* const Gamma = data_gruneisen_parameter->getPointer(side_normal, 0);
+    const Real* const gamma = data_thermo_properties->getPointer(side_normal, 0);
     
     computeGruneisenParameter(
         Gamma,
@@ -4402,16 +4402,16 @@ EquationOfStateIdealGas::computeGruneisenParameter(
 /*
  * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
  */
-double
+Real
 EquationOfStateIdealGas::getPressureDerivativeWithDensity(
-    const double* const density,
-    const double* const pressure,
-    const std::vector<const double*>& thermo_properties) const
+    const Real* const density,
+    const Real* const pressure,
+    const std::vector<const Real*>& thermo_properties) const
 {
     NULL_USE(thermo_properties);
     
-    const double& rho = *density;
-    const double& p = *pressure;
+    const Real& rho = *density;
+    const Real& p = *pressure;
     
     return p/rho;
 }
@@ -4422,10 +4422,10 @@ EquationOfStateIdealGas::getPressureDerivativeWithDensity(
  */
 void
 EquationOfStateIdealGas::computePressureDerivativeWithDensity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_pressure_partial_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const std::vector<const Real*>& thermo_properties,
     const hier::Box& domain) const
 {
     NULL_USE(thermo_properties);
@@ -4512,9 +4512,9 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
      * Get the pointers to the cell data.
      */
     
-    double* const Psi = data_partial_pressure_partial_density->getPointer(0);
-    const double* const rho = data_density->getPointer(0);
-    const double* const p = data_pressure->getPointer(0);
+    Real* const Psi = data_partial_pressure_partial_density->getPointer(0);
+    const Real* const rho = data_density->getPointer(0);
+    const Real* const p = data_pressure->getPointer(0);
     
     computePressureDerivativeWithDensity(
         Psi,
@@ -4536,10 +4536,10 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
  */
 void
 EquationOfStateIdealGas::computePressureDerivativeWithDensity(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_pressure_partial_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const std::vector<const Real*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -4640,9 +4640,9 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
      * Get the pointers to the cell data.
      */
     
-    double* const Psi = data_partial_pressure_partial_density->getPointer(side_normal, 0);
-    const double* const rho = data_density->getPointer(side_normal, 0);
-    const double* const p = data_pressure->getPointer(side_normal, 0);
+    Real* const Psi = data_partial_pressure_partial_density->getPointer(side_normal, 0);
+    const Real* const rho = data_density->getPointer(side_normal, 0);
+    const Real* const p = data_pressure->getPointer(side_normal, 0);
     
     computePressureDerivativeWithDensity(
         Psi,
@@ -4664,10 +4664,10 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
  */
 void
 EquationOfStateIdealGas::computePressureDerivativeWithDensity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_pressure_partial_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_thermo_properties);
@@ -4754,9 +4754,9 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
      * Get the pointers to the cell data.
      */
     
-    double* const Psi = data_partial_pressure_partial_density->getPointer(0);
-    const double* const rho = data_density->getPointer(0);
-    const double* const p = data_pressure->getPointer(0);
+    Real* const Psi = data_partial_pressure_partial_density->getPointer(0);
+    const Real* const rho = data_density->getPointer(0);
+    const Real* const p = data_pressure->getPointer(0);
     
     computePressureDerivativeWithDensity(
         Psi,
@@ -4778,10 +4778,10 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
  */
 void
 EquationOfStateIdealGas::computePressureDerivativeWithDensity(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_pressure_partial_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -4882,9 +4882,9 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
      * Get the pointers to the cell data.
      */
     
-    double* const Psi = data_partial_pressure_partial_density->getPointer(side_normal, 0);
-    const double* const rho = data_density->getPointer(side_normal, 0);
-    const double* const p = data_pressure->getPointer(side_normal, 0);
+    Real* const Psi = data_partial_pressure_partial_density->getPointer(side_normal, 0);
+    const Real* const rho = data_density->getPointer(side_normal, 0);
+    const Real* const p = data_pressure->getPointer(side_normal, 0);
     
     computePressureDerivativeWithDensity(
         Psi,
@@ -4904,20 +4904,20 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
 /*
  * Compute the density.
  */
-double
+Real
 EquationOfStateIdealGas::getDensity(
-    const double* const pressure,
-    const double* const temperature,
-    const std::vector<const double*>& thermo_properties) const
+    const Real* const pressure,
+    const Real* const temperature,
+    const std::vector<const Real*>& thermo_properties) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 2);
 #endif
     
-    const double& R = *(thermo_properties[1]);
+    const Real& R = *(thermo_properties[1]);
     
-    const double& p = *pressure;
-    const double& T = *temperature;
+    const Real& p = *pressure;
+    const Real& T = *temperature;
     
     return p/(R*T); // Return rho.
 }
@@ -4928,10 +4928,10 @@ EquationOfStateIdealGas::getDensity(
  */
 void
 EquationOfStateIdealGas::computeDensity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const std::vector<const Real*>& thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5015,11 +5015,11 @@ EquationOfStateIdealGas::computeDensity(
      * Get the pointers to the cell data.
      */
     
-    double* const rho = data_density->getPointer(0);
-    const double* const p = data_pressure->getPointer(0);
-    const double* const T = data_temperature->getPointer(0);
+    Real* const rho = data_density->getPointer(0);
+    const Real* const p = data_pressure->getPointer(0);
+    const Real* const T = data_temperature->getPointer(0);
     
-    const double& R = *(thermo_properties[1]);
+    const Real& R = *(thermo_properties[1]);
     
     computeDensity(
         rho,
@@ -5042,10 +5042,10 @@ EquationOfStateIdealGas::computeDensity(
  */
 void
 EquationOfStateIdealGas::computeDensity(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-    const std::vector<const double*>& thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+    const std::vector<const Real*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -5143,11 +5143,11 @@ EquationOfStateIdealGas::computeDensity(
      * Get the pointers to the cell data.
      */
     
-    double* const rho = data_density->getPointer(side_normal, 0);
-    const double* const p = data_pressure->getPointer(side_normal, 0);
-    const double* const T = data_temperature->getPointer(side_normal, 0);
+    Real* const rho = data_density->getPointer(side_normal, 0);
+    const Real* const p = data_pressure->getPointer(side_normal, 0);
+    const Real* const T = data_temperature->getPointer(side_normal, 0);
     
-    const double& R = *(thermo_properties[1]);
+    const Real& R = *(thermo_properties[1]);
     
     computeDensity(
         rho,
@@ -5170,10 +5170,10 @@ EquationOfStateIdealGas::computeDensity(
  */
 void
 EquationOfStateIdealGas::computeDensity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5268,10 +5268,10 @@ EquationOfStateIdealGas::computeDensity(
      * Get the pointers to the cell data.
      */
     
-    double* const rho = data_density->getPointer(0);
-    const double* const p = data_pressure->getPointer(0);
-    const double* const T = data_temperature->getPointer(0);
-    const double* const R = data_thermo_properties->getPointer(1);
+    Real* const rho = data_density->getPointer(0);
+    const Real* const p = data_pressure->getPointer(0);
+    const Real* const T = data_temperature->getPointer(0);
+    const Real* const R = data_thermo_properties->getPointer(1);
     
     computeDensity(
         rho,
@@ -5296,10 +5296,10 @@ EquationOfStateIdealGas::computeDensity(
  */
 void
 EquationOfStateIdealGas::computeDensity(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -5410,10 +5410,10 @@ EquationOfStateIdealGas::computeDensity(
      * Get the pointers to the cell data.
      */
     
-    double* const rho = data_density->getPointer(side_normal, 0);
-    const double* const p = data_pressure->getPointer(side_normal, 0);
-    const double* const T = data_temperature->getPointer(side_normal, 0);
-    const double* const R = data_thermo_properties->getPointer(side_normal, 1);
+    Real* const rho = data_density->getPointer(side_normal, 0);
+    const Real* const p = data_pressure->getPointer(side_normal, 0);
+    const Real* const T = data_temperature->getPointer(side_normal, 0);
+    const Real* const R = data_thermo_properties->getPointer(side_normal, 1);
     
     computeDensity(
         rho,
@@ -5438,10 +5438,10 @@ EquationOfStateIdealGas::computeDensity(
  */
 void
 EquationOfStateIdealGas::computePressure(
-    double* const p,
-    const double* const rho,
-    const double* const epsilon,
-    const double& gamma,
+    Real* const p,
+    const Real* const rho,
+    const Real* const epsilon,
+    const Real& gamma,
     const hier::IntVector& offset_pressure,
     const hier::IntVector& offset_density,
     const hier::IntVector& offset_internal_energy,
@@ -5472,7 +5472,7 @@ EquationOfStateIdealGas::computePressure(
             const int idx_density = i + offset_0_density;
             const int idx_internal_energy = i + offset_0_internal_energy;
             
-            p[idx_pressure] = (gamma - double(1))*rho[idx_density]*epsilon[idx_internal_energy];
+            p[idx_pressure] = (gamma - Real(1))*rho[idx_density]*epsilon[idx_internal_energy];
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -5513,7 +5513,7 @@ EquationOfStateIdealGas::computePressure(
                 const int idx_internal_energy = (i + offset_0_internal_energy) +
                     (j + offset_1_internal_energy)*ghostcell_dim_0_internal_energy;
                 
-                p[idx_pressure] = (gamma - double(1))*rho[idx_density]*epsilon[idx_internal_energy];
+                p[idx_pressure] = (gamma - Real(1))*rho[idx_density]*epsilon[idx_internal_energy];
             }
         }
     }
@@ -5571,7 +5571,7 @@ EquationOfStateIdealGas::computePressure(
                         (k + offset_2_internal_energy)*ghostcell_dim_0_internal_energy*
                             ghostcell_dim_1_internal_energy;
                     
-                    p[idx_pressure] = (gamma - double(1))*rho[idx_density]*epsilon[idx_internal_energy];
+                    p[idx_pressure] = (gamma - Real(1))*rho[idx_density]*epsilon[idx_internal_energy];
                 }
             }
         }
@@ -5584,10 +5584,10 @@ EquationOfStateIdealGas::computePressure(
  */
 void
 EquationOfStateIdealGas::computePressure(
-    double* const p,
-    const double* const rho,
-    const double* const epsilon,
-    const double* const gamma,
+    Real* const p,
+    const Real* const rho,
+    const Real* const epsilon,
+    const Real* const gamma,
     const hier::IntVector& offset_pressure,
     const hier::IntVector& offset_density,
     const hier::IntVector& offset_internal_energy,
@@ -5622,7 +5622,7 @@ EquationOfStateIdealGas::computePressure(
             const int idx_internal_energy = i + offset_0_internal_energy;
             const int idx_thermo_properties = i + offset_0_thermo_properties;
             
-            p[idx_pressure] = (gamma[idx_thermo_properties] - double(1))*rho[idx_density]*
+            p[idx_pressure] = (gamma[idx_thermo_properties] - Real(1))*rho[idx_density]*
                 epsilon[idx_internal_energy];
         }
     }
@@ -5671,7 +5671,7 @@ EquationOfStateIdealGas::computePressure(
                 const int idx_thermo_properties = (i + offset_0_thermo_properties) +
                     (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
-                p[idx_pressure] = (gamma[idx_thermo_properties] - double(1))*rho[idx_density]*
+                p[idx_pressure] = (gamma[idx_thermo_properties] - Real(1))*rho[idx_density]*
                     epsilon[idx_internal_energy];
             }
         }
@@ -5741,7 +5741,7 @@ EquationOfStateIdealGas::computePressure(
                         (k + offset_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
-                    p[idx_pressure] = (gamma[idx_thermo_properties] - double(1))*rho[idx_density]*
+                    p[idx_pressure] = (gamma[idx_thermo_properties] - Real(1))*rho[idx_density]*
                         epsilon[idx_internal_energy];
                 }
             }
@@ -5755,10 +5755,10 @@ EquationOfStateIdealGas::computePressure(
  */
 void
 EquationOfStateIdealGas::computeSoundSpeed(
-    double* const c,
-    const double* const rho,
-    const double* const p,
-    const double& gamma,
+    Real* const c,
+    const Real* const rho,
+    const Real* const p,
+    const Real& gamma,
     const hier::IntVector& offset_sound_speed,
     const hier::IntVector& offset_density,
     const hier::IntVector& offset_pressure,
@@ -5789,7 +5789,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
             const int idx_density = i + offset_0_density;
             const int idx_pressure = i + offset_0_pressure;
             
-            c[idx_sound_speed] = sqrt(gamma*p[idx_pressure]/rho[idx_density]);
+            c[idx_sound_speed] = std::sqrt(gamma*p[idx_pressure]/rho[idx_density]);
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -5830,7 +5830,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
                 const int idx_pressure = (i + offset_0_pressure) +
                     (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                 
-                c[idx_sound_speed] = sqrt(gamma*p[idx_pressure]/rho[idx_density]);
+                c[idx_sound_speed] = std::sqrt(gamma*p[idx_pressure]/rho[idx_density]);
             }
         }
     }
@@ -5888,7 +5888,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
                         (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
-                    c[idx_sound_speed] = sqrt(gamma*p[idx_pressure]/rho[idx_density]);
+                    c[idx_sound_speed] = std::sqrt(gamma*p[idx_pressure]/rho[idx_density]);
                 }
             }
         }
@@ -5901,10 +5901,10 @@ EquationOfStateIdealGas::computeSoundSpeed(
  */
 void
 EquationOfStateIdealGas::computeSoundSpeed(
-    double* const c,
-    const double* const rho,
-    const double* const p,
-    const double* const gamma,
+    Real* const c,
+    const Real* const rho,
+    const Real* const p,
+    const Real* const gamma,
     const hier::IntVector& offset_sound_speed,
     const hier::IntVector& offset_density,
     const hier::IntVector& offset_pressure,
@@ -5939,7 +5939,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
             const int idx_pressure = i + offset_0_pressure;
             const int idx_thermo_properties = i + offset_0_thermo_properties;
             
-            c[idx_sound_speed] = sqrt(gamma[idx_thermo_properties]*p[idx_pressure]/
+            c[idx_sound_speed] = std::sqrt(gamma[idx_thermo_properties]*p[idx_pressure]/
                 rho[idx_density]);
         }
     }
@@ -5988,7 +5988,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
                 const int idx_thermo_properties = (i + offset_0_thermo_properties) +
                     (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
-                c[idx_sound_speed] = sqrt(gamma[idx_thermo_properties]*p[idx_pressure]/
+                c[idx_sound_speed] = std::sqrt(gamma[idx_thermo_properties]*p[idx_pressure]/
                     rho[idx_density]);
             }
         }
@@ -6058,7 +6058,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
                         (k + offset_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
-                    c[idx_sound_speed] = sqrt(gamma[idx_thermo_properties]*p[idx_pressure]/
+                    c[idx_sound_speed] = std::sqrt(gamma[idx_thermo_properties]*p[idx_pressure]/
                         rho[idx_density]);
                 }
             }
@@ -6072,10 +6072,10 @@ EquationOfStateIdealGas::computeSoundSpeed(
  */
 void
 EquationOfStateIdealGas::computeInternalEnergy(
-    double* const epsilon,
-    const double* const rho,
-    const double* const p,
-    const double& gamma,
+    Real* const epsilon,
+    const Real* const rho,
+    const Real* const p,
+    const Real& gamma,
     const hier::IntVector& offset_internal_energy,
     const hier::IntVector& offset_density,
     const hier::IntVector& offset_pressure,
@@ -6106,7 +6106,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
             const int idx_density = i + offset_0_density;
             const int idx_pressure = i + offset_0_pressure;
             
-            epsilon[idx_internal_energy] = p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
+            epsilon[idx_internal_energy] = p[idx_pressure]/((gamma - Real(1))*rho[idx_density]);
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -6147,7 +6147,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
                 const int idx_pressure = (i + offset_0_pressure) +
                     (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                 
-                epsilon[idx_internal_energy] = p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
+                epsilon[idx_internal_energy] = p[idx_pressure]/((gamma - Real(1))*rho[idx_density]);
             }
         }
     }
@@ -6205,7 +6205,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
                         (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
-                    epsilon[idx_internal_energy] = p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
+                    epsilon[idx_internal_energy] = p[idx_pressure]/((gamma - Real(1))*rho[idx_density]);
                 }
             }
         }
@@ -6218,10 +6218,10 @@ EquationOfStateIdealGas::computeInternalEnergy(
  */
 void
 EquationOfStateIdealGas::computeInternalEnergy(
-    double* const epsilon,
-    const double* const rho,
-    const double* const p,
-    const double* const gamma,
+    Real* const epsilon,
+    const Real* const rho,
+    const Real* const p,
+    const Real* const gamma,
     const hier::IntVector& offset_internal_energy,
     const hier::IntVector& offset_density,
     const hier::IntVector& offset_pressure,
@@ -6256,7 +6256,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
             const int idx_pressure = i + offset_0_pressure;
             const int idx_thermo_properties = i + offset_0_thermo_properties;
             
-            epsilon[idx_internal_energy] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
+            epsilon[idx_internal_energy] = p[idx_pressure]/((gamma[idx_thermo_properties] - Real(1))*
                 rho[idx_density]);
         }
     }
@@ -6305,7 +6305,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
                 const int idx_thermo_properties = (i + offset_0_thermo_properties) +
                     (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
-                epsilon[idx_internal_energy] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
+                epsilon[idx_internal_energy] = p[idx_pressure]/((gamma[idx_thermo_properties] - Real(1))*
                     rho[idx_density]);
             }
         }
@@ -6375,7 +6375,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
                         (k + offset_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
-                    epsilon[idx_internal_energy] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
+                    epsilon[idx_internal_energy] = p[idx_pressure]/((gamma[idx_thermo_properties] - Real(1))*
                         rho[idx_density]);
                 }
             }
@@ -6389,10 +6389,10 @@ EquationOfStateIdealGas::computeInternalEnergy(
  */
 void
 EquationOfStateIdealGas::computeEnthalpy(
-    double* const h,
-    const double* const rho,
-    const double* const p,
-    const double& gamma,
+    Real* const h,
+    const Real* const rho,
+    const Real* const p,
+    const Real& gamma,
     const hier::IntVector& offset_enthalpy,
     const hier::IntVector& offset_density,
     const hier::IntVector& offset_pressure,
@@ -6423,7 +6423,7 @@ EquationOfStateIdealGas::computeEnthalpy(
             const int idx_density = i + offset_0_density;
             const int idx_pressure = i + offset_0_pressure;
             
-            h[idx_enthalpy] = gamma*p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
+            h[idx_enthalpy] = gamma*p[idx_pressure]/((gamma - Real(1))*rho[idx_density]);
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -6464,7 +6464,7 @@ EquationOfStateIdealGas::computeEnthalpy(
                 const int idx_pressure = (i + offset_0_pressure) +
                     (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                 
-                h[idx_enthalpy] = gamma*p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
+                h[idx_enthalpy] = gamma*p[idx_pressure]/((gamma - Real(1))*rho[idx_density]);
             }
         }
     }
@@ -6522,7 +6522,7 @@ EquationOfStateIdealGas::computeEnthalpy(
                         (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
-                    h[idx_enthalpy] = gamma*p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
+                    h[idx_enthalpy] = gamma*p[idx_pressure]/((gamma - Real(1))*rho[idx_density]);
                 }
             }
         }
@@ -6535,10 +6535,10 @@ EquationOfStateIdealGas::computeEnthalpy(
  */
 void
 EquationOfStateIdealGas::computeEnthalpy(
-    double* const h,
-    const double* const rho,
-    const double* const p,
-    const double* const gamma,
+    Real* const h,
+    const Real* const rho,
+    const Real* const p,
+    const Real* const gamma,
     const hier::IntVector& offset_enthalpy,
     const hier::IntVector& offset_density,
     const hier::IntVector& offset_pressure,
@@ -6574,7 +6574,7 @@ EquationOfStateIdealGas::computeEnthalpy(
             const int idx_thermo_properties = i + offset_0_thermo_properties;
             
             h[idx_enthalpy] = gamma[idx_thermo_properties]*p[idx_pressure]/
-                ((gamma[idx_thermo_properties] - double(1))*rho[idx_density]);
+                ((gamma[idx_thermo_properties] - Real(1))*rho[idx_density]);
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -6623,7 +6623,7 @@ EquationOfStateIdealGas::computeEnthalpy(
                     (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
                 h[idx_enthalpy] = gamma[idx_thermo_properties]*p[idx_pressure]/
-                    ((gamma[idx_thermo_properties] - double(1))*rho[idx_density]);
+                    ((gamma[idx_thermo_properties] - Real(1))*rho[idx_density]);
             }
         }
     }
@@ -6693,7 +6693,7 @@ EquationOfStateIdealGas::computeEnthalpy(
                             ghostcell_dim_1_thermo_properties;
                     
                     h[idx_enthalpy] = gamma[idx_thermo_properties]*p[idx_pressure]/
-                        ((gamma[idx_thermo_properties] - double(1))*rho[idx_density]);
+                        ((gamma[idx_thermo_properties] - Real(1))*rho[idx_density]);
                 }
             }
         }
@@ -6706,11 +6706,11 @@ EquationOfStateIdealGas::computeEnthalpy(
  */
 void
 EquationOfStateIdealGas::computeTemperature(
-    double* const T,
-    const double* const rho,
-    const double* const p,
-    const double& gamma,
-    const double& c_v,
+    Real* const T,
+    const Real* const rho,
+    const Real* const p,
+    const Real& gamma,
+    const Real& c_v,
     const hier::IntVector& offset_temperature,
     const hier::IntVector& offset_density,
     const hier::IntVector& offset_pressure,
@@ -6741,7 +6741,7 @@ EquationOfStateIdealGas::computeTemperature(
             const int idx_density = i + offset_0_density;
             const int idx_pressure = i + offset_0_pressure;
             
-            T[idx_temperature] = p[idx_pressure]/((gamma - double(1))*c_v*rho[idx_density]);
+            T[idx_temperature] = p[idx_pressure]/((gamma - Real(1))*c_v*rho[idx_density]);
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -6782,7 +6782,7 @@ EquationOfStateIdealGas::computeTemperature(
                 const int idx_pressure = (i + offset_0_pressure) +
                     (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                 
-                T[idx_temperature] = p[idx_pressure]/((gamma - double(1))*c_v*rho[idx_density]);
+                T[idx_temperature] = p[idx_pressure]/((gamma - Real(1))*c_v*rho[idx_density]);
             }
         }
     }
@@ -6840,7 +6840,7 @@ EquationOfStateIdealGas::computeTemperature(
                         (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
-                    T[idx_temperature] = p[idx_pressure]/((gamma - double(1))*c_v*rho[idx_density]);
+                    T[idx_temperature] = p[idx_pressure]/((gamma - Real(1))*c_v*rho[idx_density]);
                 }
             }
         }
@@ -6853,11 +6853,11 @@ EquationOfStateIdealGas::computeTemperature(
  */
 void
 EquationOfStateIdealGas::computeTemperature(
-    double* const T,
-    const double* const rho,
-    const double* const p,
-    const double* const gamma,
-    const double* const c_v,
+    Real* const T,
+    const Real* const rho,
+    const Real* const p,
+    const Real* const gamma,
+    const Real* const c_v,
     const hier::IntVector& offset_temperature,
     const hier::IntVector& offset_density,
     const hier::IntVector& offset_pressure,
@@ -6892,7 +6892,7 @@ EquationOfStateIdealGas::computeTemperature(
             const int idx_pressure = i + offset_0_pressure;
             const int idx_thermo_properties = i + offset_0_thermo_properties;
             
-            T[idx_temperature] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
+            T[idx_temperature] = p[idx_pressure]/((gamma[idx_thermo_properties] - Real(1))*
                 c_v[idx_thermo_properties]*rho[idx_density]);
         }
     }
@@ -6941,7 +6941,7 @@ EquationOfStateIdealGas::computeTemperature(
                 const int idx_thermo_properties = (i + offset_0_thermo_properties) +
                     (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
-                T[idx_temperature] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
+                T[idx_temperature] = p[idx_pressure]/((gamma[idx_thermo_properties] - Real(1))*
                     c_v[idx_thermo_properties]*rho[idx_density]);
             }
         }
@@ -7011,7 +7011,7 @@ EquationOfStateIdealGas::computeTemperature(
                         (k + offset_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
-                    T[idx_temperature] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
+                    T[idx_temperature] = p[idx_pressure]/((gamma[idx_thermo_properties] - Real(1))*
                         c_v[idx_thermo_properties]*rho[idx_density]);
                 }
             }
@@ -7025,9 +7025,9 @@ EquationOfStateIdealGas::computeTemperature(
  */
 void
 EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
-    double* const epsilon,
-    const double* const T,
-    const double& c_v,
+    Real* const epsilon,
+    const Real* const T,
+    const Real& c_v,
     const hier::IntVector& offset_internal_energy,
     const hier::IntVector& offset_temperature,
     const hier::IntVector& ghostcell_dims_internal_energy,
@@ -7148,9 +7148,9 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
  */
 void
 EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
-    double* const epsilon,
-    const double* const T,
-    const double* const c_v,
+    Real* const epsilon,
+    const Real* const T,
+    const Real* const c_v,
     const hier::IntVector& offset_internal_energy,
     const hier::IntVector& offset_temperature,
     const hier::IntVector& offset_thermo_properties,
@@ -7293,8 +7293,8 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
  */
 void
 EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
-    double* const c_v,
-    const double& c_v_src,
+    Real* const c_v,
+    const Real& c_v_src,
     const hier::IntVector& offset_isochoric_specific_heat_capacity,
     const hier::IntVector& ghostcell_dims_isochoric_specific_heat_capacity,
     const hier::IntVector& domain_lo,
@@ -7408,8 +7408,8 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
  */
 void
 EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
-    double* const c_v,
-    const double* const c_v_src,
+    Real* const c_v,
+    const Real* const c_v_src,
     const hier::IntVector& offset_isochoric_specific_heat_capacity,
     const hier::IntVector& offset_thermo_properties,
     const hier::IntVector& ghostcell_dims_isochoric_specific_heat_capacity,
@@ -7547,8 +7547,8 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
  */
 void
 EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
-    double* const c_p,
-    const double& c_p_src,
+    Real* const c_p,
+    const Real& c_p_src,
     const hier::IntVector& offset_isobaric_specific_heat_capacity,
     const hier::IntVector& ghostcell_dims_isobaric_specific_heat_capacity,
     const hier::IntVector& domain_lo,
@@ -7662,8 +7662,8 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
  */
 void
 EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
-    double* const c_p,
-    const double* const c_p_src,
+    Real* const c_p,
+    const Real* const c_p_src,
     const hier::IntVector& offset_isobaric_specific_heat_capacity,
     const hier::IntVector& offset_thermo_properties,
     const hier::IntVector& ghostcell_dims_isobaric_specific_heat_capacity,
@@ -7802,14 +7802,14 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
  */
 void
 EquationOfStateIdealGas::computeGruneisenParameter(
-    double* const Gamma,
-    const double& gamma,
+    Real* const Gamma,
+    const Real& gamma,
     const hier::IntVector& offset_gruneisen_parameter,
     const hier::IntVector& ghostcell_dims_gruneisen_parameter,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims) const
 {
-    const double Gamma_src = gamma - double(1);
+    const Real Gamma_src = gamma - Real(1);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -7920,8 +7920,8 @@ EquationOfStateIdealGas::computeGruneisenParameter(
  */
 void
 EquationOfStateIdealGas::computeGruneisenParameter(
-    double* const Gamma,
-    const double* const gamma,
+    Real* const Gamma,
+    const Real* const gamma,
     const hier::IntVector& offset_gruneisen_parameter,
     const hier::IntVector& offset_thermo_properties,
     const hier::IntVector& ghostcell_dims_gruneisen_parameter,
@@ -7952,7 +7952,7 @@ EquationOfStateIdealGas::computeGruneisenParameter(
             
             const int idx_thermo_properties = i + offset_0_thermo_properties;
             
-            Gamma[idx_gruneisen_parameter] = gamma[idx_thermo_properties] - double(1);
+            Gamma[idx_gruneisen_parameter] = gamma[idx_thermo_properties] - Real(1);
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -7991,7 +7991,7 @@ EquationOfStateIdealGas::computeGruneisenParameter(
                 const int idx_thermo_properties = (i + offset_0_thermo_properties) +
                     (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
-                Gamma[idx_gruneisen_parameter] = gamma[idx_thermo_properties] - double(1);
+                Gamma[idx_gruneisen_parameter] = gamma[idx_thermo_properties] - Real(1);
             }
         }
     }
@@ -8046,7 +8046,7 @@ EquationOfStateIdealGas::computeGruneisenParameter(
                         (k + offset_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
-                    Gamma[idx_gruneisen_parameter] = gamma[idx_thermo_properties] - double(1);
+                    Gamma[idx_gruneisen_parameter] = gamma[idx_thermo_properties] - Real(1);
                 }
             }
         }
@@ -8059,9 +8059,9 @@ EquationOfStateIdealGas::computeGruneisenParameter(
  */
 void
 EquationOfStateIdealGas::computePressureDerivativeWithDensity(
-    double* const Psi,
-    const double* const rho,
-    const double* const p,
+    Real* const Psi,
+    const Real* const rho,
+    const Real* const p,
     const hier::IntVector& offset_partial_pressure_partial_density,
     const hier::IntVector& offset_density,
     const hier::IntVector& offset_pressure,
@@ -8204,10 +8204,10 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
  */
 void
 EquationOfStateIdealGas::computeDensity(
-    double* const rho,
-    const double* const p,
-    const double* const T,
-    const double& R,
+    Real* const rho,
+    const Real* const p,
+    const Real* const T,
+    const Real& R,
     const hier::IntVector& offset_density,
     const hier::IntVector& offset_pressure,
     const hier::IntVector& offset_temperature,
@@ -8350,10 +8350,10 @@ EquationOfStateIdealGas::computeDensity(
  */
 void
 EquationOfStateIdealGas::computeDensity(
-    double* const rho,
-    const double* const p,
-    const double* const T,
-    const double* const R,
+    Real* const rho,
+    const Real* const p,
+    const Real* const T,
+    const Real* const R,
     const hier::IntVector& offset_density,
     const hier::IntVector& offset_pressure,
     const hier::IntVector& offset_temperature,

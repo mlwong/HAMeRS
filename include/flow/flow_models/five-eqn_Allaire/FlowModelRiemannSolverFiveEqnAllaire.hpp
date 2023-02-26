@@ -25,9 +25,9 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxFromConservativeVariables(
-            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_minus,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_plus,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_minus,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_plus,
             const DIRECTION::TYPE& direction,
             const RIEMANN_SOLVER::TYPE& riemann_solver_type,
             const hier::Box& domain) const;
@@ -37,9 +37,9 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxFromPrimitiveVariables(
-            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_minus,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_plus,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_minus,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_plus,
             const DIRECTION::TYPE& direction,
             const RIEMANN_SOLVER::TYPE& riemann_solver_type,
             const hier::Box& domain) const;
@@ -49,10 +49,10 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxAndVelocityFromConservativeVariables(
-            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_minus,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_plus,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_minus,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_plus,
             const DIRECTION::TYPE& direction,
             const RIEMANN_SOLVER::TYPE& riemann_solver_type,
             const hier::Box& domain) const;
@@ -62,10 +62,10 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxAndVelocityFromPrimitiveVariables(
-            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_minus,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_plus,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_minus,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_plus,
             const DIRECTION::TYPE& direction,
             const RIEMANN_SOLVER::TYPE& riemann_solver_type,
             const hier::Box& domain) const;
@@ -77,10 +77,10 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxAndVelocityInXDirectionFromConservativeVariablesHLLC(
-            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_L,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_R,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_L,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_R,
             const hier::Box& domain,
             bool compute_velocity) const;
         
@@ -90,10 +90,10 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxAndVelocityInYDirectionFromConservativeVariablesHLLC(
-            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_B,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_T,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_B,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_T,
             const hier::Box& domain,
             bool compute_velocity) const;
         
@@ -103,10 +103,10 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxAndVelocityInZDirectionFromConservativeVariablesHLLC(
-            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_B,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_F,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_B,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_F,
             const hier::Box& domain,
             bool compute_velocity) const;
         
@@ -116,10 +116,10 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxAndVelocityInXDirectionFromPrimitiveVariablesHLLC(
-            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_L,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_R,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_L,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_R,
             const hier::Box& domain,
             bool compute_velocity) const;
         
@@ -129,10 +129,10 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxAndVelocityInYDirectionFromPrimitiveVariablesHLLC(
-            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_B,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_T,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_B,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_T,
             const hier::Box& domain,
             bool compute_velocity) const;
         
@@ -142,10 +142,10 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxAndVelocityInZDirectionFromPrimitiveVariablesHLLC(
-            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_B,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_F,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_B,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_F,
             const hier::Box& domain,
             bool compute_velocity) const;
         
@@ -155,10 +155,10 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxAndVelocityInXDirectionFromConservativeVariablesHLLC_HLL(
-            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_L,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_R,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_L,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_R,
             const hier::Box& domain,
             bool compute_velocity) const;
         
@@ -168,10 +168,10 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxAndVelocityInYDirectionFromConservativeVariablesHLLC_HLL(
-            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_B,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_T,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_B,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_T,
             const hier::Box& domain,
             bool compute_velocity) const;
         
@@ -181,10 +181,10 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxAndVelocityInZDirectionFromConservativeVariablesHLLC_HLL(
-            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_B,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_F,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_B,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_F,
             const hier::Box& domain,
             bool compute_velocity) const;
         
@@ -194,10 +194,10 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxAndVelocityInXDirectionFromPrimitiveVariablesHLLC_HLL(
-            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_L,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_R,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_L,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_R,
             const hier::Box& domain,
             bool compute_velocity) const;
         
@@ -207,10 +207,10 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxAndVelocityInYDirectionFromPrimitiveVariablesHLLC_HLL(
-            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_B,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_T,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_B,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_T,
             const hier::Box& domain,
             bool compute_velocity) const;
         
@@ -220,10 +220,10 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxAndVelocityInZDirectionFromPrimitiveVariablesHLLC_HLL(
-            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_B,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_F,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_B,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_F,
             const hier::Box& domain,
             bool compute_velocity) const;
         

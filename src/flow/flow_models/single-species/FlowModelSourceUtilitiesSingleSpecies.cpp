@@ -269,7 +269,7 @@ FlowModelSourceUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()
                 if (!d_data_gruneisen_parameter)
                 {
                     // Create the cell data of Gruneisen parameter.
-                    d_data_gruneisen_parameter.reset(new pdat::CellData<double>(
+                    d_data_gruneisen_parameter.reset(new pdat::CellData<Real>(
                         interior_box, 1, d_subghostcell_dims_gruneisen_parameter));
                 }
             }
@@ -365,7 +365,7 @@ FlowModelSourceUtilitiesSingleSpecies::computeDerivedCellData()
  */
 void
 FlowModelSourceUtilitiesSingleSpecies::computeSourceTermsOnPatch(
-    const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+    const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
     const double time,
     const double dt,
     const int RK_step_number)
@@ -388,11 +388,11 @@ FlowModelSourceUtilitiesSingleSpecies::computeSourceTermsOnPatch(
         const HAMERS_SHARED_PTR<hier::VariableContext> data_context = flow_model_tmp->getDataContext();
         
         // Get the cell data of source.
-        HAMERS_SHARED_PTR<pdat::CellData<double> > source(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > source(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(variable_source, data_context)));
         
-        std::vector<double*> S;
+        std::vector<Real*> S;
         S.reserve(d_num_eqn);
         for (int si = 0; si < d_num_eqn; si++)
         {
@@ -409,11 +409,11 @@ FlowModelSourceUtilitiesSingleSpecies::computeSourceTermsOnPatch(
         if (d_has_gravity)
         {
             // Get the cell data of momentum.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum =
                 flow_model_tmp->getCellData("MOMENTUM");
             
             // Get the cell data of density.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_density =
                 flow_model_tmp->getCellData("DENSITY");
             
             /*
@@ -434,12 +434,12 @@ FlowModelSourceUtilitiesSingleSpecies::computeSourceTermsOnPatch(
             const hier::IntVector subghostcell_dims_density = subghost_box_density.numberCells();
             
             //Get the pointer to the cell data of density.
-            double* rho = data_density->getPointer(0);
+            Real* rho = data_density->getPointer(0);
             
             if (d_dim == tbox::Dimension(1))
             {
                 // Get the pointer to cell data of momentum.
-                double* rho_u = data_momentum->getPointer(0);
+                Real* rho_u = data_momentum->getPointer(0);
                 
                 /*
                  * Compute the source due to gravity.
@@ -453,15 +453,15 @@ FlowModelSourceUtilitiesSingleSpecies::computeSourceTermsOnPatch(
                     const int idx_momentum = i + num_subghosts_momentum[0];
                     const int idx_density  = i + num_subghosts_density[0];
                     
-                    S[1][idx_source] += dt*rho[idx_density]*d_gravity[0];
-                    S[2][idx_source] += dt*rho_u[idx_momentum]*d_gravity[0];
+                    S[1][idx_source] += Real(dt)*rho[idx_density]*d_gravity[0];
+                    S[2][idx_source] += Real(dt)*rho_u[idx_momentum]*d_gravity[0];
                 }
             }
             else if (d_dim == tbox::Dimension(2))
             {
                 // Get the pointer to cell data of momentum.
-                double* rho_u = data_momentum->getPointer(0);
-                double* rho_v = data_momentum->getPointer(1);
+                Real* rho_u = data_momentum->getPointer(0);
+                Real* rho_v = data_momentum->getPointer(1);
                 
                 /*
                  * Compute the source due to gravity.
@@ -484,9 +484,9 @@ FlowModelSourceUtilitiesSingleSpecies::computeSourceTermsOnPatch(
                         const int idx_density = (i + num_subghosts_density[0]) +
                             (j + num_subghosts_density[1])*subghostcell_dims_density[0];
                         
-                        S[1][idx_source] += dt*rho[idx_density]*d_gravity[0];
-                        S[2][idx_source] += dt*rho[idx_density]*d_gravity[1];
-                        S[3][idx_source] += dt*
+                        S[1][idx_source] += Real(dt)*rho[idx_density]*d_gravity[0];
+                        S[2][idx_source] += Real(dt)*rho[idx_density]*d_gravity[1];
+                        S[3][idx_source] += Real(dt)*
                             (rho_u[idx_momentum]*d_gravity[0] +
                              rho_v[idx_momentum]*d_gravity[1]);
                     }
@@ -495,9 +495,9 @@ FlowModelSourceUtilitiesSingleSpecies::computeSourceTermsOnPatch(
             else if (d_dim == tbox::Dimension(3))
             {
                 // Get the pointer to cell data of momentum.
-                double* rho_u = data_momentum->getPointer(0);
-                double* rho_v = data_momentum->getPointer(1);
-                double* rho_w = data_momentum->getPointer(2);
+                Real* rho_u = data_momentum->getPointer(0);
+                Real* rho_v = data_momentum->getPointer(1);
+                Real* rho_w = data_momentum->getPointer(2);
                 
                 /*
                  * Compute the source due to gravity.
@@ -529,10 +529,10 @@ FlowModelSourceUtilitiesSingleSpecies::computeSourceTermsOnPatch(
                                 (k + num_subghosts_density[2])*subghostcell_dims_density[0]*
                                     subghostcell_dims_density[1];
                             
-                            S[1][idx_source] += dt*rho[idx_density]*d_gravity[0];
-                            S[2][idx_source] += dt*rho[idx_density]*d_gravity[1];
-                            S[3][idx_source] += dt*rho[idx_density]*d_gravity[2];
-                            S[4][idx_source] += dt*
+                            S[1][idx_source] += Real(dt)*rho[idx_density]*d_gravity[0];
+                            S[2][idx_source] += Real(dt)*rho[idx_density]*d_gravity[1];
+                            S[3][idx_source] += Real(dt)*rho[idx_density]*d_gravity[2];
+                            S[4][idx_source] += Real(dt)*
                                 (rho_u[idx_momentum]*d_gravity[0] +
                                  rho_v[idx_momentum]*d_gravity[1] +
                                  rho_w[idx_momentum]*d_gravity[2]);
@@ -561,7 +561,7 @@ FlowModelSourceUtilitiesSingleSpecies::getStableDtOnPatch()
     // Create empty box.
     const hier::Box empty_box(d_dim);
     
-    double dt_stable_global = tbox::MathUtilities<double>::getMax();
+    Real dt_stable_global = tbox::MathUtilities<Real>::getMax();
     
     if (d_has_source_terms)
     {
@@ -592,7 +592,7 @@ FlowModelSourceUtilitiesSingleSpecies::getStableDtOnPatch()
             }
             
             // Get the cell data of sound speed.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_sound_speed =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_sound_speed =
                 flow_model_tmp->getCellData("SOUND_SPEED");
             
             /*
@@ -613,14 +613,14 @@ FlowModelSourceUtilitiesSingleSpecies::getStableDtOnPatch()
             const hier::IntVector subghostcell_dims_sound_speed = subghost_box_sound_speed.numberCells();
             
             // Get the pointer to the cell data of Gruneisen parameter.
-            double* Gamma = d_data_gruneisen_parameter->getPointer(0);
+            Real* Gamma = d_data_gruneisen_parameter->getPointer(0);
             
             // Get the pointer to the cell data of sound speed.
-            double* c = data_sound_speed->getPointer(0);
+            Real* c = data_sound_speed->getPointer(0);
             
             if (d_dim == tbox::Dimension(1))
             {
-                const double g_mag = fabs(d_gravity[0]);
+                const Real g_mag = std::abs(d_gravity[0]);
                 
                 /*
                  * Compute the stable time step size.
@@ -633,15 +633,15 @@ FlowModelSourceUtilitiesSingleSpecies::getStableDtOnPatch()
                     const int idx_gruneisen_parameter = i + d_num_subghosts_gruneisen_parameter[0];
                     const int idx_sound_speed         = i + num_subghosts_sound_speed[0];
                     
-                    const double dt_stable_local = c[idx_sound_speed]/
-                        (g_mag*sqrt(double(2)*Gamma[idx_gruneisen_parameter]*(Gamma[idx_gruneisen_parameter] + double(1))));
+                    const Real dt_stable_local = c[idx_sound_speed]/
+                        (g_mag*std::sqrt(Real(2)*Gamma[idx_gruneisen_parameter]*(Gamma[idx_gruneisen_parameter] + Real(1))));
                     
-                    dt_stable_global = fmin(dt_stable_local, dt_stable_global);
+                    dt_stable_global = std::min(dt_stable_local, dt_stable_global);
                 }
             }
             else if (d_dim == tbox::Dimension(2))
             {
-                const double g_mag = sqrt(d_gravity[0]*d_gravity[0] + d_gravity[1]*d_gravity[1]);
+                const Real g_mag = std::sqrt(d_gravity[0]*d_gravity[0] + d_gravity[1]*d_gravity[1]);
                 
                 /*
                  * Compute the stable time step size.
@@ -661,16 +661,16 @@ FlowModelSourceUtilitiesSingleSpecies::getStableDtOnPatch()
                         const int idx_sound_speed = (i + num_subghosts_sound_speed[0]) +
                             (j + num_subghosts_sound_speed[1])*subghostcell_dims_sound_speed[0];
                         
-                        const double dt_stable_local = c[idx_sound_speed]/
-                            (g_mag*sqrt(double(2)*Gamma[idx_gruneisen_parameter]*(Gamma[idx_gruneisen_parameter] + double(1))));
+                        const Real dt_stable_local = c[idx_sound_speed]/
+                            (g_mag*std::sqrt(Real(2)*Gamma[idx_gruneisen_parameter]*(Gamma[idx_gruneisen_parameter] + Real(1))));
                         
-                        dt_stable_global = fmin(dt_stable_local, dt_stable_global);
+                        dt_stable_global = std::min(dt_stable_local, dt_stable_global);
                     }
                 }
             }
             else if (d_dim == tbox::Dimension(3))
             {
-                const double g_mag = sqrt(d_gravity[0]*d_gravity[0] + d_gravity[1]*d_gravity[1] + d_gravity[2]*d_gravity[2]);
+                const Real g_mag = std::sqrt(d_gravity[0]*d_gravity[0] + d_gravity[1]*d_gravity[1] + d_gravity[2]*d_gravity[2]);
                 
                 /*
                  * Compute the stable time step size.
@@ -697,10 +697,10 @@ FlowModelSourceUtilitiesSingleSpecies::getStableDtOnPatch()
                                 (k + num_subghosts_sound_speed[2])*subghostcell_dims_sound_speed[0]*
                                     subghostcell_dims_sound_speed[1];
                             
-                            const double dt_stable_local = c[idx_sound_speed]/
-                                (g_mag*sqrt(double(2)*Gamma[idx_gruneisen_parameter]*(Gamma[idx_gruneisen_parameter] + double(1))));
+                            const Real dt_stable_local = c[idx_sound_speed]/
+                                (g_mag*std::sqrt(Real(2)*Gamma[idx_gruneisen_parameter]*(Gamma[idx_gruneisen_parameter] + Real(1))));
                             
-                            dt_stable_global = fmin(dt_stable_local, dt_stable_global);
+                            dt_stable_global = std::min(dt_stable_local, dt_stable_global);
                         }
                     }
                 }
@@ -708,7 +708,7 @@ FlowModelSourceUtilitiesSingleSpecies::getStableDtOnPatch()
         }
     }
     
-    return dt_stable_global;
+    return double(dt_stable_global);
 }
 
 
@@ -843,11 +843,11 @@ FlowModelSourceUtilitiesSingleSpecies::computeCellDataOfGruneisenParameter()
             HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
             
             // Get the cell data of density.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_density =
                 flow_model_tmp->getCellData("DENSITY");
             
             // Get the cell data of pressure.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_pressure =
                 flow_model_tmp->getCellData("PRESSURE");
             
             // Get the thermodynamic properties of the species.
@@ -855,9 +855,9 @@ FlowModelSourceUtilitiesSingleSpecies::computeCellDataOfGruneisenParameter()
             const int num_thermo_properties = d_equation_of_state_mixing_rules->
                 getNumberOfSpeciesThermodynamicProperties();
             
-            std::vector<double> thermo_properties;
-            std::vector<double*> thermo_properties_ptr;
-            std::vector<const double*> thermo_properties_const_ptr;
+            std::vector<Real> thermo_properties;
+            std::vector<Real*> thermo_properties_ptr;
+            std::vector<const Real*> thermo_properties_const_ptr;
             
             thermo_properties.resize(num_thermo_properties);
             thermo_properties_ptr.reserve(num_thermo_properties);

@@ -37,7 +37,7 @@ DiffusiveFluxReconstructorMidpoint::DiffusiveFluxReconstructorMidpoint(
 void
 DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
     hier::Patch& patch,
-    const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_diffusive_flux,
+    const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_diffusive_flux,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double time,
     const double dt,
@@ -80,8 +80,8 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
     const hier::IntVector diff_ghostcell_dims = diff_ghost_box.numberCells();
     
     // Get the side data of diffusive flux.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > diffusive_flux(
-        HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > diffusive_flux(
+        HAMERS_SHARED_PTR_CAST<pdat::SideData<Real>, hier::PatchData>(
             patch.getPatchData(variable_diffusive_flux, data_context)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -90,7 +90,7 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
 #endif
     
     // Initialize the data of diffusive flux to zero.
-    diffusive_flux->fillAll(double(0));
+    diffusive_flux->fillAll(Real(0));
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -120,8 +120,8 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
          * Delcare containers for computing diffusivities at midpoints.
          */
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > var_cell_data_for_diffusivities;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > var_side_data_for_diffusivities;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > var_cell_data_for_diffusivities;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > var_side_data_for_diffusivities;
         std::vector<int> var_cell_data_for_diffusivities_component_idx;
         
         diffusive_flux_utilities->getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities(
@@ -146,33 +146,33 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
          * Delcare containers for computing fluxes in different directions.
          */
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_data_x;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > diffusivities_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > diffusivities_data_x;
         
         std::vector<std::vector<int> > var_component_idx_x;
         
         std::vector<std::vector<int> > diffusivities_component_idx_x;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_x_midpoint_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > derivatives_x_midpoint_x;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivatives_x_node;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > derivatives_x_node;
         
-        std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_x_midpoint_x_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_x_midpoint_x_computed;
 
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_x_node_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivatives_x_node_computed;
         
-        HAMERS_SHARED_PTR<pdat::SideData<double> > diffusive_flux_midpoint;
-        diffusive_flux_midpoint.reset(new pdat::SideData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
+        HAMERS_SHARED_PTR<pdat::SideData<Real> > diffusive_flux_midpoint;
+        diffusive_flux_midpoint.reset(new pdat::SideData<Real>(interior_box, d_num_eqn, d_num_diff_ghosts));
         
-        std::vector<double*> F_midpoint_x;
+        std::vector<Real*> F_midpoint_x;
         F_midpoint_x.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
             F_midpoint_x.push_back(diffusive_flux_midpoint->getPointer(0, ei));
         }
         
-        diffusive_flux_midpoint->fillAll(double(0));
+        diffusive_flux_midpoint->fillAll(Real(0));
         
         /*
          * (1) Compute the flux in the x-direction.
@@ -227,10 +227,10 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 const int mu_idx = diffusivities_component_idx_x[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_x[ei][vi]->getPointer(0, mu_idx);
+                Real* mu = diffusivities_data_x[ei][vi]->getPointer(0, mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudx = derivatives_x_midpoint_x[ei][vi]->getPointer(0, 0);
+                Real* dudx = derivatives_x_midpoint_x[ei][vi]->getPointer(0, 0);
                 
                 /*
                  * Get the sub-ghost cell width of the diffusivity.
@@ -310,8 +310,8 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
          * Delcare containers for computing diffusivities at midpoints.
          */
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > var_cell_data_for_diffusivities;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > var_side_data_for_diffusivities;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > var_cell_data_for_diffusivities;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > var_side_data_for_diffusivities;
         std::vector<int> var_cell_data_for_diffusivities_component_idx;
         
         diffusive_flux_utilities->getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities(
@@ -336,11 +336,11 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
          * Delcare containers for computing fluxes in different directions.
          */
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_x;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_data_y;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > diffusivities_data_x;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > diffusivities_data_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > diffusivities_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > diffusivities_data_y;
         
         std::vector<std::vector<int> > var_component_idx_x;
         std::vector<std::vector<int> > var_component_idx_y;
@@ -348,29 +348,29 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
         std::vector<std::vector<int> > diffusivities_component_idx_x;
         std::vector<std::vector<int> > diffusivities_component_idx_y;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_x_midpoint_x;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_y_midpoint_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > derivatives_x_midpoint_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > derivatives_y_midpoint_x;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_x_midpoint_y;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_y_midpoint_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > derivatives_x_midpoint_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > derivatives_y_midpoint_y;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivatives_x_node;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivatives_y_node;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > derivatives_x_node;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > derivatives_y_node;
         
-        std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_x_midpoint_x_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_y_midpoint_x_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_x_midpoint_x_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_y_midpoint_x_computed;
         
-        std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_x_midpoint_y_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_y_midpoint_y_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_x_midpoint_y_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_y_midpoint_y_computed;
         
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_x_node_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_y_node_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivatives_x_node_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivatives_y_node_computed;
         
-        HAMERS_SHARED_PTR<pdat::SideData<double> > diffusive_flux_midpoint;
-        diffusive_flux_midpoint.reset(new pdat::SideData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
+        HAMERS_SHARED_PTR<pdat::SideData<Real> > diffusive_flux_midpoint;
+        diffusive_flux_midpoint.reset(new pdat::SideData<Real>(interior_box, d_num_eqn, d_num_diff_ghosts));
         
-        std::vector<double*> F_midpoint_x;
-        std::vector<double*> F_midpoint_y;
+        std::vector<Real*> F_midpoint_x;
+        std::vector<Real*> F_midpoint_y;
         F_midpoint_x.reserve(d_num_eqn);
         F_midpoint_y.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
@@ -379,7 +379,7 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
             F_midpoint_y.push_back(diffusive_flux_midpoint->getPointer(1, ei));
         }
         
-        diffusive_flux_midpoint->fillAll(double(0));
+        diffusive_flux_midpoint->fillAll(Real(0));
         
         /*
          * (1) Compute the flux in the x-direction.
@@ -471,10 +471,10 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 const int mu_idx = diffusivities_component_idx_x[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_x[ei][vi]->getPointer(0, mu_idx);
+                Real* mu = diffusivities_data_x[ei][vi]->getPointer(0, mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudx = derivatives_x_midpoint_x[ei][vi]->getPointer(0, 0);
+                Real* dudx = derivatives_x_midpoint_x[ei][vi]->getPointer(0, 0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -521,10 +521,10 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 const int mu_idx = diffusivities_component_idx_y[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_y[ei][vi]->getPointer(0, mu_idx);
+                Real* mu = diffusivities_data_y[ei][vi]->getPointer(0, mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudy = derivatives_y_midpoint_x[ei][vi]->getPointer(0, 0);
+                Real* dudy = derivatives_y_midpoint_x[ei][vi]->getPointer(0, 0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -677,10 +677,10 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 const int mu_idx = diffusivities_component_idx_x[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_x[ei][vi]->getPointer(1, mu_idx);
+                Real* mu = diffusivities_data_x[ei][vi]->getPointer(1, mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudx = derivatives_x_midpoint_y[ei][vi]->getPointer(1, 0);
+                Real* dudx = derivatives_x_midpoint_y[ei][vi]->getPointer(1, 0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -727,10 +727,10 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 const int mu_idx = diffusivities_component_idx_y[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_y[ei][vi]->getPointer(1, mu_idx);
+                Real* mu = diffusivities_data_y[ei][vi]->getPointer(1, mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudy = derivatives_y_midpoint_y[ei][vi]->getPointer(1, 0);
+                Real* dudy = derivatives_y_midpoint_y[ei][vi]->getPointer(1, 0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -836,8 +836,8 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
          * Delcare containers for computing diffusivities at midpoints.
          */
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > var_cell_data_for_diffusivities;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > var_side_data_for_diffusivities;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > var_cell_data_for_diffusivities;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > var_side_data_for_diffusivities;
         std::vector<int> var_cell_data_for_diffusivities_component_idx;
         
         diffusive_flux_utilities->getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities(
@@ -857,13 +857,13 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
          * Delcare containers for computing fluxes in different directions.
          */
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_x;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_y;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_z;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_data_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_data_z;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > diffusivities_data_x;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > diffusivities_data_y;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > diffusivities_data_z;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > diffusivities_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > diffusivities_data_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > diffusivities_data_z;
         
         std::vector<std::vector<int> > var_component_idx_x;
         std::vector<std::vector<int> > var_component_idx_y;
@@ -873,44 +873,44 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
         std::vector<std::vector<int> > diffusivities_component_idx_y;
         std::vector<std::vector<int> > diffusivities_component_idx_z;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_x_midpoint_x;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_y_midpoint_x;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_z_midpoint_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > derivatives_x_midpoint_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > derivatives_y_midpoint_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > derivatives_z_midpoint_x;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_x_midpoint_y;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_y_midpoint_y;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_z_midpoint_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > derivatives_x_midpoint_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > derivatives_y_midpoint_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > derivatives_z_midpoint_y;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_x_midpoint_z;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_y_midpoint_z;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_z_midpoint_z;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > derivatives_x_midpoint_z;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > derivatives_y_midpoint_z;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > derivatives_z_midpoint_z;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivatives_x_node;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivatives_y_node;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivatives_z_node;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > derivatives_x_node;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > derivatives_y_node;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > derivatives_z_node;
         
-        std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_x_midpoint_x_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_y_midpoint_x_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_z_midpoint_x_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_x_midpoint_x_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_y_midpoint_x_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_z_midpoint_x_computed;
         
-        std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_x_midpoint_y_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_y_midpoint_y_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_z_midpoint_y_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_x_midpoint_y_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_y_midpoint_y_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_z_midpoint_y_computed;
         
-        std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_x_midpoint_z_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_y_midpoint_z_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_z_midpoint_z_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_x_midpoint_z_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_y_midpoint_z_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_z_midpoint_z_computed;
         
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_x_node_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_y_node_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_z_node_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivatives_x_node_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivatives_y_node_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivatives_z_node_computed;
         
-        HAMERS_SHARED_PTR<pdat::SideData<double> > diffusive_flux_midpoint;
-        diffusive_flux_midpoint.reset(new pdat::SideData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
+        HAMERS_SHARED_PTR<pdat::SideData<Real> > diffusive_flux_midpoint;
+        diffusive_flux_midpoint.reset(new pdat::SideData<Real>(interior_box, d_num_eqn, d_num_diff_ghosts));
         
-        std::vector<double*> F_midpoint_x;
-        std::vector<double*> F_midpoint_y;
-        std::vector<double*> F_midpoint_z;
+        std::vector<Real*> F_midpoint_x;
+        std::vector<Real*> F_midpoint_y;
+        std::vector<Real*> F_midpoint_z;
         F_midpoint_x.reserve(d_num_eqn);
         F_midpoint_y.reserve(d_num_eqn);
         F_midpoint_z.reserve(d_num_eqn);
@@ -921,35 +921,35 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
             F_midpoint_z.push_back(diffusive_flux_midpoint->getPointer(2, ei));
         }
         
-        diffusive_flux_midpoint->fillAll(double(0));
+        diffusive_flux_midpoint->fillAll(Real(0));
         
         /*
          * Delcare containers for subgrid scale model.
          */
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > var_data_sgs_x;
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > var_data_sgs_y;
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > var_data_sgs_z;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > var_data_sgs_x;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > var_data_sgs_y;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > var_data_sgs_z;
         
         std::vector<int> var_component_idx_sgs_x;
         std::vector<int> var_component_idx_sgs_y;
         std::vector<int> var_component_idx_sgs_z;
         
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_x_midpoint_x;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_y_midpoint_x;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_z_midpoint_x;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_sgs_x_midpoint_x;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_sgs_y_midpoint_x;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_sgs_z_midpoint_x;
         
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_x_midpoint_y;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_y_midpoint_y;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_z_midpoint_y;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_sgs_x_midpoint_y;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_sgs_y_midpoint_y;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_sgs_z_midpoint_y;
         
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_x_midpoint_z;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_y_midpoint_z;
-        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > derivatives_sgs_z_midpoint_z;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_sgs_x_midpoint_z;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_sgs_y_midpoint_z;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivatives_sgs_z_midpoint_z;
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_sgs_x_node;
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_sgs_y_node;
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > derivatives_sgs_z_node;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivatives_sgs_x_node;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivatives_sgs_y_node;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivatives_sgs_z_node;
         
         if (diffusive_flux_utilities->useSubgridScaleModel())
         {
@@ -1218,51 +1218,51 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
              * (4) Update the diffusivities with subgrid scale model
              */
             
-            std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_midpoint_x;
-            std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_midpoint_y;
-            std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > derivatives_midpoint_z;
+            std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > derivatives_midpoint_x;
+            std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > derivatives_midpoint_y;
+            std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > > derivatives_midpoint_z;
             
-            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >
                 derivatives_x_midpoint_x_pair(
                     DIRECTION::X_DIRECTION,
                     derivatives_sgs_x_midpoint_x);
             
-            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >
                 derivatives_y_midpoint_x_pair(
                     DIRECTION::Y_DIRECTION,
                     derivatives_sgs_y_midpoint_x);
             
-            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >
                 derivatives_z_midpoint_x_pair(
                     DIRECTION::Z_DIRECTION,
                     derivatives_sgs_z_midpoint_x);
             
-            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >
                 derivatives_x_midpoint_y_pair(
                     DIRECTION::X_DIRECTION,
                     derivatives_sgs_x_midpoint_y);
             
-            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >
                 derivatives_y_midpoint_y_pair(
                     DIRECTION::Y_DIRECTION,
                     derivatives_sgs_y_midpoint_y);
             
-            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >
                 derivatives_z_midpoint_y_pair(
                     DIRECTION::Z_DIRECTION,
                     derivatives_sgs_z_midpoint_y);
             
-            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >
                 derivatives_x_midpoint_z_pair(
                     DIRECTION::X_DIRECTION,
                     derivatives_sgs_x_midpoint_z);
             
-            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >
                 derivatives_y_midpoint_z_pair(
                     DIRECTION::Y_DIRECTION,
                     derivatives_sgs_y_midpoint_z);
             
-            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >
+            std::pair<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >
                 derivatives_z_midpoint_z_pair(
                     DIRECTION::Z_DIRECTION,
                     derivatives_sgs_z_midpoint_z);
@@ -1424,10 +1424,10 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 const int mu_idx = diffusivities_component_idx_x[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_x[ei][vi]->getPointer(0, mu_idx);
+                Real* mu = diffusivities_data_x[ei][vi]->getPointer(0, mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudx = derivatives_x_midpoint_x[ei][vi]->getPointer(0, 0);
+                Real* dudx = derivatives_x_midpoint_x[ei][vi]->getPointer(0, 0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -1483,10 +1483,10 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 const int mu_idx = diffusivities_component_idx_y[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_y[ei][vi]->getPointer(0, mu_idx);
+                Real* mu = diffusivities_data_y[ei][vi]->getPointer(0, mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudy = derivatives_y_midpoint_x[ei][vi]->getPointer(0, 0);
+                Real* dudy = derivatives_y_midpoint_x[ei][vi]->getPointer(0, 0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -1542,10 +1542,10 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 const int mu_idx = diffusivities_component_idx_z[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_z[ei][vi]->getPointer(0, mu_idx);
+                Real* mu = diffusivities_data_z[ei][vi]->getPointer(0, mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudz = derivatives_z_midpoint_x[ei][vi]->getPointer(0, 0);
+                Real* dudz = derivatives_z_midpoint_x[ei][vi]->getPointer(0, 0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -1750,10 +1750,10 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 const int mu_idx = diffusivities_component_idx_x[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_x[ei][vi]->getPointer(1, mu_idx);
+                Real* mu = diffusivities_data_x[ei][vi]->getPointer(1, mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudx = derivatives_x_midpoint_y[ei][vi]->getPointer(1, 0);
+                Real* dudx = derivatives_x_midpoint_y[ei][vi]->getPointer(1, 0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -1809,10 +1809,10 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 const int mu_idx = diffusivities_component_idx_y[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_y[ei][vi]->getPointer(1, mu_idx);
+                Real* mu = diffusivities_data_y[ei][vi]->getPointer(1, mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudy = derivatives_y_midpoint_y[ei][vi]->getPointer(1, 0);
+                Real* dudy = derivatives_y_midpoint_y[ei][vi]->getPointer(1, 0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -1868,10 +1868,10 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 const int mu_idx = diffusivities_component_idx_z[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_z[ei][vi]->getPointer(1, mu_idx);
+                Real* mu = diffusivities_data_z[ei][vi]->getPointer(1, mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudz = derivatives_z_midpoint_y[ei][vi]->getPointer(1, 0);
+                Real* dudz = derivatives_z_midpoint_y[ei][vi]->getPointer(1, 0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -2076,10 +2076,10 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 const int mu_idx = diffusivities_component_idx_x[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_x[ei][vi]->getPointer(2, mu_idx);
+                Real* mu = diffusivities_data_x[ei][vi]->getPointer(2, mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudx = derivatives_x_midpoint_z[ei][vi]->getPointer(2, 0);
+                Real* dudx = derivatives_x_midpoint_z[ei][vi]->getPointer(2, 0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -2135,10 +2135,10 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 const int mu_idx = diffusivities_component_idx_y[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_y[ei][vi]->getPointer(2, mu_idx);
+                Real* mu = diffusivities_data_y[ei][vi]->getPointer(2, mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudy = derivatives_y_midpoint_z[ei][vi]->getPointer(2, 0);
+                Real* dudy = derivatives_y_midpoint_z[ei][vi]->getPointer(2, 0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -2194,10 +2194,10 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
                 const int mu_idx = diffusivities_component_idx_z[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_z[ei][vi]->getPointer(2, mu_idx);
+                Real* mu = diffusivities_data_z[ei][vi]->getPointer(2, mu_idx);
                 
                 // Get the pointer to derivative.
-                double* dudz = derivatives_z_midpoint_z[ei][vi]->getPointer(2, 0);
+                Real* dudz = derivatives_z_midpoint_z[ei][vi]->getPointer(2, 0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -2303,9 +2303,9 @@ DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
  */
 void
 DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtMidpointX(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_x_midpoint_x,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_x_midpoint_x_computed,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_x,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_x_midpoint_x,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_x_midpoint_x_computed,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& data_x,
     const std::vector<int>& data_component_idx_x,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
@@ -2327,7 +2327,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtMidpointX(
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_0_inv = double(1)/dx[0];
+    const Real dx_0_inv = Real(1)/Real(dx[0]);
     
     hier::IntVector direction = hier::IntVector::getZero(d_dim);
     direction[0] = 1;
@@ -2343,7 +2343,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtMidpointX(
             == derivatives_x_midpoint_x_computed.end())
         {
             // Get the pointer to variable for derivative.
-            double* u = data_x[vi]->getPointer(u_idx);
+            Real* u = data_x[vi]->getPointer(u_idx);
             
             d_num_scratch_derivatives_midpoint_x_used++;
             // Declare container to store the derivative.
@@ -2352,8 +2352,8 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtMidpointX(
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
                 TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_x.size()) == d_num_scratch_derivatives_midpoint_x_used - 1);
 #endif
-                d_scratch_derivatives_midpoint_x.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
-                    new pdat::SideData<double>(
+                d_scratch_derivatives_midpoint_x.push_back(HAMERS_SHARED_PTR<pdat::SideData<Real> >(
+                    new pdat::SideData<Real>(
                         interior_box, 1, d_num_diff_ghosts, direction)));
             }
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -2364,7 +2364,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtMidpointX(
 #endif
             
             // Get the pointer to the derivative at midpoint.
-            double* dudx = d_scratch_derivatives_midpoint_x[d_num_scratch_derivatives_midpoint_x_used - 1]->getPointer(0, 0);
+            Real* dudx = d_scratch_derivatives_midpoint_x[d_num_scratch_derivatives_midpoint_x_used - 1]->getPointer(0, 0);
             
             /*
              * Get the ghost cell widths and ghost box dimensions of the variables.
@@ -2401,7 +2401,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtMidpointX(
                 domain_dims,
                 dx_0_inv);
             
-            std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
+            std::pair<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivative_pair(
                 u,
                 d_scratch_derivatives_midpoint_x[d_num_scratch_derivatives_midpoint_x_used - 1]);
             
@@ -2420,9 +2420,9 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtMidpointX(
  */
 void
 DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtMidpointX(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_x_midpoint_x,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_x_midpoint_x_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& derivatives_x_midpoint_x,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_x_midpoint_x_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_x,
     const std::vector<std::vector<int> >& data_component_idx_x,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
@@ -2460,9 +2460,9 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtMidpointX(
  */
 void
 DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtMidpointY(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_y_midpoint_y,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_y_midpoint_y_computed,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_y,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_y_midpoint_y,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_y_midpoint_y_computed,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& data_y,
     const std::vector<int>& data_component_idx_y,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
@@ -2495,7 +2495,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtMidpointY(
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_1_inv = double(1)/dx[1];
+    const Real dx_1_inv = Real(1)/Real(dx[1]);
     
     hier::IntVector direction = hier::IntVector::getZero(d_dim);
     direction[1] = 1;
@@ -2511,7 +2511,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtMidpointY(
             == derivatives_y_midpoint_y_computed.end())
         {
             // Get the pointer to variable for derivative.
-            double* u = data_y[vi]->getPointer(u_idx);
+            Real* u = data_y[vi]->getPointer(u_idx);
             
             d_num_scratch_derivatives_midpoint_y_used++;
             // Declare container to store the derivative.
@@ -2520,8 +2520,8 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtMidpointY(
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
                 TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_y.size()) == d_num_scratch_derivatives_midpoint_y_used - 1);
 #endif
-                d_scratch_derivatives_midpoint_y.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
-                    new pdat::SideData<double>(
+                d_scratch_derivatives_midpoint_y.push_back(HAMERS_SHARED_PTR<pdat::SideData<Real> >(
+                    new pdat::SideData<Real>(
                         interior_box, 1, d_num_diff_ghosts, direction)));
             }
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -2532,7 +2532,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtMidpointY(
 #endif
             
             // Get the pointer to the derivative at midpoint.
-            double* dudy = d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]->getPointer(1, 0);
+            Real* dudy = d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]->getPointer(1, 0);
             
             /*
              * Get the ghost cell widths and ghost box dimensions of the variables.
@@ -2569,7 +2569,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtMidpointY(
                 domain_dims,
                 dx_1_inv);
             
-            std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
+            std::pair<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivative_pair(
                 u,
                 d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]);
             
@@ -2588,9 +2588,9 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtMidpointY(
  */
 void
 DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtMidpointY(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_y_midpoint_y,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_y_midpoint_y_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& derivatives_y_midpoint_y,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_y_midpoint_y_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_y,
     const std::vector<std::vector<int> >& data_component_idx_y,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
@@ -2637,9 +2637,9 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtMidpointY(
  */
 void
 DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtMidpointZ(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_z_midpoint_z,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_z_midpoint_z_computed,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_z,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_z_midpoint_z,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_z_midpoint_z_computed,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& data_z,
     const std::vector<int>& data_component_idx_z,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
@@ -2680,7 +2680,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtMidpointZ(
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_2_inv = double(1)/dx[2];
+    const Real dx_2_inv = Real(1)/Real(dx[2]);
     
     hier::IntVector direction = hier::IntVector::getZero(d_dim);
     direction[2] = 1;
@@ -2696,7 +2696,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtMidpointZ(
             == derivatives_z_midpoint_z_computed.end())
         {
             // Get the pointer to variable for derivative.
-            double* u = data_z[vi]->getPointer(u_idx);
+            Real* u = data_z[vi]->getPointer(u_idx);
             
             d_num_scratch_derivatives_midpoint_z_used++;
             // Declare container to store the derivative.
@@ -2705,8 +2705,8 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtMidpointZ(
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
                 TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_z.size()) == d_num_scratch_derivatives_midpoint_z_used - 1);
 #endif
-                d_scratch_derivatives_midpoint_z.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
-                    new pdat::SideData<double>(
+                d_scratch_derivatives_midpoint_z.push_back(HAMERS_SHARED_PTR<pdat::SideData<Real> >(
+                    new pdat::SideData<Real>(
                         interior_box, 1, d_num_diff_ghosts, direction)));
             }
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -2717,7 +2717,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtMidpointZ(
 #endif
             
             // Get the pointer to the derivative at midpoint.
-            double* dudz = d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]->getPointer(2, 0);
+            Real* dudz = d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]->getPointer(2, 0);
             
             /*
              * Get the ghost cell widths and ghost box dimensions of the variables.
@@ -2754,7 +2754,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtMidpointZ(
                 domain_dims,
                 dx_2_inv);
             
-            std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
+            std::pair<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivative_pair(
                 u,
                 d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]);
             
@@ -2773,9 +2773,9 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtMidpointZ(
  */
 void
 DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtMidpointZ(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_z_midpoint_z,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_z_midpoint_z_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& derivatives_z_midpoint_z,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_z_midpoint_z_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_z,
     const std::vector<std::vector<int> >& data_component_idx_z,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
@@ -2830,9 +2830,9 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtMidpointZ(
  */
 void
 DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtNode(
-    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x_node,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x_node_computed,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_x,
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_x_node,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_x_node_computed,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& data_x,
     const std::vector<int>& data_component_idx_x,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_node)
@@ -2854,7 +2854,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtNode(
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_0_inv = double(1)/dx[0];
+    const Real dx_0_inv = Real(1)/Real(dx[0]);
     
     derivatives_x_node.reserve(static_cast<int>(data_x.size()));
     
@@ -2867,7 +2867,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtNode(
             == derivatives_x_node_computed.end())
         {
             // Get the pointer to variable for derivative.
-            double* u = data_x[vi]->getPointer(u_idx);
+            Real* u = data_x[vi]->getPointer(u_idx);
             
             d_num_scratch_derivatives_node_used++;
             // Declare container to store the derivative.
@@ -2876,8 +2876,8 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtNode(
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
                 TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_node.size()) == d_num_scratch_derivatives_node_used - 1);
 #endif
-                d_scratch_derivatives_node.push_back(HAMERS_SHARED_PTR<pdat::CellData<double> >(
-                    new pdat::CellData<double>(
+                d_scratch_derivatives_node.push_back(HAMERS_SHARED_PTR<pdat::CellData<Real> >(
+                    new pdat::CellData<Real>(
                         interior_box, 1, d_num_diff_ghosts)));
             }
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -2888,7 +2888,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtNode(
 #endif
             
             // Get the pointer to the derivative.
-            double* dudx = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
+            Real* dudx = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
             
             /*
              * Get the ghost cell widths and ghost box dimensions of the variables.
@@ -2924,7 +2924,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtNode(
                 domain_dims,
                 dx_0_inv);
             
-            std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+            std::pair<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_pair(
                 u,
                 d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]);
             
@@ -2943,9 +2943,9 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtNode(
  */
 void
 DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtNode(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_x_node,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x_node_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivatives_x_node,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_x_node_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_x,
     const std::vector<std::vector<int> >& data_component_idx_x,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_node)
@@ -2983,9 +2983,9 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInXAtNode(
  */
 void
 DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtNode(
-    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y_node,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y_node_computed,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_y,
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_y_node,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_y_node_computed,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& data_y,
     const std::vector<int>& data_component_idx_y,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_node)
@@ -3018,7 +3018,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtNode(
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_1_inv = double(1)/dx[1];
+    const Real dx_1_inv = Real(1)/Real(dx[1]);
     
     derivatives_y_node.reserve(static_cast<int>(data_y.size()));
     
@@ -3031,7 +3031,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtNode(
             == derivatives_y_node_computed.end())
         {
             // Get the pointer to variable for derivative.
-            double* u = data_y[vi]->getPointer(u_idx);
+            Real* u = data_y[vi]->getPointer(u_idx);
             
             d_num_scratch_derivatives_node_used++;
             // Declare container to store the derivative.
@@ -3040,8 +3040,8 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtNode(
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
                 TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_node.size()) == d_num_scratch_derivatives_node_used - 1);
 #endif
-                d_scratch_derivatives_node.push_back(HAMERS_SHARED_PTR<pdat::CellData<double> >(
-                    new pdat::CellData<double>(
+                d_scratch_derivatives_node.push_back(HAMERS_SHARED_PTR<pdat::CellData<Real> >(
+                    new pdat::CellData<Real>(
                         interior_box, 1, d_num_diff_ghosts)));
             }
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -3052,7 +3052,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtNode(
 #endif
             
             // Get the pointer to the derivative.
-            double* dudy = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
+            Real* dudy = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
             
             /*
              * Get the ghost cell widths and ghost box dimensions of the variables.
@@ -3088,7 +3088,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtNode(
                 domain_dims,
                 dx_1_inv);
             
-            std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+            std::pair<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_pair(
                 u,
                 d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]);
             
@@ -3107,9 +3107,9 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtNode(
  */
 void
 DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtNode(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_y_node,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y_node_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivatives_y_node,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_y_node_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_y,
     const std::vector<std::vector<int> >& data_component_idx_y,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_node)
@@ -3156,9 +3156,9 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInYAtNode(
  */
 void
 DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtNode(
-    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z_node,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z_node_computed,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_z,
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_z_node,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_z_node_computed,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& data_z,
     const std::vector<int>& data_component_idx_z,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_node)
@@ -3199,7 +3199,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtNode(
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_2_inv = double(1)/dx[2];
+    const Real dx_2_inv = Real(1)/Real(dx[2]);
     
     derivatives_z_node.reserve(static_cast<int>(data_z.size()));
     
@@ -3212,7 +3212,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtNode(
             == derivatives_z_node_computed.end())
         {
             // Get the pointer to variable for derivative.
-            double* u = data_z[vi]->getPointer(u_idx);
+            Real* u = data_z[vi]->getPointer(u_idx);
             
             d_num_scratch_derivatives_node_used++;
             // Declare container to store the derivative.
@@ -3221,8 +3221,8 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtNode(
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
                 TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_node.size()) == d_num_scratch_derivatives_node_used - 1);
 #endif
-                d_scratch_derivatives_node.push_back(HAMERS_SHARED_PTR<pdat::CellData<double> >(
-                    new pdat::CellData<double>(
+                d_scratch_derivatives_node.push_back(HAMERS_SHARED_PTR<pdat::CellData<Real> >(
+                    new pdat::CellData<Real>(
                         interior_box, 1, d_num_diff_ghosts)));
             }
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -3233,7 +3233,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtNode(
 #endif
             
             // Get the pointer to the derivative.
-            double* dudz = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
+            Real* dudz = d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]->getPointer(0);
             
             /*
              * Get the ghost cell widths and ghost box dimensions of the variables.
@@ -3269,7 +3269,7 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtNode(
                 domain_dims,
                 dx_2_inv);
             
-            std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
+            std::pair<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_pair(
                 u,
                 d_scratch_derivatives_node[d_num_scratch_derivatives_node_used - 1]);
             
@@ -3288,9 +3288,9 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtNode(
  */
 void
 DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtNode(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_z_node,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z_node_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivatives_z_node,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_z_node_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_z,
     const std::vector<std::vector<int> >& data_component_idx_z,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_node)
@@ -3345,8 +3345,8 @@ DiffusiveFluxReconstructorMidpoint::computeFirstDerivativesInZAtNode(
  */
 void
 DiffusiveFluxReconstructorMidpoint::interpolateDiffusivitiesFromNodeToMidpoint(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_side_data_for_diffusivities,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& var_cell_data_for_diffusivities,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& var_side_data_for_diffusivities,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& var_cell_data_for_diffusivities,
     const std::vector<int>& var_cell_data_for_diffusivities_component_idx,
     const hier::Patch& patch,
     const bool allocate_scratch_diffusivities_midpoint)
@@ -3375,7 +3375,7 @@ DiffusiveFluxReconstructorMidpoint::interpolateDiffusivitiesFromNodeToMidpoint(
 #endif
         
         // Get the pointer to variable for interpoation.
-        double* u_node = var_cell_data_for_diffusivities[vi]->getPointer(var_cell_data_for_diffusivities_component_idx[vi]);
+        Real* u_node = var_cell_data_for_diffusivities[vi]->getPointer(var_cell_data_for_diffusivities_component_idx[vi]);
         
         d_num_scratch_diffusivities_midpoint_used++;
         // Declare container to store the diffusivities.
@@ -3384,8 +3384,8 @@ DiffusiveFluxReconstructorMidpoint::interpolateDiffusivitiesFromNodeToMidpoint(
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
             TBOX_ASSERT(static_cast<int>(d_scratch_diffusivities_midpoint.size()) == d_num_scratch_diffusivities_midpoint_used - 1);
 #endif
-            d_scratch_diffusivities_midpoint.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
-                new pdat::SideData<double>(
+            d_scratch_diffusivities_midpoint.push_back(HAMERS_SHARED_PTR<pdat::SideData<Real> >(
+                new pdat::SideData<Real>(
                     interior_box, 1, d_num_diff_ghosts)));
         }
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -3415,7 +3415,7 @@ DiffusiveFluxReconstructorMidpoint::interpolateDiffusivitiesFromNodeToMidpoint(
         if (d_dim == tbox::Dimension(1))
         {
             // Get the pointer to the diffusivity at midpoint.
-            double* u_midpoint_x =
+            Real* u_midpoint_x =
                 d_scratch_diffusivities_midpoint[d_num_scratch_diffusivities_midpoint_used - 1]->getPointer(0, 0);
             
             // Interpolation in x-direction.
@@ -3440,9 +3440,9 @@ DiffusiveFluxReconstructorMidpoint::interpolateDiffusivitiesFromNodeToMidpoint(
         else if (d_dim == tbox::Dimension(2))
         {
             // Get the pointers to the diffusivities at midpoints.
-            double* u_midpoint_x =
+            Real* u_midpoint_x =
                 d_scratch_diffusivities_midpoint[d_num_scratch_diffusivities_midpoint_used - 1]->getPointer(0, 0);
-            double* u_midpoint_y =
+            Real* u_midpoint_y =
                 d_scratch_diffusivities_midpoint[d_num_scratch_diffusivities_midpoint_used - 1]->getPointer(1, 0);
             
             // Interpolation in x-direction.
@@ -3486,11 +3486,11 @@ DiffusiveFluxReconstructorMidpoint::interpolateDiffusivitiesFromNodeToMidpoint(
         else if (d_dim == tbox::Dimension(3))
         {
             // Get the pointers to the diffusivities at midpoints.
-            double* u_midpoint_x =
+            Real* u_midpoint_x =
                 d_scratch_diffusivities_midpoint[d_num_scratch_diffusivities_midpoint_used - 1]->getPointer(0, 0);
-            double* u_midpoint_y =
+            Real* u_midpoint_y =
                 d_scratch_diffusivities_midpoint[d_num_scratch_diffusivities_midpoint_used - 1]->getPointer(1, 0);
-            double* u_midpoint_z =
+            Real* u_midpoint_z =
                 d_scratch_diffusivities_midpoint[d_num_scratch_diffusivities_midpoint_used - 1]->getPointer(2, 0);
             
             // Interpolation in x-direction.
@@ -3561,10 +3561,10 @@ DiffusiveFluxReconstructorMidpoint::interpolateDiffusivitiesFromNodeToMidpoint(
  */
 void
 DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointX(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_x,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_x_computed,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_node,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_midpoint_x,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_midpoint_x_computed,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivative_node,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& data,
     const std::vector<int>& data_component_idx,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
@@ -3602,10 +3602,10 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointX(
             == derivatives_midpoint_x_computed.end())
         {
             // Get the pointer to variable for derivative.
-            double* u = data[vi]->getPointer(u_idx);
+            Real* u = data[vi]->getPointer(u_idx);
             
             // Get the pointer to variable for interpoation.
-            double* der_node = derivative_node[vi]->getPointer(0);
+            Real* der_node = derivative_node[vi]->getPointer(0);
             
             d_num_scratch_derivatives_midpoint_x_used++;
             // Declare container to store the derivative.
@@ -3614,8 +3614,8 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointX(
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
                 TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_x.size()) == d_num_scratch_derivatives_midpoint_x_used - 1);
 #endif
-                d_scratch_derivatives_midpoint_x.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
-                    new pdat::SideData<double>(
+                d_scratch_derivatives_midpoint_x.push_back(HAMERS_SHARED_PTR<pdat::SideData<Real> >(
+                    new pdat::SideData<Real>(
                         interior_box, 1, d_num_diff_ghosts, direction)));
             }
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -3626,7 +3626,7 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointX(
 #endif
             
             // Get the pointer to the derivative at midpoint.
-            double* der_midpoint_x = d_scratch_derivatives_midpoint_x[d_num_scratch_derivatives_midpoint_x_used - 1]->getPointer(0, 0);
+            Real* der_midpoint_x = d_scratch_derivatives_midpoint_x[d_num_scratch_derivatives_midpoint_x_used - 1]->getPointer(0, 0);
             
             /*
              * Get the ghost cell widths and ghost box dimensions of the variables.
@@ -3658,7 +3658,7 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointX(
                 domain_lo,
                 domain_dims);
             
-            std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
+            std::pair<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivative_pair(
                 u,
                 d_scratch_derivatives_midpoint_x[d_num_scratch_derivatives_midpoint_x_used - 1]);
             
@@ -3677,10 +3677,10 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointX(
  */
 void
 DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointX(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_midpoint_x,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_x_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_node,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& derivatives_midpoint_x,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_midpoint_x_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_node,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data,
     const std::vector<std::vector<int> >& data_component_idx,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
@@ -3714,10 +3714,10 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointX(
  */
 void
 DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointY(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_y,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_y_computed,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_node,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_midpoint_y,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_midpoint_y_computed,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivative_node,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& data,
     const std::vector<int>& data_component_idx,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
@@ -3766,10 +3766,10 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointY(
             == derivatives_midpoint_y_computed.end())
         {
             // Get the pointer to variable for derivative.
-            double* u = data[vi]->getPointer(u_idx);
+            Real* u = data[vi]->getPointer(u_idx);
             
             // Get the pointer to variable for interpoation.
-            double* der_node = derivative_node[vi]->getPointer(0);
+            Real* der_node = derivative_node[vi]->getPointer(0);
             
             d_num_scratch_derivatives_midpoint_y_used++;
             // Declare container to store the derivative.
@@ -3778,8 +3778,8 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointY(
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
                 TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_y.size()) == d_num_scratch_derivatives_midpoint_y_used - 1);
 #endif
-                d_scratch_derivatives_midpoint_y.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
-                    new pdat::SideData<double>(
+                d_scratch_derivatives_midpoint_y.push_back(HAMERS_SHARED_PTR<pdat::SideData<Real> >(
+                    new pdat::SideData<Real>(
                         interior_box, 1, d_num_diff_ghosts, direction)));
             }
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -3790,7 +3790,7 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointY(
 #endif
             
             // Get the pointer to the derivative at midpoint.
-            double* der_midpoint_y = d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]->getPointer(1, 0);
+            Real* der_midpoint_y = d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]->getPointer(1, 0);
             
             /*
              * Get the ghost cell widths and ghost box dimensions of the variables.
@@ -3822,7 +3822,7 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointY(
                 domain_lo,
                 domain_dims);
             
-            std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
+            std::pair<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivative_pair(
                 u,
                 d_scratch_derivatives_midpoint_y[d_num_scratch_derivatives_midpoint_y_used - 1]);
             
@@ -3841,10 +3841,10 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointY(
  */
 void
 DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointY(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_midpoint_y,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_y_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_node,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& derivatives_midpoint_y,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_midpoint_y_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_node,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data,
     const std::vector<std::vector<int> >& data_component_idx,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
@@ -3887,10 +3887,10 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointY(
  */
 void
 DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointZ(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_z,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_z_computed,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_node,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_midpoint_z,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_midpoint_z_computed,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivative_node,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& data,
     const std::vector<int>& data_component_idx,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
@@ -3947,10 +3947,10 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointZ(
             == derivatives_midpoint_z_computed.end())
         {
             // Get the pointer to variable for derivative.
-            double* u = data[vi]->getPointer(u_idx);
+            Real* u = data[vi]->getPointer(u_idx);
             
             // Get the pointer to variable for interpoation.
-            double* der_node = derivative_node[vi]->getPointer(0);
+            Real* der_node = derivative_node[vi]->getPointer(0);
             
             d_num_scratch_derivatives_midpoint_z_used++;
             // Declare container to store the derivative.
@@ -3959,8 +3959,8 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointZ(
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
                 TBOX_ASSERT(static_cast<int>(d_scratch_derivatives_midpoint_z.size()) == d_num_scratch_derivatives_midpoint_z_used - 1);
 #endif
-                d_scratch_derivatives_midpoint_z.push_back(HAMERS_SHARED_PTR<pdat::SideData<double> >(
-                    new pdat::SideData<double>(
+                d_scratch_derivatives_midpoint_z.push_back(HAMERS_SHARED_PTR<pdat::SideData<Real> >(
+                    new pdat::SideData<Real>(
                         interior_box, 1, d_num_diff_ghosts, direction)));
             }
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -3971,7 +3971,7 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointZ(
 #endif
             
             // Get the pointer to the derivative at midpoint.
-            double* der_midpoint_z = d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]->getPointer(2, 0);
+            Real* der_midpoint_z = d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]->getPointer(2, 0);
             
             /*
              * Get the ghost cell widths and ghost box dimensions of the variables.
@@ -4003,7 +4003,7 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointZ(
                 domain_lo,
                 domain_dims);
             
-            std::pair<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > > derivative_pair(
+            std::pair<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > > derivative_pair(
                 u,
                 d_scratch_derivatives_midpoint_z[d_num_scratch_derivatives_midpoint_z_used - 1]);
             
@@ -4022,10 +4022,10 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointZ(
  */
 void
 DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointZ(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives_midpoint_z,
-    std::map<double*, HAMERS_SHARED_PTR<pdat::SideData<double> > >& derivatives_midpoint_z_computed,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_node,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& derivatives_midpoint_z,
+    std::map<Real*, HAMERS_SHARED_PTR<pdat::SideData<Real> > >& derivatives_midpoint_z_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_node,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data,
     const std::vector<std::vector<int> >& data_component_idx,
     const hier::Patch& patch,
     const bool allocate_scratch_derivatives_midpoint)
@@ -4076,8 +4076,8 @@ DiffusiveFluxReconstructorMidpoint::interpolateDerivativesFromNodeToMidpointZ(
  */
 void
 DiffusiveFluxReconstructorMidpoint::reconstructFluxX(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux_midpoint,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& diffusive_flux,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& diffusive_flux_midpoint,
     const hier::Patch& patch,
     const double dt) const
 {
@@ -4107,8 +4107,8 @@ DiffusiveFluxReconstructorMidpoint::reconstructFluxX(
     
     for (int ei = 0; ei < d_num_eqn; ei++)
     {
-        double* F_face_x     = diffusive_flux->getPointer(0, ei);
-        double* F_midpoint_x = diffusive_flux_midpoint->getPointer(0, ei);
+        Real* F_face_x     = diffusive_flux->getPointer(0, ei);
+        Real* F_midpoint_x = diffusive_flux_midpoint->getPointer(0, ei);
         
         reconstructFluxX(
             F_face_x,
@@ -4128,8 +4128,8 @@ DiffusiveFluxReconstructorMidpoint::reconstructFluxX(
  */
 void
 DiffusiveFluxReconstructorMidpoint::reconstructFluxY(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux_midpoint,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& diffusive_flux,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& diffusive_flux_midpoint,
     const hier::Patch& patch,
     const double dt) const
 {
@@ -4168,8 +4168,8 @@ DiffusiveFluxReconstructorMidpoint::reconstructFluxY(
     
     for (int ei = 0; ei < d_num_eqn; ei++)
     {
-        double* F_face_y     = diffusive_flux->getPointer(1, ei);
-        double* F_midpoint_y = diffusive_flux_midpoint->getPointer(1, ei);
+        Real* F_face_y     = diffusive_flux->getPointer(1, ei);
+        Real* F_midpoint_y = diffusive_flux_midpoint->getPointer(1, ei);
         
         reconstructFluxY(
             F_face_y,
@@ -4189,8 +4189,8 @@ DiffusiveFluxReconstructorMidpoint::reconstructFluxY(
  */
 void
 DiffusiveFluxReconstructorMidpoint::reconstructFluxZ(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux_midpoint,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& diffusive_flux,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& diffusive_flux_midpoint,
     const hier::Patch& patch,
     const double dt) const
 {
@@ -4237,8 +4237,8 @@ DiffusiveFluxReconstructorMidpoint::reconstructFluxZ(
     
     for (int ei = 0; ei < d_num_eqn; ei++)
     {
-        double* F_face_z     = diffusive_flux->getPointer(2, ei);
-        double* F_midpoint_z = diffusive_flux_midpoint->getPointer(2, ei);
+        Real* F_face_z     = diffusive_flux->getPointer(2, ei);
+        Real* F_midpoint_z = diffusive_flux_midpoint->getPointer(2, ei);
         
         reconstructFluxZ(
             F_face_z,

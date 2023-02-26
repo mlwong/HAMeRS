@@ -40,7 +40,7 @@ using namespace SAMRAI;
  * 1 spatial dimension.  It contains routines for reading boundary data
  * information from input files, applying those boundary conditions,
  * and error checking boundary data.  These routines apply to the
- * case of cell-centered double data only.  One may use all of these
+ * case of cell-centered Real data only.  One may use all of these
  * capabilities, or use the input reading, boundary setting, and error
  * checking routines independently.
  *
@@ -168,11 +168,11 @@ struct BasicCartesianBoundaryUtilities1
         static void
         fillNodeBoundaryData(
             const std::string& var_name,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& var_data,
             const hier::Patch& patch,
             const std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
-            const std::vector<double>& bdry_node_values,
+            const std::vector<Real>& bdry_node_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(1)));
         
     private:

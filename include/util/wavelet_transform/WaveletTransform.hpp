@@ -62,8 +62,8 @@ class WaveletTransform
          */
         virtual void
         computeWaveletCoefficients(
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& wavelet_coeffs,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& wavelet_coeffs,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& cell_data,
             hier::Patch& patch,
             const int depth = 0,
             const bool smooth_cell_data = false) = 0;
@@ -73,9 +73,9 @@ class WaveletTransform
          */
         virtual void
         computeWaveletCoefficientsWithVariableLocalMeans(
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& wavelet_coeffs,
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& variable_local_means,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& wavelet_coeffs,
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& variable_local_means,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& cell_data,
             hier::Patch& patch,
             const int depth = 0,
             const bool smooth_cell_data = false) = 0;

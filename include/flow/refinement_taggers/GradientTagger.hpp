@@ -106,9 +106,9 @@ class GradientTagger
         tagCellsOnPatchWithGradientSensor(
             hier::Patch& patch,
             const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& gradient,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& gradient,
             const std::string& sensor_key,
-            const double tol);
+            const Real tol);
         
         /*
          * Tag cells on a patch using difference sensor.
@@ -117,13 +117,13 @@ class GradientTagger
         tagCellsOnPatchWithDifferenceSensor(
             hier::Patch& patch,
             const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& difference,
-            const double difference_max,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& variable_local_mean,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& difference,
+            const Real difference_max,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& variable_local_mean,
             const bool uses_global_tol,
             const bool uses_local_tol,
-            const double global_tol,
-            const double local_tol);
+            const Real global_tol,
+            const Real local_tol);
         
         /*
          * The object name is used for error/warning reporting.
@@ -159,8 +159,8 @@ class GradientTagger
          * Whether only apply the gradient sensors in a box.
          */
         bool d_is_tagging_in_box_only;
-        std::vector<double> d_tagging_box_xlo; // Lower spatial coordinates.
-        std::vector<double> d_tagging_box_xhi; // Upper spatial coordinates.
+        std::vector<Real> d_tagging_box_xlo; // Lower spatial coordinates.
+        std::vector<Real> d_tagging_box_xhi; // Upper spatial coordinates.
         
         /*
          * HAMERS_SHARED_PTR to difference operators.
@@ -177,14 +177,14 @@ class GradientTagger
          * Variables, tolerances and settings for the gradient sensors.
          */
         std::vector<std::string> d_difference_first_order_variables;
-        std::vector<double> d_difference_first_order_global_tol;
-        std::vector<double> d_difference_first_order_local_tol;
+        std::vector<Real> d_difference_first_order_global_tol;
+        std::vector<Real> d_difference_first_order_local_tol;
         std::vector<bool> d_difference_first_order_uses_global_tol;
         std::vector<bool> d_difference_first_order_uses_local_tol;
         
         std::vector<std::string> d_difference_second_order_variables;
-        std::vector<double> d_difference_second_order_global_tol;
-        std::vector<double> d_difference_second_order_local_tol;
+        std::vector<Real> d_difference_second_order_global_tol;
+        std::vector<Real> d_difference_second_order_local_tol;
         std::vector<bool> d_difference_second_order_uses_global_tol;
         std::vector<bool> d_difference_second_order_uses_local_tol;
         
@@ -192,44 +192,44 @@ class GradientTagger
          * Variables and tolerances for the Jameson gradient sensors.
          */
         std::vector<std::string> d_Jameson_gradient_variables;
-        std::vector<double> d_Jameson_gradient_tol;
+        std::vector<Real> d_Jameson_gradient_tol;
         
         /*
          * HAMERS_SHARED_PTR to differences.
          */
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_first_order_density;
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_first_order_total_energy;
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_first_order_pressure;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_difference_first_order_density;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_difference_first_order_total_energy;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_difference_first_order_pressure;
         
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_second_order_density;
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_second_order_total_energy;
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_second_order_pressure;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_difference_second_order_density;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_difference_second_order_total_energy;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_difference_second_order_pressure;
         
         /*
          * HAMERS_SHARED_PTR to values of Jameson gradient sensor.
          */
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_Jameson_gradient_density;
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_Jameson_gradient_total_energy;
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_Jameson_gradient_pressure;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_Jameson_gradient_density;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_Jameson_gradient_total_energy;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_Jameson_gradient_pressure;
         
         /*
          * Statistics of sensor values.
          */
-        double d_difference_first_order_max_density;
-        double d_difference_first_order_max_total_energy;
-        double d_difference_first_order_max_pressure;
+        Real d_difference_first_order_max_density;
+        Real d_difference_first_order_max_total_energy;
+        Real d_difference_first_order_max_pressure;
         
-        double d_difference_second_order_max_density;
-        double d_difference_second_order_max_total_energy;
-        double d_difference_second_order_max_pressure;
+        Real d_difference_second_order_max_density;
+        Real d_difference_second_order_max_total_energy;
+        Real d_difference_second_order_max_pressure;
         
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_first_order_local_mean_density;
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_first_order_local_mean_total_energy;
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_first_order_local_mean_pressure;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_difference_first_order_local_mean_density;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_difference_first_order_local_mean_total_energy;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_difference_first_order_local_mean_pressure;
         
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_second_order_local_mean_density;
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_second_order_local_mean_total_energy;
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_second_order_local_mean_pressure;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_difference_second_order_local_mean_density;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_difference_second_order_local_mean_total_energy;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_difference_second_order_local_mean_pressure;
         
 };
 

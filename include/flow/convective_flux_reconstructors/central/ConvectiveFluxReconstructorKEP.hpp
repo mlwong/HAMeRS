@@ -46,8 +46,8 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
         void
         computeConvectiveFluxAndSourceOnPatch(
             hier::Patch& patch,
-            const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_convective_flux,
-            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+            const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double time,
             const double dt,
@@ -59,8 +59,8 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
          */
         void
         addLinearTermToConvectiveFluxX(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
             const int component_idx_flux,
             const int component_idx_f,
             const double dt) const;
@@ -70,9 +70,9 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
          */
         void
         addQuadraticTermToConvectiveFluxX(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_g,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_g,
             const int component_idx_flux,
             const int component_idx_f,
             const int component_idx_g,
@@ -83,10 +83,10 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
          */
         void
         addCubicTermToConvectiveFluxX(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_g,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_h,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_g,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_h,
             const int component_idx_flux,
             const int component_idx_f,
             const int component_idx_g,
@@ -98,8 +98,8 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
          */
         void
         addLinearTermToConvectiveFluxY(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
             const int component_idx_flux,
             const int component_idx_f,
             const double dt) const;
@@ -109,9 +109,9 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
          */
         void
         addQuadraticTermToConvectiveFluxY(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_g,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_g,
             const int component_idx_flux,
             const int component_idx_f,
             const int component_idx_g,
@@ -122,10 +122,10 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
          */
         void
         addCubicTermToConvectiveFluxY(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_g,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_h,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_g,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_h,
             const int component_idx_flux,
             const int component_idx_f,
             const int component_idx_g,
@@ -137,8 +137,8 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
          */
         void
         addLinearTermToConvectiveFluxZ(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
             const int component_idx_flux,
             const int component_idx_f,
             const double dt) const;
@@ -148,9 +148,9 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
          */
         void
         addQuadraticTermToConvectiveFluxZ(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_g,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_g,
             const int component_idx_flux,
             const int component_idx_f,
             const int component_idx_g,
@@ -161,10 +161,10 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
          */
         void
         addCubicTermToConvectiveFluxZ(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_g,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_h,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_g,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_h,
             const int component_idx_flux,
             const int component_idx_f,
             const int component_idx_g,
@@ -177,9 +177,9 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
          */
         void
         addSourceTermsToVolumeFractionEquations(
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_source,
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity,
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_source,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_velocity,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_volume_fractions,
             const double* const dx,
             const double dt) const;
         
@@ -206,12 +206,12 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
          * Coefficients for finite differencing.
          */
          
-        double d_coef_a;
-        double d_coef_b;
-        double d_coef_c;
-        double d_coef_d;
-        double d_coef_e;
-        double d_coef_f;
+        Real d_coef_a;
+        Real d_coef_b;
+        Real d_coef_c;
+        Real d_coef_d;
+        Real d_coef_e;
+        Real d_coef_f;
 };
 
 #endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_KEP_HPP */

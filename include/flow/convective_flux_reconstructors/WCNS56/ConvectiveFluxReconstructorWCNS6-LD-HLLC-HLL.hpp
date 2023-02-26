@@ -37,17 +37,17 @@ class ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL: public ConvectiveFluxReconst
          */
         void
         performWENOInterpolation(
-            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& variables_minus,
-            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& variables_plus,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& variables);
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& variables_minus,
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& variables_plus,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& variables);
         
         /*
          * Constants used by the scheme.
          */
         int d_constant_p;
         int d_constant_q;
-        double d_constant_C;
-        double d_constant_alpha_tau;
+        Real d_constant_C;
+        Real d_constant_alpha_tau;
         
 };
 

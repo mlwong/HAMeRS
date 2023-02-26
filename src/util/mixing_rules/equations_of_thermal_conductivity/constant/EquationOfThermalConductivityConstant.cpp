@@ -25,11 +25,11 @@ EquationOfThermalConductivityConstant::printClassData(
 /*
  * Compute the thermal conductivity.
  */
-double
+Real
 EquationOfThermalConductivityConstant::getThermalConductivity(
-    const double* const pressure,
-    const double* const temperature,
-    const std::vector<const double*>& molecular_properties) const
+    const Real* const pressure,
+    const Real* const temperature,
+    const std::vector<const Real*>& molecular_properties) const
 {
     NULL_USE(pressure);
     NULL_USE(temperature);
@@ -38,7 +38,7 @@ EquationOfThermalConductivityConstant::getThermalConductivity(
     TBOX_ASSERT(static_cast<int>(molecular_properties.size()) >= 1);
 #endif
     
-    const double& kappa = *(molecular_properties[0]);
+    const Real& kappa = *(molecular_properties[0]);
     
     return kappa;
 }
@@ -49,10 +49,10 @@ EquationOfThermalConductivityConstant::getThermalConductivity(
  */
 void
 EquationOfThermalConductivityConstant::computeThermalConductivity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermal_conductivity,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const std::vector<const double*>& molecular_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermal_conductivity,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const std::vector<const Real*>& molecular_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_pressure);
@@ -84,10 +84,10 @@ EquationOfThermalConductivityConstant::computeThermalConductivity(
  */
 void
 EquationOfThermalConductivityConstant::computeThermalConductivity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermal_conductivity,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_molecular_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermal_conductivity,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_molecular_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_pressure);
@@ -163,8 +163,8 @@ EquationOfThermalConductivityConstant::computeThermalConductivity(
      * Get the pointers to the cell data.
      */
     
-    double* kappa = data_thermal_conductivity->getPointer(0);
-    double* kappa_src = data_molecular_properties->getPointer(0);
+    Real* kappa = data_thermal_conductivity->getPointer(0);
+    Real* kappa_src = data_molecular_properties->getPointer(0);
     
     if (d_dim == tbox::Dimension(1))
     {

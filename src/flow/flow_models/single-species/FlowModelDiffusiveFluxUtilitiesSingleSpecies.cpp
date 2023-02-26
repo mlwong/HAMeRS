@@ -295,7 +295,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()
             if (!d_data_shear_viscosity)
             {
                 // Create the cell data of shear viscosity.
-                d_data_shear_viscosity.reset(new pdat::CellData<double>(
+                d_data_shear_viscosity.reset(new pdat::CellData<Real>(
                     interior_box, 1, d_num_subghosts_shear_viscosity));
             }
         }
@@ -314,7 +314,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()
         {
             if (!d_data_bulk_viscosity)
             {
-                d_data_bulk_viscosity.reset(new pdat::CellData<double>(
+                d_data_bulk_viscosity.reset(new pdat::CellData<Real>(
                     interior_box, 1, d_num_subghosts_bulk_viscosity));
             }
         }
@@ -333,7 +333,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()
         {
             if (!d_data_thermal_conductivity)
             {
-                d_data_thermal_conductivity.reset(new pdat::CellData<double>(
+                d_data_thermal_conductivity.reset(new pdat::CellData<Real>(
                     interior_box, 1, d_num_subghosts_thermal_conductivity));
             }
         }
@@ -356,17 +356,17 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()
                 {
                     if (d_dim == tbox::Dimension(1))
                     {
-                        d_data_diffusivities.reset(new pdat::CellData<double>(
+                        d_data_diffusivities.reset(new pdat::CellData<Real>(
                             interior_box, 3, d_num_subghosts_diffusivities));
                     }
                     else if (d_dim == tbox::Dimension(2))
                     {
-                        d_data_diffusivities.reset(new pdat::CellData<double>(
+                        d_data_diffusivities.reset(new pdat::CellData<Real>(
                             interior_box, 10, d_num_subghosts_diffusivities));
                     }
                     else if (d_dim == tbox::Dimension(3))
                     {
-                        d_data_diffusivities.reset(new pdat::CellData<double>(
+                        d_data_diffusivities.reset(new pdat::CellData<Real>(
                             interior_box, 13, d_num_subghosts_diffusivities));
                     }
                 }
@@ -418,17 +418,17 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForSideDataOfDiffusi
             {
                 if (d_dim == tbox::Dimension(1))
                 {
-                    d_side_data_diffusivities.reset(new pdat::SideData<double>(
+                    d_side_data_diffusivities.reset(new pdat::SideData<Real>(
                         interior_box, 3, d_num_subghosts_diffusivities));
                 }
                 else if (d_dim == tbox::Dimension(2))
                 {
-                    d_side_data_diffusivities.reset(new pdat::SideData<double>(
+                    d_side_data_diffusivities.reset(new pdat::SideData<Real>(
                         interior_box, 7, d_num_subghosts_diffusivities));
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
-                    d_side_data_diffusivities.reset(new pdat::SideData<double>(
+                    d_side_data_diffusivities.reset(new pdat::SideData<Real>(
                         interior_box, 8, d_num_subghosts_diffusivities));
                 }
             }
@@ -565,7 +565,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeDerivedCellData()
 /*
  * Get the cell data of one cell variable related to this class in the registered patch.
  */
-HAMERS_SHARED_PTR<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<Real> >
 FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellData(const std::string& variable_key)
 {
     if (d_flow_model.expired())
@@ -588,7 +588,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellData(const std::string& var
             << std::endl);
     }
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > cell_data;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > cell_data;
     
     if (variable_key == "SHEAR_VISCOSITY")
     {
@@ -631,11 +631,11 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellData(const std::string& var
 /*
  * Get the cell data of different cell variables related to this class in the registered patch.
  */
-std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
 FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellData(
     const std::vector<std::string>& variable_keys)
 {
-    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > cell_data(
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > cell_data(
         static_cast<int>(variable_keys.size()));
     
     for (int vi = 0; static_cast<int>(variable_keys.size()); vi++)
@@ -652,7 +652,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellData(
  */
 void
 FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxVariablesForDerivative(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_var_data,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivative_var_data,
     std::vector<std::vector<int> >& derivative_var_component_idx,
     const DIRECTION::TYPE& flux_direction,
     const DIRECTION::TYPE& derivative_direction)
@@ -671,11 +671,11 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxVariable
     derivative_var_component_idx.resize(d_num_eqn);
     
     // Get the cell data of velocity.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_velocity =
         flow_model_tmp->getCellData("VELOCITY");
     
     // Get the cell data of temperature.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_temperature =
         flow_model_tmp->getCellData("TEMPERATURE");
     
     if (d_dim == tbox::Dimension(1))
@@ -1504,7 +1504,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxVariable
  */
 void
 FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& diffusivities_data,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& diffusivities_data,
     std::vector<std::vector<int> >& diffusivities_component_idx,
     const DIRECTION::TYPE& flux_direction,
     const DIRECTION::TYPE& derivative_direction)
@@ -2364,7 +2364,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusiv
  */
 void
 FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataForInterpolationToSideDataForDiffusiveFluxDiffusivities(
-    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& var_data_for_diffusivities,
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& var_data_for_diffusivities,
     std::vector<int>& var_data_for_diffusivities_component_idx)
 {
     if (d_flow_model.expired())
@@ -2422,7 +2422,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataForInterpolationToSideD
     var_data_for_diffusivities_component_idx[2] = 0;
     
     // Get the cell data of velocity.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_velocity =
         flow_model_tmp->getCellData("VELOCITY");
     
     if (d_dim == tbox::Dimension(1))
@@ -2456,7 +2456,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataForInterpolationToSideD
         for (int vi = 0; vi < static_cast<int>(var_to_interpolate.size()); vi++)
         {
             const std::string var_str = var_to_interpolate[vi];
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_u = flow_model_tmp->getCellData(var_str);
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_u = flow_model_tmp->getCellData(var_str);
             var_data_for_diffusivities.push_back(data_u);
             var_data_for_diffusivities_component_idx.push_back(var_to_interpolate_component_idx[vi]);
         }
@@ -2469,7 +2469,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataForInterpolationToSideD
  */
 void
 FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiffusivities(
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_data_for_diffusivities)
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& var_data_for_diffusivities)
 {
     if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
     {
@@ -2516,57 +2516,57 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
             
             if (d_dim == tbox::Dimension(1))
             {
-                double* mu_x    = var_data_for_diffusivities[0]->getPointer(0, 0);
-                double* mu_v_x  = var_data_for_diffusivities[1]->getPointer(0, 0);
-                double* kappa_x = var_data_for_diffusivities[2]->getPointer(0, 0);
-                double* u_x     = var_data_for_diffusivities[3]->getPointer(0, 0);
+                Real* mu_x    = var_data_for_diffusivities[0]->getPointer(0, 0);
+                Real* mu_v_x  = var_data_for_diffusivities[1]->getPointer(0, 0);
+                Real* kappa_x = var_data_for_diffusivities[2]->getPointer(0, 0);
+                Real* u_x     = var_data_for_diffusivities[3]->getPointer(0, 0);
                 
                 /*
                  * Compute the diffusivities for the x-direction derivatives.
                  */
                 
-                double* D_00 = d_side_data_diffusivities->getPointer(0, 0);
-                double* D_01 = d_side_data_diffusivities->getPointer(0, 1);
-                double* D_02 = d_side_data_diffusivities->getPointer(0, 2);
+                Real* D_00 = d_side_data_diffusivities->getPointer(0, 0);
+                Real* D_01 = d_side_data_diffusivities->getPointer(0, 1);
+                Real* D_02 = d_side_data_diffusivities->getPointer(0, 2);
                 
                 for (int i = -num_ghosts[0]; i < interior_dims[0] + num_ghosts[0] + 1; i++)
                 {
                     const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
                     const int idx_var_data      = i + num_ghosts[0];
                     
-                    D_00[idx_diffusivities] = -(double(4)/double(3)*mu_x[idx_var_data] + mu_v_x[idx_var_data]);
-                    D_01[idx_diffusivities] = -u_x[idx_var_data]*(double(4)/double(3)*mu_x[idx_var_data] +
+                    D_00[idx_diffusivities] = -(Real(4)/Real(3)*mu_x[idx_var_data] + mu_v_x[idx_var_data]);
+                    D_01[idx_diffusivities] = -u_x[idx_var_data]*(Real(4)/Real(3)*mu_x[idx_var_data] +
                         mu_v_x[idx_var_data]);
                     D_02[idx_diffusivities] = -kappa_x[idx_var_data];
                 }
             }
             else if (d_dim == tbox::Dimension(2))
             {
-                double* mu_x    = var_data_for_diffusivities[0]->getPointer(0, 0);
-                double* mu_v_x  = var_data_for_diffusivities[1]->getPointer(0, 0);
-                double* kappa_x = var_data_for_diffusivities[2]->getPointer(0, 0);
+                Real* mu_x    = var_data_for_diffusivities[0]->getPointer(0, 0);
+                Real* mu_v_x  = var_data_for_diffusivities[1]->getPointer(0, 0);
+                Real* kappa_x = var_data_for_diffusivities[2]->getPointer(0, 0);
                 
-                double* mu_y    = var_data_for_diffusivities[0]->getPointer(1, 0);
-                double* mu_v_y  = var_data_for_diffusivities[1]->getPointer(1, 0);
-                double* kappa_y = var_data_for_diffusivities[2]->getPointer(1, 0);
+                Real* mu_y    = var_data_for_diffusivities[0]->getPointer(1, 0);
+                Real* mu_v_y  = var_data_for_diffusivities[1]->getPointer(1, 0);
+                Real* kappa_y = var_data_for_diffusivities[2]->getPointer(1, 0);
                 
-                double* u_x = var_data_for_diffusivities[3]->getPointer(0, 0);
-                double* v_x = var_data_for_diffusivities[4]->getPointer(0, 0);
+                Real* u_x = var_data_for_diffusivities[3]->getPointer(0, 0);
+                Real* v_x = var_data_for_diffusivities[4]->getPointer(0, 0);
                 
-                double* u_y = var_data_for_diffusivities[3]->getPointer(1, 0);
-                double* v_y = var_data_for_diffusivities[4]->getPointer(1, 0);
+                Real* u_y = var_data_for_diffusivities[3]->getPointer(1, 0);
+                Real* v_y = var_data_for_diffusivities[4]->getPointer(1, 0);
                 
                 /*
                  * Compute the diffusivities for the x-direction derivatives.
                  */
                 
-                double* D_00 = d_side_data_diffusivities->getPointer(0, 0);
-                double* D_01 = d_side_data_diffusivities->getPointer(0, 1);
-                double* D_02 = d_side_data_diffusivities->getPointer(0, 2);
-                double* D_03 = d_side_data_diffusivities->getPointer(0, 3);
-                double* D_04 = d_side_data_diffusivities->getPointer(0, 4);
-                double* D_05 = d_side_data_diffusivities->getPointer(0, 5);
-                double* D_06 = d_side_data_diffusivities->getPointer(0, 6);
+                Real* D_00 = d_side_data_diffusivities->getPointer(0, 0);
+                Real* D_01 = d_side_data_diffusivities->getPointer(0, 1);
+                Real* D_02 = d_side_data_diffusivities->getPointer(0, 2);
+                Real* D_03 = d_side_data_diffusivities->getPointer(0, 3);
+                Real* D_04 = d_side_data_diffusivities->getPointer(0, 4);
+                Real* D_05 = d_side_data_diffusivities->getPointer(0, 5);
+                Real* D_06 = d_side_data_diffusivities->getPointer(0, 6);
                 
                 for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
                 {
@@ -2578,12 +2578,12 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                         const int idx_var_data = (i + num_ghosts[0]) +
                             (j + num_ghosts[1])*(ghostcell_dims[0] + 1);
                         
-                        D_00[idx_diffusivities] = -(double(4)/double(3)*mu_x[idx_var_data] + mu_v_x[idx_var_data]);
-                        D_01[idx_diffusivities] = double(2)/double(3)*mu_x[idx_var_data] - mu_v_x[idx_var_data];
+                        D_00[idx_diffusivities] = -(Real(4)/Real(3)*mu_x[idx_var_data] + mu_v_x[idx_var_data]);
+                        D_01[idx_diffusivities] = Real(2)/Real(3)*mu_x[idx_var_data] - mu_v_x[idx_var_data];
                         D_02[idx_diffusivities] = -mu_x[idx_var_data];
-                        D_03[idx_diffusivities] = -u_x[idx_var_data]*(double(4)/double(3)*mu_x[idx_var_data] +
+                        D_03[idx_diffusivities] = -u_x[idx_var_data]*(Real(4)/Real(3)*mu_x[idx_var_data] +
                             mu_v_x[idx_var_data]);
-                        D_04[idx_diffusivities] = u_x[idx_var_data]*(double(2)/double(3)*mu_x[idx_var_data] -
+                        D_04[idx_diffusivities] = u_x[idx_var_data]*(Real(2)/Real(3)*mu_x[idx_var_data] -
                             mu_v_x[idx_var_data]);
                         D_05[idx_diffusivities] = -v_x[idx_var_data]*mu_x[idx_var_data];
                         D_06[idx_diffusivities] = -kappa_x[idx_var_data];
@@ -2612,12 +2612,12 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                         const int idx_var_data = (i + num_ghosts[0]) +
                             (j + num_ghosts[1])*ghostcell_dims[0];
                         
-                        D_00[idx_diffusivities] = -(double(4)/double(3)*mu_y[idx_var_data] + mu_v_y[idx_var_data]);
-                        D_01[idx_diffusivities] = double(2)/double(3)*mu_y[idx_var_data] - mu_v_y[idx_var_data];
+                        D_00[idx_diffusivities] = -(Real(4)/Real(3)*mu_y[idx_var_data] + mu_v_y[idx_var_data]);
+                        D_01[idx_diffusivities] = Real(2)/Real(3)*mu_y[idx_var_data] - mu_v_y[idx_var_data];
                         D_02[idx_diffusivities] = -mu_y[idx_var_data];
-                        D_03[idx_diffusivities] = -v_y[idx_var_data]*(double(4)/double(3)*mu_y[idx_var_data] +
+                        D_03[idx_diffusivities] = -v_y[idx_var_data]*(Real(4)/Real(3)*mu_y[idx_var_data] +
                             mu_v_y[idx_var_data]);
-                        D_04[idx_diffusivities] = v_y[idx_var_data]*(double(2)/double(3)*mu_y[idx_var_data] -
+                        D_04[idx_diffusivities] = v_y[idx_var_data]*(Real(2)/Real(3)*mu_y[idx_var_data] -
                             mu_v_y[idx_var_data]);
                         D_05[idx_diffusivities] = -u_y[idx_var_data]*mu_y[idx_var_data];
                         D_06[idx_diffusivities] = -kappa_y[idx_var_data];
@@ -2626,42 +2626,42 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
             }
             else if (d_dim == tbox::Dimension(3))
             {
-                double* mu_x    = var_data_for_diffusivities[0]->getPointer(0, 0);
-                double* mu_v_x  = var_data_for_diffusivities[1]->getPointer(0, 0);
-                double* kappa_x = var_data_for_diffusivities[2]->getPointer(0, 0);
+                Real* mu_x    = var_data_for_diffusivities[0]->getPointer(0, 0);
+                Real* mu_v_x  = var_data_for_diffusivities[1]->getPointer(0, 0);
+                Real* kappa_x = var_data_for_diffusivities[2]->getPointer(0, 0);
                 
-                double* mu_y    = var_data_for_diffusivities[0]->getPointer(1, 0);
-                double* mu_v_y  = var_data_for_diffusivities[1]->getPointer(1, 0);
-                double* kappa_y = var_data_for_diffusivities[2]->getPointer(1, 0);
+                Real* mu_y    = var_data_for_diffusivities[0]->getPointer(1, 0);
+                Real* mu_v_y  = var_data_for_diffusivities[1]->getPointer(1, 0);
+                Real* kappa_y = var_data_for_diffusivities[2]->getPointer(1, 0);
                 
-                double* mu_z    = var_data_for_diffusivities[0]->getPointer(2, 0);
-                double* mu_v_z  = var_data_for_diffusivities[1]->getPointer(2, 0);
-                double* kappa_z = var_data_for_diffusivities[2]->getPointer(2, 0);
+                Real* mu_z    = var_data_for_diffusivities[0]->getPointer(2, 0);
+                Real* mu_v_z  = var_data_for_diffusivities[1]->getPointer(2, 0);
+                Real* kappa_z = var_data_for_diffusivities[2]->getPointer(2, 0);
                 
-                double* u_x = var_data_for_diffusivities[3]->getPointer(0, 0);
-                double* v_x = var_data_for_diffusivities[4]->getPointer(0, 0);
-                double* w_x = var_data_for_diffusivities[5]->getPointer(0, 0);
+                Real* u_x = var_data_for_diffusivities[3]->getPointer(0, 0);
+                Real* v_x = var_data_for_diffusivities[4]->getPointer(0, 0);
+                Real* w_x = var_data_for_diffusivities[5]->getPointer(0, 0);
                 
-                double* u_y = var_data_for_diffusivities[3]->getPointer(1, 0);
-                double* v_y = var_data_for_diffusivities[4]->getPointer(1, 0);
-                double* w_y = var_data_for_diffusivities[5]->getPointer(1, 0);
+                Real* u_y = var_data_for_diffusivities[3]->getPointer(1, 0);
+                Real* v_y = var_data_for_diffusivities[4]->getPointer(1, 0);
+                Real* w_y = var_data_for_diffusivities[5]->getPointer(1, 0);
                 
-                double* u_z = var_data_for_diffusivities[3]->getPointer(2, 0);
-                double* v_z = var_data_for_diffusivities[4]->getPointer(2, 0);
-                double* w_z = var_data_for_diffusivities[5]->getPointer(2, 0);
+                Real* u_z = var_data_for_diffusivities[3]->getPointer(2, 0);
+                Real* v_z = var_data_for_diffusivities[4]->getPointer(2, 0);
+                Real* w_z = var_data_for_diffusivities[5]->getPointer(2, 0);
                 
                 /*
                  * Compute the diffusivities for the x-direction derivatives.
                  */
                 
-                double* D_00 = d_side_data_diffusivities->getPointer(0, 0);
-                double* D_01 = d_side_data_diffusivities->getPointer(0, 1);
-                double* D_02 = d_side_data_diffusivities->getPointer(0, 2);
-                double* D_03 = d_side_data_diffusivities->getPointer(0, 3);
-                double* D_04 = d_side_data_diffusivities->getPointer(0, 4);
-                double* D_05 = d_side_data_diffusivities->getPointer(0, 5);
-                double* D_06 = d_side_data_diffusivities->getPointer(0, 6);
-                double* D_07 = d_side_data_diffusivities->getPointer(0, 7);
+                Real* D_00 = d_side_data_diffusivities->getPointer(0, 0);
+                Real* D_01 = d_side_data_diffusivities->getPointer(0, 1);
+                Real* D_02 = d_side_data_diffusivities->getPointer(0, 2);
+                Real* D_03 = d_side_data_diffusivities->getPointer(0, 3);
+                Real* D_04 = d_side_data_diffusivities->getPointer(0, 4);
+                Real* D_05 = d_side_data_diffusivities->getPointer(0, 5);
+                Real* D_06 = d_side_data_diffusivities->getPointer(0, 6);
+                Real* D_07 = d_side_data_diffusivities->getPointer(0, 7);
                 
                 for (int k = -num_ghosts[2]; k < interior_dims[2] + num_ghosts[2]; k++)
                 {
@@ -2679,12 +2679,12 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                                 (k + num_ghosts[2])*(ghostcell_dims[0] + 1)*
                                     ghostcell_dims[1];
                             
-                            D_00[idx_diffusivities] = -(double(4)/double(3)*mu_x[idx_var_data] + mu_v_x[idx_var_data]);
-                            D_01[idx_diffusivities] = double(2)/double(3)*mu_x[idx_var_data] - mu_v_x[idx_var_data];
+                            D_00[idx_diffusivities] = -(Real(4)/Real(3)*mu_x[idx_var_data] + mu_v_x[idx_var_data]);
+                            D_01[idx_diffusivities] = Real(2)/Real(3)*mu_x[idx_var_data] - mu_v_x[idx_var_data];
                             D_02[idx_diffusivities] = -mu_x[idx_var_data];
-                            D_03[idx_diffusivities] = -u_x[idx_var_data]*(double(4)/double(3)*mu_x[idx_var_data] +
+                            D_03[idx_diffusivities] = -u_x[idx_var_data]*(Real(4)/Real(3)*mu_x[idx_var_data] +
                                 mu_v_x[idx_var_data]);
-                            D_04[idx_diffusivities] = u_x[idx_var_data]*(double(2)/double(3)*mu_x[idx_var_data] -
+                            D_04[idx_diffusivities] = u_x[idx_var_data]*(Real(2)/Real(3)*mu_x[idx_var_data] -
                                 mu_v_x[idx_var_data]);
                             D_05[idx_diffusivities] = -v_x[idx_var_data]*mu_x[idx_var_data];
                             D_06[idx_diffusivities] = -w_x[idx_var_data]*mu_x[idx_var_data];
@@ -2722,12 +2722,12 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                                 (k + num_ghosts[2])*ghostcell_dims[0]*
                                     (ghostcell_dims[1] + 1);
                             
-                            D_00[idx_diffusivities] = -(double(4)/double(3)*mu_y[idx_var_data] + mu_v_y[idx_var_data]);
-                            D_01[idx_diffusivities] = double(2)/double(3)*mu_y[idx_var_data] - mu_v_y[idx_var_data];
+                            D_00[idx_diffusivities] = -(Real(4)/Real(3)*mu_y[idx_var_data] + mu_v_y[idx_var_data]);
+                            D_01[idx_diffusivities] = Real(2)/Real(3)*mu_y[idx_var_data] - mu_v_y[idx_var_data];
                             D_02[idx_diffusivities] = -mu_y[idx_var_data];
-                            D_03[idx_diffusivities] = -v_y[idx_var_data]*(double(4)/double(3)*mu_y[idx_var_data] +
+                            D_03[idx_diffusivities] = -v_y[idx_var_data]*(Real(4)/Real(3)*mu_y[idx_var_data] +
                                 mu_v_y[idx_var_data]);
-                            D_04[idx_diffusivities] = v_y[idx_var_data]*(double(2)/double(3)*mu_y[idx_var_data] -
+                            D_04[idx_diffusivities] = v_y[idx_var_data]*(Real(2)/Real(3)*mu_y[idx_var_data] -
                                 mu_v_y[idx_var_data]);
                             D_05[idx_diffusivities] = -u_y[idx_var_data]*mu_y[idx_var_data];
                             D_06[idx_diffusivities] = -w_y[idx_var_data]*mu_y[idx_var_data];
@@ -2765,12 +2765,12 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
                                 (k + num_ghosts[2])*ghostcell_dims[0]*
                                     ghostcell_dims[1];
                             
-                            D_00[idx_diffusivities] = -(double(4)/double(3)*mu_z[idx_var_data] + mu_v_z[idx_var_data]);
-                            D_01[idx_diffusivities] = double(2)/double(3)*mu_z[idx_var_data] - mu_v_z[idx_var_data];
+                            D_00[idx_diffusivities] = -(Real(4)/Real(3)*mu_z[idx_var_data] + mu_v_z[idx_var_data]);
+                            D_01[idx_diffusivities] = Real(2)/Real(3)*mu_z[idx_var_data] - mu_v_z[idx_var_data];
                             D_02[idx_diffusivities] = -mu_z[idx_var_data];
-                            D_03[idx_diffusivities] = -w_z[idx_var_data]*(double(4)/double(3)*mu_z[idx_var_data] +
+                            D_03[idx_diffusivities] = -w_z[idx_var_data]*(Real(4)/Real(3)*mu_z[idx_var_data] +
                                 mu_v_z[idx_var_data]);
-                            D_04[idx_diffusivities] = w_z[idx_var_data]*(double(2)/double(3)*mu_z[idx_var_data] -
+                            D_04[idx_diffusivities] = w_z[idx_var_data]*(Real(2)/Real(3)*mu_z[idx_var_data] -
                                 mu_v_z[idx_var_data]);
                             D_05[idx_diffusivities] = -u_z[idx_var_data]*mu_z[idx_var_data];
                             D_06[idx_diffusivities] = -v_z[idx_var_data]*mu_z[idx_var_data];
@@ -2798,7 +2798,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeSideDataOfDiffusiveFluxDiff
  */
 void
 FlowModelDiffusiveFluxUtilitiesSingleSpecies::getSideDataOfDiffusiveFluxDiffusivities(
-    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& diffusivities_data,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& diffusivities_data,
     std::vector<std::vector<int> >& diffusivities_component_idx,
     const DIRECTION::TYPE& flux_direction,
     const DIRECTION::TYPE& derivative_direction)
@@ -3806,20 +3806,20 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfShearViscosity()
             HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
             
             // Get the cell data of pressure.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_pressure =
                 flow_model_tmp->getCellData("PRESSURE");
             
             // Get the cell data of temperature.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_temperature =
                 flow_model_tmp->getCellData("TEMPERATURE");
             
             /*
              * Get the molecular properties of the species for shear viscosity.
              */
             
-            std::vector<double> molecular_properties_shear_viscosity;
-            std::vector<double*> molecular_properties_shear_viscosity_ptr;
-            std::vector<const double*> molecular_properties_shear_viscosity_const_ptr;
+            std::vector<Real> molecular_properties_shear_viscosity;
+            std::vector<Real*> molecular_properties_shear_viscosity_ptr;
+            std::vector<const Real*> molecular_properties_shear_viscosity_const_ptr;
             
             const int num_molecular_properties_shear_viscosity = d_equation_of_shear_viscosity_mixing_rules->
                 getNumberOfSpeciesMolecularProperties();
@@ -3888,20 +3888,20 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfBulkViscosity()
             HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
             
             // Get the cell data of pressure.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_pressure =
                 flow_model_tmp->getCellData("PRESSURE");
             
             // Get the cell data of temperature.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_temperature =
                 flow_model_tmp->getCellData("TEMPERATURE");
             
             /*
              * Get the molecular properties of the species for bulk viscosity.
              */
             
-            std::vector<double> molecular_properties_bulk_viscosity;
-            std::vector<double*> molecular_properties_bulk_viscosity_ptr;
-            std::vector<const double*> molecular_properties_bulk_viscosity_const_ptr;
+            std::vector<Real> molecular_properties_bulk_viscosity;
+            std::vector<Real*> molecular_properties_bulk_viscosity_ptr;
+            std::vector<const Real*> molecular_properties_bulk_viscosity_const_ptr;
             
             const int num_molecular_properties_bulk_viscosity = d_equation_of_bulk_viscosity_mixing_rules->
                 getNumberOfSpeciesMolecularProperties();
@@ -3970,20 +3970,20 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfThermalConductivi
             HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
             
             // Get the cell data of pressure.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_pressure =
                 flow_model_tmp->getCellData("PRESSURE");
             
             // Get the cell data of temperature.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_temperature =
                 flow_model_tmp->getCellData("TEMPERATURE");
             
             /*
              * Get the molecular properties of the species for thermal conductivity.
              */
             
-            std::vector<double> molecular_properties_thermal_conductivity;
-            std::vector<double*> molecular_properties_thermal_conductivity_ptr;
-            std::vector<const double*> molecular_properties_thermal_conductivity_const_ptr;
+            std::vector<Real> molecular_properties_thermal_conductivity;
+            std::vector<Real*> molecular_properties_thermal_conductivity_ptr;
+            std::vector<const Real*> molecular_properties_thermal_conductivity_const_ptr;
             
             const int num_molecular_properties_thermal_conductivity = d_equation_of_thermal_conductivity_mixing_rules->
                 getNumberOfSpeciesMolecularProperties();
@@ -4072,7 +4072,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfDiffusivities()
             }
             
             // Get the cell data of velocity.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_velocity =
                 flow_model_tmp->getCellData("VELOCITY");
             
             /*
@@ -4092,9 +4092,9 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfDiffusivities()
              * Get the pointers to the cell data of shear viscosity, bulk viscosity and thermal conductivity.
              */
             
-            double* mu    = d_data_shear_viscosity->getPointer(0);
-            double* mu_v  = d_data_bulk_viscosity->getPointer(0);
-            double* kappa = d_data_thermal_conductivity->getPointer(0);
+            Real* mu    = d_data_shear_viscosity->getPointer(0);
+            Real* mu_v  = d_data_bulk_viscosity->getPointer(0);
+            Real* kappa = d_data_thermal_conductivity->getPointer(0);
             
             if (d_dim == tbox::Dimension(1))
             {
@@ -4103,11 +4103,11 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfDiffusivities()
 #endif
                 
                 // Get the pointer to cell data of velocity and diffusivities.
-                double* u = data_velocity->getPointer(0);
+                Real* u = data_velocity->getPointer(0);
                 
-                double* D_00 = d_data_diffusivities->getPointer(0);
-                double* D_01 = d_data_diffusivities->getPointer(1);
-                double* D_02 = d_data_diffusivities->getPointer(2);
+                Real* D_00 = d_data_diffusivities->getPointer(0);
+                Real* D_01 = d_data_diffusivities->getPointer(1);
+                Real* D_02 = d_data_diffusivities->getPointer(2);
                 
                 /*
                  * Compute the diffusivities.
@@ -4123,8 +4123,8 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfDiffusivities()
                     const int idx_thermal_conductivity = i + d_num_subghosts_thermal_conductivity[0];
                     const int idx_velocity = i + num_subghosts_velocity[0];
                     
-                    D_00[idx_diffusivities] = -(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
-                    D_01[idx_diffusivities] = -u[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] +
+                    D_00[idx_diffusivities] = -(Real(4)/Real(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
+                    D_01[idx_diffusivities] = -u[idx_velocity]*(Real(4)/Real(3)*mu[idx_shear_viscosity] +
                         mu_v[idx_bulk_viscosity]);
                     D_02[idx_diffusivities] = -kappa[idx_thermal_conductivity];
                 }
@@ -4136,19 +4136,19 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfDiffusivities()
 #endif
                 
                 // Get the pointer to cell data of velocity and diffusivities.
-                double* u = data_velocity->getPointer(0);
-                double* v = data_velocity->getPointer(1);
+                Real* u = data_velocity->getPointer(0);
+                Real* v = data_velocity->getPointer(1);
                 
-                double* D_00 = d_data_diffusivities->getPointer(0);
-                double* D_01 = d_data_diffusivities->getPointer(1);
-                double* D_02 = d_data_diffusivities->getPointer(2);
-                double* D_03 = d_data_diffusivities->getPointer(3);
-                double* D_04 = d_data_diffusivities->getPointer(4);
-                double* D_05 = d_data_diffusivities->getPointer(5);
-                double* D_06 = d_data_diffusivities->getPointer(6);
-                double* D_07 = d_data_diffusivities->getPointer(7);
-                double* D_08 = d_data_diffusivities->getPointer(8);
-                double* D_09 = d_data_diffusivities->getPointer(9);
+                Real* D_00 = d_data_diffusivities->getPointer(0);
+                Real* D_01 = d_data_diffusivities->getPointer(1);
+                Real* D_02 = d_data_diffusivities->getPointer(2);
+                Real* D_03 = d_data_diffusivities->getPointer(3);
+                Real* D_04 = d_data_diffusivities->getPointer(4);
+                Real* D_05 = d_data_diffusivities->getPointer(5);
+                Real* D_06 = d_data_diffusivities->getPointer(6);
+                Real* D_07 = d_data_diffusivities->getPointer(7);
+                Real* D_08 = d_data_diffusivities->getPointer(8);
+                Real* D_09 = d_data_diffusivities->getPointer(9);
                 
                 /*
                  * Compute the diffusivities.
@@ -4177,16 +4177,16 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfDiffusivities()
                         const int idx_velocity = (i + num_subghosts_velocity[0]) +
                             (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0];
                         
-                        D_00[idx_diffusivities] = -(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
-                        D_01[idx_diffusivities] = double(2)/double(3)*mu[idx_shear_viscosity] - mu_v[idx_bulk_viscosity];
+                        D_00[idx_diffusivities] = -(Real(4)/Real(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
+                        D_01[idx_diffusivities] = Real(2)/Real(3)*mu[idx_shear_viscosity] - mu_v[idx_bulk_viscosity];
                         D_02[idx_diffusivities] = -mu[idx_shear_viscosity];
-                        D_03[idx_diffusivities] = -u[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] +
+                        D_03[idx_diffusivities] = -u[idx_velocity]*(Real(4)/Real(3)*mu[idx_shear_viscosity] +
                             mu_v[idx_bulk_viscosity]);
-                        D_04[idx_diffusivities] = -v[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] +
+                        D_04[idx_diffusivities] = -v[idx_velocity]*(Real(4)/Real(3)*mu[idx_shear_viscosity] +
                             mu_v[idx_bulk_viscosity]);
-                        D_05[idx_diffusivities] = u[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] -
+                        D_05[idx_diffusivities] = u[idx_velocity]*(Real(2)/Real(3)*mu[idx_shear_viscosity] -
                             mu_v[idx_bulk_viscosity]);
-                        D_06[idx_diffusivities] = v[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] -
+                        D_06[idx_diffusivities] = v[idx_velocity]*(Real(2)/Real(3)*mu[idx_shear_viscosity] -
                             mu_v[idx_bulk_viscosity]);
                         D_07[idx_diffusivities] = -u[idx_velocity]*mu[idx_shear_viscosity];
                         D_08[idx_diffusivities] = -v[idx_velocity]*mu[idx_shear_viscosity];
@@ -4201,23 +4201,23 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfDiffusivities()
 #endif
                 
                 // Get the pointer to cell data of velocity and diffusivities.
-                double* u = data_velocity->getPointer(0);
-                double* v = data_velocity->getPointer(1);
-                double* w = data_velocity->getPointer(2);
+                Real* u = data_velocity->getPointer(0);
+                Real* v = data_velocity->getPointer(1);
+                Real* w = data_velocity->getPointer(2);
                 
-                double* D_00 = d_data_diffusivities->getPointer(0);
-                double* D_01 = d_data_diffusivities->getPointer(1);
-                double* D_02 = d_data_diffusivities->getPointer(2);
-                double* D_03 = d_data_diffusivities->getPointer(3);
-                double* D_04 = d_data_diffusivities->getPointer(4);
-                double* D_05 = d_data_diffusivities->getPointer(5);
-                double* D_06 = d_data_diffusivities->getPointer(6);
-                double* D_07 = d_data_diffusivities->getPointer(7);
-                double* D_08 = d_data_diffusivities->getPointer(8);
-                double* D_09 = d_data_diffusivities->getPointer(9);
-                double* D_10 = d_data_diffusivities->getPointer(10);
-                double* D_11 = d_data_diffusivities->getPointer(11);
-                double* D_12 = d_data_diffusivities->getPointer(12);
+                Real* D_00 = d_data_diffusivities->getPointer(0);
+                Real* D_01 = d_data_diffusivities->getPointer(1);
+                Real* D_02 = d_data_diffusivities->getPointer(2);
+                Real* D_03 = d_data_diffusivities->getPointer(3);
+                Real* D_04 = d_data_diffusivities->getPointer(4);
+                Real* D_05 = d_data_diffusivities->getPointer(5);
+                Real* D_06 = d_data_diffusivities->getPointer(6);
+                Real* D_07 = d_data_diffusivities->getPointer(7);
+                Real* D_08 = d_data_diffusivities->getPointer(8);
+                Real* D_09 = d_data_diffusivities->getPointer(9);
+                Real* D_10 = d_data_diffusivities->getPointer(10);
+                Real* D_11 = d_data_diffusivities->getPointer(11);
+                Real* D_12 = d_data_diffusivities->getPointer(12);
                 
                 /*
                  * Compute the diffusivities.
@@ -4259,20 +4259,20 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfDiffusivities()
                                 (k + num_subghosts_velocity[2])*subghostcell_dims_velocity[0]*
                                     subghostcell_dims_velocity[1];
                             
-                            D_00[idx_diffusivities] = -(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
-                            D_01[idx_diffusivities] = double(2)/double(3)*mu[idx_shear_viscosity] - mu_v[idx_bulk_viscosity];
+                            D_00[idx_diffusivities] = -(Real(4)/Real(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
+                            D_01[idx_diffusivities] = Real(2)/Real(3)*mu[idx_shear_viscosity] - mu_v[idx_bulk_viscosity];
                             D_02[idx_diffusivities] = -mu[idx_shear_viscosity];
-                            D_03[idx_diffusivities] = -u[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] +
+                            D_03[idx_diffusivities] = -u[idx_velocity]*(Real(4)/Real(3)*mu[idx_shear_viscosity] +
                                 mu_v[idx_bulk_viscosity]);
-                            D_04[idx_diffusivities] = -v[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] +
+                            D_04[idx_diffusivities] = -v[idx_velocity]*(Real(4)/Real(3)*mu[idx_shear_viscosity] +
                                 mu_v[idx_bulk_viscosity]);
-                            D_05[idx_diffusivities] = -w[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] +
+                            D_05[idx_diffusivities] = -w[idx_velocity]*(Real(4)/Real(3)*mu[idx_shear_viscosity] +
                                 mu_v[idx_bulk_viscosity]);
-                            D_06[idx_diffusivities] = u[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] -
+                            D_06[idx_diffusivities] = u[idx_velocity]*(Real(2)/Real(3)*mu[idx_shear_viscosity] -
                                 mu_v[idx_bulk_viscosity]);
-                            D_07[idx_diffusivities] = v[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] -
+                            D_07[idx_diffusivities] = v[idx_velocity]*(Real(2)/Real(3)*mu[idx_shear_viscosity] -
                                 mu_v[idx_bulk_viscosity]);
-                            D_08[idx_diffusivities] = w[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] -
+                            D_08[idx_diffusivities] = w[idx_velocity]*(Real(2)/Real(3)*mu[idx_shear_viscosity] -
                                 mu_v[idx_bulk_viscosity]);
                             D_09[idx_diffusivities] = -u[idx_velocity]*mu[idx_shear_viscosity];
                             D_10[idx_diffusivities] = -v[idx_velocity]*mu[idx_shear_viscosity];

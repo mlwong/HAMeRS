@@ -10,7 +10,7 @@
 void
 NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveFluxDivergenceOnPatch(
     hier::Patch& patch,
-    const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_diffusive_flux_divergence,
+    const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_diffusive_flux_divergence,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double time,
     const double dt,
@@ -48,8 +48,8 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
     const hier::IntVector diff_ghostcell_dims = diff_ghost_box.numberCells();
     
     // Get the cell data of diffusive flux divergence.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > diffusive_flux_divergence(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > diffusive_flux_divergence(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(variable_diffusive_flux_divergence, data_context)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -58,7 +58,7 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
 #endif
     
     // Initialize the data of diffusive flux to zero.
-    diffusive_flux_divergence->fillAll(double(0));
+    diffusive_flux_divergence->fillAll(Real(0));
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -78,23 +78,23 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
          * Delcare containers for computing flux derivatives in different directions.
          */
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_data_x;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > diffusivities_data_x;
         
         std::vector<std::vector<int> > var_component_idx_x;
         
         std::vector<std::vector<int> > diffusivities_component_idx_x;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_x;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_xx;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_xx;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_derivative_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > diffusivities_derivative_x;
         
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_x_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_x_computed;
         
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_xx_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_xx_computed;
         
         /*
          * Compute the derivatives for diffusive flux in x-direction.
@@ -191,11 +191,11 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
          * Delcare containers for computing flux derivatives in different directions.
          */
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_x;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_data_y;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_data_x;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_data_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > diffusivities_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > diffusivities_data_y;
         
         std::vector<std::vector<int> > var_component_idx_x;
         std::vector<std::vector<int> > var_component_idx_y;
@@ -206,24 +206,24 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         std::vector<std::vector<int> > var_derivative_component_idx_x;
         std::vector<std::vector<int> > var_derivative_component_idx_y;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_x;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_y;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_xx;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_xy;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_yx;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_yy;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_xx;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_xy;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_yx;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_yy;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_derivative_x;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_derivative_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > diffusivities_derivative_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > diffusivities_derivative_y;
         
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_x_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_y_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_x_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_y_computed;
         
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_xx_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_xy_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_yx_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_yy_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_xx_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_xy_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_yx_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_yy_computed;
         
         /*
          * (1) Compute the derivatives for diffusive flux in x-direction.
@@ -549,13 +549,13 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
          * Delcare containers for computing flux derivatives in different directions.
          */
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_x;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_y;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_z;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_data_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_data_z;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_data_x;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_data_y;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_data_z;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > diffusivities_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > diffusivities_data_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > diffusivities_data_z;
         
         std::vector<std::vector<int> > var_component_idx_x;
         std::vector<std::vector<int> > var_component_idx_y;
@@ -569,37 +569,37 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
         std::vector<std::vector<int> > var_derivative_component_idx_y;
         std::vector<std::vector<int> > var_derivative_component_idx_z;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_x;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_y;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_z;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_z;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_xx;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_xy;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_xz;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_yx;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_yy;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_yz;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_zx;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_zy;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_derivative_zz;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_xx;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_xy;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_xz;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_yx;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_yy;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_yz;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_zx;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_zy;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > var_derivative_zz;
         
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_derivative_x;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_derivative_y;
-        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_derivative_z;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > diffusivities_derivative_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > diffusivities_derivative_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > > diffusivities_derivative_z;
         
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_x_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_y_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_z_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_x_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_y_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_z_computed;
         
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_xx_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_xy_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_xz_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_yx_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_yy_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_yz_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_zx_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_zy_computed;
-        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_zz_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_xx_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_xy_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_xz_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_yx_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_yy_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_yz_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_zx_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_zy_computed;
+        std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > > derivative_zz_computed;
         
         /*
          * (1) Compute the derivatives for diffusive flux in x-direction.
@@ -1301,11 +1301,11 @@ NonconservativeDiffusiveFluxDivergenceOperator::computeNonconservativeDiffusiveF
  * Add derivatives to divergence.
  */
 void NonconservativeDiffusiveFluxDivergenceOperator::addDerivativeToDivergence(
-    HAMERS_SHARED_PTR<pdat::CellData<double> > & divergence,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& var_first_derivative,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& var_derivative_cross_derivative,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& diffusivities_data,
-    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& diffusivities_first_derivative,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > & divergence,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& var_first_derivative,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& var_derivative_cross_derivative,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& diffusivities_data,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& diffusivities_first_derivative,
     const std::vector<std::vector<int> >& var_component_idx,
     const std::vector<std::vector<int> >& diffusivities_component_idx,
     const hier::Patch& patch,
@@ -1348,7 +1348,7 @@ void NonconservativeDiffusiveFluxDivergenceOperator::addDerivativeToDivergence(
             TBOX_ASSERT(static_cast<int>(diffusivities_first_derivative[ei].size()) ==
                         static_cast<int>(var_component_idx[ei].size()));
             
-            double* nabla_F = divergence->getPointer(ei);
+            Real* nabla_F = divergence->getPointer(ei);
             
             for (int vi = 0; vi < static_cast<int>(var_component_idx[ei].size()); vi++)
             {
@@ -1356,12 +1356,12 @@ void NonconservativeDiffusiveFluxDivergenceOperator::addDerivativeToDivergence(
                 const int mu_idx = diffusivities_component_idx[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data[ei][vi]->getPointer(mu_idx);
+                Real* mu = diffusivities_data[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointers to derivatives.
-                double* dudx = var_first_derivative[ei][vi]->getPointer(0);
-                double* d2udxdy = var_derivative_cross_derivative[ei][vi]->getPointer(0);
-                double* dmudy = diffusivities_first_derivative[ei][vi]->getPointer(0);
+                Real* dudx = var_first_derivative[ei][vi]->getPointer(0);
+                Real* d2udxdy = var_derivative_cross_derivative[ei][vi]->getPointer(0);
+                Real* dmudy = diffusivities_first_derivative[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -1385,7 +1385,7 @@ void NonconservativeDiffusiveFluxDivergenceOperator::addDerivativeToDivergence(
                     
                     const int idx_diff = i + num_diff_ghosts_0;
                     
-                    nabla_F[idx_nghost] += dt*(dmudy[idx_diff]*dudx[idx_diff] +
+                    nabla_F[idx_nghost] += Real(dt)*(dmudy[idx_diff]*dudx[idx_diff] +
                         mu[idx_diffusivity]*d2udxdy[idx_diff]);
                 }
             }
@@ -1422,7 +1422,7 @@ void NonconservativeDiffusiveFluxDivergenceOperator::addDerivativeToDivergence(
             TBOX_ASSERT(static_cast<int>(diffusivities_first_derivative[ei].size()) ==
                         static_cast<int>(var_component_idx[ei].size()));
             
-            double* nabla_F = divergence->getPointer(ei);
+            Real* nabla_F = divergence->getPointer(ei);
             
             for (int vi = 0; vi < static_cast<int>(var_component_idx[ei].size()); vi++)
             {
@@ -1430,12 +1430,12 @@ void NonconservativeDiffusiveFluxDivergenceOperator::addDerivativeToDivergence(
                 const int mu_idx = diffusivities_component_idx[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data[ei][vi]->getPointer(mu_idx);
+                Real* mu = diffusivities_data[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointers to derivatives.
-                double* dudx = var_first_derivative[ei][vi]->getPointer(0);
-                double* d2udxdy = var_derivative_cross_derivative[ei][vi]->getPointer(0);
-                double* dmudy = diffusivities_first_derivative[ei][vi]->getPointer(0);
+                Real* dudx = var_first_derivative[ei][vi]->getPointer(0);
+                Real* d2udxdy = var_derivative_cross_derivative[ei][vi]->getPointer(0);
+                Real* dmudy = diffusivities_first_derivative[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -1465,7 +1465,7 @@ void NonconservativeDiffusiveFluxDivergenceOperator::addDerivativeToDivergence(
                         const int idx_diff = (i + num_diff_ghosts_0) +
                             (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
-                        nabla_F[idx_nghost] += dt*(dmudy[idx_diff]*dudx[idx_diff] +
+                        nabla_F[idx_nghost] += Real(dt)*(dmudy[idx_diff]*dudx[idx_diff] +
                             mu[idx_diffusivity]*d2udxdy[idx_diff]);
                     }
                 }
@@ -1506,7 +1506,7 @@ void NonconservativeDiffusiveFluxDivergenceOperator::addDerivativeToDivergence(
             TBOX_ASSERT(static_cast<int>(diffusivities_first_derivative[ei].size()) ==
                         static_cast<int>(var_component_idx[ei].size()));
             
-            double* nabla_F = divergence->getPointer(ei);
+            Real* nabla_F = divergence->getPointer(ei);
             
             for (int vi = 0; vi < static_cast<int>(var_component_idx[ei].size()); vi++)
             {
@@ -1514,12 +1514,12 @@ void NonconservativeDiffusiveFluxDivergenceOperator::addDerivativeToDivergence(
                 const int mu_idx = diffusivities_component_idx[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data[ei][vi]->getPointer(mu_idx);
+                Real* mu = diffusivities_data[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointers to derivatives.
-                double* dudx = var_first_derivative[ei][vi]->getPointer(0);
-                double* d2udxdy = var_derivative_cross_derivative[ei][vi]->getPointer(0);
-                double* dmudy = diffusivities_first_derivative[ei][vi]->getPointer(0);
+                Real* dudx = var_first_derivative[ei][vi]->getPointer(0);
+                Real* d2udxdy = var_derivative_cross_derivative[ei][vi]->getPointer(0);
+                Real* dmudy = diffusivities_first_derivative[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
@@ -1559,7 +1559,7 @@ void NonconservativeDiffusiveFluxDivergenceOperator::addDerivativeToDivergence(
                                 (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            nabla_F[idx_nghost] += dt*(dmudy[idx_diff]*dudx[idx_diff] +
+                            nabla_F[idx_nghost] += Real(dt)*(dmudy[idx_diff]*dudx[idx_diff] +
                                 mu[idx_diffusivity]*d2udxdy[idx_diff]);
                         }
                     }

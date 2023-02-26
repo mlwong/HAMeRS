@@ -19,17 +19,17 @@ int main(int argc, char *argv[])
      */
     tbox::Dimension dim(3);
     
-    double p = 0.0;
-    double T = 0.0;
+    Real p = (0);
+    Real T = (0);
     
-    std::vector<double> molecular_properties;
-    std::vector<const double*> molecular_properties_const_ptr;
+    std::vector<Real> molecular_properties;
+    std::vector<const Real*> molecular_properties_const_ptr;
     
     /*
      * Verify that the equations of shear viscosity are implemented correctly.
      */
     
-    double mu = 0.0;
+    Real mu = (0);
     
     HAMERS_SHARED_PTR<EquationOfShearViscosity> equation_of_shear_viscosity;
     
@@ -47,18 +47,18 @@ int main(int argc, char *argv[])
         molecular_properties_const_ptr.push_back(&molecular_properties[i]);
     }
     
-    molecular_properties[0] = 1.81e-5;
-    molecular_properties[1] = 29.0;
+    molecular_properties[0] = Real(1.81e-5);
+    molecular_properties[1] = Real(29.0);
     
-    p = 1.0e5;
-    T = 300.0;
+    p = Real(1.0e5);
+    T = Real(300);
     
     mu = equation_of_shear_viscosity->getShearViscosity(
         &p,
         &T,
         molecular_properties_const_ptr);
     
-    if (fabs(mu - 1.81e-5) < 1.0e-8)
+    if (std::abs(mu - Real(1.81e-5)) < Real(1.0e-8))
     {
         std::cout << "EquationOfShearViscosityConstant is implemented correctly!" << std::endl;
     }
@@ -83,19 +83,19 @@ int main(int argc, char *argv[])
         molecular_properties_const_ptr.push_back(&molecular_properties[i]);
     }
     
-    molecular_properties[0] = 78.6;
-    molecular_properties[1] = 3.711;
-    molecular_properties[2] = 29.0;
+    molecular_properties[0] = Real(78.6);
+    molecular_properties[1] = Real(3.711);
+    molecular_properties[2] = Real(29);
     
-    p = 1.0e5;
-    T = 300.0;
+    p = Real(1.0e5);
+    T = Real(300);
     
     mu = equation_of_shear_viscosity->getShearViscosity(
         &p,
         &T,
         molecular_properties_const_ptr);
     
-    if (fabs(mu - 1.8461366680483000e-5) < 1.0e-8)
+    if (std::abs(mu - Real(1.8461366680483000e-5)) < Real(1.0e-8))
     {
         std::cout << "EquationOfShearViscosityChapmanEnskog is implemented correctly!" << std::endl;
     }
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
      * Verify that the equations of bulk viscosity are implemented correctly.
      */
     
-    double mu_v = 0.0;
+    Real mu_v = Real(0);
     
     HAMERS_SHARED_PTR<EquationOfBulkViscosity> equation_of_bulk_viscosity;
     
@@ -128,11 +128,11 @@ int main(int argc, char *argv[])
         molecular_properties_const_ptr.push_back(&molecular_properties[i]);
     }
     
-    molecular_properties[0] = 1.59e-5;
-    molecular_properties[1] = 29.0;
+    molecular_properties[0] = Real(1.59e-5);
+    molecular_properties[1] = Real(29);
     
-    p = 1.0e5;
-    T = 300.0;
+    p = Real(1.0e5);
+    T = Real(300);
     
     mu_v = equation_of_bulk_viscosity->getBulkViscosity(
         &p,
@@ -164,27 +164,27 @@ int main(int argc, char *argv[])
         molecular_properties_const_ptr.push_back(&molecular_properties[i]);
     }
     
-    molecular_properties[0] = 1.4;
+    molecular_properties[0] = Real(1.4);
     
-    molecular_properties[1] = -3.15e-5;
-    molecular_properties[2] = 1.58e-7;
+    molecular_properties[1] = Real(-3.15e-5);
+    molecular_properties[2] = Real(1.58e-7);
     
-    molecular_properties[3] = 0.0;
-    molecular_properties[4] = 0.0;
-    molecular_properties[5] = 0.0;
-    molecular_properties[6] = 0.0;
+    molecular_properties[3] = Real(0);
+    molecular_properties[4] = Real(0);
+    molecular_properties[5] = Real(0);
+    molecular_properties[6] = Real(0);
     
-    molecular_properties[7] = 29.0;
+    molecular_properties[7] = Real(29);
     
-    p = 1.0e5;
-    T = 300.0;
+    p = Real(1.0e5);
+    T = Real(300);
     
     mu_v = equation_of_bulk_viscosity->getBulkViscosity(
         &p,
         &T,
         molecular_properties_const_ptr);
     
-    if (fabs(mu_v - 1.59e-5) < 1.0e-8)
+    if (std::abs(mu_v - Real(1.59e-5)) < Real(1.0e-8))
     {
         std::cout << "EquationOfBulkViscosityCramer is implemented correctly!" << std::endl;
     }
@@ -193,27 +193,27 @@ int main(int argc, char *argv[])
         std::cout << "EquationOfBulkViscosityCramer is not implemented correctly!" << std::endl;
     }
     
-    molecular_properties[0] = 1.1;
+    molecular_properties[0] = Real(1.1);
     
-    molecular_properties[1] = 0.0;
-    molecular_properties[2] = 0.0;
+    molecular_properties[1] = Real(0);
+    molecular_properties[2] = Real(0);
     
-    molecular_properties[3] = 1.0/(molecular_properties[0] - 1.0) - (3.0 + 3.0)/2.0;
-    molecular_properties[4] = 0.2064e-5;
-    molecular_properties[5] = 121.0;
-    molecular_properties[6] = -339.0;
+    molecular_properties[3] = Real(1)/(molecular_properties[0] - Real(1)) - (Real(3) + Real(3))/Real(2);
+    molecular_properties[4] = Real(0.2064e-5);
+    molecular_properties[5] = Real(121);
+    molecular_properties[6] = -Real(339);
     
-    molecular_properties[7] = 146.0;
+    molecular_properties[7] = Real(146.0);
     
-    p = 1.0e5;
-    T = 300.0;
+    p = Real(1.0e5);
+    T = Real(300);
     
     mu_v = equation_of_bulk_viscosity->getBulkViscosity(
         &p,
         &T,
         molecular_properties_const_ptr);
     
-    if (fabs(mu_v - 5.30175204375121e-3) < 1.0e-8)
+    if (std::abs(mu_v - Real(5.30175204375121e-3)) < Real(1.0e-8))
     {
         std::cout << "EquationOfBulkViscosityCramer is implemented correctly!" << std::endl;
     }
@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
      * Verify that the equations of thermal conductivity are implemented correctly.
      */
     
-    double kappa = 0.0;
+    Real kappa = Real(0);
     
     HAMERS_SHARED_PTR<EquationOfThermalConductivity> equation_of_thermal_conductivity;
     
@@ -246,18 +246,18 @@ int main(int argc, char *argv[])
         molecular_properties_const_ptr.push_back(&molecular_properties[i]);
     }
     
-    molecular_properties[0] = 2.71e-2;
-    molecular_properties[1] = 29.0;
+    molecular_properties[0] = Real(2.71e-2);
+    molecular_properties[1] = Real(29);
     
-    p = 1.0e5;
-    T = 300.0;
+    p = Real(1.0e5);
+    T = Real(300);
     
     kappa = equation_of_thermal_conductivity->getThermalConductivity(
         &p,
         &T,
         molecular_properties_const_ptr);
     
-    if (fabs(kappa - 2.71e-2) < 1.0e-8)
+    if (std::abs(kappa - Real(2.71e-2)) < Real(1.0e-8))
     {
         std::cout << "EquationOfThermalConductivityConstant is implemented correctly!" << std::endl;
     }
@@ -288,22 +288,22 @@ int main(int argc, char *argv[])
         molecular_properties_const_ptr.push_back(&molecular_properties[i]);
     }
     
-    molecular_properties[0] = 1005.0;
-    molecular_properties[1] = 0.72;
-    molecular_properties[2] = 29.0;
-    molecular_properties[3] = 78.6;
-    molecular_properties[4] = 3.711;
-    molecular_properties[5] = 29.0;
+    molecular_properties[0] = Real(1005);
+    molecular_properties[1] = Real(0.72);
+    molecular_properties[2] = Real(29);
+    molecular_properties[3] = Real(78.6);
+    molecular_properties[4] = Real(3.711);
+    molecular_properties[5] = Real(29);
     
-    p = 1.0e5;
-    T = 300.0;
+    p = Real(1.0e5);
+    T = Real(300);
     
     kappa = equation_of_thermal_conductivity->getThermalConductivity(
         &p,
         &T,
         molecular_properties_const_ptr);
     
-    if (fabs(kappa - 2.5768990991507500e-2) < 1.0e-8)
+    if (std::abs(kappa - Real(2.5768990991507500e-2)) < Real(1.0e-8))
     {
         std::cout << "EquationOfThermalConductivityPrandtl is implemented correctly!" << std::endl;
     }
@@ -322,11 +322,11 @@ int main(int argc, char *argv[])
      * Verify that the equations of mass diffusivity are implemented correctly.
      */
     
-    std::vector<double> D;
-    std::vector<double*> D_ptr;
+    std::vector<Real> D;
+    std::vector<Real*> D_ptr;
     
-    std::vector<double> Y;
-    std::vector<const double*> Y_const_ptr;
+    std::vector<Real> Y;
+    std::vector<const Real*> Y_const_ptr;
     
     HAMERS_SHARED_PTR<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules;
     
@@ -335,12 +335,12 @@ int main(int argc, char *argv[])
     equation_of_mass_diffusivity_mixing_rules_db.reset(new
         tbox::MemoryDatabase("equation_of_mass_diffusivity_mixing_rules_db"));
     
-    std::vector<double> species_D;
+    std::vector<Real> species_D;
     species_D.reserve(2);
-    species_D.push_back(1.85e-5);
-    species_D.push_back(1.85e-5);
+    species_D.push_back(Real(1.85e-5));
+    species_D.push_back(Real(1.85e-5));
     
-    equation_of_mass_diffusivity_mixing_rules_db->putDoubleVector(
+    equation_of_mass_diffusivity_mixing_rules_db->putRealVector(
         "species_D",
         species_D);
     
@@ -365,11 +365,11 @@ int main(int argc, char *argv[])
         Y_const_ptr.push_back(&Y[i]);
     }
     
-    p = 23000;
-    T = 298;
+    p = Real(23000);
+    T = Real(298);
     
-    Y[0] = 0.1;
-    Y[1] = 0.9;
+    Y[0] = Real(0.1);
+    Y[1] = Real(0.9);
     
     equation_of_mass_diffusivity_mixing_rules->getMassDiffusivities(
         D_ptr,
@@ -377,7 +377,7 @@ int main(int argc, char *argv[])
         &T,
         Y_const_ptr);
     
-    if (fabs(D[1] - 1.85e-5) < 1.0e-8)
+    if (fabs(D[1] - Real(1.85e-5)) < Real(1.0e-8))
     {
         std::cout << "EquationOfMassDiffusivityMixingRulesConstant is implemented correctly!" << std::endl;
     }
@@ -397,30 +397,30 @@ int main(int argc, char *argv[])
     equation_of_mass_diffusivity_mixing_rules_db.reset(new
         tbox::MemoryDatabase("equation_of_mass_diffusivity_mixing_rules_db"));
     
-    std::vector<double> species_epsilon_by_k;
+    std::vector<Real> species_epsilon_by_k;
     species_epsilon_by_k.reserve(2);
-    species_epsilon_by_k.push_back(212.0);
-    species_epsilon_by_k.push_back(458.0);
+    species_epsilon_by_k.push_back(Real(212));
+    species_epsilon_by_k.push_back(Real(458));
     
-    std::vector<double> species_sigma;
+    std::vector<Real> species_sigma;
     species_sigma.reserve(2);
-    species_sigma.push_back(5.199);
-    species_sigma.push_back(4.599);
+    species_sigma.push_back(Real(5.199));
+    species_sigma.push_back(Real(4.599));
     
-    std::vector<double> species_M;
+    std::vector<Real> species_M;
     species_M.reserve(2);
-    species_M.push_back(146.057);
-    species_M.push_back(58.0805);
+    species_M.push_back(Real(146.057));
+    species_M.push_back(Real(58.0805));
     
-    equation_of_mass_diffusivity_mixing_rules_db->putDoubleVector(
+    equation_of_mass_diffusivity_mixing_rules_db->putRealVector(
         "species_epsilon_by_k",
         species_epsilon_by_k);
     
-    equation_of_mass_diffusivity_mixing_rules_db->putDoubleVector(
+    equation_of_mass_diffusivity_mixing_rules_db->putRealVector(
         "species_sigma",
         species_sigma);
     
-    equation_of_mass_diffusivity_mixing_rules_db->putDoubleVector(
+    equation_of_mass_diffusivity_mixing_rules_db->putRealVector(
         "species_M",
         species_M);
     
@@ -445,11 +445,11 @@ int main(int argc, char *argv[])
         Y_const_ptr.push_back(&Y[i]);
     }
     
-    p = 23000;
-    T = 298;
+    p = Real(23000);
+    T = Real(298);
     
-    Y[0] = 0.1;
-    Y[1] = 0.9;
+    Y[0] = Real(0.1);
+    Y[1] = Real(0.9);
     
     equation_of_mass_diffusivity_mixing_rules->getMassDiffusivities(
         D_ptr,
@@ -457,7 +457,7 @@ int main(int argc, char *argv[])
         &T,
         Y_const_ptr);
     
-    if (fabs(D[1] - 1.84656024212537e-5) < 1.0e-8)
+    if (fabs(D[1] - Real(1.84656024212537e-5)) < Real(1.0e-8))
     {
         std::cout << "EquationOfMassDiffusivityMixingRulesReid is implemented correctly!" << std::endl;
     }

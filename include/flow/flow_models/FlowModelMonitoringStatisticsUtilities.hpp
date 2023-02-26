@@ -104,13 +104,13 @@ class FlowModelMonitoringStatisticsUtilities
         /*
          * Get monitoring statistical quantities.
          */
-        virtual double getMonitoringStatistics(
+        virtual Real getMonitoringStatistics(
             std::string statistics_name) const = 0;
         
         /*
          * Get map of monitoring statistical quantities.
          */
-        virtual std::unordered_map<std::string, double> getMonitoringStatisticsMap() const = 0;
+        virtual std::unordered_map<std::string, Real> getMonitoringStatisticsMap() const = 0;
         
     protected:
         /*
