@@ -35,50 +35,50 @@ class DiffusiveFluxReconstructorNodeFourthOrder: public DiffusiveFluxReconstruct
          * Kernel to compute the first derivatives in the x-direction.
          */
         void computeFirstDerivativesInX(
-            double* dudx,
-            const double* const u,
+            Real* dudx,
+            const Real* const u,
             const hier::IntVector& num_ghosts_derivative_node,
             const hier::IntVector& num_ghosts_data_node,
             const hier::IntVector& ghostcell_dims_derivative_node,
             const hier::IntVector& ghostcell_dims_data_node,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims,
-            const double& dx_0_inv) const;
+            const Real& dx_0_inv) const;
         
         /*
          * Kernel to compute the first derivatives in the y-direction.
          */
         void computeFirstDerivativesInY(
-            double* dudy,
-            const double* const u,
+            Real* dudy,
+            const Real* const u,
             const hier::IntVector& num_ghosts_derivative_node,
             const hier::IntVector& num_ghosts_data_node,
             const hier::IntVector& ghostcell_dims_derivative_node,
             const hier::IntVector& ghostcell_dims_data_node,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims,
-            const double& dx_1_in) const;
+            const Real& dx_1_in) const;
         
         /*
          * Kernel to compute the first derivatives in the z-direction.
          */
         void computeFirstDerivativesInZ(
-            double* dudz,
-            const double* const u,
+            Real* dudz,
+            const Real* const u,
             const hier::IntVector& num_ghosts_derivative_node,
             const hier::IntVector& num_ghosts_data_node,
             const hier::IntVector& ghostcell_dims_derivative_node,
             const hier::IntVector& ghostcell_dims_data_node,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims,
-            const double& dx_2_inv) const;
+            const Real& dx_2_inv) const;
         
         /*
          * Kernel to reconstruct the flux using flux at nodes in x-direction.
          */
         void reconstructFluxX(
-            double* F_face_x,
-            const double* const F_node_x,
+            Real* F_face_x,
+            const Real* const F_node_x,
             const hier::IntVector& num_ghosts_flux_node,
             const hier::IntVector& ghostcell_dims_flux_node,
             const hier::IntVector& domain_lo,
@@ -90,8 +90,8 @@ class DiffusiveFluxReconstructorNodeFourthOrder: public DiffusiveFluxReconstruct
          * Kernel to reconstruct the flux using flux at nodes in y-direction.
          */
         void reconstructFluxY(
-            double* F_face_y,
-            const double* const F_node_y,
+            Real* F_face_y,
+            const Real* const F_node_y,
             const hier::IntVector& num_ghosts_flux_node,
             const hier::IntVector& ghostcell_dims_flux_node,
             const hier::IntVector& domain_lo,
@@ -103,8 +103,8 @@ class DiffusiveFluxReconstructorNodeFourthOrder: public DiffusiveFluxReconstruct
          * Kernel to reconstruct the flux using flux at nodes in z-direction.
          */
         void reconstructFluxZ(
-            double* F_face_z,
-            const double* const F_node_z,
+            Real* F_face_z,
+            const Real* const F_node_z,
             const hier::IntVector& num_ghosts_flux_node,
             const hier::IntVector& ghostcell_dims_flux_node,
             const hier::IntVector& domain_lo,

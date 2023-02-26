@@ -64,19 +64,19 @@ DiffusiveFluxReconstructorNodeSixthOrder::putToRestart(
  */
 void
 DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInX(
-    double* dudx,
-    const double* const u,
+    Real* dudx,
+    const Real* const u,
     const hier::IntVector& num_ghosts_derivative_node,
     const hier::IntVector& num_ghosts_data_node,
     const hier::IntVector& ghostcell_dims_derivative_node,
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_0_inv) const
+    const Real& dx_0_inv) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const Real a_n =  Real(3)/Real(4);
+    const Real b_n = -Real(3)/Real(20);
+    const Real c_n =  Real(1)/Real(60);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -248,19 +248,19 @@ DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInX(
  */
 void
 DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInY(
-    double* dudy,
-    const double* const u,
+    Real* dudy,
+    const Real* const u,
     const hier::IntVector& num_ghosts_derivative_node,
     const hier::IntVector& num_ghosts_data_node,
     const hier::IntVector& ghostcell_dims_derivative_node,
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_1_inv) const
+    const Real& dx_1_inv) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const Real a_n =  Real(3)/Real(4);
+    const Real b_n = -Real(3)/Real(20);
+    const Real c_n =  Real(1)/Real(60);
     
     if (d_dim == tbox::Dimension(2))
     {
@@ -399,19 +399,19 @@ DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInY(
  */
 void
 DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInZ(
-    double* dudz,
-    const double* const u,
+    Real* dudz,
+    const Real* const u,
     const hier::IntVector& num_ghosts_derivative_node,
     const hier::IntVector& num_ghosts_data_node,
     const hier::IntVector& ghostcell_dims_derivative_node,
     const hier::IntVector& ghostcell_dims_data_node,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
-    const double& dx_2_inv) const
+    const Real& dx_2_inv) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const Real a_n =  Real(3)/Real(4);
+    const Real b_n = -Real(3)/Real(20);
+    const Real c_n =  Real(1)/Real(60);
     
     /*
      * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
@@ -494,8 +494,8 @@ DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInZ(
  */
 void
 DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxX(
-    double* F_face_x,
-    const double* const F_node_x,
+    Real* F_face_x,
+    const Real* const F_node_x,
     const hier::IntVector& num_ghosts_flux_node,
     const hier::IntVector& ghostcell_dims_flux_node,
     const hier::IntVector& domain_lo,
@@ -503,13 +503,13 @@ DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxX(
     const hier::IntVector& interior_dims,
     const double& dt) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const Real a_n =  Real(3)/Real(4);
+    const Real b_n = -Real(3)/Real(20);
+    const Real c_n =  Real(1)/Real(60);
     
-    const double a_r = a_n + b_n + c_n;
-    const double b_r = b_n + c_n;
-    const double c_r = c_n;
+    const Real a_r = a_n + b_n + c_n;
+    const Real b_r = b_n + c_n;
+    const Real c_r = c_n;
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -535,7 +535,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxX(
             const int idx_node_RR  = i + 1 + num_ghosts_0_flux_node;
             const int idx_node_RRR = i + 2 + num_ghosts_0_flux_node;
             
-            F_face_x[idx_face_x] += dt*(
+            F_face_x[idx_face_x] += Real(dt)*(
                 a_r*(F_node_x[idx_node_L]   + F_node_x[idx_node_R]) +
                 b_r*(F_node_x[idx_node_LL]  + F_node_x[idx_node_RR]) +
                 c_r*(F_node_x[idx_node_LLL] + F_node_x[idx_node_RRR])
@@ -586,7 +586,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxX(
                 const int idx_node_RRR = (i + 2 + num_ghosts_0_flux_node) +
                     (j + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
                 
-                F_face_x[idx_face_x] += dt*(
+                F_face_x[idx_face_x] += Real(dt)*(
                     a_r*(F_node_x[idx_node_L]   + F_node_x[idx_node_R]) +
                     b_r*(F_node_x[idx_node_LL]  + F_node_x[idx_node_RR]) +
                     c_r*(F_node_x[idx_node_LLL] + F_node_x[idx_node_RRR])
@@ -658,7 +658,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxX(
                         (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
                             ghostcell_dim_1_flux_node;
                     
-                    F_face_x[idx_face_x] += dt*(
+                    F_face_x[idx_face_x] += Real(dt)*(
                         a_r*(F_node_x[idx_node_L]   + F_node_x[idx_node_R]) +
                         b_r*(F_node_x[idx_node_LL]  + F_node_x[idx_node_RR]) +
                         c_r*(F_node_x[idx_node_LLL] + F_node_x[idx_node_RRR])
@@ -675,8 +675,8 @@ DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxX(
  */
 void
 DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxY(
-    double* F_face_y,
-    const double* const F_node_y,
+    Real* F_face_y,
+    const Real* const F_node_y,
     const hier::IntVector& num_ghosts_flux_node,
     const hier::IntVector& ghostcell_dims_flux_node,
     const hier::IntVector& domain_lo,
@@ -684,13 +684,13 @@ DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxY(
     const hier::IntVector& interior_dims,
     const double& dt) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const Real a_n =  Real(3)/Real(4);
+    const Real b_n = -Real(3)/Real(20);
+    const Real c_n =  Real(1)/Real(60);
     
-    const double a_r = a_n + b_n + c_n;
-    const double b_r = b_n + c_n;
-    const double c_r = c_n;
+    const Real a_r = a_n + b_n + c_n;
+    const Real b_r = b_n + c_n;
+    const Real c_r = c_n;
     
     if (d_dim == tbox::Dimension(2))
     {
@@ -736,7 +736,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxY(
                 const int idx_node_TTT = (i + num_ghosts_0_flux_node) +
                     (j + 2 + num_ghosts_1_flux_node)*ghostcell_dim_0_flux_node;
                 
-                F_face_y[idx_face_y] += dt*(
+                F_face_y[idx_face_y] += Real(dt)*(
                     a_r*(F_node_y[idx_node_B]   + F_node_y[idx_node_T]) +
                     b_r*(F_node_y[idx_node_BB]  + F_node_y[idx_node_TT]) +
                     c_r*(F_node_y[idx_node_BBB] + F_node_y[idx_node_TTT])
@@ -808,7 +808,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxY(
                         (k + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
                             ghostcell_dim_1_flux_node;
                     
-                    F_face_y[idx_face_y] += dt*(
+                    F_face_y[idx_face_y] += Real(dt)*(
                         a_r*(F_node_y[idx_node_B]   + F_node_y[idx_node_T]) +
                         b_r*(F_node_y[idx_node_BB]  + F_node_y[idx_node_TT]) +
                         c_r*(F_node_y[idx_node_BBB] + F_node_y[idx_node_TTT])
@@ -825,8 +825,8 @@ DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxY(
  */
 void
 DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxZ(
-    double* F_face_z,
-    const double* const F_node_z,
+    Real* F_face_z,
+    const Real* const F_node_z,
     const hier::IntVector& num_ghosts_flux_node,
     const hier::IntVector& ghostcell_dims_flux_node,
     const hier::IntVector& domain_lo,
@@ -834,13 +834,13 @@ DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxZ(
     const hier::IntVector& interior_dims,
     const double& dt) const
 {
-    const double a_n =  double(3)/double(4);
-    const double b_n = -double(3)/double(20);
-    const double c_n =  double(1)/double(60);
+    const Real a_n =  Real(3)/Real(4);
+    const Real b_n = -Real(3)/Real(20);
+    const Real c_n =  Real(1)/Real(60);
     
-    const double a_r = a_n + b_n + c_n;
-    const double b_r = b_n + c_n;
-    const double c_r = c_n;
+    const Real a_r = a_n + b_n + c_n;
+    const Real b_r = b_n + c_n;
+    const Real c_r = c_n;
     
     /*
      * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
@@ -904,7 +904,7 @@ DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxZ(
                     (k + 2 + num_ghosts_2_flux_node)*ghostcell_dim_0_flux_node*
                         ghostcell_dim_1_flux_node;
                 
-                F_face_z[idx_face_z] += dt*(
+                F_face_z[idx_face_z] += Real(dt)*(
                     a_r*(F_node_z[idx_node_B]   + F_node_z[idx_node_F]) +
                     b_r*(F_node_z[idx_node_BB]  + F_node_z[idx_node_FF]) +
                     c_r*(F_node_z[idx_node_BBB] + F_node_z[idx_node_FFF])

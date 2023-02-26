@@ -48,7 +48,7 @@ MPIHelper::MPIHelper(
     
     for (int di = 0; di < d_dim.getValue(); di++)
     {
-        d_dx_coarsest_level_dims[di] = dx_tmp[di];
-        d_dx_finest_level_dims[di]   = dx_tmp[di]/d_ratio_finest_level_to_coarsest_level[di];
+        d_dx_coarsest_level_dims[di] = Real(dx_tmp[di]);
+        d_dx_finest_level_dims[di]   = Real(dx_tmp[di])/Real(d_ratio_finest_level_to_coarsest_level[di]);
     }
 }

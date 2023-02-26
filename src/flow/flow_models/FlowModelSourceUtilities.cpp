@@ -157,7 +157,7 @@ FlowModelSourceUtilities::computeDerivedCellData()
  */
 void
 FlowModelSourceUtilities::computeSourceTermsOnPatch(
-    const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+    const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
     const double time,
     const double dt,
     const int RK_step_number)
@@ -174,7 +174,7 @@ FlowModelSourceUtilities::computeSourceTermsOnPatch(
  */
 void
 FlowModelSourceUtilities::computeSpecialSourceTermsOnPatch(
-    const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+    const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
     const double time,
     const double dt,
     const int RK_step_number)
@@ -185,12 +185,12 @@ FlowModelSourceUtilities::computeSpecialSourceTermsOnPatch(
         const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
         const HAMERS_SHARED_PTR<hier::VariableContext> data_context = flow_model_tmp->getDataContext();
         
-        const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_var_data =
+        const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_var_data =
             flow_model_tmp->getCellDataOfConservativeVariables();
         
         // Get the cell data of source.
-        HAMERS_SHARED_PTR<pdat::CellData<double> > source(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > source(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(variable_source, data_context)));
         
         
@@ -199,7 +199,7 @@ FlowModelSourceUtilities::computeSpecialSourceTermsOnPatch(
         HAMERS_SHARED_PTR<FlowModelMonitoringStatisticsUtilities> monitoring_statistics_utilities =
             flow_model_tmp->getFlowModelMonitoringStatisticsUtilities();
         
-        const std::unordered_map<std::string, double>& monitoring_statistics_map = monitoring_statistics_utilities->
+        const std::unordered_map<std::string, Real>& monitoring_statistics_map = monitoring_statistics_utilities->
             getMonitoringStatisticsMap();
         
         d_special_source_terms->computeSpecialSourceTermsOnPatch(

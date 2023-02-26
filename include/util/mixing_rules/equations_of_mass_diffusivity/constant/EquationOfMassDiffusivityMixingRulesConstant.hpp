@@ -34,20 +34,20 @@ class EquationOfMassDiffusivityMixingRulesConstant: public EquationOfMassDiffusi
          */
         void
         getMassDiffusivities(
-            std::vector<double*>& mass_diffusivities,
-            const double* const pressure,
-            const double* const temperature,
-            const std::vector<const double*>& mass_fractions) const;
+            std::vector<Real*>& mass_diffusivities,
+            const Real* const pressure,
+            const Real* const temperature,
+            const std::vector<const Real*>& mass_fractions) const;
         
         /*
          * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeMassDiffusivities(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_diffusivities,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_diffusivities,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -65,14 +65,14 @@ class EquationOfMassDiffusivityMixingRulesConstant: public EquationOfMassDiffusi
          */
         void
         getSpeciesMolecularProperties(
-            std::vector<double*>& species_molecular_properties,
+            std::vector<Real*>& species_molecular_properties,
             const int species_index = 0) const;
         
     private:
         /*
          * Mass diffusivity of different species.
          */
-        std::vector<double> d_species_D;
+        std::vector<Real> d_species_D;
         
 };
 

@@ -35,7 +35,7 @@ class DiffusiveFluxReconstructorNode: public DiffusiveFluxReconstructor
          */
         void computeDiffusiveFluxOnPatch(
             hier::Patch& patch,
-            const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_diffusive_flux,
+            const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_diffusive_flux,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double time,
             const double dt,
@@ -46,9 +46,9 @@ class DiffusiveFluxReconstructorNode: public DiffusiveFluxReconstructor
          * Compute the first derivatives in the x-direction.
          */
         void computeFirstDerivativesInX(
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x_computed,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_x,
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_x,
+            std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_x_computed,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& data_x,
             const std::vector<int>& data_component_idx_x,
             const hier::Patch& patch,
             const bool allocate_scratch_derivatives_node);
@@ -57,9 +57,9 @@ class DiffusiveFluxReconstructorNode: public DiffusiveFluxReconstructor
          * Compute the first derivatives in the x-direction.
          */
         void computeFirstDerivativesInX(
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_x,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_x_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivatives_x,
+            std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_x_computed,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_x,
             const std::vector<std::vector<int> >& data_component_idx_x,
             const hier::Patch& patch,
             const bool allocate_scratch_derivatives_node);
@@ -68,9 +68,9 @@ class DiffusiveFluxReconstructorNode: public DiffusiveFluxReconstructor
          * Compute the first derivatives in the y-direction.
          */
         void computeFirstDerivativesInY(
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y_computed,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_y,
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_y,
+            std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_y_computed,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& data_y,
             const std::vector<int>& data_component_idx_y,
             const hier::Patch& patch,
             const bool allocate_scratch_derivatives_node);
@@ -79,9 +79,9 @@ class DiffusiveFluxReconstructorNode: public DiffusiveFluxReconstructor
          * Compute the first derivatives in the y-direction.
          */
         void computeFirstDerivativesInY(
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_y,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_y_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivatives_y,
+            std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_y_computed,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_y,
             const std::vector<std::vector<int> >& data_component_idx_y,
             const hier::Patch& patch,
             const bool allocate_scratch_derivatives_node);
@@ -90,9 +90,9 @@ class DiffusiveFluxReconstructorNode: public DiffusiveFluxReconstructor
          * Compute the first derivatives in the z-direction.
          */
         void computeFirstDerivativesInZ(
-            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z_computed,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_z,
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_z,
+            std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_z_computed,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& data_z,
             const std::vector<int>& data_component_idx_z,
             const hier::Patch& patch,
             const bool allocate_scratch_derivatives_node);
@@ -101,9 +101,9 @@ class DiffusiveFluxReconstructorNode: public DiffusiveFluxReconstructor
          * Compute the first derivatives in the z-direction.
          */
         void computeFirstDerivativesInZ(
-            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivatives_z,
-            std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivatives_z_computed,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& derivatives_z,
+            std::map<Real*, HAMERS_SHARED_PTR<pdat::CellData<Real> > >& derivatives_z_computed,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > >& data_z,
             const std::vector<std::vector<int> >& data_component_idx_z,
             const hier::Patch& patch,
             const bool allocate_scratch_derivatives_node);
@@ -112,8 +112,8 @@ class DiffusiveFluxReconstructorNode: public DiffusiveFluxReconstructor
          * Reconstruct the flux using flux at nodes in x-direction.
          */
         void reconstructFluxX(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& diffusive_flux_node,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& diffusive_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& diffusive_flux_node,
             const hier::Patch& patch,
             const double dt) const;
         
@@ -121,8 +121,8 @@ class DiffusiveFluxReconstructorNode: public DiffusiveFluxReconstructor
          * Reconstruct the flux using flux at nodes in y-direction.
          */
         void reconstructFluxY(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& diffusive_flux_node,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& diffusive_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& diffusive_flux_node,
             const hier::Patch& patch,
             const double dt) const;
         
@@ -130,8 +130,8 @@ class DiffusiveFluxReconstructorNode: public DiffusiveFluxReconstructor
          * Reconstruct the flux using flux at nodes in z-direction.
          */
         void reconstructFluxZ(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& diffusive_flux,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& diffusive_flux_node,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& diffusive_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& diffusive_flux_node,
             const hier::Patch& patch,
             const double dt) const;
         
@@ -140,50 +140,50 @@ class DiffusiveFluxReconstructorNode: public DiffusiveFluxReconstructor
          * Kernel to compute the first derivatives in the x-direction.
          */
         virtual void computeFirstDerivativesInX(
-            double* dudx,
-            const double* const u,
+            Real* dudx,
+            const Real* const u,
             const hier::IntVector& num_ghosts_derivative_node,
             const hier::IntVector& num_ghosts_data_node,
             const hier::IntVector& ghostcell_dims_derivative_node,
             const hier::IntVector& ghostcell_dims_data_node,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims,
-            const double& dx_0_inv) const = 0;
+            const Real& dx_0_inv) const = 0;
         
         /*
          * Kernel to compute the first derivatives in the y-direction.
          */
         virtual void computeFirstDerivativesInY(
-            double* dudy,
-            const double* const u,
+            Real* dudy,
+            const Real* const u,
             const hier::IntVector& num_ghosts_derivative_node,
             const hier::IntVector& num_ghosts_data_node,
             const hier::IntVector& ghostcell_dims_derivative_node,
             const hier::IntVector& ghostcell_dims_data_node,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims,
-            const double& dx_1_in) const = 0;
+            const Real& dx_1_in) const = 0;
         
         /*
          * Kernel to compute the first derivatives in the z-direction.
          */
         virtual void computeFirstDerivativesInZ(
-            double* dudz,
-            const double* const u,
+            Real* dudz,
+            const Real* const u,
             const hier::IntVector& num_ghosts_derivative_node,
             const hier::IntVector& num_ghosts_data_node,
             const hier::IntVector& ghostcell_dims_derivative_node,
             const hier::IntVector& ghostcell_dims_data_node,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims,
-            const double& dx_2_inv) const = 0;
+            const Real& dx_2_inv) const = 0;
         
         /*
          * Kernel to reconstruct the flux using flux at nodes in x-direction.
          */
         virtual void reconstructFluxX(
-            double* F_face_x,
-            const double* const F_node_x,
+            Real* F_face_x,
+            const Real* const F_node_x,
             const hier::IntVector& num_ghosts_flux_node,
             const hier::IntVector& ghostcell_dims_flux_node,
             const hier::IntVector& domain_lo,
@@ -195,8 +195,8 @@ class DiffusiveFluxReconstructorNode: public DiffusiveFluxReconstructor
          * Kernel to reconstruct the flux using flux at nodes in y-direction.
          */
         virtual void reconstructFluxY(
-            double* F_face_y,
-            const double* const F_node_y,
+            Real* F_face_y,
+            const Real* const F_node_y,
             const hier::IntVector& num_ghosts_flux_node,
             const hier::IntVector& ghostcell_dims_flux_node,
             const hier::IntVector& domain_lo,
@@ -208,8 +208,8 @@ class DiffusiveFluxReconstructorNode: public DiffusiveFluxReconstructor
          * Kernel to reconstruct the flux using flux at nodes in z-direction.
          */
         virtual void reconstructFluxZ(
-            double* F_face_z,
-            const double* const F_node_z,
+            Real* F_face_z,
+            const Real* const F_node_z,
             const hier::IntVector& num_ghosts_flux_node,
             const hier::IntVector& ghostcell_dims_flux_node,
             const hier::IntVector& domain_lo,
@@ -231,7 +231,7 @@ class DiffusiveFluxReconstructorNode: public DiffusiveFluxReconstructor
         /*
          * Scratch data containers.
          */
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > d_scratch_derivatives_node;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > d_scratch_derivatives_node;
         
 };
 

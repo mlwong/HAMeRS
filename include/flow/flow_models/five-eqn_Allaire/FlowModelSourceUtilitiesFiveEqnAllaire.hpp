@@ -53,7 +53,7 @@ class FlowModelSourceUtilitiesFiveEqnAllaire: public FlowModelSourceUtilities
          */
         void
         computeSourceTermsOnPatch(
-            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
             const double time,
             const double dt,
             const int RK_step_number);
@@ -101,7 +101,7 @@ class FlowModelSourceUtilitiesFiveEqnAllaire: public FlowModelSourceUtilities
         /*
          * Gravity vector.
          */
-        std::vector<double> d_gravity;
+        std::vector<Real> d_gravity;
         
         /*
          * Number of sub-ghost cells of derived cell data related to this class.
@@ -121,7 +121,7 @@ class FlowModelSourceUtilitiesFiveEqnAllaire: public FlowModelSourceUtilities
         /*
          * HAMERS_SHARED_PTR to derived cell data related to this class.
          */
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_gruneisen_parameter;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_gruneisen_parameter;
         
         /*
          * Whether derived cell data related to this class is computed.

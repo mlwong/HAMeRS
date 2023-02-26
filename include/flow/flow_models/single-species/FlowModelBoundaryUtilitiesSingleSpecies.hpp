@@ -104,11 +104,11 @@ class FlowModelBoundaryUtilitiesSingleSpecies: public FlowModelBoundaryUtilities
          */
         void
         fill1dNodeBoundaryData(
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
-            const std::vector<std::vector<double> >& bdry_node_values,
+            const std::vector<std::vector<Real> >& bdry_node_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(1)));
         
         /*
@@ -117,11 +117,11 @@ class FlowModelBoundaryUtilitiesSingleSpecies: public FlowModelBoundaryUtilities
          */
         void
         fill2dEdgeBoundaryData(
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_edge_locs,
             const std::vector<int>& bdry_edge_conds,
-            const std::vector<std::vector<double> >& bdry_edge_values,
+            const std::vector<std::vector<Real> >& bdry_edge_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(2)));
         
         /*
@@ -130,11 +130,11 @@ class FlowModelBoundaryUtilitiesSingleSpecies: public FlowModelBoundaryUtilities
          */
         void
         fill2dNodeBoundaryData(
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
-            const std::vector<std::vector<double> >& bdry_edge_values,
+            const std::vector<std::vector<Real> >& bdry_edge_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(2)));
         
         /*
@@ -143,11 +143,11 @@ class FlowModelBoundaryUtilitiesSingleSpecies: public FlowModelBoundaryUtilities
          */
         void
         fill3dFaceBoundaryData(
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_face_locs,
             const std::vector<int>& bdry_face_conds,
-            const std::vector<std::vector<double> >& bdry_face_values,
+            const std::vector<std::vector<Real> >& bdry_face_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(3)));
         
         /*
@@ -156,11 +156,11 @@ class FlowModelBoundaryUtilitiesSingleSpecies: public FlowModelBoundaryUtilities
          */
         void
         fill3dEdgeBoundaryData(
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_edge_locs,
             const std::vector<int>& bdry_edge_conds,
-            const std::vector<std::vector<double> >& bdry_face_values,
+            const std::vector<std::vector<Real> >& bdry_face_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(3)));
         
         /*
@@ -169,11 +169,11 @@ class FlowModelBoundaryUtilitiesSingleSpecies: public FlowModelBoundaryUtilities
          */
         void
         fill3dNodeBoundaryData(
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
-            const std::vector<std::vector<double> >& bdry_face_values,
+            const std::vector<std::vector<Real> >& bdry_face_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(3)));
         
     private:
@@ -243,40 +243,40 @@ class FlowModelBoundaryUtilitiesSingleSpecies: public FlowModelBoundaryUtilities
         /*
          * Thermodynamic properties of the species.
          */
-        std::vector<double> d_thermo_properties;
+        std::vector<Real> d_thermo_properties;
         
         /*
          * Vectors of node (1D), edge (2D) or face (3D) boundary values for ADIABATIC_NO_SLIP case.
          */
-        std::vector<double> d_bdry_node_adiabatic_no_slip_vel;
-        std::vector<double> d_bdry_edge_adiabatic_no_slip_vel;
-        std::vector<double> d_bdry_face_adiabatic_no_slip_vel;
+        std::vector<Real> d_bdry_node_adiabatic_no_slip_vel;
+        std::vector<Real> d_bdry_edge_adiabatic_no_slip_vel;
+        std::vector<Real> d_bdry_face_adiabatic_no_slip_vel;
         
         /*
          * Vectors of node (1D), edge (2D) or face (3D) boundary values for ISOTHERMAL_NO_SLIP case.
          */
-        std::vector<double> d_bdry_node_isothermal_no_slip_T;
-        std::vector<double> d_bdry_edge_isothermal_no_slip_T;
-        std::vector<double> d_bdry_face_isothermal_no_slip_T;
-        std::vector<double> d_bdry_node_isothermal_no_slip_vel;
-        std::vector<double> d_bdry_edge_isothermal_no_slip_vel;
-        std::vector<double> d_bdry_face_isothermal_no_slip_vel;
+        std::vector<Real> d_bdry_node_isothermal_no_slip_T;
+        std::vector<Real> d_bdry_edge_isothermal_no_slip_T;
+        std::vector<Real> d_bdry_face_isothermal_no_slip_T;
+        std::vector<Real> d_bdry_node_isothermal_no_slip_vel;
+        std::vector<Real> d_bdry_edge_isothermal_no_slip_vel;
+        std::vector<Real> d_bdry_face_isothermal_no_slip_vel;
         
         /*
          * Vectors of node (1D), edge (2D) or face (3D) boundary values for NONREFLECTING_OUTFLOW case.
          */
-         std::vector<double> d_bdry_node_nonreflecting_outflow_p_t;
-         std::vector<double> d_bdry_edge_nonreflecting_outflow_p_t;
-         std::vector<double> d_bdry_face_nonreflecting_outflow_p_t;
-         std::vector<double> d_bdry_node_nonreflecting_outflow_sigma;
-         std::vector<double> d_bdry_edge_nonreflecting_outflow_sigma;
-         std::vector<double> d_bdry_face_nonreflecting_outflow_sigma;
-         std::vector<double> d_bdry_node_nonreflecting_outflow_beta;
-         std::vector<double> d_bdry_edge_nonreflecting_outflow_beta;
-         std::vector<double> d_bdry_face_nonreflecting_outflow_beta;
-         std::vector<double> d_bdry_node_nonreflecting_outflow_length_char;
-         std::vector<double> d_bdry_edge_nonreflecting_outflow_length_char;
-         std::vector<double> d_bdry_face_nonreflecting_outflow_length_char;
+         std::vector<Real> d_bdry_node_nonreflecting_outflow_p_t;
+         std::vector<Real> d_bdry_edge_nonreflecting_outflow_p_t;
+         std::vector<Real> d_bdry_face_nonreflecting_outflow_p_t;
+         std::vector<Real> d_bdry_node_nonreflecting_outflow_sigma;
+         std::vector<Real> d_bdry_edge_nonreflecting_outflow_sigma;
+         std::vector<Real> d_bdry_face_nonreflecting_outflow_sigma;
+         std::vector<Real> d_bdry_node_nonreflecting_outflow_beta;
+         std::vector<Real> d_bdry_edge_nonreflecting_outflow_beta;
+         std::vector<Real> d_bdry_face_nonreflecting_outflow_beta;
+         std::vector<Real> d_bdry_node_nonreflecting_outflow_length_char;
+         std::vector<Real> d_bdry_edge_nonreflecting_outflow_length_char;
+         std::vector<Real> d_bdry_face_nonreflecting_outflow_length_char;
 };
 
 #endif /* FLOW_MODEL_BOUNDARY_UTILITIES_SINGLE_SPECIES_HPP */

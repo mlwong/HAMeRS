@@ -26,8 +26,8 @@ class FilterNone: public Filter
          */
         void
         applyFilter(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& filtered_cell_data,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& filtered_cell_data,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& cell_data,
             const int depth_filtered_cell_data,
             const int depth_cell_data)
         {
@@ -45,8 +45,8 @@ class FilterNone: public Filter
          */
         void
         applyFilter(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& filtered_cell_data,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& filtered_cell_data,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& cell_data,
             const int depth_filtered_cell_data,
             const int depth_cell_data,
             const hier::Box& domain);

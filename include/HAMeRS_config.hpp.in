@@ -12,19 +12,38 @@
 /* Enable HAMeRS developer assertion checking */
 #cmakedefine HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
 
-/* Define epsilon to prevent divisoin by zero */
-#define HAMERS_EPSILON 1.0e-15
+/* Define real data type */
+// typedef float Real;
+// #define getReal getFloat
+// #define putReal putFloat
+// #define getRealVector getFloatVector
+// #define putRealVector putFloatVector
+// #define getRealWithDefault getFloatWithDefault
+// #define putRealWithDefault putFloatWithDefault
+// #define HAMERS_EPSILON Real(1.0e-8)
+// #define HAMERS_MPI_REAL MPI_FLOAT
+// #define HAMERS_REAL_EPSILON FLT_EPSILON
 
-/* Define machine epsilon */
+typedef double Real;
+#define getReal getDouble
+#define putReal putDouble
+#define getRealVector getDoubleVector
+#define putRealVector putDoubleVector
+#define getRealWithDefault getDoubleWithDefault
+#define putRealWithDefault putDoubleWithDefault
+#define HAMERS_EPSILON 1.0e-15
+#define HAMERS_MPI_REAL MPI_DOUBLE
 #define HAMERS_REAL_EPSILON DBL_EPSILON
 
 /* Enable compilation with Boost library */
 #cmakedefine HAMERS_USE_BOOST
 
+/* Define the DEBUG macro variable */
 #ifndef NDEBUG
 #define DEBUG
 #endif
 
+/* Set up vectorization pragmas */
 #if defined(HAMERS_ENABLE_SIMD)
 #if defined(DEBUG)
 #define HAMERS_PRAGMA_VEC(EXP)

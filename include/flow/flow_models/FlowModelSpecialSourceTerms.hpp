@@ -37,11 +37,11 @@ class FlowModelSpecialSourceTerms
         {
             if (source_terms_db->keyExists("special_source_box_lo"))
             {
-                d_special_source_box_lo = source_terms_db->getDoubleVector("special_source_box_lo");
+                d_special_source_box_lo = source_terms_db->getRealVector("special_source_box_lo");
             }
             else if (source_terms_db->keyExists("d_special_source_box_lo"))
             {
-                d_special_source_box_lo = source_terms_db->getDoubleVector("d_special_source_box_lo");
+                d_special_source_box_lo = source_terms_db->getRealVector("d_special_source_box_lo");
             }
             else
             {
@@ -53,11 +53,11 @@ class FlowModelSpecialSourceTerms
             
             if (source_terms_db->keyExists("special_source_box_hi"))
             {
-                d_special_source_box_hi = source_terms_db->getDoubleVector("special_source_box_hi");
+                d_special_source_box_hi = source_terms_db->getRealVector("special_source_box_hi");
             }
             else if (source_terms_db->keyExists("d_special_source_box_hi"))
             {
-                d_special_source_box_hi = source_terms_db->getDoubleVector("d_special_source_box_hi");
+                d_special_source_box_hi = source_terms_db->getRealVector("d_special_source_box_hi");
             }
             else
             {
@@ -92,20 +92,20 @@ class FlowModelSpecialSourceTerms
          */
         void
         computeSpecialSourceTermsOnPatch(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& source,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& source,
             const hier::Patch& patch,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
-            const std::unordered_map<std::string, double>& monitoring_statistics_map,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
+            const std::unordered_map<std::string, Real>& monitoring_statistics_map,
             const double time,
             const double dt,
             const int RK_step_number);
         
-        std::vector<double> getSpecialSourceBoxLo() const
+        std::vector<Real> getSpecialSourceBoxLo() const
         {
             return d_special_source_box_lo;
         }
         
-        std::vector<double> getSpecialSourceBoxHi() const
+        std::vector<Real> getSpecialSourceBoxHi() const
         {
             return d_special_source_box_hi;
         }
@@ -121,8 +121,8 @@ class FlowModelSpecialSourceTerms
         void
         putToRestartBase(const HAMERS_SHARED_PTR<tbox::Database>& restart_source_terms_db)
         {
-            restart_source_terms_db->putDoubleVector("d_special_source_box_lo", d_special_source_box_lo);
-            restart_source_terms_db->putDoubleVector("d_special_source_box_hi", d_special_source_box_hi);
+            restart_source_terms_db->putRealVector("d_special_source_box_lo", d_special_source_box_lo);
+            restart_source_terms_db->putRealVector("d_special_source_box_hi", d_special_source_box_hi);
         
             restart_source_terms_db->putBool("d_special_source_exterior", d_special_source_exterior);
         }
@@ -160,8 +160,8 @@ class FlowModelSpecialSourceTerms
         /*
          * Special source box definition.
          */
-        std::vector<double> d_special_source_box_lo; // Lower spatial coordinates.
-        std::vector<double> d_special_source_box_hi; // Upper spatial coordinates.
+        std::vector<Real> d_special_source_box_lo; // Lower spatial coordinates.
+        std::vector<Real> d_special_source_box_hi; // Upper spatial coordinates.
         bool d_special_source_exterior;
         
 };

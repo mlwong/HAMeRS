@@ -7,13 +7,13 @@
 /*
  * Compute centroid in x-direction.
  */
-double
+Real
 MPIHelperCentroid::getCentroidInXDirection(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
-    double x_c = tbox::MathUtilities<double>::getMax();
+    Real x_c = tbox::MathUtilities<Real>::getMax();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -30,13 +30,13 @@ MPIHelperCentroid::getCentroidInXDirection(
     
     if (d_dim == tbox::Dimension(1))
     {
-        double num_local  = double(0);
-        double num_global = double(0);
+        Real num_local  = Real(0);
+        Real num_global = Real(0);
         
-        double den_local  = double(0);
-        double den_global = double(0);
+        Real den_local  = Real(0);
+        Real den_global = Real(0);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -69,11 +69,11 @@ MPIHelperCentroid::getCentroidInXDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -89,8 +89,8 @@ MPIHelperCentroid::getCentroidInXDirection(
                 
                 const int num_ghosts_0_quantity = num_ghosts_quantity[0];
                 
-                double num_to_add = double(0);
-                double den_to_add = double(0);
+                Real num_to_add = Real(0);
+                Real den_to_add = Real(0);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -137,15 +137,15 @@ MPIHelperCentroid::getCentroidInXDirection(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                        const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                         
-                        num_to_add += x*u[idx]/((double) n_overlapped);
-                        den_to_add += u[idx]/((double) n_overlapped);
+                        num_to_add += x*u[idx]/((Real) n_overlapped);
+                        den_to_add += u[idx]/((Real) n_overlapped);
                     }
                 }
                 
-                num_to_add = num_to_add*dx[0];
-                den_to_add = den_to_add*dx[0];
+                num_to_add = num_to_add*Real(dx[0]);
+                den_to_add = den_to_add*Real(dx[0]);
                 
                 num_local += num_to_add;
                 den_local += den_to_add;
@@ -160,27 +160,27 @@ MPIHelperCentroid::getCentroidInXDirection(
             &num_local,
             &num_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         d_mpi.Allreduce(
             &den_local,
             &den_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         x_c = num_global/den_global;
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double num_local  = double(0);
-        double num_global = double(0);
+        Real num_local  = Real(0);
+        Real num_global = Real(0);
         
-        double den_local  = double(0);
-        double den_global = double(0);
+        Real den_local  = Real(0);
+        Real den_global = Real(0);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -213,11 +213,11 @@ MPIHelperCentroid::getCentroidInXDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -236,8 +236,8 @@ MPIHelperCentroid::getCentroidInXDirection(
                 const int num_ghosts_1_quantity = num_ghosts_quantity[1];
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 
-                double num_to_add = double(0);
-                double den_to_add = double(0);
+                Real num_to_add = Real(0);
+                Real den_to_add = Real(0);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -290,16 +290,16 @@ MPIHelperCentroid::getCentroidInXDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                            const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                             
-                            num_to_add += x*u[idx]/((double) n_overlapped);
-                            den_to_add += u[idx]/((double) n_overlapped);
+                            num_to_add += x*u[idx]/((Real) n_overlapped);
+                            den_to_add += u[idx]/((Real) n_overlapped);
                         }
                     }
                 }
                 
-                num_to_add = num_to_add*dx[0]*dx[1];
-                den_to_add = den_to_add*dx[0]*dx[1];
+                num_to_add = num_to_add*Real(dx[0]*dx[1]);
+                den_to_add = den_to_add*Real(dx[0]*dx[1]);
                 
                 num_local += num_to_add;
                 den_local += den_to_add;
@@ -314,27 +314,27 @@ MPIHelperCentroid::getCentroidInXDirection(
             &num_local,
             &num_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         d_mpi.Allreduce(
             &den_local,
             &den_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         x_c = num_global/den_global;
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double num_local  = double(0);
-        double num_global = double(0);
+        Real num_local  = Real(0);
+        Real num_global = Real(0);
         
-        double den_local  = double(0);
-        double den_global = double(0);
+        Real den_local  = Real(0);
+        Real den_global = Real(0);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -367,11 +367,11 @@ MPIHelperCentroid::getCentroidInXDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -392,8 +392,8 @@ MPIHelperCentroid::getCentroidInXDirection(
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
                 
-                double num_to_add = double(0);
-                double den_to_add = double(0);
+                Real num_to_add = Real(0);
+                Real den_to_add = Real(0);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -453,17 +453,17 @@ MPIHelperCentroid::getCentroidInXDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                                const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                                 
-                                num_to_add += x*u[idx]/((double) n_overlapped);
-                                den_to_add += u[idx]/((double) n_overlapped);
+                                num_to_add += x*u[idx]/((Real) n_overlapped);
+                                den_to_add += u[idx]/((Real) n_overlapped);
                             }
                         }
                     }
                 }
                 
-                num_to_add = num_to_add*dx[0]*dx[1]*dx[2];
-                den_to_add = den_to_add*dx[0]*dx[1]*dx[2];
+                num_to_add = num_to_add*Real(dx[0]*dx[1]*dx[2]);
+                den_to_add = den_to_add*Real(dx[0]*dx[1]*dx[2]);
                 
                 num_local += num_to_add;
                 den_local += den_to_add;
@@ -478,14 +478,14 @@ MPIHelperCentroid::getCentroidInXDirection(
             &num_local,
             &num_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         d_mpi.Allreduce(
             &den_local,
             &den_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         x_c = num_global/den_global;
@@ -498,13 +498,13 @@ MPIHelperCentroid::getCentroidInXDirection(
 /*
  * Compute centroid in y-direction.
  */
-double
+Real
 MPIHelperCentroid::getCentroidInYDirection(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
-    double y_c = tbox::MathUtilities<double>::getMax();
+    Real y_c = tbox::MathUtilities<Real>::getMax();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -528,13 +528,13 @@ MPIHelperCentroid::getCentroidInYDirection(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double num_local  = double(0);
-        double num_global = double(0);
+        Real num_local  = Real(0);
+        Real num_global = Real(0);
         
-        double den_local  = double(0);
-        double den_global = double(0);
+        Real den_local  = Real(0);
+        Real den_global = Real(0);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -567,11 +567,11 @@ MPIHelperCentroid::getCentroidInYDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -590,8 +590,8 @@ MPIHelperCentroid::getCentroidInYDirection(
                 const int num_ghosts_1_quantity = num_ghosts_quantity[1];
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 
-                double num_to_add = double(0);
-                double den_to_add = double(0);
+                Real num_to_add = Real(0);
+                Real den_to_add = Real(0);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -644,16 +644,16 @@ MPIHelperCentroid::getCentroidInYDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
+                            const Real y = (Real(relative_idx_lo_1 + j) + half)*Real(dx[1]) + Real(x_lo_patch[1]);
                             
-                            num_to_add += y*u[idx]/((double) n_overlapped);
-                            den_to_add += u[idx]/((double) n_overlapped);
+                            num_to_add += y*u[idx]/((Real) n_overlapped);
+                            den_to_add += u[idx]/((Real) n_overlapped);
                         }
                     }
                 }
                 
-                num_to_add = num_to_add*dx[0]*dx[1];
-                den_to_add = den_to_add*dx[0]*dx[1];
+                num_to_add = num_to_add*Real(dx[0]*dx[1]);
+                den_to_add = den_to_add*Real(dx[0]*dx[1]);
                 
                 num_local += num_to_add;
                 den_local += den_to_add;
@@ -668,27 +668,27 @@ MPIHelperCentroid::getCentroidInYDirection(
             &num_local,
             &num_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         d_mpi.Allreduce(
             &den_local,
             &den_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         y_c = num_global/den_global;
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double num_local  = double(0);
-        double num_global = double(0);
+        Real num_local  = Real(0);
+        Real num_global = Real(0);
         
-        double den_local  = double(0);
-        double den_global = double(0);
+        Real den_local  = Real(0);
+        Real den_global = Real(0);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -721,11 +721,11 @@ MPIHelperCentroid::getCentroidInYDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -746,8 +746,8 @@ MPIHelperCentroid::getCentroidInYDirection(
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
                 
-                double num_to_add = double(0);
-                double den_to_add = double(0);
+                Real num_to_add = Real(0);
+                Real den_to_add = Real(0);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -807,17 +807,17 @@ MPIHelperCentroid::getCentroidInYDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
+                                const Real y = (Real(relative_idx_lo_1 + j) + half)*Real(dx[1]) + Real(x_lo_patch[1]);
                                 
-                                num_to_add += y*u[idx]/((double) n_overlapped);
-                                den_to_add += u[idx]/((double) n_overlapped);
+                                num_to_add += y*u[idx]/((Real) n_overlapped);
+                                den_to_add += u[idx]/((Real) n_overlapped);
                             }
                         }
                     }
                 }
                 
-                num_to_add = num_to_add*dx[0]*dx[1]*dx[2];
-                den_to_add = den_to_add*dx[0]*dx[1]*dx[2];
+                num_to_add = num_to_add*Real(dx[0]*dx[1]*dx[2]);
+                den_to_add = den_to_add*Real(dx[0]*dx[1]*dx[2]);
                 
                 num_local += num_to_add;
                 den_local += den_to_add;
@@ -832,14 +832,14 @@ MPIHelperCentroid::getCentroidInYDirection(
             &num_local,
             &num_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         d_mpi.Allreduce(
             &den_local,
             &den_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         y_c = num_global/den_global;
@@ -852,13 +852,13 @@ MPIHelperCentroid::getCentroidInYDirection(
 /*
  * Compute centroid in z-direction.
  */
-double
+Real
 MPIHelperCentroid::getCentroidInZDirection(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+    HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
-    double z_c = tbox::MathUtilities<double>::getMax();
+    Real z_c = tbox::MathUtilities<Real>::getMax();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -889,13 +889,13 @@ MPIHelperCentroid::getCentroidInZDirection(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double num_local  = double(0);
-        double num_global = double(0);
+        Real num_local  = Real(0);
+        Real num_global = Real(0);
         
-        double den_local  = double(0);
-        double den_global = double(0);
+        Real den_local  = Real(0);
+        Real den_global = Real(0);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -928,11 +928,11 @@ MPIHelperCentroid::getCentroidInZDirection(
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
-                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity(
+                    HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                         patch->getPatchData(variable_quantity, data_context)));
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -953,8 +953,8 @@ MPIHelperCentroid::getCentroidInZDirection(
                 const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
                 
-                double num_to_add = double(0);
-                double den_to_add = double(0);
+                Real num_to_add = Real(0);
+                Real den_to_add = Real(0);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -1014,17 +1014,17 @@ MPIHelperCentroid::getCentroidInZDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double z = (relative_idx_lo_2 + k + half)*dx[2] + x_lo_patch[2];
+                                const Real z = (Real(relative_idx_lo_2 + k) + half)*Real(dx[2]) + Real(x_lo_patch[2]);
                                 
-                                num_to_add += z*u[idx]/((double) n_overlapped);
-                                den_to_add += u[idx]/((double) n_overlapped);
+                                num_to_add += z*u[idx]/((Real) n_overlapped);
+                                den_to_add += u[idx]/((Real) n_overlapped);
                             }
                         }
                     }
                 }
                 
-                num_to_add = num_to_add*dx[0]*dx[1]*dx[2];
-                den_to_add = den_to_add*dx[0]*dx[1]*dx[2];
+                num_to_add = num_to_add*Real(dx[0]*dx[1]*dx[2]);
+                den_to_add = den_to_add*Real(dx[0]*dx[1]*dx[2]);
                 
                 num_local += num_to_add;
                 den_local += den_to_add;
@@ -1039,14 +1039,14 @@ MPIHelperCentroid::getCentroidInZDirection(
             &num_local,
             &num_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         d_mpi.Allreduce(
             &den_local,
             &den_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         z_c = num_global/den_global;

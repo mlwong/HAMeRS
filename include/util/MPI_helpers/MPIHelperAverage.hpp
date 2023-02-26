@@ -23,64 +23,64 @@ class MPIHelperAverage: public MPIHelper
         /*
          * Compute averaged value over the entire domain.
          */
-        double getAveragedQuantity(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        Real getAveragedQuantity(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Compute averaged value (on product of variables) over the entire domain.
          */
-        double getAveragedQuantity(
-            std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >& variable_quantities,
+        Real getAveragedQuantity(
+            std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > >& variable_quantities,
             const std::vector<int>& component_indices,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Compute averaged value with only x-direction as inhomogeneous direction.
          */
-        std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        std::vector<Real> getAveragedQuantityWithInhomogeneousXDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Compute averaged value (on product of variables) with only x-direction as inhomogeneous direction.
          */
-        std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
-            std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >& variable_quantities,
+        std::vector<Real> getAveragedQuantityWithInhomogeneousXDirection(
+            std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > >& variable_quantities,
             const std::vector<int>& component_indices,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Compute averaged value with only y-direction as inhomogeneous direction.
          */
-        std::vector<double> getAveragedQuantityWithInhomogeneousYDirection(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        std::vector<Real> getAveragedQuantityWithInhomogeneousYDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Compute averaged value (on product of variables) with only y-direction as inhomogeneous direction.
          */
-        std::vector<double> getAveragedQuantityWithInhomogeneousYDirection(
-            std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >& variable_quantities,
+        std::vector<Real> getAveragedQuantityWithInhomogeneousYDirection(
+            std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > >& variable_quantities,
             const std::vector<int>& component_indices,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Compute averaged value with only z-direction as inhomogeneous direction.
          */
-        std::vector<double> getAveragedQuantityWithInhomogeneousZDirection(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+        std::vector<Real> getAveragedQuantityWithInhomogeneousZDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_quantity,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Compute averaged value (on product of variables) with only z-direction as inhomogeneous direction.
          */
-        std::vector<double> getAveragedQuantityWithInhomogeneousZDirection(
-            std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >& variable_quantities,
+        std::vector<Real> getAveragedQuantityWithInhomogeneousZDirection(
+            std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > >& variable_quantities,
             const std::vector<int>& component_indices,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         

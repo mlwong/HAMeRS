@@ -69,7 +69,7 @@ class FlowModelSingleSpecies: public FlowModel
         /*
          * Get the conservative variables.
          */
-        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >
+        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > >
         getConservativeVariables();
         
         /*
@@ -110,19 +110,19 @@ class FlowModelSingleSpecies: public FlowModel
         /*
          * Get the cell data of one cell variable in the registered patch.
          */
-        HAMERS_SHARED_PTR<pdat::CellData<double> >
+        HAMERS_SHARED_PTR<pdat::CellData<Real> >
         getCellData(const std::string& variable_key);
         
         /*
          * Get the cell data of different cell variables in the registered patch.
          */
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
         getCellData(const std::vector<std::string>& variable_keys);
         
         /*
          * Get the cell data of species cell variables in the registered patch.
          */
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
         getSpeciesCellData(const std::string& variable_key);
         
         /*
@@ -146,13 +146,13 @@ class FlowModelSingleSpecies: public FlowModel
         /*
          * Get the cell data of the conservative variables in the registered patch.
          */
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
         getCellDataOfConservativeVariables();
         
         /*
          * Get the cell data of the primitive variables in the registered patch.
          */
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
         getCellDataOfPrimitiveVariables();
         
         /*
@@ -197,19 +197,19 @@ class FlowModelSingleSpecies: public FlowModel
         /*
          * Get the cell data of density in the registered patch.
          */
-        HAMERS_SHARED_PTR<pdat::CellData<double> >
+        HAMERS_SHARED_PTR<pdat::CellData<Real> >
         getCellDataOfDensity();
         
         /*
          * Get the cell data of momentum in the registered patch.
          */
-        HAMERS_SHARED_PTR<pdat::CellData<double> >
+        HAMERS_SHARED_PTR<pdat::CellData<Real> >
         getCellDataOfMomentum();
         
         /*
          * Get the cell data of total energy in the registered patch.
          */
-        HAMERS_SHARED_PTR<pdat::CellData<double> >
+        HAMERS_SHARED_PTR<pdat::CellData<Real> >
         getCellDataOfTotalEnergy();
         
         /*
@@ -265,9 +265,9 @@ class FlowModelSingleSpecies: public FlowModel
         /*
          * HAMERS_SHARED_PTR to registered conservative variables.
          */
-        static HAMERS_SHARED_PTR<pdat::CellVariable<double> > s_variable_density;
-        static HAMERS_SHARED_PTR<pdat::CellVariable<double> > s_variable_momentum;
-        static HAMERS_SHARED_PTR<pdat::CellVariable<double> > s_variable_total_energy;
+        static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_density;
+        static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_momentum;
+        static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_total_energy;
         
         /*
          * Number of sub-ghost cells of derived cell data.
@@ -320,18 +320,18 @@ class FlowModelSingleSpecies: public FlowModel
         /*
          * HAMERS_SHARED_PTR to derived cell data.
          */
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_velocity;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_internal_energy;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_pressure;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_sound_speed;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_temperature;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_convective_flux_x;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_convective_flux_y;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_convective_flux_z;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_max_wave_speed_x;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_max_wave_speed_y;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_max_wave_speed_z;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_max_diffusivity;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_velocity;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_internal_energy;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_pressure;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_sound_speed;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_temperature;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_convective_flux_x;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_convective_flux_y;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_convective_flux_z;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_max_wave_speed_x;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_max_wave_speed_y;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_max_wave_speed_z;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_max_diffusivity;
         
         /*
          * Whether derived cell data is computed.
@@ -403,22 +403,22 @@ class FlowModelSingleSpecies: public FlowModel
         /*
          * Thermodynamic properties of the species.
          */
-        std::vector<double> d_thermo_properties;
+        std::vector<Real> d_thermo_properties;
         
         /*
          * Molecular properties of the species for shear viscosity.
          */
-        std::vector<double> d_molecular_properties_shear_viscosity;
+        std::vector<Real> d_molecular_properties_shear_viscosity;
         
         /*
          * Molecular properties of the species for bulk viscosity.
          */
-        std::vector<double> d_molecular_properties_bulk_viscosity;
+        std::vector<Real> d_molecular_properties_bulk_viscosity;
         
         /*
          * Molecular properties of the species for thermal conductivity.
          */
-        std::vector<double> d_molecular_properties_thermal_conductivity;
+        std::vector<Real> d_molecular_properties_thermal_conductivity;
         
 };
 

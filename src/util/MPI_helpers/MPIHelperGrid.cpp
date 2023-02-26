@@ -7,17 +7,17 @@
 /*
  * Compute number of cells.
  */
-double
+Real
 MPIHelperGrid::getNumberOfCells() const
 {
-    double num_cells_global;
+    Real num_cells_global;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
     if (d_dim == tbox::Dimension(1))
     {
-        double num_cells_local = double(0);
-        num_cells_global       = double(0);
+        Real num_cells_local = Real(0);
+        num_cells_global       = Real(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -42,7 +42,7 @@ MPIHelperGrid::getNumberOfCells() const
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                num_cells_local += double(interior_dims[0]);
+                num_cells_local += Real(interior_dims[0]);
             }
         }
         
@@ -54,13 +54,13 @@ MPIHelperGrid::getNumberOfCells() const
             &num_cells_local,
             &num_cells_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double num_cells_local = double(0);
-        num_cells_global       = double(0);
+        Real num_cells_local = Real(0);
+        num_cells_global       = Real(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -85,7 +85,7 @@ MPIHelperGrid::getNumberOfCells() const
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                num_cells_local += double(interior_dims[0])*double(interior_dims[1]);
+                num_cells_local += Real(interior_dims[0])*Real(interior_dims[1]);
             }
         }
         
@@ -97,13 +97,13 @@ MPIHelperGrid::getNumberOfCells() const
             &num_cells_local,
             &num_cells_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double num_cells_local = double(0);
-        num_cells_global       = double(0);
+        Real num_cells_local = Real(0);
+        num_cells_global       = Real(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -128,7 +128,7 @@ MPIHelperGrid::getNumberOfCells() const
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                num_cells_local += double(interior_dims[0])*double(interior_dims[1])*double(interior_dims[2]);
+                num_cells_local += Real(interior_dims[0])*Real(interior_dims[1])*Real(interior_dims[2]);
             }
         }
         
@@ -140,7 +140,7 @@ MPIHelperGrid::getNumberOfCells() const
             &num_cells_local,
             &num_cells_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     
@@ -151,17 +151,17 @@ MPIHelperGrid::getNumberOfCells() const
 /*
  * Compute weighted number of cells.
  */
-double
+Real
 MPIHelperGrid::getWeightedNumberOfCells() const
 {
-    double weighted_num_cells_global;
+    Real weighted_num_cells_global;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
     if (d_dim == tbox::Dimension(1))
     {
-        double weighted_num_cells_local = double(0);
-        weighted_num_cells_global       = double(0);
+        Real weighted_num_cells_local = Real(0);
+        weighted_num_cells_global       = Real(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -202,7 +202,7 @@ MPIHelperGrid::getWeightedNumberOfCells() const
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                weighted_num_cells_local += double(interior_dims[0])*double(ratioCurrentLevelToCoarsestLevel[0]);
+                weighted_num_cells_local += Real(interior_dims[0])*Real(ratioCurrentLevelToCoarsestLevel[0]);
             }
         }
         
@@ -214,13 +214,13 @@ MPIHelperGrid::getWeightedNumberOfCells() const
             &weighted_num_cells_local,
             &weighted_num_cells_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double weighted_num_cells_local = double(0);
-        weighted_num_cells_global       = double(0);
+        Real weighted_num_cells_local = Real(0);
+        weighted_num_cells_global       = Real(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -261,8 +261,8 @@ MPIHelperGrid::getWeightedNumberOfCells() const
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                weighted_num_cells_local += double(interior_dims[0])*double(interior_dims[1])*
-                    double(ratioCurrentLevelToCoarsestLevel[0]);
+                weighted_num_cells_local += Real(interior_dims[0])*Real(interior_dims[1])*
+                    Real(ratioCurrentLevelToCoarsestLevel[0]);
             }
         }
         
@@ -274,13 +274,13 @@ MPIHelperGrid::getWeightedNumberOfCells() const
             &weighted_num_cells_local,
             &weighted_num_cells_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double weighted_num_cells_local = double(0);
-        weighted_num_cells_global       = double(0);
+        Real weighted_num_cells_local = Real(0);
+        weighted_num_cells_global       = Real(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -321,8 +321,8 @@ MPIHelperGrid::getWeightedNumberOfCells() const
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                weighted_num_cells_local += double(interior_dims[0])*double(interior_dims[1])*
-                    double(ratioCurrentLevelToCoarsestLevel[0]);
+                weighted_num_cells_local += Real(interior_dims[0])*Real(interior_dims[1])*
+                    Real(ratioCurrentLevelToCoarsestLevel[0]);
             }
         }
         
@@ -334,7 +334,7 @@ MPIHelperGrid::getWeightedNumberOfCells() const
             &weighted_num_cells_local,
             &weighted_num_cells_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     
@@ -345,10 +345,10 @@ MPIHelperGrid::getWeightedNumberOfCells() const
 /*
  * Compute averaged grid level number with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousXDirection() const
 {
-    std::vector<double> averaged_grid_level_num;
+    std::vector<Real> averaged_grid_level_num;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -374,15 +374,15 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousXDirection() const
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* ln_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* ln_avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_grid_level_num.resize(finest_level_dim_0);
-        double* ln_avg_global = averaged_grid_level_num.data();
+        Real* ln_avg_global = averaged_grid_level_num.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            ln_avg_local[i]  = double(0);
-            ln_avg_global[i] = double(0);
+            ln_avg_local[i]  = Real(0);
+            ln_avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -473,7 +473,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousXDirection() const
                          * Compute the linear index and the grid level to add.
                          */
                         
-                        const double value_to_add = li/((double) n_overlapped);
+                        const Real value_to_add = Real(li)/((Real) n_overlapped);
                         
                         for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                         {
@@ -494,7 +494,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousXDirection() const
             ln_avg_local,
             ln_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(ln_avg_local);
@@ -507,17 +507,17 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousXDirection() const
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        double* ln_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* ln_avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_grid_level_num.resize(finest_level_dim_0);
-        double* ln_avg_global = averaged_grid_level_num.data();
+        Real* ln_avg_global = averaged_grid_level_num.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            ln_avg_local[i]  = double(0);
-            ln_avg_global[i] = double(0);
+            ln_avg_local[i]  = Real(0);
+            ln_avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -573,7 +573,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousXDirection() const
                         patch_box,
                         li);
                 
-                const double weight = dx[1]/L_y;
+                const Real weight = Real(dx[1])/L_y;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -620,7 +620,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousXDirection() const
                              * Compute the linear index and the grid level to add.
                              */
                             
-                            const double value_to_add = li*weight/((double) n_overlapped);
+                            const Real value_to_add = Real(li)*weight/((Real) n_overlapped);
                             
                             for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                             {
@@ -642,7 +642,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousXDirection() const
             ln_avg_local,
             ln_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(ln_avg_local);
@@ -655,18 +655,18 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousXDirection() const
          * Get the size of the physical domain.
          */
         
-        const double L_y = x_hi[1] - x_lo[1];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        double* ln_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* ln_avg_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         averaged_grid_level_num.resize(finest_level_dim_0);
-        double* ln_avg_global = averaged_grid_level_num.data();
+        Real* ln_avg_global = averaged_grid_level_num.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            ln_avg_local[i]  = double(0);
-            ln_avg_global[i] = double(0);
+            ln_avg_local[i]  = Real(0);
+            ln_avg_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -722,7 +722,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousXDirection() const
                         patch_box,
                         li);
                 
-                const double weight = (dx[1]*dx[2])/(L_y*L_z);
+                const Real weight = Real(dx[1]*dx[2])/(L_y*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -773,7 +773,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousXDirection() const
                                  * Compute the linear index and the grid level to add.
                                  */
                                 
-                                const double value_to_add = li*weight/((double) n_overlapped);
+                                const Real value_to_add = Real(li)*weight/((Real) n_overlapped);
                                 
                                 for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                                 {
@@ -796,7 +796,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousXDirection() const
             ln_avg_local,
             ln_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(ln_avg_local);
@@ -809,10 +809,10 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousXDirection() const
 /*
  * Compute averaged grid level number with only y-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousYDirection() const
 {
-    std::vector<double> averaged_grid_level_num;
+    std::vector<Real> averaged_grid_level_num;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -850,17 +850,17 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousYDirection() const
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
         
-        double* ln_avg_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* ln_avg_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         averaged_grid_level_num.resize(finest_level_dim_1);
-        double* ln_avg_global = averaged_grid_level_num.data();
+        Real* ln_avg_global = averaged_grid_level_num.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            ln_avg_local[j]  = double(0);
-            ln_avg_global[j] = double(0);
+            ln_avg_local[j]  = Real(0);
+            ln_avg_global[j] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -916,7 +916,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousYDirection() const
                         patch_box,
                         li);
                 
-                const double weight = dx[0]/L_x;
+                const Real weight = Real(dx[0])/L_x;
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -963,7 +963,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousYDirection() const
                              * Compute the linear index and the grid level to add.
                              */
                             
-                            const double value_to_add = li*weight/((double) n_overlapped);
+                            const Real value_to_add = Real(li)*weight/((Real) n_overlapped);
                             
                             for (int jj = 0; jj < ratio_to_finest_level_1; jj++)
                             {
@@ -985,7 +985,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousYDirection() const
             ln_avg_local,
             ln_avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(ln_avg_local);
@@ -998,18 +998,18 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousYDirection() const
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_z = x_hi[2] - x_lo[2];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_z = Real(x_hi[2] - x_lo[2]);
         
-        double* ln_avg_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* ln_avg_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         averaged_grid_level_num.resize(finest_level_dim_1);
-        double* ln_avg_global = averaged_grid_level_num.data();
+        Real* ln_avg_global = averaged_grid_level_num.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            ln_avg_local[j]  = double(0);
-            ln_avg_global[j] = double(0);
+            ln_avg_local[j]  = Real(0);
+            ln_avg_global[j] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -1065,7 +1065,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousYDirection() const
                         patch_box,
                         li);
                 
-                const double weight = (dx[0]*dx[2])/(L_x*L_z);
+                const Real weight = Real(dx[0]*dx[2])/(L_x*L_z);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -1116,7 +1116,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousYDirection() const
                                  * Compute the linear index and the grid level to add.
                                  */
                                 
-                                const double value_to_add = li*weight/((double) n_overlapped);
+                                const Real value_to_add = Real(li)*weight/((Real) n_overlapped);
                                 
                                 for (int jj = 0; jj < ratio_to_finest_level_1; jj++)
                                 {
@@ -1139,7 +1139,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousYDirection() const
             ln_avg_local,
             ln_avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(ln_avg_local);
@@ -1152,10 +1152,10 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousYDirection() const
 /*
  * Compute averaged grid level number with only z-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousZDirection() const
 {
-    std::vector<double> averaged_grid_level_num;
+    std::vector<Real> averaged_grid_level_num;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -1201,18 +1201,18 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousZDirection() const
          * Get the size of the physical domain.
          */
         
-        const double L_x = x_hi[0] - x_lo[0];
-        const double L_y = x_hi[1] - x_lo[1];
+        const Real L_x = Real(x_hi[0] - x_lo[0]);
+        const Real L_y = Real(x_hi[1] - x_lo[1]);
         
-        double* ln_avg_local = (double*)std::malloc(finest_level_dim_2*sizeof(double));
+        Real* ln_avg_local = (Real*)std::malloc(finest_level_dim_2*sizeof(Real));
         
         averaged_grid_level_num.resize(finest_level_dim_2);
-        double* ln_avg_global = averaged_grid_level_num.data();
+        Real* ln_avg_global = averaged_grid_level_num.data();
         
         for (int k = 0; k < finest_level_dim_2; k++)
         {
-            ln_avg_local[k]  = double(0);
-            ln_avg_global[k] = double(0);
+            ln_avg_local[k]  = Real(0);
+            ln_avg_global[k] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -1268,7 +1268,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousZDirection() const
                         patch_box,
                         li);
                 
-                const double weight = (dx[0]*dx[1])/(L_x*L_y);
+                const Real weight = Real(dx[0]*dx[1])/(L_x*L_y);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -1319,7 +1319,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousZDirection() const
                                  * Compute the linear index and the grid level to add.
                                  */
                                 
-                                const double value_to_add = li*weight/((double) n_overlapped);
+                                const Real value_to_add = Real(li)*weight/((Real) n_overlapped);
                                 
                                 for (int kk = 0; kk < ratio_to_finest_level_2; kk++)
                                 {
@@ -1342,7 +1342,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousZDirection() const
             ln_avg_local,
             ln_avg_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(ln_avg_local);

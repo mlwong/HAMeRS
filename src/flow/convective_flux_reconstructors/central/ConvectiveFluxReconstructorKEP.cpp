@@ -82,12 +82,12 @@ ConvectiveFluxReconstructorKEP::ConvectiveFluxReconstructorKEP(
         }
     }
     
-    d_coef_a = double(0);
-    d_coef_b = double(0);
-    d_coef_c = double(0);
-    d_coef_d = double(0);
-    d_coef_e = double(0);
-    d_coef_f = double(0);
+    d_coef_a = Real(0);
+    d_coef_b = Real(0);
+    d_coef_c = Real(0);
+    d_coef_d = Real(0);
+    d_coef_e = Real(0);
+    d_coef_f = Real(0);
     
     if (d_use_DRP4)
     {
@@ -95,31 +95,31 @@ ConvectiveFluxReconstructorKEP::ConvectiveFluxReconstructorKEP(
         {
             d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*4;
             
-            d_coef_a = double( 0.841570125482);
-            d_coef_b = double(-0.244678631765);
-            d_coef_c = double( 0.059463584768);
-            d_coef_d = double(-0.007650904064);
+            d_coef_a = Real( 0.841570125482);
+            d_coef_b = Real(-0.244678631765);
+            d_coef_c = Real( 0.059463584768);
+            d_coef_d = Real(-0.007650904064);
         }
         else if (d_stencil_width == 11)
         {
             d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*5;
             
-            d_coef_a = double( 0.872756993962);
-            d_coef_b = double(-0.286511173973);
-            d_coef_c = double( 0.090320001280);
-            d_coef_d = double(-0.020779405824);
-            d_coef_e = double( 0.002484594688);
+            d_coef_a = Real( 0.872756993962);
+            d_coef_b = Real(-0.286511173973);
+            d_coef_c = Real( 0.090320001280);
+            d_coef_d = Real(-0.020779405824);
+            d_coef_e = Real( 0.002484594688);
         }
         else if (d_stencil_width == 13)
         {
             d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*6;
             
-            d_coef_a = double( 0.907646591371);
-            d_coef_b = double(-0.337048393268);
-            d_coef_c = double( 0.133442885327);
-            d_coef_d = double(-0.045246480208);
-            d_coef_e = double( 0.011169294114);
-            d_coef_f = double(-0.001456501759);
+            d_coef_a = Real( 0.907646591371);
+            d_coef_b = Real(-0.337048393268);
+            d_coef_c = Real( 0.133442885327);
+            d_coef_d = Real(-0.045246480208);
+            d_coef_e = Real( 0.011169294114);
+            d_coef_f = Real(-0.001456501759);
         }
     }
     else
@@ -130,52 +130,52 @@ ConvectiveFluxReconstructorKEP::ConvectiveFluxReconstructorKEP(
         {
             d_num_conv_ghosts = hier::IntVector::getOne(d_dim);
             
-            d_coef_a = double(1)/double(2);
+            d_coef_a = Real(1)/Real(2);
         }
         else if (d_stencil_width == 5)
         {
             d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*2;
             
-            d_coef_a =  double(2)/double(3);
-            d_coef_b = -double(1)/double(12);
+            d_coef_a =  Real(2)/Real(3);
+            d_coef_b = -Real(1)/Real(12);
         }
         else if (d_stencil_width == 7)
         {
             d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*3;
             
-            d_coef_a =  double(3)/double(4);
-            d_coef_b = -double(3)/double(20);
-            d_coef_c =  double(1)/double(60);
+            d_coef_a =  Real(3)/Real(4);
+            d_coef_b = -Real(3)/Real(20);
+            d_coef_c =  Real(1)/Real(60);
         }
         else if (d_stencil_width == 9)
         {
             d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*4;
             
-            d_coef_a =  double(4)/double(5);
-            d_coef_b = -double(1)/double(5);
-            d_coef_c =  double(4)/double(105);
-            d_coef_d = -double(1)/double(280);
+            d_coef_a =  Real(4)/Real(5);
+            d_coef_b = -Real(1)/Real(5);
+            d_coef_c =  Real(4)/Real(105);
+            d_coef_d = -Real(1)/Real(280);
         }
         else if (d_stencil_width == 11)
         {
             d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*5;
             
-            d_coef_a =  double(5)/double(6);
-            d_coef_b = -double(5)/double(21);
-            d_coef_c =  double(5)/double(84);
-            d_coef_d = -double(5)/double(504);
-            d_coef_e =  double(1)/double(1260);
+            d_coef_a =  Real(5)/Real(6);
+            d_coef_b = -Real(5)/Real(21);
+            d_coef_c =  Real(5)/Real(84);
+            d_coef_d = -Real(5)/Real(504);
+            d_coef_e =  Real(1)/Real(1260);
         }
         else if (d_stencil_width == 13)
         {
             d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*6;
             
-            d_coef_a =  double(6)/double(7);
-            d_coef_b = -double(15)/double(56);
-            d_coef_c =  double(5)/double(63);
-            d_coef_d = -double(1)/double(56);
-            d_coef_e =  double(3)/double(1155);
-            d_coef_f = -double(1)/double(5544);
+            d_coef_a =  Real(6)/Real(7);
+            d_coef_b = -Real(15)/Real(56);
+            d_coef_c =  Real(5)/Real(63);
+            d_coef_d = -Real(1)/Real(56);
+            d_coef_e =  Real(3)/Real(1155);
+            d_coef_f = -Real(1)/Real(5544);
         }
     }
     
@@ -248,8 +248,8 @@ ConvectiveFluxReconstructorKEP::putToRestart(
 void
 ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
     hier::Patch& patch,
-    const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_convective_flux,
-    const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+    const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
+    const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double time,
     const double dt,
@@ -284,13 +284,13 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
     const double* const dx = patch_geom->getDx();
     
     // Get the side data of convective flux.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux(
-        HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux(
+        HAMERS_SHARED_PTR_CAST<pdat::SideData<Real>, hier::PatchData>(
             patch.getPatchData(variable_convective_flux, data_context)));
     
     // Get the cell data of source.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > source(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > source(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(variable_source, data_context)));
     
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -303,7 +303,7 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
     
     // Initialize the flux to be zero.
     
-    convective_flux->fill(double(0));
+    convective_flux->fill(Real(0));
     
     /*
      * Register the patch and derived cell variables in the flow model and compute the corresponding cell data.
@@ -339,13 +339,13 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
      * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
      */
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > density      = d_flow_model->getCellData("DENSITY");
-    HAMERS_SHARED_PTR<pdat::CellData<double> > velocity     = d_flow_model->getCellData("VELOCITY");
-    HAMERS_SHARED_PTR<pdat::CellData<double> > pressure     = d_flow_model->getCellData("PRESSURE");
-    HAMERS_SHARED_PTR<pdat::CellData<double> > total_energy = d_flow_model->getCellData("TOTAL_ENERGY");
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > density      = d_flow_model->getCellData("DENSITY");
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity     = d_flow_model->getCellData("VELOCITY");
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > pressure     = d_flow_model->getCellData("PRESSURE");
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > total_energy = d_flow_model->getCellData("TOTAL_ENERGY");
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > mass_fractions;
-    HAMERS_SHARED_PTR<pdat::CellData<double> > volume_fractions;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > mass_fractions;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > volume_fractions;
     
     if (d_flow_model_type == FLOW_MODEL::FOUR_EQN_CONSERVATIVE || d_flow_model_type == FLOW_MODEL::FIVE_EQN_ALLAIRE)
     {
@@ -368,15 +368,15 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
     
     // Initialize data container for specific total enthalpy.
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > specific_total_enthalpy(new pdat::CellData<double>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > specific_total_enthalpy(new pdat::CellData<Real>(
        interior_box, 1, d_num_conv_ghosts));
     
     // Get the pointers to the cell data.
     
-    double* rho = density->getPointer(0);
-    double* p   = pressure->getPointer(0);
-    double* E   = total_energy->getPointer(0);
-    double* H   = specific_total_enthalpy->getPointer(0);
+    Real* rho = density->getPointer(0);
+    Real* p   = pressure->getPointer(0);
+    Real* E   = total_energy->getPointer(0);
+    Real* H   = specific_total_enthalpy->getPointer(0);
     
     // Compute the specific total enthalpy.
     
@@ -1352,8 +1352,8 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
  */
 void
 ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
     const int component_idx_flux,
     const int component_idx_f,
     const double dt) const
@@ -1374,8 +1374,8 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
      * Get the pointers to the data.
      */
     
-    double* F_face_x = data_convective_flux->getPointer(0, component_idx_flux);
-    double* f        = data_f->getPointer(component_idx_f);
+    Real* F_face_x = data_convective_flux->getPointer(0, component_idx_flux);
+    Real* f        = data_f->getPointer(component_idx_f);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -1402,7 +1402,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                 const int idx_f_L = i - 1 + num_ghosts_0_f;
                 const int idx_f_R = i     + num_ghosts_0_f;
                 
-                F_face_x[idx_face_x] += dt*(
+                F_face_x[idx_face_x] += Real(dt)*(
                     d_coef_a*(f[idx_f_L] + f[idx_f_R]));
             }
         }
@@ -1420,7 +1420,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                 const int idx_f_R  = i     + num_ghosts_0_f;
                 const int idx_f_RR = i + 1 + num_ghosts_0_f;
                 
-                F_face_x[idx_face_x] += dt*(
+                F_face_x[idx_face_x] += Real(dt)*(
                     d_coef_a*((f[idx_f_L]  + f[idx_f_R] )) +
                     d_coef_b*((f[idx_f_LL] + f[idx_f_R] )  +
                               (f[idx_f_L]  + f[idx_f_RR])));
@@ -1442,7 +1442,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                 const int idx_f_RR  = i + 1 + num_ghosts_0_f;
                 const int idx_f_RRR = i + 2 + num_ghosts_0_f;
                 
-                F_face_x[idx_face_x] += dt*(
+                F_face_x[idx_face_x] += Real(dt)*(
                     d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )) +
                     d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )  +
                               (f[idx_f_L]   + f[idx_f_RR] )) +
@@ -1469,7 +1469,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                 const int idx_f_RRR  = i + 2 + num_ghosts_0_f;
                 const int idx_f_RRRR = i + 3 + num_ghosts_0_f;
                 
-                F_face_x[idx_face_x] += dt*(
+                F_face_x[idx_face_x] += Real(dt)*(
                     d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )) +
                     d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )  +
                               (f[idx_f_L]    + f[idx_f_RR]  )) +
@@ -1502,7 +1502,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                 const int idx_f_RRRR  = i + 3 + num_ghosts_0_f;
                 const int idx_f_RRRRR = i + 4 + num_ghosts_0_f;
                 
-                F_face_x[idx_face_x] += dt*(
+                F_face_x[idx_face_x] += Real(dt)*(
                     d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )) +
                     d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )  +
                               (f[idx_f_L]     + f[idx_f_RR]   )) +
@@ -1542,7 +1542,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                 const int idx_f_RRRRR  = i + 4 + num_ghosts_0_f;
                 const int idx_f_RRRRRR = i + 5 + num_ghosts_0_f;
                 
-                F_face_x[idx_face_x] += dt*(
+                F_face_x[idx_face_x] += Real(dt)*(
                     d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )) +
                     d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )  +
                               (f[idx_f_L]      + f[idx_f_RR]    )) +
@@ -1600,7 +1600,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                     const int idx_f_R = (i + num_ghosts_0_f) +
                         (j + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
-                    F_face_x[idx_face_x] += dt*(
+                    F_face_x[idx_face_x] += Real(dt)*(
                         d_coef_a*(f[idx_f_L] + f[idx_f_R]));
                 }
             }
@@ -1627,7 +1627,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                     const int idx_f_RR = (i + 1 + num_ghosts_0_f) +
                         (j + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
-                    F_face_x[idx_face_x] += dt*(
+                    F_face_x[idx_face_x] += Real(dt)*(
                         d_coef_a*((f[idx_f_L]  + f[idx_f_R] )) +
                         d_coef_b*((f[idx_f_LL] + f[idx_f_R] )  +
                                   (f[idx_f_L]  + f[idx_f_RR])));
@@ -1662,7 +1662,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                     const int idx_f_RRR = (i + 2 + num_ghosts_0_f) +
                         (j + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
-                    F_face_x[idx_face_x] += dt*(
+                    F_face_x[idx_face_x] += Real(dt)*(
                         d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )) +
                         d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )  +
                                   (f[idx_f_L]   + f[idx_f_RR] )) +
@@ -1706,7 +1706,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                     const int idx_f_RRRR = (i + 3 + num_ghosts_0_f) +
                         (j + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
-                    F_face_x[idx_face_x] += dt*(
+                    F_face_x[idx_face_x] += Real(dt)*(
                         d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )) +
                         d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )  +
                                   (f[idx_f_L]    + f[idx_f_RR]  )) +
@@ -1760,7 +1760,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                     const int idx_f_RRRRR = (i + 4 + num_ghosts_0_f) +
                         (j + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
-                    F_face_x[idx_face_x] += dt*(
+                    F_face_x[idx_face_x] += Real(dt)*(
                         d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )) +
                         d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )  +
                                   (f[idx_f_L]     + f[idx_f_RR]   )) +
@@ -1825,7 +1825,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                     const int idx_f_RRRRRR = (i + 5 + num_ghosts_0_f) +
                         (j + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
-                    F_face_x[idx_face_x] += dt*(
+                    F_face_x[idx_face_x] += Real(dt)*(
                         d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )) +
                         d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )  +
                                   (f[idx_f_L]      + f[idx_f_RR]    )) +
@@ -1896,7 +1896,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                             (k + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_x[idx_face_x] += dt*(
+                        F_face_x[idx_face_x] += Real(dt)*(
                             d_coef_a*(f[idx_f_L] + f[idx_f_R]));
                     }
                 }
@@ -1937,7 +1937,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                             (k + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_x[idx_face_x] += dt*(
+                        F_face_x[idx_face_x] += Real(dt)*(
                             d_coef_a*((f[idx_f_L]  + f[idx_f_R] )) +
                             d_coef_b*((f[idx_f_LL] + f[idx_f_R] )  +
                                       (f[idx_f_L]  + f[idx_f_RR])));
@@ -1990,7 +1990,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                             (k + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_x[idx_face_x] += dt*(
+                        F_face_x[idx_face_x] += Real(dt)*(
                             d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )) +
                             d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )  +
                                       (f[idx_f_L]   + f[idx_f_RR] )) +
@@ -2056,7 +2056,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                             (k + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_x[idx_face_x] += dt*(
+                        F_face_x[idx_face_x] += Real(dt)*(
                             d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )) +
                             d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )  +
                                       (f[idx_f_L]    + f[idx_f_RR]  )) +
@@ -2136,7 +2136,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                             (k + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_x[idx_face_x] += dt*(
+                        F_face_x[idx_face_x] += Real(dt)*(
                             d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )) +
                             d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )  +
                                       (f[idx_f_L]     + f[idx_f_RR]   )) +
@@ -2231,7 +2231,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                             (k + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_x[idx_face_x] += dt*(
+                        F_face_x[idx_face_x] += Real(dt)*(
                             d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )) +
                             d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )  +
                                       (f[idx_f_L]      + f[idx_f_RR]    )) +
@@ -2266,9 +2266,9 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
  */
 void
 ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_g,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_g,
     const int component_idx_flux,
     const int component_idx_f,
     const int component_idx_g,
@@ -2296,11 +2296,11 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
      * Get the pointers to the data.
      */
     
-    double* F_face_x = data_convective_flux->getPointer(0, component_idx_flux);
-    double* f        = data_f->getPointer(component_idx_f);
-    double* g        = data_g->getPointer(component_idx_g);
+    Real* F_face_x = data_convective_flux->getPointer(0, component_idx_flux);
+    Real* f        = data_f->getPointer(component_idx_f);
+    Real* g        = data_g->getPointer(component_idx_g);
     
-    const double half = double(1)/double(2);
+    const Real half = Real(1)/Real(2);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -2331,7 +2331,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                 const int idx_g_L = i - 1 + num_ghosts_0_g;
                 const int idx_g_R = i     + num_ghosts_0_g;
                 
-                F_face_x[idx_face_x] += dt*half*(
+                F_face_x[idx_face_x] += Real(dt)*half*(
                     d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R]));
             }
         }
@@ -2354,7 +2354,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                 const int idx_g_R  = i     + num_ghosts_0_g;
                 const int idx_g_RR = i + 1 + num_ghosts_0_g;
                 
-                F_face_x[idx_face_x] += dt*half*(
+                F_face_x[idx_face_x] += Real(dt)*half*(
                     d_coef_a*((f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )) +
                     d_coef_b*((f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )  +
                               (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])));
@@ -2383,7 +2383,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                 const int idx_g_RR  = i + 1 + num_ghosts_0_g;
                 const int idx_g_RRR = i + 2 + num_ghosts_0_g;
                 
-                F_face_x[idx_face_x] += dt*half*(
+                F_face_x[idx_face_x] += Real(dt)*half*(
                     d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )) +
                     d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )  +
                               (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )) +
@@ -2419,7 +2419,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                 const int idx_g_RRR  = i + 2 + num_ghosts_0_g;
                 const int idx_g_RRRR = i + 3 + num_ghosts_0_g;
                 
-                F_face_x[idx_face_x] += dt*half*(
+                F_face_x[idx_face_x] += Real(dt)*half*(
                     d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )) +
                     d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )  +
                               (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )) +
@@ -2463,7 +2463,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                 const int idx_g_RRRR  = i + 3 + num_ghosts_0_g;
                 const int idx_g_RRRRR = i + 4 + num_ghosts_0_g;
                 
-                F_face_x[idx_face_x] += dt*half*(
+                F_face_x[idx_face_x] += Real(dt)*half*(
                     d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )) +
                     d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )  +
                               (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )) +
@@ -2516,7 +2516,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                 const int idx_g_RRRRR  = i + 4 + num_ghosts_0_g;
                 const int idx_g_RRRRRR = i + 5 + num_ghosts_0_g;
                 
-                F_face_x[idx_face_x] += dt*half*(
+                F_face_x[idx_face_x] += Real(dt)*half*(
                     d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )) +
                     d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )  +
                               (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )) +
@@ -2584,7 +2584,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     const int idx_g_R = (i + num_ghosts_0_g) +
                         (j + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_x[idx_face_x] += dt*half*(
+                    F_face_x[idx_face_x] += Real(dt)*half*(
                         d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R]));
                 }
             }
@@ -2623,7 +2623,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     const int idx_g_RR = (i + 1 + num_ghosts_0_g) +
                         (j + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_x[idx_face_x] += dt*half*(
+                    F_face_x[idx_face_x] += Real(dt)*half*(
                         d_coef_a*((f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )) +
                         d_coef_b*((f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )  +
                                   (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])));
@@ -2676,7 +2676,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     const int idx_g_RRR = (i + 2 + num_ghosts_0_g) +
                         (j + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_x[idx_face_x] += dt*half*(
+                    F_face_x[idx_face_x] += Real(dt)*half*(
                         d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )) +
                         d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )  +
                                   (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )) +
@@ -2744,7 +2744,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     const int idx_g_RRRR = (i + 3 + num_ghosts_0_g) +
                         (j + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_x[idx_face_x] += dt*half*(
+                    F_face_x[idx_face_x] += Real(dt)*half*(
                         d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )) +
                         d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )  +
                                   (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )) +
@@ -2828,7 +2828,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     const int idx_g_RRRRR = (i + 4 + num_ghosts_0_g) +
                         (j + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_x[idx_face_x] += dt*half*(
+                    F_face_x[idx_face_x] += Real(dt)*half*(
                         d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )) +
                         d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )  +
                                   (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )) +
@@ -2929,7 +2929,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     const int idx_g_RRRRRR = (i + 5 + num_ghosts_0_g) +
                         (j + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_x[idx_face_x] += dt*half*(
+                    F_face_x[idx_face_x] += Real(dt)*half*(
                         d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )) +
                         d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )  +
                                   (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )) +
@@ -3016,7 +3016,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_x[idx_face_x] += dt*half*(
+                        F_face_x[idx_face_x] += Real(dt)*half*(
                             d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R]));
                     }
                 }
@@ -3077,7 +3077,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_x[idx_face_x] += dt*half*(
+                        F_face_x[idx_face_x] += Real(dt)*half*(
                             d_coef_a*((f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )) +
                             d_coef_b*((f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )  +
                                       (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])));
@@ -3160,7 +3160,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_x[idx_face_x] += dt*half*(
+                        F_face_x[idx_face_x] += Real(dt)*half*(
                             d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )) +
                             d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )  +
                                       (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )) +
@@ -3266,7 +3266,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_x[idx_face_x] += dt*half*(
+                        F_face_x[idx_face_x] += Real(dt)*half*(
                             d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )) +
                             d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )  +
                                       (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )) +
@@ -3396,7 +3396,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_x[idx_face_x] += dt*half*(
+                        F_face_x[idx_face_x] += Real(dt)*half*(
                             d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )) +
                             d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )  +
                                       (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )) +
@@ -3551,7 +3551,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_x[idx_face_x] += dt*half*(
+                        F_face_x[idx_face_x] += Real(dt)*half*(
                             d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )) +
                             d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )  +
                                       (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )) +
@@ -3586,10 +3586,10 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
  */
 void
 ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_g,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_h,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_g,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_h,
     const int component_idx_flux,
     const int component_idx_f,
     const int component_idx_g,
@@ -3623,12 +3623,12 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
      * Get the pointers to the data.
      */
     
-    double* F_face_x = data_convective_flux->getPointer(0, component_idx_flux);
-    double* f        = data_f->getPointer(component_idx_f);
-    double* g        = data_g->getPointer(component_idx_g);
-    double* h        = data_h->getPointer(component_idx_h);
+    Real* F_face_x = data_convective_flux->getPointer(0, component_idx_flux);
+    Real* f        = data_f->getPointer(component_idx_f);
+    Real* g        = data_g->getPointer(component_idx_g);
+    Real* h        = data_h->getPointer(component_idx_h);
     
-    const double quarter = double(1)/double(4);
+    const Real quarter = Real(1)/Real(4);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -3663,7 +3663,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                 const int idx_h_L = i - 1 + num_ghosts_0_h;
                 const int idx_h_R = i     + num_ghosts_0_h;
                 
-                F_face_x[idx_face_x] += dt*quarter*(
+                F_face_x[idx_face_x] += Real(dt)*quarter*(
                     d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R])*(h[idx_h_L] + h[idx_h_R]));
             }
         }
@@ -3691,7 +3691,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                 const int idx_h_R  = i     + num_ghosts_0_h;
                 const int idx_h_RR = i + 1 + num_ghosts_0_h;
                 
-                F_face_x[idx_face_x] += dt*quarter*(
+                F_face_x[idx_face_x] += Real(dt)*quarter*(
                     d_coef_a*((f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )*(h[idx_h_L]  + h[idx_h_R] )) +
                     d_coef_b*((f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )*(h[idx_h_LL] + h[idx_h_R] )  +
                               (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])*(h[idx_h_L]  + h[idx_h_RR])));
@@ -3727,7 +3727,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                 const int idx_h_RR  = i + 1 + num_ghosts_0_h;
                 const int idx_h_RRR = i + 2 + num_ghosts_0_h;
                 
-                F_face_x[idx_face_x] += dt*quarter*(
+                F_face_x[idx_face_x] += Real(dt)*quarter*(
                     d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )*(h[idx_h_L]   + h[idx_h_R]  )) +
                     d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )*(h[idx_h_LL]  + h[idx_h_R]  )  +
                               (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )*(h[idx_h_L]   + h[idx_h_RR] )) +
@@ -3772,7 +3772,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                 const int idx_h_RRR  = i + 2 + num_ghosts_0_h;
                 const int idx_h_RRRR = i + 3 + num_ghosts_0_h;
                 
-                F_face_x[idx_face_x] += dt*quarter*(
+                F_face_x[idx_face_x] += Real(dt)*quarter*(
                     d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )*(h[idx_h_L]    + h[idx_h_R]   )) +
                     d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )*(h[idx_h_LL]   + h[idx_h_R]   )  +
                               (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )*(h[idx_h_L]    + h[idx_h_RR]  )) +
@@ -3827,7 +3827,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                 const int idx_h_RRRR  = i + 3 + num_ghosts_0_h;
                 const int idx_h_RRRRR = i + 4 + num_ghosts_0_h;
                 
-                F_face_x[idx_face_x] += dt*quarter*(
+                F_face_x[idx_face_x] += Real(dt)*quarter*(
                     d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )*(h[idx_h_L]     + h[idx_h_R]    )) +
                     d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )*(h[idx_h_LL]    + h[idx_h_R]    )  +
                               (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )*(h[idx_h_L]     + h[idx_h_RR]   )) +
@@ -3893,7 +3893,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                 const int idx_h_RRRRR  = i + 4 + num_ghosts_0_h;
                 const int idx_h_RRRRRR = i + 5 + num_ghosts_0_h;
                 
-                F_face_x[idx_face_x] += dt*quarter*(
+                F_face_x[idx_face_x] += Real(dt)*quarter*(
                     d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )*(h[idx_h_L]      + h[idx_h_R]     )) +
                     d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )*(h[idx_h_LL]     + h[idx_h_R]     )  +
                               (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )*(h[idx_h_L]      + h[idx_h_RR]    )) +
@@ -3971,7 +3971,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     const int idx_h_R = (i + num_ghosts_0_h) +
                         (j + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_x[idx_face_x] += dt*quarter*(
+                    F_face_x[idx_face_x] += Real(dt)*quarter*(
                         d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R])*(h[idx_h_L] + h[idx_h_R]));
                 }
             }
@@ -4022,7 +4022,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     const int idx_h_RR = (i + 1 + num_ghosts_0_h) +
                         (j + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_x[idx_face_x] += dt*quarter*(
+                    F_face_x[idx_face_x] += Real(dt)*quarter*(
                         d_coef_a*((f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )*(h[idx_h_L]  + h[idx_h_R] )) +
                         d_coef_b*((f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )*(h[idx_h_LL] + h[idx_h_R] )  +
                                   (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])*(h[idx_h_L]  + h[idx_h_RR])));
@@ -4093,7 +4093,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     const int idx_h_RRR = (i + 2 + num_ghosts_0_h) +
                         (j + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_x[idx_face_x] += dt*quarter*(
+                    F_face_x[idx_face_x] += Real(dt)*quarter*(
                         d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )*(h[idx_h_L]   + h[idx_h_R]  )) +
                         d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )*(h[idx_h_LL]  + h[idx_h_R]  )  +
                                   (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )*(h[idx_h_L]   + h[idx_h_RR] )) +
@@ -4185,7 +4185,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     const int idx_h_RRRR = (i + 3 + num_ghosts_0_h) +
                         (j + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_x[idx_face_x] += dt*quarter*(
+                    F_face_x[idx_face_x] += Real(dt)*quarter*(
                         d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )*(h[idx_h_L]    + h[idx_h_R]   )) +
                         d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )*(h[idx_h_LL]   + h[idx_h_R]   )  +
                                   (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )*(h[idx_h_L]    + h[idx_h_RR]  )) +
@@ -4299,7 +4299,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     const int idx_h_RRRRR = (i + 4 + num_ghosts_0_h) +
                         (j + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_x[idx_face_x] += dt*quarter*(
+                    F_face_x[idx_face_x] += Real(dt)*quarter*(
                         d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )*(h[idx_h_L]     + h[idx_h_R]    )) +
                         d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )*(h[idx_h_LL]    + h[idx_h_R]    )  +
                                   (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )*(h[idx_h_L]     + h[idx_h_RR]   )) +
@@ -4436,7 +4436,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     const int idx_h_RRRRRR = (i + 5 + num_ghosts_0_h) +
                         (j + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_x[idx_face_x] += dt*quarter*(
+                    F_face_x[idx_face_x] += Real(dt)*quarter*(
                         d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )*(h[idx_h_L]      + h[idx_h_R]     )) +
                         d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )*(h[idx_h_LL]     + h[idx_h_R]     )  +
                                   (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )*(h[idx_h_L]      + h[idx_h_RR]    )) +
@@ -4539,7 +4539,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_x[idx_face_x] += dt*quarter*(
+                        F_face_x[idx_face_x] += Real(dt)*quarter*(
                             d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R])*(h[idx_h_L] + h[idx_h_R]));
                     }
                 }
@@ -4620,7 +4620,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_x[idx_face_x] += dt*quarter*(
+                        F_face_x[idx_face_x] += Real(dt)*quarter*(
                             d_coef_a*((f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )*(h[idx_h_L]  + h[idx_h_R] )) +
                             d_coef_b*((f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )*(h[idx_h_LL] + h[idx_h_R] )  +
                                       (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])*(h[idx_h_L]  + h[idx_h_RR])));
@@ -4733,7 +4733,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_x[idx_face_x] += dt*quarter*(
+                        F_face_x[idx_face_x] += Real(dt)*quarter*(
                             d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )*(h[idx_h_L]   + h[idx_h_R]  )) +
                             d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )*(h[idx_h_LL]  + h[idx_h_R]  )  +
                                       (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )*(h[idx_h_L]   + h[idx_h_RR] )) +
@@ -4879,7 +4879,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_x[idx_face_x] += dt*quarter*(
+                        F_face_x[idx_face_x] += Real(dt)*quarter*(
                             d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )*(h[idx_h_L]    + h[idx_h_R]   )) +
                             d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )*(h[idx_h_LL]   + h[idx_h_R]   )  +
                                       (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )*(h[idx_h_L]    + h[idx_h_RR]  )) +
@@ -5059,7 +5059,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_x[idx_face_x] += dt*quarter*(
+                        F_face_x[idx_face_x] += Real(dt)*quarter*(
                             d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )*(h[idx_h_L]     + h[idx_h_R]    )) +
                             d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )*(h[idx_h_LL]    + h[idx_h_R]    )  +
                                       (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )*(h[idx_h_L]     + h[idx_h_RR]   )) +
@@ -5274,7 +5274,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_x[idx_face_x] += dt*quarter*(
+                        F_face_x[idx_face_x] += Real(dt)*quarter*(
                             d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )*(h[idx_h_L]      + h[idx_h_R]     )) +
                             d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )*(h[idx_h_LL]     + h[idx_h_R]     )  +
                                       (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )*(h[idx_h_L]      + h[idx_h_RR]    )) +
@@ -5309,8 +5309,8 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
  */
 void
 ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
     const int component_idx_flux,
     const int component_idx_f,
     const double dt) const
@@ -5339,8 +5339,8 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
      * Get the pointers to the data.
      */
     
-    double* F_face_y = data_convective_flux->getPointer(1, component_idx_flux);
-    double* f        = data_f->getPointer(component_idx_f);
+    Real* F_face_y = data_convective_flux->getPointer(1, component_idx_flux);
+    Real* f        = data_f->getPointer(component_idx_f);
     
     if (d_dim == tbox::Dimension(2))
     {
@@ -5375,7 +5375,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                     const int idx_f_T = (i + num_ghosts_0_f) +
                         (j + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
-                    F_face_y[idx_face_y] += dt*(
+                    F_face_y[idx_face_y] += Real(dt)*(
                         d_coef_a*(f[idx_f_B] + f[idx_f_T]));
                 }
             }
@@ -5402,7 +5402,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                     const int idx_f_TT = (i + num_ghosts_0_f) +
                         (j + 1 + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
-                    F_face_y[idx_face_y] += dt*(
+                    F_face_y[idx_face_y] += Real(dt)*(
                         d_coef_a*((f[idx_f_B]  + f[idx_f_T] )) +
                         d_coef_b*((f[idx_f_BB] + f[idx_f_T] )  +
                                   (f[idx_f_B]  + f[idx_f_TT])));
@@ -5437,7 +5437,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                     const int idx_f_TTT = (i + num_ghosts_0_f) +
                         (j + 2 + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
-                    F_face_y[idx_face_y] += dt*(
+                    F_face_y[idx_face_y] += Real(dt)*(
                         d_coef_a*((f[idx_f_B]   + f[idx_f_T]  )) +
                         d_coef_b*((f[idx_f_BB]  + f[idx_f_T]  )  +
                                   (f[idx_f_B]   + f[idx_f_TT] )) +
@@ -5481,7 +5481,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                     const int idx_f_TTTT = (i + num_ghosts_0_f) +
                         (j + 3 + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
-                    F_face_y[idx_face_y] += dt*(
+                    F_face_y[idx_face_y] += Real(dt)*(
                         d_coef_a*((f[idx_f_B]    + f[idx_f_T]   )) +
                         d_coef_b*((f[idx_f_BB]   + f[idx_f_T]   )  +
                                   (f[idx_f_B]    + f[idx_f_TT]  )) +
@@ -5535,7 +5535,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                     const int idx_f_TTTTT = (i + num_ghosts_0_f) +
                         (j + 4 + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
-                    F_face_y[idx_face_y] += dt*(
+                    F_face_y[idx_face_y] += Real(dt)*(
                         d_coef_a*((f[idx_f_B]     + f[idx_f_T]    )) +
                         d_coef_b*((f[idx_f_BB]    + f[idx_f_T]    )  +
                                   (f[idx_f_B]     + f[idx_f_TT]   )) +
@@ -5600,7 +5600,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                     const int idx_f_TTTTTT = (i + num_ghosts_0_f) +
                         (j + 5 + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
-                    F_face_y[idx_face_y] += dt*(
+                    F_face_y[idx_face_y] += Real(dt)*(
                         d_coef_a*((f[idx_f_B]      + f[idx_f_T]     )) +
                         d_coef_b*((f[idx_f_BB]     + f[idx_f_T]     )  +
                                   (f[idx_f_B]      + f[idx_f_TT]    )) +
@@ -5669,7 +5669,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                             (k + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_y[idx_face_y] += dt*(
+                        F_face_y[idx_face_y] += Real(dt)*(
                             d_coef_a*(f[idx_f_B] + f[idx_f_T]));
                     }
                 }
@@ -5708,7 +5708,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                             (k + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_y[idx_face_y] += dt*(
+                        F_face_y[idx_face_y] += Real(dt)*(
                             d_coef_a*((f[idx_f_B]  + f[idx_f_T] )) +
                             d_coef_b*((f[idx_f_BB] + f[idx_f_T] )  +
                                       (f[idx_f_B]  + f[idx_f_TT])));
@@ -5759,7 +5759,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                             (k + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_y[idx_face_y] += dt*(
+                        F_face_y[idx_face_y] += Real(dt)*(
                             d_coef_a*((f[idx_f_B]   + f[idx_f_T]  )) +
                             d_coef_b*((f[idx_f_BB]  + f[idx_f_T]  )  +
                                       (f[idx_f_B]   + f[idx_f_TT] )) +
@@ -5823,7 +5823,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                             (k + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_y[idx_face_y] += dt*(
+                        F_face_y[idx_face_y] += Real(dt)*(
                             d_coef_a*((f[idx_f_B]    + f[idx_f_T]   )) +
                             d_coef_b*((f[idx_f_BB]   + f[idx_f_T]   )  +
                                       (f[idx_f_B]    + f[idx_f_TT]  )) +
@@ -5901,7 +5901,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                             (k + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_y[idx_face_y] += dt*(
+                        F_face_y[idx_face_y] += Real(dt)*(
                             d_coef_a*((f[idx_f_B]     + f[idx_f_T]    )) +
                             d_coef_b*((f[idx_f_BB]    + f[idx_f_T]    )  +
                                       (f[idx_f_B]     + f[idx_f_TT]   )) +
@@ -5994,7 +5994,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                             (k + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_y[idx_face_y] += dt*(
+                        F_face_y[idx_face_y] += Real(dt)*(
                             d_coef_a*((f[idx_f_B]      + f[idx_f_T]     )) +
                             d_coef_b*((f[idx_f_BB]     + f[idx_f_T]     )  +
                                       (f[idx_f_B]      + f[idx_f_TT]    )) +
@@ -6029,9 +6029,9 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
  */
 void
 ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_g,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_g,
     const int component_idx_flux,
     const int component_idx_f,
     const int component_idx_g,
@@ -6067,11 +6067,11 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
      * Get the pointers to the data.
      */
     
-    double* F_face_y = data_convective_flux->getPointer(1, component_idx_flux);
-    double* f        = data_f->getPointer(component_idx_f);
-    double* g        = data_g->getPointer(component_idx_g);
+    Real* F_face_y = data_convective_flux->getPointer(1, component_idx_flux);
+    Real* f        = data_f->getPointer(component_idx_f);
+    Real* g        = data_g->getPointer(component_idx_g);
     
-    const double half = double(1)/double(2);
+    const Real half = Real(1)/Real(2);
     
     if (d_dim == tbox::Dimension(2))
     {
@@ -6116,7 +6116,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                     const int idx_g_T = (i + num_ghosts_0_g) +
                         (j + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_y[idx_face_y] += dt*half*(
+                    F_face_y[idx_face_y] += Real(dt)*half*(
                         d_coef_a*(f[idx_f_B] + f[idx_f_T])*(g[idx_g_B] + g[idx_g_T]));
                 }
             }
@@ -6155,7 +6155,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                     const int idx_g_TT = (i + num_ghosts_0_g) +
                         (j + 1 + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_y[idx_face_y] += dt*half*(
+                    F_face_y[idx_face_y] += Real(dt)*half*(
                         d_coef_a*((f[idx_f_B]  + f[idx_f_T] )*(g[idx_g_B]  + g[idx_g_T] )) +
                         d_coef_b*((f[idx_f_BB] + f[idx_f_T] )*(g[idx_g_BB] + g[idx_g_T] )  +
                                   (f[idx_f_B]  + f[idx_f_TT])*(g[idx_g_B]  + g[idx_g_TT])));
@@ -6208,7 +6208,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                     const int idx_g_TTT = (i + num_ghosts_0_g) +
                         (j + 2 + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_y[idx_face_y] += dt*half*(
+                    F_face_y[idx_face_y] += Real(dt)*half*(
                         d_coef_a*((f[idx_f_B]   + f[idx_f_T]  )*(g[idx_g_B]   + g[idx_g_T]  )) +
                         d_coef_b*((f[idx_f_BB]  + f[idx_f_T]  )*(g[idx_g_BB]  + g[idx_g_T]  )  +
                                   (f[idx_f_B]   + f[idx_f_TT] )*(g[idx_g_B]   + g[idx_g_TT] )) +
@@ -6276,7 +6276,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                     const int idx_g_TTTT = (i + num_ghosts_0_g) +
                         (j + 3 + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_y[idx_face_y] += dt*half*(
+                    F_face_y[idx_face_y] += Real(dt)*half*(
                         d_coef_a*((f[idx_f_B]    + f[idx_f_T]   )*(g[idx_g_B]    + g[idx_g_T]   )) +
                         d_coef_b*((f[idx_f_BB]   + f[idx_f_T]   )*(g[idx_g_BB]   + g[idx_g_T]   )  +
                                   (f[idx_f_B]    + f[idx_f_TT]  )*(g[idx_g_B]    + g[idx_g_TT]  )) +
@@ -6360,7 +6360,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                     const int idx_g_TTTTT = (i + num_ghosts_0_g) +
                         (j + 4 + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_y[idx_face_y] += dt*half*(
+                    F_face_y[idx_face_y] += Real(dt)*half*(
                         d_coef_a*((f[idx_f_B]     + f[idx_f_T]    )*(g[idx_g_B]     + g[idx_g_T]    )) +
                         d_coef_b*((f[idx_f_BB]    + f[idx_f_T]    )*(g[idx_g_BB]    + g[idx_g_T]    )  +
                                   (f[idx_f_B]     + f[idx_f_TT]   )*(g[idx_g_B]     + g[idx_g_TT]   )) +
@@ -6461,7 +6461,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                     const int idx_g_TTTTTT = (i + num_ghosts_0_g) +
                         (j + 5 + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_y[idx_face_y] += dt*half*(
+                    F_face_y[idx_face_y] += Real(dt)*half*(
                         d_coef_a*((f[idx_f_B]      + f[idx_f_T]     )*(g[idx_g_B]      + g[idx_g_T]     )) +
                         d_coef_b*((f[idx_f_BB]     + f[idx_f_T]     )*(g[idx_g_BB]     + g[idx_g_T]     )  +
                                   (f[idx_f_B]      + f[idx_f_TT]    )*(g[idx_g_B]      + g[idx_g_TT]    )) +
@@ -6546,7 +6546,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_y[idx_face_y] += dt*half*(
+                        F_face_y[idx_face_y] += Real(dt)*half*(
                             d_coef_a*(f[idx_f_B] + f[idx_f_T])*(g[idx_g_B] + g[idx_g_T]));
                     }
                 }
@@ -6605,7 +6605,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_y[idx_face_y] += dt*half*(
+                        F_face_y[idx_face_y] += Real(dt)*half*(
                             d_coef_a*((f[idx_f_B]  + f[idx_f_T] )*(g[idx_g_B]  + g[idx_g_T] )) +
                             d_coef_b*((f[idx_f_BB] + f[idx_f_T] )*(g[idx_g_BB] + g[idx_g_T] )  +
                                       (f[idx_f_B]  + f[idx_f_TT])*(g[idx_g_B]  + g[idx_g_TT])));
@@ -6686,7 +6686,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_y[idx_face_y] += dt*half*(
+                        F_face_y[idx_face_y] += Real(dt)*half*(
                             d_coef_a*((f[idx_f_B]   + f[idx_f_T]  )*(g[idx_g_B]   + g[idx_g_T]  )) +
                             d_coef_b*((f[idx_f_BB]  + f[idx_f_T]  )*(g[idx_g_BB]  + g[idx_g_T]  )  +
                                       (f[idx_f_B]   + f[idx_f_TT] )*(g[idx_g_B]   + g[idx_g_TT] )) +
@@ -6790,7 +6790,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_y[idx_face_y] += dt*half*(
+                        F_face_y[idx_face_y] += Real(dt)*half*(
                             d_coef_a*((f[idx_f_B]    + f[idx_f_T]   )*(g[idx_g_B]    + g[idx_g_T]   )) +
                             d_coef_b*((f[idx_f_BB]   + f[idx_f_T]   )*(g[idx_g_BB]   + g[idx_g_T]   )  +
                                       (f[idx_f_B]    + f[idx_f_TT]  )*(g[idx_g_B]    + g[idx_g_TT]  )) +
@@ -6918,7 +6918,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_y[idx_face_y] += dt*half*(
+                        F_face_y[idx_face_y] += Real(dt)*half*(
                             d_coef_a*((f[idx_f_B]     + f[idx_f_T]    )*(g[idx_g_B]     + g[idx_g_T]    )) +
                             d_coef_b*((f[idx_f_BB]    + f[idx_f_T]    )*(g[idx_g_BB]    + g[idx_g_T]    )  +
                                       (f[idx_f_B]     + f[idx_f_TT]   )*(g[idx_g_B]     + g[idx_g_TT]   )) +
@@ -7071,7 +7071,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_y[idx_face_y] += dt*half*(
+                        F_face_y[idx_face_y] += Real(dt)*half*(
                             d_coef_a*((f[idx_f_B]      + f[idx_f_T]     )*(g[idx_g_B]      + g[idx_g_T]     )) +
                             d_coef_b*((f[idx_f_BB]     + f[idx_f_T]     )*(g[idx_g_BB]     + g[idx_g_T]     )  +
                                       (f[idx_f_B]      + f[idx_f_TT]    )*(g[idx_g_B]      + g[idx_g_TT]    )) +
@@ -7106,10 +7106,10 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
  */
 void
 ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_g,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_h,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_g,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_h,
     const int component_idx_flux,
     const int component_idx_f,
     const int component_idx_g,
@@ -7151,12 +7151,12 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
      * Get the pointers to the data.
      */
     
-    double* F_face_y = data_convective_flux->getPointer(1, component_idx_flux);
-    double* f        = data_f->getPointer(component_idx_f);
-    double* g        = data_g->getPointer(component_idx_g);
-    double* h        = data_h->getPointer(component_idx_h);
+    Real* F_face_y = data_convective_flux->getPointer(1, component_idx_flux);
+    Real* f        = data_f->getPointer(component_idx_f);
+    Real* g        = data_g->getPointer(component_idx_g);
+    Real* h        = data_h->getPointer(component_idx_h);
     
-    const double quarter = double(1)/double(4);
+    const Real quarter = Real(1)/Real(4);
     
     if (d_dim == tbox::Dimension(2))
     {
@@ -7211,7 +7211,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                     const int idx_h_T = (i + num_ghosts_0_h) +
                         (j + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_y[idx_face_y] += dt*quarter*(
+                    F_face_y[idx_face_y] += Real(dt)*quarter*(
                         d_coef_a*(f[idx_f_B] + f[idx_f_T])*(g[idx_g_B] + g[idx_g_T])*(h[idx_h_B] + h[idx_h_T]));
                 }
             }
@@ -7262,7 +7262,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                     const int idx_h_TT = (i + num_ghosts_0_h) +
                         (j + 1 + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_y[idx_face_y] += dt*quarter*(
+                    F_face_y[idx_face_y] += Real(dt)*quarter*(
                         d_coef_a*((f[idx_f_B]  + f[idx_f_T] )*(g[idx_g_B]  + g[idx_g_T] )*(h[idx_h_B]  + h[idx_h_T] )) +
                         d_coef_b*((f[idx_f_BB] + f[idx_f_T] )*(g[idx_g_BB] + g[idx_g_T] )*(h[idx_h_BB] + h[idx_h_T] )  +
                                   (f[idx_f_B]  + f[idx_f_TT])*(g[idx_g_B]  + g[idx_g_TT])*(h[idx_h_B]  + h[idx_h_TT])));
@@ -7333,7 +7333,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                     const int idx_h_TTT = (i + num_ghosts_0_h) +
                         (j + 2 + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_y[idx_face_y] += dt*quarter*(
+                    F_face_y[idx_face_y] += Real(dt)*quarter*(
                         d_coef_a*((f[idx_f_B]   + f[idx_f_T]  )*(g[idx_g_B]   + g[idx_g_T]  )*(h[idx_h_B]   + h[idx_h_T]  )) +
                         d_coef_b*((f[idx_f_BB]  + f[idx_f_T]  )*(g[idx_g_BB]  + g[idx_g_T]  )*(h[idx_h_BB]  + h[idx_h_T]  )  +
                                   (f[idx_f_B]   + f[idx_f_TT] )*(g[idx_g_B]   + g[idx_g_TT] )*(h[idx_h_B]   + h[idx_h_TT] )) +
@@ -7425,7 +7425,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                     const int idx_h_TTTT = (i + num_ghosts_0_h) +
                         (j + 3 + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_y[idx_face_y] += dt*quarter*(
+                    F_face_y[idx_face_y] += Real(dt)*quarter*(
                         d_coef_a*((f[idx_f_B]    + f[idx_f_T]   )*(g[idx_g_B]    + g[idx_g_T]   )*(h[idx_h_B]    + h[idx_h_T]   )) +
                         d_coef_b*((f[idx_f_BB]   + f[idx_f_T]   )*(g[idx_g_BB]   + g[idx_g_T]   )*(h[idx_h_BB]   + h[idx_h_T]   )  +
                                   (f[idx_f_B]    + f[idx_f_TT]  )*(g[idx_g_B]    + g[idx_g_TT]  )*(h[idx_h_B]    + h[idx_h_TT]  )) +
@@ -7539,7 +7539,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                     const int idx_h_TTTTT = (i + num_ghosts_0_h) +
                         (j + 4 + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_y[idx_face_y] += dt*quarter*(
+                    F_face_y[idx_face_y] += Real(dt)*quarter*(
                         d_coef_a*((f[idx_f_B]     + f[idx_f_T]    )*(g[idx_g_B]     + g[idx_g_T]    )*(h[idx_h_B]     + h[idx_h_T]    )) +
                         d_coef_b*((f[idx_f_BB]    + f[idx_f_T]    )*(g[idx_g_BB]    + g[idx_g_T]    )*(h[idx_h_BB]    + h[idx_h_T]    )  +
                                   (f[idx_f_B]     + f[idx_f_TT]   )*(g[idx_g_B]     + g[idx_g_TT]   )*(h[idx_h_B]     + h[idx_h_TT]   )) +
@@ -7676,7 +7676,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                     const int idx_h_TTTTTT = (i + num_ghosts_0_h) +
                         (j + 5 + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_y[idx_face_y] += dt*quarter*(
+                    F_face_y[idx_face_y] += Real(dt)*quarter*(
                         d_coef_a*((f[idx_f_B]      + f[idx_f_T]     )*(g[idx_g_B]      + g[idx_g_T]     )*(h[idx_h_B]      + h[idx_h_T]     )) +
                         d_coef_b*((f[idx_f_BB]     + f[idx_f_T]     )*(g[idx_g_BB]     + g[idx_g_T]     )*(h[idx_h_BB]     + h[idx_h_T]     )  +
                                   (f[idx_f_B]      + f[idx_f_TT]    )*(g[idx_g_B]      + g[idx_g_TT]    )*(h[idx_h_B]      + h[idx_h_TT]    )) +
@@ -7777,7 +7777,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_y[idx_face_y] += dt*quarter*(
+                        F_face_y[idx_face_y] += Real(dt)*quarter*(
                             d_coef_a*(f[idx_f_B] + f[idx_f_T])*(g[idx_g_B] + g[idx_g_T])*(h[idx_h_B] + h[idx_h_T]));
                     }
                 }
@@ -7856,7 +7856,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_y[idx_face_y] += dt*quarter*(
+                        F_face_y[idx_face_y] += Real(dt)*quarter*(
                             d_coef_a*((f[idx_f_B]  + f[idx_f_T] )*(g[idx_g_B]  + g[idx_g_T] )*(h[idx_h_B]  + h[idx_h_T] )) +
                             d_coef_b*((f[idx_f_BB] + f[idx_f_T] )*(g[idx_g_BB] + g[idx_g_T] )*(h[idx_h_BB] + h[idx_h_T] )  +
                                       (f[idx_f_B]  + f[idx_f_TT])*(g[idx_g_B]  + g[idx_g_TT])*(h[idx_h_B]  + h[idx_h_TT])));
@@ -7967,7 +7967,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_y[idx_face_y] += dt*quarter*(
+                        F_face_y[idx_face_y] += Real(dt)*quarter*(
                             d_coef_a*((f[idx_f_B]   + f[idx_f_T]  )*(g[idx_g_B]   + g[idx_g_T]  )*(h[idx_h_B]   + h[idx_h_T]  )) +
                             d_coef_b*((f[idx_f_BB]  + f[idx_f_T]  )*(g[idx_g_BB]  + g[idx_g_T]  )*(h[idx_h_BB]  + h[idx_h_T]  )  +
                                       (f[idx_f_B]   + f[idx_f_TT] )*(g[idx_g_B]   + g[idx_g_TT] )*(h[idx_h_B]   + h[idx_h_TT] )) +
@@ -8111,7 +8111,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_y[idx_face_y] += dt*quarter*(
+                        F_face_y[idx_face_y] += Real(dt)*quarter*(
                             d_coef_a*((f[idx_f_B]    + f[idx_f_T]   )*(g[idx_g_B]    + g[idx_g_T]   )*(h[idx_h_B]    + h[idx_h_T]   )) +
                             d_coef_b*((f[idx_f_BB]   + f[idx_f_T]   )*(g[idx_g_BB]   + g[idx_g_T]   )*(h[idx_h_BB]   + h[idx_h_T]   )  +
                                       (f[idx_f_B]    + f[idx_f_TT]  )*(g[idx_g_B]    + g[idx_g_TT]  )*(h[idx_h_B]    + h[idx_h_TT]  )) +
@@ -8289,7 +8289,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_y[idx_face_y] += dt*quarter*(
+                        F_face_y[idx_face_y] += Real(dt)*quarter*(
                             d_coef_a*((f[idx_f_B]     + f[idx_f_T]    )*(g[idx_g_B]     + g[idx_g_T]    )*(h[idx_h_B]     + h[idx_h_T]    )) +
                             d_coef_b*((f[idx_f_BB]    + f[idx_f_T]    )*(g[idx_g_BB]    + g[idx_g_T]    )*(h[idx_h_BB]    + h[idx_h_T]    )  +
                                       (f[idx_f_B]     + f[idx_f_TT]   )*(g[idx_g_B]     + g[idx_g_TT]   )*(h[idx_h_B]     + h[idx_h_TT]   )) +
@@ -8502,7 +8502,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_y[idx_face_y] += dt*quarter*(
+                        F_face_y[idx_face_y] += Real(dt)*quarter*(
                             d_coef_a*((f[idx_f_B]      + f[idx_f_T]     )*(g[idx_g_B]      + g[idx_g_T]     )*(h[idx_h_B]      + h[idx_h_T]     )) +
                             d_coef_b*((f[idx_f_BB]     + f[idx_f_T]     )*(g[idx_g_BB]     + g[idx_g_T]     )*(h[idx_h_BB]     + h[idx_h_T]     )  +
                                       (f[idx_f_B]      + f[idx_f_TT]    )*(g[idx_g_B]      + g[idx_g_TT]    )*(h[idx_h_B]      + h[idx_h_TT]    )) +
@@ -8537,8 +8537,8 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
  */
 void
 ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
     const int component_idx_flux,
     const int component_idx_f,
     const double dt) const
@@ -8572,8 +8572,8 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
      * Get the pointers to the data.
      */
     
-    double* F_face_z = data_convective_flux->getPointer(2, component_idx_flux);
-    double* f        = data_f->getPointer(component_idx_f);
+    Real* F_face_z = data_convective_flux->getPointer(2, component_idx_flux);
+    Real* f        = data_f->getPointer(component_idx_f);
     
     if (d_dim == tbox::Dimension(3))
     {
@@ -8619,7 +8619,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
                             (k + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_z[idx_face_z] += dt*(
+                        F_face_z[idx_face_z] += Real(dt)*(
                             d_coef_a*(f[idx_f_B] + f[idx_f_F]));
                     }
                 }
@@ -8658,7 +8658,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
                             (k + 1 + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_z[idx_face_z] += dt*(
+                        F_face_z[idx_face_z] += Real(dt)*(
                             d_coef_a*((f[idx_f_B]  + f[idx_f_F] )) +
                             d_coef_b*((f[idx_f_BB] + f[idx_f_F] )  +
                                       (f[idx_f_B]  + f[idx_f_FF])));
@@ -8709,7 +8709,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
                             (k + 2 + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_z[idx_face_z] += dt*(
+                        F_face_z[idx_face_z] += Real(dt)*(
                             d_coef_a*((f[idx_f_B]   + f[idx_f_F]  )) +
                             d_coef_b*((f[idx_f_BB]  + f[idx_f_F]  )  +
                                       (f[idx_f_B]   + f[idx_f_FF] )) +
@@ -8773,7 +8773,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
                             (k + 3 + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_z[idx_face_z] += dt*(
+                        F_face_z[idx_face_z] += Real(dt)*(
                             d_coef_a*((f[idx_f_B]    + f[idx_f_F]   )) +
                             d_coef_b*((f[idx_f_BB]   + f[idx_f_F]   )  +
                                       (f[idx_f_B]    + f[idx_f_FF]  )) +
@@ -8851,7 +8851,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
                             (k + 4 + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_z[idx_face_z] += dt*(
+                        F_face_z[idx_face_z] += Real(dt)*(
                             d_coef_a*((f[idx_f_B]     + f[idx_f_F]    )) +
                             d_coef_b*((f[idx_f_BB]    + f[idx_f_F]    )  +
                                       (f[idx_f_B]     + f[idx_f_FF]   )) +
@@ -8944,7 +8944,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
                             (k + 5 + num_ghosts_2_f)*ghostcell_dim_0_f*
                                 ghostcell_dim_1_f;
                         
-                        F_face_z[idx_face_z] += dt*(
+                        F_face_z[idx_face_z] += Real(dt)*(
                             d_coef_a*((f[idx_f_B]      + f[idx_f_F]     )) +
                             d_coef_b*((f[idx_f_BB]     + f[idx_f_F]     )  +
                                       (f[idx_f_B]      + f[idx_f_FF]    )) +
@@ -8979,9 +8979,9 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
  */
 void
 ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_g,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_g,
     const int component_idx_flux,
     const int component_idx_f,
     const int component_idx_g,
@@ -9022,11 +9022,11 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
      * Get the pointers to the data.
      */
     
-    double* F_face_z = data_convective_flux->getPointer(2, component_idx_flux);
-    double* f        = data_f->getPointer(component_idx_f);
-    double* g        = data_g->getPointer(component_idx_g);
+    Real* F_face_z = data_convective_flux->getPointer(2, component_idx_flux);
+    Real* f        = data_f->getPointer(component_idx_f);
+    Real* g        = data_g->getPointer(component_idx_g);
     
-    const double half = double(1)/double(2);
+    const Real half = Real(1)/Real(2);
     
     if (d_dim == tbox::Dimension(3))
     {
@@ -9087,7 +9087,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_z[idx_face_z] += dt*half*(
+                        F_face_z[idx_face_z] += Real(dt)*half*(
                             d_coef_a*(f[idx_f_B] + f[idx_f_F])*(g[idx_g_B] + g[idx_g_F]));
                     }
                 }
@@ -9146,7 +9146,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
                             (k + 1 + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_z[idx_face_z] += dt*half*(
+                        F_face_z[idx_face_z] += Real(dt)*half*(
                             d_coef_a*((f[idx_f_B]  + f[idx_f_F] )*(g[idx_g_B]  + g[idx_g_F] )) +
                             d_coef_b*((f[idx_f_BB] + f[idx_f_F] )*(g[idx_g_BB] + g[idx_g_F] )  +
                                       (f[idx_f_B]  + f[idx_f_FF])*(g[idx_g_B]  + g[idx_g_FF])));
@@ -9227,7 +9227,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
                             (k + 2 + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_z[idx_face_z] += dt*half*(
+                        F_face_z[idx_face_z] += Real(dt)*half*(
                             d_coef_a*((f[idx_f_B]   + f[idx_f_F]  )*(g[idx_g_B]   + g[idx_g_F]  )) +
                             d_coef_b*((f[idx_f_BB]  + f[idx_f_F]  )*(g[idx_g_BB]  + g[idx_g_F]  )  +
                                       (f[idx_f_B]   + f[idx_f_FF] )*(g[idx_g_B]   + g[idx_g_FF] )) +
@@ -9331,7 +9331,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
                             (k + 3 + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_z[idx_face_z] += dt*half*(
+                        F_face_z[idx_face_z] += Real(dt)*half*(
                             d_coef_a*((f[idx_f_B]    + f[idx_f_F]   )*(g[idx_g_B]    + g[idx_g_F]   )) +
                             d_coef_b*((f[idx_f_BB]   + f[idx_f_F]   )*(g[idx_g_BB]   + g[idx_g_F]   )  +
                                       (f[idx_f_B]    + f[idx_f_FF]  )*(g[idx_g_B]    + g[idx_g_FF]  )) +
@@ -9459,7 +9459,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
                             (k + 4 + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_z[idx_face_z] += dt*half*(
+                        F_face_z[idx_face_z] += Real(dt)*half*(
                             d_coef_a*((f[idx_f_B]     + f[idx_f_F]    )*(g[idx_g_B]     + g[idx_g_F]    )) +
                             d_coef_b*((f[idx_f_BB]    + f[idx_f_F]    )*(g[idx_g_BB]    + g[idx_g_F]    )  +
                                       (f[idx_f_B]     + f[idx_f_FF]   )*(g[idx_g_B]     + g[idx_g_FF]   )) +
@@ -9612,7 +9612,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
                             (k + 5 + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_z[idx_face_z] += dt*half*(
+                        F_face_z[idx_face_z] += Real(dt)*half*(
                             d_coef_a*((f[idx_f_B]      + f[idx_f_F]     )*(g[idx_g_B]      + g[idx_g_F]     )) +
                             d_coef_b*((f[idx_f_BB]     + f[idx_f_F]     )*(g[idx_g_BB]     + g[idx_g_F]     )  +
                                       (f[idx_f_B]      + f[idx_f_FF]    )*(g[idx_g_B]      + g[idx_g_FF]    )) +
@@ -9647,10 +9647,10 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
  */
 void
 ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_g,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_h,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_convective_flux,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_f,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_g,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_h,
     const int component_idx_flux,
     const int component_idx_f,
     const int component_idx_g,
@@ -9697,12 +9697,12 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
      * Get the pointers to the data.
      */
     
-    double* F_face_z = data_convective_flux->getPointer(2, component_idx_flux);
-    double* f        = data_f->getPointer(component_idx_f);
-    double* g        = data_g->getPointer(component_idx_g);
-    double* h        = data_h->getPointer(component_idx_h);
+    Real* F_face_z = data_convective_flux->getPointer(2, component_idx_flux);
+    Real* f        = data_f->getPointer(component_idx_f);
+    Real* g        = data_g->getPointer(component_idx_g);
+    Real* h        = data_h->getPointer(component_idx_h);
     
-    const double quarter = double(1)/double(4);
+    const Real quarter = Real(1)/Real(4);
     
     if (d_dim == tbox::Dimension(3))
     {
@@ -9779,7 +9779,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_z[idx_face_z] += dt*quarter*(
+                        F_face_z[idx_face_z] += Real(dt)*quarter*(
                             d_coef_a*(f[idx_f_B] + f[idx_f_F])*(g[idx_g_B] + g[idx_g_F])*(h[idx_h_B] + h[idx_h_F]));
                     }
                 }
@@ -9858,7 +9858,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
                             (k + 1 + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_z[idx_face_z] += dt*quarter*(
+                        F_face_z[idx_face_z] += Real(dt)*quarter*(
                             d_coef_a*((f[idx_f_B]  + f[idx_f_F] )*(g[idx_g_B]  + g[idx_g_F] )*(h[idx_h_B]  + h[idx_h_F] )) +
                             d_coef_b*((f[idx_f_BB] + f[idx_f_F] )*(g[idx_g_BB] + g[idx_g_F] )*(h[idx_h_BB] + h[idx_h_F] )  +
                                       (f[idx_f_B]  + f[idx_f_FF])*(g[idx_g_B]  + g[idx_g_FF])*(h[idx_h_B]  + h[idx_h_FF])));
@@ -9969,7 +9969,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
                             (k + 2 + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_z[idx_face_z] += dt*quarter*(
+                        F_face_z[idx_face_z] += Real(dt)*quarter*(
                             d_coef_a*((f[idx_f_B]   + f[idx_f_F]  )*(g[idx_g_B]   + g[idx_g_F]  )*(h[idx_h_B]   + h[idx_h_F]  )) +
                             d_coef_b*((f[idx_f_BB]  + f[idx_f_F]  )*(g[idx_g_BB]  + g[idx_g_F]  )*(h[idx_h_BB]  + h[idx_h_F]  )  +
                                       (f[idx_f_B]   + f[idx_f_FF] )*(g[idx_g_B]   + g[idx_g_FF] )*(h[idx_h_B]   + h[idx_h_FF] )) +
@@ -10113,7 +10113,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
                             (k + 3 + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_z[idx_face_z] += dt*quarter*(
+                        F_face_z[idx_face_z] += Real(dt)*quarter*(
                             d_coef_a*((f[idx_f_B]    + f[idx_f_F]   )*(g[idx_g_B]    + g[idx_g_F]   )*(h[idx_h_B]    + h[idx_h_F]   )) +
                             d_coef_b*((f[idx_f_BB]   + f[idx_f_F]   )*(g[idx_g_BB]   + g[idx_g_F]   )*(h[idx_h_BB]   + h[idx_h_F]   )  +
                                       (f[idx_f_B]    + f[idx_f_FF]  )*(g[idx_g_B]    + g[idx_g_FF]  )*(h[idx_h_B]    + h[idx_h_FF]  )) +
@@ -10291,7 +10291,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
                             (k + 4 + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_z[idx_face_z] += dt*quarter*(
+                        F_face_z[idx_face_z] += Real(dt)*quarter*(
                             d_coef_a*((f[idx_f_B]     + f[idx_f_F]    )*(g[idx_g_B]     + g[idx_g_F]    )*(h[idx_h_B]     + h[idx_h_F]    )) +
                             d_coef_b*((f[idx_f_BB]    + f[idx_f_F]    )*(g[idx_g_BB]    + g[idx_g_F]    )*(h[idx_h_BB]    + h[idx_h_F]    )  +
                                       (f[idx_f_B]     + f[idx_f_FF]   )*(g[idx_g_B]     + g[idx_g_FF]   )*(h[idx_h_B]     + h[idx_h_FF]   )) +
@@ -10504,7 +10504,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
                             (k + 5 + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_z[idx_face_z] += dt*quarter*(
+                        F_face_z[idx_face_z] += Real(dt)*quarter*(
                             d_coef_a*((f[idx_f_B]      + f[idx_f_F]     )*(g[idx_g_B]      + g[idx_g_F]     )*(h[idx_h_B]      + h[idx_h_F]     )) +
                             d_coef_b*((f[idx_f_BB]     + f[idx_f_F]     )*(g[idx_g_BB]     + g[idx_g_F]     )*(h[idx_h_BB]     + h[idx_h_F]     )  +
                                       (f[idx_f_B]      + f[idx_f_FF]    )*(g[idx_g_B]      + g[idx_g_FF]    )*(h[idx_h_B]      + h[idx_h_FF]    )) +
@@ -10540,9 +10540,9 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
  */
 void
 ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_source,
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity,
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_source,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_velocity,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_volume_fractions,
     const double* const dx,
     const double dt) const
 {
@@ -10574,7 +10574,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
      * Get the pointers to the data.
      */
     
-    std::vector<double*> Z;
+    std::vector<Real*> Z;
     Z.reserve(num_species);
     for (int si = 0; si < num_species; si++)
     {
@@ -10600,7 +10600,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
          * Get the pointers to velocity component.
          */
         
-        double* u = data_velocity->getPointer(0);
+        Real* u = data_velocity->getPointer(0);
         
         for (int si = 0; si < num_species - 1; si++)
         {
@@ -10610,7 +10610,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
             TBOX_ASSERT(d_eqn_form[ei] == EQN_FORM::ADVECTIVE);
 #endif
             
-            double* S = data_source->getPointer(ei);
+            Real* S = data_source->getPointer(ei);
             
             if (d_stencil_width == 3)
             {
@@ -10626,9 +10626,9 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                     const int idx_cell_volume_fractions_x_L = i - 1 + num_ghosts_0_volume_fractions;
                     const int idx_cell_volume_fractions_x_R = i + 1 + num_ghosts_0_volume_fractions;
                     
-                    S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                    S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                         d_coef_a*(Z[si][idx_cell_volume_fractions_x_R] - Z[si][idx_cell_volume_fractions_x_L])
-                        )/dx[0]
+                        )/Real(dx[0])
                         );
                 }
             }
@@ -10648,10 +10648,10 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                     const int idx_cell_volume_fractions_x_R  = i + 1 + num_ghosts_0_volume_fractions;
                     const int idx_cell_volume_fractions_x_RR = i + 2 + num_ghosts_0_volume_fractions;
                     
-                    S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                    S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                         d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]  - Z[si][idx_cell_volume_fractions_x_L]) +
                         d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR] - Z[si][idx_cell_volume_fractions_x_LL])
-                        )/dx[0]
+                        )/Real(dx[0])
                         );
                 }
             }
@@ -10673,11 +10673,11 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                     const int idx_cell_volume_fractions_x_RR  = i + 2 + num_ghosts_0_volume_fractions;
                     const int idx_cell_volume_fractions_x_RRR = i + 3 + num_ghosts_0_volume_fractions;
                     
-                    S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                    S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                         d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]   - Z[si][idx_cell_volume_fractions_x_L]) +
                         d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]  - Z[si][idx_cell_volume_fractions_x_LL]) +
                         d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR] - Z[si][idx_cell_volume_fractions_x_LLL])
-                        )/dx[0]
+                        )/Real(dx[0])
                         );
                 }
             }
@@ -10701,12 +10701,12 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                     const int idx_cell_volume_fractions_x_RRR  = i + 3 + num_ghosts_0_volume_fractions;
                     const int idx_cell_volume_fractions_x_RRRR = i + 4 + num_ghosts_0_volume_fractions;
                     
-                    S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                    S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                         d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]    - Z[si][idx_cell_volume_fractions_x_L]) +
                         d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]   - Z[si][idx_cell_volume_fractions_x_LL]) +
                         d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]  - Z[si][idx_cell_volume_fractions_x_LLL]) +
                         d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR] - Z[si][idx_cell_volume_fractions_x_LLLL])
-                        )/dx[0]
+                        )/Real(dx[0])
                         );
                 }
             }
@@ -10732,13 +10732,13 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                     const int idx_cell_volume_fractions_x_RRRR  = i + 4 + num_ghosts_0_volume_fractions;
                     const int idx_cell_volume_fractions_x_RRRRR = i + 5 + num_ghosts_0_volume_fractions;
                     
-                    S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                    S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                         d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]     - Z[si][idx_cell_volume_fractions_x_L]) +
                         d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]    - Z[si][idx_cell_volume_fractions_x_LL]) +
                         d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]   - Z[si][idx_cell_volume_fractions_x_LLL]) +
                         d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR]  - Z[si][idx_cell_volume_fractions_x_LLLL]) +
                         d_coef_e*(Z[si][idx_cell_volume_fractions_x_RRRRR] - Z[si][idx_cell_volume_fractions_x_LLLLL])
-                        )/dx[0]
+                        )/Real(dx[0])
                         );
                 }
             }
@@ -10766,14 +10766,14 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                     const int idx_cell_volume_fractions_x_RRRRR  = i + 5 + num_ghosts_0_volume_fractions;
                     const int idx_cell_volume_fractions_x_RRRRRR = i + 6 + num_ghosts_0_volume_fractions;
                     
-                    S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                    S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                         d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]      - Z[si][idx_cell_volume_fractions_x_L]) +
                         d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]     - Z[si][idx_cell_volume_fractions_x_LL]) +
                         d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]    - Z[si][idx_cell_volume_fractions_x_LLL]) +
                         d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR]   - Z[si][idx_cell_volume_fractions_x_LLLL]) +
                         d_coef_e*(Z[si][idx_cell_volume_fractions_x_RRRRR]  - Z[si][idx_cell_volume_fractions_x_LLLLL]) +
                         d_coef_f*(Z[si][idx_cell_volume_fractions_x_RRRRRR] - Z[si][idx_cell_volume_fractions_x_LLLLLL])
-                        )/dx[0]
+                        )/Real(dx[0])
                         );
                 }
             }
@@ -10804,8 +10804,8 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
          * Get the pointers to velocity components.
          */
         
-        double* u = data_velocity->getPointer(0);
-        double* v = data_velocity->getPointer(1);
+        Real* u = data_velocity->getPointer(0);
+        Real* v = data_velocity->getPointer(1);
         
         for (int si = 0; si < num_species - 1; si++)
         {
@@ -10815,7 +10815,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
             TBOX_ASSERT(d_eqn_form[ei] == EQN_FORM::ADVECTIVE);
 #endif
             
-            double* S = data_source->getPointer(ei);
+            Real* S = data_source->getPointer(ei);
             
             if (d_stencil_width == 3)
             {
@@ -10844,12 +10844,12 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                         const int idx_cell_volume_fractions_y_T = (i + num_ghosts_0_volume_fractions) +
                             (j + 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
                         
-                        S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                        S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                             d_coef_a*(Z[si][idx_cell_volume_fractions_x_R] - Z[si][idx_cell_volume_fractions_x_L])
-                            )/dx[0] +
-                            dt*v[idx_cell_velocity]*(
+                            )/Real(dx[0]) +
+                            Real(dt)*v[idx_cell_velocity]*(
                             d_coef_a*(Z[si][idx_cell_volume_fractions_y_T] - Z[si][idx_cell_volume_fractions_y_B])
-                            )/dx[1]
+                            )/Real(dx[1])
                             );
                     }
                 }
@@ -10893,14 +10893,14 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                         const int idx_cell_volume_fractions_y_TT = (i + num_ghosts_0_volume_fractions) +
                             (j + 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
                         
-                        S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                        S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                             d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]  - Z[si][idx_cell_volume_fractions_x_L]) +
                             d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR] - Z[si][idx_cell_volume_fractions_x_LL])
-                            )/dx[0] +
-                            dt*v[idx_cell_velocity]*(
+                            )/Real(dx[0]) +
+                            Real(dt)*v[idx_cell_velocity]*(
                             d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]  - Z[si][idx_cell_volume_fractions_y_B]) +
                             d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT] - Z[si][idx_cell_volume_fractions_y_BB])
-                            )/dx[1]
+                            )/Real(dx[1])
                             );
                     }
                 }
@@ -10956,16 +10956,16 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                         const int idx_cell_volume_fractions_y_TTT = (i + num_ghosts_0_volume_fractions) +
                             (j + 3 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
                         
-                        S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                        S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                             d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]   - Z[si][idx_cell_volume_fractions_x_L]) +
                             d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]  - Z[si][idx_cell_volume_fractions_x_LL]) +
                             d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR] - Z[si][idx_cell_volume_fractions_x_LLL])
-                            )/dx[0] +
-                            dt*v[idx_cell_velocity]*(
+                            )/Real(dx[0]) +
+                            Real(dt)*v[idx_cell_velocity]*(
                             d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]   - Z[si][idx_cell_volume_fractions_y_B]) +
                             d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT]  - Z[si][idx_cell_volume_fractions_y_BB]) +
                             d_coef_c*(Z[si][idx_cell_volume_fractions_y_TTT] - Z[si][idx_cell_volume_fractions_y_BBB])
-                            )/dx[1]
+                            )/Real(dx[1])
                             );
                     }
                 }
@@ -11033,18 +11033,18 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                         const int idx_cell_volume_fractions_y_TTTT = (i + num_ghosts_0_volume_fractions) +
                             (j + 4 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
                         
-                        S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                        S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                             d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]    - Z[si][idx_cell_volume_fractions_x_L]) +
                             d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]   - Z[si][idx_cell_volume_fractions_x_LL]) +
                             d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]  - Z[si][idx_cell_volume_fractions_x_LLL]) +
                             d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR] - Z[si][idx_cell_volume_fractions_x_LLLL])
-                            )/dx[0] +
-                            dt*v[idx_cell_velocity]*(
+                            )/Real(dx[0]) +
+                            Real(dt)*v[idx_cell_velocity]*(
                             d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]    - Z[si][idx_cell_volume_fractions_y_B]) +
                             d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT]   - Z[si][idx_cell_volume_fractions_y_BB]) +
                             d_coef_c*(Z[si][idx_cell_volume_fractions_y_TTT]  - Z[si][idx_cell_volume_fractions_y_BBB]) +
                             d_coef_d*(Z[si][idx_cell_volume_fractions_y_TTTT] - Z[si][idx_cell_volume_fractions_y_BBBB])
-                            )/dx[1]
+                            )/Real(dx[1])
                             );
                     }
                 }
@@ -11124,20 +11124,20 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                         const int idx_cell_volume_fractions_y_TTTTT = (i + num_ghosts_0_volume_fractions) +
                             (j + 5 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
                         
-                        S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                        S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                             d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]     - Z[si][idx_cell_volume_fractions_x_L]) +
                             d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]    - Z[si][idx_cell_volume_fractions_x_LL]) +
                             d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]   - Z[si][idx_cell_volume_fractions_x_LLL]) +
                             d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR]  - Z[si][idx_cell_volume_fractions_x_LLLL]) +
                             d_coef_e*(Z[si][idx_cell_volume_fractions_x_RRRRR] - Z[si][idx_cell_volume_fractions_x_LLLLL])
-                            )/dx[0] +
-                            dt*v[idx_cell_velocity]*(
+                            )/Real(dx[0]) +
+                            Real(dt)*v[idx_cell_velocity]*(
                             d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]     - Z[si][idx_cell_volume_fractions_y_B]) +
                             d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT]    - Z[si][idx_cell_volume_fractions_y_BB]) +
                             d_coef_c*(Z[si][idx_cell_volume_fractions_y_TTT]   - Z[si][idx_cell_volume_fractions_y_BBB]) +
                             d_coef_d*(Z[si][idx_cell_volume_fractions_y_TTTT]  - Z[si][idx_cell_volume_fractions_y_BBBB]) +
                             d_coef_e*(Z[si][idx_cell_volume_fractions_y_TTTTT] - Z[si][idx_cell_volume_fractions_y_BBBBB])
-                            )/dx[1]
+                            )/Real(dx[1])
                             );
                     }
                 }
@@ -11229,22 +11229,22 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                         const int idx_cell_volume_fractions_y_TTTTTT = (i + num_ghosts_0_volume_fractions) +
                             (j + 6 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
                         
-                        S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                        S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                             d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]      - Z[si][idx_cell_volume_fractions_x_L]) +
                             d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]     - Z[si][idx_cell_volume_fractions_x_LL]) +
                             d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]    - Z[si][idx_cell_volume_fractions_x_LLL]) +
                             d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR]   - Z[si][idx_cell_volume_fractions_x_LLLL]) +
                             d_coef_e*(Z[si][idx_cell_volume_fractions_x_RRRRR]  - Z[si][idx_cell_volume_fractions_x_LLLLL]) +
                             d_coef_f*(Z[si][idx_cell_volume_fractions_x_RRRRRR] - Z[si][idx_cell_volume_fractions_x_LLLLLL])
-                            )/dx[0] +
-                            dt*v[idx_cell_velocity]*(
+                            )/Real(dx[0]) +
+                            Real(dt)*v[idx_cell_velocity]*(
                             d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]      - Z[si][idx_cell_volume_fractions_y_B]) +
                             d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT]     - Z[si][idx_cell_volume_fractions_y_BB]) +
                             d_coef_c*(Z[si][idx_cell_volume_fractions_y_TTT]    - Z[si][idx_cell_volume_fractions_y_BBB]) +
                             d_coef_d*(Z[si][idx_cell_volume_fractions_y_TTTT]   - Z[si][idx_cell_volume_fractions_y_BBBB]) +
                             d_coef_e*(Z[si][idx_cell_volume_fractions_y_TTTTT]  - Z[si][idx_cell_volume_fractions_y_BBBBB]) +
                             d_coef_f*(Z[si][idx_cell_volume_fractions_y_TTTTTT] - Z[si][idx_cell_volume_fractions_y_BBBBBB])
-                            )/dx[1]
+                            )/Real(dx[1])
                             );
                     }
                 }
@@ -11281,9 +11281,9 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
          * Get the pointers to velocity components.
          */
         
-        double* u = data_velocity->getPointer(0);
-        double* v = data_velocity->getPointer(1);
-        double* w = data_velocity->getPointer(2);
+        Real* u = data_velocity->getPointer(0);
+        Real* v = data_velocity->getPointer(1);
+        Real* w = data_velocity->getPointer(2);
         
         for (int si = 0; si < num_species - 1; si++)
         {
@@ -11293,7 +11293,7 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
             TBOX_ASSERT(d_eqn_form[ei] == EQN_FORM::ADVECTIVE);
 #endif
             
-            double* S = data_source->getPointer(ei);
+            Real* S = data_source->getPointer(ei);
             
             if (d_stencil_width == 3)
             {
@@ -11346,15 +11346,15 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                                 (k + 1 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
                                     ghostcell_dim_1_volume_fractions;
                             
-                            S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                            S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_x_R] - Z[si][idx_cell_volume_fractions_x_L])
-                                )/dx[0] +
-                                dt*v[idx_cell_velocity]*(
+                                )/Real(dx[0]) +
+                                Real(dt)*v[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_y_T] - Z[si][idx_cell_volume_fractions_y_B])
-                                )/dx[1] +
-                                dt*w[idx_cell_velocity]*(
+                                )/Real(dx[1]) +
+                                Real(dt)*w[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_z_F] - Z[si][idx_cell_volume_fractions_z_B])
-                                )/dx[2]
+                                )/Real(dx[2])
                                 );
                         }
                     }
@@ -11441,18 +11441,18 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                                 (k + 2 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
                                     ghostcell_dim_1_volume_fractions;
                             
-                            S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                            S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]  - Z[si][idx_cell_volume_fractions_x_L]) +
                                 d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR] - Z[si][idx_cell_volume_fractions_x_LL])
-                                )/dx[0] +
-                                dt*v[idx_cell_velocity]*(
+                                )/Real(dx[0]) +
+                                Real(dt)*v[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]  - Z[si][idx_cell_volume_fractions_y_B]) +
                                 d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT] - Z[si][idx_cell_volume_fractions_y_BB])
-                                )/dx[1] +
-                                dt*w[idx_cell_velocity]*(
+                                )/Real(dx[1]) +
+                                Real(dt)*w[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_z_F]  - Z[si][idx_cell_volume_fractions_z_B]) +
                                 d_coef_b*(Z[si][idx_cell_volume_fractions_z_FF] - Z[si][idx_cell_volume_fractions_z_BB])
-                                )/dx[2]
+                                )/Real(dx[2])
                                 );
                         }
                     }
@@ -11569,21 +11569,21 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                                 (k + 3 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
                                     ghostcell_dim_1_volume_fractions;
                             
-                            S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                            S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]   - Z[si][idx_cell_volume_fractions_x_L]) +
                                 d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]  - Z[si][idx_cell_volume_fractions_x_LL]) +
                                 d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR] - Z[si][idx_cell_volume_fractions_x_LLL])
-                                )/dx[0] +
-                                dt*v[idx_cell_velocity]*(
+                                )/Real(dx[0]) +
+                                Real(dt)*v[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]   - Z[si][idx_cell_volume_fractions_y_B]) +
                                 d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT]  - Z[si][idx_cell_volume_fractions_y_BB]) +
                                 d_coef_c*(Z[si][idx_cell_volume_fractions_y_TTT] - Z[si][idx_cell_volume_fractions_y_BBB])
-                                )/dx[1] +
-                                dt*w[idx_cell_velocity]*(
+                                )/Real(dx[1]) +
+                                Real(dt)*w[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_z_F]   - Z[si][idx_cell_volume_fractions_z_B]) +
                                 d_coef_b*(Z[si][idx_cell_volume_fractions_z_FF]  - Z[si][idx_cell_volume_fractions_z_BB]) +
                                 d_coef_c*(Z[si][idx_cell_volume_fractions_z_FFF] - Z[si][idx_cell_volume_fractions_z_BBB])
-                                )/dx[2]
+                                )/Real(dx[2])
                                 );
                         }
                     }
@@ -11730,24 +11730,24 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                                 (k + 4 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
                                     ghostcell_dim_1_volume_fractions;
                             
-                            S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                            S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]    - Z[si][idx_cell_volume_fractions_x_L]) +
                                 d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]   - Z[si][idx_cell_volume_fractions_x_LL]) +
                                 d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]  - Z[si][idx_cell_volume_fractions_x_LLL]) +
                                 d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR] - Z[si][idx_cell_volume_fractions_x_LLLL])
-                                )/dx[0] +
-                                dt*v[idx_cell_velocity]*(
+                                )/Real(dx[0]) +
+                                Real(dt)*v[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]    - Z[si][idx_cell_volume_fractions_y_B]) +
                                 d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT]   - Z[si][idx_cell_volume_fractions_y_BB]) +
                                 d_coef_c*(Z[si][idx_cell_volume_fractions_y_TTT]  - Z[si][idx_cell_volume_fractions_y_BBB]) +
                                 d_coef_d*(Z[si][idx_cell_volume_fractions_y_TTTT] - Z[si][idx_cell_volume_fractions_y_BBBB])
-                                )/dx[1] +
-                                dt*w[idx_cell_velocity]*(
+                                )/Real(dx[1]) +
+                                Real(dt)*w[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_z_F]    - Z[si][idx_cell_volume_fractions_z_B]) +
                                 d_coef_b*(Z[si][idx_cell_volume_fractions_z_FF]   - Z[si][idx_cell_volume_fractions_z_BB]) +
                                 d_coef_c*(Z[si][idx_cell_volume_fractions_z_FFF]  - Z[si][idx_cell_volume_fractions_z_BBB]) +
                                 d_coef_d*(Z[si][idx_cell_volume_fractions_z_FFFF] - Z[si][idx_cell_volume_fractions_z_BBBB])
-                                )/dx[2]
+                                )/Real(dx[2])
                                 );
                         }
                     }
@@ -11924,27 +11924,27 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                                 (k + 5 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
                                     ghostcell_dim_1_volume_fractions;
                             
-                            S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                            S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]     - Z[si][idx_cell_volume_fractions_x_L]) +
                                 d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]    - Z[si][idx_cell_volume_fractions_x_LL]) +
                                 d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]   - Z[si][idx_cell_volume_fractions_x_LLL]) +
                                 d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR]  - Z[si][idx_cell_volume_fractions_x_LLLL]) +
                                 d_coef_e*(Z[si][idx_cell_volume_fractions_x_RRRRR] - Z[si][idx_cell_volume_fractions_x_LLLLL])
-                                )/dx[0] +
-                                dt*v[idx_cell_velocity]*(
+                                )/Real(dx[0]) +
+                                Real(dt)*v[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]     - Z[si][idx_cell_volume_fractions_y_B]) +
                                 d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT]    - Z[si][idx_cell_volume_fractions_y_BB]) +
                                 d_coef_c*(Z[si][idx_cell_volume_fractions_y_TTT]   - Z[si][idx_cell_volume_fractions_y_BBB]) +
                                 d_coef_d*(Z[si][idx_cell_volume_fractions_y_TTTT]  - Z[si][idx_cell_volume_fractions_y_BBBB]) +
                                 d_coef_e*(Z[si][idx_cell_volume_fractions_y_TTTTT] - Z[si][idx_cell_volume_fractions_y_BBBBB])
-                                )/dx[1] +
-                                dt*w[idx_cell_velocity]*(
+                                )/Real(dx[1]) +
+                                Real(dt)*w[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_z_F]     - Z[si][idx_cell_volume_fractions_z_B]) +
                                 d_coef_b*(Z[si][idx_cell_volume_fractions_z_FF]    - Z[si][idx_cell_volume_fractions_z_BB]) +
                                 d_coef_c*(Z[si][idx_cell_volume_fractions_z_FFF]   - Z[si][idx_cell_volume_fractions_z_BBB]) +
                                 d_coef_d*(Z[si][idx_cell_volume_fractions_z_FFFF]  - Z[si][idx_cell_volume_fractions_z_BBBB]) +
                                 d_coef_e*(Z[si][idx_cell_volume_fractions_z_FFFFF] - Z[si][idx_cell_volume_fractions_z_BBBBB])
-                                )/dx[2]
+                                )/Real(dx[2])
                                 );
                         }
                     }
@@ -12151,30 +12151,30 @@ ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
                                 (k + 6 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
                                     ghostcell_dim_1_volume_fractions;
                             
-                            S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                            S[idx_cell_source] -= (Real(dt)*u[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]      - Z[si][idx_cell_volume_fractions_x_L]) +
                                 d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]     - Z[si][idx_cell_volume_fractions_x_LL]) +
                                 d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]    - Z[si][idx_cell_volume_fractions_x_LLL]) +
                                 d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR]   - Z[si][idx_cell_volume_fractions_x_LLLL]) +
                                 d_coef_e*(Z[si][idx_cell_volume_fractions_x_RRRRR]  - Z[si][idx_cell_volume_fractions_x_LLLLL]) +
                                 d_coef_f*(Z[si][idx_cell_volume_fractions_x_RRRRRR] - Z[si][idx_cell_volume_fractions_x_LLLLLL])
-                                )/dx[0] +
-                                dt*v[idx_cell_velocity]*(
+                                )/Real(dx[0]) +
+                                Real(dt)*v[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]      - Z[si][idx_cell_volume_fractions_y_B]) +
                                 d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT]     - Z[si][idx_cell_volume_fractions_y_BB]) +
                                 d_coef_c*(Z[si][idx_cell_volume_fractions_y_TTT]    - Z[si][idx_cell_volume_fractions_y_BBB]) +
                                 d_coef_d*(Z[si][idx_cell_volume_fractions_y_TTTT]   - Z[si][idx_cell_volume_fractions_y_BBBB]) +
                                 d_coef_e*(Z[si][idx_cell_volume_fractions_y_TTTTT]  - Z[si][idx_cell_volume_fractions_y_BBBBB]) +
                                 d_coef_f*(Z[si][idx_cell_volume_fractions_y_TTTTTT] - Z[si][idx_cell_volume_fractions_y_BBBBBB])
-                                )/dx[1] +
-                                dt*w[idx_cell_velocity]*(
+                                )/Real(dx[1]) +
+                                Real(dt)*w[idx_cell_velocity]*(
                                 d_coef_a*(Z[si][idx_cell_volume_fractions_z_F]      - Z[si][idx_cell_volume_fractions_z_B]) +
                                 d_coef_b*(Z[si][idx_cell_volume_fractions_z_FF]     - Z[si][idx_cell_volume_fractions_z_BB]) +
                                 d_coef_c*(Z[si][idx_cell_volume_fractions_z_FFF]    - Z[si][idx_cell_volume_fractions_z_BBB]) +
                                 d_coef_d*(Z[si][idx_cell_volume_fractions_z_FFFF]   - Z[si][idx_cell_volume_fractions_z_BBBB]) +
                                 d_coef_e*(Z[si][idx_cell_volume_fractions_z_FFFFF]  - Z[si][idx_cell_volume_fractions_z_BBBBB]) +
                                 d_coef_f*(Z[si][idx_cell_volume_fractions_z_FFFFFF] - Z[si][idx_cell_volume_fractions_z_BBBBBB])
-                                )/dx[2]
+                                )/Real(dx[2])
                                 );
                         }
                     }

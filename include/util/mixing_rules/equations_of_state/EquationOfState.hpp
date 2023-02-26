@@ -35,21 +35,21 @@ class EquationOfState
         /*
          * Compute the pressure.
          */
-        virtual double
+        virtual Real
         getPressure(
-            const double* const density,
-            const double* const internal_energy,
-            const std::vector<const double*>& thermo_properties) const = 0;
+            const Real* const density,
+            const Real* const internal_energy,
+            const std::vector<const Real*>& thermo_properties) const = 0;
         
         /*
          * Compute the pressure.
          */
         void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const std::vector<const double*>& thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const std::vector<const Real*>& thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computePressure(
@@ -65,10 +65,10 @@ class EquationOfState
          */
         virtual void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -76,10 +76,10 @@ class EquationOfState
          */
         void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -97,10 +97,10 @@ class EquationOfState
          */
         virtual void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -109,10 +109,10 @@ class EquationOfState
          */
         void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computePressure(
@@ -128,10 +128,10 @@ class EquationOfState
          */
         virtual void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -139,10 +139,10 @@ class EquationOfState
          */
         void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -160,31 +160,31 @@ class EquationOfState
          */
         virtual void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
         /*
          * Compute the sound speed.
          */
-        virtual double
+        virtual Real
         getSoundSpeed(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& thermo_properties) const = 0;
         
         /*
          * Compute the sound speed.
          */
         void
         computeSoundSpeed(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_sound_speed,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_sound_speed,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeSoundSpeed(
@@ -200,10 +200,10 @@ class EquationOfState
          */
         virtual void
         computeSoundSpeed(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_sound_speed,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_sound_speed,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -211,10 +211,10 @@ class EquationOfState
          */
         void
         computeSoundSpeed(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_sound_speed,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_sound_speed,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -232,10 +232,10 @@ class EquationOfState
          */
         virtual void
         computeSoundSpeed(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_sound_speed,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_sound_speed,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -244,10 +244,10 @@ class EquationOfState
          */
         void
         computeSoundSpeed(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_sound_speed,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_sound_speed,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeSoundSpeed(
@@ -263,10 +263,10 @@ class EquationOfState
          */
         virtual void
         computeSoundSpeed(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_sound_speed,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_sound_speed,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -274,10 +274,10 @@ class EquationOfState
          */
         void
         computeSoundSpeed(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_sound_speed,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_sound_speed,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -295,31 +295,31 @@ class EquationOfState
          */
         virtual void
         computeSoundSpeed(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_sound_speed,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_sound_speed,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
         /*
          * Compute the specific internal energy.
          */
-        virtual double
+        virtual Real
         getInternalEnergy(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& thermo_properties) const = 0;
         
         /*
          * Compute the specific internal energy.
          */
         void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeInternalEnergy(
@@ -335,10 +335,10 @@ class EquationOfState
          */
         virtual void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -346,10 +346,10 @@ class EquationOfState
          */
         void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -367,10 +367,10 @@ class EquationOfState
          */
         virtual void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -379,10 +379,10 @@ class EquationOfState
          */
         void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeInternalEnergy(
@@ -398,10 +398,10 @@ class EquationOfState
          */
         virtual void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -409,10 +409,10 @@ class EquationOfState
          */
         void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -430,31 +430,31 @@ class EquationOfState
          */
         virtual void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
         /*
          * Compute the specific enthalpy.
          */
-        virtual double
+        virtual Real
         getEnthalpy(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& thermo_properties) const = 0;
         
         /*
          * Compute the specific enthalpy.
          */
         void
         computeEnthalpy(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_enthalpy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_enthalpy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeEnthalpy(
@@ -470,10 +470,10 @@ class EquationOfState
          */
         virtual void
         computeEnthalpy(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_enthalpy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_enthalpy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -481,10 +481,10 @@ class EquationOfState
          */
         void
         computeEnthalpy(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_enthalpy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_enthalpy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -502,10 +502,10 @@ class EquationOfState
          */
         virtual void
         computeEnthalpy(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_enthalpy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_enthalpy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -514,10 +514,10 @@ class EquationOfState
          */
         void
         computeEnthalpy(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_enthalpy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_enthalpy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeEnthalpy(
@@ -533,10 +533,10 @@ class EquationOfState
          */
         virtual void
         computeEnthalpy(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_enthalpy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_enthalpy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -544,10 +544,10 @@ class EquationOfState
          */
         void
         computeEnthalpy(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_enthalpy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_enthalpy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -565,31 +565,31 @@ class EquationOfState
          */
         virtual void
         computeEnthalpy(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_enthalpy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_enthalpy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
         /*
          * Compute the temperature.
          */
-        virtual double
+        virtual Real
         getTemperature(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& thermo_properties) const = 0;
         
         /*
          * Compute the temperature.
          */
         void
         computeTemperature(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeTemperature(
@@ -605,10 +605,10 @@ class EquationOfState
          */
         virtual void
         computeTemperature(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -616,10 +616,10 @@ class EquationOfState
          */
         void
         computeTemperature(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -637,10 +637,10 @@ class EquationOfState
          */
         virtual void
         computeTemperature(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -649,10 +649,10 @@ class EquationOfState
          */
         void
         computeTemperature(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeTemperature(
@@ -668,10 +668,10 @@ class EquationOfState
          */
         virtual void
         computeTemperature(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -679,10 +679,10 @@ class EquationOfState
          */
         void
         computeTemperature(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -700,31 +700,31 @@ class EquationOfState
          */
         virtual void
         computeTemperature(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
         /*
          * Compute the specific internal energy from temperature.
          */
-        virtual double
+        virtual Real
         getInternalEnergyFromTemperature(
-            const double* const density,
-            const double* const temperature,
-            const std::vector<const double*>& thermo_properties) const = 0;
+            const Real* const density,
+            const Real* const temperature,
+            const std::vector<const Real*>& thermo_properties) const = 0;
         
         /*
          * Compute the specific internal energy from temperature.
          */
         void
         computeInternalEnergyFromTemperature(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const std::vector<const double*>& thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const std::vector<const Real*>& thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeInternalEnergyFromTemperature(
@@ -740,10 +740,10 @@ class EquationOfState
          */
         virtual void
         computeInternalEnergyFromTemperature(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -751,10 +751,10 @@ class EquationOfState
          */
         void
         computeInternalEnergyFromTemperature(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -772,10 +772,10 @@ class EquationOfState
          */
         virtual void
         computeInternalEnergyFromTemperature(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -784,10 +784,10 @@ class EquationOfState
          */
         void
         computeInternalEnergyFromTemperature(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeInternalEnergyFromTemperature(
@@ -803,10 +803,10 @@ class EquationOfState
          */
         virtual void
         computeInternalEnergyFromTemperature(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -814,10 +814,10 @@ class EquationOfState
          */
         void
         computeInternalEnergyFromTemperature(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -835,31 +835,31 @@ class EquationOfState
          */
         virtual void
         computeInternalEnergyFromTemperature(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
         /*
          * Compute the isochoric specific heat capacity.
          */
-        virtual double
+        virtual Real
         getIsochoricSpecificHeatCapacity(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& thermo_properties) const = 0;
         
         /*
          * Compute the isochoric specific heat capacity.
          */
         void
         computeIsochoricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeIsochoricSpecificHeatCapacity(
@@ -875,10 +875,10 @@ class EquationOfState
          */
         virtual void
         computeIsochoricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -886,10 +886,10 @@ class EquationOfState
          */
         void
         computeIsochoricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -907,10 +907,10 @@ class EquationOfState
          */
         virtual void
         computeIsochoricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -919,10 +919,10 @@ class EquationOfState
          */
         void
         computeIsochoricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeIsochoricSpecificHeatCapacity(
@@ -938,10 +938,10 @@ class EquationOfState
          */
         virtual void
         computeIsochoricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -949,10 +949,10 @@ class EquationOfState
          */
         void
         computeIsochoricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -970,31 +970,31 @@ class EquationOfState
          */
         virtual void
         computeIsochoricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
         /*
          * Compute the isobaric specific heat capacity.
          */
-        virtual double
+        virtual Real
         getIsobaricSpecificHeatCapacity(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& thermo_properties) const = 0;
         
         /*
          * Compute the isobaric specific heat capacity.
          */
         void
         computeIsobaricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeIsobaricSpecificHeatCapacity(
@@ -1010,10 +1010,10 @@ class EquationOfState
          */
         virtual void
         computeIsobaricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -1021,10 +1021,10 @@ class EquationOfState
          */
         void
         computeIsobaricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -1042,10 +1042,10 @@ class EquationOfState
          */
         virtual void
         computeIsobaricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -1054,10 +1054,10 @@ class EquationOfState
          */
         void
         computeIsobaricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeIsobaricSpecificHeatCapacity(
@@ -1073,10 +1073,10 @@ class EquationOfState
          */
         virtual void
         computeIsobaricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -1084,10 +1084,10 @@ class EquationOfState
          */
         void
         computeIsobaricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -1105,10 +1105,10 @@ class EquationOfState
          */
         virtual void
         computeIsobaricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -1116,11 +1116,11 @@ class EquationOfState
          * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
          * constant density divided by density).
          */
-        virtual double
+        virtual Real
         getGruneisenParameter(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& thermo_properties) const = 0;
         
         /*
          * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
@@ -1128,10 +1128,10 @@ class EquationOfState
          */
         void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeGruneisenParameter(
@@ -1148,10 +1148,10 @@ class EquationOfState
          */
         virtual void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -1160,10 +1160,10 @@ class EquationOfState
          */
         void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -1182,10 +1182,10 @@ class EquationOfState
          */
         virtual void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -1195,10 +1195,10 @@ class EquationOfState
          */
         void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeGruneisenParameter(
@@ -1215,10 +1215,10 @@ class EquationOfState
          */
         virtual void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -1227,10 +1227,10 @@ class EquationOfState
          */
         void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -1249,31 +1249,31 @@ class EquationOfState
          */
         virtual void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
         /*
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
-        virtual double
+        virtual Real
         getPressureDerivativeWithDensity(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& thermo_properties) const = 0;
         
         /*
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
         computePressureDerivativeWithDensity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_pressure_partial_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computePressureDerivativeWithDensity(
@@ -1289,10 +1289,10 @@ class EquationOfState
          */
         virtual void
         computePressureDerivativeWithDensity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_pressure_partial_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -1300,10 +1300,10 @@ class EquationOfState
          */
         void
         computePressureDerivativeWithDensity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_pressure_partial_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -1321,10 +1321,10 @@ class EquationOfState
          */
         virtual void
         computePressureDerivativeWithDensity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_pressure_partial_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -1333,10 +1333,10 @@ class EquationOfState
          */
         void
         computePressureDerivativeWithDensity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_pressure_partial_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computePressureDerivativeWithDensity(
@@ -1352,10 +1352,10 @@ class EquationOfState
          */
         virtual void
         computePressureDerivativeWithDensity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_pressure_partial_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -1363,10 +1363,10 @@ class EquationOfState
          */
         void
         computePressureDerivativeWithDensity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_pressure_partial_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -1384,31 +1384,31 @@ class EquationOfState
          */
         virtual void
         computePressureDerivativeWithDensity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_pressure_partial_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
         /*
          * Compute the density.
          */
-        virtual double
+        virtual Real
         getDensity(
-            const double* const pressure,
-            const double* const temperature,
-            const std::vector<const double*>& thermo_properties) const = 0;
+            const Real* const pressure,
+            const Real* const temperature,
+            const std::vector<const Real*>& thermo_properties) const = 0;
         
         /*
          * Compute the density.
          */
         void
         computeDensity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const std::vector<const double*>& thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const std::vector<const Real*>& thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeDensity(
@@ -1424,10 +1424,10 @@ class EquationOfState
          */
         virtual void
         computeDensity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const std::vector<const Real*>& thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -1435,10 +1435,10 @@ class EquationOfState
          */
         void
         computeDensity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -1456,10 +1456,10 @@ class EquationOfState
          */
         virtual void
         computeDensity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const std::vector<const double*>& thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const std::vector<const Real*>& thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -1468,10 +1468,10 @@ class EquationOfState
          */
         void
         computeDensity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeDensity(
@@ -1487,10 +1487,10 @@ class EquationOfState
          */
         virtual void
         computeDensity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -1498,10 +1498,10 @@ class EquationOfState
          */
         void
         computeDensity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -1519,10 +1519,10 @@ class EquationOfState
          */
         virtual void
         computeDensity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const = 0;
         

@@ -25,11 +25,11 @@ EquationOfBulkViscosityConstant::printClassData(
 /*
  * Compute the bulk viscosity.
  */
-double
+Real
 EquationOfBulkViscosityConstant::getBulkViscosity(
-    const double* const pressure,
-    const double* const temperature,
-    const std::vector<const double*>& molecular_properties) const
+    const Real* const pressure,
+    const Real* const temperature,
+    const std::vector<const Real*>& molecular_properties) const
 {
     NULL_USE(pressure);
     NULL_USE(temperature);
@@ -47,10 +47,10 @@ EquationOfBulkViscosityConstant::getBulkViscosity(
  */
 void
 EquationOfBulkViscosityConstant::computeBulkViscosity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const std::vector<const double*>& molecular_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_bulk_viscosity,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const std::vector<const Real*>& molecular_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_pressure);
@@ -82,10 +82,10 @@ EquationOfBulkViscosityConstant::computeBulkViscosity(
  */
 void
 EquationOfBulkViscosityConstant::computeBulkViscosity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_molecular_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_bulk_viscosity,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_molecular_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_pressure);
@@ -161,8 +161,8 @@ EquationOfBulkViscosityConstant::computeBulkViscosity(
      * Get the pointers to the cell data.
      */
     
-    double* mu_v = data_bulk_viscosity->getPointer(0);
-    double* mu_v_src = data_molecular_properties->getPointer(0);
+    Real* mu_v = data_bulk_viscosity->getPointer(0);
+    Real* mu_v_src = data_molecular_properties->getPointer(0);
     
     if (d_dim == tbox::Dimension(1))
     {

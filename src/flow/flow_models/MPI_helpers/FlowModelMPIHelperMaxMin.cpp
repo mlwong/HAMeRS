@@ -8,14 +8,14 @@
 /*
  * Compute maximum value over the entire domain.
  */
-double
+Real
 FlowModelMPIHelperMaxMin::getMaxQuantity(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    double u_max_local  = std::numeric_limits<double>::min();
-    double u_max_global = std::numeric_limits<double>::min();
+    Real u_max_local  = std::numeric_limits<Real>::min();
+    Real u_max_global = std::numeric_limits<Real>::min();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -77,10 +77,10 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -114,7 +114,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        u_max_local = fmax(u_max_local, u[idx]);
+                        u_max_local = std::max(u_max_local, u[idx]);
                     }
                 }
                 
@@ -134,7 +134,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
             &u_max_local,
             &u_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -184,10 +184,10 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -229,7 +229,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            u_max_local = fmax(u_max_local, u[idx]);
+                            u_max_local = std::max(u_max_local, u[idx]);
                         }
                     }
                 }
@@ -250,7 +250,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
             &u_max_local,
             &u_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -300,10 +300,10 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -353,7 +353,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                u_max_local = fmax(u_max_local, u[idx]);
+                                u_max_local = std::max(u_max_local, u[idx]);
                             }
                         }
                     }
@@ -375,7 +375,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
             &u_max_local,
             &u_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     
@@ -386,14 +386,14 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
 /*
  * Compute maximum reciprocal of value over the entire domain.
  */
-double
+Real
 FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantity(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    double u_inv_max_local  = std::numeric_limits<double>::min();
-    double u_inv_max_global = std::numeric_limits<double>::min();
+    Real u_inv_max_local  = std::numeric_limits<Real>::min();
+    Real u_inv_max_global = std::numeric_limits<Real>::min();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -455,10 +455,10 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -492,7 +492,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantity(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        u_inv_max_local = fmax(u_inv_max_local, double(1)/u[idx]);
+                        u_inv_max_local = std::max(u_inv_max_local, Real(1)/u[idx]);
                     }
                 }
                 
@@ -512,7 +512,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantity(
             &u_inv_max_local,
             &u_inv_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -562,10 +562,10 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -607,7 +607,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantity(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            u_inv_max_local = fmax(u_inv_max_local, double(1)/u[idx]);
+                            u_inv_max_local = std::max(u_inv_max_local, Real(1)/u[idx]);
                         }
                     }
                 }
@@ -628,7 +628,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantity(
             &u_inv_max_local,
             &u_inv_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -678,10 +678,10 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -731,7 +731,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantity(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                u_inv_max_local = fmax(u_inv_max_local, double(1)/u[idx]);
+                                u_inv_max_local = std::max(u_inv_max_local, Real(1)/u[idx]);
                             }
                         }
                     }
@@ -753,7 +753,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantity(
             &u_inv_max_local,
             &u_inv_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     
@@ -764,7 +764,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantity(
 /*
  * Compute maximum value (on product of variables) over the entire domain.
  */
-double
+Real
 FlowModelMPIHelperMaxMin::getMaxQuantity(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -787,7 +787,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
 /*
  * Compute maximum value (on product of variables) over the entire domain.
  */
-double
+Real
 FlowModelMPIHelperMaxMin::getMaxQuantity(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -799,8 +799,8 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
-    double max_local  = std::numeric_limits<double>::min();
-    double max_global = std::numeric_limits<double>::min();
+    Real max_local  = std::numeric_limits<Real>::min();
+    Real max_global = std::numeric_limits<Real>::min();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -865,14 +865,14 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -941,7 +941,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
                          * Compute the linear index and update the max.
                          */
                         
-                        double value = double(1);
+                        Real value = Real(1);
                         
                         for (int qi = 0; qi < num_quantities; qi++)
                         {
@@ -957,7 +957,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
                             }
                         }
                         
-                        max_local = fmax(max_local, value);
+                        max_local = std::max(max_local, value);
                     }
                 }
                 
@@ -977,7 +977,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
             &max_local,
             &max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -1030,14 +1030,14 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -1119,7 +1119,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
                              * Compute the linear index and update the max.
                              */
                             
-                            double value = double(1);
+                            Real value = Real(1);
                             
                             for (int qi = 0; qi < num_quantities; qi++)
                             {
@@ -1136,7 +1136,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
                                 }
                             }
                             
-                            max_local = fmax(max_local, value);
+                            max_local = std::max(max_local, value);
                         }
                     }
                 }
@@ -1157,7 +1157,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
             &max_local,
             &max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -1210,14 +1210,14 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -1310,7 +1310,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
                                  * Compute the linear index and update the max.
                                  */
                                 
-                                double value = double(1);
+                                Real value = Real(1);
                                 
                                 for (int qi = 0; qi < num_quantities; qi++)
                                 {
@@ -1329,7 +1329,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
                                     }
                                 }
                                 
-                                max_local = fmax(max_local, value);
+                                max_local = std::max(max_local, value);
                             }
                         }
                     }
@@ -1351,7 +1351,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
             &max_local,
             &max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     
@@ -1362,14 +1362,14 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
 /*
  * Compute minimum value over the entire domain.
  */
-double
+Real
 FlowModelMPIHelperMaxMin::getMinQuantity(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    double u_min_local  = std::numeric_limits<double>::max();
-    double u_min_global = std::numeric_limits<double>::max();
+    Real u_min_local  = std::numeric_limits<Real>::max();
+    Real u_min_global = std::numeric_limits<Real>::max();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -1431,10 +1431,10 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -1468,7 +1468,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        u_min_local = fmin(u_min_local, u[idx]);
+                        u_min_local = std::min(u_min_local, u[idx]);
                     }
                 }
                 
@@ -1488,7 +1488,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
             &u_min_local,
             &u_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -1538,10 +1538,10 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -1583,7 +1583,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            u_min_local = fmin(u_min_local, u[idx]);
+                            u_min_local = std::min(u_min_local, u[idx]);
                         }
                     }
                 }
@@ -1604,7 +1604,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
             &u_min_local,
             &u_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -1654,10 +1654,10 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -1707,7 +1707,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                u_min_local = fmin(u_min_local, u[idx]);
+                                u_min_local = std::min(u_min_local, u[idx]);
                             }
                         }
                     }
@@ -1729,7 +1729,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
             &u_min_local,
             &u_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     
@@ -1740,14 +1740,14 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
 /*
  * Compute minimum reciprocal of value over the entire domain.
  */
-double
+Real
 FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantity(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    double u_inv_min_local  = std::numeric_limits<double>::max();
-    double u_inv_min_global = std::numeric_limits<double>::max();
+    Real u_inv_min_local  = std::numeric_limits<Real>::max();
+    Real u_inv_min_global = std::numeric_limits<Real>::max();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -1809,10 +1809,10 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -1846,7 +1846,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantity(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        u_inv_min_local = fmin(u_inv_min_local, double(1)/u[idx]);
+                        u_inv_min_local = std::min(u_inv_min_local, Real(1)/u[idx]);
                     }
                 }
                 
@@ -1866,7 +1866,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantity(
             &u_inv_min_local,
             &u_inv_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -1916,10 +1916,10 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -1961,7 +1961,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantity(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            u_inv_min_local = fmin(u_inv_min_local, double(1)/u[idx]);
+                            u_inv_min_local = std::min(u_inv_min_local, Real(1)/u[idx]);
                         }
                     }
                 }
@@ -1982,7 +1982,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantity(
             &u_inv_min_local,
             &u_inv_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -2032,10 +2032,10 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantity(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -2085,7 +2085,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantity(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                u_inv_min_local = fmin(u_inv_min_local, double(1)/u[idx]);
+                                u_inv_min_local = std::min(u_inv_min_local, Real(1)/u[idx]);
                             }
                         }
                     }
@@ -2107,7 +2107,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantity(
             &u_inv_min_local,
             &u_inv_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     
@@ -2118,7 +2118,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantity(
 /*
  * Compute minimum value (on product of variables) over the entire domain.
  */
-double
+Real
 FlowModelMPIHelperMaxMin::getMinQuantity(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -2141,7 +2141,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
 /*
  * Compute minimum value (on product of variables) over the entire domain.
  */
-double
+Real
 FlowModelMPIHelperMaxMin::getMinQuantity(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -2153,8 +2153,8 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
-    double min_local  = std::numeric_limits<double>::max();
-    double min_global = std::numeric_limits<double>::max();
+    Real min_local  = std::numeric_limits<Real>::max();
+    Real min_global = std::numeric_limits<Real>::max();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -2219,14 +2219,14 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -2295,7 +2295,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
                          * Compute the linear index and update the min.
                          */
                         
-                        double value = double(1);
+                        Real value = Real(1);
                         
                         for (int qi = 0; qi < num_quantities; qi++)
                         {
@@ -2311,7 +2311,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
                             }
                         }
                         
-                        min_local = fmin(min_local, value);
+                        min_local = std::min(min_local, value);
                     }
                 }
                 
@@ -2331,7 +2331,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
             &min_local,
             &min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2384,14 +2384,14 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -2473,7 +2473,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
                              * Compute the linear index and update the min.
                              */
                             
-                            double value = double(1);
+                            Real value = Real(1);
                             
                             for (int qi = 0; qi < num_quantities; qi++)
                             {
@@ -2490,7 +2490,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
                                 }
                             }
                             
-                            min_local = fmin(min_local, value);
+                            min_local = std::min(min_local, value);
                         }
                     }
                 }
@@ -2511,7 +2511,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
             &min_local,
             &min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -2564,14 +2564,14 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -2664,7 +2664,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
                                  * Compute the linear index and update the min.
                                  */
                                 
-                                double value = double(1);
+                                Real value = Real(1);
                                 
                                 for (int qi = 0; qi < num_quantities; qi++)
                                 {
@@ -2683,7 +2683,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
                                     }
                                 }
                                 
-                                min_local = fmin(min_local, value);
+                                min_local = std::min(min_local, value);
                             }
                         }
                     }
@@ -2705,7 +2705,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
             &min_local,
             &min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     
@@ -2716,13 +2716,13 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
 /*
  * Compute maximum value with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> max_quantity;
+    std::vector<Real> max_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -2741,15 +2741,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_0);
-        double* u_max_global = max_quantity.data();
+        Real* u_max_global = max_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_max_local[i]  = std::numeric_limits<double>::min();
-            u_max_global[i] = std::numeric_limits<double>::min();
+            u_max_local[i]  = std::numeric_limits<Real>::min();
+            u_max_global[i] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -2813,10 +2813,10 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -2855,7 +2855,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                             
-                            u_max_local[idx_fine] = fmax(u_max_local[idx_fine], u[idx]);
+                            u_max_local[idx_fine] = std::max(u_max_local[idx_fine], u[idx]);
                         }
                     }
                 }
@@ -2876,7 +2876,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -2885,15 +2885,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_0);
-        double* u_max_global = max_quantity.data();
+        Real* u_max_global = max_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_max_local[i]  = std::numeric_limits<double>::min();
-            u_max_global[i] = std::numeric_limits<double>::min();
+            u_max_local[i]  = std::numeric_limits<Real>::min();
+            u_max_global[i] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -2957,10 +2957,10 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -3008,7 +3008,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                 
-                                u_max_local[idx_fine] = fmax(u_max_local[idx_fine], u[idx]);
+                                u_max_local[idx_fine] = std::max(u_max_local[idx_fine], u[idx]);
                             }
                         }
                     }
@@ -3030,7 +3030,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -3039,15 +3039,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_0);
-        double* u_max_global = max_quantity.data();
+        Real* u_max_global = max_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_max_local[i]  = std::numeric_limits<double>::min();
-            u_max_global[i] = std::numeric_limits<double>::min();
+            u_max_local[i]  = std::numeric_limits<Real>::min();
+            u_max_global[i] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -3111,10 +3111,10 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -3171,7 +3171,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                     
-                                    u_max_local[idx_fine] = fmax(u_max_local[idx_fine], u[idx]);
+                                    u_max_local[idx_fine] = std::max(u_max_local[idx_fine], u[idx]);
                                 }
                             }
                         }
@@ -3194,7 +3194,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -3207,13 +3207,13 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
 /*
  * Compute maximum reciprocal of value with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> max_reciprocal_quantity;
+    std::vector<Real> max_reciprocal_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -3232,15 +3232,15 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_inv_max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_inv_max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_reciprocal_quantity.resize(finest_level_dim_0);
-        double* u_inv_max_global = max_reciprocal_quantity.data();
+        Real* u_inv_max_global = max_reciprocal_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_inv_max_local[i]  = std::numeric_limits<double>::min();
-            u_inv_max_global[i] = std::numeric_limits<double>::min();
+            u_inv_max_local[i]  = std::numeric_limits<Real>::min();
+            u_inv_max_global[i] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -3304,10 +3304,10 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -3346,7 +3346,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                             
-                            u_inv_max_local[idx_fine] = fmax(u_inv_max_local[idx_fine], double(1)/u[idx]);
+                            u_inv_max_local[idx_fine] = std::max(u_inv_max_local[idx_fine], Real(1)/u[idx]);
                         }
                     }
                 }
@@ -3367,7 +3367,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
             u_inv_max_local,
             u_inv_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_inv_max_local);
@@ -3376,15 +3376,15 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_inv_max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_inv_max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_reciprocal_quantity.resize(finest_level_dim_0);
-        double* u_inv_max_global = max_reciprocal_quantity.data();
+        Real* u_inv_max_global = max_reciprocal_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_inv_max_local[i]  = std::numeric_limits<double>::min();
-            u_inv_max_global[i] = std::numeric_limits<double>::min();
+            u_inv_max_local[i]  = std::numeric_limits<Real>::min();
+            u_inv_max_global[i] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -3448,10 +3448,10 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -3499,7 +3499,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                 
-                                u_inv_max_local[idx_fine] = fmax(u_inv_max_local[idx_fine], double(1)/u[idx]);
+                                u_inv_max_local[idx_fine] = std::max(u_inv_max_local[idx_fine], Real(1)/u[idx]);
                             }
                         }
                     }
@@ -3521,7 +3521,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
             u_inv_max_local,
             u_inv_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_inv_max_local);
@@ -3530,15 +3530,15 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_inv_max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_inv_max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_reciprocal_quantity.resize(finest_level_dim_0);
-        double* u_inv_max_global = max_reciprocal_quantity.data();
+        Real* u_inv_max_global = max_reciprocal_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_inv_max_local[i]  = std::numeric_limits<double>::min();
-            u_inv_max_global[i] = std::numeric_limits<double>::min();
+            u_inv_max_local[i]  = std::numeric_limits<Real>::min();
+            u_inv_max_global[i] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -3602,10 +3602,10 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -3662,7 +3662,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                     
-                                    u_inv_max_local[idx_fine] = fmax(u_inv_max_local[idx_fine], double(1)/u[idx]);
+                                    u_inv_max_local[idx_fine] = std::max(u_inv_max_local[idx_fine], Real(1)/u[idx]);
                                 }
                             }
                         }
@@ -3685,7 +3685,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
             u_inv_max_local,
             u_inv_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_inv_max_local);
@@ -3698,7 +3698,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
 /*
  * Compute maximum value (on product of variables) with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -3721,7 +3721,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
 /*
  * Compute maximum value (on product of variables) with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -3733,7 +3733,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
-    std::vector<double> max_quantity;
+    std::vector<Real> max_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -3752,15 +3752,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_0);
-        double* max_global = max_quantity.data();
+        Real* max_global = max_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            max_local[i]  = std::numeric_limits<double>::min();
-            max_global[i] = std::numeric_limits<double>::min();
+            max_local[i]  = std::numeric_limits<Real>::min();
+            max_global[i] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -3827,14 +3827,14 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -3907,7 +3907,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                             
-                            double value = double(1);
+                            Real value = Real(1);
                             
                             for (int qi = 0; qi < num_quantities; qi++)
                             {
@@ -3923,7 +3923,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                                 }
                             }
                             
-                            max_local[idx_fine] = fmax(max_local[idx_fine], value);
+                            max_local[idx_fine] = std::max(max_local[idx_fine], value);
                         }
                     }
                 }
@@ -3944,7 +3944,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
             max_local,
             max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(max_local);
@@ -3953,15 +3953,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_0);
-        double* max_global = max_quantity.data();
+        Real* max_global = max_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            max_local[i]  = std::numeric_limits<double>::min();
-            max_global[i] = std::numeric_limits<double>::min();
+            max_local[i]  = std::numeric_limits<Real>::min();
+            max_global[i] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -4028,14 +4028,14 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -4121,7 +4121,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                 
-                                double value = double(1);
+                                Real value = Real(1);
                                 
                                 for (int qi = 0; qi < num_quantities; qi++)
                                 {
@@ -4138,7 +4138,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                                     }
                                 }
                                 
-                                max_local[idx_fine] = fmax(max_local[idx_fine], value);
+                                max_local[idx_fine] = std::max(max_local[idx_fine], value);
                             }
                         }
                     }
@@ -4160,7 +4160,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
             max_local,
             max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(max_local);
@@ -4169,15 +4169,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_0);
-        double* max_global = max_quantity.data();
+        Real* max_global = max_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            max_local[i]  = std::numeric_limits<double>::min();
-            max_global[i] = std::numeric_limits<double>::min();
+            max_local[i]  = std::numeric_limits<Real>::min();
+            max_global[i] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -4244,14 +4244,14 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -4348,7 +4348,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                     
-                                    double value = double(1);
+                                    Real value = Real(1);
                                     
                                     for (int qi = 0; qi < num_quantities; qi++)
                                     {
@@ -4367,7 +4367,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                                         }
                                     }
                                     
-                                    max_local[idx_fine] = fmax(max_local[idx_fine], value);
+                                    max_local[idx_fine] = std::max(max_local[idx_fine], value);
                                 }
                             }
                         }
@@ -4390,7 +4390,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
             max_local,
             max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(max_local);
@@ -4403,13 +4403,13 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
 /*
  * Compute minimum value with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> min_quantity;
+    std::vector<Real> min_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -4428,15 +4428,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_min_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_min_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_0);
-        double* u_min_global = min_quantity.data();
+        Real* u_min_global = min_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_min_local[i]  = std::numeric_limits<double>::max();
-            u_min_global[i] = std::numeric_limits<double>::max();
+            u_min_local[i]  = std::numeric_limits<Real>::max();
+            u_min_global[i] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -4500,10 +4500,10 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -4542,7 +4542,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                             
-                            u_min_local[idx_fine] = fmin(u_min_local[idx_fine], u[idx]);
+                            u_min_local[idx_fine] = std::min(u_min_local[idx_fine], u[idx]);
                         }
                     }
                 }
@@ -4563,7 +4563,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -4572,15 +4572,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_min_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_min_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_0);
-        double* u_min_global = min_quantity.data();
+        Real* u_min_global = min_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_min_local[i]  = std::numeric_limits<double>::max();
-            u_min_global[i] = std::numeric_limits<double>::max();
+            u_min_local[i]  = std::numeric_limits<Real>::max();
+            u_min_global[i] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -4644,10 +4644,10 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -4695,7 +4695,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                 
-                                u_min_local[idx_fine] = fmin(u_min_local[idx_fine], u[idx]);
+                                u_min_local[idx_fine] = std::min(u_min_local[idx_fine], u[idx]);
                             }
                         }
                     }
@@ -4717,7 +4717,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -4726,15 +4726,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_min_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_min_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_0);
-        double* u_min_global = min_quantity.data();
+        Real* u_min_global = min_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_min_local[i]  = std::numeric_limits<double>::max();
-            u_min_global[i] = std::numeric_limits<double>::max();
+            u_min_local[i]  = std::numeric_limits<Real>::max();
+            u_min_global[i] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -4798,10 +4798,10 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -4858,7 +4858,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                     
-                                    u_min_local[idx_fine] = fmin(u_min_local[idx_fine], u[idx]);
+                                    u_min_local[idx_fine] = std::min(u_min_local[idx_fine], u[idx]);
                                 }
                             }
                         }
@@ -4881,7 +4881,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -4894,13 +4894,13 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
 /*
  * Compute minimum reciprocal of value with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> min_reciprocal_quantity;
+    std::vector<Real> min_reciprocal_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -4919,15 +4919,15 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_inv_min_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_inv_min_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         min_reciprocal_quantity.resize(finest_level_dim_0);
-        double* u_inv_min_global = min_reciprocal_quantity.data();
+        Real* u_inv_min_global = min_reciprocal_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_inv_min_local[i]  = std::numeric_limits<double>::max();
-            u_inv_min_global[i] = std::numeric_limits<double>::max();
+            u_inv_min_local[i]  = std::numeric_limits<Real>::max();
+            u_inv_min_global[i] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -4991,10 +4991,10 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -5033,7 +5033,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                             
-                            u_inv_min_local[idx_fine] = fmin(u_inv_min_local[idx_fine], double(1)/u[idx]);
+                            u_inv_min_local[idx_fine] = std::min(u_inv_min_local[idx_fine], Real(1)/u[idx]);
                         }
                     }
                 }
@@ -5054,7 +5054,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
             u_inv_min_local,
             u_inv_min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_inv_min_local);
@@ -5063,15 +5063,15 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_inv_min_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_inv_min_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         min_reciprocal_quantity.resize(finest_level_dim_0);
-        double* u_inv_min_global = min_reciprocal_quantity.data();
+        Real* u_inv_min_global = min_reciprocal_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_inv_min_local[i]  = std::numeric_limits<double>::max();
-            u_inv_min_global[i] = std::numeric_limits<double>::max();
+            u_inv_min_local[i]  = std::numeric_limits<Real>::max();
+            u_inv_min_global[i] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -5135,10 +5135,10 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -5186,7 +5186,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                 
-                                u_inv_min_local[idx_fine] = fmin(u_inv_min_local[idx_fine], double(1)/u[idx]);
+                                u_inv_min_local[idx_fine] = std::min(u_inv_min_local[idx_fine], Real(1)/u[idx]);
                             }
                         }
                     }
@@ -5208,7 +5208,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
             u_inv_min_local,
             u_inv_min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_inv_min_local);
@@ -5217,15 +5217,15 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* u_inv_min_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* u_inv_min_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         min_reciprocal_quantity.resize(finest_level_dim_0);
-        double* u_inv_min_global = min_reciprocal_quantity.data();
+        Real* u_inv_min_global = min_reciprocal_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            u_inv_min_local[i]  = std::numeric_limits<double>::max();
-            u_inv_min_global[i] = std::numeric_limits<double>::max();
+            u_inv_min_local[i]  = std::numeric_limits<Real>::max();
+            u_inv_min_global[i] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -5289,10 +5289,10 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -5349,7 +5349,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                     
-                                    u_inv_min_local[idx_fine] = fmin(u_inv_min_local[idx_fine], double(1)/u[idx]);
+                                    u_inv_min_local[idx_fine] = std::min(u_inv_min_local[idx_fine], Real(1)/u[idx]);
                                 }
                             }
                         }
@@ -5372,7 +5372,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
             u_inv_min_local,
             u_inv_min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_inv_min_local);
@@ -5385,7 +5385,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
 /*
  * Compute minimum value (on product of variables) with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -5408,7 +5408,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
 /*
  * Compute minimum value (on product of variables) with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -5420,7 +5420,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
-    std::vector<double> min_quantity;
+    std::vector<Real> min_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -5439,15 +5439,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* min_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* min_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_0);
-        double* min_global = min_quantity.data();
+        Real* min_global = min_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            min_local[i]  = std::numeric_limits<double>::max();
-            min_global[i] = std::numeric_limits<double>::max();
+            min_local[i]  = std::numeric_limits<Real>::max();
+            min_global[i] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -5514,14 +5514,14 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -5594,7 +5594,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                             
-                            double value = double(1);
+                            Real value = Real(1);
                             
                             for (int qi = 0; qi < num_quantities; qi++)
                             {
@@ -5610,7 +5610,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                                 }
                             }
                             
-                            min_local[idx_fine] = fmin(min_local[idx_fine], value);
+                            min_local[idx_fine] = std::min(min_local[idx_fine], value);
                         }
                     }
                 }
@@ -5631,7 +5631,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
             min_local,
             min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(min_local);
@@ -5640,15 +5640,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* min_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* min_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_0);
-        double* min_global = min_quantity.data();
+        Real* min_global = min_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            min_local[i]  = std::numeric_limits<double>::max();
-            min_global[i] = std::numeric_limits<double>::max();
+            min_local[i]  = std::numeric_limits<Real>::max();
+            min_global[i] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -5715,14 +5715,14 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -5808,7 +5808,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                 
-                                double value = double(1);
+                                Real value = Real(1);
                                 
                                 for (int qi = 0; qi < num_quantities; qi++)
                                 {
@@ -5825,7 +5825,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                                     }
                                 }
                                 
-                                min_local[idx_fine] = fmin(min_local[idx_fine], value);
+                                min_local[idx_fine] = std::min(min_local[idx_fine], value);
                             }
                         }
                     }
@@ -5847,7 +5847,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
             min_local,
             min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(min_local);
@@ -5856,15 +5856,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
     {
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* min_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* min_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_0);
-        double* min_global = min_quantity.data();
+        Real* min_global = min_quantity.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            min_local[i]  = std::numeric_limits<double>::max();
-            min_global[i] = std::numeric_limits<double>::max();
+            min_local[i]  = std::numeric_limits<Real>::max();
+            min_global[i] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -5931,14 +5931,14 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -6035,7 +6035,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                     
-                                    double value = double(1);
+                                    Real value = Real(1);
                                     
                                     for (int qi = 0; qi < num_quantities; qi++)
                                     {
@@ -6054,7 +6054,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                                         }
                                     }
                                     
-                                    min_local[idx_fine] = fmin(min_local[idx_fine], value);
+                                    min_local[idx_fine] = std::min(min_local[idx_fine], value);
                                 }
                             }
                         }
@@ -6077,7 +6077,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
             min_local,
             min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(min_local);
@@ -6090,13 +6090,13 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
 /*
  * Compute maximum value with only y-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> max_quantity;
+    std::vector<Real> max_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -6123,15 +6123,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
     {
         const int finest_level_dim_1 = d_finest_level_dims[1];
         
-        double* u_max_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* u_max_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_1);
-        double* u_max_global = max_quantity.data();
+        Real* u_max_global = max_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            u_max_local[j]  = std::numeric_limits<double>::min();
-            u_max_global[j] = std::numeric_limits<double>::min();
+            u_max_local[j]  = std::numeric_limits<Real>::min();
+            u_max_global[j] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -6195,10 +6195,10 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -6246,7 +6246,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                             {
                                 const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                 
-                                u_max_local[idx_fine] = fmax(u_max_local[idx_fine], u[idx]);
+                                u_max_local[idx_fine] = std::max(u_max_local[idx_fine], u[idx]);
                             }
                         }
                     }
@@ -6268,7 +6268,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -6277,15 +6277,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
     {
         const int finest_level_dim_1 = d_finest_level_dims[1];
         
-        double* u_max_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* u_max_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_1);
-        double* u_max_global = max_quantity.data();
+        Real* u_max_global = max_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            u_max_local[j]  = std::numeric_limits<double>::min();
-            u_max_global[j] = std::numeric_limits<double>::min();
+            u_max_local[j]  = std::numeric_limits<Real>::min();
+            u_max_global[j] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -6349,10 +6349,10 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -6409,7 +6409,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                                 {
                                     const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                     
-                                    u_max_local[idx_fine] = fmax(u_max_local[idx_fine], u[idx]);
+                                    u_max_local[idx_fine] = std::max(u_max_local[idx_fine], u[idx]);
                                 }
                             }
                         }
@@ -6432,7 +6432,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -6445,13 +6445,13 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
 /*
  * Compute maximum reciprocal of value with only y-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousYDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> max_reciprocal_quantity;
+    std::vector<Real> max_reciprocal_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -6478,15 +6478,15 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousYDirection(
     {
         const int finest_level_dim_1 = d_finest_level_dims[1];
         
-        double* u_inv_max_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* u_inv_max_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         max_reciprocal_quantity.resize(finest_level_dim_1);
-        double* u_inv_max_global = max_reciprocal_quantity.data();
+        Real* u_inv_max_global = max_reciprocal_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            u_inv_max_local[j]  = std::numeric_limits<double>::min();
-            u_inv_max_global[j] = std::numeric_limits<double>::min();
+            u_inv_max_local[j]  = std::numeric_limits<Real>::min();
+            u_inv_max_global[j] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -6550,10 +6550,10 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousYDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -6601,7 +6601,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousYDirection(
                             {
                                 const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                 
-                                u_inv_max_local[idx_fine] = fmax(u_inv_max_local[idx_fine], double(1)/u[idx]);
+                                u_inv_max_local[idx_fine] = std::max(u_inv_max_local[idx_fine], Real(1)/u[idx]);
                             }
                         }
                     }
@@ -6623,7 +6623,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousYDirection(
             u_inv_max_local,
             u_inv_max_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_inv_max_local);
@@ -6632,15 +6632,15 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousYDirection(
     {
         const int finest_level_dim_1 = d_finest_level_dims[1];
         
-        double* u_inv_max_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* u_inv_max_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         max_reciprocal_quantity.resize(finest_level_dim_1);
-        double* u_inv_max_global = max_reciprocal_quantity.data();
+        Real* u_inv_max_global = max_reciprocal_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            u_inv_max_local[j]  = std::numeric_limits<double>::min();
-            u_inv_max_global[j] = std::numeric_limits<double>::min();
+            u_inv_max_local[j]  = std::numeric_limits<Real>::min();
+            u_inv_max_global[j] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -6704,10 +6704,10 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousYDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -6764,7 +6764,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousYDirection(
                                 {
                                     const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                     
-                                    u_inv_max_local[idx_fine] = fmax(u_inv_max_local[idx_fine], double(1)/u[idx]);
+                                    u_inv_max_local[idx_fine] = std::max(u_inv_max_local[idx_fine], Real(1)/u[idx]);
                                 }
                             }
                         }
@@ -6787,7 +6787,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousYDirection(
             u_inv_max_local,
             u_inv_max_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_inv_max_local);
@@ -6800,7 +6800,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousYDirection(
 /*
  * Compute maximum value (on product of variables) with only y-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -6823,7 +6823,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
 /*
  * Compute maximum value (on product of variables) with only y-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -6835,7 +6835,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
-    std::vector<double> max_quantity;
+    std::vector<Real> max_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -6862,15 +6862,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
     {
         const int finest_level_dim_1 = d_finest_level_dims[1];
         
-        double* max_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* max_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_1);
-        double* max_global = max_quantity.data();
+        Real* max_global = max_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            max_local[j]  = std::numeric_limits<double>::min();
-            max_global[j] = std::numeric_limits<double>::min();
+            max_local[j]  = std::numeric_limits<Real>::min();
+            max_global[j] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -6937,14 +6937,14 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -7030,7 +7030,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                             {
                                 const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                 
-                                double value = double(1);
+                                Real value = Real(1);
                                 
                                 for (int qi = 0; qi < num_quantities; qi++)
                                 {
@@ -7047,7 +7047,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                                     }
                                 }
                                 
-                                max_local[idx_fine] = fmax(max_local[idx_fine], value);
+                                max_local[idx_fine] = std::max(max_local[idx_fine], value);
                             }
                         }
                     }
@@ -7069,7 +7069,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
             max_local,
             max_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(max_local);
@@ -7078,15 +7078,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
     {
         const int finest_level_dim_1 = d_finest_level_dims[1];
         
-        double* max_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* max_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_1);
-        double* max_global = max_quantity.data();
+        Real* max_global = max_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            max_local[j]  = std::numeric_limits<double>::min();
-            max_global[j] = std::numeric_limits<double>::min();
+            max_local[j]  = std::numeric_limits<Real>::min();
+            max_global[j] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -7153,14 +7153,14 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -7257,7 +7257,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                                 {
                                     const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                     
-                                    double value = double(1);
+                                    Real value = Real(1);
                                     
                                     for (int qi = 0; qi < num_quantities; qi++)
                                     {
@@ -7276,7 +7276,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                                         }
                                     }
                                     
-                                    max_local[idx_fine] = fmax(max_local[idx_fine], value);
+                                    max_local[idx_fine] = std::max(max_local[idx_fine], value);
                                 }
                             }
                         }
@@ -7299,7 +7299,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
             max_local,
             max_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(max_local);
@@ -7312,13 +7312,13 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
 /*
  * Compute minimum value with only y-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> min_quantity;
+    std::vector<Real> min_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -7345,15 +7345,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
     {
         const int finest_level_dim_1 = d_finest_level_dims[1];
         
-        double* u_min_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* u_min_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_1);
-        double* u_min_global = min_quantity.data();
+        Real* u_min_global = min_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            u_min_local[j]  = std::numeric_limits<double>::max();
-            u_min_global[j] = std::numeric_limits<double>::max();
+            u_min_local[j]  = std::numeric_limits<Real>::max();
+            u_min_global[j] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -7417,10 +7417,10 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -7468,7 +7468,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                             {
                                 const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                 
-                                u_min_local[idx_fine] = fmin(u_min_local[idx_fine], u[idx]);
+                                u_min_local[idx_fine] = std::min(u_min_local[idx_fine], u[idx]);
                             }
                         }
                     }
@@ -7490,7 +7490,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -7499,15 +7499,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
     {
         const int finest_level_dim_1 = d_finest_level_dims[1];
         
-        double* u_min_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* u_min_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_1);
-        double* u_min_global = min_quantity.data();
+        Real* u_min_global = min_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            u_min_local[j]  = std::numeric_limits<double>::max();
-            u_min_global[j] = std::numeric_limits<double>::max();
+            u_min_local[j]  = std::numeric_limits<Real>::max();
+            u_min_global[j] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -7571,10 +7571,10 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -7631,7 +7631,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                                 {
                                     const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                     
-                                    u_min_local[idx_fine] = fmin(u_min_local[idx_fine], u[idx]);
+                                    u_min_local[idx_fine] = std::min(u_min_local[idx_fine], u[idx]);
                                 }
                             }
                         }
@@ -7654,7 +7654,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -7667,13 +7667,13 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
 /*
  * Compute minimum reciprocal of value with only y-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousYDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> min_reciprocal_quantity;
+    std::vector<Real> min_reciprocal_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -7700,15 +7700,15 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousYDirection(
     {
         const int finest_level_dim_1 = d_finest_level_dims[1];
         
-        double* u_inv_min_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* u_inv_min_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         min_reciprocal_quantity.resize(finest_level_dim_1);
-        double* u_inv_min_global = min_reciprocal_quantity.data();
+        Real* u_inv_min_global = min_reciprocal_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            u_inv_min_local[j]  = std::numeric_limits<double>::max();
-            u_inv_min_global[j] = std::numeric_limits<double>::max();
+            u_inv_min_local[j]  = std::numeric_limits<Real>::max();
+            u_inv_min_global[j] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -7772,10 +7772,10 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousYDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -7823,7 +7823,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousYDirection(
                             {
                                 const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                 
-                                u_inv_min_local[idx_fine] = fmin(u_inv_min_local[idx_fine], double(1)/u[idx]);
+                                u_inv_min_local[idx_fine] = std::min(u_inv_min_local[idx_fine], Real(1)/u[idx]);
                             }
                         }
                     }
@@ -7845,7 +7845,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousYDirection(
             u_inv_min_local,
             u_inv_min_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_inv_min_local);
@@ -7854,15 +7854,15 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousYDirection(
     {
         const int finest_level_dim_1 = d_finest_level_dims[1];
         
-        double* u_inv_min_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* u_inv_min_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         min_reciprocal_quantity.resize(finest_level_dim_1);
-        double* u_inv_min_global = min_reciprocal_quantity.data();
+        Real* u_inv_min_global = min_reciprocal_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            u_inv_min_local[j]  = std::numeric_limits<double>::max();
-            u_inv_min_global[j] = std::numeric_limits<double>::max();
+            u_inv_min_local[j]  = std::numeric_limits<Real>::max();
+            u_inv_min_global[j] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -7926,10 +7926,10 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousYDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -7986,7 +7986,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousYDirection(
                                 {
                                     const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                     
-                                    u_inv_min_local[idx_fine] = fmin(u_inv_min_local[idx_fine], double(1)/u[idx]);
+                                    u_inv_min_local[idx_fine] = std::min(u_inv_min_local[idx_fine], Real(1)/u[idx]);
                                 }
                             }
                         }
@@ -8009,7 +8009,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousYDirection(
             u_inv_min_local,
             u_inv_min_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_inv_min_local);
@@ -8022,7 +8022,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousYDirection(
 /*
  * Compute minimum value (on product of variables) with only y-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -8045,7 +8045,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
 /*
  * Compute minimum value (on product of variables) with only y-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -8057,7 +8057,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
-    std::vector<double> min_quantity;
+    std::vector<Real> min_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -8084,15 +8084,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
     {
         const int finest_level_dim_1 = d_finest_level_dims[1];
         
-        double* min_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* min_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_1);
-        double* min_global = min_quantity.data();
+        Real* min_global = min_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            min_local[j]  = std::numeric_limits<double>::max();
-            min_global[j] = std::numeric_limits<double>::max();
+            min_local[j]  = std::numeric_limits<Real>::max();
+            min_global[j] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -8159,14 +8159,14 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -8252,7 +8252,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                             {
                                 const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                 
-                                double value = double(1);
+                                Real value = Real(1);
                                 
                                 for (int qi = 0; qi < num_quantities; qi++)
                                 {
@@ -8269,7 +8269,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                                     }
                                 }
                                 
-                                min_local[idx_fine] = fmin(min_local[idx_fine], value);
+                                min_local[idx_fine] = std::min(min_local[idx_fine], value);
                             }
                         }
                     }
@@ -8291,7 +8291,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
             min_local,
             min_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(min_local);
@@ -8300,15 +8300,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
     {
         const int finest_level_dim_1 = d_finest_level_dims[1];
         
-        double* min_local = (double*)std::malloc(finest_level_dim_1*sizeof(double));
+        Real* min_local = (Real*)std::malloc(finest_level_dim_1*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_1);
-        double* min_global = min_quantity.data();
+        Real* min_global = min_quantity.data();
         
         for (int j = 0; j < finest_level_dim_1; j++)
         {
-            min_local[j]  = std::numeric_limits<double>::max();
-            min_global[j] = std::numeric_limits<double>::max();
+            min_local[j]  = std::numeric_limits<Real>::max();
+            min_global[j] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -8375,14 +8375,14 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -8479,7 +8479,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                                 {
                                     const int idx_fine = (idx_lo_1 + j)*ratio_to_finest_level_1 + jj;
                                     
-                                    double value = double(1);
+                                    Real value = Real(1);
                                     
                                     for (int qi = 0; qi < num_quantities; qi++)
                                     {
@@ -8498,7 +8498,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                                         }
                                     }
                                     
-                                    min_local[idx_fine] = fmin(min_local[idx_fine], value);
+                                    min_local[idx_fine] = std::min(min_local[idx_fine], value);
                                 }
                             }
                         }
@@ -8521,7 +8521,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
             min_local,
             min_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(min_local);
@@ -8534,13 +8534,13 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
 /*
  * Compute maximum value with only z-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> max_quantity;
+    std::vector<Real> max_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -8575,15 +8575,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
     {
         const int finest_level_dim_2 = d_finest_level_dims[2];
         
-        double* u_max_local = (double*)std::malloc(finest_level_dim_2*sizeof(double));
+        Real* u_max_local = (Real*)std::malloc(finest_level_dim_2*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_2);
-        double* u_max_global = max_quantity.data();
+        Real* u_max_global = max_quantity.data();
         
         for (int k = 0; k < finest_level_dim_2; k++)
         {
-            u_max_local[k]  = std::numeric_limits<double>::min();
-            u_max_global[k] = std::numeric_limits<double>::min();
+            u_max_local[k]  = std::numeric_limits<Real>::min();
+            u_max_global[k] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -8647,10 +8647,10 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -8707,7 +8707,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
                                 {
                                     const int idx_fine = (idx_lo_2 + k)*ratio_to_finest_level_2 + kk;
                                     
-                                    u_max_local[idx_fine] = fmax(u_max_local[idx_fine], u[idx]);
+                                    u_max_local[idx_fine] = std::max(u_max_local[idx_fine], u[idx]);
                                 }
                             }
                         }
@@ -8730,7 +8730,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -8743,13 +8743,13 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
 /*
  * Compute maximum reciprocal of value with only z-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousZDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> max_reciprocal_quantity;
+    std::vector<Real> max_reciprocal_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -8784,15 +8784,15 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousZDirection(
     {
         const int finest_level_dim_2 = d_finest_level_dims[2];
         
-        double* u_inv_max_local = (double*)std::malloc(finest_level_dim_2*sizeof(double));
+        Real* u_inv_max_local = (Real*)std::malloc(finest_level_dim_2*sizeof(Real));
         
         max_reciprocal_quantity.resize(finest_level_dim_2);
-        double* u_inv_max_global = max_reciprocal_quantity.data();
+        Real* u_inv_max_global = max_reciprocal_quantity.data();
         
         for (int k = 0; k < finest_level_dim_2; k++)
         {
-            u_inv_max_local[k]  = std::numeric_limits<double>::min();
-            u_inv_max_global[k] = std::numeric_limits<double>::min();
+            u_inv_max_local[k]  = std::numeric_limits<Real>::min();
+            u_inv_max_global[k] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -8856,10 +8856,10 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousZDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -8916,7 +8916,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousZDirection(
                                 {
                                     const int idx_fine = (idx_lo_2 + k)*ratio_to_finest_level_2 + kk;
                                     
-                                    u_inv_max_local[idx_fine] = fmax(u_inv_max_local[idx_fine], double(1)/u[idx]);
+                                    u_inv_max_local[idx_fine] = std::max(u_inv_max_local[idx_fine], Real(1)/u[idx]);
                                 }
                             }
                         }
@@ -8939,7 +8939,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousZDirection(
             u_inv_max_local,
             u_inv_max_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_inv_max_local);
@@ -8952,7 +8952,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousZDirection(
 /*
  * Compute maximum value (on product of variables) with only z-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -8975,7 +8975,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
 /*
  * Compute maximum value (on product of variables) with only z-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -8987,7 +8987,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
-    std::vector<double> max_quantity;
+    std::vector<Real> max_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -9022,15 +9022,15 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
     {
         const int finest_level_dim_2 = d_finest_level_dims[2];
         
-        double* max_local = (double*)std::malloc(finest_level_dim_2*sizeof(double));
+        Real* max_local = (Real*)std::malloc(finest_level_dim_2*sizeof(Real));
         
         max_quantity.resize(finest_level_dim_2);
-        double* max_global = max_quantity.data();
+        Real* max_global = max_quantity.data();
         
         for (int k = 0; k < finest_level_dim_2; k++)
         {
-            max_local[k]  = std::numeric_limits<double>::min();
-            max_global[k] = std::numeric_limits<double>::min();
+            max_local[k]  = std::numeric_limits<Real>::min();
+            max_global[k] = std::numeric_limits<Real>::min();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -9097,14 +9097,14 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -9201,7 +9201,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
                                 {
                                     const int idx_fine = (idx_lo_2 + k)*ratio_to_finest_level_2 + kk;
                                     
-                                    double value = double(1);
+                                    Real value = Real(1);
                                     
                                     for (int qi = 0; qi < num_quantities; qi++)
                                     {
@@ -9220,7 +9220,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
                                         }
                                     }
                                     
-                                    max_local[idx_fine] = fmax(max_local[idx_fine], value);
+                                    max_local[idx_fine] = std::max(max_local[idx_fine], value);
                                 }
                             }
                         }
@@ -9243,7 +9243,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
             max_local,
             max_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(max_local);
@@ -9256,13 +9256,13 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
 /*
  * Compute minimum value with only z-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> min_quantity;
+    std::vector<Real> min_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -9297,15 +9297,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
     {
         const int finest_level_dim_2 = d_finest_level_dims[2];
         
-        double* u_min_local = (double*)std::malloc(finest_level_dim_2*sizeof(double));
+        Real* u_min_local = (Real*)std::malloc(finest_level_dim_2*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_2);
-        double* u_min_global = min_quantity.data();
+        Real* u_min_global = min_quantity.data();
         
         for (int k = 0; k < finest_level_dim_2; k++)
         {
-            u_min_local[k]  = std::numeric_limits<double>::max();
-            u_min_global[k] = std::numeric_limits<double>::max();
+            u_min_local[k]  = std::numeric_limits<Real>::max();
+            u_min_global[k] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -9369,10 +9369,10 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -9429,7 +9429,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
                                 {
                                     const int idx_fine = (idx_lo_2 + k)*ratio_to_finest_level_2 + kk;
                                     
-                                    u_min_local[idx_fine] = fmin(u_min_local[idx_fine], u[idx]);
+                                    u_min_local[idx_fine] = std::min(u_min_local[idx_fine], u[idx]);
                                 }
                             }
                         }
@@ -9452,7 +9452,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -9465,13 +9465,13 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
 /*
  * Compute minimum reciprocal of value with only z-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousZDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    std::vector<double> min_reciprocal_quantity;
+    std::vector<Real> min_reciprocal_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -9506,15 +9506,15 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousZDirection(
     {
         const int finest_level_dim_2 = d_finest_level_dims[2];
         
-        double* u_inv_min_local = (double*)std::malloc(finest_level_dim_2*sizeof(double));
+        Real* u_inv_min_local = (Real*)std::malloc(finest_level_dim_2*sizeof(Real));
         
         min_reciprocal_quantity.resize(finest_level_dim_2);
-        double* u_inv_min_global = min_reciprocal_quantity.data();
+        Real* u_inv_min_global = min_reciprocal_quantity.data();
         
         for (int k = 0; k < finest_level_dim_2; k++)
         {
-            u_inv_min_local[k]  = std::numeric_limits<double>::max();
-            u_inv_min_global[k] = std::numeric_limits<double>::max();
+            u_inv_min_local[k]  = std::numeric_limits<Real>::max();
+            u_inv_min_global[k] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -9578,10 +9578,10 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousZDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -9638,7 +9638,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousZDirection(
                                 {
                                     const int idx_fine = (idx_lo_2 + k)*ratio_to_finest_level_2 + kk;
                                     
-                                    u_inv_min_local[idx_fine] = fmin(u_inv_min_local[idx_fine], double(1)/u[idx]);
+                                    u_inv_min_local[idx_fine] = std::min(u_inv_min_local[idx_fine], Real(1)/u[idx]);
                                 }
                             }
                         }
@@ -9661,7 +9661,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousZDirection(
             u_inv_min_local,
             u_inv_min_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_inv_min_local);
@@ -9674,7 +9674,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousZDirection(
 /*
  * Compute minimum value (on product of variables) with only z-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -9697,7 +9697,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
 /*
  * Compute minimum value (on product of variables) with only z-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
@@ -9709,7 +9709,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
-    std::vector<double> min_quantity;
+    std::vector<Real> min_quantity;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -9744,15 +9744,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
     {
         const int finest_level_dim_2 = d_finest_level_dims[2];
         
-        double* min_local = (double*)std::malloc(finest_level_dim_2*sizeof(double));
+        Real* min_local = (Real*)std::malloc(finest_level_dim_2*sizeof(Real));
         
         min_quantity.resize(finest_level_dim_2);
-        double* min_global = min_quantity.data();
+        Real* min_global = min_quantity.data();
         
         for (int k = 0; k < finest_level_dim_2; k++)
         {
-            min_local[k]  = std::numeric_limits<double>::max();
-            min_global[k] = std::numeric_limits<double>::max();
+            min_local[k]  = std::numeric_limits<Real>::max();
+            min_global[k] = std::numeric_limits<Real>::max();
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -9819,14 +9819,14 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
                  * Get the pointers to data inside the flow model.
                  */
                 
-                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > data_quantities;
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
                     data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
-                std::vector<double*> u_qi;
+                std::vector<Real*> u_qi;
                 u_qi.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
@@ -9923,7 +9923,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
                                 {
                                     const int idx_fine = (idx_lo_2 + k)*ratio_to_finest_level_2 + kk;
                                     
-                                    double value = double(1);
+                                    Real value = Real(1);
                                     
                                     for (int qi = 0; qi < num_quantities; qi++)
                                     {
@@ -9942,7 +9942,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
                                         }
                                     }
                                     
-                                    min_local[idx_fine] = fmin(min_local[idx_fine], value);
+                                    min_local[idx_fine] = std::min(min_local[idx_fine], value);
                                 }
                             }
                         }
@@ -9965,7 +9965,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
             min_local,
             min_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(min_local);
@@ -9978,15 +9978,15 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
 /*
  * Compute maximum location within quantity bounds in x-direction.
  */
-double
+Real
 FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-    const double bound_lo,
-    const double bound_hi)
+    const Real bound_lo,
+    const Real bound_hi)
 {
-    double location_x_max_global;
+    Real location_x_max_global;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -10009,10 +10009,10 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
     
     if (d_dim == tbox::Dimension(1))
     {
-        double location_x_max_local = x_lo[0];
-        location_x_max_global       = x_lo[0];
+        Real location_x_max_local = Real(x_lo[0]);
+        location_x_max_global     = Real(x_lo[0]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -10067,10 +10067,10 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -10104,7 +10104,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                        const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                         
                         if (u[idx] > bound_lo && u[idx] < bound_hi)
                         {
@@ -10132,15 +10132,15 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
             &location_x_max_local,
             &location_x_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double location_x_max_local = x_lo[0];
-        location_x_max_global       = x_lo[0];
+        Real location_x_max_local = Real(x_lo[0]);
+        location_x_max_global     = Real(x_lo[0]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -10195,10 +10195,10 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -10240,7 +10240,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                            const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                             
                             if (u[idx] > bound_lo && u[idx] < bound_hi)
                             {
@@ -10269,15 +10269,15 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
             &location_x_max_local,
             &location_x_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double location_x_max_local = x_lo[0];
-        location_x_max_global       = x_lo[0];
+        Real location_x_max_local = Real(x_lo[0]);
+        location_x_max_global     = Real(x_lo[0]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -10332,10 +10332,10 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -10385,7 +10385,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                                const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
@@ -10415,7 +10415,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
             &location_x_max_local,
             &location_x_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     
@@ -10426,15 +10426,15 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
 /*
  * Compute minimum location within quantity bounds in x-direction.
  */
-double
+Real
 FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-    const double bound_lo,
-    const double bound_hi)
+    const Real bound_lo,
+    const Real bound_hi)
 {
-    double location_x_min_global;
+    Real location_x_min_global;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -10457,10 +10457,10 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
     
     if (d_dim == tbox::Dimension(1))
     {
-        double location_x_min_local = x_hi[0];
-        location_x_min_global       = x_hi[0];
+        Real location_x_min_local = Real(x_hi[0]);
+        location_x_min_global       = Real(x_hi[0]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -10515,10 +10515,10 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -10552,7 +10552,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                        const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                         
                         if (u[idx] > bound_lo && u[idx] < bound_hi)
                         {
@@ -10580,15 +10580,15 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
             &location_x_min_local,
             &location_x_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double location_x_min_local = x_hi[0];
-        location_x_min_global       = x_hi[0];
+        Real location_x_min_local = Real(x_hi[0]);
+        location_x_min_global       = Real(x_hi[0]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -10643,10 +10643,10 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -10688,7 +10688,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                            const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                             
                             if (u[idx] > bound_lo && u[idx] < bound_hi)
                             {
@@ -10717,15 +10717,15 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
             &location_x_min_local,
             &location_x_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double location_x_min_local = x_hi[0];
-        location_x_min_global       = x_hi[0];
+        Real location_x_min_local = Real(x_hi[0]);
+        location_x_min_global       = Real(x_hi[0]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -10780,10 +10780,10 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -10833,7 +10833,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
+                                const Real x = (Real(relative_idx_lo_0 + i) + half)*Real(dx[0]) + Real(x_lo_patch[0]);
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
@@ -10863,7 +10863,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
             &location_x_min_local,
             &location_x_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     
@@ -10874,15 +10874,15 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
 /*
  * Compute maximum location within quantity bounds in y-direction.
  */
-double
+Real
 FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-    const double bound_lo,
-    const double bound_hi)
+    const Real bound_lo,
+    const Real bound_hi)
 {
-    double location_y_max_global;
+    Real location_y_max_global;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -10912,10 +10912,10 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double location_y_max_local = x_lo[1];
-        location_y_max_global       = x_lo[1];
+        Real location_y_max_local = Real(x_lo[1]);
+        location_y_max_global     = Real(x_lo[1]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -10970,10 +10970,10 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -11015,7 +11015,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
+                            const Real y = (Real(relative_idx_lo_1 + j) + half)*Real(dx[1]) + Real(x_lo_patch[1]);
                             
                             if (u[idx] > bound_lo && u[idx] < bound_hi)
                             {
@@ -11044,15 +11044,15 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
             &location_y_max_local,
             &location_y_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double location_y_max_local = x_lo[1];
-        location_y_max_global       = x_lo[1];
+        Real location_y_max_local = Real(x_lo[1]);
+        location_y_max_global     = Real(x_lo[1]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -11107,10 +11107,10 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -11160,7 +11160,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
+                                const Real y = (Real(relative_idx_lo_1 + j) + half)*Real(dx[1]) + Real(x_lo_patch[1]);
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
@@ -11190,7 +11190,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
             &location_y_max_local,
             &location_y_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     
@@ -11201,15 +11201,15 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
 /*
  * Compute minimum location within quantity bounds in y-direction.
  */
-double
+Real
 FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-    const double bound_lo,
-    const double bound_hi)
+    const Real bound_lo,
+    const Real bound_hi)
 {
-    double location_y_min_global;
+    Real location_y_min_global;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -11239,10 +11239,10 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double location_y_min_local = x_hi[1];
-        location_y_min_global       = x_hi[1];
+        Real location_y_min_local = Real(x_hi[1]);
+        location_y_min_global       = Real(x_hi[1]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -11297,10 +11297,10 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -11342,7 +11342,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
+                            const Real y = (Real(relative_idx_lo_1 + j) + half)*Real(dx[1]) + Real(x_lo_patch[1]);
                             
                             if (u[idx] > bound_lo && u[idx] < bound_hi)
                             {
@@ -11371,15 +11371,15 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
             &location_y_min_local,
             &location_y_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double location_y_min_local = x_hi[1];
-        location_y_min_global       = x_hi[1];
+        Real location_y_min_local = Real(x_hi[1]);
+        location_y_min_global       = Real(x_hi[1]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -11434,10 +11434,10 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -11487,7 +11487,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
+                                const Real y = (Real(relative_idx_lo_1 + j) + half)*Real(dx[1]) + Real(x_lo_patch[1]);
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
@@ -11517,7 +11517,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
             &location_y_min_local,
             &location_y_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     
@@ -11528,15 +11528,15 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
 /*
  * Compute maximum location within quantity bounds in z-direction.
  */
-double
+Real
 FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-    const double bound_lo,
-    const double bound_hi)
+    const Real bound_lo,
+    const Real bound_hi)
 {
-    double location_z_max_global;
+    Real location_z_max_global;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -11573,10 +11573,10 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double location_z_max_local = x_lo[2];
-        location_z_max_global       = x_lo[2];
+        Real location_z_max_local = Real(x_lo[2]);
+        location_z_max_global     = Real(x_lo[2]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -11631,10 +11631,10 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -11684,7 +11684,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double z = (relative_idx_lo_2 + k + half)*dx[2] + x_lo_patch[2];
+                                const Real z = (Real(relative_idx_lo_2 + k) + half)*Real(dx[2]) + Real(x_lo_patch[2]);
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
@@ -11714,7 +11714,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
             &location_z_max_local,
             &location_z_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     
@@ -11725,15 +11725,15 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
 /*
  * Compute minimum location within quantity bounds in z-direction.
  */
-double
+Real
 FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-    const double bound_lo,
-    const double bound_hi)
+    const Real bound_lo,
+    const Real bound_hi)
 {
-    double location_z_min_global;
+    Real location_z_min_global;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -11770,10 +11770,10 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double location_z_min_local = x_hi[2];
-        location_z_min_global       = x_hi[2];
+        Real location_z_min_local = Real(x_hi[2]);
+        location_z_min_global       = Real(x_hi[2]);
         
-        const double half = double(1)/double(2);
+        const Real half = Real(1)/Real(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -11828,10 +11828,10 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
                  * Get the pointer to data inside the flow model.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
-                double* u = data_quantity->getPointer(component_idx);
+                Real* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -11881,7 +11881,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double z = (relative_idx_lo_2 + k + half)*dx[2] + x_lo_patch[2];
+                                const Real z = (Real(relative_idx_lo_2 + k) + half)*Real(dx[2]) + Real(x_lo_patch[2]);
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
@@ -11911,7 +11911,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
             &location_z_min_local,
             &location_z_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     
@@ -11922,7 +11922,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
 /*
  * Compute maximum value of absolute value of gradient with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
     const std::string quantity_name,
     const int component_idx,
@@ -11958,7 +11958,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
     hier::IntVector num_ghosts_der = hier::IntVector::getZero(d_dim);
     num_ghosts_der[derivative_direction] = num_ghosts_derivative;
     
-    std::vector<double> max_abs_derivative;
+    std::vector<Real> max_abs_derivative;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -11984,15 +11984,15 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
         
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* abs_der_max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* abs_der_max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_abs_derivative.resize(finest_level_dim_0);
-        double* abs_der_max_global = max_abs_derivative.data();
+        Real* abs_der_max_global = max_abs_derivative.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            abs_der_max_local[i]  = double(0);
-            abs_der_max_global[i] = double(0);
+            abs_der_max_local[i]  = Real(0);
+            abs_der_max_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -12061,7 +12061,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                 
                 computeDerivedCellData();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
                 const hier::BoxContainer& patch_visible_boxes =
@@ -12073,10 +12073,10 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                  * Initialize cell data for the derivative and get pointer to the cell data.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative(
-                    new pdat::CellData<double>(patch_box, 1, hier::IntVector::getZero(d_dim)));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative(
+                    new pdat::CellData<Real>(patch_box, 1, hier::IntVector::getZero(d_dim)));
                 
-                double* der = data_derivative->getPointer(0);
+                Real* der = data_derivative->getPointer(0);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -12089,7 +12089,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                         derivative_first_order_x->computeDerivative(
                             data_derivative,
                             data_quantity,
-                            dx[0],
+                            Real(dx[0]),
                             patch_visible_box,
                             0,
                             component_idx);
@@ -12117,7 +12117,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                             
-                            abs_der_max_local[idx_fine] = fmax(abs_der_max_local[idx_fine], fabs(der[idx]));
+                            abs_der_max_local[idx_fine] = std::max(abs_der_max_local[idx_fine], std::abs(der[idx]));
                         }
                     }
                 }
@@ -12138,7 +12138,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
             abs_der_max_local,
             abs_der_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(abs_der_max_local);
@@ -12161,15 +12161,15 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
         
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* abs_der_max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* abs_der_max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_abs_derivative.resize(finest_level_dim_0);
-        double* abs_der_max_global = max_abs_derivative.data();
+        Real* abs_der_max_global = max_abs_derivative.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            abs_der_max_local[i]  = double(0);
-            abs_der_max_global[i] = double(0);
+            abs_der_max_local[i]  = Real(0);
+            abs_der_max_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -12238,7 +12238,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                 
                 computeDerivedCellData();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
                 const hier::BoxContainer& patch_visible_boxes =
@@ -12250,10 +12250,10 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                  * Initialize cell data for the derivative and get pointer to the cell data.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative(
-                    new pdat::CellData<double>(patch_box, 1, hier::IntVector::getZero(d_dim)));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative(
+                    new pdat::CellData<Real>(patch_box, 1, hier::IntVector::getZero(d_dim)));
                 
-                double* der = data_derivative->getPointer(0);
+                Real* der = data_derivative->getPointer(0);
                 
                 const hier::IntVector patch_interior_dims = patch_box.numberCells();
                 const int patch_interior_dim_0 = patch_interior_dims[0];
@@ -12269,7 +12269,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                         derivative_first_order_x->computeDerivative(
                             data_derivative,
                             data_quantity,
-                            dx[0],
+                            Real(dx[0]),
                             patch_visible_box,
                             0,
                             component_idx);
@@ -12279,7 +12279,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                         derivative_first_order_y->computeDerivative(
                             data_derivative,
                             data_quantity,
-                            dx[1],
+                            Real(dx[1]),
                             patch_visible_box,
                             0,
                             component_idx);
@@ -12313,7 +12313,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                 
-                                abs_der_max_local[idx_fine] = fmax(abs_der_max_local[idx_fine], fabs(der[idx]));
+                                abs_der_max_local[idx_fine] = std::max(abs_der_max_local[idx_fine], std::abs(der[idx]));
                             }
                         }
                     }
@@ -12335,7 +12335,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
             abs_der_max_local,
             abs_der_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(abs_der_max_local);
@@ -12365,15 +12365,15 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
         
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* abs_der_max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* abs_der_max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_abs_derivative.resize(finest_level_dim_0);
-        double* abs_der_max_global = max_abs_derivative.data();
+        Real* abs_der_max_global = max_abs_derivative.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            abs_der_max_local[i]  = double(0);
-            abs_der_max_global[i] = double(0);
+            abs_der_max_local[i]  = Real(0);
+            abs_der_max_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -12442,7 +12442,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                 
                 computeDerivedCellData();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
                 const hier::BoxContainer& patch_visible_boxes =
@@ -12454,10 +12454,10 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                  * Initialize cell data for the derivative and get pointer to the cell data.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative(
-                    new pdat::CellData<double>(patch_box, 1, hier::IntVector::getZero(d_dim)));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative(
+                    new pdat::CellData<Real>(patch_box, 1, hier::IntVector::getZero(d_dim)));
                 
-                double* der = data_derivative->getPointer(0);
+                Real* der = data_derivative->getPointer(0);
                 
                 const hier::IntVector patch_interior_dims = patch_box.numberCells();
                 const int patch_interior_dim_0 = patch_interior_dims[0];
@@ -12474,7 +12474,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                         derivative_first_order_x->computeDerivative(
                             data_derivative,
                             data_quantity,
-                            dx[0],
+                            Real(dx[0]),
                             patch_visible_box,
                             0,
                             component_idx);
@@ -12484,7 +12484,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                         derivative_first_order_y->computeDerivative(
                             data_derivative,
                             data_quantity,
-                            dx[1],
+                            Real(dx[1]),
                             patch_visible_box,
                             0,
                             component_idx);
@@ -12494,7 +12494,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                          derivative_first_order_z->computeDerivative(
                             data_derivative,
                             data_quantity,
-                            dx[2],
+                            Real(dx[2]),
                             patch_visible_box,
                             0,
                             component_idx);
@@ -12535,7 +12535,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                     
-                                    abs_der_max_local[idx_fine] = fmax(abs_der_max_local[idx_fine], fabs(der[idx]));
+                                    abs_der_max_local[idx_fine] = std::max(abs_der_max_local[idx_fine], std::abs(der[idx]));
                                 }
                             }
                         }
@@ -12558,7 +12558,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
             abs_der_max_local,
             abs_der_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(abs_der_max_local);
@@ -12572,7 +12572,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
 /*
  * Compute maximum value of magnitude of gradient with only x-direction as inhomogeneous direction.
  */
-std::vector<double>
+std::vector<Real>
 FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
     const std::string quantity_name,
     const int component_idx,
@@ -12581,7 +12581,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
 {
     hier::IntVector num_ghosts_der = hier::IntVector::getOne(d_dim)*num_ghosts_derivative;
     
-    std::vector<double> max_mag_gradient;
+    std::vector<Real> max_mag_gradient;
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -12607,15 +12607,15 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
         
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* mag_grad_max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* mag_grad_max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_mag_gradient.resize(finest_level_dim_0);
-        double* mag_grad_max_global = max_mag_gradient.data();
+        Real* mag_grad_max_global = max_mag_gradient.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            mag_grad_max_local[i]  = double(0);
-            mag_grad_max_global[i] = double(0);
+            mag_grad_max_local[i]  = Real(0);
+            mag_grad_max_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -12684,7 +12684,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                 
                 computeDerivedCellData();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
                 const hier::BoxContainer& patch_visible_boxes =
@@ -12696,10 +12696,10 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                  * Initialize cell data for the derivative and get pointer to the cell data.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative(
-                    new pdat::CellData<double>(patch_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivative(
+                    new pdat::CellData<Real>(patch_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
                 
-                double* der_x = data_derivative->getPointer(0);
+                Real* der_x = data_derivative->getPointer(0);
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -12710,7 +12710,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                     derivative_first_order_x->computeDerivative(
                         data_derivative,
                         data_quantity,
-                        dx[0],
+                        Real(dx[0]),
                         patch_visible_box,
                         0,
                         component_idx);
@@ -12733,13 +12733,13 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                         
                         const int idx = relative_idx_lo_0 + i;
                         
-                        const double mag_grad = sqrt(der_x[idx]*der_x[idx]);
+                        const Real mag_grad = std::sqrt(der_x[idx]*der_x[idx]);
                         
                         for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                             
-                            mag_grad_max_local[idx_fine] = fmax(mag_grad_max_local[idx_fine], mag_grad);
+                            mag_grad_max_local[idx_fine] = std::max(mag_grad_max_local[idx_fine], mag_grad);
                         }
                     }
                 }
@@ -12760,7 +12760,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
             mag_grad_max_local,
             mag_grad_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(mag_grad_max_local);
@@ -12783,15 +12783,15 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
         
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* mag_grad_max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* mag_grad_max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_mag_gradient.resize(finest_level_dim_0);
-        double* mag_grad_max_global = max_mag_gradient.data();
+        Real* mag_grad_max_global = max_mag_gradient.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            mag_grad_max_local[i]  = double(0);
-            mag_grad_max_global[i] = double(0);
+            mag_grad_max_local[i]  = Real(0);
+            mag_grad_max_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -12860,7 +12860,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                 
                 computeDerivedCellData();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
                 const hier::BoxContainer& patch_visible_boxes =
@@ -12872,11 +12872,11 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                  * Initialize cell data for the derivatives and get pointers to the cell data.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivatives(
-                    new pdat::CellData<double>(patch_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivatives(
+                    new pdat::CellData<Real>(patch_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
                 
-                double* der_x = data_derivatives->getPointer(0);
-                double* der_y = data_derivatives->getPointer(1);
+                Real* der_x = data_derivatives->getPointer(0);
+                Real* der_y = data_derivatives->getPointer(1);
                 
                 const hier::IntVector patch_interior_dims = patch_box.numberCells();
                 const int patch_interior_dim_0 = patch_interior_dims[0];
@@ -12890,7 +12890,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                     derivative_first_order_x->computeDerivative(
                         data_derivatives,
                         data_quantity,
-                        dx[0],
+                        Real(dx[0]),
                         patch_visible_box,
                         0,
                         component_idx);
@@ -12898,7 +12898,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                     derivative_first_order_y->computeDerivative(
                         data_derivatives,
                         data_quantity,
-                        dx[1],
+                        Real(dx[1]),
                         patch_visible_box,
                         1,
                         component_idx);
@@ -12927,13 +12927,13 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                             const int idx = (relative_idx_lo_0 + i) +
                                 (relative_idx_lo_1 + j)*patch_interior_dim_0;
                             
-                            const double mag_grad = sqrt(der_x[idx]*der_x[idx] + der_y[idx]*der_y[idx]);
+                            const Real mag_grad = std::sqrt(der_x[idx]*der_x[idx] + der_y[idx]*der_y[idx]);
                             
                             for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                 
-                                mag_grad_max_local[idx_fine] = fmax(mag_grad_max_local[idx_fine], mag_grad);
+                                mag_grad_max_local[idx_fine] = std::max(mag_grad_max_local[idx_fine], mag_grad);
                             }
                         }
                     }
@@ -12955,7 +12955,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
             mag_grad_max_local,
             mag_grad_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(mag_grad_max_local);
@@ -12985,15 +12985,15 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
         
         const int finest_level_dim_0 = d_finest_level_dims[0];
         
-        double* mag_grad_max_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        Real* mag_grad_max_local = (Real*)std::malloc(finest_level_dim_0*sizeof(Real));
         
         max_mag_gradient.resize(finest_level_dim_0);
-        double* mag_grad_max_global = max_mag_gradient.data();
+        Real* mag_grad_max_global = max_mag_gradient.data();
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            mag_grad_max_local[i]  = double(0);
-            mag_grad_max_global[i] = double(0);
+            mag_grad_max_local[i]  = Real(0);
+            mag_grad_max_global[i] = Real(0);
         }
         
         for (int li = 0; li < num_levels; li++)
@@ -13062,7 +13062,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                 
                 computeDerivedCellData();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_quantity =
                     getCellData(quantity_name);
                 
                 const hier::BoxContainer& patch_visible_boxes =
@@ -13074,12 +13074,12 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                  * Initialize cell data for the derivatives and get pointers to the cell data.
                  */
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivatives(
-                    new pdat::CellData<double>(patch_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_derivatives(
+                    new pdat::CellData<Real>(patch_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
                 
-                double* der_x = data_derivatives->getPointer(0);
-                double* der_y = data_derivatives->getPointer(1);
-                double* der_z = data_derivatives->getPointer(2);
+                Real* der_x = data_derivatives->getPointer(0);
+                Real* der_y = data_derivatives->getPointer(1);
+                Real* der_z = data_derivatives->getPointer(2);
                 
                 const hier::IntVector patch_interior_dims = patch_box.numberCells();
                 const int patch_interior_dim_0 = patch_interior_dims[0];
@@ -13094,7 +13094,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                     derivative_first_order_x->computeDerivative(
                         data_derivatives,
                         data_quantity,
-                        dx[0],
+                        Real(dx[0]),
                         patch_visible_box,
                         0,
                         component_idx);
@@ -13102,7 +13102,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                     derivative_first_order_y->computeDerivative(
                         data_derivatives,
                         data_quantity,
-                        dx[1],
+                        Real(dx[1]),
                         patch_visible_box,
                         1,
                         component_idx);
@@ -13110,7 +13110,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                      derivative_first_order_z->computeDerivative(
                         data_derivatives,
                         data_quantity,
-                        dx[2],
+                        Real(dx[2]),
                         patch_visible_box,
                         2,
                         component_idx);
@@ -13146,13 +13146,13 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                                     (relative_idx_lo_2 + k)*patch_interior_dim_0*
                                         patch_interior_dim_1;
                                 
-                                const double mag_grad = sqrt(der_x[idx]*der_x[idx] + der_y[idx]*der_y[idx] + der_z[idx]*der_z[idx]);
+                                const Real mag_grad = std::sqrt(der_x[idx]*der_x[idx] + der_y[idx]*der_y[idx] + der_z[idx]*der_z[idx]);
                                 
                                 for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                     
-                                    mag_grad_max_local[idx_fine] = fmax(mag_grad_max_local[idx_fine], mag_grad);
+                                    mag_grad_max_local[idx_fine] = std::max(mag_grad_max_local[idx_fine], mag_grad);
                                 }
                             }
                         }
@@ -13175,7 +13175,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
             mag_grad_max_local,
             mag_grad_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(mag_grad_max_local);

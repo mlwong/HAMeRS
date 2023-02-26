@@ -20,8 +20,8 @@ GradientSensorJameson::GradientSensorJameson(
  */
 void
 GradientSensorJameson::computeGradient(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& gradient,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& gradient,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& cell_data,
     hier::Patch& patch,
     const int depth)
 {
@@ -49,10 +49,10 @@ GradientSensorJameson::computeGradient(
     const hier::IntVector ghostcell_dims_gradient = ghost_box_gradient.numberCells();
     
     // Get the pointer to the current depth component of the given cell data.
-    double* f = cell_data->getPointer(depth);
+    Real* f = cell_data->getPointer(depth);
     
     // Get the pointer to the gradient.
-    double* psi = gradient->getPointer(0);
+    Real* psi = gradient->getPointer(0);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -62,13 +62,13 @@ GradientSensorJameson::computeGradient(
         const int num_ghosts_0_gradient = num_ghosts_gradient[0];
         
         // Allocate memory.
-        HAMERS_SHARED_PTR<pdat::CellData<double> > gradient_x(
-            new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        HAMERS_SHARED_PTR<pdat::CellData<double> > local_mean_value_x(
-            new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > gradient_x(
+            new pdat::CellData<Real>(interior_box, 1, num_ghosts_gradient));
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > local_mean_value_x(
+            new pdat::CellData<Real>(interior_box, 1, num_ghosts_gradient));
         
-        double* psi_x = gradient_x->getPointer(0);
-        double* mean_x = local_mean_value_x->getPointer(0);
+        Real* psi_x = gradient_x->getPointer(0);
+        Real* mean_x = local_mean_value_x->getPointer(0);
         
         HAMERS_PRAGMA_SIMD
         for (int i = 0; i < interior_dim_0; i++)
@@ -79,8 +79,8 @@ GradientSensorJameson::computeGradient(
             const int idx_x   = i + num_ghosts_0_cell_data;
             const int idx_x_R = i + 1 + num_ghosts_0_cell_data;
             
-            psi_x[idx]  = f[idx_x_R] - double(2)*f[idx_x] + f[idx_x_L];
-            mean_x[idx] = f[idx_x_R] + double(2)*f[idx_x] + f[idx_x_L];
+            psi_x[idx]  = f[idx_x_R] - Real(2)*f[idx_x] + f[idx_x_L];
+            mean_x[idx] = f[idx_x_R] + Real(2)*f[idx_x] + f[idx_x_L];
         }
         
         HAMERS_PRAGMA_SIMD
@@ -89,7 +89,7 @@ GradientSensorJameson::computeGradient(
             // Compute the linear index.
             const int idx = i + num_ghosts_0_gradient;
             
-            psi[idx] = fabs(psi_x[idx])/(mean_x[idx] + double(EPSILON));
+            psi[idx] = std::abs(psi_x[idx])/(mean_x[idx] + Real(EPSILON));
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -106,19 +106,19 @@ GradientSensorJameson::computeGradient(
         const int ghostcell_dim_0_gradient = ghostcell_dims_gradient[0];
         
         // Allocate memory in different dimensions.
-        HAMERS_SHARED_PTR<pdat::CellData<double> > gradient_x(
-            new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        HAMERS_SHARED_PTR<pdat::CellData<double> > gradient_y(
-            new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        HAMERS_SHARED_PTR<pdat::CellData<double> > local_mean_value_x(
-            new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        HAMERS_SHARED_PTR<pdat::CellData<double> > local_mean_value_y(
-            new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > gradient_x(
+            new pdat::CellData<Real>(interior_box, 1, num_ghosts_gradient));
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > gradient_y(
+            new pdat::CellData<Real>(interior_box, 1, num_ghosts_gradient));
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > local_mean_value_x(
+            new pdat::CellData<Real>(interior_box, 1, num_ghosts_gradient));
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > local_mean_value_y(
+            new pdat::CellData<Real>(interior_box, 1, num_ghosts_gradient));
         
-        double* psi_x = gradient_x->getPointer(0);
-        double* psi_y = gradient_y->getPointer(0);
-        double* mean_x = local_mean_value_x->getPointer(0);
-        double* mean_y = local_mean_value_y->getPointer(0);
+        Real* psi_x = gradient_x->getPointer(0);
+        Real* psi_y = gradient_y->getPointer(0);
+        Real* mean_x = local_mean_value_x->getPointer(0);
+        Real* mean_y = local_mean_value_y->getPointer(0);
         
         for (int j = 0; j < interior_dim_1; j++)
         {
@@ -138,8 +138,8 @@ GradientSensorJameson::computeGradient(
                 const int idx_x_R = (i + 1 + num_ghosts_0_cell_data) +
                     (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                 
-                psi_x[idx]  = f[idx_x_R] - double(2)*f[idx_x] + f[idx_x_L];
-                mean_x[idx] = f[idx_x_R] + double(2)*f[idx_x] + f[idx_x_L];
+                psi_x[idx]  = f[idx_x_R] - Real(2)*f[idx_x] + f[idx_x_L];
+                mean_x[idx] = f[idx_x_R] + Real(2)*f[idx_x] + f[idx_x_L];
             }
         }
         
@@ -161,8 +161,8 @@ GradientSensorJameson::computeGradient(
                 const int idx_y_T = (i + num_ghosts_0_cell_data) +
                     (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                 
-                psi_y[idx]  = f[idx_y_T] - double(2)*f[idx_y] + f[idx_y_B];
-                mean_y[idx] = f[idx_y_T] + double(2)*f[idx_y] + f[idx_y_B];
+                psi_y[idx]  = f[idx_y_T] - Real(2)*f[idx_y] + f[idx_y_B];
+                mean_y[idx] = f[idx_y_T] + Real(2)*f[idx_y] + f[idx_y_B];
             }
         }
         
@@ -175,8 +175,8 @@ GradientSensorJameson::computeGradient(
                 const int idx = (i + num_ghosts_0_gradient) +
                     (j + num_ghosts_1_gradient)*ghostcell_dim_0_gradient;
                 
-                psi[idx] = sqrt(psi_x[idx]*psi_x[idx] + psi_y[idx]*psi_y[idx])/
-                    (sqrt(mean_x[idx]*mean_x[idx] + mean_y[idx]*mean_y[idx]) + double(EPSILON));
+                psi[idx] = std::sqrt(psi_x[idx]*psi_x[idx] + psi_y[idx]*psi_y[idx])/
+                    (std::sqrt(mean_x[idx]*mean_x[idx] + mean_y[idx]*mean_y[idx]) + Real(EPSILON));
             }
         }
     }
@@ -199,25 +199,25 @@ GradientSensorJameson::computeGradient(
         const int ghostcell_dim_1_gradient = ghostcell_dims_gradient[1];
         
         // Allocate memory in different dimensions.
-        HAMERS_SHARED_PTR<pdat::CellData<double> > gradient_x(
-            new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        HAMERS_SHARED_PTR<pdat::CellData<double> > gradient_y(
-            new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        HAMERS_SHARED_PTR<pdat::CellData<double> > gradient_z(
-            new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        HAMERS_SHARED_PTR<pdat::CellData<double> > local_mean_value_x(
-            new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        HAMERS_SHARED_PTR<pdat::CellData<double> > local_mean_value_y(
-            new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        HAMERS_SHARED_PTR<pdat::CellData<double> > local_mean_value_z(
-            new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > gradient_x(
+            new pdat::CellData<Real>(interior_box, 1, num_ghosts_gradient));
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > gradient_y(
+            new pdat::CellData<Real>(interior_box, 1, num_ghosts_gradient));
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > gradient_z(
+            new pdat::CellData<Real>(interior_box, 1, num_ghosts_gradient));
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > local_mean_value_x(
+            new pdat::CellData<Real>(interior_box, 1, num_ghosts_gradient));
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > local_mean_value_y(
+            new pdat::CellData<Real>(interior_box, 1, num_ghosts_gradient));
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > local_mean_value_z(
+            new pdat::CellData<Real>(interior_box, 1, num_ghosts_gradient));
         
-        double* psi_x = gradient_x->getPointer(0);
-        double* psi_y = gradient_y->getPointer(0);
-        double* psi_z = gradient_z->getPointer(0);
-        double* mean_x = local_mean_value_x->getPointer(0);
-        double* mean_y = local_mean_value_y->getPointer(0);
-        double* mean_z = local_mean_value_z->getPointer(0);
+        Real* psi_x = gradient_x->getPointer(0);
+        Real* psi_y = gradient_y->getPointer(0);
+        Real* psi_z = gradient_z->getPointer(0);
+        Real* mean_x = local_mean_value_x->getPointer(0);
+        Real* mean_y = local_mean_value_y->getPointer(0);
+        Real* mean_z = local_mean_value_z->getPointer(0);
         
         for (int k = 0; k < interior_dim_2; k++)
         {
@@ -247,8 +247,8 @@ GradientSensorJameson::computeGradient(
                         (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                             ghostcell_dim_1_cell_data;
                     
-                    psi_x[idx]  = f[idx_x_R] - double(2)*f[idx_x] + f[idx_x_L];
-                    mean_x[idx] = f[idx_x_R] + double(2)*f[idx_x] + f[idx_x_L];
+                    psi_x[idx]  = f[idx_x_R] - Real(2)*f[idx_x] + f[idx_x_L];
+                    mean_x[idx] = f[idx_x_R] + Real(2)*f[idx_x] + f[idx_x_L];
                 }
             }
         }
@@ -281,8 +281,8 @@ GradientSensorJameson::computeGradient(
                         (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                             ghostcell_dim_1_cell_data;
                     
-                    psi_y[idx]  = f[idx_y_T] - double(2)*f[idx_y] + f[idx_y_B];
-                    mean_y[idx] = f[idx_y_T] + double(2)*f[idx_y] + f[idx_y_B];
+                    psi_y[idx]  = f[idx_y_T] - Real(2)*f[idx_y] + f[idx_y_B];
+                    mean_y[idx] = f[idx_y_T] + Real(2)*f[idx_y] + f[idx_y_B];
                 }
             }
         }
@@ -315,8 +315,8 @@ GradientSensorJameson::computeGradient(
                         (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                             ghostcell_dim_1_cell_data;
                     
-                    psi_z[idx]  = f[idx_z_F] - double(2)*f[idx_z] + f[idx_z_B];
-                    mean_z[idx] = f[idx_z_F] + double(2)*f[idx_z] + f[idx_z_B];
+                    psi_z[idx]  = f[idx_z_F] - Real(2)*f[idx_z] + f[idx_z_B];
+                    mean_z[idx] = f[idx_z_F] + Real(2)*f[idx_z] + f[idx_z_B];
                 }
             }
         }
@@ -334,9 +334,9 @@ GradientSensorJameson::computeGradient(
                         (k + num_ghosts_2_gradient)*ghostcell_dim_0_gradient*
                             ghostcell_dim_1_gradient;
                     
-                    psi[idx] = sqrt(psi_x[idx]*psi_x[idx] + psi_y[idx]*psi_y[idx] + psi_z[idx]*psi_z[idx])/
-                        (sqrt(mean_x[idx]*mean_x[idx] + mean_y[idx]*mean_y[idx] + mean_z[idx]*mean_z[idx]) +
-                         double(EPSILON));
+                    psi[idx] = std::sqrt(psi_x[idx]*psi_x[idx] + psi_y[idx]*psi_y[idx] + psi_z[idx]*psi_z[idx])/
+                        (std::sqrt(mean_x[idx]*mean_x[idx] + mean_y[idx]*mean_y[idx] + mean_z[idx]*mean_z[idx]) +
+                         Real(EPSILON));
                 }
             }
         }

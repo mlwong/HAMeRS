@@ -62,8 +62,8 @@ class FlowModelSubgridScaleModel
          */
         virtual void
         updateSideDataOfDiffusiveFluxDiffusivities(
-            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& var_data_for_diffusivities,
-            const std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& derivatives,
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& var_data_for_diffusivities,
+            const std::map<DIRECTION::TYPE, std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& derivatives,
             const DIRECTION::TYPE& side_direction,
             const hier::Patch& patch);
         

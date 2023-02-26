@@ -62,8 +62,8 @@ ConvectiveFluxReconstructorFirstOrderLLF::putToRestart(
 void
 ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
     hier::Patch& patch,
-    const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_convective_flux,
-    const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+    const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
+    const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double time,
     const double dt,
@@ -90,13 +90,13 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
     const double* const dx = patch_geom->getDx();
     
     // Get the side data of convective flux.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux(
-        HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux(
+        HAMERS_SHARED_PTR_CAST<pdat::SideData<Real>, hier::PatchData>(
             patch.getPatchData(variable_convective_flux, data_context)));
     
     // Get the cell data of source.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > source(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > source(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(variable_source, data_context)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -121,12 +121,12 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
     }
     
     // Allocate temporary patch data.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity_intercell;
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity_intercell;
     
     if (has_advection_eqn)
     {
         velocity_intercell.reset(
-            new pdat::SideData<double>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
+            new pdat::SideData<Real>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
     }
     
     if (d_dim == tbox::Dimension(1))
@@ -159,9 +159,9 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > density;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > pressure;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > velocity;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > density;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > pressure;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity;
         
         if (has_advection_eqn)
         {
@@ -170,9 +170,9 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
             velocity = d_flow_model->getCellData("VELOCITY");
         }
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > convective_flux_node(1);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > convective_flux_node(1);
         convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
         
         hier::IntVector num_subghosts_density(d_dim);
@@ -201,9 +201,9 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
         hier::IntVector num_subghosts_convective_flux_x = convective_flux_node[0]->getGhostCellWidth();
         hier::IntVector subghostcell_dims_convective_flux_x = convective_flux_node[0]->getGhostBox().numberCells();
         
-        double* rho = nullptr;
-        double* p = nullptr;
-        double* u = nullptr;
+        Real* rho = nullptr;
+        Real* p = nullptr;
+        Real* u = nullptr;
         
         if (has_advection_eqn)
         {
@@ -212,9 +212,9 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
             u = velocity->getPointer(0);
         }
         
-        double* max_lambda_x = max_wave_speed_x->getPointer(0);
+        Real* max_lambda_x = max_wave_speed_x->getPointer(0);
         
-        std::vector<double*> F_x_node;
+        std::vector<Real*> F_x_node;
         F_x_node.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -226,7 +226,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_variables =
             d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -235,7 +235,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
         std::vector<hier::IntVector> subghostcell_dims_conservative_var;
         subghostcell_dims_conservative_var.reserve(d_num_eqn);
         
-        std::vector<double*> Q;
+        std::vector<Real*> Q;
         Q.reserve(d_num_eqn);
         
         int count_eqn = 0;
@@ -271,7 +271,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
             const int idx_L_convective_flux_x = i - 1 + num_subghosts_convective_flux_x[0];
             const int idx_R_convective_flux_x = i + num_subghosts_convective_flux_x[0];
             
-            const double alpha_x = fmax(max_lambda_x[idx_L_max_wave_speed_x], max_lambda_x[idx_R_max_wave_speed_x]);
+            const Real alpha_x = std::max(max_lambda_x[idx_L_max_wave_speed_x], max_lambda_x[idx_R_max_wave_speed_x]);
             
             // Compute the fluxes.
             for (int ei = 0; ei < d_num_eqn; ei++)
@@ -280,7 +280,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
                 const int idx_L_conservative_var = i - 1 + num_subghosts_conservative_var[ei][0];
                 const int idx_R_conservative_var = i + num_subghosts_conservative_var[ei][0];
                 
-                convective_flux->getPointer(0, ei)[idx_midpoint_x] = 0.5*dt*(
+                convective_flux->getPointer(0, ei)[idx_midpoint_x] = Real(1)/Real(2)*Real(dt)*(
                     F_x_node[ei][idx_L_convective_flux_x] + F_x_node[ei][idx_R_convective_flux_x] -
                         alpha_x*(Q[ei][idx_R_conservative_var] - Q[ei][idx_L_conservative_var]));
             }
@@ -313,7 +313,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
             {
                 if (eqn_form[ei] == EQN_FORM::ADVECTIVE)
                 {
-                    double* S = source->getPointer(ei);
+                    Real* S = source->getPointer(ei);
                     
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
@@ -323,10 +323,10 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
                         const int idx_midpoint_x_L = i;
                         const int idx_midpoint_x_R = i + 1;
                         
-                        const double& u_L = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_L];
-                        const double& u_R = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_R];
+                        const Real& u_L = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_L];
+                        const Real& u_R = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_R];
                         
-                        S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(u_R - u_L)/dx[0];
+                        S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(u_R - u_L)/Real(dx[0]);
                     }
                 }
             }
@@ -370,9 +370,9 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > density;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > pressure;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > velocity;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > density;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > pressure;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity;
         
         if (has_advection_eqn)
         {
@@ -381,10 +381,10 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
             velocity = d_flow_model->getCellData("VELOCITY");
         }
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
-        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > convective_flux_node(2);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > convective_flux_node(2);
         convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
         convective_flux_node[1] = d_flow_model->getCellData("CONVECTIVE_FLUX_Y");
         
@@ -420,10 +420,10 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
         hier::IntVector num_subghosts_convective_flux_y = convective_flux_node[1]->getGhostCellWidth();
         hier::IntVector subghostcell_dims_convective_flux_y = convective_flux_node[1]->getGhostBox().numberCells();
         
-        double* rho = nullptr;
-        double* p = nullptr;
-        double* u = nullptr;
-        double* v = nullptr;
+        Real* rho = nullptr;
+        Real* p = nullptr;
+        Real* u = nullptr;
+        Real* v = nullptr;
         
         if (has_advection_eqn)
         {
@@ -433,11 +433,11 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
             v = velocity->getPointer(1);
         }
         
-        double* max_lambda_x = max_wave_speed_x->getPointer(0);
-        double* max_lambda_y = max_wave_speed_y->getPointer(0);
+        Real* max_lambda_x = max_wave_speed_x->getPointer(0);
+        Real* max_lambda_y = max_wave_speed_y->getPointer(0);
         
-        std::vector<double*> F_x_node;
-        std::vector<double*> F_y_node;
+        std::vector<Real*> F_x_node;
+        std::vector<Real*> F_y_node;
         F_x_node.reserve(d_num_eqn);
         F_y_node.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
@@ -451,7 +451,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_variables =
             d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -460,7 +460,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
         std::vector<hier::IntVector> subghostcell_dims_conservative_var;
         subghostcell_dims_conservative_var.reserve(d_num_eqn);
         
-        std::vector<double*> Q;
+        std::vector<Real*> Q;
         Q.reserve(d_num_eqn);
         
         int count_eqn = 0;
@@ -507,7 +507,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
                 const int idx_R_convective_flux_x = (i + num_subghosts_convective_flux_x[0]) +
                     (j + num_subghosts_convective_flux_x[1])*subghostcell_dims_convective_flux_x[0];
                 
-                const double alpha_x = fmax(max_lambda_x[idx_L_max_wave_speed_x], max_lambda_x[idx_R_max_wave_speed_x]);
+                const Real alpha_x = std::max(max_lambda_x[idx_L_max_wave_speed_x], max_lambda_x[idx_R_max_wave_speed_x]);
                 
                 // Compute the fluxes.
                 for (int ei = 0; ei < d_num_eqn; ei++)
@@ -519,7 +519,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
                     const int idx_R_conservative_var = (i + num_subghosts_conservative_var[ei][0]) +
                         (j + num_subghosts_conservative_var[ei][1])*subghostcell_dims_conservative_var[ei][0];
                     
-                    convective_flux->getPointer(0, ei)[idx_midpoint_x] = 0.5*dt*(
+                    convective_flux->getPointer(0, ei)[idx_midpoint_x] = Real(1)/Real(2)*Real(dt)*(
                         F_x_node[ei][idx_L_convective_flux_x] + F_x_node[ei][idx_R_convective_flux_x] -
                             alpha_x*(Q[ei][idx_R_conservative_var] - Q[ei][idx_L_conservative_var]));
                 }
@@ -584,7 +584,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
                 const int idx_T_convective_flux_y = (i + num_subghosts_convective_flux_y[0]) +
                     (j + num_subghosts_convective_flux_y[1])*subghostcell_dims_convective_flux_y[0];
                 
-                const double alpha_y = fmax(max_lambda_y[idx_B_max_wave_speed_y], max_lambda_y[idx_T_max_wave_speed_y]);
+                const Real alpha_y = std::max(max_lambda_y[idx_B_max_wave_speed_y], max_lambda_y[idx_T_max_wave_speed_y]);
                 
                 // Compute the fluxes.
                 for (int ei = 0; ei < d_num_eqn; ei++)
@@ -596,7 +596,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
                     const int idx_T_conservative_var = (i + num_subghosts_conservative_var[ei][0]) +
                         (j + num_subghosts_conservative_var[ei][1])*subghostcell_dims_conservative_var[ei][0];
                     
-                    convective_flux->getPointer(1, ei)[idx_midpoint_y] = 0.5*dt*(
+                    convective_flux->getPointer(1, ei)[idx_midpoint_y] = Real(1)/Real(2)*Real(dt)*(
                         F_y_node[ei][idx_B_convective_flux_y] + F_y_node[ei][idx_T_convective_flux_y] -
                             alpha_y*(Q[ei][idx_T_conservative_var] - Q[ei][idx_B_conservative_var]));
                 }
@@ -648,7 +648,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
             {
                 if (eqn_form[ei] == EQN_FORM::ADVECTIVE)
                 {
-                    double* S = source->getPointer(ei);
+                    Real* S = source->getPointer(ei);
                     
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
@@ -672,13 +672,13 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
                             const int idx_midpoint_y_T = i +
                                 (j + 1)*interior_dims[0];
                             
-                            const double& u_L = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_L];
-                            const double& u_R = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_R];
+                            const Real& u_L = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_L];
+                            const Real& u_R = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_R];
                             
-                            const double& v_B = velocity_intercell->getPointer(1, 1)[idx_midpoint_y_B];
-                            const double& v_T = velocity_intercell->getPointer(1, 1)[idx_midpoint_y_T];
+                            const Real& v_B = velocity_intercell->getPointer(1, 1)[idx_midpoint_y_B];
+                            const Real& v_T = velocity_intercell->getPointer(1, 1)[idx_midpoint_y_T];
                             
-                            S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*((u_R - u_L)/dx[0] + (v_T - v_B)/dx[1]);
+                            S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*((u_R - u_L)/Real(dx[0]) + (v_T - v_B)/Real(dx[1]));
                         }
                     }
                 }
@@ -726,9 +726,9 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > density;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > pressure;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > velocity;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > density;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > pressure;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity;
         
         if (has_advection_eqn)
         {
@@ -737,11 +737,11 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
             velocity = d_flow_model->getCellData("VELOCITY");
         }
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
-        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
-        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_z = d_flow_model->getCellData("MAX_WAVE_SPEED_Z");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > max_wave_speed_z = d_flow_model->getCellData("MAX_WAVE_SPEED_Z");
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > convective_flux_node(3);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > convective_flux_node(3);
         convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
         convective_flux_node[1] = d_flow_model->getCellData("CONVECTIVE_FLUX_Y");
         convective_flux_node[2] = d_flow_model->getCellData("CONVECTIVE_FLUX_Z");
@@ -784,11 +784,11 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
         hier::IntVector num_subghosts_convective_flux_z = convective_flux_node[2]->getGhostCellWidth();
         hier::IntVector subghostcell_dims_convective_flux_z = convective_flux_node[2]->getGhostBox().numberCells();
         
-        double* rho = nullptr;
-        double* p = nullptr;
-        double* u = nullptr;
-        double* v = nullptr;
-        double* w = nullptr;
+        Real* rho = nullptr;
+        Real* p = nullptr;
+        Real* u = nullptr;
+        Real* v = nullptr;
+        Real* w = nullptr;
         
         if (has_advection_eqn)
         {
@@ -799,13 +799,13 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
             w = velocity->getPointer(2);
         }
         
-        double* max_lambda_x = max_wave_speed_x->getPointer(0);
-        double* max_lambda_y = max_wave_speed_y->getPointer(0);
-        double* max_lambda_z = max_wave_speed_z->getPointer(0);
+        Real* max_lambda_x = max_wave_speed_x->getPointer(0);
+        Real* max_lambda_y = max_wave_speed_y->getPointer(0);
+        Real* max_lambda_z = max_wave_speed_z->getPointer(0);
         
-        std::vector<double*> F_x_node;
-        std::vector<double*> F_y_node;
-        std::vector<double*> F_z_node;
+        std::vector<Real*> F_x_node;
+        std::vector<Real*> F_y_node;
+        std::vector<Real*> F_z_node;
         F_x_node.reserve(d_num_eqn);
         F_y_node.reserve(d_num_eqn);
         F_z_node.reserve(d_num_eqn);
@@ -821,7 +821,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_variables =
             d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -830,7 +830,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
         std::vector<hier::IntVector> subghostcell_dims_conservative_var;
         subghostcell_dims_conservative_var.reserve(d_num_eqn);
         
-        std::vector<double*> Q;
+        std::vector<Real*> Q;
         Q.reserve(d_num_eqn);
         
         int count_eqn = 0;
@@ -888,7 +888,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
                         (k + num_subghosts_convective_flux_x[2])*subghostcell_dims_convective_flux_x[0]*
                             subghostcell_dims_convective_flux_x[1];
                     
-                    const double alpha_x = fmax(max_lambda_x[idx_L_max_wave_speed_x], max_lambda_x[idx_R_max_wave_speed_x]);
+                    const Real alpha_x = std::max(max_lambda_x[idx_L_max_wave_speed_x], max_lambda_x[idx_R_max_wave_speed_x]);
                     
                     // Compute the fluxes.
                     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -904,7 +904,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
                             (k + num_subghosts_conservative_var[ei][2])*subghostcell_dims_conservative_var[ei][0]*
                                 subghostcell_dims_conservative_var[ei][1];
                         
-                        convective_flux->getPointer(0, ei)[idx_midpoint_x] = 0.5*dt*(
+                        convective_flux->getPointer(0, ei)[idx_midpoint_x] = Real(1)/Real(2)*Real(dt)*(
                             F_x_node[ei][idx_L_convective_flux_x] + F_x_node[ei][idx_R_convective_flux_x] -
                                 alpha_x*(Q[ei][idx_R_conservative_var] - Q[ei][idx_L_conservative_var]));
                     }
@@ -999,7 +999,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
                         (k + num_subghosts_convective_flux_y[2])*subghostcell_dims_convective_flux_y[0]*
                             subghostcell_dims_convective_flux_y[1];
                     
-                    const double alpha_y = fmax(max_lambda_y[idx_B_max_wave_speed_y], max_lambda_y[idx_T_max_wave_speed_y]);
+                    const Real alpha_y = std::max(max_lambda_y[idx_B_max_wave_speed_y], max_lambda_y[idx_T_max_wave_speed_y]);
                     
                     // Compute the fluxes.
                     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -1015,7 +1015,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
                         (k + num_subghosts_conservative_var[ei][2])*subghostcell_dims_conservative_var[ei][0]*
                             subghostcell_dims_conservative_var[ei][1];
                         
-                        convective_flux->getPointer(1, ei)[idx_midpoint_y] = 0.5*dt*(
+                        convective_flux->getPointer(1, ei)[idx_midpoint_y] = Real(1)/Real(2)*Real(dt)*(
                             F_y_node[ei][idx_B_convective_flux_y] + F_y_node[ei][idx_T_convective_flux_y] -
                                 alpha_y*(Q[ei][idx_T_conservative_var] - Q[ei][idx_B_conservative_var]));
                     }
@@ -1111,7 +1111,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
                         (k + num_subghosts_convective_flux_z[2])*subghostcell_dims_convective_flux_z[0]*
                             subghostcell_dims_convective_flux_z[1];
                     
-                    const double alpha_z = fmax(max_lambda_z[idx_B_max_wave_speed_z], max_lambda_z[idx_F_max_wave_speed_z]);
+                    const Real alpha_z = std::max(max_lambda_z[idx_B_max_wave_speed_z], max_lambda_z[idx_F_max_wave_speed_z]);
                     
                     // Compute the fluxes.
                     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -1126,7 +1126,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
                             (k + num_subghosts_conservative_var[ei][2])*subghostcell_dims_conservative_var[ei][0]*
                                 subghostcell_dims_conservative_var[ei][1];
                         
-                        convective_flux->getPointer(2, ei)[idx_midpoint_z] = 0.5*dt*(
+                        convective_flux->getPointer(2, ei)[idx_midpoint_z] = Real(1)/Real(2)*Real(dt)*(
                             F_z_node[ei][idx_B_convective_flux_z] + F_z_node[ei][idx_F_convective_flux_z] -
                                 alpha_z*(Q[ei][idx_F_conservative_var] - Q[ei][idx_B_conservative_var]));       
                     }
@@ -1197,7 +1197,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
             {
                 if (eqn_form[ei] == EQN_FORM::ADVECTIVE)
                 {
-                    double* S = source->getPointer(ei);
+                    Real* S = source->getPointer(ei);
                     
                     for (int k = 0; k < interior_dims[2]; k++)
                     {
@@ -1239,17 +1239,17 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
                                     j*interior_dims[0] +
                                     (k + 1)*interior_dims[0]*interior_dims[1];
                                 
-                                const double& u_L = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_L];
-                                const double& u_R = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_R];
+                                const Real& u_L = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_L];
+                                const Real& u_R = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_R];
                                 
-                                const double& v_B = velocity_intercell->getPointer(1, 1)[idx_midpoint_y_B];
-                                const double& v_T = velocity_intercell->getPointer(1, 1)[idx_midpoint_y_T];
+                                const Real& v_B = velocity_intercell->getPointer(1, 1)[idx_midpoint_y_B];
+                                const Real& v_T = velocity_intercell->getPointer(1, 1)[idx_midpoint_y_T];
                                 
-                                const double& w_B = velocity_intercell->getPointer(2, 2)[idx_midpoint_z_B];
-                                const double& w_F = velocity_intercell->getPointer(2, 2)[idx_midpoint_z_F];
+                                const Real& w_B = velocity_intercell->getPointer(2, 2)[idx_midpoint_z_B];
+                                const Real& w_F = velocity_intercell->getPointer(2, 2)[idx_midpoint_z_F];
                                 
-                                S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
-                                    (u_R - u_L)/dx[0] + (v_T - v_B)/dx[1] + (w_F - w_B)/dx[2]);
+                                S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                    (u_R - u_L)/Real(dx[0]) + (v_T - v_B)/Real(dx[1]) + (w_F - w_B)/Real(dx[2]));
                             }
                         }
                     }
