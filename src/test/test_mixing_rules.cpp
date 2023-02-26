@@ -19,8 +19,8 @@ int main(int argc, char *argv[])
      */
     tbox::Dimension dim(3);
     
-    Real p = (0);
-    Real T = (0);
+    Real p = Real(0);
+    Real T = Real(0);
     
     std::vector<Real> molecular_properties;
     std::vector<const Real*> molecular_properties_const_ptr;
@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
      * Verify that the equations of shear viscosity are implemented correctly.
      */
     
-    Real mu = (0);
+    Real mu = Real(0);
     
     HAMERS_SHARED_PTR<EquationOfShearViscosity> equation_of_shear_viscosity;
     
