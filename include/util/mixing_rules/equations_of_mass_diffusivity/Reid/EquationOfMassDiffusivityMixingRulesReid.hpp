@@ -34,20 +34,20 @@ class EquationOfMassDiffusivityMixingRulesReid: public EquationOfMassDiffusivity
          */
         void
         getMassDiffusivities(
-            std::vector<double*>& mass_diffusivities,
-            const double* const pressure,
-            const double* const temperature,
-            const std::vector<const double*>& mass_fractions) const;
+            std::vector<Real*>& mass_diffusivities,
+            const Real* const pressure,
+            const Real* const temperature,
+            const std::vector<const Real*>& mass_fractions) const;
         
         /*
          * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeMassDiffusivities(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_diffusivities,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_diffusivities,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -65,34 +65,34 @@ class EquationOfMassDiffusivityMixingRulesReid: public EquationOfMassDiffusivity
          */
         void
         getSpeciesMolecularProperties(
-            std::vector<double*>& species_molecular_properties,
+            std::vector<Real*>& species_molecular_properties,
             const int species_index = 0) const;
         
     private:
         /*
          * Compute the mass diffusivity of a binary mixture.
          */
-        double
+        Real
         getMassDiffusivity(
-            const double* const pressure,
-            const double* const temperature,
-            const std::vector<const double*>& molecular_properties_1,
-            const std::vector<const double*>& molecular_properties_2) const;
+            const Real* const pressure,
+            const Real* const temperature,
+            const std::vector<const Real*>& molecular_properties_1,
+            const std::vector<const Real*>& molecular_properties_2) const;
         
         /*
          * Lennard-Jones energy parameter of different species.
          */
-        std::vector<double> d_species_epsilon_by_k;
+        std::vector<Real> d_species_epsilon_by_k;
         
         /*
          * Collision diameter of different species.
          */
-        std::vector<double> d_species_sigma;
+        std::vector<Real> d_species_sigma;
         
         /*
          * Molecular weight of different species.
          */
-        std::vector<double> d_species_M;
+        std::vector<Real> d_species_M;
         
 };
 

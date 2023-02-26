@@ -50,9 +50,9 @@ DerivativeSecondOrder::DerivativeSecondOrder(
  */
 void
 DerivativeSecondOrder::computeDerivative(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& derivative,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data,
-    const double dx,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& derivative,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data,
+    const Real dx,
     const hier::Box& domain,
     const int depth_derivative,
     const int depth_data)
@@ -128,14 +128,14 @@ DerivativeSecondOrder::computeDerivative(
     }
     
     // Get the pointer to the the given cell data.
-    double* u = data->getPointer(depth_data);
+    Real* u = data->getPointer(depth_data);
     
     if (d_direction == DIRECTION::X_DIRECTION)
     {
         // Get the pointer to the derivative.
-        double* d2udx2 = derivative->getPointer(depth_derivative);
+        Real* d2udx2 = derivative->getPointer(depth_derivative);
         
-        const double dx_sq = dx*dx;
+        const Real dx_sq = dx*dx;
         
         if (d_dim == tbox::Dimension(1))
         {
@@ -167,11 +167,11 @@ DerivativeSecondOrder::computeDerivative(
                     const int idx_x_RRR  = i + 3 + offset_0_data;
                     const int idx_x_RRRR = i + 4 + offset_0_data;
                     
-                    d2udx2[idx_derivative] = (double(-205)/double(72)*u[idx_x] +
-                                              double(8)/double(5)*(u[idx_x_L] + u[idx_x_R]) +
-                                              double(-1)/double(5)*(u[idx_x_LL] + u[idx_x_RR]) +
-                                              double(8)/double(315)*(u[idx_x_LLL] + u[idx_x_RRR]) +
-                                              double(-1)/double(560)*(u[idx_x_LLLL] + u[idx_x_RRRR]))/dx_sq;
+                    d2udx2[idx_derivative] = (Real(-205)/Real(72)*u[idx_x] +
+                                              Real(8)/Real(5)*(u[idx_x_L] + u[idx_x_R]) +
+                                              Real(-1)/Real(5)*(u[idx_x_LL] + u[idx_x_RR]) +
+                                              Real(8)/Real(315)*(u[idx_x_LLL] + u[idx_x_RRR]) +
+                                              Real(-1)/Real(560)*(u[idx_x_LLLL] + u[idx_x_RRRR]))/dx_sq;
                 }
             }
             else if (d_num_derivative_ghosts[0] == 3)
@@ -190,10 +190,10 @@ DerivativeSecondOrder::computeDerivative(
                     const int idx_x_RR  = i + 2 + offset_0_data;
                     const int idx_x_RRR = i + 3 + offset_0_data;
                     
-                    d2udx2[idx_derivative] = (double(-49)/double(18)*u[idx_x] +
-                                              double(3)/double(2)*(u[idx_x_L] + u[idx_x_R]) +
-                                              double(-3)/double(20)*(u[idx_x_LL] + u[idx_x_RR]) +
-                                              double(1)/double(90)*(u[idx_x_LLL] + u[idx_x_RRR]))/dx_sq;
+                    d2udx2[idx_derivative] = (Real(-49)/Real(18)*u[idx_x] +
+                                              Real(3)/Real(2)*(u[idx_x_L] + u[idx_x_R]) +
+                                              Real(-3)/Real(20)*(u[idx_x_LL] + u[idx_x_RR]) +
+                                              Real(1)/Real(90)*(u[idx_x_LLL] + u[idx_x_RRR]))/dx_sq;
                 }
             }
             else if (d_num_derivative_ghosts[0] == 2)
@@ -210,9 +210,9 @@ DerivativeSecondOrder::computeDerivative(
                     const int idx_x_R  = i + 1 + offset_0_data;
                     const int idx_x_RR = i + 2 + offset_0_data;
                     
-                    d2udx2[idx_derivative] = (double(-5)/double(2)*u[idx_x] +
-                                              double(4)/double(3)*(u[idx_x_L] + u[idx_x_R]) +
-                                              double(-1)/double(12)*(u[idx_x_LL] + u[idx_x_RR]))/dx_sq;
+                    d2udx2[idx_derivative] = (Real(-5)/Real(2)*u[idx_x] +
+                                              Real(4)/Real(3)*(u[idx_x_L] + u[idx_x_R]) +
+                                              Real(-1)/Real(12)*(u[idx_x_LL] + u[idx_x_RR]))/dx_sq;
                 }
             }
             else if (d_num_derivative_ghosts[0] == 1)
@@ -227,7 +227,7 @@ DerivativeSecondOrder::computeDerivative(
                     const int idx_x   = i     + offset_0_data;
                     const int idx_x_R = i + 1 + offset_0_data;
                     
-                    d2udx2[idx_derivative] = (double(-2)*u[idx_x] +
+                    d2udx2[idx_derivative] = (Real(-2)*u[idx_x] +
                                               (u[idx_x_L] + u[idx_x_R]))/dx_sq;
                 }
             }
@@ -289,11 +289,11 @@ DerivativeSecondOrder::computeDerivative(
                         const int idx_x_RRRR = (i + 4 + offset_0_data) +
                             (j + offset_1_data)*ghostcell_dim_0_data;
                         
-                        d2udx2[idx_derivative] = (double(-205)/double(72)*u[idx_x] +
-                                                  double(8)/double(5)*(u[idx_x_L] + u[idx_x_R]) +
-                                                  double(-1)/double(5)*(u[idx_x_LL] + u[idx_x_RR]) +
-                                                  double(8)/double(315)*(u[idx_x_LLL] + u[idx_x_RRR]) +
-                                                  double(-1)/double(560)*(u[idx_x_LLLL] + u[idx_x_RRRR]))/dx_sq;
+                        d2udx2[idx_derivative] = (Real(-205)/Real(72)*u[idx_x] +
+                                                  Real(8)/Real(5)*(u[idx_x_L] + u[idx_x_R]) +
+                                                  Real(-1)/Real(5)*(u[idx_x_LL] + u[idx_x_RR]) +
+                                                  Real(8)/Real(315)*(u[idx_x_LLL] + u[idx_x_RRR]) +
+                                                  Real(-1)/Real(560)*(u[idx_x_LLLL] + u[idx_x_RRRR]))/dx_sq;
                     }
                 }
             }
@@ -329,10 +329,10 @@ DerivativeSecondOrder::computeDerivative(
                         const int idx_x_RRR = (i + 3 + offset_0_data) +
                             (j + offset_1_data)*ghostcell_dim_0_data;
                         
-                        d2udx2[idx_derivative] = (double(-49)/double(18)*u[idx_x] +
-                                                  double(3)/double(2)*(u[idx_x_L] + u[idx_x_R]) +
-                                                  double(-3)/double(20)*(u[idx_x_LL] + u[idx_x_RR]) +
-                                                  double(1)/double(90)*(u[idx_x_LLL] + u[idx_x_RRR]))/dx_sq;
+                        d2udx2[idx_derivative] = (Real(-49)/Real(18)*u[idx_x] +
+                                                  Real(3)/Real(2)*(u[idx_x_L] + u[idx_x_R]) +
+                                                  Real(-3)/Real(20)*(u[idx_x_LL] + u[idx_x_RR]) +
+                                                  Real(1)/Real(90)*(u[idx_x_LLL] + u[idx_x_RRR]))/dx_sq;
                     }
                 }
             }
@@ -362,9 +362,9 @@ DerivativeSecondOrder::computeDerivative(
                         const int idx_x_RR = (i + 2 + offset_0_data) +
                             (j + offset_1_data)*ghostcell_dim_0_data;
                         
-                        d2udx2[idx_derivative] = (double(-5)/double(2)*u[idx_x] +
-                                                  double(4)/double(3)*(u[idx_x_L] + u[idx_x_R]) +
-                                                  double(-1)/double(12)*(u[idx_x_LL] + u[idx_x_RR]))/dx_sq;
+                        d2udx2[idx_derivative] = (Real(-5)/Real(2)*u[idx_x] +
+                                                  Real(4)/Real(3)*(u[idx_x_L] + u[idx_x_R]) +
+                                                  Real(-1)/Real(12)*(u[idx_x_LL] + u[idx_x_RR]))/dx_sq;
                     }
                 }
             }
@@ -388,7 +388,7 @@ DerivativeSecondOrder::computeDerivative(
                         const int idx_x_R = (i + 1 + offset_0_data) +
                             (j + offset_1_data)*ghostcell_dim_0_data;
                         
-                        d2udx2[idx_derivative] = (double(-2)*u[idx_x] +
+                        d2udx2[idx_derivative] = (Real(-2)*u[idx_x] +
                                                   (u[idx_x_L] + u[idx_x_R]))/dx_sq;
                     }
                 }
@@ -479,11 +479,11 @@ DerivativeSecondOrder::computeDerivative(
                                 (k + offset_2_data)*ghostcell_dim_0_data*
                                     ghostcell_dim_1_data;
                             
-                            d2udx2[idx_derivative] = (double(-205)/double(72)*u[idx_x] +
-                                                      double(8)/double(5)*(u[idx_x_L] + u[idx_x_R]) +
-                                                      double(-1)/double(5)*(u[idx_x_LL] + u[idx_x_RR]) +
-                                                      double(8)/double(315)*(u[idx_x_LLL] + u[idx_x_RRR]) +
-                                                      double(-1)/double(560)*(u[idx_x_LLLL] + u[idx_x_RRRR]))/dx_sq;
+                            d2udx2[idx_derivative] = (Real(-205)/Real(72)*u[idx_x] +
+                                                      Real(8)/Real(5)*(u[idx_x_L] + u[idx_x_R]) +
+                                                      Real(-1)/Real(5)*(u[idx_x_LL] + u[idx_x_RR]) +
+                                                      Real(8)/Real(315)*(u[idx_x_LLL] + u[idx_x_RRR]) +
+                                                      Real(-1)/Real(560)*(u[idx_x_LLLL] + u[idx_x_RRRR]))/dx_sq;
                         }
                     }
                 }
@@ -538,10 +538,10 @@ DerivativeSecondOrder::computeDerivative(
                                 (k + offset_2_data)*ghostcell_dim_0_data*
                                     ghostcell_dim_1_data;
                             
-                            d2udx2[idx_derivative] = (double(-49)/double(18)*u[idx_x] +
-                                                      double(3)/double(2)*(u[idx_x_L] + u[idx_x_R]) +
-                                                      double(-3)/double(20)*(u[idx_x_LL] + u[idx_x_RR]) +
-                                                      double(1)/double(90)*(u[idx_x_LLL] + u[idx_x_RRR]))/dx_sq;
+                            d2udx2[idx_derivative] = (Real(-49)/Real(18)*u[idx_x] +
+                                                      Real(3)/Real(2)*(u[idx_x_L] + u[idx_x_R]) +
+                                                      Real(-3)/Real(20)*(u[idx_x_LL] + u[idx_x_RR]) +
+                                                      Real(1)/Real(90)*(u[idx_x_LLL] + u[idx_x_RRR]))/dx_sq;
                         }
                     }
                 }
@@ -586,9 +586,9 @@ DerivativeSecondOrder::computeDerivative(
                                 (k + offset_2_data)*ghostcell_dim_0_data*
                                     ghostcell_dim_1_data;
                             
-                            d2udx2[idx_derivative] = (double(-5)/double(2)*u[idx_x] +
-                                                      double(4)/double(3)*(u[idx_x_L] + u[idx_x_R]) +
-                                                      double(-1)/double(12)*(u[idx_x_LL] + u[idx_x_RR]))/dx_sq;
+                            d2udx2[idx_derivative] = (Real(-5)/Real(2)*u[idx_x] +
+                                                      Real(4)/Real(3)*(u[idx_x_L] + u[idx_x_R]) +
+                                                      Real(-1)/Real(12)*(u[idx_x_LL] + u[idx_x_RR]))/dx_sq;
                         }
                     }
                 }
@@ -623,7 +623,7 @@ DerivativeSecondOrder::computeDerivative(
                                 (k + offset_2_data)*ghostcell_dim_0_data*
                                     ghostcell_dim_1_data;
                             
-                            d2udx2[idx_derivative] = (double(-2)*u[idx_x] +
+                            d2udx2[idx_derivative] = (Real(-2)*u[idx_x] +
                                                       (u[idx_x_L] + u[idx_x_R]))/dx_sq;
                         }
                     }
@@ -634,9 +634,9 @@ DerivativeSecondOrder::computeDerivative(
     else if (d_direction == DIRECTION::Y_DIRECTION)
     {
         // Get the pointer to the derivative.
-        double* d2udy2 = derivative->getPointer(depth_derivative);
+        Real* d2udy2 = derivative->getPointer(depth_derivative);
         
-        const double dy_sq = dx*dx;
+        const Real dy_sq = dx*dx;
         
         if (d_dim == tbox::Dimension(2))
         {
@@ -695,11 +695,11 @@ DerivativeSecondOrder::computeDerivative(
                         const int idx_y_TTTT = (i + offset_0_data) +
                             (j + 4 + offset_1_data)*ghostcell_dim_0_data;
                         
-                        d2udy2[idx_derivative] = (double(-205)/double(72)*u[idx_y] +
-                                                  double(8)/double(5)*(u[idx_y_B] + u[idx_y_T]) +
-                                                  double(-1)/double(5)*(u[idx_y_BB] + u[idx_y_TT]) +
-                                                  double(8)/double(315)*(u[idx_y_BBB] + u[idx_y_TTT]) +
-                                                  double(-1)/double(560)*(u[idx_y_BBBB] + u[idx_y_TTTT]))/dy_sq;
+                        d2udy2[idx_derivative] = (Real(-205)/Real(72)*u[idx_y] +
+                                                  Real(8)/Real(5)*(u[idx_y_B] + u[idx_y_T]) +
+                                                  Real(-1)/Real(5)*(u[idx_y_BB] + u[idx_y_TT]) +
+                                                  Real(8)/Real(315)*(u[idx_y_BBB] + u[idx_y_TTT]) +
+                                                  Real(-1)/Real(560)*(u[idx_y_BBBB] + u[idx_y_TTTT]))/dy_sq;
                     }
                 }
             }
@@ -735,10 +735,10 @@ DerivativeSecondOrder::computeDerivative(
                         const int idx_y_TTT = (i + offset_0_data) +
                             (j + 3 + offset_1_data)*ghostcell_dim_0_data;
                         
-                        d2udy2[idx_derivative] = (double(-49)/double(18)*u[idx_y] +
-                                                  double(3)/double(2)*(u[idx_y_B] + u[idx_y_T]) +
-                                                  double(-3)/double(20)*(u[idx_y_BB] + u[idx_y_TT]) +
-                                                  double(1)/double(90)*(u[idx_y_BBB] + u[idx_y_TTT]))/dy_sq;
+                        d2udy2[idx_derivative] = (Real(-49)/Real(18)*u[idx_y] +
+                                                  Real(3)/Real(2)*(u[idx_y_B] + u[idx_y_T]) +
+                                                  Real(-3)/Real(20)*(u[idx_y_BB] + u[idx_y_TT]) +
+                                                  Real(1)/Real(90)*(u[idx_y_BBB] + u[idx_y_TTT]))/dy_sq;
                     }
                 }
             }
@@ -768,9 +768,9 @@ DerivativeSecondOrder::computeDerivative(
                         const int idx_y_TT = (i + offset_0_data) +
                             (j + 2 + offset_1_data)*ghostcell_dim_0_data;
                         
-                        d2udy2[idx_derivative] = (double(-5)/double(2)*u[idx_y] +
-                                                  double(4)/double(3)*(u[idx_y_B] + u[idx_y_T]) +
-                                                  double(-1)/double(12)*(u[idx_y_BB] + u[idx_y_TT]))/dy_sq;
+                        d2udy2[idx_derivative] = (Real(-5)/Real(2)*u[idx_y] +
+                                                  Real(4)/Real(3)*(u[idx_y_B] + u[idx_y_T]) +
+                                                  Real(-1)/Real(12)*(u[idx_y_BB] + u[idx_y_TT]))/dy_sq;
                     }
                 }
             }
@@ -794,7 +794,7 @@ DerivativeSecondOrder::computeDerivative(
                         const int idx_y_T = (i + offset_0_data) +
                             (j + 1 + offset_1_data)*ghostcell_dim_0_data;
                         
-                        d2udy2[idx_derivative] = (double(-2)*u[idx_y] +
+                        d2udy2[idx_derivative] = (Real(-2)*u[idx_y] +
                                                   (u[idx_y_B] + u[idx_y_T]))/dy_sq;
                     }
                 }
@@ -885,11 +885,11 @@ DerivativeSecondOrder::computeDerivative(
                                 (k + offset_2_data)*ghostcell_dim_0_data*
                                     ghostcell_dim_1_data;
                             
-                            d2udy2[idx_derivative] = (double(-205)/double(72)*u[idx_y] +
-                                                      double(8)/double(5)*(u[idx_y_B] + u[idx_y_T]) +
-                                                      double(-1)/double(5)*(u[idx_y_BB] + u[idx_y_TT]) +
-                                                      double(8)/double(315)*(u[idx_y_BBB] + u[idx_y_TTT]) +
-                                                      double(-1)/double(560)*(u[idx_y_BBBB] + u[idx_y_TTTT]))/dy_sq;
+                            d2udy2[idx_derivative] = (Real(-205)/Real(72)*u[idx_y] +
+                                                      Real(8)/Real(5)*(u[idx_y_B] + u[idx_y_T]) +
+                                                      Real(-1)/Real(5)*(u[idx_y_BB] + u[idx_y_TT]) +
+                                                      Real(8)/Real(315)*(u[idx_y_BBB] + u[idx_y_TTT]) +
+                                                      Real(-1)/Real(560)*(u[idx_y_BBBB] + u[idx_y_TTTT]))/dy_sq;
                         }
                     }
                 }
@@ -944,10 +944,10 @@ DerivativeSecondOrder::computeDerivative(
                                 (k + offset_2_data)*ghostcell_dim_0_data*
                                     ghostcell_dim_1_data;
                             
-                            d2udy2[idx_derivative] = (double(-49)/double(18)*u[idx_y] +
-                                                      double(3)/double(2)*(u[idx_y_B] + u[idx_y_T]) +
-                                                      double(-3)/double(20)*(u[idx_y_BB] + u[idx_y_TT]) +
-                                                      double(1)/double(90)*(u[idx_y_BBB] + u[idx_y_TTT]))/dy_sq;
+                            d2udy2[idx_derivative] = (Real(-49)/Real(18)*u[idx_y] +
+                                                      Real(3)/Real(2)*(u[idx_y_B] + u[idx_y_T]) +
+                                                      Real(-3)/Real(20)*(u[idx_y_BB] + u[idx_y_TT]) +
+                                                      Real(1)/Real(90)*(u[idx_y_BBB] + u[idx_y_TTT]))/dy_sq;
                         }
                     }
                 }
@@ -992,9 +992,9 @@ DerivativeSecondOrder::computeDerivative(
                                 (k + offset_2_data)*ghostcell_dim_0_data*
                                     ghostcell_dim_1_data;
                             
-                            d2udy2[idx_derivative] = (double(-5)/double(2)*u[idx_y] +
-                                                      double(4)/double(3)*(u[idx_y_B] + u[idx_y_T]) +
-                                                      double(-1)/double(12)*(u[idx_y_BB] + u[idx_y_TT]))/dy_sq;
+                            d2udy2[idx_derivative] = (Real(-5)/Real(2)*u[idx_y] +
+                                                      Real(4)/Real(3)*(u[idx_y_B] + u[idx_y_T]) +
+                                                      Real(-1)/Real(12)*(u[idx_y_BB] + u[idx_y_TT]))/dy_sq;
                         }
                     }
                 }
@@ -1029,7 +1029,7 @@ DerivativeSecondOrder::computeDerivative(
                                 (k + offset_2_data)*ghostcell_dim_0_data*
                                     ghostcell_dim_1_data;
                             
-                            d2udy2[idx_derivative] = (double(-2)*u[idx_y] +
+                            d2udy2[idx_derivative] = (Real(-2)*u[idx_y] +
                                                       (u[idx_y_B] + u[idx_y_T]))/dy_sq;
                         }
                     }
@@ -1040,9 +1040,9 @@ DerivativeSecondOrder::computeDerivative(
     else if (d_direction == DIRECTION::Z_DIRECTION)
     {
         // Get the pointer to the derivative.
-        double* d2udz2 = derivative->getPointer(depth_derivative);
+        Real* d2udz2 = derivative->getPointer(depth_derivative);
         
-        const double dz_sq = dx*dx;
+        const Real dz_sq = dx*dx;
         
         /*
          * Get the local lower indices, numbers of cells in each dimension and offsets.
@@ -1127,11 +1127,11 @@ DerivativeSecondOrder::computeDerivative(
                             (k + 4 + offset_2_data)*ghostcell_dim_0_data*
                                 ghostcell_dim_1_data;
                         
-                        d2udz2[idx_derivative] = (double(-205)/double(72)*u[idx_z] +
-                                                  double(8)/double(5)*(u[idx_z_B] + u[idx_z_F]) +
-                                                  double(-1)/double(5)*(u[idx_z_BB] + u[idx_z_FF]) +
-                                                  double(8)/double(315)*(u[idx_z_BBB] + u[idx_z_FFF]) +
-                                                  double(-1)/double(560)*(u[idx_z_BBBB] + u[idx_z_FFFF]))/dz_sq;
+                        d2udz2[idx_derivative] = (Real(-205)/Real(72)*u[idx_z] +
+                                                  Real(8)/Real(5)*(u[idx_z_B] + u[idx_z_F]) +
+                                                  Real(-1)/Real(5)*(u[idx_z_BB] + u[idx_z_FF]) +
+                                                  Real(8)/Real(315)*(u[idx_z_BBB] + u[idx_z_FFF]) +
+                                                  Real(-1)/Real(560)*(u[idx_z_BBBB] + u[idx_z_FFFF]))/dz_sq;
                     }
                 }
             }
@@ -1186,10 +1186,10 @@ DerivativeSecondOrder::computeDerivative(
                             (k + 3 + offset_2_data)*ghostcell_dim_0_data*
                                 ghostcell_dim_1_data;
                         
-                        d2udz2[idx_derivative] = (double(-49)/double(18)*u[idx_z] +
-                                                  double(3)/double(2)*(u[idx_z_B] + u[idx_z_F]) +
-                                                  double(-3)/double(20)*(u[idx_z_BB] + u[idx_z_FF]) +
-                                                  double(1)/double(90)*(u[idx_z_BBB] + u[idx_z_FFF]))/dz_sq;
+                        d2udz2[idx_derivative] = (Real(-49)/Real(18)*u[idx_z] +
+                                                  Real(3)/Real(2)*(u[idx_z_B] + u[idx_z_F]) +
+                                                  Real(-3)/Real(20)*(u[idx_z_BB] + u[idx_z_FF]) +
+                                                  Real(1)/Real(90)*(u[idx_z_BBB] + u[idx_z_FFF]))/dz_sq;
                     }
                 }
             }
@@ -1234,9 +1234,9 @@ DerivativeSecondOrder::computeDerivative(
                             (k + 2 + offset_2_data)*ghostcell_dim_0_data*
                                 ghostcell_dim_1_data;
                         
-                        d2udz2[idx_derivative] = (double(-5)/double(2)*u[idx_z] +
-                                                  double(4)/double(3)*(u[idx_z_B] + u[idx_z_F]) +
-                                                  double(-1)/double(12)*(u[idx_z_BB] + u[idx_z_FF]))/dz_sq;
+                        d2udz2[idx_derivative] = (Real(-5)/Real(2)*u[idx_z] +
+                                                  Real(4)/Real(3)*(u[idx_z_B] + u[idx_z_F]) +
+                                                  Real(-1)/Real(12)*(u[idx_z_BB] + u[idx_z_FF]))/dz_sq;
                     }
                 }
             }
@@ -1271,7 +1271,7 @@ DerivativeSecondOrder::computeDerivative(
                             (k + 1 + offset_2_data)*ghostcell_dim_0_data*
                                 ghostcell_dim_1_data;
                         
-                        d2udz2[idx_derivative] = (double(-2)*u[idx_z] +
+                        d2udz2[idx_derivative] = (Real(-2)*u[idx_z] +
                                                   (u[idx_z_B] + u[idx_z_F]))/dz_sq;
                     }
                 }

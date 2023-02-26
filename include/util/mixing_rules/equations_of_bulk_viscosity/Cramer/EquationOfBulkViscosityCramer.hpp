@@ -25,21 +25,21 @@ class EquationOfBulkViscosityCramer: public EquationOfBulkViscosity
         /*
          * Compute the thermal conductivity.
          */
-        double
+        Real
         getBulkViscosity(
-            const double* const pressure,
-            const double* const temperature,
-            const std::vector<const double*>& molecular_properties) const;
+            const Real* const pressure,
+            const Real* const temperature,
+            const std::vector<const Real*>& molecular_properties) const;
         
         /*
          * Compute the bulk viscosity.
          */
         void
         computeBulkViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const std::vector<const double*>& molecular_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_bulk_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const std::vector<const Real*>& molecular_properties,
             const hier::Box& domain) const;
         
         /*
@@ -47,10 +47,10 @@ class EquationOfBulkViscosityCramer: public EquationOfBulkViscosity
          */
         void
         computeBulkViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_molecular_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_bulk_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_molecular_properties,
             const hier::Box& domain) const;
         
     private:

@@ -266,7 +266,7 @@ class FlowModel:
         /*
          * Get the conservative variables.
          */
-        virtual std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >
+        virtual std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > >
         getConservativeVariables() = 0;
         
         /*
@@ -331,19 +331,19 @@ class FlowModel:
         /*
          * Get the cell data of one cell variable in the registered patch.
          */
-        virtual HAMERS_SHARED_PTR<pdat::CellData<double> >
+        virtual HAMERS_SHARED_PTR<pdat::CellData<Real> >
         getCellData(const std::string& variable_key) = 0;
         
         /*
          * Get the cell data of different cell variables in the registered patch.
          */
-        virtual std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+        virtual std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
         getCellData(const std::vector<std::string>& variable_keys) = 0;
         
         /*
          * Get the cell data of species cell variables in the registered patch.
          */
-        virtual std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+        virtual std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
         getSpeciesCellData(const std::string& variable_key) = 0;
         
         /*
@@ -367,13 +367,13 @@ class FlowModel:
         /*
          * Get the cell data of the conservative variables in the registered patch.
          */
-        virtual std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+        virtual std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
         getCellDataOfConservativeVariables() = 0;
         
         /*
          * Get the cell data of the primitive variables in the registered patch.
          */
-        virtual std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+        virtual std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
         getCellDataOfPrimitiveVariables() = 0;
         
         /*

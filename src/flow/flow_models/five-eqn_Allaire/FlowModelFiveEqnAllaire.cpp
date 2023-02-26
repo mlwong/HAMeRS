@@ -9,10 +9,10 @@
 #include "flow/flow_models/five-eqn_Allaire/FlowModelSourceUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelStatisticsUtilitiesFiveEqnAllaire.hpp"
 
-HAMERS_SHARED_PTR<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_partial_densities;
-HAMERS_SHARED_PTR<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_momentum;
-HAMERS_SHARED_PTR<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_total_energy;
-HAMERS_SHARED_PTR<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_volume_fractions;
+HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelFiveEqnAllaire::s_variable_partial_densities;
+HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelFiveEqnAllaire::s_variable_momentum;
+HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelFiveEqnAllaire::s_variable_total_energy;
+HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelFiveEqnAllaire::s_variable_volume_fractions;
 
 FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
     const std::string& object_name,
@@ -117,17 +117,17 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
      * Initialize the conservative variables.
      */
     
-    s_variable_partial_densities = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(d_dim, "partial densities", d_num_species));
+    s_variable_partial_densities = HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
+        new pdat::CellVariable<Real>(d_dim, "partial densities", d_num_species));
     
-    s_variable_momentum = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(d_dim, "momentum", d_dim.getValue()));
+    s_variable_momentum = HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
+        new pdat::CellVariable<Real>(d_dim, "momentum", d_dim.getValue()));
     
-    s_variable_total_energy = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(d_dim, "total energy", 1));
+    s_variable_total_energy = HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
+        new pdat::CellVariable<Real>(d_dim, "total energy", 1));
     
-    s_variable_volume_fractions = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(d_dim, "volume fractions", d_num_species));
+    s_variable_volume_fractions = HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
+        new pdat::CellVariable<Real>(d_dim, "volume fractions", d_num_species));
     
     /*
      * Initialize d_equation_of_state_mixing_rules_manager and get the equation of state mixing rules object.
@@ -625,10 +625,10 @@ FlowModelFiveEqnAllaire::getVariableTypesOfPrimitiveVariables()
 /*
  * Get the conservative variables.
  */
-std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > >
 FlowModelFiveEqnAllaire::getConservativeVariables()
 {
-    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > conservative_variables;
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > conservative_variables;
     conservative_variables.reserve(4);
     
     conservative_variables.push_back(s_variable_partial_densities);
@@ -665,8 +665,8 @@ FlowModelFiveEqnAllaire::registerPatchWithDataContext(
      * Set the number of ghost cells of conservative variables.
      */
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             d_patch->getPatchData(s_variable_partial_densities, getDataContext())));
     
     d_num_ghosts = data_partial_densities->getGhostCellWidth();
@@ -984,7 +984,7 @@ FlowModelFiveEqnAllaire::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of density.
                 d_data_density.reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_density));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_density));
             }
         }
         else
@@ -1004,7 +1004,7 @@ FlowModelFiveEqnAllaire::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of mass fractions.
                 d_data_mass_fractions.reset(
-                    new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_mass_fractions));
+                    new pdat::CellData<Real>(d_interior_box, d_num_species, d_num_subghosts_mass_fractions));
             }
         }
         else
@@ -1024,7 +1024,7 @@ FlowModelFiveEqnAllaire::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of velocity.
                 d_data_velocity.reset(
-                    new pdat::CellData<double>(d_interior_box, d_dim.getValue(), d_num_subghosts_velocity));
+                    new pdat::CellData<Real>(d_interior_box, d_dim.getValue(), d_num_subghosts_velocity));
             }
         }
         else
@@ -1044,7 +1044,7 @@ FlowModelFiveEqnAllaire::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of internal energy.
                 d_data_internal_energy.reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_internal_energy));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_internal_energy));
             }
         }
         else
@@ -1064,7 +1064,7 @@ FlowModelFiveEqnAllaire::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of pressure.
                 d_data_pressure.reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_pressure));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_pressure));
             }
         }
         else
@@ -1084,7 +1084,7 @@ FlowModelFiveEqnAllaire::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of sound speed.
                 d_data_sound_speed.reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_sound_speed));
             }
         }
         else
@@ -1104,7 +1104,7 @@ FlowModelFiveEqnAllaire::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of convective flux in the x-direction.
                 d_data_convective_flux_x.reset(
-                    new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_x));
+                    new pdat::CellData<Real>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_x));
             }
         }
         else
@@ -1124,7 +1124,7 @@ FlowModelFiveEqnAllaire::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of convective flux in the y-direction.
                 d_data_convective_flux_y.reset(
-                    new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_y));
+                    new pdat::CellData<Real>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_y));
             }
         }
         else
@@ -1144,7 +1144,7 @@ FlowModelFiveEqnAllaire::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of convective flux in the z-direction.
                 d_data_convective_flux_z.reset(
-                    new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_z));
+                    new pdat::CellData<Real>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_z));
             }
         }
         else
@@ -1164,7 +1164,7 @@ FlowModelFiveEqnAllaire::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of maximum wave speed in the x-direction.
                 d_data_max_wave_speed_x.reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_x));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_max_wave_speed_x));
             }
         }
         else
@@ -1184,7 +1184,7 @@ FlowModelFiveEqnAllaire::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of maximum wave speed in the y-direction.
                 d_data_max_wave_speed_y.reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_y));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_max_wave_speed_y));
             }
         }
         else
@@ -1204,7 +1204,7 @@ FlowModelFiveEqnAllaire::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of maximum wave speed in the z-direction.
                 d_data_max_wave_speed_z.reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_z));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_max_wave_speed_z));
             }
         }
         else
@@ -1224,7 +1224,7 @@ FlowModelFiveEqnAllaire::allocateMemoryForDerivedCellData()
             {
                 // Create the cell data of maximum diffusivity.
                 d_data_max_diffusivity.reset(
-                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+                    new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
             }
         }
         else
@@ -1246,7 +1246,7 @@ FlowModelFiveEqnAllaire::allocateMemoryForDerivedCellData()
                 if (!d_data_species_densities[si])
                 {
                     d_data_species_densities[si].reset(
-                        new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_species_densities));
+                        new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_species_densities));
                 }
             }
         }
@@ -1269,7 +1269,7 @@ FlowModelFiveEqnAllaire::allocateMemoryForDerivedCellData()
                 if (!d_data_species_temperatures[si])
                 {
                     d_data_species_temperatures[si].reset(
-                        new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_species_temperatures));
+                        new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_species_temperatures));
                 }
             }
         }
@@ -1470,7 +1470,7 @@ FlowModelFiveEqnAllaire::computeDerivedCellData()
 /*
  * Get the cell data of one cell variable in the registered patch.
  */
-HAMERS_SHARED_PTR<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<Real> >
 FlowModelFiveEqnAllaire::getCellData(
     const std::string& variable_key)
 {
@@ -1483,7 +1483,7 @@ FlowModelFiveEqnAllaire::getCellData(
             << std::endl);
     }
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > cell_data;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > cell_data;
     
     if (variable_key == "PARTIAL_DENSITIES")
     {
@@ -1660,11 +1660,11 @@ FlowModelFiveEqnAllaire::getCellData(
 /*
  * Get the cell data of different cell variables in the registered patch.
  */
-std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
 FlowModelFiveEqnAllaire::getCellData(
     const std::vector<std::string>& variable_keys)
 {
-    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > cell_data(
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > cell_data(
         static_cast<int>(variable_keys.size()));
     
     for (int vi = 0; static_cast<int>(variable_keys.size()); vi++)
@@ -1679,7 +1679,7 @@ FlowModelFiveEqnAllaire::getCellData(
 /*
  * Get the cell data of species cell variables in the registered patch.
  */
-std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
 FlowModelFiveEqnAllaire::getSpeciesCellData(
     const std::string& variable_key)
 {
@@ -1692,7 +1692,7 @@ FlowModelFiveEqnAllaire::getSpeciesCellData(
             << std::endl);
     }
     
-    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > species_cell_data;
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > species_cell_data;
     
     if (variable_key == "SPECIES_DENSITIES")
     {
@@ -1770,19 +1770,19 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
         ghostcell_dims_mask = mask_cell_data->getGhostBox().numberCells();
     }
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities = getCellDataOfPartialDensities();
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum = getCellDataOfMomentum();
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy = getCellDataOfTotalEnergy();
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions = getCellDataOfVolumeFractions();
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities = getCellDataOfPartialDensities();
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum = getCellDataOfMomentum();
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_total_energy = getCellDataOfTotalEnergy();
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_volume_fractions = getCellDataOfVolumeFractions();
     
-    std::vector<double*> Z_rho;
+    std::vector<Real*> Z_rho;
     Z_rho.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
         Z_rho.push_back(data_partial_densities->getPointer(si));
     }
-    double* E = data_total_energy->getPointer(0);
-    std::vector<double*> Z;
+    Real* E = data_total_energy->getPointer(0);
+    std::vector<Real*> Z;
     Z.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
@@ -1792,7 +1792,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
     if (d_dim == tbox::Dimension(1))
     {
         // Get the pointer to the momentum component.
-        double* rho_u = data_momentum->getPointer(0);
+        Real* rho_u = data_momentum->getPointer(0);
         
         // Get the dimension and the number of ghost cells.
         
@@ -1815,7 +1815,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                     
                     if (mask[idx_mask] == mask_valid_value)
                     {
-                        Z_rho[si][idx] = double(0);
+                        Z_rho[si][idx] = Real(0);
                     }
                 }
             }
@@ -1829,8 +1829,8 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                 
                 if (mask[idx_mask] == mask_valid_value)
                 {
-                    rho_u[idx] = double(0);
-                    E[idx]     = double(0);
+                    rho_u[idx] = Real(0);
+                    E[idx]     = Real(0);
                 }
             }
             
@@ -1845,7 +1845,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                     
                     if (mask[idx_mask] == mask_valid_value)
                     {
-                        Z[si][idx] = double(0);
+                        Z[si][idx] = Real(0);
                     }
                 }
             }
@@ -1860,7 +1860,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                     // Compute the linear index.
                     const int idx = i + num_ghosts_0;
                     
-                    Z_rho[si][idx] = double(0);
+                    Z_rho[si][idx] = Real(0);
                 }
             }
             
@@ -1870,8 +1870,8 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                 // Compute the linear index.
                 const int idx = i + num_ghosts_0;
                 
-                rho_u[idx] = double(0);
-                E[idx]     = double(0);
+                rho_u[idx] = Real(0);
+                E[idx]     = Real(0);
             }
             
             for (int si = 0; si < d_num_species; si++)
@@ -1882,7 +1882,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                     // Compute the linear index.
                     const int idx = i + num_ghosts_0;
                     
-                    Z[si][idx] = double(0);
+                    Z[si][idx] = Real(0);
                 }
             }
         }
@@ -1890,8 +1890,8 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
     else if (d_dim == tbox::Dimension(2))
     {
         // Get the pointers to the momentum components.
-        double* rho_u = data_momentum->getPointer(0);
-        double* rho_v = data_momentum->getPointer(1);
+        Real* rho_u = data_momentum->getPointer(0);
+        Real* rho_v = data_momentum->getPointer(1);
         
         // Get the dimensions and the numbers of ghost cells.
         
@@ -1924,7 +1924,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                         
                         if (mask[idx_mask] == mask_valid_value)
                         {
-                            Z_rho[si][idx] = double(0);
+                            Z_rho[si][idx] = Real(0);
                         }
                     }
                 }
@@ -1944,9 +1944,9 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                     
                     if (mask[idx_mask] == mask_valid_value)
                     {
-                        rho_u[idx] = double(0);
-                        rho_v[idx] = double(0);
-                        E[idx]     = double(0);
+                        rho_u[idx] = Real(0);
+                        rho_v[idx] = Real(0);
+                        E[idx]     = Real(0);
                     }
                 }
             }
@@ -1967,7 +1967,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                         
                         if (mask[idx_mask] == mask_valid_value)
                         {
-                            Z[si][idx] = double(0);
+                            Z[si][idx] = Real(0);
                         }
                     }
                 }
@@ -1986,7 +1986,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                         const int idx  = (i + num_ghosts_0) +
                             (j + num_ghosts_1)*ghostcell_dim_0;
                         
-                        Z_rho[si][idx] = double(0);
+                        Z_rho[si][idx] = Real(0);
                     }
                 }
             }
@@ -2000,9 +2000,9 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                     const int idx  = (i + num_ghosts_0) +
                         (j + num_ghosts_1)*ghostcell_dim_0;
                     
-                    rho_u[idx] = double(0);
-                    rho_v[idx] = double(0);
-                    E[idx]     = double(0);
+                    rho_u[idx] = Real(0);
+                    rho_v[idx] = Real(0);
+                    E[idx]     = Real(0);
                 }
             }
             
@@ -2017,7 +2017,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                         const int idx  = (i + num_ghosts_0) +
                             (j + num_ghosts_1)*ghostcell_dim_0;
                         
-                        Z[si][idx] = double(0);
+                        Z[si][idx] = Real(0);
                     }
                 }
             }
@@ -2026,9 +2026,9 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
     else if (d_dim == tbox::Dimension(3))
     {
         // Get the pointers to the momentum components.
-        double* rho_u = data_momentum->getPointer(0);
-        double* rho_v = data_momentum->getPointer(1);
-        double* rho_w = data_momentum->getPointer(2);
+        Real* rho_u = data_momentum->getPointer(0);
+        Real* rho_v = data_momentum->getPointer(1);
+        Real* rho_w = data_momentum->getPointer(2);
         
         // Get the dimensions and the numbers of ghost cells.
         
@@ -2070,7 +2070,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                             
                             if (mask[idx_mask] == mask_valid_value)
                             {
-                                Z_rho[si][idx] = double(0);
+                                Z_rho[si][idx] = Real(0);
                             }
                         }
                     }
@@ -2095,10 +2095,10 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                         
                         if (mask[idx_mask] == mask_valid_value)
                         {
-                            rho_u[idx] = double(0);
-                            rho_v[idx] = double(0);
-                            rho_w[idx] = double(0);
-                            E[idx]     = double(0);
+                            rho_u[idx] = Real(0);
+                            rho_v[idx] = Real(0);
+                            rho_w[idx] = Real(0);
+                            E[idx]     = Real(0);
                         }
                     }
                 }
@@ -2124,7 +2124,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                             
                             if (mask[idx_mask] == mask_valid_value)
                             {
-                                Z[si][idx] = double(0);
+                                Z[si][idx] = Real(0);
                             }
                         }
                     }
@@ -2147,7 +2147,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                                 (j + num_ghosts_1)*ghostcell_dim_0 +
                                 (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
                             
-                            Z_rho[si][idx] = double(0);
+                            Z_rho[si][idx] = Real(0);
                         }
                     }
                 }
@@ -2165,10 +2165,10 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                             (j + num_ghosts_1)*ghostcell_dim_0 +
                             (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
                         
-                        rho_u[idx] = double(0);
-                        rho_v[idx] = double(0);
-                        rho_w[idx] = double(0);
-                        E[idx]     = double(0);
+                        rho_u[idx] = Real(0);
+                        rho_v[idx] = Real(0);
+                        rho_w[idx] = Real(0);
+                        E[idx]     = Real(0);
                     }
                 }
             }
@@ -2187,7 +2187,7 @@ FlowModelFiveEqnAllaire::fillCellDataOfConservativeVariablesWithZero(
                                 (j + num_ghosts_1)*ghostcell_dim_0 +
                                 (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
                             
-                            Z[si][idx] = double(0);
+                            Z[si][idx] = Real(0);
                         }
                     }
                 }
@@ -2238,9 +2238,9 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
         ghostcell_dims_mask = mask_cell_data->getGhostBox().numberCells();
     }
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions = getCellDataOfVolumeFractions();
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_volume_fractions = getCellDataOfVolumeFractions();
     
-    std::vector<double*> Z;
+    std::vector<Real*> Z;
     Z.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
@@ -2266,7 +2266,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
                 
                 if (mask[idx_mask] == mask_valid_value)
                 {
-                    Z[d_num_species - 1][idx] = double(1);
+                    Z[d_num_species - 1][idx] = Real(1);
                 }
             }
             
@@ -2294,7 +2294,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
                 // Compute the linear index.
                 const int idx = i + num_ghosts_0;
                 
-                Z[d_num_species - 1][idx] = double(1);
+                Z[d_num_species - 1][idx] = Real(1);
             }
             
             for (int si = 0; si < d_num_species - 1; si++)
@@ -2339,7 +2339,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
                     
                     if (mask[idx_mask] == mask_valid_value)
                     {
-                        Z[d_num_species - 1][idx] = double(1);
+                        Z[d_num_species - 1][idx] = Real(1);
                     }
                 }
             }
@@ -2377,7 +2377,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
                     const int idx  = (i + num_ghosts_0) +
                         (j + num_ghosts_1)*ghostcell_dim_0;
                     
-                    Z[d_num_species - 1][idx] = double(1);
+                    Z[d_num_species - 1][idx] = Real(1);
                 }
             }
             
@@ -2436,7 +2436,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
                         
                         if (mask[idx_mask] == mask_valid_value)
                         {
-                            Z[d_num_species - 1][idx] = double(1);
+                            Z[d_num_species - 1][idx] = Real(1);
                         }
                     }
                 }
@@ -2483,7 +2483,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
                             (j + num_ghosts_1)*ghostcell_dim_0 +
                             (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
                         
-                        Z[d_num_species - 1][idx] = double(1);
+                        Z[d_num_species - 1][idx] = Real(1);
                     }
                 }
             }
@@ -2515,7 +2515,7 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables(
 /*
  * Get the cell data of the conservative variables in the registered patch.
  */
-std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
 FlowModelFiveEqnAllaire::getCellDataOfConservativeVariables()
 {
     // Check whether a patch is already registered.
@@ -2527,7 +2527,7 @@ FlowModelFiveEqnAllaire::getCellDataOfConservativeVariables()
             << std::endl);
     }
     
-    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > cell_data;
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > cell_data;
     cell_data.reserve(4);
     
     cell_data.push_back(getCellDataOfPartialDensities());
@@ -2542,7 +2542,7 @@ FlowModelFiveEqnAllaire::getCellDataOfConservativeVariables()
 /*
  * Get the cell data of the primitive variables in the registered patch.
  */
-std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
 FlowModelFiveEqnAllaire::getCellDataOfPrimitiveVariables()
 {
     // Check whether a patch is already registered.
@@ -2554,7 +2554,7 @@ FlowModelFiveEqnAllaire::getCellDataOfPrimitiveVariables()
             << std::endl);
     }
     
-    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > cell_data;
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > cell_data;
     cell_data.reserve(4);
     
     cell_data.push_back(getCellDataOfPartialDensities());
@@ -2615,8 +2615,8 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     
     if (variable_name == "density")
     {
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2629,7 +2629,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
-        std::vector<const double*> Z_rho;
+        std::vector<const Real*> Z_rho;
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
@@ -2646,14 +2646,14 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 size_t idx_data = offset_data + i;
                 size_t idx_region = i;
                 
-                std::vector<const double*> Z_rho_ptr;
+                std::vector<const Real*> Z_rho_ptr;
                 Z_rho_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                 }
                 
-                buffer[idx_region] = d_equation_of_state_mixing_rules->getMixtureDensity(Z_rho_ptr);
+                buffer[idx_region] = double(d_equation_of_state_mixing_rules->getMixtureDensity(Z_rho_ptr));
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -2669,14 +2669,14 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     size_t idx_region = i +
                         j*region_dims[0];
                     
-                    std::vector<const double*> Z_rho_ptr;
+                    std::vector<const Real*> Z_rho_ptr;
                     Z_rho_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
                         Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                     }
                     
-                    buffer[idx_region] = d_equation_of_state_mixing_rules->getMixtureDensity(Z_rho_ptr);
+                    buffer[idx_region] = double(d_equation_of_state_mixing_rules->getMixtureDensity(Z_rho_ptr));
                 }
             }
         }
@@ -2697,14 +2697,14 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                             j*region_dims[0] +
                             k*region_dims[0]*region_dims[1];
                         
-                        std::vector<const double*> Z_rho_ptr;
+                        std::vector<const Real*> Z_rho_ptr;
                         Z_rho_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                         }
                         
-                        buffer[idx_region] = d_equation_of_state_mixing_rules->getMixtureDensity(Z_rho_ptr);
+                        buffer[idx_region] = double(d_equation_of_state_mixing_rules->getMixtureDensity(Z_rho_ptr));
                     }
                 }
             }
@@ -2714,20 +2714,20 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "pressure")
     {
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_momentum, d_plot_context)));
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_total_energy(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_volume_fractions(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_volume_fractions, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2746,17 +2746,17 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
-        std::vector<const double*> Z_rho;
+        std::vector<const Real*> Z_rho;
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
             Z_rho.push_back(data_partial_densities->getPointer(si));
         }
-        const double* const rho_u = data_momentum->getPointer(0);
-        const double* const rho_v = d_dim > tbox::Dimension(1) ? data_momentum->getPointer(1) : NULL;
-        const double* const rho_w = d_dim > tbox::Dimension(2) ? data_momentum->getPointer(2) : NULL;
-        const double* const E     = data_total_energy->getPointer(0);
-        std::vector<const double*> Z;
+        const Real* const rho_u = data_momentum->getPointer(0);
+        const Real* const rho_v = d_dim > tbox::Dimension(1) ? data_momentum->getPointer(1) : NULL;
+        const Real* const rho_w = d_dim > tbox::Dimension(2) ? data_momentum->getPointer(2) : NULL;
+        const Real* const E     = data_total_energy->getPointer(0);
+        std::vector<const Real*> Z;
         Z.reserve(d_num_species - 1);
         for (int si = 0; si < d_num_species - 1; si++)
         {
@@ -2773,34 +2773,34 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 size_t idx_data = offset_data + i;
                 size_t idx_region = i;
                 
-                std::vector<const double*> Z_rho_ptr;
+                std::vector<const Real*> Z_rho_ptr;
                 Z_rho_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                 }
-                const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                     Z_rho_ptr);
                 
                 /*
                  * Compute the internal energy.
                  */
-                double epsilon = double(0);
+                Real epsilon = Real(0);
                 if (d_dim == tbox::Dimension(1))
                 {
                     epsilon = (E[idx_data] -
-                        double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                        Real(1)/Real(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                 }
                 else if (d_dim == tbox::Dimension(2))
                 {
                     epsilon = (E[idx_data] -
-                        double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                        Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                         rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
                     epsilon = (E[idx_data] -
-                        double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                        Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                         rho_v[idx_data]*rho_v[idx_data] +
                         rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                 }
@@ -2808,7 +2808,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 /*
                  * Compute the mass fractions.
                  */
-                double Y[d_num_species];
+                Real Y[d_num_species];
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y[si] = Z_rho[si][idx_data]/rho;
@@ -2817,26 +2817,26 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 /*
                  * Get the pointers to the mass fractions.
                  */
-                std::vector<const double*> Y_ptr;
+                std::vector<const Real*> Y_ptr;
                 Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y_ptr.push_back(&Y[si]);
                 }
                 
-                std::vector<const double*> Z_ptr;
+                std::vector<const Real*> Z_ptr;
                 Z_ptr.reserve(d_num_species - 1);
                 for (int si = 0; si < d_num_species - 1; si++)
                 {
                     Z_ptr.push_back(&Z[si][idx_data]);
                 }
                 
-                buffer[idx_region] = d_equation_of_state_mixing_rules->
+                buffer[idx_region] = double(d_equation_of_state_mixing_rules->
                     getPressure(
                         &rho,
                         &epsilon,
                         Y_ptr,
-                        Z_ptr);
+                        Z_ptr));
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -2852,34 +2852,34 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     size_t idx_region = i +
                         j*region_dims[0];
                     
-                    std::vector<const double*> Z_rho_ptr;
+                    std::vector<const Real*> Z_rho_ptr;
                     Z_rho_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
                         Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                     }
-                    const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                    const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                         Z_rho_ptr);
                     
                     /*
                      * Compute the internal energy.
                      */
-                    double epsilon = double(0);
+                    Real epsilon = Real(0);
                     if (d_dim == tbox::Dimension(1))
                     {
                         epsilon = (E[idx_data] -
-                            double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                            Real(1)/Real(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                     }
                     else if (d_dim == tbox::Dimension(2))
                     {
                         epsilon = (E[idx_data] -
-                            double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                            Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                             rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                     }
                     else if (d_dim == tbox::Dimension(3))
                     {
                         epsilon = (E[idx_data] -
-                            double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                            Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                             rho_v[idx_data]*rho_v[idx_data] +
                             rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                     }
@@ -2887,7 +2887,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     /*
                      * Compute the mass fractions.
                      */
-                    double Y[d_num_species];
+                    Real Y[d_num_species];
                     for (int si = 0; si < d_num_species; si++)
                     {
                         Y[si] = Z_rho[si][idx_data]/rho;
@@ -2896,26 +2896,26 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     /*
                      * Get the pointers to the mass fractions.
                      */
-                    std::vector<const double*> Y_ptr;
+                    std::vector<const Real*> Y_ptr;
                     Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
                         Y_ptr.push_back(&Y[si]);
                     }
                     
-                    std::vector<const double*> Z_ptr;
+                    std::vector<const Real*> Z_ptr;
                     Z_ptr.reserve(d_num_species - 1);
                     for (int si = 0; si < d_num_species - 1; si++)
                     {
                         Z_ptr.push_back(&Z[si][idx_data]);
                     }
                     
-                    buffer[idx_region] = d_equation_of_state_mixing_rules->
+                    buffer[idx_region] = double(d_equation_of_state_mixing_rules->
                         getPressure(
                             &rho,
                             &epsilon,
                             Y_ptr,
-                            Z_ptr);
+                            Z_ptr));
                 }
             }
         }
@@ -2936,34 +2936,34 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                             j*region_dims[0] +
                             k*region_dims[0]*region_dims[1];
                         
-                        std::vector<const double*> Z_rho_ptr;
+                        std::vector<const Real*> Z_rho_ptr;
                         Z_rho_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                         }
-                        const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                        const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                             Z_rho_ptr);
                         
                         /*
                          * Compute the internal energy.
                          */
-                        double epsilon = double(0);
+                        Real epsilon = Real(0);
                         if (d_dim == tbox::Dimension(1))
                         {
                             epsilon = (E[idx_data] -
-                                double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                                Real(1)/Real(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                         }
                         else if (d_dim == tbox::Dimension(2))
                         {
                             epsilon = (E[idx_data] -
-                                double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                                Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                                 rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                         }
                         else if (d_dim == tbox::Dimension(3))
                         {
                             epsilon = (E[idx_data] -
-                                double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                                Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                                 rho_v[idx_data]*rho_v[idx_data] +
                                 rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                         }
@@ -2971,7 +2971,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                         /*
                          * Compute the mass fractions.
                          */
-                        double Y[d_num_species];
+                        Real Y[d_num_species];
                         for (int si = 0; si < d_num_species; si++)
                         {
                             Y[si] = Z_rho[si][idx_data]/rho;
@@ -2980,26 +2980,26 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                         /*
                          * Get the pointers to the mass fractions.
                          */
-                        std::vector<const double*> Y_ptr;
+                        std::vector<const Real*> Y_ptr;
                         Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             Y_ptr.push_back(&Y[si]);
                         }
                         
-                        std::vector<const double*> Z_ptr;
+                        std::vector<const Real*> Z_ptr;
                         Z_ptr.reserve(d_num_species - 1);
                         for (int si = 0; si < d_num_species - 1; si++)
                         {
                             Z_ptr.push_back(&Z[si][idx_data]);
                         }
                         
-                        buffer[idx_region] = d_equation_of_state_mixing_rules->
+                        buffer[idx_region] = double(d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho,
                                 &epsilon,
                                 Y_ptr,
-                                Z_ptr);
+                                Z_ptr));
                     }
                 }
             }
@@ -3009,20 +3009,20 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "sound speed")
     {
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_momentum, d_plot_context)));
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_total_energy(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_volume_fractions(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_volume_fractions, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3041,17 +3041,17 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
-        std::vector<const double*> Z_rho;
+        std::vector<const Real*> Z_rho;
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
             Z_rho.push_back(data_partial_densities->getPointer(si));
         }
-        const double* const rho_u = data_momentum->getPointer(0);
-        const double* const rho_v = d_dim > tbox::Dimension(1) ? data_momentum->getPointer(1) : NULL;
-        const double* const rho_w = d_dim > tbox::Dimension(2) ? data_momentum->getPointer(2) : NULL;
-        const double* const E     = data_total_energy->getPointer(0);
-        std::vector<const double*> Z;
+        const Real* const rho_u = data_momentum->getPointer(0);
+        const Real* const rho_v = d_dim > tbox::Dimension(1) ? data_momentum->getPointer(1) : NULL;
+        const Real* const rho_w = d_dim > tbox::Dimension(2) ? data_momentum->getPointer(2) : NULL;
+        const Real* const E     = data_total_energy->getPointer(0);
+        std::vector<const Real*> Z;
         Z.reserve(d_num_species - 1);
         for (int si = 0; si < d_num_species - 1; si++)
         {
@@ -3068,34 +3068,34 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 size_t idx_data = offset_data + i;
                 size_t idx_region = i;
                 
-                std::vector<const double*> Z_rho_ptr;
+                std::vector<const Real*> Z_rho_ptr;
                 Z_rho_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                 }
-                const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                     Z_rho_ptr);
                 
                 /*
                  * Compute the internal energy.
                  */
-                double epsilon = double(0);
+                Real epsilon = Real(0);
                 if (d_dim == tbox::Dimension(1))
                 {
                     epsilon = (E[idx_data] -
-                        double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                        Real(1)/Real(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                 }
                 else if (d_dim == tbox::Dimension(2))
                 {
                     epsilon = (E[idx_data] -
-                        double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                        Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                         rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
                     epsilon = (E[idx_data] -
-                        double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                        Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                         rho_v[idx_data]*rho_v[idx_data] +
                         rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                 }
@@ -3103,7 +3103,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 /*
                  * Compute the mass fractions.
                  */
-                double Y[d_num_species];
+                Real Y[d_num_species];
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y[si] = Z_rho[si][idx_data]/rho;
@@ -3112,21 +3112,21 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 /*
                  * Get the pointers to the mass fractions.
                  */
-                std::vector<const double*> Y_ptr;
+                std::vector<const Real*> Y_ptr;
                 Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y_ptr.push_back(&Y[si]);
                 }
                 
-                std::vector<const double*> Z_ptr;
+                std::vector<const Real*> Z_ptr;
                 Z_ptr.reserve(d_num_species - 1);
                 for (int si = 0; si < d_num_species - 1; si++)
                 {
                     Z_ptr.push_back(&Z[si][idx_data]);
                 }
                 
-                const double p = d_equation_of_state_mixing_rules->
+                const Real p = d_equation_of_state_mixing_rules->
                     getPressure(
                         &rho,
                         &epsilon,
@@ -3136,7 +3136,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 /*
                  * Compute the Gruneisen parameter.
                  */
-                const double Gamma = d_equation_of_state_mixing_rules->
+                const Real Gamma = d_equation_of_state_mixing_rules->
                     getGruneisenParameter(
                         &rho,
                         &p,
@@ -3146,7 +3146,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 /*
                  * Compute the partial pressure partial partial densities.
                  */
-                std::vector<double> Psi = d_equation_of_state_mixing_rules->
+                std::vector<Real> Psi = d_equation_of_state_mixing_rules->
                     getPressureDerivativeWithPartialDensities(
                         &rho,
                         &p,
@@ -3156,14 +3156,14 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 /*
                  * Compute the sound speed.
                  */
-                buffer[idx_region] = Gamma*p/rho;
+                buffer[idx_region] = double(Gamma*p/rho);
                 
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    buffer[idx_region] += Y[si]*Psi[si];
+                    buffer[idx_region] += double(Y[si]*Psi[si]);
                 }
                 
-                buffer[idx_region] = sqrt(buffer[idx_region]);
+                buffer[idx_region] = double(std::sqrt(buffer[idx_region]));
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -3179,34 +3179,34 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     size_t idx_region = i +
                         j*region_dims[0];
                     
-                    std::vector<const double*> Z_rho_ptr;
+                    std::vector<const Real*> Z_rho_ptr;
                     Z_rho_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
                         Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                     }
-                    const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                    const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                         Z_rho_ptr);
                     
                     /*
                      * Compute the internal energy.
                      */
-                    double epsilon = double(0);
+                    Real epsilon = Real(0);
                     if (d_dim == tbox::Dimension(1))
                     {
                         epsilon = (E[idx_data] -
-                            double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                            Real(1)/Real(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                     }
                     else if (d_dim == tbox::Dimension(2))
                     {
                         epsilon = (E[idx_data] -
-                            double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                            Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                             rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                     }
                     else if (d_dim == tbox::Dimension(3))
                     {
                         epsilon = (E[idx_data] -
-                            double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                            Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                             rho_v[idx_data]*rho_v[idx_data] +
                             rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                     }
@@ -3214,7 +3214,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     /*
                      * Compute the mass fractions.
                      */
-                    double Y[d_num_species];
+                    Real Y[d_num_species];
                     for (int si = 0; si < d_num_species; si++)
                     {
                         Y[si] = Z_rho[si][idx_data]/rho;
@@ -3223,21 +3223,21 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     /*
                      * Get the pointers to the mass fractions.
                      */
-                    std::vector<const double*> Y_ptr;
+                    std::vector<const Real*> Y_ptr;
                     Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
                         Y_ptr.push_back(&Y[si]);
                     }
                     
-                    std::vector<const double*> Z_ptr;
+                    std::vector<const Real*> Z_ptr;
                     Z_ptr.reserve(d_num_species - 1);
                     for (int si = 0; si < d_num_species - 1; si++)
                     {
                         Z_ptr.push_back(&Z[si][idx_data]);
                     }
                     
-                    const double p = d_equation_of_state_mixing_rules->
+                    const Real p = d_equation_of_state_mixing_rules->
                         getPressure(
                             &rho,
                             &epsilon,
@@ -3247,7 +3247,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     /*
                      * Compute the Gruneisen parameter.
                      */
-                    const double Gamma = d_equation_of_state_mixing_rules->
+                    const Real Gamma = d_equation_of_state_mixing_rules->
                         getGruneisenParameter(
                             &rho,
                             &p,
@@ -3257,7 +3257,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     /*
                      * Compute the partial pressure partial partial densities.
                      */
-                    std::vector<double> Psi = d_equation_of_state_mixing_rules->
+                    std::vector<Real> Psi = d_equation_of_state_mixing_rules->
                         getPressureDerivativeWithPartialDensities(
                             &rho,
                             &p,
@@ -3267,14 +3267,14 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     /*
                      * Compute the sound speed.
                      */
-                    buffer[idx_region] = Gamma*p/rho;
+                    buffer[idx_region] = double(Gamma*p/rho);
                     
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        buffer[idx_region] += Y[si]*Psi[si];
+                        buffer[idx_region] += double(Y[si]*Psi[si]);
                     }
                     
-                    buffer[idx_region] = sqrt(buffer[idx_region]);
+                    buffer[idx_region] = double(std::sqrt(buffer[idx_region]));
                 }
             }
         }
@@ -3295,34 +3295,34 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                             j*region_dims[0] +
                             k*region_dims[0]*region_dims[1];
                         
-                        std::vector<const double*> Z_rho_ptr;
+                        std::vector<const Real*> Z_rho_ptr;
                         Z_rho_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                         }
-                        const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                        const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                             Z_rho_ptr);
                         
                         /*
                          * Compute the internal energy.
                          */
-                        double epsilon = double(0);
+                        Real epsilon = Real(0);
                         if (d_dim == tbox::Dimension(1))
                         {
                             epsilon = (E[idx_data] -
-                                double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                                Real(1)/Real(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                         }
                         else if (d_dim == tbox::Dimension(2))
                         {
                             epsilon = (E[idx_data] -
-                                double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                                Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                                 rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                         }
                         else if (d_dim == tbox::Dimension(3))
                         {
                             epsilon = (E[idx_data] -
-                                double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
+                                Real(1)/Real(2)*(rho_u[idx_data]*rho_u[idx_data] +
                                 rho_v[idx_data]*rho_v[idx_data] +
                                 rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                         }
@@ -3330,7 +3330,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                         /*
                          * Compute the mass fractions.
                          */
-                        double Y[d_num_species];
+                        Real Y[d_num_species];
                         for (int si = 0; si < d_num_species; si++)
                         {
                             Y[si] = Z_rho[si][idx_data]/rho;
@@ -3339,21 +3339,21 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                         /*
                          * Get the pointers to the mass fractions.
                          */
-                        std::vector<const double*> Y_ptr;
+                        std::vector<const Real*> Y_ptr;
                         Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             Y_ptr.push_back(&Y[si]);
                         }
                         
-                        std::vector<const double*> Z_ptr;
+                        std::vector<const Real*> Z_ptr;
                         Z_ptr.reserve(d_num_species - 1);
                         for (int si = 0; si < d_num_species - 1; si++)
                         {
                             Z_ptr.push_back(&Z[si][idx_data]);
                         }
                         
-                        const double p = d_equation_of_state_mixing_rules->
+                        const Real p = d_equation_of_state_mixing_rules->
                             getPressure(
                                 &rho,
                                 &epsilon,
@@ -3363,7 +3363,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                         /*
                          * Compute the Gruneisen parameter.
                          */
-                        const double Gamma = d_equation_of_state_mixing_rules->
+                        const Real Gamma = d_equation_of_state_mixing_rules->
                             getGruneisenParameter(
                                 &rho,
                                 &p,
@@ -3373,7 +3373,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                         /*
                          * Compute the partial pressure partial partial densities.
                          */
-                        std::vector<double> Psi = d_equation_of_state_mixing_rules->
+                        std::vector<Real> Psi = d_equation_of_state_mixing_rules->
                             getPressureDerivativeWithPartialDensities(
                                 &rho,
                                 &p,
@@ -3383,14 +3383,14 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                         /*
                          * Compute the sound speed.
                          */
-                        buffer[idx_region] = Gamma*p/rho;
+                        buffer[idx_region] = double(Gamma*p/rho);
                         
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            buffer[idx_region] += Y[si]*Psi[si];
+                            buffer[idx_region] += double(Y[si]*Psi[si]);
                         }
                         
-                        buffer[idx_region] = sqrt(buffer[idx_region]);
+                        buffer[idx_region] = double(std::sqrt(buffer[idx_region]));
                     }
                 }
             }
@@ -3400,12 +3400,12 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "velocity")
     {
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_momentum, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3420,13 +3420,13 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
-        std::vector<const double*> Z_rho;
+        std::vector<const Real*> Z_rho;
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
             Z_rho.push_back(data_partial_densities->getPointer(si));
         }
-        const double* const m = data_momentum->getPointer(depth_id);
+        const Real* const m = data_momentum->getPointer(depth_id);
         
         size_t offset_data = data_box.offset(region.lower());
         
@@ -3438,17 +3438,17 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 size_t idx_data = offset_data + i;
                 size_t idx_region = i;
                 
-                std::vector<const double*> Z_rho_ptr;
+                std::vector<const Real*> Z_rho_ptr;
                 Z_rho_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                 }
                 
-                const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                     Z_rho_ptr);
                 
-                buffer[idx_region] = m[idx_data]/rho;
+                buffer[idx_region] = double(m[idx_data]/rho);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -3464,17 +3464,17 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     size_t idx_region = i +
                         j*region_dims[0];
                     
-                    std::vector<const double*> Z_rho_ptr;
+                    std::vector<const Real*> Z_rho_ptr;
                     Z_rho_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
                         Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                     }
                     
-                    const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                    const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                         Z_rho_ptr);
                     
-                    buffer[idx_region] = m[idx_data]/rho;
+                    buffer[idx_region] = double(m[idx_data]/rho);
                 }
             }
         }
@@ -3495,17 +3495,17 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                             j*region_dims[0] +
                             k*region_dims[0]*region_dims[1];
                         
-                        std::vector<const double*> Z_rho_ptr;
+                        std::vector<const Real*> Z_rho_ptr;
                         Z_rho_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                         }
                         
-                        const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                        const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                             Z_rho_ptr);
                         
-                        buffer[idx_region] = m[idx_data]/rho;
+                        buffer[idx_region] = double(m[idx_data]/rho);
                     }
                 }
             }
@@ -3517,8 +3517,8 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     {
         int species_idx = std::stoi(variable_name.substr(14));
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3531,7 +3531,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to conservative variables.
-        std::vector<const double*> Z_rho;
+        std::vector<const Real*> Z_rho;
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
@@ -3548,17 +3548,17 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 size_t idx_data = offset_data + i;
                 size_t idx_region = i;
                 
-                std::vector<const double*> Z_rho_ptr;
+                std::vector<const Real*> Z_rho_ptr;
                 Z_rho_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                 }
                 
-                const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                     Z_rho_ptr);
                 
-                buffer[idx_region] = Z_rho[species_idx][idx_data]/rho;
+                buffer[idx_region] = double(Z_rho[species_idx][idx_data]/rho);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -3574,17 +3574,17 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     size_t idx_region = i +
                         j*region_dims[0];
                     
-                    std::vector<const double*> Z_rho_ptr;
+                    std::vector<const Real*> Z_rho_ptr;
                     Z_rho_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
                         Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                     }
                     
-                    const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                    const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                         Z_rho_ptr);
                     
-                    buffer[idx_region] = Z_rho[species_idx][idx_data]/rho;
+                    buffer[idx_region] = double(Z_rho[species_idx][idx_data]/rho);
                 }
             }
         }
@@ -3605,17 +3605,17 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                             j*region_dims[0] +
                             k*region_dims[0]*region_dims[1];
                         
-                        std::vector<const double*> Z_rho_ptr;
+                        std::vector<const Real*> Z_rho_ptr;
                         Z_rho_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                         }
                         
-                        const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                        const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                             Z_rho_ptr);
                         
-                        buffer[idx_region] = Z_rho[species_idx][idx_data]/rho;
+                        buffer[idx_region] = double(Z_rho[species_idx][idx_data]/rho);
                     }
                 }
             }
@@ -4297,12 +4297,12 @@ FlowModelFiveEqnAllaire::setDerivedCellVariableGhostBoxes()
 /*
  * Get the cell data of partial densities in the registered patch.
  */
-HAMERS_SHARED_PTR<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<Real> >
 FlowModelFiveEqnAllaire::getCellDataOfPartialDensities()
 {
     // Get the cell data of the registered variable partial densities.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             d_patch->getPatchData(s_variable_partial_densities, getDataContext())));
     
     return data_partial_densities;
@@ -4312,12 +4312,12 @@ FlowModelFiveEqnAllaire::getCellDataOfPartialDensities()
 /*
  * Get the cell data of momentum in the registered patch.
  */
-HAMERS_SHARED_PTR<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<Real> >
 FlowModelFiveEqnAllaire::getCellDataOfMomentum()
 {
     // Get the cell data of the registered variable momentum.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             d_patch->getPatchData(s_variable_momentum, getDataContext())));
     
     return data_momentum;
@@ -4327,12 +4327,12 @@ FlowModelFiveEqnAllaire::getCellDataOfMomentum()
 /*
  * Get the cell data of total energy in the registered patch.
  */
-HAMERS_SHARED_PTR<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<Real> >
 FlowModelFiveEqnAllaire::getCellDataOfTotalEnergy()
 {
     // Get the cell data of the registered variable total energy.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_total_energy(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             d_patch->getPatchData(s_variable_total_energy, getDataContext())));
     
     return data_total_energy;
@@ -4342,12 +4342,12 @@ FlowModelFiveEqnAllaire::getCellDataOfTotalEnergy()
 /*
  * Get the cell data of volume fractions in the registered patch.
  */
-HAMERS_SHARED_PTR<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<Real> >
 FlowModelFiveEqnAllaire::getCellDataOfVolumeFractions()
 {
     // Get the cell data of the registered variable volume fractions.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_volume_fractions(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             d_patch->getPatchData(s_variable_volume_fractions, getDataContext())));
     
     return data_volume_fractions;
@@ -4370,7 +4370,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfDensity(
 #endif
             
             // Get the cell data of the variable partial densities.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities =
                 getCellDataOfPartialDensities();
             
             // Compute the density field.
@@ -4430,7 +4430,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMassFractionsWithDensity(
             }
             
             // Get the cell data of the variable partial densities.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities =
                 getCellDataOfPartialDensities();
             
             if (!d_cell_data_computed_density)
@@ -4439,14 +4439,14 @@ FlowModelFiveEqnAllaire::computeCellDataOfMassFractionsWithDensity(
             }
             
             // Get the pointers to the cell data of mass fractions, density and partial densities.
-            std::vector<double*> Y;
+            std::vector<Real*> Y;
             Y.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
                 Y.push_back(d_data_mass_fractions->getPointer(si));
             }
-            double* rho = d_data_density->getPointer(0);
-            std::vector<double*> Z_rho;
+            Real* rho = d_data_density->getPointer(0);
+            std::vector<Real*> Z_rho;
             Z_rho.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
@@ -4641,7 +4641,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfVelocityWithDensity(
             }
             
             // Get the cell data of the variable momentum.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum =
                 getCellDataOfMomentum();
             
             if (!d_cell_data_computed_density)
@@ -4650,7 +4650,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfVelocityWithDensity(
             }
             
             // Get the pointer to the cell data of density.
-            double* rho = d_data_density->getPointer(0);
+            Real* rho = d_data_density->getPointer(0);
             
             if (d_dim == tbox::Dimension(1))
             {
@@ -4667,10 +4667,10 @@ FlowModelFiveEqnAllaire::computeCellDataOfVelocityWithDensity(
                 
                 
                 // Get the pointer to the cell data of velocity.
-                double* u = d_data_velocity->getPointer(0);
+                Real* u = d_data_velocity->getPointer(0);
                 
                 // Get the pointer to the cell data of momentum.
-                double* rho_u = data_momentum->getPointer(0);
+                Real* rho_u = data_momentum->getPointer(0);
                 
                 // Compute the velocity field.
                 HAMERS_PRAGMA_SIMD
@@ -4708,12 +4708,12 @@ FlowModelFiveEqnAllaire::computeCellDataOfVelocityWithDensity(
                 const int subghostcell_dim_0_velocity = d_subghostcell_dims_velocity[0];
                 
                 // Get the pointers to the cell data of velocity.
-                double* u = d_data_velocity->getPointer(0);
-                double* v = d_data_velocity->getPointer(1);
+                Real* u = d_data_velocity->getPointer(0);
+                Real* v = d_data_velocity->getPointer(1);
                 
                 // Get the pointers to the cell data of momentum.
-                double* rho_u = data_momentum->getPointer(0);
-                double* rho_v = data_momentum->getPointer(1);
+                Real* rho_u = data_momentum->getPointer(0);
+                Real* rho_v = data_momentum->getPointer(1);
                 
                 // Compute the velocity field.
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -4768,14 +4768,14 @@ FlowModelFiveEqnAllaire::computeCellDataOfVelocityWithDensity(
                 const int subghostcell_dim_1_velocity = d_subghostcell_dims_velocity[1];
                 
                 // Get the pointers to the cell data of velocity.
-                double* u = d_data_velocity->getPointer(0);
-                double* v = d_data_velocity->getPointer(1);
-                double* w = d_data_velocity->getPointer(2);
+                Real* u = d_data_velocity->getPointer(0);
+                Real* v = d_data_velocity->getPointer(1);
+                Real* w = d_data_velocity->getPointer(2);
                 
                 // Get the pointers to the cell data of momentum.
-                double* rho_u = data_momentum->getPointer(0);
-                double* rho_v = data_momentum->getPointer(1);
-                double* rho_w = data_momentum->getPointer(2);
+                Real* rho_u = data_momentum->getPointer(0);
+                Real* rho_v = data_momentum->getPointer(1);
+                Real* rho_w = data_momentum->getPointer(2);
                 
                 // Compute the velocity field.
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
@@ -4860,7 +4860,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfInternalEnergyWithDensityAndVelocity(
             }
             
             // Get the cell data of the variables total energy and volume fractions.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_total_energy =
                 getCellDataOfTotalEnergy();
             
             if (!d_cell_data_computed_density)
@@ -4874,9 +4874,9 @@ FlowModelFiveEqnAllaire::computeCellDataOfInternalEnergyWithDensityAndVelocity(
             }
             
             // Get the pointers to the cell data of internal energy, total energy and density.
-            double* epsilon = d_data_internal_energy->getPointer(0);
-            double* E = data_total_energy->getPointer(0);
-            double* rho = d_data_density->getPointer(0);
+            Real* epsilon = d_data_internal_energy->getPointer(0);
+            Real* E = data_total_energy->getPointer(0);
+            Real* rho = d_data_density->getPointer(0);
             
             if (d_dim == tbox::Dimension(1))
             {
@@ -4893,7 +4893,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfInternalEnergyWithDensityAndVelocity(
                 const int num_subghosts_0_internal_energy = d_num_subghosts_internal_energy[0];
                 
                 // Get the pointer to cell data of velocity.
-                double* u = d_data_velocity->getPointer(0);
+                Real* u = d_data_velocity->getPointer(0);
                 
                 // Compute the internal energy field.
                 HAMERS_PRAGMA_SIMD
@@ -4906,7 +4906,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfInternalEnergyWithDensityAndVelocity(
                     const int idx_internal_energy = i + num_subghosts_0_internal_energy;
                     
                     epsilon[idx_internal_energy] = E[idx]/rho[idx_density] -
-                        double(1)/double(2)*u[idx_velocity]*u[idx_velocity];
+                        Real(1)/Real(2)*u[idx_velocity]*u[idx_velocity];
                 }
             }
             else if (d_dim == tbox::Dimension(2))
@@ -4937,8 +4937,8 @@ FlowModelFiveEqnAllaire::computeCellDataOfInternalEnergyWithDensityAndVelocity(
                 const int subghostcell_dim_0_internal_energy = d_subghostcell_dims_internal_energy[0];
                 
                 // Get the pointers to the cell data of velocity.
-                double* u = d_data_velocity->getPointer(0);
-                double* v = d_data_velocity->getPointer(1);
+                Real* u = d_data_velocity->getPointer(0);
+                Real* v = d_data_velocity->getPointer(1);
                 
                 // Compute the internal energy field.
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -4960,7 +4960,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfInternalEnergyWithDensityAndVelocity(
                             (j + num_subghosts_1_internal_energy)*subghostcell_dim_0_internal_energy;
                         
                         epsilon[idx_internal_energy] = E[idx]/rho[idx_density] -
-                            double(1)/double(2)*(u[idx_velocity]*u[idx_velocity] + v[idx_velocity]*v[idx_velocity]);
+                            Real(1)/Real(2)*(u[idx_velocity]*u[idx_velocity] + v[idx_velocity]*v[idx_velocity]);
                     }
                 }
             }
@@ -5002,9 +5002,9 @@ FlowModelFiveEqnAllaire::computeCellDataOfInternalEnergyWithDensityAndVelocity(
                 const int subghostcell_dim_1_internal_energy = d_subghostcell_dims_internal_energy[1];
                 
                 // Get the pointers to the cell data of velocity.
-                double* u = d_data_velocity->getPointer(0);
-                double* v = d_data_velocity->getPointer(1);
-                double* w = d_data_velocity->getPointer(2);
+                Real* u = d_data_velocity->getPointer(0);
+                Real* v = d_data_velocity->getPointer(1);
+                Real* w = d_data_velocity->getPointer(2);
                 
                 // Compute the internal energy field.
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
@@ -5035,7 +5035,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfInternalEnergyWithDensityAndVelocity(
                                     subghostcell_dim_1_internal_energy;
                             
                             epsilon[idx_internal_energy] = E[idx]/rho[idx_density] -
-                                double(1)/double(2)*(u[idx_velocity]*u[idx_velocity] + v[idx_velocity]*v[idx_velocity] +
+                                Real(1)/Real(2)*(u[idx_velocity]*u[idx_velocity] + v[idx_velocity]*v[idx_velocity] +
                                 w[idx_velocity]*w[idx_velocity]);
                         }
                     }
@@ -5072,7 +5072,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfPressureWithDensityMassFractionsAndInt
 #endif
             
             // Get the cell data of the variable volume fractions.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_volume_fractions =
                 getCellDataOfVolumeFractions();
             
             if (!d_cell_data_computed_density)
@@ -5152,7 +5152,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
             }
             
             // Get the cell data of the variable volume fractions.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_volume_fractions =
                 getCellDataOfVolumeFractions();
             
             if (!d_cell_data_computed_density)
@@ -5171,11 +5171,11 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
             }
             
             // Compute the partial derivatives.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_gruneisen_parameter(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_gruneisen_parameter(
+                new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_sound_speed));
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_pressure_partial_partial_densities(
-                new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_sound_speed));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_pressure_partial_partial_densities(
+                new pdat::CellData<Real>(d_interior_box, d_num_species, d_num_subghosts_sound_speed));
             
             d_equation_of_state_mixing_rules->computeGruneisenParameter(
                 data_gruneisen_parameter,
@@ -5195,12 +5195,12 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
             
             // Get the pointers to the cell data of sound speed, density, mass fractions, pressure,
             // Gruneisen parameter and partial pressure partial partial densities.
-            double* c     = d_data_sound_speed->getPointer(0);
-            double* rho   = d_data_density->getPointer(0);
-            double* p     = d_data_pressure->getPointer(0);
-            double* Gamma = data_gruneisen_parameter->getPointer(0);
-            std::vector<double*> Y;
-            std::vector<double*> Psi;
+            Real* c     = d_data_sound_speed->getPointer(0);
+            Real* rho   = d_data_density->getPointer(0);
+            Real* p     = d_data_pressure->getPointer(0);
+            Real* Gamma = data_gruneisen_parameter->getPointer(0);
+            std::vector<Real*> Y;
+            std::vector<Real*> Psi;
             Y.reserve(d_num_species);
             Psi.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
@@ -5255,7 +5255,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
                     // Compute the linear index.
                     const int idx_sound_speed = i + num_subghosts_0_sound_speed;
                     
-                    c[idx_sound_speed] = sqrt(c[idx_sound_speed]);
+                    c[idx_sound_speed] = std::sqrt(c[idx_sound_speed]);
                 }
             }
             else if (d_dim == tbox::Dimension(2))
@@ -5332,7 +5332,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
                         const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
                             (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
                         
-                        c[idx_sound_speed] = sqrt(c[idx_sound_speed]);
+                        c[idx_sound_speed] = std::sqrt(c[idx_sound_speed]);
                     }
                 }
             }
@@ -5440,7 +5440,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
                                 (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
                                     subghostcell_dim_1_sound_speed;
                             
-                            c[idx_sound_speed] = sqrt(c[idx_sound_speed]);
+                            c[idx_sound_speed] = std::sqrt(c[idx_sound_speed]);
                         }
                     }
                 }
@@ -5502,23 +5502,23 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 }
                 
                 // Get the pointers to the components of the convective flux in the x-direction.
-                std::vector<double*> F_x;
+                std::vector<Real*> F_x;
                 F_x.reserve(d_num_eqn);
                 for (int ei = 0; ei < d_num_eqn; ei++)
                 {
                     F_x.push_back(d_data_convective_flux_x->getPointer(ei));
                 }
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities =
                     getCellDataOfPartialDensities();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum =
                     getCellDataOfMomentum();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_total_energy =
                     getCellDataOfTotalEnergy();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_volume_fractions =
                     getCellDataOfVolumeFractions();
                 
                 if (!d_cell_data_computed_velocity)
@@ -5533,20 +5533,20 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 
                 // Get the pointers to the cell data of partial densities, total energy, volume fractions
                 // and pressure.
-                std::vector<double*> Z_rho;
+                std::vector<Real*> Z_rho;
                 Z_rho.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Z_rho.push_back(data_partial_densities->getPointer(si));
                 }
-                double* E = data_total_energy->getPointer(0);
-                std::vector<double*> Z;
+                Real* E = data_total_energy->getPointer(0);
+                std::vector<Real*> Z;
                 Z.reserve(d_num_species - 1);
                 for (int si = 0; si < d_num_species - 1; si++)
                 {
                     Z.push_back(data_volume_fractions->getPointer(si));
                 }
-                double* p = d_data_pressure->getPointer(0);
+                Real* p = d_data_pressure->getPointer(0);
                 
                 if (d_dim == tbox::Dimension(1))
                 {
@@ -5563,10 +5563,10 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     const int num_subghosts_0_convective_flux_x = d_num_subghosts_convective_flux_x[0];
                     
                     // Get the pointer to the cell data of momentum.
-                    double* rho_u = data_momentum->getPointer(0);
+                    Real* rho_u = data_momentum->getPointer(0);
                     
                     // Get the pointer to the cell data of velocity.
-                    double* u = d_data_velocity->getPointer(0);
+                    Real* u = d_data_velocity->getPointer(0);
                     
                     // Compute the convective flux in the x-direction.
                     for (int si = 0; si < d_num_species; si++)
@@ -5638,11 +5638,11 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     const int subghostcell_dim_0_convective_flux_x = d_subghostcell_dims_convective_flux_x[0];
                     
                     // Get the pointers to the cell data of momentum.
-                    double* rho_u = data_momentum->getPointer(0);
-                    double* rho_v = data_momentum->getPointer(1);
+                    Real* rho_u = data_momentum->getPointer(0);
+                    Real* rho_v = data_momentum->getPointer(1);
                     
                     // Get the pointer to the cell data of velocity.
-                    double* u = d_data_velocity->getPointer(0);
+                    Real* u = d_data_velocity->getPointer(0);
                     
                     // Compute the convective flux in the x-direction.
                     for (int si = 0; si < d_num_species; si++)
@@ -5748,12 +5748,12 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     const int subghostcell_dim_1_convective_flux_x = d_subghostcell_dims_convective_flux_x[1];
                     
                     // Get the pointers to the cell data of momentum.
-                    double* rho_u = data_momentum->getPointer(0);
-                    double* rho_v = data_momentum->getPointer(1);
-                    double* rho_w = data_momentum->getPointer(2);
+                    Real* rho_u = data_momentum->getPointer(0);
+                    Real* rho_v = data_momentum->getPointer(1);
+                    Real* rho_w = data_momentum->getPointer(2);
                     
                     // Get the pointer to the cell data of velocity.
-                    double* u = d_data_velocity->getPointer(0);
+                    Real* u = d_data_velocity->getPointer(0);
                     
                     // Compute the convective flux in the x-direction.
                     for (int si = 0; si < d_num_species; si++)
@@ -5897,23 +5897,23 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 }
                 
                 // Get the pointers to the components of the convective flux in the y-direction.
-                std::vector<double*> F_y;
+                std::vector<Real*> F_y;
                 F_y.reserve(d_num_eqn);
                 for (int ei = 0; ei < d_num_eqn; ei++)
                 {
                     F_y.push_back(d_data_convective_flux_y->getPointer(ei));
                 }
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities =
                     getCellDataOfPartialDensities();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum =
                     getCellDataOfMomentum();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_total_energy =
                     getCellDataOfTotalEnergy();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_volume_fractions =
                     getCellDataOfVolumeFractions();
                 
                 if (!d_cell_data_computed_pressure)
@@ -5928,20 +5928,20 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 
                 // Get the pointers to the cell data of partial densities, total energy, volume fractions
                 // and pressure.
-                std::vector<double*> Z_rho;
+                std::vector<Real*> Z_rho;
                 Z_rho.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Z_rho.push_back(data_partial_densities->getPointer(si));
                 }
-                double* E = data_total_energy->getPointer(0);
-                std::vector<double*> Z;
+                Real* E = data_total_energy->getPointer(0);
+                std::vector<Real*> Z;
                 Z.reserve(d_num_species - 1);
                 for (int si = 0; si < d_num_species - 1; si++)
                 {
                     Z.push_back(data_volume_fractions->getPointer(si));
                 }
-                double* p = d_data_pressure->getPointer(0);
+                Real* p = d_data_pressure->getPointer(0);
                 
                 if (d_dim == tbox::Dimension(1))
                 {
@@ -5979,11 +5979,11 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     const int subghostcell_dim_0_convective_flux_y = d_subghostcell_dims_convective_flux_y[0];
                     
                     // Get the pointers to the cell data of momentum.
-                    double* rho_u = data_momentum->getPointer(0);
-                    double* rho_v = data_momentum->getPointer(1);
+                    Real* rho_u = data_momentum->getPointer(0);
+                    Real* rho_v = data_momentum->getPointer(1);
                     
                     // Get the pointer to the cell data of velocity.
-                    double* v = d_data_velocity->getPointer(1);
+                    Real* v = d_data_velocity->getPointer(1);
                     
                     // Compute the convective flux in the y-direction.
                     for (int si = 0; si < d_num_species; si++)
@@ -6089,12 +6089,12 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     const int subghostcell_dim_1_convective_flux_y = d_subghostcell_dims_convective_flux_y[1];
                     
                     // Get the pointers to the cell data of momentum.
-                    double* rho_u = data_momentum->getPointer(0);
-                    double* rho_v = data_momentum->getPointer(1);
-                    double* rho_w = data_momentum->getPointer(2);
+                    Real* rho_u = data_momentum->getPointer(0);
+                    Real* rho_v = data_momentum->getPointer(1);
+                    Real* rho_w = data_momentum->getPointer(2);
                     
                     // Get the pointer to the cell data of velocity.
-                    double* v = d_data_velocity->getPointer(1);
+                    Real* v = d_data_velocity->getPointer(1);
                     
                     // Compute the convective flux in the y-direction.
                     for (int si = 0; si < d_num_species; si++)
@@ -6238,23 +6238,23 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 }
                 
                 // Get the pointers to the components of the convective flux in the z-direction.
-                std::vector<double*> F_z;
+                std::vector<Real*> F_z;
                 F_z.reserve(d_num_eqn);
                 for (int ei = 0; ei < d_num_eqn; ei++)
                 {
                     F_z.push_back(d_data_convective_flux_z->getPointer(ei));
                 }
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities =
                     getCellDataOfPartialDensities();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_momentum =
                     getCellDataOfMomentum();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_total_energy =
                     getCellDataOfTotalEnergy();
                 
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > data_volume_fractions =
                     getCellDataOfVolumeFractions();
                 
                 if (!d_cell_data_computed_pressure)
@@ -6269,20 +6269,20 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 
                 // Get the pointers to the cell data of partial densities, total energy, volume fractions
                 // and pressure.
-                std::vector<double*> Z_rho;
+                std::vector<Real*> Z_rho;
                 Z_rho.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Z_rho.push_back(data_partial_densities->getPointer(si));
                 }
-                double* E = data_total_energy->getPointer(0);
-                std::vector<double*> Z;
+                Real* E = data_total_energy->getPointer(0);
+                std::vector<Real*> Z;
                 Z.reserve(d_num_species - 1);
                 for (int si = 0; si < d_num_species - 1; si++)
                 {
                     Z.push_back(data_volume_fractions->getPointer(si));
                 }
-                double* p = d_data_pressure->getPointer(0);
+                Real* p = d_data_pressure->getPointer(0);
                 
                 if (d_dim == tbox::Dimension(1) || d_dim == tbox::Dimension(2))
                 {
@@ -6330,12 +6330,12 @@ FlowModelFiveEqnAllaire::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                     const int subghostcell_dim_1_convective_flux_z = d_subghostcell_dims_convective_flux_z[1];
                     
                     // Get the pointers to the cell data of momentum.
-                    double* rho_u = data_momentum->getPointer(0);
-                    double* rho_v = data_momentum->getPointer(1);
-                    double* rho_w = data_momentum->getPointer(2);
+                    Real* rho_u = data_momentum->getPointer(0);
+                    Real* rho_v = data_momentum->getPointer(1);
+                    Real* rho_w = data_momentum->getPointer(2);
                     
                     // Get the pointer to the cell data of velocity.
-                    double* w = d_data_velocity->getPointer(2);
+                    Real* w = d_data_velocity->getPointer(2);
                     
                     // Compute the convective flux in the z-direction.
                     for (int si = 0; si < d_num_species; si++)
@@ -6501,9 +6501,9 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 }
                 
                 // Get the pointers to the cell data of maximum wave speed and velocity in x-direction, and sound speed.
-                double* lambda_max_x = d_data_max_wave_speed_x->getPointer(0);
-                double* u            = d_data_velocity->getPointer(0);
-                double* c            = d_data_sound_speed->getPointer(0);
+                Real* lambda_max_x = d_data_max_wave_speed_x->getPointer(0);
+                Real* u            = d_data_velocity->getPointer(0);
+                Real* c            = d_data_sound_speed->getPointer(0);
                 
                 if (d_dim == tbox::Dimension(1))
                 {
@@ -6527,7 +6527,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                         const int idx_velocity = i + num_subghosts_0_velocity;
                         const int idx_max_wave_speed_x = i + num_subghosts_0_max_wave_speed_x;
                         
-                        lambda_max_x[idx_max_wave_speed_x] = fabs(u[idx_velocity]) + c[idx_sound_speed];
+                        lambda_max_x[idx_max_wave_speed_x] = std::abs(u[idx_velocity]) + c[idx_sound_speed];
                     }
                 }
                 else if (d_dim == tbox::Dimension(2))
@@ -6569,7 +6569,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                             const int idx_max_wave_speed_x = (i + num_subghosts_0_max_wave_speed_x) +
                                 (j + num_subghosts_1_max_wave_speed_x)*subghostcell_dim_0_max_wave_speed_x;
                             
-                            lambda_max_x[idx_max_wave_speed_x] = fabs(u[idx_velocity]) + c[idx_sound_speed];
+                            lambda_max_x[idx_max_wave_speed_x] = std::abs(u[idx_velocity]) + c[idx_sound_speed];
                         }
                     }
                 }
@@ -6628,7 +6628,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                                     (k + num_subghosts_2_max_wave_speed_x)*subghostcell_dim_0_max_wave_speed_x*
                                         subghostcell_dim_1_max_wave_speed_x;
                                 
-                                lambda_max_x[idx_max_wave_speed_x] = fabs(u[idx_velocity]) + c[idx_sound_speed];
+                                lambda_max_x[idx_max_wave_speed_x] = std::abs(u[idx_velocity]) + c[idx_sound_speed];
                             }
                         }
                     }
@@ -6689,9 +6689,9 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 }
                 
                 // Get the pointers to the cell data of maximum wave speed and velocity in y-direction, and sound speed.
-                double* lambda_max_y = d_data_max_wave_speed_y->getPointer(0);
-                double* v            = d_data_velocity->getPointer(1);
-                double* c            = d_data_sound_speed->getPointer(0);
+                Real* lambda_max_y = d_data_max_wave_speed_y->getPointer(0);
+                Real* v            = d_data_velocity->getPointer(1);
+                Real* c            = d_data_sound_speed->getPointer(0);
                 
                 if (d_dim == tbox::Dimension(1))
                 {
@@ -6740,7 +6740,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                             const int idx_max_wave_speed_y = (i + num_subghosts_0_max_wave_speed_y) +
                                 (j + num_subghosts_1_max_wave_speed_y)*subghostcell_dim_0_max_wave_speed_y;
                             
-                            lambda_max_y[idx_max_wave_speed_y] = fabs(v[idx_velocity]) + c[idx_sound_speed];
+                            lambda_max_y[idx_max_wave_speed_y] = std::abs(v[idx_velocity]) + c[idx_sound_speed];
                         }
                     }
                 }
@@ -6799,7 +6799,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                                     (k + num_subghosts_2_max_wave_speed_y)*subghostcell_dim_0_max_wave_speed_y*
                                         subghostcell_dim_1_max_wave_speed_y;
                                 
-                                lambda_max_y[idx_max_wave_speed_y] = fabs(v[idx_velocity]) + c[idx_sound_speed];
+                                lambda_max_y[idx_max_wave_speed_y] = std::abs(v[idx_velocity]) + c[idx_sound_speed];
                             }
                         }
                     }
@@ -6860,9 +6860,9 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 }
                 
                 // Get the pointers to the cell data of maximum wave speed and velocity in z-direction, and sound speed.
-                double* lambda_max_z = d_data_max_wave_speed_z->getPointer(0);
-                double* w            = d_data_velocity->getPointer(2);
-                double* c            = d_data_sound_speed->getPointer(0);
+                Real* lambda_max_z = d_data_max_wave_speed_z->getPointer(0);
+                Real* w            = d_data_velocity->getPointer(2);
+                Real* c            = d_data_sound_speed->getPointer(0);
                 
                 if (d_dim == tbox::Dimension(1) || d_dim == tbox::Dimension(2))
                 {
@@ -6927,7 +6927,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                                     (k + num_subghosts_2_max_wave_speed_z)*subghostcell_dim_0_max_wave_speed_z*
                                         subghostcell_dim_1_max_wave_speed_z;
                                 
-                                lambda_max_z[idx_max_wave_speed_z] = fabs(w[idx_velocity]) + c[idx_sound_speed];
+                                lambda_max_z[idx_max_wave_speed_z] = std::abs(w[idx_velocity]) + c[idx_sound_speed];
                             }
                         }
                     }
@@ -7018,25 +7018,25 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxDiffusivityWithDensityMassFractions
             }
             
             // Get the cell data of the variable volume fractions.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_volume_fractions =
                 getCellDataOfVolumeFractions();
             
             /*
              * Create temporary cell data of shear viscosity and bulk viscosity.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_shear_viscosity(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_shear_viscosity(
+                new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_bulk_viscosity(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_bulk_viscosity(
+                new pdat::CellData<Real>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
             
             // Get the pointers to the cell data of maximum diffusivity, density, shear viscosity and
             // bulk viscosity.
-            double* D_max = d_data_max_diffusivity->getPointer(0);
-            double* rho   = d_data_density->getPointer(0);
-            double* mu    = data_shear_viscosity->getPointer(0);
-            double* mu_v  = data_bulk_viscosity->getPointer(0);
+            Real* D_max = d_data_max_diffusivity->getPointer(0);
+            Real* rho   = d_data_density->getPointer(0);
+            Real* mu    = data_shear_viscosity->getPointer(0);
+            Real* mu_v  = data_bulk_viscosity->getPointer(0);
             
             // Compute the shear viscosity field.
             d_equation_of_shear_viscosity_mixing_rules->computeShearViscosity(
@@ -7075,7 +7075,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxDiffusivityWithDensityMassFractions
                     const int idx_max_diffusivity = i + num_subghosts_0_max_diffusivity;
                     const int idx_density = i + num_subghosts_0_density;
                     
-                    D_max[idx_max_diffusivity] = fmax(mu[idx_max_diffusivity]/rho[idx_density],
+                    D_max[idx_max_diffusivity] = std::max(mu[idx_max_diffusivity]/rho[idx_density],
                         mu_v[idx_max_diffusivity]/rho[idx_density]);
                 }
             }
@@ -7110,7 +7110,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxDiffusivityWithDensityMassFractions
                         const int idx_density = (i + num_subghosts_0_density) +
                             (j + num_subghosts_1_density)*subghostcell_dim_0_density;
                         
-                        D_max[idx_max_diffusivity] = fmax(mu[idx_max_diffusivity]/rho[idx_density],
+                        D_max[idx_max_diffusivity] = std::max(mu[idx_max_diffusivity]/rho[idx_density],
                             mu_v[idx_max_diffusivity]/rho[idx_density]);
                     }
                 }
@@ -7158,7 +7158,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxDiffusivityWithDensityMassFractions
                                 (k + num_subghosts_2_density)*subghostcell_dim_0_density*
                                     subghostcell_dim_1_density;
                             
-                            D_max[idx_max_diffusivity] = fmax(mu[idx_max_diffusivity]/rho[idx_density],
+                            D_max[idx_max_diffusivity] = std::max(mu[idx_max_diffusivity]/rho[idx_density],
                                 mu_v[idx_max_diffusivity]/rho[idx_density]);
                         }
                     }
@@ -7220,27 +7220,27 @@ FlowModelFiveEqnAllaire::computeCellDataOfSpeciesDensities(
             }
             
             // Get the cell data of the variable partial densities.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities =
                 getCellDataOfPartialDensities();
             
             // Get the cell data of the variable volume fractions.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_volume_fractions =
                 getCellDataOfVolumeFractions();
             
             // Get the pointers to the cell data of species densities, partial densities and volume fractions.
-            std::vector<double*> rho_i;
+            std::vector<Real*> rho_i;
             rho_i.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
                 rho_i.push_back(d_data_species_densities[si]->getPointer(0));
             }
-            std::vector<double*> Z_rho;
+            std::vector<Real*> Z_rho;
             Z_rho.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
                 Z_rho.push_back(data_partial_densities->getPointer(si));
             }
-            std::vector<double*> Z;
+            std::vector<Real*> Z;
             Z.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
@@ -7416,9 +7416,9 @@ FlowModelFiveEqnAllaire::computeCellDataOfSpeciesTemperaturesWithSpeciesDensitie
             
             for (int si = 0; si < d_num_species; si++)
             {
-                std::vector<double> species_thermo_properties;
-                std::vector<double*> species_thermo_properties_ptr;
-                std::vector<const double*> species_thermo_properties_const_ptr;
+                std::vector<Real> species_thermo_properties;
+                std::vector<Real*> species_thermo_properties_ptr;
+                std::vector<const Real*> species_thermo_properties_const_ptr;
                 
                 const int num_thermo_properties = d_equation_of_state_mixing_rules->
                     getNumberOfSpeciesThermodynamicProperties(si);

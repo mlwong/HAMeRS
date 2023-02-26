@@ -10,7 +10,7 @@ class EquationOfShearViscosityConstant: public EquationOfShearViscosity
             const std::string& object_name,
             const tbox::Dimension& dim,
             const bool use_constant_kinematic_viscosity_and_ideal_gas_assumptions,
-            const double R_u = double(8.314462618153240)): // Universal gas constant in SI units.
+            const Real R_u = Real(8.314462618153240)): // Universal gas constant in SI units.
                 EquationOfShearViscosity(
                     object_name,
                     dim),
@@ -29,21 +29,21 @@ class EquationOfShearViscosityConstant: public EquationOfShearViscosity
         /*
          * Compute the shear viscosity.
          */
-        double
+        Real
         getShearViscosity(
-            const double* const pressure,
-            const double* const temperature,
-            const std::vector<const double*>& molecular_properties) const;
+            const Real* const pressure,
+            const Real* const temperature,
+            const std::vector<const Real*>& molecular_properties) const;
         
         /*
          * Compute the shear viscosity.
          */
         void
         computeShearViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_shear_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const std::vector<const double*>& molecular_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_shear_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const std::vector<const Real*>& molecular_properties,
             const hier::Box& domain) const;
         
         /*
@@ -51,10 +51,10 @@ class EquationOfShearViscosityConstant: public EquationOfShearViscosity
          */
         void
         computeShearViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_shear_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_molecular_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_shear_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_molecular_properties,
             const hier::Box& domain) const;
         
     private:
@@ -66,7 +66,7 @@ class EquationOfShearViscosityConstant: public EquationOfShearViscosity
         /*
          * Universal gas constant.
          */
-        double d_R_u;
+        Real d_R_u;
         
 };
 

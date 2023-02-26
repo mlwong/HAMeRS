@@ -53,21 +53,21 @@ class EquationOfStateMixingRules
         /*
          * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
          */
-        virtual double
+        virtual Real
         getPressure(
-            const double* const density,
-            const double* const internal_energy,
-            const std::vector<const double*>& mass_fractions) const = 0;
+            const Real* const density,
+            const Real* const internal_energy,
+            const std::vector<const Real*>& mass_fractions) const = 0;
         
         /*
          * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computePressure(
@@ -83,10 +83,10 @@ class EquationOfStateMixingRules
          */
         virtual void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -94,10 +94,10 @@ class EquationOfStateMixingRules
          */
         void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -115,33 +115,33 @@ class EquationOfStateMixingRules
          */
         virtual void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const = 0;
         
         /*
          * Compute the pressure of the mixture with isobaric equilibrium assumption.
          */
-        virtual double
+        virtual Real
         getPressure(
-            const double* const density,
-            const double* const internal_energy,
-            const std::vector<const double*>& mass_fractions,
-            const std::vector<const double*>& volume_fractions) const = 0;
+            const Real* const density,
+            const Real* const internal_energy,
+            const std::vector<const Real*>& mass_fractions,
+            const std::vector<const Real*>& volume_fractions) const = 0;
         
         /*
          * Compute the pressure of the mixture with isobaric equilibrium assumption.
          */
         void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computePressure(
@@ -158,11 +158,11 @@ class EquationOfStateMixingRules
          */
         virtual void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -170,11 +170,11 @@ class EquationOfStateMixingRules
          */
         void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_volume_fractions,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -193,32 +193,32 @@ class EquationOfStateMixingRules
          */
         virtual void
         computePressure(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_volume_fractions,
             int side_normal,
             const hier::Box& domain) const = 0;
         
         /*
          * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
          */
-        virtual double
+        virtual Real
         getInternalEnergy(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& mass_fractions) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& mass_fractions) const = 0;
         
         /*
          * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computeInternalEnergy(
@@ -234,10 +234,10 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -245,10 +245,10 @@ class EquationOfStateMixingRules
          */
         void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -266,33 +266,33 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const = 0;
         
         /*
          * Compute the specific internal energy of the mixture with isobaric equilibrium assumption.
          */
-        virtual double
+        virtual Real
         getInternalEnergy(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& mass_fractions,
-            const std::vector<const double*>& volume_fractions) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& mass_fractions,
+            const std::vector<const Real*>& volume_fractions) const = 0;
         
         /*
          * Compute the specific internal energy of the mixture with isobaric equilibrium assumption.
          */
         void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computeInternalEnergy(
@@ -309,11 +309,11 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -321,11 +321,11 @@ class EquationOfStateMixingRules
          */
         void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_volume_fractions,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -344,32 +344,32 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeInternalEnergy(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_volume_fractions,
             int side_normal,
             const hier::Box& domain) const = 0;
         
         /*
          * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
          */
-        virtual double
+        virtual Real
         getTemperature(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& mass_fractions) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& mass_fractions) const = 0;
         
         /*
          * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeTemperature(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computeTemperature(
@@ -385,10 +385,10 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeTemperature(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -396,10 +396,10 @@ class EquationOfStateMixingRules
          */
         void
         computeTemperature(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -417,10 +417,10 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeTemperature(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -428,11 +428,11 @@ class EquationOfStateMixingRules
          * Compute the specific internal energy of the mixture from temperature with isothermal
          * and isobaric equilibrium assumptions.
          */
-        virtual double
+        virtual Real
         getInternalEnergyFromTemperature(
-            const double* const density,
-            const double* const temperature,
-            const std::vector<const double*>& mass_fractions) const = 0;
+            const Real* const density,
+            const Real* const temperature,
+            const std::vector<const Real*>& mass_fractions) const = 0;
         
         /*
          * Compute the specific internal energy of the mixture from temperature with isothermal
@@ -440,10 +440,10 @@ class EquationOfStateMixingRules
          */
         void
         computeInternalEnergyFromTemperature(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computeInternalEnergyFromTemperature(
@@ -460,10 +460,10 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeInternalEnergyFromTemperature(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -472,10 +472,10 @@ class EquationOfStateMixingRules
          */
         void
         computeInternalEnergyFromTemperature(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -494,10 +494,10 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeInternalEnergyFromTemperature(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -505,11 +505,11 @@ class EquationOfStateMixingRules
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
          * equilibrium assumptions.
          */
-        virtual double
+        virtual Real
         getIsochoricSpecificHeatCapacity(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& mass_fractions) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& mass_fractions) const = 0;
         
         /*
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
@@ -517,10 +517,10 @@ class EquationOfStateMixingRules
          */
         void
         computeIsochoricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computeIsochoricSpecificHeatCapacity(
@@ -537,10 +537,10 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeIsochoricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -549,10 +549,10 @@ class EquationOfStateMixingRules
          */
         void
         computeIsochoricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -571,10 +571,10 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeIsochoricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -582,11 +582,11 @@ class EquationOfStateMixingRules
          * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric
          * equilibrium assumptions.
          */
-        virtual double
+        virtual Real
         getIsobaricSpecificHeatCapacity(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& mass_fractions) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& mass_fractions) const = 0;
         
         /*
          * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric
@@ -594,10 +594,10 @@ class EquationOfStateMixingRules
          */
         void
         computeIsobaricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computeIsobaricSpecificHeatCapacity(
@@ -614,10 +614,10 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeIsobaricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -626,10 +626,10 @@ class EquationOfStateMixingRules
          */
         void
         computeIsobaricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -648,10 +648,10 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeIsobaricSpecificHeatCapacity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -660,11 +660,11 @@ class EquationOfStateMixingRules
          * (partial derivative of pressure w.r.t. specific internal energy under constant partial densities
          * divided by mixture density).
          */
-        virtual double
+        virtual Real
         getGruneisenParameter(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& mass_fractions) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& mass_fractions) const = 0;
         
         /*
          * Compute the Gruneisen parameter of the mixture with isothermal and isobaric equilibrium assumptions
@@ -673,10 +673,10 @@ class EquationOfStateMixingRules
          */
         void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computeGruneisenParameter(
@@ -694,10 +694,10 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -707,10 +707,10 @@ class EquationOfStateMixingRules
          */
         void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -730,10 +730,10 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -742,12 +742,12 @@ class EquationOfStateMixingRules
          * (partial derivative of pressure w.r.t. specific internal energy under constant partial densities
          * and volume fractions divided by mixture density).
          */
-        virtual double
+        virtual Real
         getGruneisenParameter(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& mass_fractions,
-            const std::vector<const double*>& volume_fractions) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& mass_fractions,
+            const std::vector<const Real*>& volume_fractions) const = 0;
         
         /*
          * Compute the Gruneisen parameter of the mixture with isobaric equilibrium assumption
@@ -756,11 +756,11 @@ class EquationOfStateMixingRules
          */
         void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computeGruneisenParameter(
@@ -779,11 +779,11 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -793,11 +793,11 @@ class EquationOfStateMixingRules
          */
         void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_volume_fractions,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -818,11 +818,11 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeGruneisenParameter(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_volume_fractions,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -830,11 +830,11 @@ class EquationOfStateMixingRules
          * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
          * internal energy with isothermal and isobaric equilibrium assumptions.
          */
-        virtual std::vector<double>
+        virtual std::vector<Real>
         getPressureDerivativeWithPartialDensities(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& mass_fractions) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& mass_fractions) const = 0;
         
         /*
          * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
@@ -842,10 +842,10 @@ class EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_pressure_partial_partial_densities,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computePressureDerivativeWithPartialDensities(
@@ -862,10 +862,10 @@ class EquationOfStateMixingRules
          */
         virtual void
         computePressureDerivativeWithPartialDensities(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_pressure_partial_partial_densities,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -874,10 +874,10 @@ class EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_pressure_partial_partial_densities,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -896,10 +896,10 @@ class EquationOfStateMixingRules
          */
         virtual void
         computePressureDerivativeWithPartialDensities(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_pressure_partial_partial_densities,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -907,12 +907,12 @@ class EquationOfStateMixingRules
          * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
          * internal energy and volume fractions with isobaric equilibrium assumption.
          */
-        virtual std::vector<double>
+        virtual std::vector<Real>
         getPressureDerivativeWithPartialDensities(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& mass_fractions,
-            const std::vector<const double*>& volume_fractions) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& mass_fractions,
+            const std::vector<const Real*>& volume_fractions) const = 0;
         
         /*
          * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
@@ -920,11 +920,11 @@ class EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_pressure_partial_partial_densities,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computePressureDerivativeWithPartialDensities(
@@ -942,11 +942,11 @@ class EquationOfStateMixingRules
          */
         virtual void
         computePressureDerivativeWithPartialDensities(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_pressure_partial_partial_densities,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -955,11 +955,11 @@ class EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_pressure_partial_partial_densities,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_volume_fractions,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -979,11 +979,11 @@ class EquationOfStateMixingRules
          */
         virtual void
         computePressureDerivativeWithPartialDensities(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_pressure_partial_partial_densities,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_volume_fractions,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -991,12 +991,12 @@ class EquationOfStateMixingRules
          * Compute the mixture partial derivative of pressure w.r.t. volume fractions under constant specific
          * internal energy and partial densities with isobaric equilibrium assumption.
          */
-        virtual std::vector<double>
+        virtual std::vector<Real>
         getPressureDerivativeWithVolumeFractions(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& mass_fractions,
-            const std::vector<const double*>& volume_fractions) const = 0;
+            const Real* const density,
+            const Real* const pressure,
+            const std::vector<const Real*>& mass_fractions,
+            const std::vector<const Real*>& volume_fractions) const = 0;
         
         /*
          * Compute the mixture partial derivative of pressure w.r.t. volume fractions under constant specific
@@ -1004,11 +1004,11 @@ class EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithVolumeFractions(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_volume_fractions,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_pressure_partial_volume_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computePressureDerivativeWithVolumeFractions(
@@ -1026,11 +1026,11 @@ class EquationOfStateMixingRules
          */
         virtual void
         computePressureDerivativeWithVolumeFractions(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_volume_fractions,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_pressure_partial_volume_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_volume_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -1039,11 +1039,11 @@ class EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithVolumeFractions(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_volume_fractions,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_pressure_partial_volume_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_volume_fractions,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -1063,32 +1063,32 @@ class EquationOfStateMixingRules
          */
         virtual void
         computePressureDerivativeWithVolumeFractions(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_volume_fractions,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_pressure_partial_volume_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_volume_fractions,
             int side_normal,
             const hier::Box& domain) const = 0;
         
         /*
          * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
          */
-        virtual double
+        virtual Real
         getMixtureDensity(
-            const double* const pressure,
-            const double* const temperature,
-            const std::vector<const double*>& mass_fractions) const = 0;
+            const Real* const pressure,
+            const Real* const temperature,
+            const std::vector<const Real*>& mass_fractions) const = 0;
         
         /*
          * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeMixtureDensity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mixture_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mixture_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computeMixtureDensity(
@@ -1104,10 +1104,10 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeMixtureDensity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mixture_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mixture_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -1115,10 +1115,10 @@ class EquationOfStateMixingRules
          */
         void
         computeMixtureDensity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mixture_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mixture_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -1136,10 +1136,10 @@ class EquationOfStateMixingRules
          */
         virtual void
         computeMixtureDensity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mixture_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mixture_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const = 0;
         
@@ -1154,30 +1154,30 @@ class EquationOfStateMixingRules
          */
         virtual void
         getSpeciesThermodynamicProperties(
-            std::vector<double*>& species_thermo_properties,
+            std::vector<Real*>& species_thermo_properties,
             const int species_index = 0) const = 0;
         
         /*
          * Get the molecular weight of a species.
          */
-        double
+        Real
         getSpeciesMolecularWeight(
             const int species_index = 0) const;
         
         /*
          * Compute the molecular weight of mixture.
          */
-        double
+        Real
         getMixtureMolecularWeight(
-            const std::vector<const double*>& mass_fractions) const;
+            const std::vector<const Real*>& mass_fractions) const;
         
         /*
          * Compute the molecular weight of mixture.
          */
         void
         computeMixtureMolecularWeight(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mixture_molecular_weight,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mixture_molecular_weight,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computeMixtureMolecularWeight(
@@ -1191,8 +1191,8 @@ class EquationOfStateMixingRules
          */
         void
         computeMixtureMolecularWeight(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mixture_molecular_weight,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mixture_molecular_weight,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -1200,8 +1200,8 @@ class EquationOfStateMixingRules
          */
         void
         computeMixtureMolecularWeight(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mixture_molecular_weight,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mixture_molecular_weight,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -1217,25 +1217,25 @@ class EquationOfStateMixingRules
          */
         void
         computeMixtureMolecularWeight(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mixture_molecular_weight,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mixture_molecular_weight,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const;
         
         /*
          * Helper function to compute the density of mixture given the partial densities.
          */
-        double
+        Real
         getMixtureDensity(
-            const std::vector<const double*>& partial_densities) const;
+            const std::vector<const Real*>& partial_densities) const;
         
         /*
          * Helper function to compute the density of mixture given the partial densities.
          */
         void
         computeMixtureDensity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mixture_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_densities) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mixture_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_densities) const
         {
             const hier::Box empty_box(d_dim);
             computeMixtureDensity(
@@ -1249,8 +1249,8 @@ class EquationOfStateMixingRules
          */
         void
         computeMixtureDensity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mixture_density,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_densities,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mixture_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_densities,
             const hier::Box& domain) const;
         
         /*
@@ -1258,8 +1258,8 @@ class EquationOfStateMixingRules
          */
         void
         computeMixtureDensity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mixture_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_densities,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mixture_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_densities,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
@@ -1275,8 +1275,8 @@ class EquationOfStateMixingRules
          */
         void
         computeMixtureDensity(
-            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mixture_density,
-            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_densities,
+            HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mixture_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_densities,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -1286,8 +1286,8 @@ class EquationOfStateMixingRules
          */
         void
         computeMixtureMolecularWeight(
-            double* const M,
-            const std::vector<const double*>& Y,
+            Real* const M,
+            const std::vector<const Real*>& Y,
             const hier::IntVector& num_ghosts_mixture_molecular_weight,
             const hier::IntVector& num_ghosts_mass_fractions,
             const hier::IntVector& ghostcell_dims_mixture_molecular_weight,
@@ -1300,8 +1300,8 @@ class EquationOfStateMixingRules
          */
         void
         computeMixtureDensity(
-            double* const rho,
-            const std::vector<const double*>& Z_rho,
+            Real* const rho,
+            const std::vector<const Real*>& Z_rho,
             const hier::IntVector& num_ghosts_mixture_density,
             const hier::IntVector& num_ghosts_partial_densities,
             const hier::IntVector& ghostcell_dims_mixture_density,
@@ -1337,7 +1337,7 @@ class EquationOfStateMixingRules
         /*
          * Molecular weights of different species.
          */
-        std::vector<double> d_species_M;
+        std::vector<Real> d_species_M;
         
 };
 

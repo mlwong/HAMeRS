@@ -5,11 +5,11 @@
  */
 void
 FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVariables(
-    const std::vector<const double*>& conservative_variables,
-    const std::vector<double*>& primitive_variables)
+    const std::vector<const Real*>& conservative_variables,
+    const std::vector<Real*>& primitive_variables)
 {
-    const std::vector<const double*>& Q = conservative_variables;
-    const std::vector<double*>&       V = primitive_variables;
+    const std::vector<const Real*>& Q = conservative_variables;
+    const std::vector<Real*>&       V = primitive_variables;
     
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     if (!(static_cast<int>(Q.size()) == d_num_eqn || static_cast<int>(Q.size()) == d_num_eqn + 1))
@@ -32,45 +32,45 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
 #endif
     
     // Compute the mixture density.
-    std::vector<const double*> Z_rho_ptr;
+    std::vector<const Real*> Z_rho_ptr;
     Z_rho_ptr.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
         Z_rho_ptr.push_back(Q[si]);
     }
-    const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+    const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
         Z_rho_ptr);
     
     // Compute the specific internal energy.
-    double epsilon = double(0);
+    Real epsilon = Real(0);
     if (d_dim == tbox::Dimension(1))
     {
         epsilon = ((*Q[d_num_species + d_dim.getValue()]) -
-            double(1)/double(2)*((*Q[d_num_species])*(*Q[d_num_species]))/rho)/rho;
+            Real(1)/Real(2)*((*Q[d_num_species])*(*Q[d_num_species]))/rho)/rho;
     }
     else if (d_dim == tbox::Dimension(2))
     {
         epsilon = ((*Q[d_num_species + d_dim.getValue()]) -
-            double(1)/double(2)*((*Q[d_num_species])*(*Q[d_num_species]) +
+            Real(1)/Real(2)*((*Q[d_num_species])*(*Q[d_num_species]) +
             (*Q[d_num_species + 1])*(*Q[d_num_species + 1]))/rho)/rho;
     }
     else if (d_dim == tbox::Dimension(3))
     {
         epsilon = ((*Q[d_num_species + d_dim.getValue()]) -
-            double(1)/double(2)*((*Q[d_num_species])*(*Q[d_num_species]) +
+            Real(1)/Real(2)*((*Q[d_num_species])*(*Q[d_num_species]) +
             (*Q[d_num_species + 1])*(*Q[d_num_species + 1]) +
             (*Q[d_num_species + 2])*(*Q[d_num_species + 2]))/rho)/rho;
     }
     
     // Compute the mass fractions.
-    double Y[d_num_species];
+    Real Y[d_num_species];
     for (int si = 0; si < d_num_species; si++)
     {
         Y[si] = (*Q[si])/rho;
     }
     
     // Get the pointers to the mass fractions.
-    std::vector<const double*> Y_ptr;
+    std::vector<const Real*> Y_ptr;
     Y_ptr.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
@@ -78,7 +78,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
     }
     
     // Get the pointers to the volume fractions.
-    std::vector<const double*> Z_ptr;
+    std::vector<const Real*> Z_ptr;
     Z_ptr.reserve(d_num_species - 1);
     for (int si = 0; si < d_num_species - 1; si++)
     {
@@ -86,7 +86,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
     }
     
     // Compute the pressure.
-    const double p = d_equation_of_state_mixing_rules->getPressure(
+    const Real p = d_equation_of_state_mixing_rules->getPressure(
         &rho,
         &epsilon,
         Y_ptr,
@@ -125,8 +125,8 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
  */
 void
 FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVariables(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables)
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables)
 {
     if (d_flow_model.expired())
     {
@@ -276,10 +276,10 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
      * Declare the pointers to the primitive variables and conservative variables.
      */
     
-    std::vector<double*> V;
+    std::vector<Real*> V;
     V.resize(d_num_eqn_primitive_var);
     
-    std::vector<double*> Q;
+    std::vector<Real*> Q;
     Q.resize(d_num_eqn_conservative_var);
     
     int count_eqn = 0;
@@ -289,31 +289,31 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
      */
     
     // Create the temporary side data.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_density(
-        new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_density(
+        new pdat::SideData<Real>(interior_box, 1, num_ghosts_conservative_var));
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_internal_energy(
-        new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_internal_energy(
+        new pdat::SideData<Real>(interior_box, 1, num_ghosts_conservative_var));
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_pressure(
-        new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_pressure(
+        new pdat::SideData<Real>(interior_box, 1, num_ghosts_conservative_var));
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_mass_fractions(
-        new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_mass_fractions(
+        new pdat::SideData<Real>(interior_box, d_num_species, num_ghosts_conservative_var));
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_volume_fractions(
-        new pdat::SideData<double>(interior_box, d_num_species - 1, num_ghosts_conservative_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_volume_fractions(
+        new pdat::SideData<Real>(interior_box, d_num_species - 1, num_ghosts_conservative_var));
     
-    data_density->fillAll(double(0));
+    data_density->fillAll(Real(0));
     
-    double* rho     = nullptr;
-    double* epsilon = nullptr;
-    double* p       = nullptr;
+    Real* rho     = nullptr;
+    Real* epsilon = nullptr;
+    Real* p       = nullptr;
     
-    std::vector<double*> Y;
+    std::vector<Real*> Y;
     Y.resize(d_num_species);
     
-    std::vector<double*> Z;
+    std::vector<Real*> Z;
     Z.resize(d_num_species - 1);
     
     if (d_dim == tbox::Dimension(1))
@@ -390,7 +390,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
             const int idx_conservative_var = i + num_ghosts_0_conservative_var;
             
             epsilon[idx_conservative_var] = (Q[d_num_species + d_dim.getValue()][idx_conservative_var] -
-                double(1)/double(2)*(Q[d_num_species][idx_conservative_var]*Q[d_num_species][idx_conservative_var])/
+                Real(1)/Real(2)*(Q[d_num_species][idx_conservative_var]*Q[d_num_species][idx_conservative_var])/
                 rho[idx_conservative_var])/rho[idx_conservative_var];
         }
         
@@ -486,7 +486,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                 // Compute the linear index.
                 const int idx_primitive_var = i + num_ghosts_0_primitive_var;
                 
-                V[d_num_eqn][idx_primitive_var] = double(1);
+                V[d_num_eqn][idx_primitive_var] = Real(1);
             }
             
             for (int si = 0; si < d_num_species - 1; si++)
@@ -612,7 +612,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                     (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1);
                 
                 epsilon[idx_conservative_var] = (Q[d_num_species + d_dim.getValue()][idx_conservative_var] -
-                    double(1)/double(2)*(Q[d_num_species][idx_conservative_var]*Q[d_num_species][idx_conservative_var] +
+                    Real(1)/Real(2)*(Q[d_num_species][idx_conservative_var]*Q[d_num_species][idx_conservative_var] +
                     Q[d_num_species + 1][idx_conservative_var]*Q[d_num_species + 1][idx_conservative_var])/
                     rho[idx_conservative_var])/rho[idx_conservative_var];
             }
@@ -740,7 +740,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
                         (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
                     
-                    V[d_num_eqn][idx_primitive_var] = double(1);
+                    V[d_num_eqn][idx_primitive_var] = Real(1);
                 }
             }
             
@@ -864,7 +864,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                     (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
                 
                 epsilon[idx_conservative_var] = (Q[d_num_species + d_dim.getValue()][idx_conservative_var] -
-                    double(1)/double(2)*(Q[d_num_species][idx_conservative_var]*Q[d_num_species][idx_conservative_var] +
+                    Real(1)/Real(2)*(Q[d_num_species][idx_conservative_var]*Q[d_num_species][idx_conservative_var] +
                     Q[d_num_species + 1][idx_conservative_var]*Q[d_num_species + 1][idx_conservative_var])/
                     rho[idx_conservative_var])/rho[idx_conservative_var];
             }
@@ -992,7 +992,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
                         (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
                     
-                    V[d_num_eqn][idx_primitive_var] = double(1);
+                    V[d_num_eqn][idx_primitive_var] = Real(1);
                 }
             }
             
@@ -1143,7 +1143,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                             ghostcell_dim_1_conservative_var;
                     
                     epsilon[idx_conservative_var] = (Q[d_num_species + d_dim.getValue()][idx_conservative_var] -
-                        double(1)/double(2)*(Q[d_num_species][idx_conservative_var]*Q[d_num_species][idx_conservative_var] +
+                        Real(1)/Real(2)*(Q[d_num_species][idx_conservative_var]*Q[d_num_species][idx_conservative_var] +
                         Q[d_num_species + 1][idx_conservative_var]*Q[d_num_species + 1][idx_conservative_var] +
                         Q[d_num_species + 2][idx_conservative_var]*Q[d_num_species + 2][idx_conservative_var])/
                         rho[idx_conservative_var])/rho[idx_conservative_var];
@@ -1309,7 +1309,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                             (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
                                 ghostcell_dim_1_primitive_var;
                         
-                        V[d_num_eqn][idx_primitive_var] = double(1);
+                        V[d_num_eqn][idx_primitive_var] = Real(1);
                     }
                 }
             }
@@ -1457,7 +1457,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                             (ghostcell_dim_1_conservative_var + 1);
                     
                     epsilon[idx_conservative_var] = (Q[d_num_species + d_dim.getValue()][idx_conservative_var] -
-                        double(1)/double(2)*(Q[d_num_species][idx_conservative_var]*Q[d_num_species][idx_conservative_var] +
+                        Real(1)/Real(2)*(Q[d_num_species][idx_conservative_var]*Q[d_num_species][idx_conservative_var] +
                         Q[d_num_species + 1][idx_conservative_var]*Q[d_num_species + 1][idx_conservative_var] +
                         Q[d_num_species + 2][idx_conservative_var]*Q[d_num_species + 2][idx_conservative_var])/
                         rho[idx_conservative_var])/rho[idx_conservative_var];
@@ -1623,7 +1623,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                             (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                                 (ghostcell_dim_1_primitive_var + 1);
                         
-                        V[d_num_eqn][idx_primitive_var] = double(1);
+                        V[d_num_eqn][idx_primitive_var] = Real(1);
                     }
                 }
             }
@@ -1771,7 +1771,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                             ghostcell_dim_1_conservative_var;
                     
                     epsilon[idx_conservative_var] = (Q[d_num_species + d_dim.getValue()][idx_conservative_var] -
-                        double(1)/double(2)*(Q[d_num_species][idx_conservative_var]*Q[d_num_species][idx_conservative_var] +
+                        Real(1)/Real(2)*(Q[d_num_species][idx_conservative_var]*Q[d_num_species][idx_conservative_var] +
                         Q[d_num_species + 1][idx_conservative_var]*Q[d_num_species + 1][idx_conservative_var] +
                         Q[d_num_species + 2][idx_conservative_var]*Q[d_num_species + 2][idx_conservative_var])/
                         rho[idx_conservative_var])/rho[idx_conservative_var];
@@ -1937,7 +1937,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                             (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                                 ghostcell_dim_1_primitive_var;
                         
-                        V[d_num_eqn][idx_primitive_var] = double(1);
+                        V[d_num_eqn][idx_primitive_var] = Real(1);
                     }
                 }
             }
@@ -2010,11 +2010,11 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
  */
 void
 FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVariables(
-    const std::vector<const double*>& primitive_variables,
-    const std::vector<double*>& conservative_variables)
+    const std::vector<const Real*>& primitive_variables,
+    const std::vector<Real*>& conservative_variables)
 {
-    const std::vector<const double*>& V = primitive_variables;
-    const std::vector<double*>&       Q = conservative_variables;
+    const std::vector<const Real*>& V = primitive_variables;
+    const std::vector<Real*>&       Q = conservative_variables;
     
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     if (!(static_cast<int>(V.size()) == d_num_eqn || static_cast<int>(V.size()) == d_num_eqn + 1))
@@ -2037,24 +2037,24 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
 #endif
     
     // Compute the mixture density.
-    std::vector<const double*> Z_rho_ptr;
+    std::vector<const Real*> Z_rho_ptr;
     Z_rho_ptr.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
         Z_rho_ptr.push_back(V[si]);
     }
-    const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+    const Real rho = d_equation_of_state_mixing_rules->getMixtureDensity(
         Z_rho_ptr);
     
     // Compute the mass fractions.
-    double Y[d_num_species];
+    Real Y[d_num_species];
     for (int si = 0; si < d_num_species; si++)
     {
         Y[si] = (*V[si])/rho;
     }
     
     // Get the pointers to the mass fractions.
-    std::vector<const double*> Y_ptr;
+    std::vector<const Real*> Y_ptr;
     Y_ptr.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
@@ -2062,7 +2062,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
     }
     
     // Get the pointers to the volume fractions.
-    std::vector<const double*> Z_ptr;
+    std::vector<const Real*> Z_ptr;
     Z_ptr.reserve(d_num_species - 1);
     for (int si = 0; si < d_num_species - 1; si++)
     {
@@ -2070,26 +2070,26 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
     }
     
     // Compute the total energy.
-    const double epsilon = d_equation_of_state_mixing_rules->getInternalEnergy(
+    const Real epsilon = d_equation_of_state_mixing_rules->getInternalEnergy(
         &rho,
         V[d_num_species + d_dim.getValue()],
         Y_ptr,
         Z_ptr);
     
-    double E = double(0);
+    Real E = Real(0);
     if (d_dim == tbox::Dimension(1))
     {
-        E = rho*(epsilon + double(1)/double(2)*((*V[d_num_species])*(*V[d_num_species])));
+        E = rho*(epsilon + Real(1)/Real(2)*((*V[d_num_species])*(*V[d_num_species])));
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        E = rho*(epsilon + double(1)/double(2)*(
+        E = rho*(epsilon + Real(1)/Real(2)*(
             (*V[d_num_species])*(*V[d_num_species]) +
             (*V[d_num_species + 1])*(*V[d_num_species + 1])));
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        E = rho*(epsilon + double(1)/double(2)*(
+        E = rho*(epsilon + Real(1)/Real(2)*(
             (*V[d_num_species])*(*V[d_num_species]) +
             (*V[d_num_species + 1])*(*V[d_num_species + 1]) + 
             (*V[d_num_species + 2])*(*V[d_num_species + 2])));
@@ -2128,8 +2128,8 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
  */
 void
 FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVariables(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables)
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables)
 {
     if (d_flow_model.expired())
     {
@@ -2279,10 +2279,10 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
      * Declare the pointers to the conservative variables and primitive variables.
      */
     
-    std::vector<double*> Q;
+    std::vector<Real*> Q;
     Q.resize(d_num_eqn_conservative_var);
     
-    std::vector<double*> V;
+    std::vector<Real*> V;
     V.resize(d_num_eqn_primitive_var);
     
     int count_eqn = 0;
@@ -2292,31 +2292,31 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
      */
     
     // Create the temporary side data.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_density(
-        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_density(
+        new pdat::SideData<Real>(interior_box, 1, num_ghosts_primitive_var));
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_pressure(
-        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_pressure(
+        new pdat::SideData<Real>(interior_box, 1, num_ghosts_primitive_var));
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_internal_energy(
-        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_internal_energy(
+        new pdat::SideData<Real>(interior_box, 1, num_ghosts_primitive_var));
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_mass_fractions(
-        new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_mass_fractions(
+        new pdat::SideData<Real>(interior_box, d_num_species, num_ghosts_primitive_var));
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_volume_fractions(
-        new pdat::SideData<double>(interior_box, d_num_species - 1, num_ghosts_primitive_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_volume_fractions(
+        new pdat::SideData<Real>(interior_box, d_num_species - 1, num_ghosts_primitive_var));
     
-    data_density->fillAll(double(0));
+    data_density->fillAll(Real(0));
     
-    double* rho     = nullptr;
-    double* p       = nullptr;
-    double* epsilon = nullptr;
+    Real* rho     = nullptr;
+    Real* p       = nullptr;
+    Real* epsilon = nullptr;
     
-    std::vector<double*> Y;
+    std::vector<Real*> Y;
     Y.resize(d_num_species);
     
-    std::vector<double*> Z;
+    std::vector<Real*> Z;
     Z.resize(d_num_species - 1);
     
     if (d_dim == tbox::Dimension(1))
@@ -2474,7 +2474,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
             const int idx_primitive_var    = i + num_ghosts_0_primitive_var;
             
             Q[d_num_species + d_dim.getValue()][idx_conservative_var] = rho[idx_primitive_var]*
-                (epsilon[idx_primitive_var] + double(1)/double(2)*
+                (epsilon[idx_primitive_var] + Real(1)/Real(2)*
                 V[d_num_species][idx_primitive_var]*V[d_num_species][idx_primitive_var]);
         }
         
@@ -2489,7 +2489,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                 // Compute the linear index.
                 const int idx_conservative_var = i + num_ghosts_0_conservative_var;
                 
-                Q[d_num_eqn][idx_conservative_var] = double(1);
+                Q[d_num_eqn][idx_conservative_var] = Real(1);
             }
             
             for (int si = 0; si < d_num_species - 1; si++)
@@ -2721,7 +2721,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                     (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
                 
                 Q[d_num_species + d_dim.getValue()][idx_conservative_var] = rho[idx_primitive_var]*
-                    (epsilon[idx_primitive_var] + double(1)/double(2)*(
+                    (epsilon[idx_primitive_var] + Real(1)/Real(2)*(
                     V[d_num_species][idx_primitive_var]*V[d_num_species][idx_primitive_var] +
                     V[d_num_species + 1][idx_primitive_var]*V[d_num_species + 1][idx_primitive_var]));
             }
@@ -2741,7 +2741,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
                         (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1);
                     
-                    Q[d_num_eqn][idx_conservative_var] = double(1);
+                    Q[d_num_eqn][idx_conservative_var] = Real(1);
                 }
             }
             
@@ -2973,7 +2973,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                     (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
                 
                 Q[d_num_species + d_dim.getValue()][idx_conservative_var] = rho[idx_primitive_var]*
-                    (epsilon[idx_primitive_var] + double(1)/double(2)*(
+                    (epsilon[idx_primitive_var] + Real(1)/Real(2)*(
                     V[d_num_species][idx_primitive_var]*V[d_num_species][idx_primitive_var] +
                     V[d_num_species + 1][idx_primitive_var]*V[d_num_species + 1][idx_primitive_var]));
             }
@@ -2993,7 +2993,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
                         (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
                     
-                    Q[d_num_eqn][idx_conservative_var] = double(1);
+                    Q[d_num_eqn][idx_conservative_var] = Real(1);
                 }
             }
             
@@ -3284,7 +3284,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                             ghostcell_dim_1_primitive_var;
                     
                      Q[d_num_species + d_dim.getValue()][idx_conservative_var] = rho[idx_primitive_var]*
-                         (epsilon[idx_primitive_var] + double(1)/double(2)*(
+                         (epsilon[idx_primitive_var] + Real(1)/Real(2)*(
                          V[d_num_species][idx_primitive_var]*V[d_num_species][idx_primitive_var] + 
                          V[d_num_species + 1][idx_primitive_var]*V[d_num_species + 1][idx_primitive_var] +
                          V[d_num_species + 2][idx_primitive_var]*V[d_num_species + 2][idx_primitive_var]));
@@ -3310,7 +3310,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                             (k + num_ghosts_2_conservative_var)*(ghostcell_dim_0_conservative_var + 1)*
                                 ghostcell_dim_1_conservative_var;
                         
-                        Q[d_num_eqn][idx_conservative_var] = double(1);
+                        Q[d_num_eqn][idx_conservative_var] = Real(1);
                     }
                 }
             }
@@ -3598,7 +3598,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                             (ghostcell_dim_1_primitive_var + 1);
                     
                      Q[d_num_species + d_dim.getValue()][idx_conservative_var] = rho[idx_primitive_var]*
-                         (epsilon[idx_primitive_var] + double(1)/double(2)*(
+                         (epsilon[idx_primitive_var] + Real(1)/Real(2)*(
                          V[d_num_species][idx_primitive_var]*V[d_num_species][idx_primitive_var] + 
                          V[d_num_species + 1][idx_primitive_var]*V[d_num_species + 1][idx_primitive_var] +
                          V[d_num_species + 2][idx_primitive_var]*V[d_num_species + 2][idx_primitive_var]));
@@ -3624,7 +3624,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                             (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
                                 (ghostcell_dim_1_conservative_var + 1);
                         
-                        Q[d_num_eqn][idx_conservative_var] = double(1);
+                        Q[d_num_eqn][idx_conservative_var] = Real(1);
                     }
                 }
             }
@@ -3912,7 +3912,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                             ghostcell_dim_1_primitive_var;
                     
                      Q[d_num_species + d_dim.getValue()][idx_conservative_var] = rho[idx_primitive_var]*
-                         (epsilon[idx_primitive_var] + double(1)/double(2)*(
+                         (epsilon[idx_primitive_var] + Real(1)/Real(2)*(
                          V[d_num_species][idx_primitive_var]*V[d_num_species][idx_primitive_var] + 
                          V[d_num_species + 1][idx_primitive_var]*V[d_num_species + 1][idx_primitive_var] +
                          V[d_num_species + 2][idx_primitive_var]*V[d_num_species + 2][idx_primitive_var]));
@@ -3938,7 +3938,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                             (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
                                 ghostcell_dim_1_conservative_var;
                         
-                        Q[d_num_eqn][idx_conservative_var] = double(1);
+                        Q[d_num_eqn][idx_conservative_var] = Real(1);
                     }
                 }
             }
@@ -4012,7 +4012,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
 void
 FlowModelBasicUtilitiesFiveEqnAllaire::checkCellDataOfConservativeVariablesBounded(
     HAMERS_SHARED_PTR<pdat::CellData<int> >& bounded_flag,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables)
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables)
 {
     NULL_USE(bounded_flag);
     NULL_USE(conservative_variables);
@@ -4032,7 +4032,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkCellDataOfConservativeVariablesBound
 void
 FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBounded(
     HAMERS_SHARED_PTR<pdat::SideData<int> >& bounded_flag,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables)
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables)
 {
     if (d_flow_model.expired())
     {
@@ -4134,16 +4134,16 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
     bounded_flag->fillAll(1);
     
     // Create the side data for last volume fraction.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_last_volume_fraction(
-        new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_last_volume_fraction(
+        new pdat::SideData<Real>(interior_box, 1, num_ghosts_conservative_var));
     
-    data_last_volume_fraction->fillAll(double(1));
+    data_last_volume_fraction->fillAll(Real(1));
     
     // Create the side data of density.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_density(
-        new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_density(
+        new pdat::SideData<Real>(interior_box, 1, num_ghosts_conservative_var));
     
-    data_density->fillAll(double(0));
+    data_density->fillAll(Real(0));
     
     /*
      * Declare containers to store pointers to different data.
@@ -4151,12 +4151,12 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
     
     int* are_bounded = nullptr;
     
-    std::vector<double*> Q;
+    std::vector<Real*> Q;
     Q.resize(d_num_eqn);
     
-    double* Z_last = nullptr;
+    Real* Z_last = nullptr;
     
-    double* rho = nullptr;
+    Real* rho = nullptr;
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -4249,7 +4249,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
                 // Compute the linear index.
                 const int idx_face = i + num_ghosts_0_conservative_var;
                 
-                const double Y = Q[si][idx_face]/rho[idx_face];
+                const Real Y = Q[si][idx_face]/rho[idx_face];
                 
                 if (Y > d_Y_bound_lo && Y < d_Y_bound_up)
                 {
@@ -4271,7 +4271,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
             // Compute the linear index.
             const int idx_face = i + num_ghosts_0_conservative_var;
             
-            if (rho[idx_face] > double(0))
+            if (rho[idx_face] > Real(0))
             {
                 are_bounded[idx_face] &= 1;
             }
@@ -4280,7 +4280,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
                 are_bounded[idx_face] &= 0;
             }
             
-            if (Q[d_num_species + d_dim.getValue()][idx_face] > double(0))
+            if (Q[d_num_species + d_dim.getValue()][idx_face] > Real(0))
             {
                 are_bounded[idx_face] &= 1;
             }
@@ -4399,7 +4399,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
                     const int idx_face = (i + num_ghosts_0_conservative_var) +
                         (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1);
                     
-                    const double Y = Q[si][idx_face]/rho[idx_face];
+                    const Real Y = Q[si][idx_face]/rho[idx_face];
                     
                     if (Y > d_Y_bound_lo && Y < d_Y_bound_up)
                     {
@@ -4425,7 +4425,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
                 const int idx_face = (i + num_ghosts_0_conservative_var) +
                     (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1);
                 
-                if (rho[idx_face] > double(0))
+                if (rho[idx_face] > Real(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -4434,7 +4434,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
                     are_bounded[idx_face] &= 0;
                 }
                 
-                if (Q[d_num_species + d_dim.getValue()][idx_face] > double(0))
+                if (Q[d_num_species + d_dim.getValue()][idx_face] > Real(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -4545,7 +4545,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
                     const int idx_face = (i + num_ghosts_0_conservative_var) +
                         (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
                     
-                    const double Y = Q[si][idx_face]/rho[idx_face];
+                    const Real Y = Q[si][idx_face]/rho[idx_face];
                     
                     if (Y > d_Y_bound_lo && Y < d_Y_bound_up)
                     {
@@ -4571,7 +4571,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
                 const int idx_face = (i + num_ghosts_0_conservative_var) +
                     (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
                 
-                if (rho[idx_face] > double(0))
+                if (rho[idx_face] > Real(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -4580,7 +4580,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
                     are_bounded[idx_face] &= 0;
                 }
                 
-                if (Q[d_num_species + d_dim.getValue()][idx_face] > double(0))
+                if (Q[d_num_species + d_dim.getValue()][idx_face] > Real(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -4722,7 +4722,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
                             (k + num_ghosts_2_conservative_var)*(ghostcell_dim_0_conservative_var + 1)*
                                 ghostcell_dim_1_conservative_var;
                         
-                        const double Y = Q[si][idx_face]/rho[idx_face];
+                        const Real Y = Q[si][idx_face]/rho[idx_face];
                         
                         if (Y > d_Y_bound_lo && Y < d_Y_bound_up)
                         {
@@ -4753,7 +4753,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
                         (k + num_ghosts_2_conservative_var)*(ghostcell_dim_0_conservative_var + 1)*
                             ghostcell_dim_1_conservative_var;
                     
-                    if (rho[idx_face] > double(0))
+                    if (rho[idx_face] > Real(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -4762,7 +4762,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
                         are_bounded[idx_face] &= 0;
                     }
                     
-                    if (Q[d_num_species + d_dim.getValue()][idx_face] > double(0))
+                    if (Q[d_num_species + d_dim.getValue()][idx_face] > Real(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -4893,7 +4893,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
                             (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
                                 (ghostcell_dim_1_conservative_var + 1);
                         
-                        const double Y = Q[si][idx_face]/rho[idx_face];
+                        const Real Y = Q[si][idx_face]/rho[idx_face];
                         
                         if (Y > d_Y_bound_lo && Y < d_Y_bound_up)
                         {
@@ -4924,7 +4924,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
                         (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
                             (ghostcell_dim_1_conservative_var + 1);
                     
-                    if (rho[idx_face] > double(0))
+                    if (rho[idx_face] > Real(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -4933,7 +4933,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
                         are_bounded[idx_face] &= 0;
                     }
                     
-                    if (Q[d_num_species + d_dim.getValue()][idx_face] > double(0))
+                    if (Q[d_num_species + d_dim.getValue()][idx_face] > Real(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -5064,7 +5064,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
                             (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
                                 ghostcell_dim_1_conservative_var;
                         
-                        const double Y = Q[si][idx_face]/rho[idx_face];
+                        const Real Y = Q[si][idx_face]/rho[idx_face];
                         
                         if (Y > d_Y_bound_lo && Y < d_Y_bound_up)
                         {
@@ -5095,7 +5095,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
                         (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
                             ghostcell_dim_1_conservative_var;
                     
-                    if (rho[idx_face] > double(0))
+                    if (rho[idx_face] > Real(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -5104,7 +5104,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
                         are_bounded[idx_face] &= 0;
                     }
                     
-                    if (Q[d_num_species + d_dim.getValue()][idx_face] > double(0))
+                    if (Q[d_num_species + d_dim.getValue()][idx_face] > Real(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -5125,7 +5125,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
 void
 FlowModelBasicUtilitiesFiveEqnAllaire::checkCellDataOfPrimitiveVariablesBounded(
     HAMERS_SHARED_PTR<pdat::CellData<int> >& bounded_flag,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& primitive_variables)
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& primitive_variables)
 {
     NULL_USE(bounded_flag);
     NULL_USE(primitive_variables);
@@ -5145,7 +5145,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkCellDataOfPrimitiveVariablesBounded(
 void
 FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
     HAMERS_SHARED_PTR<pdat::SideData<int> >& bounded_flag,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables)
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables)
 {
     if (d_flow_model.expired())
     {
@@ -5247,35 +5247,35 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
     bounded_flag->fillAll(1);
     
     // Create the side data for volume fractions.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_volume_fractions(
-        new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_volume_fractions(
+        new pdat::SideData<Real>(interior_box, d_num_species, num_ghosts_primitive_var));
     
-    data_volume_fractions->fill(double(1), d_num_species - 1);
+    data_volume_fractions->fill(Real(1), d_num_species - 1);
     
     // Create the side data of density.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_density(
-        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_density(
+        new pdat::SideData<Real>(interior_box, 1, num_ghosts_primitive_var));
     
-    data_density->fillAll(double(0));
+    data_density->fillAll(Real(0));
     
     // Create the side data of pressure.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_pressure(
-        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_pressure(
+        new pdat::SideData<Real>(interior_box, 1, num_ghosts_primitive_var));
     
     // Create the side data of mass fractions.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_mass_fractions(
-        new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_mass_fractions(
+        new pdat::SideData<Real>(interior_box, d_num_species, num_ghosts_primitive_var));
     
     // Create the side data of partial derivatives.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_gruneisen_parameter(
-        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_gruneisen_parameter(
+        new pdat::SideData<Real>(interior_box, 1, num_ghosts_primitive_var));
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_partial_pressure_partial_partial_densities(
-        new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_partial_pressure_partial_partial_densities(
+        new pdat::SideData<Real>(interior_box, d_num_species, num_ghosts_primitive_var));
     
     // Create the side data of square of sound speed.
-    HAMERS_SHARED_PTR<pdat::SideData<double> > data_sound_speed_sq(
-        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_var));
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > data_sound_speed_sq(
+        new pdat::SideData<Real>(interior_box, 1, num_ghosts_primitive_var));
     
     /*
      * Declare containers to store pointers to different data.
@@ -5283,24 +5283,24 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
     
     int* are_bounded = nullptr;
     
-    std::vector<double*> V;
+    std::vector<Real*> V;
     V.resize(d_num_eqn);
     
-    std::vector<double*> Z;
+    std::vector<Real*> Z;
     Z.resize(d_num_eqn);
     
-    double* rho = nullptr;
-    double* p = nullptr;
+    Real* rho = nullptr;
+    Real* p = nullptr;
     
-    std::vector<double*> Y;
+    std::vector<Real*> Y;
     Y.resize(d_num_eqn);
     
-    double* Gamma;
+    Real* Gamma;
     
-    std::vector<double*> Psi;
+    std::vector<Real*> Psi;
     Psi.resize(d_num_species);
     
-    double* c_sq;
+    Real* c_sq;
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -5438,7 +5438,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                 // Compute the linear index.
                 const int idx_face = i + num_ghosts_0_primitive_var;
                 
-                if (V[si][idx_face] > double(0))
+                if (V[si][idx_face] > Real(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -5512,7 +5512,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
             // Compute the linear index.
             const int idx_face = i + num_ghosts_0_primitive_var;
             
-            if (c_sq[idx_face] > double(0))
+            if (c_sq[idx_face] > Real(0))
             {
                 are_bounded[idx_face] &= 1;
             }
@@ -5680,7 +5680,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                     const int idx_face = (i + num_ghosts_0_primitive_var) +
                         (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
                     
-                    if (V[si][idx_face] > double(0))
+                    if (V[si][idx_face] > Real(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -5770,7 +5770,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                 const int idx_face = (i + num_ghosts_0_primitive_var) +
                     (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
                 
-                if (c_sq[idx_face] > double(0))
+                if (c_sq[idx_face] > Real(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -5930,7 +5930,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                     const int idx_face = (i + num_ghosts_0_primitive_var) +
                         (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
                     
-                    if (V[si][idx_face] > double(0))
+                    if (V[si][idx_face] > Real(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -6020,7 +6020,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                 const int idx_face = (i + num_ghosts_0_primitive_var) +
                     (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
                 
-                if (c_sq[idx_face] > double(0))
+                if (c_sq[idx_face] > Real(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -6216,7 +6216,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                             (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
                                 ghostcell_dim_1_primitive_var;
                         
-                        if (V[si][idx_face] > double(0))
+                        if (V[si][idx_face] > Real(0))
                         {
                             are_bounded[idx_face] &= 1;
                         }
@@ -6326,7 +6326,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                         (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
                             ghostcell_dim_1_primitive_var;
                     
-                    if (c_sq[idx_face] > double(0))
+                    if (c_sq[idx_face] > Real(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -6512,7 +6512,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                             (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                                 (ghostcell_dim_1_primitive_var + 1);
                         
-                        if (V[si][idx_face] > double(0))
+                        if (V[si][idx_face] > Real(0))
                         {
                             are_bounded[idx_face] &= 1;
                         }
@@ -6622,7 +6622,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                         (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                             (ghostcell_dim_1_primitive_var + 1);
                     
-                    if (c_sq[idx_face] > double(0))
+                    if (c_sq[idx_face] > Real(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -6807,7 +6807,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                             (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                                 ghostcell_dim_1_primitive_var;
                         
-                        if (V[si][idx_face] > double(0))
+                        if (V[si][idx_face] > Real(0))
                         {
                             are_bounded[idx_face] &= 1;
                         }
@@ -6917,7 +6917,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                         (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                             ghostcell_dim_1_primitive_var;
                     
-                    if (c_sq[idx_face] > double(0))
+                    if (c_sq[idx_face] > Real(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -7045,7 +7045,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::getNumberOfProjectionVariablesForPrimitiv
  */
 void
 FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForConservativeVariables(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables)
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables)
 {
     NULL_USE(projection_variables);
     
@@ -7064,7 +7064,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForCo
  */
 void
 FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForPrimitiveVariables(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables)
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables)
 {
     if (d_flow_model.expired())
     {
@@ -7150,14 +7150,14 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForPr
     }
     
     // Get the cell data of the variable partial densities.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_partial_densities =
         flow_model_tmp->getCellData("PARTIAL_DENSITIES");
     
     // Get the cell data of total density and sound speed.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_density =
         flow_model_tmp->getCellData("DENSITY");
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_sound_speed =
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_sound_speed =
         flow_model_tmp->getCellData("SOUND_SPEED");
     
     // Get the numbers of ghost cells and ghost cell dimensions of of total density and sound speed.
@@ -7186,23 +7186,23 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForPr
     }
     
     // Get the pointers to the cell data of partial densities, total density and sound speed.
-    std::vector<double*> Z_rho;
+    std::vector<Real*> Z_rho;
     Z_rho.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
         Z_rho.push_back(data_partial_densities->getPointer(si));
     }
-    double* rho = data_density->getPointer(0);
-    double* c = data_sound_speed->getPointer(0);
+    Real* rho = data_density->getPointer(0);
+    Real* c = data_sound_speed->getPointer(0);
     
     /*
      * Declare pointers to different data.
      */
     
-    std::vector<double*> Z_rho_average;
+    std::vector<Real*> Z_rho_average;
     Z_rho_average.resize(d_num_species);
-    double* rho_average = nullptr;
-    double* c_average = nullptr;
+    Real* rho_average = nullptr;
+    Real* c_average = nullptr;
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -7240,7 +7240,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForPr
                         const int idx_L = i - 1 + num_ghosts_0;
                         const int idx_R = i + num_ghosts_0;
                         
-                        Z_rho_average[si][idx_face_x] = double(1)/double(2)*(Z_rho[si][idx_L] + Z_rho[si][idx_R]);
+                        Z_rho_average[si][idx_face_x] = Real(1)/Real(2)*(Z_rho[si][idx_L] + Z_rho[si][idx_R]);
                     }
                 }
                 
@@ -7256,8 +7256,8 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForPr
                     const int idx_sound_speed_L = i - 1 + num_subghosts_0_sound_speed;
                     const int idx_sound_speed_R = i + num_subghosts_0_sound_speed;
                     
-                    rho_average[idx_face_x] = double(1)/double(2)*(rho[idx_density_L] + rho[idx_density_R]);
-                    c_average[idx_face_x] = double(1)/double(2)*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
+                    rho_average[idx_face_x] = Real(1)/Real(2)*(rho[idx_density_L] + rho[idx_density_R]);
+                    c_average[idx_face_x] = Real(1)/Real(2)*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
                 }
                 
                 break;
@@ -7337,7 +7337,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForPr
                             const int idx_R = (i + num_ghosts_0) +
                                 (j + num_ghosts_1)*ghostcell_dim_0;
                             
-                            Z_rho_average[si][idx_face_x] = double(1)/double(2)*(Z_rho[si][idx_L] + Z_rho[si][idx_R]);
+                            Z_rho_average[si][idx_face_x] = Real(1)/Real(2)*(Z_rho[si][idx_L] + Z_rho[si][idx_R]);
                         }
                     }
                 }
@@ -7365,8 +7365,8 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForPr
                         const int idx_sound_speed_R = (i + num_subghosts_0_sound_speed) +
                             (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
                         
-                        rho_average[idx_face_x] = double(1)/double(2)*(rho[idx_density_L] + rho[idx_density_R]);
-                        c_average[idx_face_x] = double(1)/double(2)*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
+                        rho_average[idx_face_x] = Real(1)/Real(2)*(rho[idx_density_L] + rho[idx_density_R]);
+                        c_average[idx_face_x] = Real(1)/Real(2)*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
                     }
                 }
                 
@@ -7400,7 +7400,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForPr
                             const int idx_T = (i + num_ghosts_0) +
                                 (j + num_ghosts_1)*ghostcell_dim_0;
                             
-                            Z_rho_average[si][idx_face_y] = double(1)/double(2)*(Z_rho[si][idx_B] + Z_rho[si][idx_T]);
+                            Z_rho_average[si][idx_face_y] = Real(1)/Real(2)*(Z_rho[si][idx_B] + Z_rho[si][idx_T]);
                         }
                     }
                 }
@@ -7428,8 +7428,8 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForPr
                         const int idx_sound_speed_T = (i + num_subghosts_0_sound_speed) +
                             (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
                         
-                        rho_average[idx_face_y] = double(1)/double(2)*(rho[idx_density_B] + rho[idx_density_T]);
-                        c_average[idx_face_y] = double(1)/double(2)*(c[idx_sound_speed_B] + c[idx_sound_speed_T]);
+                        rho_average[idx_face_y] = Real(1)/Real(2)*(rho[idx_density_B] + rho[idx_density_T]);
+                        c_average[idx_face_y] = Real(1)/Real(2)*(c[idx_sound_speed_B] + c[idx_sound_speed_T]);
                     }
                 }
                 
@@ -7527,7 +7527,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForPr
                                     (k + num_ghosts_2)*ghostcell_dim_0*
                                         ghostcell_dim_1;
                                 
-                                Z_rho_average[si][idx_face_x] = double(1)/double(2)*(Z_rho[si][idx_L] + Z_rho[si][idx_R]);
+                                Z_rho_average[si][idx_face_x] = Real(1)/Real(2)*(Z_rho[si][idx_L] + Z_rho[si][idx_R]);
                             }
                         }
                     }
@@ -7568,8 +7568,8 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForPr
                                 (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
                                     subghostcell_dim_1_sound_speed;
                             
-                            rho_average[idx_face_x] = double(1)/double(2)*(rho[idx_density_L] + rho[idx_density_R]);
-                            c_average[idx_face_x] = double(1)/double(2)*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
+                            rho_average[idx_face_x] = Real(1)/Real(2)*(rho[idx_density_L] + rho[idx_density_R]);
+                            c_average[idx_face_x] = Real(1)/Real(2)*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
                         }
                     }
                 }
@@ -7612,7 +7612,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForPr
                                     (k + num_ghosts_2)*ghostcell_dim_0*
                                         ghostcell_dim_1;
                                 
-                                Z_rho_average[si][idx_face_y] = double(1)/double(2)*(Z_rho[si][idx_B] + Z_rho[si][idx_T]);
+                                Z_rho_average[si][idx_face_y] = Real(1)/Real(2)*(Z_rho[si][idx_B] + Z_rho[si][idx_T]);
                             }
                         }
                     }
@@ -7653,8 +7653,8 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForPr
                                 (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
                                     subghostcell_dim_1_sound_speed;
                             
-                            rho_average[idx_face_y] = double(1)/double(2)*(rho[idx_density_B] + rho[idx_density_T]);
-                            c_average[idx_face_y] = double(1)/double(2)*(c[idx_sound_speed_B] + c[idx_sound_speed_T]);
+                            rho_average[idx_face_y] = Real(1)/Real(2)*(rho[idx_density_B] + rho[idx_density_T]);
+                            c_average[idx_face_y] = Real(1)/Real(2)*(c[idx_sound_speed_B] + c[idx_sound_speed_T]);
                         }
                     }
                 }
@@ -7697,7 +7697,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForPr
                                     (k + num_ghosts_2)*ghostcell_dim_0*
                                         ghostcell_dim_1;
                                 
-                                Z_rho_average[si][idx_face_z] = double(1)/double(2)*(Z_rho[si][idx_B] + Z_rho[si][idx_F]);
+                                Z_rho_average[si][idx_face_z] = Real(1)/Real(2)*(Z_rho[si][idx_B] + Z_rho[si][idx_F]);
                             }
                         }
                     }
@@ -7738,8 +7738,8 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForPr
                                 (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
                                     subghostcell_dim_1_sound_speed;
                             
-                            rho_average[idx_face_z] = double(1)/double(2)*(rho[idx_density_B] + rho[idx_density_F]);
-                            c_average[idx_face_z] = double(1)/double(2)*(c[idx_sound_speed_B] + c[idx_sound_speed_F]);
+                            rho_average[idx_face_z] = Real(1)/Real(2)*(rho[idx_density_B] + rho[idx_density_F]);
+                            c_average[idx_face_z] = Real(1)/Real(2)*(c[idx_sound_speed_B] + c[idx_sound_speed_F]);
                         }
                     }
                 }
@@ -7774,9 +7774,9 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForPr
  */
 void
 FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesFromConservativeVariables(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& characteristic_variables,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
     const int& idx_offset)
 {
     NULL_USE(characteristic_variables);
@@ -7798,9 +7798,9 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
  */
 void
 FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& characteristic_variables,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& primitive_variables,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& primitive_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
     const int& idx_offset)
 {
     if (d_flow_model.expired())
@@ -7989,7 +7989,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
      * Declare containers to store pointers to different data.
      */
     
-    std::vector<double*> V;
+    std::vector<Real*> V;
     V.reserve(d_num_eqn);
     
     int count_eqn = 0;
@@ -8010,13 +8010,13 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
         }
     }
     
-    std::vector<double*> W;
+    std::vector<Real*> W;
     W.resize(d_num_eqn);
     
-    std::vector<double*> Z_rho_average;
+    std::vector<Real*> Z_rho_average;
     Z_rho_average.resize(d_num_species);
-    double* rho_average = nullptr;
-    double* c_average = nullptr;
+    Real* rho_average = nullptr;
+    Real* c_average = nullptr;
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -8093,10 +8093,10 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
             const int idx_p = i + idx_offset_p + num_ghosts_0_p;
             
             W[0][idx_face] = V[d_num_species][idx_vel] -
-                double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 1][idx_p];
+                Real(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 1][idx_p];
             
             W[2*d_num_species][idx_face] = V[d_num_species][idx_vel] +
-                double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 1][idx_p];
+                Real(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 1][idx_p];
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -8210,12 +8210,12 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
                     (j + num_ghosts_1_p)*ghostcell_dim_0_p;
                 
                 W[0][idx_face] = V[d_num_species][idx_vel] -
-                    double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
+                    Real(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
                 
                 W[d_num_species + 1][idx_face] = V[d_num_species + 1][idx_vel];
                 
                 W[2*d_num_species + 1][idx_face] = V[d_num_species][idx_vel] +
-                    double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
+                    Real(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
             }
         }
         
@@ -8300,12 +8300,12 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
                     (j + idx_offset_p + num_ghosts_1_p)*ghostcell_dim_0_p;
                 
                 W[0][idx_face] = V[d_num_species + 1][idx_vel] -
-                    double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
+                    Real(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
                 
                 W[d_num_species + 1][idx_face] = V[d_num_species][idx_vel];
                 
                 W[2*d_num_species + 1][idx_face] = V[d_num_species + 1][idx_vel] +
-                    double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
+                    Real(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
             }
         }
     }
@@ -8455,14 +8455,14 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
                             ghostcell_dim_1_p;
                     
                     W[0][idx_face] = V[d_num_species][idx_vel] -
-                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                        Real(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
                     
                     W[d_num_species + 1][idx_face] = V[d_num_species + 1][idx_vel];
                     
                     W[d_num_species + 2][idx_face] = V[d_num_species + 2][idx_vel];
                     
                     W[2*d_num_species + 2][idx_face] = V[d_num_species][idx_vel] +
-                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                        Real(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
                 }
             }
         }
@@ -8572,14 +8572,14 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
                             ghostcell_dim_1_p;
                     
                     W[0][idx_face] = V[d_num_species + 1][idx_vel] -
-                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                        Real(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
                     
                     W[d_num_species + 1][idx_face] = V[d_num_species][idx_vel];
                     
                     W[d_num_species + 2][idx_face] = V[d_num_species + 2][idx_vel];
                     
                     W[2*d_num_species + 2][idx_face] = V[d_num_species + 1][idx_vel] +
-                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                        Real(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
                 }
             }
         }
@@ -8689,14 +8689,14 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
                             ghostcell_dim_1_p;
                     
                     W[0][idx_face] = V[d_num_species + 2][idx_vel] -
-                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                        Real(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
                     
                     W[d_num_species + 1][idx_face] = V[d_num_species][idx_vel];
                     
                     W[d_num_species + 2][idx_face] = V[d_num_species + 1][idx_vel];
                     
                     W[2*d_num_species + 2][idx_face] = V[d_num_species + 2][idx_vel] +
-                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                        Real(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
                 }
             }
         }
@@ -8709,9 +8709,9 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
  */
 void
 FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfConservativeVariablesFromCharacteristicVariables(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& characteristic_variables,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables)
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables)
 {
     NULL_USE(conservative_variables);
     NULL_USE(characteristic_variables);
@@ -8731,9 +8731,9 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfConservativeVariablesFro
  */
 void
 FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& characteristic_variables,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables)
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables)
 {
     if (d_flow_model.expired())
     {
@@ -8902,15 +8902,15 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
      * Declare containers to store pointers to different data.
      */
     
-    std::vector<double*> V;
-    std::vector<double*> W;
+    std::vector<Real*> V;
+    std::vector<Real*> W;
     V.resize(d_num_eqn);
     W.resize(d_num_eqn);
     
-    std::vector<double*> Z_rho_average;
+    std::vector<Real*> Z_rho_average;
     Z_rho_average.resize(d_num_species);
-    double* rho_average = nullptr;
-    double* c_average = nullptr;
+    Real* rho_average = nullptr;
+    Real* c_average = nullptr;
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -8949,9 +8949,9 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                 // Compute the linear index.
                 const int idx_face = i + num_ghosts_0_characteristic_var;
                 
-                V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                V[si][idx_face] = -Real(1)/Real(2)*Z_rho_average[si][idx_face]/
                     c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
-                        double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                        Real(1)/Real(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
                             W[d_num_eqn - 1][idx_face];
             }
         }
@@ -8978,11 +8978,11 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
             // Compute the linear index.
             const int idx_face = i + num_ghosts_0_characteristic_var;
             
-            V[d_num_species][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                double(1)/double(2)*W[d_num_eqn - 1][idx_face];
+            V[d_num_species][idx_face] = Real(1)/Real(2)*W[0][idx_face] +
+                Real(1)/Real(2)*W[d_num_eqn - 1][idx_face];
             
-            V[d_num_species + 1][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
-                W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+            V[d_num_species + 1][idx_face] = -Real(1)/Real(2)*rho_average[idx_face]*c_average[idx_face]*
+                W[0][idx_face] + Real(1)/Real(2)*rho_average[idx_face]*c_average[idx_face]*
                     W[d_num_eqn - 1][idx_face];
         }
     }
@@ -9029,9 +9029,9 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                     const int idx_face = (i + num_ghosts_0_characteristic_var) +
                         (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1);
                     
-                    V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                    V[si][idx_face] = -Real(1)/Real(2)*Z_rho_average[si][idx_face]/
                         c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
-                            double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                            Real(1)/Real(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
                                 W[d_num_eqn - 1][idx_face];
                 }
             }
@@ -9066,13 +9066,13 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                 const int idx_face = (i + num_ghosts_0_characteristic_var) +
                     (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1);
                 
-                V[d_num_species][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                    double(1)/double(2)*W[d_num_eqn - 1][idx_face];
+                V[d_num_species][idx_face] = Real(1)/Real(2)*W[0][idx_face] +
+                    Real(1)/Real(2)*W[d_num_eqn - 1][idx_face];
                 
                 V[d_num_species + 1][idx_face] = W[d_num_species + 1][idx_face];
                 
-                V[d_num_species + 2][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
-                    W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                V[d_num_species + 2][idx_face] = -Real(1)/Real(2)*rho_average[idx_face]*c_average[idx_face]*
+                    W[0][idx_face] + Real(1)/Real(2)*rho_average[idx_face]*c_average[idx_face]*
                         W[d_num_eqn - 1][idx_face];
             }
         }
@@ -9111,9 +9111,9 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                     const int idx_face = (i + num_ghosts_0_characteristic_var) +
                         (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var;
                     
-                    V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                    V[si][idx_face] = -Real(1)/Real(2)*Z_rho_average[si][idx_face]/
                         c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
-                            double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                            Real(1)/Real(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
                                 W[d_num_eqn - 1][idx_face];
                 }
             }
@@ -9150,11 +9150,11 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                 
                 V[d_num_species][idx_face] = W[d_num_species + 1][idx_face];
                 
-                V[d_num_species + 1][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                    double(1)/double(2)*W[d_num_eqn - 1][idx_face];
+                V[d_num_species + 1][idx_face] = Real(1)/Real(2)*W[0][idx_face] +
+                    Real(1)/Real(2)*W[d_num_eqn - 1][idx_face];
                 
-                V[d_num_species + 2][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
-                    W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                V[d_num_species + 2][idx_face] = -Real(1)/Real(2)*rho_average[idx_face]*c_average[idx_face]*
+                    W[0][idx_face] + Real(1)/Real(2)*rho_average[idx_face]*c_average[idx_face]*
                         W[d_num_eqn - 1][idx_face];
             }
         }
@@ -9209,9 +9209,9 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                             (k + num_ghosts_2_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1)*
                                 ghostcell_dim_1_characteristic_var;
                         
-                        V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                        V[si][idx_face] = -Real(1)/Real(2)*Z_rho_average[si][idx_face]/
                             c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
-                                double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                                Real(1)/Real(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
                                     W[d_num_eqn - 1][idx_face];
                     }
                 }
@@ -9256,15 +9256,15 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                         (k + num_ghosts_2_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1)*
                             ghostcell_dim_1_characteristic_var;
                     
-                    V[d_num_species][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                        double(1)/double(2)*W[d_num_eqn - 1][idx_face];
+                    V[d_num_species][idx_face] = Real(1)/Real(2)*W[0][idx_face] +
+                        Real(1)/Real(2)*W[d_num_eqn - 1][idx_face];
                     
                     V[d_num_species + 1][idx_face] = W[d_num_species + 1][idx_face];
                     
                     V[d_num_species + 2][idx_face] = W[d_num_species + 2][idx_face];
                     
-                    V[d_num_species + 3][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
-                        W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                    V[d_num_species + 3][idx_face] = -Real(1)/Real(2)*rho_average[idx_face]*c_average[idx_face]*
+                        W[0][idx_face] + Real(1)/Real(2)*rho_average[idx_face]*c_average[idx_face]*
                             W[d_num_eqn - 1][idx_face];
                 }
             }
@@ -9308,9 +9308,9 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                             (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
                                 (ghostcell_dim_1_characteristic_var + 1);
                         
-                        V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                        V[si][idx_face] = -Real(1)/Real(2)*Z_rho_average[si][idx_face]/
                             c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
-                                double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                                Real(1)/Real(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
                                     W[d_num_eqn - 1][idx_face];
                     }
                 }
@@ -9357,13 +9357,13 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                     
                     V[d_num_species][idx_face] = W[d_num_species + 1][idx_face];
                     
-                    V[d_num_species + 1][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                        double(1)/double(2)*W[d_num_eqn - 1][idx_face];
+                    V[d_num_species + 1][idx_face] = Real(1)/Real(2)*W[0][idx_face] +
+                        Real(1)/Real(2)*W[d_num_eqn - 1][idx_face];
                     
                     V[d_num_species + 2][idx_face] = W[d_num_species + 2][idx_face];
                     
-                    V[d_num_species + 3][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
-                        W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                    V[d_num_species + 3][idx_face] = -Real(1)/Real(2)*rho_average[idx_face]*c_average[idx_face]*
+                        W[0][idx_face] + Real(1)/Real(2)*rho_average[idx_face]*c_average[idx_face]*
                             W[d_num_eqn - 1][idx_face];
                 }
             }
@@ -9407,9 +9407,9 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                             (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
                                 ghostcell_dim_1_characteristic_var;
                         
-                        V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                        V[si][idx_face] = -Real(1)/Real(2)*Z_rho_average[si][idx_face]/
                             c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
-                                double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                                Real(1)/Real(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
                                     W[d_num_eqn - 1][idx_face];
                     }
                 }
@@ -9458,12 +9458,12 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                     
                     V[d_num_species + 1][idx_face] = W[d_num_species + 2][idx_face];
                     
-                    V[d_num_species + 2][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                        double(1)/double(2)*W[d_num_eqn - 1][idx_face];
+                    V[d_num_species + 2][idx_face] = Real(1)/Real(2)*W[0][idx_face] +
+                        Real(1)/Real(2)*W[d_num_eqn - 1][idx_face];
                     
-                    V[d_num_species + 3][idx_face] = -double(1)/double(2)*rho_average[idx_face]*
+                    V[d_num_species + 3][idx_face] = -Real(1)/Real(2)*rho_average[idx_face]*
                         c_average[idx_face]*W[0][idx_face] +
-                            double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*W[d_num_eqn - 1][idx_face];
+                            Real(1)/Real(2)*rho_average[idx_face]*c_average[idx_face]*W[d_num_eqn - 1][idx_face];
                 }
             }
         }

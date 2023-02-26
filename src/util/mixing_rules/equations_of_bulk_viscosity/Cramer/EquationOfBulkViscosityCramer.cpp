@@ -27,11 +27,11 @@ EquationOfBulkViscosityCramer::printClassData(
 /*
  * Compute the bulk viscosity.
  */
-double
+Real
 EquationOfBulkViscosityCramer::getBulkViscosity(
-    const double* const pressure,
-    const double* const temperature,
-    const std::vector<const double*>& molecular_properties) const
+    const Real* const pressure,
+    const Real* const temperature,
+    const std::vector<const Real*>& molecular_properties) const
 {
     NULL_USE(pressure);
     
@@ -39,21 +39,21 @@ EquationOfBulkViscosityCramer::getBulkViscosity(
     TBOX_ASSERT(static_cast<int>(molecular_properties.size()) >= 7);
 #endif
     
-    const double& T = *temperature;
+    const Real& T = *temperature;
     
-    const double& gamma = *(molecular_properties[0]);
+    const Real& gamma = *(molecular_properties[0]);
     
-    const double& A_r = *(molecular_properties[1]);
-    const double& B_r = *(molecular_properties[2]);
+    const Real& A_r = *(molecular_properties[1]);
+    const Real& B_r = *(molecular_properties[2]);
     
-    const double& c_v_v = *(molecular_properties[3]);
-    const double& A_v   = *(molecular_properties[4]);
-    const double& B_v   = *(molecular_properties[5]);
-    const double& C_v   = *(molecular_properties[6]);
+    const Real& c_v_v = *(molecular_properties[3]);
+    const Real& A_v   = *(molecular_properties[4]);
+    const Real& B_v   = *(molecular_properties[5]);
+    const Real& C_v   = *(molecular_properties[6]);
     
-    double mu_v = A_r + B_r*T +
-        (gamma - double(1))*(gamma - double(1))*c_v_v*A_v*exp(B_v/(pow(T, double(1)/double(3))) +
-        C_v/(pow(T, double(2)/double(3))));
+    Real mu_v = A_r + B_r*T +
+        (gamma - Real(1))*(gamma - Real(1))*c_v_v*A_v*std::exp(B_v/(std::pow(T, Real(1)/Real(3))) +
+        C_v/(std::pow(T, Real(2)/Real(3))));
     
     return mu_v;
 }
@@ -64,10 +64,10 @@ EquationOfBulkViscosityCramer::getBulkViscosity(
  */
 void
 EquationOfBulkViscosityCramer::computeBulkViscosity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const std::vector<const double*>& molecular_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_bulk_viscosity,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const std::vector<const Real*>& molecular_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_pressure);
@@ -142,18 +142,18 @@ EquationOfBulkViscosityCramer::computeBulkViscosity(
      * Get the pointers to the cell data.
      */
     
-    double* mu_v = data_bulk_viscosity->getPointer(0);
-    double* T = data_temperature->getPointer(0);
+    Real* mu_v = data_bulk_viscosity->getPointer(0);
+    Real* T = data_temperature->getPointer(0);
     
-    const double& gamma = *(molecular_properties[0]);
+    const Real& gamma = *(molecular_properties[0]);
     
-    const double& A_r = *(molecular_properties[1]);
-    const double& B_r = *(molecular_properties[2]);
+    const Real& A_r = *(molecular_properties[1]);
+    const Real& B_r = *(molecular_properties[2]);
     
-    const double& c_v_v = *(molecular_properties[3]);
-    const double& A_v   = *(molecular_properties[4]);
-    const double& B_v   = *(molecular_properties[5]);
-    const double& C_v   = *(molecular_properties[6]);
+    const Real& c_v_v = *(molecular_properties[3]);
+    const Real& A_v   = *(molecular_properties[4]);
+    const Real& B_v   = *(molecular_properties[5]);
+    const Real& C_v   = *(molecular_properties[6]);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -175,9 +175,9 @@ EquationOfBulkViscosityCramer::computeBulkViscosity(
             const int idx_temperature = i + offset_0_temperature;
             
             mu_v[idx_bulk_viscosity] = A_r + B_r*T[idx_temperature] + 
-                (gamma - double(1))*(gamma - double(1))*c_v_v*A_v*
-                exp(B_v/(pow(T[idx_temperature], double(1)/double(3))) +
-                C_v/(pow(T[idx_temperature], double(2)/double(3))));
+                (gamma - Real(1))*(gamma - Real(1))*c_v_v*A_v*
+                std::exp(B_v/(std::pow(T[idx_temperature], Real(1)/Real(3))) +
+                C_v/(std::pow(T[idx_temperature], Real(2)/Real(3))));
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -212,9 +212,9 @@ EquationOfBulkViscosityCramer::computeBulkViscosity(
                     (j + offset_1_temperature)*ghostcell_dim_0_temperature;
                 
                 mu_v[idx_bulk_viscosity] = A_r + B_r*T[idx_temperature] + 
-                    (gamma - double(1))*(gamma - double(1))*c_v_v*A_v*
-                    exp(B_v/(pow(T[idx_temperature], double(1)/double(3))) +
-                    C_v/(pow(T[idx_temperature], double(2)/double(3))));
+                    (gamma - Real(1))*(gamma - Real(1))*c_v_v*A_v*
+                    std::exp(B_v/(std::pow(T[idx_temperature], Real(1)/Real(3))) +
+                    C_v/(std::pow(T[idx_temperature], Real(2)/Real(3))));
             }
         }
     }
@@ -262,9 +262,9 @@ EquationOfBulkViscosityCramer::computeBulkViscosity(
                             ghostcell_dim_1_temperature;
                     
                     mu_v[idx_bulk_viscosity] = A_r + B_r*T[idx_temperature] + 
-                        (gamma - double(1))*(gamma - double(1))*c_v_v*
-                        A_v*exp(B_v/(pow(T[idx_temperature], double(1)/double(3))) +
-                        C_v/(pow(T[idx_temperature], double(2)/double(3))));
+                        (gamma - Real(1))*(gamma - Real(1))*c_v_v*
+                        A_v*std::exp(B_v/(std::pow(T[idx_temperature], Real(1)/Real(3))) +
+                        C_v/(std::pow(T[idx_temperature], Real(2)/Real(3))));
                 }
             }
         }
@@ -277,10 +277,10 @@ EquationOfBulkViscosityCramer::computeBulkViscosity(
  */
 void
 EquationOfBulkViscosityCramer::computeBulkViscosity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_molecular_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_bulk_viscosity,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_molecular_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_pressure);
@@ -366,18 +366,18 @@ EquationOfBulkViscosityCramer::computeBulkViscosity(
      * Get the pointers to the cell data.
      */
     
-    double* mu_v = data_bulk_viscosity->getPointer(0);
-    double* T = data_temperature->getPointer(0);
+    Real* mu_v = data_bulk_viscosity->getPointer(0);
+    Real* T = data_temperature->getPointer(0);
     
-    double* gamma = data_molecular_properties->getPointer(0);
+    Real* gamma = data_molecular_properties->getPointer(0);
     
-    double* A_r = data_molecular_properties->getPointer(1);
-    double* B_r = data_molecular_properties->getPointer(2);
+    Real* A_r = data_molecular_properties->getPointer(1);
+    Real* B_r = data_molecular_properties->getPointer(2);
     
-    double* c_v_v = data_molecular_properties->getPointer(3);
-    double* A_v   = data_molecular_properties->getPointer(4);
-    double* B_v   = data_molecular_properties->getPointer(5);
-    double* C_v   = data_molecular_properties->getPointer(6);
+    Real* c_v_v = data_molecular_properties->getPointer(3);
+    Real* A_v   = data_molecular_properties->getPointer(4);
+    Real* B_v   = data_molecular_properties->getPointer(5);
+    Real* C_v   = data_molecular_properties->getPointer(6);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -402,10 +402,10 @@ EquationOfBulkViscosityCramer::computeBulkViscosity(
             
             mu_v[idx_bulk_viscosity] = A_r[idx_molecular_properties] +
                 B_r[idx_molecular_properties]*T[idx_temperature] + 
-                (gamma[idx_molecular_properties] - double(1))*(gamma[idx_molecular_properties] - double(1))*
+                (gamma[idx_molecular_properties] - Real(1))*(gamma[idx_molecular_properties] - Real(1))*
                 c_v_v[idx_molecular_properties]*A_v[idx_molecular_properties]*
-                exp(B_v[idx_molecular_properties]/(pow(T[idx_temperature], double(1)/double(3))) +
-                C_v[idx_molecular_properties]/(pow(T[idx_temperature], double(2)/double(3))));
+                std::exp(B_v[idx_molecular_properties]/(std::pow(T[idx_temperature], Real(1)/Real(3))) +
+                C_v[idx_molecular_properties]/(std::pow(T[idx_temperature], Real(2)/Real(3))));
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -448,10 +448,10 @@ EquationOfBulkViscosityCramer::computeBulkViscosity(
                 
                 mu_v[idx_bulk_viscosity] = A_r[idx_molecular_properties] +
                     B_r[idx_molecular_properties]*T[idx_temperature] + 
-                    (gamma[idx_molecular_properties] - double(1))*(gamma[idx_molecular_properties] - double(1))*
+                    (gamma[idx_molecular_properties] - Real(1))*(gamma[idx_molecular_properties] - Real(1))*
                     c_v_v[idx_molecular_properties]*A_v[idx_molecular_properties]*
-                    exp(B_v[idx_molecular_properties]/(pow(T[idx_temperature], double(1)/double(3))) +
-                    C_v[idx_molecular_properties]/(pow(T[idx_temperature], double(2)/double(3))));
+                    std::exp(B_v[idx_molecular_properties]/(std::pow(T[idx_temperature], Real(1)/Real(3))) +
+                    C_v[idx_molecular_properties]/(std::pow(T[idx_temperature], Real(2)/Real(3))));
             }
         }
     }
@@ -511,10 +511,10 @@ EquationOfBulkViscosityCramer::computeBulkViscosity(
                     
                     mu_v[idx_bulk_viscosity] = A_r[idx_molecular_properties] +
                         B_r[idx_molecular_properties]*T[idx_temperature] + 
-                        (gamma[idx_molecular_properties] - double(1))*(gamma[idx_molecular_properties] - double(1))*
+                        (gamma[idx_molecular_properties] - Real(1))*(gamma[idx_molecular_properties] - Real(1))*
                         c_v_v[idx_molecular_properties]*A_v[idx_molecular_properties]*
-                        exp(B_v[idx_molecular_properties]/(pow(T[idx_temperature], double(1)/double(3))) +
-                        C_v[idx_molecular_properties]/(pow(T[idx_temperature], double(2)/double(3))));
+                        std::exp(B_v[idx_molecular_properties]/(std::pow(T[idx_temperature], Real(1)/Real(3))) +
+                        C_v[idx_molecular_properties]/(std::pow(T[idx_temperature], Real(2)/Real(3))));
                 }
             }
         }

@@ -5,10 +5,10 @@
  */
 void
 FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& source,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& source,
     const hier::Patch& patch,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
-    const std::unordered_map<std::string, double>& monitoring_statistics_map,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
+    const std::unordered_map<std::string, Real>& monitoring_statistics_map,
     const double time,
     const double dt,
     const int RK_step_number)

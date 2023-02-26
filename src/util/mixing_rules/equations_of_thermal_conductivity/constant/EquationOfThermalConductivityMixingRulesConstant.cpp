@@ -24,7 +24,7 @@ EquationOfThermalConductivityMixingRulesConstant::EquationOfThermalConductivityM
         if (static_cast<int>(species_kappa_array_size) == d_num_species)
         {
             d_species_kappa =
-                equation_of_thermal_conductivity_mixing_rules_db->getDoubleVector("species_kappa");
+                equation_of_thermal_conductivity_mixing_rules_db->getRealVector("species_kappa");
         }
         else
         {
@@ -41,7 +41,7 @@ EquationOfThermalConductivityMixingRulesConstant::EquationOfThermalConductivityM
         if (static_cast<int>(species_kappa_array_size) == d_num_species)
         {
             d_species_kappa =
-                equation_of_thermal_conductivity_mixing_rules_db->getDoubleVector("d_species_kappa");
+                equation_of_thermal_conductivity_mixing_rules_db->getRealVector("d_species_kappa");
         }
         else
         {
@@ -71,7 +71,7 @@ EquationOfThermalConductivityMixingRulesConstant::EquationOfThermalConductivityM
         if (static_cast<int>(species_M_array_size) == d_num_species)
         {
             d_species_M =
-                equation_of_thermal_conductivity_mixing_rules_db->getDoubleVector("species_M");
+                equation_of_thermal_conductivity_mixing_rules_db->getRealVector("species_M");
         }
         else
         {
@@ -88,7 +88,7 @@ EquationOfThermalConductivityMixingRulesConstant::EquationOfThermalConductivityM
         if (static_cast<int>(species_M_array_size) == d_num_species)
         {
             d_species_M =
-                equation_of_thermal_conductivity_mixing_rules_db->getDoubleVector("d_species_M");
+                equation_of_thermal_conductivity_mixing_rules_db->getRealVector("d_species_M");
         }
         else
         {
@@ -166,19 +166,19 @@ void
 EquationOfThermalConductivityMixingRulesConstant::putToRestart(
     const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
-    restart_db->putDoubleVector("d_species_kappa", d_species_kappa);
-    restart_db->putDoubleVector("d_species_M", d_species_M);
+    restart_db->putRealVector("d_species_kappa", d_species_kappa);
+    restart_db->putRealVector("d_species_M", d_species_M);
 }
 
 
 /*
  * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibrium assumptions.
  */
-double
+Real
 EquationOfThermalConductivityMixingRulesConstant::getThermalConductivity(
-    const double* const pressure,
-    const double* const temperature,
-    const std::vector<const double*>& mass_fractions) const
+    const Real* const pressure,
+    const Real* const temperature,
+    const std::vector<const Real*>& mass_fractions) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
@@ -187,19 +187,19 @@ EquationOfThermalConductivityMixingRulesConstant::getThermalConductivity(
                 (static_cast<int>(mass_fractions.size()) == d_num_species - 1));
 #endif
     
-    double kappa = double(0);
+    Real kappa = Real(0);
     
-    double num = double(0);
-    double den = double(0);
+    Real num = Real(0);
+    Real den = Real(0);
     
     /*
      * Initialize the container and pointers to the container for the molecular properties
      * of a species.
      */
     
-    std::vector<double> species_molecular_properties;
-    std::vector<double*> species_molecular_properties_ptr;
-    std::vector<const double*> species_molecular_properties_const_ptr;
+    std::vector<Real> species_molecular_properties;
+    std::vector<Real*> species_molecular_properties_ptr;
+    std::vector<const Real*> species_molecular_properties_const_ptr;
     
     const int num_molecular_properties = getNumberOfSpeciesMolecularProperties();
     
@@ -219,13 +219,13 @@ EquationOfThermalConductivityMixingRulesConstant::getThermalConductivity(
         {
             getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
             
-            const double kappa_i = d_equation_of_thermal_conductivity->
+            const Real kappa_i = d_equation_of_thermal_conductivity->
                 getThermalConductivity(
                     pressure,
                     temperature,
                     species_molecular_properties_const_ptr);
             
-            const double weight = *(mass_fractions[si])/(sqrt(species_molecular_properties[1]));
+            const Real weight = *(mass_fractions[si])/(std::sqrt(species_molecular_properties[1]));
             
             num += kappa_i*weight;
             den += weight;
@@ -233,19 +233,19 @@ EquationOfThermalConductivityMixingRulesConstant::getThermalConductivity(
     }
     else if (static_cast<int>(mass_fractions.size()) == d_num_species - 1)
     {
-        double Y_last = double(1);
+        Real Y_last = Real(1);
         
         for (int si = 0; si < d_num_species - 1; si++)
         {
             getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
             
-            const double kappa_i = d_equation_of_thermal_conductivity->
+            const Real kappa_i = d_equation_of_thermal_conductivity->
                 getThermalConductivity(
                     pressure,
                     temperature,
                     species_molecular_properties_const_ptr);
             
-            const double weight = *(mass_fractions[si])/(sqrt(species_molecular_properties[1]));
+            const Real weight = *(mass_fractions[si])/(std::sqrt(species_molecular_properties[1]));
             
             num += kappa_i*weight;
             den += weight;
@@ -259,13 +259,13 @@ EquationOfThermalConductivityMixingRulesConstant::getThermalConductivity(
          */
         getSpeciesMolecularProperties(species_molecular_properties_ptr, d_num_species - 1);
         
-        const double kappa_last = d_equation_of_thermal_conductivity->
+        const Real kappa_last = d_equation_of_thermal_conductivity->
             getThermalConductivity(
                 pressure,
                 temperature,
                 species_molecular_properties_const_ptr);
         
-        const double weight = Y_last/(sqrt(species_molecular_properties[1]));
+        const Real weight = Y_last/(std::sqrt(species_molecular_properties[1]));
         
         num += kappa_last*weight;
         den += weight;
@@ -290,10 +290,10 @@ EquationOfThermalConductivityMixingRulesConstant::getThermalConductivity(
  */
 void
 EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermal_conductivity,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_thermal_conductivity,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -318,12 +318,12 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
     
     // Delcare data containers for thermal conductivity of a species, denominator, numerator and
     // species molecular properties.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_thermal_conductivity_species;
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_den;
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_num;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_thermal_conductivity_species;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_den;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_num;
     
     // Declare data container for last mass fraction.
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions_last;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_mass_fractions_last;
     
     /*
      * Get the local lower index and number of cells in each direction of the domain.
@@ -382,13 +382,13 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
         
         ghostcell_dims_min = interior_dims + num_ghosts_min*2;
         
-        data_thermal_conductivity_species = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
-        data_den = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
-        data_num = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        data_thermal_conductivity_species = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(interior_box, 1, num_ghosts_min);
+        data_den = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(interior_box, 1, num_ghosts_min);
+        data_num = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(interior_box, 1, num_ghosts_min);
         
         if (data_mass_fractions->getDepth() == d_num_species - 1)
         {
-            data_mass_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+            data_mass_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(interior_box, 1, num_ghosts_min);
         }
     }
     else
@@ -410,21 +410,21 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
         ghostcell_dims_min = domain_dims;
         
         data_thermal_conductivity_species =
-            HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
-        data_den = HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
-        data_num = HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+            HAMERS_MAKE_SHARED<pdat::CellData<Real> >(domain, 1, hier::IntVector::getZero(d_dim));
+        data_den = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(domain, 1, hier::IntVector::getZero(d_dim));
+        data_num = HAMERS_MAKE_SHARED<pdat::CellData<Real> >(domain, 1, hier::IntVector::getZero(d_dim));
         
         if (data_mass_fractions->getDepth() == d_num_species - 1)
         {
             data_mass_fractions_last =
-                HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+                HAMERS_MAKE_SHARED<pdat::CellData<Real> >(domain, 1, hier::IntVector::getZero(d_dim));
         }
     }
     
     // Declare data containers for species molecular properties.
-    std::vector<double> species_molecular_properties;
-    std::vector<double*> species_molecular_properties_ptr;
-    std::vector<const double*> species_molecular_properties_const_ptr;
+    std::vector<Real> species_molecular_properties;
+    std::vector<Real*> species_molecular_properties_ptr;
+    std::vector<const Real*> species_molecular_properties_const_ptr;
     
     const int num_molecular_properties = getNumberOfSpeciesMolecularProperties();
     
@@ -443,17 +443,17 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
      * denominator and numerator.
      */
     
-    double* kappa = data_thermal_conductivity->getPointer(0);
-    double* kappa_i = data_thermal_conductivity_species->getPointer(0);
-    double* den = data_den->getPointer(0);
-    double* num = data_num->getPointer(0);
+    Real* kappa = data_thermal_conductivity->getPointer(0);
+    Real* kappa_i = data_thermal_conductivity_species->getPointer(0);
+    Real* den = data_den->getPointer(0);
+    Real* num = data_num->getPointer(0);
     
     /*
      * Fill zeros for denominator and numerator.
      */
     
-    data_den->fillAll(double(0));
-    data_num->fillAll(double(0));
+    data_den->fillAll(Real(0));
+    data_num->fillAll(Real(0));
     
     if (data_mass_fractions->getDepth() == d_num_species)
     {
@@ -461,7 +461,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
          * Get the pointers to the cell data of mass fractions.
          */
         
-        std::vector<double*> Y;
+        std::vector<Real*> Y;
         Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
@@ -494,7 +494,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
+                const Real factor = Real(1)/(std::sqrt(species_molecular_properties[1]));
                 
                 HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
@@ -503,7 +503,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                     const int idx_min = i + offset_0_min;
                     const int idx_mass_fractions = i + offset_0_mass_fractions;
                     
-                    const double weight = Y[si][idx_mass_fractions]*factor;
+                    const Real weight = Y[si][idx_mass_fractions]*factor;
                     
                     num[idx_min] += kappa_i[idx_min]*weight;
                     den[idx_min] += weight;
@@ -556,7 +556,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
+                const Real factor = Real(1)/(std::sqrt(species_molecular_properties[1]));
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -570,7 +570,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                         const int idx_mass_fractions = (i + offset_0_mass_fractions) +
                             (j + offset_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                         
-                        const double weight = Y[si][idx_mass_fractions]*factor;
+                        const Real weight = Y[si][idx_mass_fractions]*factor;
                         
                         num[idx_min] += kappa_i[idx_min]*weight;
                         den[idx_min] += weight;
@@ -638,7 +638,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
+                const Real factor = Real(1)/(std::sqrt(species_molecular_properties[1]));
                 
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -658,7 +658,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                                 (k + offset_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
                                     ghostcell_dim_1_mass_fractions;
                             
-                            const double weight = Y[si][idx_mass_fractions]*factor;
+                            const Real weight = Y[si][idx_mass_fractions]*factor;
                             
                             num[idx_min] += kappa_i[idx_min]*weight;
                             den[idx_min] += weight;
@@ -693,20 +693,20 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
     }
     else if (data_mass_fractions->getDepth() == d_num_species - 1)
     {
-        data_mass_fractions_last->fillAll(double(1));
+        data_mass_fractions_last->fillAll(Real(1));
         
         /*
          * Get the pointers to the cell data of mass fractions.
          */
         
-        std::vector<double*> Y;
+        std::vector<Real*> Y;
         Y.reserve(d_num_species - 1);
         for (int si = 0; si < d_num_species - 1; si++)
         {
             Y.push_back(data_mass_fractions->getPointer(si));
         }
         
-        double* Y_last = data_mass_fractions_last->getPointer(0);
+        Real* Y_last = data_mass_fractions_last->getPointer(0);
         
         if (d_dim == tbox::Dimension(1))
         {
@@ -734,7 +734,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
+                const Real factor = Real(1)/(std::sqrt(species_molecular_properties[1]));
                 
                 HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
@@ -743,7 +743,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                     const int idx_min = i + offset_0_min;
                     const int idx_mass_fractions = i + offset_0_mass_fractions;
                     
-                    const double weight = Y[si][idx_mass_fractions]*factor;
+                    const Real weight = Y[si][idx_mass_fractions]*factor;
                     
                     num[idx_min] += kappa_i[idx_min]*weight;
                     den[idx_min] += weight;
@@ -763,7 +763,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                     species_molecular_properties_const_ptr,
                     domain);
             
-            const double factor = double(1)/(sqrt(species_molecular_properties[1]));
+            const Real factor = Real(1)/(std::sqrt(species_molecular_properties[1]));
             
             HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
@@ -772,7 +772,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                 const int idx_thermal_conductivity = i + offset_0_thermal_conductivity;
                 const int idx_min = i + offset_0_min;
                 
-                const double weight = Y_last[idx_min]*factor;
+                const Real weight = Y_last[idx_min]*factor;
                 
                 num[idx_min] += kappa_i[idx_min]*weight;
                 den[idx_min] += weight;
@@ -816,7 +816,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
+                const Real factor = Real(1)/(std::sqrt(species_molecular_properties[1]));
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -830,7 +830,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                         const int idx_mass_fractions = (i + offset_0_mass_fractions) +
                             (j + offset_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                         
-                        const double weight = Y[si][idx_mass_fractions]*factor;
+                        const Real weight = Y[si][idx_mass_fractions]*factor;
                         
                         num[idx_min] += kappa_i[idx_min]*weight;
                         den[idx_min] += weight;
@@ -851,7 +851,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                     species_molecular_properties_const_ptr,
                     domain);
             
-            const double factor = double(1)/(sqrt(species_molecular_properties[1]));
+            const Real factor = Real(1)/(std::sqrt(species_molecular_properties[1]));
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
@@ -865,7 +865,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                     const int idx_min = (i + offset_0_min) +
                         (j + offset_1_min)*ghostcell_dim_0_min;
                     
-                    const double weight = Y_last[idx_min]*factor;
+                    const Real weight = Y_last[idx_min]*factor;
                     
                     num[idx_min] += kappa_i[idx_min]*weight;
                     den[idx_min] += weight;
@@ -918,7 +918,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
+                const Real factor = Real(1)/(std::sqrt(species_molecular_properties[1]));
                 
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -938,7 +938,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                                 (k + offset_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
                                     ghostcell_dim_1_mass_fractions;
                             
-                            const double weight = Y[si][idx_mass_fractions]*factor;
+                            const Real weight = Y[si][idx_mass_fractions]*factor;
                             
                             num[idx_min] += kappa_i[idx_min]*weight;
                             den[idx_min] += weight;
@@ -960,7 +960,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                     species_molecular_properties_const_ptr,
                     domain);
             
-            const double factor = double(1)/(sqrt(species_molecular_properties[1]));
+            const Real factor = Real(1)/(std::sqrt(species_molecular_properties[1]));
             
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -980,7 +980,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                             (k + offset_2_min)*ghostcell_dim_0_min*
                                 ghostcell_dim_1_min;
                         
-                        const double weight = Y_last[idx_min]*factor;
+                        const Real weight = Y_last[idx_min]*factor;
                         
                         num[idx_min] += kappa_i[idx_min]*weight;
                         den[idx_min] += weight;
@@ -1007,7 +1007,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
  */
 void
 EquationOfThermalConductivityMixingRulesConstant::getSpeciesMolecularProperties(
-    std::vector<double*>& species_molecular_properties,
+    std::vector<Real*>& species_molecular_properties,
     const int species_index) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS

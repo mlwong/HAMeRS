@@ -70,7 +70,7 @@ class FlowModelFourEqnConservative: public FlowModel
         /*
          * Get the conservative variables.
          */
-        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >
+        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > >
         getConservativeVariables();
         
         /*
@@ -111,19 +111,19 @@ class FlowModelFourEqnConservative: public FlowModel
         /*
          * Get the cell data of one cell variable in the registered patch.
          */
-        HAMERS_SHARED_PTR<pdat::CellData<double> >
+        HAMERS_SHARED_PTR<pdat::CellData<Real> >
         getCellData(const std::string& variable_key);
         
         /*
          * Get the cell data of different cell variables in the registered patch.
          */
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
         getCellData(const std::vector<std::string>& variable_keys);
         
         /*
          * Get the cell data of species cell variables in the registered patch.
          */
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
         getSpeciesCellData(const std::string& variable_key);
         
         /*
@@ -147,13 +147,13 @@ class FlowModelFourEqnConservative: public FlowModel
         /*
          * Get the cell data of the conservative variables in the registered patch.
          */
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
         getCellDataOfConservativeVariables();
         
         /*
          * Get the cell data of the primitive variables in the registered patch.
          */
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >
         getCellDataOfPrimitiveVariables();
         
         /*
@@ -198,19 +198,19 @@ class FlowModelFourEqnConservative: public FlowModel
         /*
          * Get the cell data of partial densities in the registered patch.
          */
-        HAMERS_SHARED_PTR<pdat::CellData<double> >
+        HAMERS_SHARED_PTR<pdat::CellData<Real> >
         getCellDataOfPartialDensities();
         
         /*
          * Get the cell data of momentum in the registered patch.
          */
-        HAMERS_SHARED_PTR<pdat::CellData<double> >
+        HAMERS_SHARED_PTR<pdat::CellData<Real> >
         getCellDataOfMomentum();
         
         /*
          * Get the cell data of total energy in the registered patch.
          */
-        HAMERS_SHARED_PTR<pdat::CellData<double> >
+        HAMERS_SHARED_PTR<pdat::CellData<Real> >
         getCellDataOfTotalEnergy();
         
         /*
@@ -304,9 +304,9 @@ class FlowModelFourEqnConservative: public FlowModel
         /*
          * HAMERS_SHARED_PTR to registered conservative variables.
          */
-        static HAMERS_SHARED_PTR<pdat::CellVariable<double> > s_variable_partial_densities;
-        static HAMERS_SHARED_PTR<pdat::CellVariable<double> > s_variable_momentum;
-        static HAMERS_SHARED_PTR<pdat::CellVariable<double> > s_variable_total_energy;
+        static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_partial_densities;
+        static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_momentum;
+        static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_total_energy;
         
         /*
          * Number of sub-ghost cells of derived cell data.
@@ -377,24 +377,24 @@ class FlowModelFourEqnConservative: public FlowModel
         /*
          * HAMERS_SHARED_PTR to derived cell data.
          */
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_density;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_mass_fractions;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_mole_fractions;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_volume_fractions;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_velocity;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_internal_energy;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_pressure;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_sound_speed;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_temperature;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_convective_flux_x;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_convective_flux_y;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_convective_flux_z;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_max_wave_speed_x;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_max_wave_speed_y;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_max_wave_speed_z;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_max_diffusivity;
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > d_data_species_densities;
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > d_data_species_enthalpies;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_density;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_mass_fractions;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_mole_fractions;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_volume_fractions;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_velocity;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_internal_energy;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_pressure;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_sound_speed;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_temperature;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_convective_flux_x;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_convective_flux_y;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_convective_flux_z;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_max_wave_speed_x;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_max_wave_speed_y;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_max_wave_speed_z;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > d_data_max_diffusivity;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > d_data_species_densities;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > d_data_species_enthalpies;
         
         /*
          * Whether derived cell data is computed.

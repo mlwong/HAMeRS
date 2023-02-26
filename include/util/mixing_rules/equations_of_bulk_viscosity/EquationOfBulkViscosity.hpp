@@ -34,21 +34,21 @@ class EquationOfBulkViscosity
         /*
          * Compute the bulk viscosity.
          */
-        virtual double
+        virtual Real
         getBulkViscosity(
-            const double* const pressure,
-            const double* const temperature,
-            const std::vector<const double*>& molecular_properties) const = 0;
+            const Real* const pressure,
+            const Real* const temperature,
+            const std::vector<const Real*>& molecular_properties) const = 0;
         
         /*
          * Compute the bulk viscosity.
          */
         void
         computeBulkViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const std::vector<const double*>& molecular_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_bulk_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const std::vector<const Real*>& molecular_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeBulkViscosity(
@@ -64,10 +64,10 @@ class EquationOfBulkViscosity
          */
         virtual void
         computeBulkViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const std::vector<const double*>& molecular_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_bulk_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const std::vector<const Real*>& molecular_properties,
             const hier::Box& domain) const = 0;
         
         /*
@@ -75,10 +75,10 @@ class EquationOfBulkViscosity
          */
         void
         computeBulkViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_molecular_properties) const
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_bulk_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_molecular_properties) const
         {
             const hier::Box empty_box(d_dim);
             computeBulkViscosity(
@@ -94,10 +94,10 @@ class EquationOfBulkViscosity
          */
         virtual void
         computeBulkViscosity(
-            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_molecular_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_bulk_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_molecular_properties,
             const hier::Box& domain) const = 0;
         
     protected:

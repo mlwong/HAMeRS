@@ -25,11 +25,11 @@ EquationOfShearViscosityConstant::printClassData(
 /*
  * Compute the shear viscosity.
  */
-double
+Real
 EquationOfShearViscosityConstant::getShearViscosity(
-    const double* const pressure,
-    const double* const temperature,
-    const std::vector<const double*>& molecular_properties) const
+    const Real* const pressure,
+    const Real* const temperature,
+    const std::vector<const Real*>& molecular_properties) const
 {
     // If the constant kinematic viscosity is used.
     if (d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions)
@@ -38,15 +38,15 @@ EquationOfShearViscosityConstant::getShearViscosity(
         TBOX_ASSERT(static_cast<int>(molecular_properties.size()) >= 2);
 #endif
         
-        const double& nu = *(molecular_properties[0]);
-        const double& M  = *(molecular_properties[1]);
+        const Real& nu = *(molecular_properties[0]);
+        const Real& M  = *(molecular_properties[1]);
         
-        const double R = d_R_u/M;
+        const Real R = d_R_u/M;
         
-        const double& p = *pressure;
-        const double& T = *temperature;
+        const Real& p = *pressure;
+        const Real& T = *temperature;
         
-        const double rho = p/(R*T);
+        const Real rho = p/(R*T);
         
         return (rho*nu);
     }
@@ -67,10 +67,10 @@ EquationOfShearViscosityConstant::getShearViscosity(
  */
 void
 EquationOfShearViscosityConstant::computeShearViscosity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_shear_viscosity,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const std::vector<const double*>& molecular_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_shear_viscosity,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const std::vector<const Real*>& molecular_properties,
     const hier::Box& domain) const
 {
 
@@ -167,17 +167,17 @@ EquationOfShearViscosityConstant::computeShearViscosity(
          * Get the pointers to the cell data.
          */
         
-        double* mu = data_shear_viscosity->getPointer(0);
+        Real* mu = data_shear_viscosity->getPointer(0);
         
-        double* p = data_pressure->getPointer(0);
-        double* T = data_temperature->getPointer(0);
+        Real* p = data_pressure->getPointer(0);
+        Real* T = data_temperature->getPointer(0);
         
         /*
          * Get the molecular properties.
          */
         
-        double nu = *molecular_properties[0];
-        double M  = *molecular_properties[1];
+        Real nu = *molecular_properties[0];
+        Real M  = *molecular_properties[1];
         
         if (d_dim == tbox::Dimension(1))
         {
@@ -202,9 +202,9 @@ EquationOfShearViscosityConstant::computeShearViscosity(
                 const int idx_pressure = i + offset_0_pressure;
                 const int idx_temperature = i + offset_0_temperature;
                 
-                const double R = d_R_u/M;
+                const Real R = d_R_u/M;
                 
-                const double rho = p[idx_pressure]/(R*T[idx_temperature]);
+                const Real rho = p[idx_pressure]/(R*T[idx_temperature]);
                 
                 mu[idx_shear_viscosity] = rho*nu;
             }
@@ -247,9 +247,9 @@ EquationOfShearViscosityConstant::computeShearViscosity(
                     const int idx_temperature = (i + offset_0_temperature) +
                         (j + offset_1_temperature)*ghostcell_dim_0_temperature;
                     
-                    const double R = d_R_u/M;
+                    const Real R = d_R_u/M;
                     
-                    const double rho = p[idx_pressure]/(R*T[idx_temperature]);
+                    const Real rho = p[idx_pressure]/(R*T[idx_temperature]);
                     
                     mu[idx_shear_viscosity] = rho*nu;
                 }
@@ -309,9 +309,9 @@ EquationOfShearViscosityConstant::computeShearViscosity(
                             (k + offset_2_temperature)*ghostcell_dim_0_temperature*
                                 ghostcell_dim_1_temperature;
                         
-                        const double R = d_R_u/M;
+                        const Real R = d_R_u/M;
                         
-                        const double rho = p[idx_pressure]/(R*T[idx_temperature]);
+                        const Real rho = p[idx_pressure]/(R*T[idx_temperature]);
                         
                         mu[idx_shear_viscosity] = rho*nu;
                     }
@@ -326,13 +326,13 @@ EquationOfShearViscosityConstant::computeShearViscosity(
          * Get the pointers to the cell data.
          */
         
-        double* mu = data_shear_viscosity->getPointer(0);
+        Real* mu = data_shear_viscosity->getPointer(0);
         
         /*
          * Get the source dynamic viscosity.
          */
         
-        double mu_src = *molecular_properties[0];
+        Real mu_src = *molecular_properties[0];
         
         if (d_dim == tbox::Dimension(1))
         {
@@ -428,10 +428,10 @@ EquationOfShearViscosityConstant::computeShearViscosity(
  */
 void
 EquationOfShearViscosityConstant::computeShearViscosity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_shear_viscosity,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_molecular_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_shear_viscosity,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_molecular_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -538,13 +538,13 @@ EquationOfShearViscosityConstant::computeShearViscosity(
          * Get the pointers to the cell data.
          */
         
-        double* mu = data_shear_viscosity->getPointer(0);
+        Real* mu = data_shear_viscosity->getPointer(0);
         
-        double* nu = data_molecular_properties->getPointer(0);
-        double* M  = data_molecular_properties->getPointer(1);
+        Real* nu = data_molecular_properties->getPointer(0);
+        Real* M  = data_molecular_properties->getPointer(1);
         
-        double* p = data_pressure->getPointer(0);
-        double* T = data_temperature->getPointer(0);
+        Real* p = data_pressure->getPointer(0);
+        Real* T = data_temperature->getPointer(0);
         
         if (d_dim == tbox::Dimension(1))
         {
@@ -571,9 +571,9 @@ EquationOfShearViscosityConstant::computeShearViscosity(
                 const int idx_pressure = i + offset_0_pressure;
                 const int idx_temperature = i + offset_0_temperature;
                 
-                const double R = d_R_u/M[idx_molecular_properties];
+                const Real R = d_R_u/M[idx_molecular_properties];
                 
-                const double rho = p[idx_pressure]/(R*T[idx_temperature]);
+                const Real rho = p[idx_pressure]/(R*T[idx_temperature]);
                 
                 mu[idx_shear_viscosity] = rho*nu[idx_molecular_properties];
             }
@@ -623,9 +623,9 @@ EquationOfShearViscosityConstant::computeShearViscosity(
                     const int idx_temperature = (i + offset_0_temperature) +
                         (j + offset_1_temperature)*ghostcell_dim_0_temperature;
                     
-                    const double R = d_R_u/M[idx_molecular_properties];
+                    const Real R = d_R_u/M[idx_molecular_properties];
                     
-                    const double rho = p[idx_pressure]/(R*T[idx_temperature]);
+                    const Real rho = p[idx_pressure]/(R*T[idx_temperature]);
                     
                     mu[idx_shear_viscosity] = rho*nu[idx_molecular_properties];
                 }
@@ -696,9 +696,9 @@ EquationOfShearViscosityConstant::computeShearViscosity(
                             (k + offset_2_temperature)*ghostcell_dim_0_temperature*
                                 ghostcell_dim_1_temperature;
                         
-                        const double R = d_R_u/M[idx_molecular_properties];
+                        const Real R = d_R_u/M[idx_molecular_properties];
                         
-                        const double rho = p[idx_pressure]/(R*T[idx_temperature]);
+                        const Real rho = p[idx_pressure]/(R*T[idx_temperature]);
                         
                         mu[idx_shear_viscosity] = rho*nu[idx_molecular_properties];
                     }
@@ -713,8 +713,8 @@ EquationOfShearViscosityConstant::computeShearViscosity(
          * Get the pointers to the cell data.
          */
         
-        double* mu = data_shear_viscosity->getPointer(0);
-        double* mu_src = data_molecular_properties->getPointer(0);
+        Real* mu = data_shear_viscosity->getPointer(0);
+        Real* mu_src = data_molecular_properties->getPointer(0);
         
         if (d_dim == tbox::Dimension(1))
         {

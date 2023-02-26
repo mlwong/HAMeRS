@@ -10,15 +10,15 @@ FilterTruncatedGaussian::FilterTruncatedGaussian(
             object_name,
             dim,
             direction),
-        a_G(double(3565)/double( 10368)),
-        b_G(double(3091)/double( 12960)),
-        c_G(double(1997)/double( 25920)),
-        d_G(double( 149)/double( 12960)),
-        e_G(double( 107)/double(103680))
+        a_G(Real(3565)/Real( 10368)),
+        b_G(Real(3091)/Real( 12960)),
+        c_G(Real(1997)/Real( 25920)),
+        d_G(Real( 149)/Real( 12960)),
+        e_G(Real( 107)/Real(103680))
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    const double sum_coeffs = a_G + double(2)*(b_G + c_G + d_G + e_G);
-    TBOX_ASSERT(fabs(sum_coeffs - double(1)) < HAMERS_REAL_EPSILON);
+    const Real sum_coeffs = a_G + Real(2)*(b_G + c_G + d_G + e_G);
+    TBOX_ASSERT(fabs(sum_coeffs - Real(1)) < HAMERS_REAL_EPSILON);
     NULL_USE(sum_coeffs);
 #endif
     
@@ -50,8 +50,8 @@ FilterTruncatedGaussian::FilterTruncatedGaussian(
  */
 void
 FilterTruncatedGaussian::applyFilter(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& filtered_cell_data,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& filtered_cell_data,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& cell_data,
     const int depth_filtered_cell_data,
     const int depth_cell_data,
     const hier::Box& domain)
@@ -138,8 +138,8 @@ FilterTruncatedGaussian::applyFilter(
     }
     
     // Get the pointers to the depth components of the given cell data.
-    double* f_filtered = filtered_cell_data->getPointer(depth_filtered_cell_data);
-    double* f = cell_data->getPointer(depth_cell_data);
+    Real* f_filtered = filtered_cell_data->getPointer(depth_filtered_cell_data);
+    Real* f = cell_data->getPointer(depth_cell_data);
     
     if (d_direction == DIRECTION::X_DIRECTION)
     {

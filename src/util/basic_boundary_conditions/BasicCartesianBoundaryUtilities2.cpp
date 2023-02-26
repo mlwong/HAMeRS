@@ -200,11 +200,11 @@ BasicCartesianBoundaryUtilities2::removeBoundaryEdgeLocations(
 void
 BasicCartesianBoundaryUtilities2::fillEdgeBoundaryData(
     const std::string& var_name,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& var_data,
     const hier::Patch& patch,
     const std::vector<int>& bdry_edge_locs,
     const std::vector<int>& bdry_edge_conds,
-    const std::vector<double>& bdry_edge_values,
+    const std::vector<Real>& bdry_edge_values,
     const hier::IntVector& ghost_width_to_fill)
 {
     TBOX_ASSERT(!var_name.empty());
@@ -554,11 +554,11 @@ BasicCartesianBoundaryUtilities2::removeBoundaryNodeLocations(
 void
 BasicCartesianBoundaryUtilities2::fillNodeBoundaryData(
     const std::string& var_name,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& var_data,
     const hier::Patch& patch,
     const std::vector<int>& bdry_node_locs,
     const std::vector<int>& bdry_node_conds,
-    const std::vector<double>& bdry_edge_values,
+    const std::vector<Real>& bdry_edge_values,
     const hier::IntVector& ghost_width_to_fill)
 {
     TBOX_ASSERT(!var_name.empty());

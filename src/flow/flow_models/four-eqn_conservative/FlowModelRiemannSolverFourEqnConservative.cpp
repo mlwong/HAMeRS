@@ -5,9 +5,9 @@
  */
 void
 FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxFromConservativeVariables(
-    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_minus,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_plus,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_minus,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_plus,
     const DIRECTION::TYPE& direction,
     const RIEMANN_SOLVER::TYPE& riemann_solver_type,
     const hier::Box& domain) const
@@ -67,7 +67,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxFromConservative
     }
 #endif
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity;
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity;
     
     switch (riemann_solver_type)
     {
@@ -192,9 +192,9 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxFromConservative
  */
 void
 FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxFromPrimitiveVariables(
-    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_minus,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_plus,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_minus,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_plus,
     const DIRECTION::TYPE& direction,
     const RIEMANN_SOLVER::TYPE& riemann_solver_type,
     const hier::Box& domain) const
@@ -254,7 +254,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxFromPrimitiveVar
     }
 #endif
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity;
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity;
     
     switch (riemann_solver_type)
     {
@@ -379,10 +379,10 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxFromPrimitiveVar
  */
 void
 FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityFromConservativeVariables(
-    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_minus,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_plus,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_minus,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables_plus,
     const DIRECTION::TYPE& direction,
     const RIEMANN_SOLVER::TYPE& riemann_solver_type,
     const hier::Box& domain) const
@@ -570,10 +570,10 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityFromC
  */
 void
 FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityFromPrimitiveVariables(
-    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
-    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_minus,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_plus,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > velocity,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_minus,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables_plus,
     const DIRECTION::TYPE& direction,
     const RIEMANN_SOLVER::TYPE& riemann_solver_type,
     const hier::Box& domain) const

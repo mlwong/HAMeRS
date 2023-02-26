@@ -104,16 +104,16 @@ class ValueTagger
             hier::Patch& patch,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
-            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_value_tagger,
-            const double value_max,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_value_tagger,
+            const Real value_max,
             const bool uses_global_tol_up,
             const bool uses_global_tol_lo,
             const bool uses_local_tol_up,
             const bool uses_local_tol_lo,
-            const double global_tol_up,
-            const double global_tol_lo,
-            const double local_tol_up,
-            const double local_tol_lo);
+            const Real global_tol_up,
+            const Real global_tol_lo,
+            const Real local_tol_up,
+            const Real local_tol_lo);
         
         /*
          * Transfer data input on a patch to data in class variable.
@@ -121,8 +121,8 @@ class ValueTagger
         void transferDataOnPatchToClassVariable(
             hier::Patch& patch,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_input,
-            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_value_tagger,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_input,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_value_tagger,
             const int depth);
         
         /*
@@ -159,10 +159,10 @@ class ValueTagger
          * Variables, tolerances and settings for the value sensor.
          */
         std::vector<std::string> d_variables;
-        std::vector<double> d_global_tol_up;
-        std::vector<double> d_global_tol_lo;
-        std::vector<double> d_local_tol_up;
-        std::vector<double> d_local_tol_lo;
+        std::vector<Real> d_global_tol_up;
+        std::vector<Real> d_global_tol_lo;
+        std::vector<Real> d_local_tol_up;
+        std::vector<Real> d_local_tol_lo;
         std::vector<bool> d_uses_global_tol_up;
         std::vector<bool> d_uses_global_tol_lo;
         std::vector<bool> d_uses_local_tol_up;
@@ -171,22 +171,22 @@ class ValueTagger
         /*
          * HAMERS_SHARED_PTR to data values.
          */
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_value_tagger_variable_density;
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_value_tagger_variable_total_energy;
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_value_tagger_variable_pressure;
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_value_tagger_variable_dilatation;
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_value_tagger_variable_enstrophy;
-        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > d_value_tagger_variable_mass_fractions;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_value_tagger_variable_density;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_value_tagger_variable_total_energy;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_value_tagger_variable_pressure;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_value_tagger_variable_dilatation;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_value_tagger_variable_enstrophy;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > d_value_tagger_variable_mass_fractions;
         
         /*
          * Statistics of data values.
          */
-        double d_value_tagger_max_density;
-        double d_value_tagger_max_total_energy;
-        double d_value_tagger_max_pressure;
-        double d_value_tagger_max_dilatation;
-        double d_value_tagger_max_enstrophy;
-        std::vector<double> d_value_tagger_max_mass_fractions;
+        Real d_value_tagger_max_density;
+        Real d_value_tagger_max_total_energy;
+        Real d_value_tagger_max_pressure;
+        Real d_value_tagger_max_dilatation;
+        Real d_value_tagger_max_enstrophy;
+        std::vector<Real> d_value_tagger_max_mass_fractions;
         
 };
 

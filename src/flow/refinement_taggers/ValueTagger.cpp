@@ -18,11 +18,11 @@ ValueTagger::ValueTagger(
         d_num_value_ghosts(hier::IntVector::getZero(d_dim)),
         d_flow_model(flow_model),
         d_num_ghosts_derivative(1),
-        d_value_tagger_max_density(0.0),
-        d_value_tagger_max_total_energy(0.0),
-        d_value_tagger_max_pressure(0.0),
-        d_value_tagger_max_dilatation(0.0),
-        d_value_tagger_max_enstrophy(0.0)
+        d_value_tagger_max_density(Real(0)),
+        d_value_tagger_max_total_energy(Real(0)),
+        d_value_tagger_max_pressure(Real(0)),
+        d_value_tagger_max_dilatation(Real(0)),
+        d_value_tagger_max_enstrophy(Real(0))
 {
     if (value_tagger_db != nullptr)
     {
@@ -105,17 +105,17 @@ ValueTagger::ValueTagger(
                 << std::endl);
         }
         
-        num_true = std::count(d_uses_global_tol_up.begin(), d_uses_global_tol_up.end(), true);
+        num_true = int(std::count(d_uses_global_tol_up.begin(), d_uses_global_tol_up.end(), true));
         
         if (num_true > 0)
         {
             if (value_tagger_db->keyExists("global_tol_up"))
             {
-                d_global_tol_up = value_tagger_db->getDoubleVector("global_tol_up");
+                d_global_tol_up = value_tagger_db->getRealVector("global_tol_up");
             }
             else if (value_tagger_db->keyExists("d_global_tol_up"))
             {
-                d_global_tol_up = value_tagger_db->getDoubleVector("d_global_tol_up");
+                d_global_tol_up = value_tagger_db->getRealVector("d_global_tol_up");
             }
             else
             {
@@ -165,17 +165,17 @@ ValueTagger::ValueTagger(
                 << std::endl);
         }
         
-        num_true = std::count(d_uses_global_tol_lo.begin(), d_uses_global_tol_lo.end(), true);
+        num_true = int(std::count(d_uses_global_tol_lo.begin(), d_uses_global_tol_lo.end(), true));
         
         if (num_true > 0)
         {
             if (value_tagger_db->keyExists("global_tol_lo"))
             {
-                d_global_tol_lo = value_tagger_db->getDoubleVector("global_tol_lo");
+                d_global_tol_lo = value_tagger_db->getRealVector("global_tol_lo");
             }
             else if (value_tagger_db->keyExists("d_global_tol_lo"))
             {
-                d_global_tol_lo = value_tagger_db->getDoubleVector("d_global_tol_lo");
+                d_global_tol_lo = value_tagger_db->getRealVector("d_global_tol_lo");
             }
             else
             {
@@ -225,17 +225,17 @@ ValueTagger::ValueTagger(
                 << std::endl);
         }
         
-        num_true = std::count(d_uses_local_tol_up.begin(), d_uses_local_tol_up.end(), true);
+        num_true = int(std::count(d_uses_local_tol_up.begin(), d_uses_local_tol_up.end(), true));
         
         if (num_true > 0)
         {
             if (value_tagger_db->keyExists("local_tol_up"))
             {
-                d_local_tol_up = value_tagger_db->getDoubleVector("local_tol_up");
+                d_local_tol_up = value_tagger_db->getRealVector("local_tol_up");
             }
             else if (value_tagger_db->keyExists("d_local_tol_up"))
             {
-                d_local_tol_up = value_tagger_db->getDoubleVector("d_local_tol_up");
+                d_local_tol_up = value_tagger_db->getRealVector("d_local_tol_up");
             }
             else
             {
@@ -285,17 +285,17 @@ ValueTagger::ValueTagger(
                 << std::endl);
         }
         
-        num_true = std::count(d_uses_local_tol_lo.begin(), d_uses_local_tol_lo.end(), true);
+        num_true = int(std::count(d_uses_local_tol_lo.begin(), d_uses_local_tol_lo.end(), true));
         
         if (num_true > 0)
         {
             if (value_tagger_db->keyExists("local_tol_lo"))
             {
-                d_local_tol_lo = value_tagger_db->getDoubleVector("local_tol_lo");
+                d_local_tol_lo = value_tagger_db->getRealVector("local_tol_lo");
             }
             else if (value_tagger_db->keyExists("d_local_tol_lo"))
             {
-                d_local_tol_lo = value_tagger_db->getDoubleVector("d_local_tol_lo");
+                d_local_tol_lo = value_tagger_db->getRealVector("d_local_tol_lo");
             }
             else
             {
@@ -347,35 +347,35 @@ ValueTagger::registerValueTaggerVariables(
         
         if (variable_key == "DENSITY")
         {
-            d_value_tagger_variable_density = HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
+            d_value_tagger_variable_density = HAMERS_MAKE_SHARED<pdat::CellVariable<Real> >(
                 d_dim,
                 "Value tagger density",
                 1);
         }
         else if (variable_key == "TOTAL_ENERGY")
         {
-            d_value_tagger_variable_total_energy = HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
+            d_value_tagger_variable_total_energy = HAMERS_MAKE_SHARED<pdat::CellVariable<Real> >(
                 d_dim,
                 "Value tagger total energy",
                 1);
         }
         else if (variable_key == "PRESSURE")
         {
-            d_value_tagger_variable_pressure = HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
+            d_value_tagger_variable_pressure = HAMERS_MAKE_SHARED<pdat::CellVariable<Real> >(
                 d_dim,
                 "Value tagger pressure",
                 1);
         }
         else if (variable_key == "DILATATION")
         {
-            d_value_tagger_variable_dilatation = HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
+            d_value_tagger_variable_dilatation = HAMERS_MAKE_SHARED<pdat::CellVariable<Real> >(
                 d_dim,
                 "Value tagger dilatation",
                 1);
         }
         else if (variable_key == "ENSTROPHY")
         {
-            d_value_tagger_variable_enstrophy = HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
+            d_value_tagger_variable_enstrophy = HAMERS_MAKE_SHARED<pdat::CellVariable<Real> >(
                 d_dim,
                 "Value tagger enstrophy",
                 1);
@@ -389,7 +389,7 @@ ValueTagger::registerValueTaggerVariables(
             for (int si = 0; si < num_species; si++)
             {
                 d_value_tagger_variable_mass_fractions.push_back(
-                    HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
+                    HAMERS_MAKE_SHARED<pdat::CellVariable<Real> >(
                         d_dim,
                         "Value tagger mass fraction " + std::to_string(si),
                         1));
@@ -399,7 +399,7 @@ ValueTagger::registerValueTaggerVariables(
             
             for (int si = 0; si < num_species; si++)
             {
-                d_value_tagger_max_mass_fractions.push_back(0.0);
+                d_value_tagger_max_mass_fractions.push_back(Real(0));
             }
         }
         else
@@ -654,28 +654,28 @@ ValueTagger::putToRestart(
     
     int num_true = 0;
     
-    num_true = std::count(d_uses_global_tol_up.begin(), d_uses_global_tol_up.end(), true);
+    num_true = int(std::count(d_uses_global_tol_up.begin(), d_uses_global_tol_up.end(), true));
     if (num_true > 0)
     {
-        restart_db->putDoubleVector("d_global_tol_up", d_global_tol_up);
+        restart_db->putRealVector("d_global_tol_up", d_global_tol_up);
     }
     
-    num_true = std::count(d_uses_global_tol_lo.begin(), d_uses_global_tol_lo.end(), true);
+    num_true = int(std::count(d_uses_global_tol_lo.begin(), d_uses_global_tol_lo.end(), true));
     if (num_true > 0)
     {
-        restart_db->putDoubleVector("d_global_tol_lo", d_global_tol_lo);
+        restart_db->putRealVector("d_global_tol_lo", d_global_tol_lo);
     }
     
-    num_true = std::count(d_uses_local_tol_up.begin(), d_uses_local_tol_up.end(), true);
+    num_true = int(std::count(d_uses_local_tol_up.begin(), d_uses_local_tol_up.end(), true));
     if (num_true > 0)
     {
-        restart_db->putDoubleVector("d_local_tol_up", d_local_tol_up);
+        restart_db->putRealVector("d_local_tol_up", d_local_tol_up);
     }
     
-    num_true = std::count(d_uses_local_tol_lo.begin(), d_uses_local_tol_lo.end(), true);
+    num_true = int(std::count(d_uses_local_tol_lo.begin(), d_uses_local_tol_lo.end(), true));
     if (num_true > 0)
     {
-        restart_db->putDoubleVector("d_local_tol_lo", d_local_tol_lo);
+        restart_db->putRealVector("d_local_tol_lo", d_local_tol_lo);
     }
 }
 
@@ -717,7 +717,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
              * Get the pointer to density data inside the flow model.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > flow_model_data_density = d_flow_model->getCellData("DENSITY");
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > flow_model_data_density = d_flow_model->getCellData("DENSITY");
             
             /*
              * Transfer data from flow model to the class variable.
@@ -759,7 +759,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
              * Get the pointer to total energy data inside the flow model.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > flow_model_data_total_energy =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > flow_model_data_total_energy =
                 d_flow_model->getCellData("TOTAL_ENERGY");
             
             /*
@@ -802,7 +802,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
              * Get the pointer to pressure data inside the flow model.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > flow_model_data_pressure = d_flow_model->getCellData("PRESSURE");
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > flow_model_data_pressure = d_flow_model->getCellData("PRESSURE");
             
             /*
              * Transfer data from flow model to the class variable.
@@ -848,11 +848,11 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             d_flow_model->computeDerivedCellData();
             
             // Get the cell data.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > dilatation(
-                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > dilatation(
+                HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                     patch.getPatchData(d_value_tagger_variable_dilatation, data_context)));
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity = d_flow_model->getCellData("VELOCITY");
             
             // Get the dimensions of box that covers the interior of patch.
             const hier::Box interior_box = patch.getBox();
@@ -864,8 +864,8 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 dilatation->getGhostBox().numberCells();
     
             // Initialize cell data for velocity derivatives.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity_derivatives(
-                new pdat::CellData<double>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity_derivatives(
+                new pdat::CellData<Real>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
             
             // Get the grid spacing.
             const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
@@ -875,7 +875,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             const double* const dx = patch_geom->getDx();
             
             // Get the pointer to the cell data of dilatation.
-            double* theta = dilatation->getPointer(0);
+            Real* theta = dilatation->getPointer(0);
             
             if (d_dim == tbox::Dimension(1))
             {
@@ -897,12 +897,12 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 derivative_first_order_x->computeDerivative(
                     velocity_derivatives,
                     velocity,
-                    dx[0],
+                    Real(dx[0]),
                     0,
                     0);
                 
                 // Get the pointer to the cell data of velocity derivative.
-                double* dudx = velocity_derivatives->getPointer(0);
+                Real* dudx = velocity_derivatives->getPointer(0);
                 
                 HAMERS_PRAGMA_SIMD
                 for (int i = 0; i < interior_dim_0; i++)
@@ -943,7 +943,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 derivative_first_order_x->computeDerivative(
                     velocity_derivatives,
                     velocity,
-                    dx[0],
+                    Real(dx[0]),
                     0,
                     0);
                 
@@ -951,13 +951,13 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 derivative_first_order_y->computeDerivative(
                     velocity_derivatives,
                     velocity,
-                    dx[1],
+                    Real(dx[1]),
                     1,
                     1);
                 
                 // Get the pointers to the cell data of velocity derivatives.
-                double* dudx = velocity_derivatives->getPointer(0);
-                double* dvdy = velocity_derivatives->getPointer(1);
+                Real* dudx = velocity_derivatives->getPointer(0);
+                Real* dvdy = velocity_derivatives->getPointer(1);
                 
                 // Compute the dilatation.
                 for (int j = 0; j < interior_dim_1; j++)
@@ -1013,7 +1013,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 derivative_first_order_x->computeDerivative(
                     velocity_derivatives,
                     velocity,
-                    dx[0],
+                    Real(dx[0]),
                     0,
                     0);
                 
@@ -1021,7 +1021,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 derivative_first_order_y->computeDerivative(
                     velocity_derivatives,
                     velocity,
-                    dx[1],
+                    Real(dx[1]),
                     1,
                     1);
                 
@@ -1029,14 +1029,14 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 derivative_first_order_z->computeDerivative(
                     velocity_derivatives,
                     velocity,
-                    dx[2],
+                    Real(dx[2]),
                     2,
                     2);
                 
                 // Get the pointers to the cell data of velocity derivatives.
-                double* dudx = velocity_derivatives->getPointer(0);
-                double* dvdy = velocity_derivatives->getPointer(1);
-                double* dwdz = velocity_derivatives->getPointer(2);
+                Real* dudx = velocity_derivatives->getPointer(0);
+                Real* dvdy = velocity_derivatives->getPointer(1);
+                Real* dwdz = velocity_derivatives->getPointer(2);
                 
                 // Compute the dilatation.
                 for (int k = 0; k < interior_dim_2; k++)
@@ -1093,11 +1093,11 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             d_flow_model->computeDerivedCellData();
             
             // Get the cell data.
-            HAMERS_SHARED_PTR<pdat::CellData<double> > enstrophy(
-                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > enstrophy(
+                HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                     patch.getPatchData(d_value_tagger_variable_enstrophy, data_context)));
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity = d_flow_model->getCellData("VELOCITY");
             
             // Get the dimensions of box that covers the interior of patch.
             const hier::Box interior_box = patch.getBox();
@@ -1116,7 +1116,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             const double* const dx = patch_geom->getDx();
             
             // Get the pointer to the cell data of enstrophy.
-            double* Omega = enstrophy->getPointer(0);
+            Real* Omega = enstrophy->getPointer(0);
             
             if (d_dim == tbox::Dimension(1))
             {
@@ -1139,8 +1139,8 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 const int ghostcell_dim_0_enstrophy = ghostcell_dims_enstrophy[0];
                 
                 // Initialize cell data for velocity derivatives.
-                HAMERS_SHARED_PTR<pdat::CellData<double> > velocity_derivatives(
-                    new pdat::CellData<double>(interior_box, d_dim.getValue()*d_dim.getValue() - d_dim.getValue(),
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity_derivatives(
+                    new pdat::CellData<Real>(interior_box, d_dim.getValue()*d_dim.getValue() - d_dim.getValue(),
                         hier::IntVector::getZero(d_dim)));
                 
                 HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
@@ -1159,7 +1159,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 derivative_first_order_y->computeDerivative(
                     velocity_derivatives,
                     velocity,
-                    dx[1],
+                    Real(dx[1]),
                     0,
                     0);
                 
@@ -1167,13 +1167,13 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 derivative_first_order_x->computeDerivative(
                     velocity_derivatives,
                     velocity,
-                    dx[0],
+                    Real(dx[0]),
                     1,
                     1);
                 
                 // Get the pointers to the cell data of velocity derivatives.
-                double* dudy = velocity_derivatives->getPointer(0);
-                double* dvdx = velocity_derivatives->getPointer(1);
+                Real* dudy = velocity_derivatives->getPointer(0);
+                Real* dvdx = velocity_derivatives->getPointer(1);
                 
                 // Compute the enstrophy.
                 for (int j = 0; j < interior_dim_1; j++)
@@ -1187,7 +1187,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                         const int idx_enstrophy = (i + num_ghosts_0_enstrophy) +
                             (j + num_ghosts_1_enstrophy)*ghostcell_dim_0_enstrophy;
                         
-                        const double omega = dvdx[idx] - dudy[idx];
+                        const Real omega = dvdx[idx] - dudy[idx];
                         Omega[idx_enstrophy] = omega*omega;
                     }
                 }
@@ -1209,8 +1209,8 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 const int ghostcell_dim_1_enstrophy = ghostcell_dims_enstrophy[1];
                 
                 // Initialize cell data for velocity derivatives.
-                HAMERS_SHARED_PTR<pdat::CellData<double> > velocity_derivatives(
-                    new pdat::CellData<double>(interior_box, d_dim.getValue()*d_dim.getValue() - d_dim.getValue(),
+                HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity_derivatives(
+                    new pdat::CellData<Real>(interior_box, d_dim.getValue()*d_dim.getValue() - d_dim.getValue(),
                         hier::IntVector::getZero(d_dim)));
                 
                 HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
@@ -1235,7 +1235,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 derivative_first_order_y->computeDerivative(
                     velocity_derivatives,
                     velocity,
-                    dx[1],
+                    Real(dx[1]),
                     0,
                     0);
                 
@@ -1243,7 +1243,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 derivative_first_order_z->computeDerivative(
                     velocity_derivatives,
                     velocity,
-                    dx[2],
+                    Real(dx[2]),
                     1,
                     0);
                 
@@ -1251,7 +1251,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 derivative_first_order_x->computeDerivative(
                     velocity_derivatives,
                     velocity,
-                    dx[0],
+                    Real(dx[0]),
                     2,
                     1);
                 
@@ -1259,7 +1259,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 derivative_first_order_z->computeDerivative(
                     velocity_derivatives,
                     velocity,
-                    dx[2],
+                    Real(dx[2]),
                     3,
                     1);
                 
@@ -1267,7 +1267,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 derivative_first_order_x->computeDerivative(
                     velocity_derivatives,
                     velocity,
-                    dx[0],
+                    Real(dx[0]),
                     4,
                     2);
                 
@@ -1275,17 +1275,17 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 derivative_first_order_y->computeDerivative(
                     velocity_derivatives,
                     velocity,
-                    dx[1],
+                    Real(dx[1]),
                     5,
                     2);
                 
                 // Get the pointers to the cell data of velocity derivatives.
-                double* dudy = velocity_derivatives->getPointer(0);
-                double* dudz = velocity_derivatives->getPointer(1);
-                double* dvdx = velocity_derivatives->getPointer(2);
-                double* dvdz = velocity_derivatives->getPointer(3);
-                double* dwdx = velocity_derivatives->getPointer(4);
-                double* dwdy = velocity_derivatives->getPointer(5);
+                Real* dudy = velocity_derivatives->getPointer(0);
+                Real* dudz = velocity_derivatives->getPointer(1);
+                Real* dvdx = velocity_derivatives->getPointer(2);
+                Real* dvdz = velocity_derivatives->getPointer(3);
+                Real* dwdx = velocity_derivatives->getPointer(4);
+                Real* dwdy = velocity_derivatives->getPointer(5);
                 
                 // Compute the enstrophy.
                 for (int k = 0; k < interior_dim_2; k++)
@@ -1303,9 +1303,9 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                                 (k + num_ghosts_2_enstrophy)*ghostcell_dim_0_enstrophy*
                                     ghostcell_dim_1_enstrophy;
                             
-                            const double omega_x = dwdy[idx] - dvdz[idx];
-                            const double omega_y = dudz[idx] - dwdx[idx];
-                            const double omega_z = dvdx[idx] - dudy[idx];
+                            const Real omega_x = dwdy[idx] - dvdz[idx];
+                            const Real omega_y = dudz[idx] - dwdx[idx];
+                            const Real omega_z = dvdx[idx] - dudy[idx];
                             
                             Omega[idx_enstrophy] = omega_x*omega_x + omega_y*omega_y + omega_z*omega_z;
                         }
@@ -1342,7 +1342,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
              * Get the pointer to mass fraction data inside the flow model.
              */
             
-            HAMERS_SHARED_PTR<pdat::CellData<double> > flow_model_data_mass_fractions =
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > flow_model_data_mass_fractions =
                 d_flow_model->getCellData("MASS_FRACTIONS");
             
             /*
@@ -1380,7 +1380,7 @@ ValueTagger::getValueStatistics(
 {
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    math::HierarchyCellDataOpsReal<double> cell_double_operator(patch_hierarchy, level_number, level_number);
+    math::HierarchyCellDataOpsReal<Real> cell_double_operator(patch_hierarchy, level_number, level_number);
     
     hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
     
@@ -1398,14 +1398,14 @@ ValueTagger::getValueStatistics(
                     d_value_tagger_variable_density,
                     data_context);
                 
-                double rho_max_local = cell_double_operator.max(rho_id);
-                d_value_tagger_max_density = 0.0;
+                Real rho_max_local = cell_double_operator.max(rho_id);
+                d_value_tagger_max_density = Real(0);
                 
                 mpi.Allreduce(
                     &rho_max_local,
                     &d_value_tagger_max_density,
                     1,
-                    MPI_DOUBLE,
+                    HAMERS_MPI_REAL,
                     MPI_MAX);
             }
             else if (variable_key == "TOTAL_ENERGY")
@@ -1414,14 +1414,14 @@ ValueTagger::getValueStatistics(
                     d_value_tagger_variable_total_energy,
                     data_context);
                 
-                double E_max_local = cell_double_operator.max(E_id);
-                d_value_tagger_max_total_energy = 0.0;
+                Real E_max_local = cell_double_operator.max(E_id);
+                d_value_tagger_max_total_energy = Real(0);
                 
                 mpi.Allreduce(
                     &E_max_local,
                     &d_value_tagger_max_total_energy,
                     1,
-                    MPI_DOUBLE,
+                    HAMERS_MPI_REAL,
                     MPI_MAX);
             }
             else if (variable_key == "PRESSURE")
@@ -1430,14 +1430,14 @@ ValueTagger::getValueStatistics(
                     d_value_tagger_variable_pressure,
                     data_context);
                 
-                double p_max_local = cell_double_operator.max(p_id);
-                d_value_tagger_max_pressure = 0.0;
+                Real p_max_local = cell_double_operator.max(p_id);
+                d_value_tagger_max_pressure = Real(0);
                 
                 mpi.Allreduce(
                     &p_max_local,
                     &d_value_tagger_max_pressure,
                     1,
-                    MPI_DOUBLE,
+                    HAMERS_MPI_REAL,
                     MPI_MAX);
             }
             else if (variable_key == "DILATATION")
@@ -1446,14 +1446,14 @@ ValueTagger::getValueStatistics(
                     d_value_tagger_variable_dilatation,
                     data_context);
                 
-                double theta_max_local = cell_double_operator.max(theta_id);
-                d_value_tagger_max_dilatation = 0.0;
+                Real theta_max_local = cell_double_operator.max(theta_id);
+                d_value_tagger_max_dilatation = Real(0);
                 
                 mpi.Allreduce(
                     &theta_max_local,
                     &d_value_tagger_max_dilatation,
                     1,
-                    MPI_DOUBLE,
+                    HAMERS_MPI_REAL,
                     MPI_MAX);
             }
             else if (variable_key == "ENSTROPHY")
@@ -1462,14 +1462,14 @@ ValueTagger::getValueStatistics(
                     d_value_tagger_variable_enstrophy,
                     data_context);
                 
-                double Omega_max_local = cell_double_operator.max(Omega_id);
-                d_value_tagger_max_enstrophy = 0.0;
+                Real Omega_max_local = cell_double_operator.max(Omega_id);
+                d_value_tagger_max_enstrophy = Real(0);
                 
                 mpi.Allreduce(
                     &Omega_max_local,
                     &d_value_tagger_max_enstrophy,
                     1,
-                    MPI_DOUBLE,
+                    HAMERS_MPI_REAL,
                     MPI_MAX);
             }
             else if (variable_key == "MASS_FRACTION" || variable_key == "MASS_FRACTIONS")
@@ -1480,14 +1480,14 @@ ValueTagger::getValueStatistics(
                         d_value_tagger_variable_mass_fractions[si],
                         data_context);
                     
-                    double Y_max_local = cell_double_operator.max(Y_id);
-                    d_value_tagger_max_mass_fractions[si] = 0.0;
+                    Real Y_max_local = cell_double_operator.max(Y_id);
+                    d_value_tagger_max_mass_fractions[si] = Real(0);
                     
                     mpi.Allreduce(
                         &Y_max_local,
                         &d_value_tagger_max_mass_fractions[si],
                         1,
-                        MPI_DOUBLE,
+                        HAMERS_MPI_REAL,
                         MPI_MAX);
                 }
             }
@@ -1521,10 +1521,10 @@ ValueTagger::tagCellsOnPatch(
         bool uses_local_tol_up = d_uses_local_tol_up[vi];
         bool uses_local_tol_lo = d_uses_local_tol_lo[vi];
         
-        double global_tol_up = 0.0;
-        double global_tol_lo = 0.0;
-        double local_tol_up = 0.0;
-        double local_tol_lo = 0.0;
+        Real global_tol_up = Real(0);
+        Real global_tol_lo = Real(0);
+        Real local_tol_up = Real(0);
+        Real local_tol_lo = Real(0);
         
         if (uses_global_tol_up)
         {
@@ -1667,23 +1667,23 @@ ValueTagger::tagCellsOnPatchWithValue(
     hier::Patch& patch,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
-    const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_value_tagger,
-    const double value_max,
+    const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_value_tagger,
+    const Real value_max,
     const bool uses_global_tol_up,
     const bool uses_global_tol_lo,
     const bool uses_local_tol_up,
     const bool uses_local_tol_lo,
-    const double global_tol_up,
-    const double global_tol_lo,
-    const double local_tol_up,
-    const double local_tol_lo)
+    const Real global_tol_up,
+    const Real global_tol_lo,
+    const Real local_tol_up,
+    const Real local_tol_lo)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
 #endif
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_value_tagger(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_value_tagger(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(variable_value_tagger, data_context)));
     
     // Get the dimensions of box that covers the interior of patch.
@@ -1706,7 +1706,7 @@ ValueTagger::tagCellsOnPatchWithValue(
     int* tag_ptr = tags->getPointer(0);
     
     // Get the pointer to the data.
-    double* u = data_value_tagger->getPointer(0);
+    Real* u = data_value_tagger->getPointer(0);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -2096,16 +2096,16 @@ void
 ValueTagger::transferDataOnPatchToClassVariable(
     hier::Patch& patch,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_input,
-    const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_value_tagger,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_input,
+    const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_value_tagger,
     const int depth)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(data_input->getDepth() > depth);
 #endif
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > data_value_tagger(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > data_value_tagger(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(variable_value_tagger, data_context)));
     
     // Get the snumber of ghost cells and dimensions of box that covers interior of patch plus
@@ -2125,8 +2125,8 @@ ValueTagger::transferDataOnPatchToClassVariable(
     const hier::IntVector interior_dims = interior_box.numberCells();
     
     // Get the pointer to the data.
-    double* u_input = data_input->getPointer(depth);
-    double* u_value_tagger = data_value_tagger->getPointer(0);
+    Real* u_input = data_input->getPointer(depth);
+    Real* u_value_tagger = data_value_tagger->getPointer(0);
     
     if (d_dim == tbox::Dimension(1))
     {

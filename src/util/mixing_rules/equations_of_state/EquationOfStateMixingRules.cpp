@@ -3,7 +3,7 @@
 /*
  * Get the molecular weight of a species.
  */
-double
+Real
 EquationOfStateMixingRules::getSpeciesMolecularWeight(
     const int species_index) const
 {
@@ -19,9 +19,9 @@ EquationOfStateMixingRules::getSpeciesMolecularWeight(
 /*
  * Compute the molecular weight of mixture.
  */
-double
+Real
 EquationOfStateMixingRules::getMixtureMolecularWeight(
-    const std::vector<const double*>& mass_fractions) const
+    const std::vector<const Real*>& mass_fractions) const
 {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
     if (static_cast<int>(mass_fractions.size()) != d_num_species)
@@ -34,16 +34,16 @@ EquationOfStateMixingRules::getMixtureMolecularWeight(
     }
 #endif
     
-    double M = double(0);
+    Real M = Real(0);
     
     for (int si = 0; si < d_num_species; si++)
     {
-        const double& Y = *(mass_fractions[si]);
+        const Real& Y = *(mass_fractions[si]);
         
         M += Y/d_species_M[si];
     }
     
-    return double(1)/M; 
+    return Real(1)/M; 
 }
 
 
@@ -52,8 +52,8 @@ EquationOfStateMixingRules::getMixtureMolecularWeight(
  */
 void
 EquationOfStateMixingRules::computeMixtureMolecularWeight(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mixture_molecular_weight,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mixture_molecular_weight,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -116,9 +116,9 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
      * Get the pointers to the cell data.
      */
     
-    double* M = data_mixture_molecular_weight->getPointer(0);
+    Real* M = data_mixture_molecular_weight->getPointer(0);
     
-    std::vector<const double*> Y;
+    std::vector<const Real*> Y;
     Y.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
@@ -131,11 +131,11 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
     
     if (domain.empty())
     {
-        data_mixture_molecular_weight->fillAll(double(0));
+        data_mixture_molecular_weight->fillAll(Real(0));
     }
     else
     {
-        data_mixture_molecular_weight->fillAll(double(0), domain);
+        data_mixture_molecular_weight->fillAll(Real(0), domain);
     }
     
     computeMixtureMolecularWeight(
@@ -155,8 +155,8 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
  */
 void
 EquationOfStateMixingRules::computeMixtureMolecularWeight(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mixture_molecular_weight,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mixture_molecular_weight,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mass_fractions,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -231,9 +231,9 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
      * Get the pointers to the cell data.
      */
     
-    double* M = data_mixture_molecular_weight->getPointer(side_normal, 0);
+    Real* M = data_mixture_molecular_weight->getPointer(side_normal, 0);
     
-    std::vector<const double*> Y;
+    std::vector<const Real*> Y;
     Y.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
@@ -246,11 +246,11 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
     
     if (domain.empty())
     {
-        data_mixture_molecular_weight->fillAll(double(0));
+        data_mixture_molecular_weight->fillAll(Real(0));
     }
     else
     {
-        data_mixture_molecular_weight->fillAll(double(0), domain);
+        data_mixture_molecular_weight->fillAll(Real(0), domain);
     }
     
     computeMixtureMolecularWeight(
@@ -268,9 +268,9 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
 /*
  * Helper function to compute the density of mixture given the partial densities.
  */
-double
+Real
 EquationOfStateMixingRules::getMixtureDensity(
-    const std::vector<const double*>& partial_densities) const
+    const std::vector<const Real*>& partial_densities) const
 {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
     if (static_cast<int>(partial_densities.size()) != d_num_species)
@@ -283,11 +283,11 @@ EquationOfStateMixingRules::getMixtureDensity(
     }
 #endif
     
-    double rho = double(0);
+    Real rho = Real(0);
     
     for (int si = 0; si < d_num_species; si++)
     {
-        const double& Z_rho = *(partial_densities[si]);
+        const Real& Z_rho = *(partial_densities[si]);
         
         rho += Z_rho;
     }
@@ -301,8 +301,8 @@ EquationOfStateMixingRules::getMixtureDensity(
  */
 void
 EquationOfStateMixingRules::computeMixtureDensity(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mixture_density,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_densities,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mixture_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_partial_densities,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -365,9 +365,9 @@ EquationOfStateMixingRules::computeMixtureDensity(
      * Get the pointers to the cell data.
      */
     
-    double* rho = data_mixture_density->getPointer(0);
+    Real* rho = data_mixture_density->getPointer(0);
     
-    std::vector<const double*> Z_rho;
+    std::vector<const Real*> Z_rho;
     Z_rho.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
@@ -380,11 +380,11 @@ EquationOfStateMixingRules::computeMixtureDensity(
     
     if (domain.empty())
     {
-        data_mixture_density->fillAll(double(0));
+        data_mixture_density->fillAll(Real(0));
     }
     else
     {
-        data_mixture_density->fillAll(double(0), domain);
+        data_mixture_density->fillAll(Real(0), domain);
     }
     
     computeMixtureDensity(
@@ -404,8 +404,8 @@ EquationOfStateMixingRules::computeMixtureDensity(
  */
 void
 EquationOfStateMixingRules::computeMixtureDensity(
-    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mixture_density,
-    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_densities,
+    HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_mixture_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& data_partial_densities,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -480,9 +480,9 @@ EquationOfStateMixingRules::computeMixtureDensity(
      * Get the pointers to the cell data.
      */
     
-    double* rho = data_mixture_density->getPointer(side_normal, 0);
+    Real* rho = data_mixture_density->getPointer(side_normal, 0);
     
-    std::vector<const double*> Z_rho;
+    std::vector<const Real*> Z_rho;
     Z_rho.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
@@ -495,11 +495,11 @@ EquationOfStateMixingRules::computeMixtureDensity(
     
     if (domain.empty())
     {
-        data_mixture_density->fillAll(double(0));
+        data_mixture_density->fillAll(Real(0));
     }
     else
     {
-        data_mixture_density->fillAll(double(0), domain);
+        data_mixture_density->fillAll(Real(0), domain);
     }
     
     computeMixtureDensity(
@@ -519,8 +519,8 @@ EquationOfStateMixingRules::computeMixtureDensity(
  */
 void
 EquationOfStateMixingRules::computeMixtureMolecularWeight(
-    double* const M,
-    const std::vector<const double*>& Y,
+    Real* const M,
+    const std::vector<const Real*>& Y,
     const hier::IntVector& num_ghosts_mixture_molecular_weight,
     const hier::IntVector& num_ghosts_mass_fractions,
     const hier::IntVector& ghostcell_dims_mixture_molecular_weight,
@@ -542,7 +542,7 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
         
         for (int si = 0; si < d_num_species; si++)
         {
-            const double M_i = d_species_M[si];
+            const Real M_i = d_species_M[si];
             
             HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0;
@@ -565,7 +565,7 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
             // Compute the linear index.
             const int idx_mixture_molecular_weight = i + num_ghosts_0_mixture_molecular_weight;
             
-            M[idx_mixture_molecular_weight] = double(1)/M[idx_mixture_molecular_weight];
+            M[idx_mixture_molecular_weight] = Real(1)/M[idx_mixture_molecular_weight];
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -589,7 +589,7 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
         
         for (int si = 0; si < d_num_species; si++)
         {
-            const double M_i = d_species_M[si];
+            const Real M_i = d_species_M[si];
             
             for (int j = domain_lo_1;
                  j < domain_lo_1 + domain_dim_1;
@@ -626,7 +626,7 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
                 const int idx_mixture_molecular_weight = (i + num_ghosts_0_mixture_molecular_weight) +
                     (j + num_ghosts_1_mixture_molecular_weight)*ghostcell_dim_0_mixture_molecular_weight;
                 
-                M[idx_mixture_molecular_weight] = double(1)/M[idx_mixture_molecular_weight];
+                M[idx_mixture_molecular_weight] = Real(1)/M[idx_mixture_molecular_weight];
             }
         }
     }
@@ -657,7 +657,7 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
         
         for (int si = 0; si < d_num_species; si++)
         {
-            const double M_i = d_species_M[si];
+            const Real M_i = d_species_M[si];
             
             for (int k = domain_lo_2;
                  k < domain_lo_2 + domain_dim_2;
@@ -708,7 +708,7 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
                         (k + num_ghosts_2_mixture_molecular_weight)*ghostcell_dim_0_mixture_molecular_weight*
                             ghostcell_dim_1_mixture_molecular_weight;
                     
-                    M[idx_mixture_molecular_weight] = double(1)/M[idx_mixture_molecular_weight];
+                    M[idx_mixture_molecular_weight] = Real(1)/M[idx_mixture_molecular_weight];
                 }
             }
         }
@@ -721,8 +721,8 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
  */
 void
 EquationOfStateMixingRules::computeMixtureDensity(
-    double* const rho,
-    const std::vector<const double*>& Z_rho,
+    Real* const rho,
+    const std::vector<const Real*>& Z_rho,
     const hier::IntVector& num_ghosts_mixture_density,
     const hier::IntVector& num_ghosts_partial_densities,
     const hier::IntVector& ghostcell_dims_mixture_density,
