@@ -267,7 +267,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
             corr_local,
             corr_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(corr_local);
@@ -510,7 +510,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
             corr_local,
             corr_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(corr_local);
@@ -802,7 +802,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
             corr_local,
             corr_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(corr_local);
@@ -1060,7 +1060,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
             corr_local,
             corr_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(corr_local);
@@ -1336,7 +1336,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
             corr_local,
             corr_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(corr_local);
@@ -1579,7 +1579,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
             corr_local,
             corr_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(corr_local);
@@ -1872,7 +1872,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
             corr_local,
             corr_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(corr_local);
@@ -2130,7 +2130,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
             corr_local,
             corr_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(corr_local);
@@ -2431,7 +2431,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection
             corr_local,
             corr_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(corr_local);
@@ -2749,7 +2749,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection
             corr_local,
             corr_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(corr_local);

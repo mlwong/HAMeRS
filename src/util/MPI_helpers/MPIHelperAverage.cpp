@@ -154,7 +154,7 @@ MPIHelperAverage::getAveragedQuantity(
             &u_avg_local,
             &u_avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -286,7 +286,7 @@ MPIHelperAverage::getAveragedQuantity(
             &u_avg_local,
             &u_avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -429,7 +429,7 @@ MPIHelperAverage::getAveragedQuantity(
             &u_avg_local,
             &u_avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     
@@ -618,7 +618,7 @@ MPIHelperAverage::getAveragedQuantity(
             &avg_local,
             &avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -783,7 +783,7 @@ MPIHelperAverage::getAveragedQuantity(
             &avg_local,
             &avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -965,7 +965,7 @@ MPIHelperAverage::getAveragedQuantity(
             &avg_local,
             &avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     
@@ -1144,7 +1144,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
             u_avg_local,
             u_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_avg_local);
@@ -1313,7 +1313,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
             u_avg_local,
             u_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_avg_local);
@@ -1493,7 +1493,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
             u_avg_local,
             u_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_avg_local);
@@ -1703,7 +1703,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
             avg_local,
             avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -1903,7 +1903,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
             avg_local,
             avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -2120,7 +2120,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
             avg_local,
             avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -2333,7 +2333,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
             u_avg_local,
             u_avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_avg_local);
@@ -2513,7 +2513,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
             u_avg_local,
             u_avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_avg_local);
@@ -2761,7 +2761,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
             avg_local,
             avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -2978,7 +2978,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
             avg_local,
             avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -3210,7 +3210,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
             u_avg_local,
             u_avg_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_avg_local);
@@ -3483,7 +3483,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
             avg_local,
             avg_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);

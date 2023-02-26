@@ -54,7 +54,7 @@ MPIHelperGrid::getNumberOfCells() const
             &num_cells_local,
             &num_cells_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -97,7 +97,7 @@ MPIHelperGrid::getNumberOfCells() const
             &num_cells_local,
             &num_cells_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -140,7 +140,7 @@ MPIHelperGrid::getNumberOfCells() const
             &num_cells_local,
             &num_cells_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     
@@ -214,7 +214,7 @@ MPIHelperGrid::getWeightedNumberOfCells() const
             &weighted_num_cells_local,
             &weighted_num_cells_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -274,7 +274,7 @@ MPIHelperGrid::getWeightedNumberOfCells() const
             &weighted_num_cells_local,
             &weighted_num_cells_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -334,7 +334,7 @@ MPIHelperGrid::getWeightedNumberOfCells() const
             &weighted_num_cells_local,
             &weighted_num_cells_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     
@@ -494,7 +494,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousXDirection() const
             ln_avg_local,
             ln_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(ln_avg_local);
@@ -642,7 +642,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousXDirection() const
             ln_avg_local,
             ln_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(ln_avg_local);
@@ -796,7 +796,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousXDirection() const
             ln_avg_local,
             ln_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(ln_avg_local);
@@ -985,7 +985,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousYDirection() const
             ln_avg_local,
             ln_avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(ln_avg_local);
@@ -1139,7 +1139,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousYDirection() const
             ln_avg_local,
             ln_avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(ln_avg_local);
@@ -1342,7 +1342,7 @@ MPIHelperGrid::getAveragedGridLevelNumberWithInhomogeneousZDirection() const
             ln_avg_local,
             ln_avg_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(ln_avg_local);

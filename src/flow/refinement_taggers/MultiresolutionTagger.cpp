@@ -1320,7 +1320,7 @@ MultiresolutionTagger::getSensorValueStatistics(
                                 &w_max_rho_local,
                                 &d_Harten_wavelet_coeffs_maxs_density[li],
                                 1,
-                                MPI_DOUBLE,
+                                HAMERS_MPI_REAL,
                                 MPI_MAX);
                         }
                     }
@@ -1339,7 +1339,7 @@ MultiresolutionTagger::getSensorValueStatistics(
                                 &w_E_max_local,
                                 &d_Harten_wavelet_coeffs_maxs_total_energy[li],
                                 1,
-                                MPI_DOUBLE,
+                                HAMERS_MPI_REAL,
                                 MPI_MAX);
                         }
                     }
@@ -1358,7 +1358,7 @@ MultiresolutionTagger::getSensorValueStatistics(
                                 &w_p_max_local,
                                 &d_Harten_wavelet_coeffs_maxs_pressure[li],
                                 1,
-                                MPI_DOUBLE,
+                                HAMERS_MPI_REAL,
                                 MPI_MAX);
                         }
                     }

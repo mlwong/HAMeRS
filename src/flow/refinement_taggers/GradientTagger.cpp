@@ -2068,7 +2068,7 @@ GradientTagger::getSensorValueStatistics(
                             &w_max_rho_local,
                             &d_difference_first_order_max_density,
                             1,
-                            MPI_DOUBLE,
+                            HAMERS_MPI_REAL,
                             MPI_MAX);
                     }
                     else if (variable_key == "TOTAL_ENERGY")
@@ -2084,7 +2084,7 @@ GradientTagger::getSensorValueStatistics(
                             &w_max_E_local,
                             &d_difference_first_order_max_total_energy,
                             1,
-                            MPI_DOUBLE,
+                            HAMERS_MPI_REAL,
                             MPI_MAX);
                     }
                     else if (variable_key == "PRESSURE")
@@ -2100,7 +2100,7 @@ GradientTagger::getSensorValueStatistics(
                             &w_max_p_local,
                             &d_difference_first_order_max_pressure,
                             1,
-                            MPI_DOUBLE,
+                            HAMERS_MPI_REAL,
                             MPI_MAX);
                     }
                 }
@@ -2131,7 +2131,7 @@ GradientTagger::getSensorValueStatistics(
                             &w_max_rho_local,
                             &d_difference_second_order_max_density,
                             1,
-                            MPI_DOUBLE,
+                            HAMERS_MPI_REAL,
                             MPI_MAX);
                     }
                     else if (variable_key == "TOTAL_ENERGY")
@@ -2147,7 +2147,7 @@ GradientTagger::getSensorValueStatistics(
                             &w_max_E_local,
                             &d_difference_second_order_max_total_energy,
                             1,
-                            MPI_DOUBLE,
+                            HAMERS_MPI_REAL,
                             MPI_MAX);
                     }
                     else if (variable_key == "PRESSURE")
@@ -2163,7 +2163,7 @@ GradientTagger::getSensorValueStatistics(
                             &w_max_p_local,
                             &d_difference_second_order_max_pressure,
                             1,
-                            MPI_DOUBLE,
+                            HAMERS_MPI_REAL,
                             MPI_MAX);
                     }
                 }

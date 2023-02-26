@@ -134,7 +134,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
             &u_max_local,
             &u_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -250,7 +250,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
             &u_max_local,
             &u_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -375,7 +375,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
             &u_max_local,
             &u_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     
@@ -512,7 +512,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantity(
             &u_inv_max_local,
             &u_inv_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -628,7 +628,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantity(
             &u_inv_max_local,
             &u_inv_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -753,7 +753,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantity(
             &u_inv_max_local,
             &u_inv_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     
@@ -977,7 +977,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
             &max_local,
             &max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -1157,7 +1157,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
             &max_local,
             &max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -1351,7 +1351,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantity(
             &max_local,
             &max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     
@@ -1488,7 +1488,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
             &u_min_local,
             &u_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -1604,7 +1604,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
             &u_min_local,
             &u_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -1729,7 +1729,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
             &u_min_local,
             &u_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     
@@ -1866,7 +1866,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantity(
             &u_inv_min_local,
             &u_inv_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -1982,7 +1982,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantity(
             &u_inv_min_local,
             &u_inv_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -2107,7 +2107,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantity(
             &u_inv_min_local,
             &u_inv_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     
@@ -2331,7 +2331,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
             &min_local,
             &min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2511,7 +2511,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
             &min_local,
             &min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -2705,7 +2705,7 @@ FlowModelMPIHelperMaxMin::getMinQuantity(
             &min_local,
             &min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     
@@ -2876,7 +2876,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -3030,7 +3030,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -3194,7 +3194,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -3367,7 +3367,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
             u_inv_max_local,
             u_inv_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_inv_max_local);
@@ -3521,7 +3521,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
             u_inv_max_local,
             u_inv_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_inv_max_local);
@@ -3685,7 +3685,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousXDirection(
             u_inv_max_local,
             u_inv_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_inv_max_local);
@@ -3944,7 +3944,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
             max_local,
             max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(max_local);
@@ -4160,7 +4160,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
             max_local,
             max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(max_local);
@@ -4390,7 +4390,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
             max_local,
             max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(max_local);
@@ -4563,7 +4563,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -4717,7 +4717,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -4881,7 +4881,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -5054,7 +5054,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
             u_inv_min_local,
             u_inv_min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_inv_min_local);
@@ -5208,7 +5208,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
             u_inv_min_local,
             u_inv_min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_inv_min_local);
@@ -5372,7 +5372,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousXDirection(
             u_inv_min_local,
             u_inv_min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_inv_min_local);
@@ -5631,7 +5631,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
             min_local,
             min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(min_local);
@@ -5847,7 +5847,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
             min_local,
             min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(min_local);
@@ -6077,7 +6077,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
             min_local,
             min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(min_local);
@@ -6268,7 +6268,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -6432,7 +6432,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -6623,7 +6623,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousYDirection(
             u_inv_max_local,
             u_inv_max_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_inv_max_local);
@@ -6787,7 +6787,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousYDirection(
             u_inv_max_local,
             u_inv_max_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_inv_max_local);
@@ -7069,7 +7069,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
             max_local,
             max_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(max_local);
@@ -7299,7 +7299,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
             max_local,
             max_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(max_local);
@@ -7490,7 +7490,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -7654,7 +7654,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -7845,7 +7845,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousYDirection(
             u_inv_min_local,
             u_inv_min_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_inv_min_local);
@@ -8009,7 +8009,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousYDirection(
             u_inv_min_local,
             u_inv_min_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_inv_min_local);
@@ -8291,7 +8291,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
             min_local,
             min_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(min_local);
@@ -8521,7 +8521,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
             min_local,
             min_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(min_local);
@@ -8730,7 +8730,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -8939,7 +8939,7 @@ FlowModelMPIHelperMaxMin::getMaxReciprocalOfQuantityWithInhomogeneousZDirection(
             u_inv_max_local,
             u_inv_max_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_inv_max_local);
@@ -9243,7 +9243,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
             max_local,
             max_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(max_local);
@@ -9452,7 +9452,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -9661,7 +9661,7 @@ FlowModelMPIHelperMaxMin::getMinReciprocalOfQuantityWithInhomogeneousZDirection(
             u_inv_min_local,
             u_inv_min_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_inv_min_local);
@@ -9965,7 +9965,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
             min_local,
             min_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(min_local);
@@ -10132,7 +10132,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
             &location_x_max_local,
             &location_x_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -10269,7 +10269,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
             &location_x_max_local,
             &location_x_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -10415,7 +10415,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
             &location_x_max_local,
             &location_x_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     
@@ -10580,7 +10580,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
             &location_x_min_local,
             &location_x_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -10717,7 +10717,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
             &location_x_min_local,
             &location_x_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -10863,7 +10863,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
             &location_x_min_local,
             &location_x_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     
@@ -11044,7 +11044,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
             &location_y_max_local,
             &location_y_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -11190,7 +11190,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
             &location_y_max_local,
             &location_y_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     
@@ -11371,7 +11371,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
             &location_y_min_local,
             &location_y_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -11517,7 +11517,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
             &location_y_min_local,
             &location_y_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     
@@ -11714,7 +11714,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
             &location_z_max_local,
             &location_z_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     
@@ -11911,7 +11911,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
             &location_z_min_local,
             &location_z_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     
@@ -12138,7 +12138,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
             abs_der_max_local,
             abs_der_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(abs_der_max_local);
@@ -12335,7 +12335,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
             abs_der_max_local,
             abs_der_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(abs_der_max_local);
@@ -12558,7 +12558,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
             abs_der_max_local,
             abs_der_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(abs_der_max_local);
@@ -12760,7 +12760,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
             mag_grad_max_local,
             mag_grad_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(mag_grad_max_local);
@@ -12955,7 +12955,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
             mag_grad_max_local,
             mag_grad_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(mag_grad_max_local);
@@ -13175,7 +13175,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
             mag_grad_max_local,
             mag_grad_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(mag_grad_max_local);

@@ -160,14 +160,14 @@ MPIHelperCentroid::getCentroidInXDirection(
             &num_local,
             &num_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         d_mpi.Allreduce(
             &den_local,
             &den_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         x_c = num_global/den_global;
@@ -314,14 +314,14 @@ MPIHelperCentroid::getCentroidInXDirection(
             &num_local,
             &num_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         d_mpi.Allreduce(
             &den_local,
             &den_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         x_c = num_global/den_global;
@@ -478,14 +478,14 @@ MPIHelperCentroid::getCentroidInXDirection(
             &num_local,
             &num_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         d_mpi.Allreduce(
             &den_local,
             &den_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         x_c = num_global/den_global;
@@ -668,14 +668,14 @@ MPIHelperCentroid::getCentroidInYDirection(
             &num_local,
             &num_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         d_mpi.Allreduce(
             &den_local,
             &den_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         y_c = num_global/den_global;
@@ -832,14 +832,14 @@ MPIHelperCentroid::getCentroidInYDirection(
             &num_local,
             &num_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         d_mpi.Allreduce(
             &den_local,
             &den_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         y_c = num_global/den_global;
@@ -1039,14 +1039,14 @@ MPIHelperCentroid::getCentroidInZDirection(
             &num_local,
             &num_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         d_mpi.Allreduce(
             &den_local,
             &den_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         z_c = num_global/den_global;

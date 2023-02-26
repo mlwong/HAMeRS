@@ -108,7 +108,7 @@ MPIHelperMaxMin::getMaxQuantity(
             &u_max_local,
             &u_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -197,7 +197,7 @@ MPIHelperMaxMin::getMaxQuantity(
             &u_max_local,
             &u_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -295,7 +295,7 @@ MPIHelperMaxMin::getMaxQuantity(
             &u_max_local,
             &u_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     
@@ -405,7 +405,7 @@ MPIHelperMaxMin::getMinQuantity(
             &u_min_local,
             &u_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -494,7 +494,7 @@ MPIHelperMaxMin::getMinQuantity(
             &u_min_local,
             &u_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -592,7 +592,7 @@ MPIHelperMaxMin::getMinQuantity(
             &u_min_local,
             &u_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     
@@ -736,7 +736,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -863,7 +863,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -1000,7 +1000,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -1146,7 +1146,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -1273,7 +1273,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -1410,7 +1410,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -1574,7 +1574,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -1711,7 +1711,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -1875,7 +1875,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -2012,7 +2012,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -2194,7 +2194,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
             u_max_local,
             u_max_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         std::free(u_max_local);
@@ -2376,7 +2376,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
             u_min_local,
             u_min_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
         
         std::free(u_min_local);
@@ -2516,7 +2516,7 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
             &location_x_max_local,
             &location_x_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2626,7 +2626,7 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
             &location_x_max_local,
             &location_x_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -2745,7 +2745,7 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
             &location_x_max_local,
             &location_x_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     
@@ -2883,7 +2883,7 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
             &location_x_min_local,
             &location_x_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2993,7 +2993,7 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
             &location_x_min_local,
             &location_x_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -3112,7 +3112,7 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
             &location_x_min_local,
             &location_x_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     
@@ -3266,7 +3266,7 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
             &location_y_max_local,
             &location_y_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -3385,7 +3385,7 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
             &location_y_max_local,
             &location_y_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     
@@ -3539,7 +3539,7 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
             &location_y_min_local,
             &location_y_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -3658,7 +3658,7 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
             &location_y_min_local,
             &location_y_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     
@@ -3828,7 +3828,7 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
             &location_z_max_local,
             &location_z_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
     }
     
@@ -3998,7 +3998,7 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
             &location_z_min_local,
             &location_z_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MIN);
     }
     

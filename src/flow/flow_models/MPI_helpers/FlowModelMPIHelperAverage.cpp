@@ -180,7 +180,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
             &u_avg_local,
             &u_avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -339,7 +339,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
             &u_avg_local,
             &u_avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -509,7 +509,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
             &u_avg_local,
             &u_avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     
@@ -694,7 +694,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantity(
             &u_inv_avg_local,
             &u_inv_avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -853,7 +853,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantity(
             &u_inv_avg_local,
             &u_inv_avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -1023,7 +1023,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantity(
             &u_inv_avg_local,
             &u_inv_avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     
@@ -1238,7 +1238,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
             &avg_local,
             &avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -1429,7 +1429,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
             &avg_local,
             &avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -1637,7 +1637,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
             &avg_local,
             &avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     
@@ -1859,7 +1859,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
             &avg_local,
             &avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2054,7 +2054,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
             &avg_local,
             &avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -2264,7 +2264,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
             &avg_local,
             &avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     
@@ -2660,7 +2660,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
             &avg_local,
             &avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2961,7 +2961,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
             &avg_local,
             &avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -3303,7 +3303,7 @@ FlowModelMPIHelperAverage::getAveragedQuantity(
             &avg_local,
             &avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     
@@ -3609,7 +3609,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
             &der_avg_local,
             &der_avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(2))
@@ -3892,7 +3892,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
             &der_avg_local,
             &der_avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -4223,7 +4223,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantity(
             &der_avg_local,
             &der_avg_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
     }
     
@@ -4403,7 +4403,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
             u_avg_local,
             u_avg_global,
             coarsest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_avg_local);
@@ -4577,7 +4577,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
             u_avg_local,
             u_avg_global,
             coarsest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_avg_local);
@@ -4762,7 +4762,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
             u_avg_local,
             u_avg_global,
             coarsest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_avg_local);
@@ -4945,7 +4945,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
             u_inv_avg_local,
             u_inv_avg_global,
             coarsest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_inv_avg_local);
@@ -5119,7 +5119,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
             u_inv_avg_local,
             u_inv_avg_global,
             coarsest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_inv_avg_local);
@@ -5304,7 +5304,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
             u_inv_avg_local,
             u_inv_avg_global,
             coarsest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_inv_avg_local);
@@ -5548,7 +5548,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
             avg_local,
             avg_global,
             coarsest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -5756,7 +5756,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
             avg_local,
             avg_global,
             coarsest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -5979,7 +5979,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
             avg_local,
             avg_global,
             coarsest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -6374,7 +6374,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
             avg_local,
             avg_global,
             coarsest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -6684,7 +6684,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
             avg_local,
             avg_global,
             coarsest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -7035,7 +7035,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirectionOnCoars
             avg_local,
             avg_global,
             coarsest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -7347,7 +7347,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
             der_avg_local,
             der_avg_global,
             coarsest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(der_avg_local);
@@ -7644,7 +7644,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
             der_avg_local,
             der_avg_global,
             coarsest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(der_avg_local);
@@ -7990,7 +7990,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
             der_avg_local,
             der_avg_global,
             coarsest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(der_avg_local);
@@ -8198,7 +8198,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
             u_avg_local,
             u_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_avg_local);
@@ -8394,7 +8394,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
             u_avg_local,
             u_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_avg_local);
@@ -8601,7 +8601,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
             u_avg_local,
             u_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_avg_local);
@@ -8809,7 +8809,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
             u_inv_avg_local,
             u_inv_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_inv_avg_local);
@@ -9005,7 +9005,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
             u_inv_avg_local,
             u_inv_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_inv_avg_local);
@@ -9212,7 +9212,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
             u_inv_avg_local,
             u_inv_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_inv_avg_local);
@@ -9478,7 +9478,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
             avg_local,
             avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -9708,7 +9708,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
             avg_local,
             avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -9953,7 +9953,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
             avg_local,
             avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -10374,7 +10374,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
             avg_local,
             avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -10710,7 +10710,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
             avg_local,
             avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -11087,7 +11087,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
             avg_local,
             avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -11426,7 +11426,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
             der_avg_local,
             der_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(der_avg_local);
@@ -11749,7 +11749,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
             der_avg_local,
             der_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(der_avg_local);
@@ -12121,7 +12121,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
             der_avg_local,
             der_avg_global,
             finest_level_dim_0,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(der_avg_local);
@@ -12360,7 +12360,7 @@ std::vector<Real> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneou
             u_avg_local,
             u_avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_avg_local);
@@ -12567,7 +12567,7 @@ std::vector<Real> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneou
             u_avg_local,
             u_avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_avg_local);
@@ -12807,7 +12807,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDire
             u_inv_avg_local,
             u_inv_avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_inv_avg_local);
@@ -13014,7 +13014,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDire
             u_inv_avg_local,
             u_inv_avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_inv_avg_local);
@@ -13317,7 +13317,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
             avg_local,
             avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -13562,7 +13562,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
             avg_local,
             avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -14023,7 +14023,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
             avg_local,
             avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -14400,7 +14400,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
             avg_local,
             avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -14795,7 +14795,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
             der_avg_local,
             der_avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(der_avg_local);
@@ -15167,7 +15167,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousYDire
             der_avg_local,
             der_avg_global,
             finest_level_dim_1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(der_avg_local);
@@ -15425,7 +15425,7 @@ std::vector<Real> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneou
             u_avg_local,
             u_avg_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_avg_local);
@@ -15684,7 +15684,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousZDire
             u_inv_avg_local,
             u_inv_avg_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(u_inv_avg_local);
@@ -16010,7 +16010,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
             avg_local,
             avg_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -16502,7 +16502,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
             avg_local,
             avg_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(avg_local);
@@ -16946,7 +16946,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousZDire
             der_avg_local,
             der_avg_global,
             finest_level_dim_2,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_SUM);
         
         std::free(der_avg_local);

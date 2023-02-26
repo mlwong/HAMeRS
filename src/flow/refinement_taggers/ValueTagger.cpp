@@ -1405,7 +1405,7 @@ ValueTagger::getValueStatistics(
                     &rho_max_local,
                     &d_value_tagger_max_density,
                     1,
-                    MPI_DOUBLE,
+                    HAMERS_MPI_REAL,
                     MPI_MAX);
             }
             else if (variable_key == "TOTAL_ENERGY")
@@ -1421,7 +1421,7 @@ ValueTagger::getValueStatistics(
                     &E_max_local,
                     &d_value_tagger_max_total_energy,
                     1,
-                    MPI_DOUBLE,
+                    HAMERS_MPI_REAL,
                     MPI_MAX);
             }
             else if (variable_key == "PRESSURE")
@@ -1437,7 +1437,7 @@ ValueTagger::getValueStatistics(
                     &p_max_local,
                     &d_value_tagger_max_pressure,
                     1,
-                    MPI_DOUBLE,
+                    HAMERS_MPI_REAL,
                     MPI_MAX);
             }
             else if (variable_key == "DILATATION")
@@ -1453,7 +1453,7 @@ ValueTagger::getValueStatistics(
                     &theta_max_local,
                     &d_value_tagger_max_dilatation,
                     1,
-                    MPI_DOUBLE,
+                    HAMERS_MPI_REAL,
                     MPI_MAX);
             }
             else if (variable_key == "ENSTROPHY")
@@ -1469,7 +1469,7 @@ ValueTagger::getValueStatistics(
                     &Omega_max_local,
                     &d_value_tagger_max_enstrophy,
                     1,
-                    MPI_DOUBLE,
+                    HAMERS_MPI_REAL,
                     MPI_MAX);
             }
             else if (variable_key == "MASS_FRACTION" || variable_key == "MASS_FRACTIONS")
@@ -1487,7 +1487,7 @@ ValueTagger::getValueStatistics(
                         &Y_max_local,
                         &d_value_tagger_max_mass_fractions[si],
                         1,
-                        MPI_DOUBLE,
+                        HAMERS_MPI_REAL,
                         MPI_MAX);
                 }
             }
