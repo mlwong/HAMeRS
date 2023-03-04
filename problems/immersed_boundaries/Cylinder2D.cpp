@@ -3,13 +3,13 @@
 void
 ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
     const hier::Patch& patch,
+    const double data_time,
+    const bool initial_time,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
     const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
     const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_wall_distance,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_surface_normal,
-    const double data_time,
-    const bool initial_time)
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_surface_normal)
 {
     NULL_USE(data_time);
     
@@ -24,14 +24,9 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
     const double* const dx = patch_geom->getDx();
     const double* const patch_xlo = patch_geom->getXLower();
     
-    // Get the dimensions of box that covers the interior of Patch.
-    hier::Box interior_box = patch.getBox();
-    const hier::IntVector patch_dims = interior_box.numberCells();
-    
     const hier::IntVector num_ghosts = data_mask->getGhostCellWidth();
     const hier::IntVector ghostcell_dims = data_mask->getGhostBox().numberCells();
     
-TBOX_ASSERT(false);
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(num_ghosts == data_wall_distance->getGhostCellWidth());
     TBOX_ASSERT(num_ghosts == data_surface_normal->getGhostCellWidth());
@@ -45,10 +40,6 @@ TBOX_ASSERT(false);
     double* norm_0 = data_surface_normal->getPointer(0);
     double* norm_1 = data_surface_normal->getPointer(1);
     
-    /************************************************
-     * Set the immersed boundary variables from here.
-     ************************************************/
-    
     /*
      * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
      */
@@ -61,6 +52,10 @@ TBOX_ASSERT(false);
     const int num_ghosts_0 = num_ghosts[0];
     const int num_ghosts_1 = num_ghosts[1];
     const int ghostcell_dim_0 = ghostcell_dims[0];
+    
+    /************************************************
+     * Set the immersed boundary variables from here.
+     ************************************************/
     
     /*
      * Set the parameters of the cylinder here.
@@ -77,7 +72,7 @@ TBOX_ASSERT(false);
         HAMERS_PRAGMA_SIMD
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
-            // Compute the linear indices.
+            // Compute the linear index.
             const int idx = (i + num_ghosts_0) +
                 (j + num_ghosts_1)*ghostcell_dim_0;
             
