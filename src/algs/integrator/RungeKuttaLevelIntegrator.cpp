@@ -1682,13 +1682,13 @@ RungeKuttaLevelIntegrator::advanceLevel(
         
         HAMERS_SHARED_PTR<xfer::RefineSchedule> fill_schedule_intermediate;
         
+        fill_schedule_intermediate = 
+            d_bdry_fill_intermediate[sn]->createSchedule(
+                level,
+                d_patch_strategy);
+        
         if (sn > 0)
         {
-            fill_schedule_intermediate = 
-                d_bdry_fill_intermediate[sn]->createSchedule(
-                    level,
-                    d_patch_strategy);
-            
             if (regrid_advance)
             {
                 t_error_bdry_fill_comm->start();
@@ -1712,14 +1712,6 @@ RungeKuttaLevelIntegrator::advanceLevel(
         
         if (d_patch_strategy->useGhostCellImmersedBoundaryMethod())
         {
-            if (sn == 0)
-            {
-                fill_schedule_intermediate = 
-                    d_bdry_fill_intermediate[sn]->createSchedule(
-                        level,
-                        d_patch_strategy);
-            }
-            
             for (hier::PatchLevel::iterator ip(level->begin());
                 ip != level->end();
                 ip++)

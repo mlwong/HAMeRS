@@ -256,16 +256,8 @@ FlowModelImmersedBoundaryMethod::setConservativeVariablesCellDataImmersedBoundar
         TBOX_ASSERT(data_surface_normal->getBox().isSpatiallyEqual(interior_box));
 #endif
         
-        hier::IntVector num_ghosts_min(d_dim);
-        
-        num_ghosts_min = num_ghosts_cons_var;
-        num_ghosts_min = hier::IntVector::min(num_ghosts_IB, num_ghosts_min);
-        
-        hier::Box ghost_box = interior_box;
-        ghost_box.grow(num_ghosts_min);
-        
-        domain_lo = -num_ghosts_min;
-        domain_dims = ghost_box.numberCells();
+        domain_lo = hier::IntVector::getZero(d_dim);;
+        domain_dims = interior_box.numberCells();
         
         offset_cons_var = num_ghosts_cons_var;
         offset_IB = num_ghosts_IB;
