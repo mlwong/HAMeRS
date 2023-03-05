@@ -25,7 +25,8 @@ class FlowModelImmersedBoundaryMethod
             const int& num_species,
             const int& num_eqn,
             const HAMERS_SHARED_PTR<ImmersedBoundaries>& immersed_boundaries,
-            const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db);
+            const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db,
+            const HAMERS_SHARED_PTR<EquationOfStateMixingRules>& equation_of_state_mixing_rules);
         
         virtual ~FlowModelImmersedBoundaryMethod() {}
         
@@ -77,6 +78,33 @@ class FlowModelImmersedBoundaryMethod
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
+         * Set the immersed boundary method ghost cells for the cell data of conservative variables.
+         */
+        void setConservativeVariablesCellDataImmersedBoundaryGhosts(
+            const hier::Box& domain,
+            const double data_time,
+            const bool initial_time,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context_IB);
+        
+        /*
+         * Set the immersed boundary method ghost cells for the cell data of conservative variables.
+         */
+        virtual void setConservativeVariablesCellDataImmersedBoundaryGhosts(
+            const hier::Patch& patch,
+            const double data_time,
+            const bool initial_time,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
+            const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal,
+            const hier::IntVector& offset_cons_var,
+            const hier::IntVector& offset_IB,
+            const hier::IntVector& ghostcell_dims_cons_var,
+            const hier::IntVector& ghostcell_dims_IB,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) = 0;
+        
+        /*
          * Get the cell data of the immersed boundary mask in the registered patch.
          */
         HAMERS_SHARED_PTR<pdat::CellData<int> >
@@ -113,6 +141,11 @@ class FlowModelImmersedBoundaryMethod
          * Pointer to immersed boundaries.
          */
         HAMERS_SHARED_PTR<ImmersedBoundaries> d_immersed_boundaries;
+        
+        /*
+         * HAMERS_SHARED_PTR to EquationOfStateMixingRules.
+         */
+        const HAMERS_SHARED_PTR<EquationOfStateMixingRules> d_equation_of_state_mixing_rules;
         
         /*
          * HAMERS_WEAK_PTR to FlowModel.

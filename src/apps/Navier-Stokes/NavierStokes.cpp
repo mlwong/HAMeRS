@@ -642,6 +642,12 @@ NavierStokes::initializeDataOnPatch(
             data_time,
             initial_time,
             getDataContext());
+        
+        flow_model_immersed_boundary_method->setConservativeVariablesCellDataImmersedBoundaryGhosts(
+            empty_box,
+            data_time,
+            initial_time,
+            getDataContext());
     }
     
     d_flow_model->unregisterPatch();
@@ -1385,7 +1391,13 @@ NavierStokes::setImmersedBoundaryGhostCells(
             getDataContext());
     }
     
-    // Compute the immersed boundary ghost cells here...
+    // Compute the immersed boundary ghost cells here.
+    
+    flow_model_immersed_boundary_method->setConservativeVariablesCellDataImmersedBoundaryGhosts(
+        empty_box,
+        time,
+        false,
+        getDataContext());
     
     d_flow_model->unregisterPatch();
 }
