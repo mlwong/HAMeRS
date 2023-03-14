@@ -9,7 +9,8 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
     const hier::IntVector& domain_dims,
     const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
     const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_wall_distance,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_surface_normal)
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_surface_normal,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_image_point)      // AFK 03/14/23
 {
     NULL_USE(data_time);
     
@@ -39,6 +40,9 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
     double* dist   = data_wall_distance->getPointer(0);
     double* norm_0 = data_surface_normal->getPointer(0);
     double* norm_1 = data_surface_normal->getPointer(1);
+
+    double* ip_location_index = data_image_point->getPointer(0);   // AFK 03/14/23
+    double* ip_ratio          = data_image_point->getPointer(1);   // AFK 03/14/23
     
     /*
      * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
@@ -78,41 +82,87 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
             
             // Compute the coordinates.
             double x[2];
-            x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
-            x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
+            x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0]; // local x coordinates 
+            x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1]; // local y coordinates
             
-            const double radius = sqrt(pow(x[0] - x_c, 2) + pow(x[1] - y_c, 2));
-            const double theta  = atan2(x[1] - y_c, x[0] - x_c);
-            if (radius < radius_c)
+            const double radius = sqrt(pow(x[0] - x_c, 2) + pow(x[1] - y_c, 2)); // distance from the cylinder center
+            const double theta  = atan2(x[1] - y_c, x[0] - x_c);                 // angle between x axis and a line passing through center and current cell
+
+            if (radius < radius_c)      // condition that should be satisfied to be in cylinder.
             {
-                double x_p = double(0); // x coordiantes on the cylinder where y = x[1].
-                double y_p = double(0); // y coordiantes on the cylinder where x = x[0].
+                double x_p = double(0); // x coordinates on the cylinder where y = x[1].
+                double y_p = double(0); // y coordinates on the cylinder where x = x[0].
                 
+                double x_ip = double(0); // AFK 03/14/23 x coordinates of the image points 
+                double y_ip = double(0); // AFK 03/14/23 y coordinates of the image points
+                
+                double d_ip = sqrt(double(2)) + double(0.000001);  // distance from cylinder boundary to the image point
+
                 if (x[0] > x_c)
                 {
-                    x_p = x_c + sqrt(pow(radius_c, 2) - pow(radius*sin(theta), 2));
+                    //x_p = x_c + sqrt(pow(radius_c, 2) - pow(radius*sin(theta), 2));
+                    x_p = x_c + sqrt(pow(radius_c, 2) - pow(radius_c*sin(theta), 2));  // AFK 03/14/23 
                 }
                 else
                 {
-                    x_p = x_c - sqrt(pow(radius_c, 2) - pow(radius*sin(theta), 2));
+                    //x_p = x_c - sqrt(pow(radius_c, 2) - pow(radius*sin(theta), 2));
+                    x_p = x_c - sqrt(pow(radius_c, 2) - pow(radius*sin(theta), 2));   // AFK 03/14/23 
                 }
                 
                 if (x[1] > y_c)
                 {
-                    y_p = y_c + sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));
+                    //y_p = y_c + sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));
+                    y_p = y_c + sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));   // AFK 03/14/23 
                 }
                 else
                 {
-                    y_p = y_c - sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));
+                    //y_p = y_c - sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));
+                    y_p = y_c - sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2)); // AFK 03/14/23  
                 }
                 
                 if ((fabs(x_p - x[0]) < (double(d_num_immersed_boundary_ghosts[0]))*dx[0]) ||
                     (fabs(y_p - x[1]) < (double(d_num_immersed_boundary_ghosts[1]))*dx[1]))
                 {
                     mask[idx]   = int(IB_MASK::IB_GHOST);
-                    dist[idx]   = radius;
+                    
+                    //dist[idx]   = radius;
+                    
+                    dist[idx]   = radius_c - radius; // AFK 03/14/23 instead of distance from center storing distance from the boundary
                     norm_0[idx] = (x[0] - x_c)/radius;
                     norm_1[idx] = (x[1] - y_c)/radius;
+                    
+                    // AFK 03/14/23 Finding the image point local coordinates
+
+                    if (x[0] > x_c)
+                    {
+                        x_ip    = x_c + sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*sin(theta), 2));
+
+                    }
+                    else
+                    { 
+                        x_ip    = x_c - sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*sin(theta), 2));
+
+                    }
+
+                    if (x[1] > y_c)
+                    {
+                        y_ip    = y_c + sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*cos(theta), 2));
+
+                    }
+                    else
+                    {
+                        y_ip    = y_c - sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*cos(theta), 2));
+                    
+                    }
+
+                    // AFK 03/14/23  Finding the image point indexes and bilinear interpolation coefficients
+
+                    ip_location_index[0]    = floor((x_ip - half * dx[0]) / dx[0]);      // x axis index of the bottom-left cell in the interpolation stencil
+                    ip_location_index[0]    = floor((y_ip - half * dx[1]) / dx[1]);      // y axis index of the bottom-left cell in the interpolation stencil
+
+                    ip_ratio[0]             = (x_ip - x[int(ip_location_index[0])]) / dx[0];      // x coefficient in the bilinear interpolation 
+                    ip_ratio[1]             = (y_ip - y[int(ip_location_index[1])]) / dx[1];      // y coefficient in the bilinear interpolation
+
                 }
                 else
                 {

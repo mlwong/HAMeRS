@@ -76,7 +76,8 @@ class ImmersedBoundaries
             const hier::Box& domain,
             const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
-            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal)
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_image_points)   // AFK 03/14/23
         {
             NULL_USE(data_time);
             
@@ -131,7 +132,8 @@ class ImmersedBoundaries
                 domain_dims,
                 data_mask,
                 data_wall_distance,
-                data_surface_normal);
+                data_surface_normal,
+                data_image_points);
         }
         
         void setImmersedBoundaryVariablesOnPatch(
@@ -142,7 +144,8 @@ class ImmersedBoundaries
             const hier::IntVector& domain_dims,
             const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
-            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal);
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_image_points);   // AFK 03/14/23
         
     private:
         /*

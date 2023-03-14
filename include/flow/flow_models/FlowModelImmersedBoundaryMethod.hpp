@@ -97,6 +97,7 @@ class FlowModelImmersedBoundaryMethod
             const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_image_points, // AFK 03/14/23
             const hier::IntVector& offset_cons_var,
             const hier::IntVector& offset_IB,
             const hier::IntVector& ghostcell_dims_cons_var,
