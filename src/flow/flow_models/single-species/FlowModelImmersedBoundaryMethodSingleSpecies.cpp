@@ -160,6 +160,8 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
     const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
     const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
     const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_ip_index,          // AFK
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_ip_corr,           // AFK
     const hier::IntVector& offset_cons_var,
     const hier::IntVector& offset_IB,
     const hier::IntVector& ghostcell_dims_cons_var,
@@ -201,7 +203,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
     Real* E   = data_total_energy->getPointer(0);
     
     int* mask = data_mask->getPointer(0);
-    // Real* dist = data_wall_distance->getPointer(0);
+    Real* dist = data_wall_distance->getPointer(0);                     // AFK 03/15/23 distance variable uncommented 
     
     const Real& rho_body = d_rho_body;
     const Real& E_body   = d_E_body;
@@ -265,9 +267,22 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
         Real* rho_u = data_momentum->getPointer(0);
         Real* rho_v = data_momentum->getPointer(1);
         
-        // Real* norm_0 = data_surface_normal->getPointer(0);
-        // Real* norm_1 = data_surface_normal->getPointer(1);
+        Real* norm_0 = data_surface_normal->getPointer(0);           // AFK 03/15/23 norm_0 variable uncommented
+        Real* norm_1 = data_surface_normal->getPointer(1);           // AFK 03/15/23 norm_1 variable uncommented
         
+        Real* ip_location_index_0 = data_ip_index->getPointer(0);    // AFK 03/15/23 
+        Real* ip_location_index_1 = data_ip_index->getPointer(1);    // AFK
+        
+        Real* ip_ratio_0          = data_ip_corr->getPointer(0);     // AFK 03/15/23 
+        Real* ip_ratio_1          = data_ip_corr->getPointer(1);     //AFK
+
+        double inter_first[4];           // AFK 03/15/23 first step of interpolation
+        double inter_second[4];          // AFK 03/15/23 second step of interpolation
+        
+        double image_point_values[4];    // AFK 03/15/23 values at the image point
+
+        double one     = double(1);      // AFK 03/15/23 one
+
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
             HAMERS_PRAGMA_SIMD
@@ -283,6 +298,16 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                 if (mask[idx_IB] == int(IB_MASK::IB_GHOST))
                 {
                     // NEED TO BE CHANGED!!!
+                    
+                    // const int idx_cons_var_ip = (int(ip_location_index[0]) + offset_0_cons_var) * (int(ip_location_index[1]) + offset_1_cons_var) * ghostcell_dim_0_cons_var;
+
+                    // // Compute the density at the image point
+                    // inter_first[0]     = (one - ip_ratio[0]) * rho[idx_cons_var_ip] + ip_ratio[0] * rho[?]
+
+
+                         
+
+
                     rho[idx_cons_var]   = rho_body;
                     rho_u[idx_cons_var] = rho_u_body;
                     rho_v[idx_cons_var] = rho_v_body;

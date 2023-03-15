@@ -10,7 +10,8 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
     const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
     const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_wall_distance,
     const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_surface_normal,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_image_point)      // AFK 03/14/23
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_ip_index,      // AFK 03/14/23
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_ip_corr)      // AFK 03/14/2
 {
     NULL_USE(data_time);
     
@@ -41,8 +42,10 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
     double* norm_0 = data_surface_normal->getPointer(0);
     double* norm_1 = data_surface_normal->getPointer(1);
 
-    double* ip_location_index = data_image_point->getPointer(0);   // AFK 03/14/23
-    double* ip_ratio          = data_image_point->getPointer(1);   // AFK 03/14/23
+    double* ip_location_index_0 = data_ip_index->getPointer(0);   // AFK 03/14/23
+    double* ip_location_index_1 = data_ip_index->getPointer(1);
+    double* ip_ratio_0          = data_ip_corr->getPointer(0);   // AFK 03/14/23
+    double* ip_ratio_1          = data_ip_corr->getPointer(1);
     
     /*
      * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
@@ -95,8 +98,11 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                 
                 double x_ip = double(0); // AFK 03/14/23 x coordinates of the image points 
                 double y_ip = double(0); // AFK 03/14/23 y coordinates of the image points
+ 
+                double x_ip_BL = double(0); // AFK 03/14/23 x coordinates of the BottomLeft Corner of image points
+                double y_ip_BL = double(0); // AFK 03/14/23 y coordinates of the BottomLeft Corner of image points
                 
-                double d_ip = sqrt(double(2)) + double(0.000001);  // distance from cylinder boundary to the image point
+                double d_ip = sqrt(double(2)) + double(0.000001);  // distance from cylinder boundary to the image point sqrt(2 + epsilon)
 
                 if (x[0] > x_c)
                 {
@@ -106,18 +112,18 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                 else
                 {
                     //x_p = x_c - sqrt(pow(radius_c, 2) - pow(radius*sin(theta), 2));
-                    x_p = x_c - sqrt(pow(radius_c, 2) - pow(radius*sin(theta), 2));   // AFK 03/14/23 
+                    x_p = x_c - sqrt(pow(radius_c, 2) - pow(radius_c*sin(theta), 2));   // AFK 03/15/23 
                 }
                 
                 if (x[1] > y_c)
                 {
                     //y_p = y_c + sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));
-                    y_p = y_c + sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));   // AFK 03/14/23 
+                    y_p = y_c + sqrt(pow(radius_c, 2) - pow(radius_c*cos(theta), 2));   // AFK 03/15/23 
                 }
                 else
                 {
                     //y_p = y_c - sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));
-                    y_p = y_c - sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2)); // AFK 03/14/23  
+                    y_p = y_c - sqrt(pow(radius_c, 2) - pow(radius_c*cos(theta), 2)); // AFK 03/15/23  
                 }
                 
                 if ((fabs(x_p - x[0]) < (double(d_num_immersed_boundary_ghosts[0]))*dx[0]) ||
@@ -127,8 +133,8 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                     
                     //dist[idx]   = radius;
                     
-                    dist[idx]   = radius_c - radius; // AFK 03/14/23 instead of distance from center storing distance from the boundary
-                    norm_0[idx] = (x[0] - x_c)/radius;
+                    dist[idx]   = radius_c - radius;      // AFK 03/14/23 instead of distance from center storing distance from the boundary
+                    norm_0[idx] = (x[0] - x_c)/radius;    
                     norm_1[idx] = (x[1] - y_c)/radius;
                     
                     // AFK 03/14/23 Finding the image point local coordinates
@@ -157,11 +163,14 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
 
                     // AFK 03/14/23  Finding the image point indexes and bilinear interpolation coefficients
 
-                    ip_location_index[0]    = floor((x_ip - half * dx[0]) / dx[0]);      // x axis index of the bottom-left cell in the interpolation stencil
-                    ip_location_index[0]    = floor((y_ip - half * dx[1]) / dx[1]);      // y axis index of the bottom-left cell in the interpolation stencil
-
-                    ip_ratio[0]             = (x_ip - x[int(ip_location_index[0])]) / dx[0];      // x coefficient in the bilinear interpolation 
-                    ip_ratio[1]             = (y_ip - y[int(ip_location_index[1])]) / dx[1];      // y coefficient in the bilinear interpolation
+                    ip_location_index_0[idx]    = floor((x_ip - half * dx[0]) / dx[0]);      // x axis index of the bottom-left cell in the interpolation stencil
+                    ip_location_index_1[idx]    = floor((y_ip - half * dx[1]) / dx[1]);      // y axis index of the bottom-left cell in the interpolation stencil
+                    
+                    x_ip_BL = patch_xlo[0] + (ip_location_index_0[idx] + double(1)/double(2))*dx[0]; // AFK
+                    y_ip_BL = patch_xlo[1] + (ip_location_index_1[idx] + double(1)/double(2))*dx[1]; // AFK
+  
+                    ip_ratio_0[idx]             = (x_ip - x_ip_BL) / dx[0];      // AFK x coefficient in the bilinear interpolation 
+                    ip_ratio_1[idx]             = (y_ip - y_ip_BL) / dx[1];      // AFK y coefficient in the bilinear interpolation
 
                 }
                 else
