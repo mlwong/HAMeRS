@@ -142,32 +142,28 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                     if (x[0] > x_c)
                     {
                         x_ip    = x_c + sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*sin(theta), 2));
-
                     }
                     else
                     { 
                         x_ip    = x_c - sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*sin(theta), 2));
-
                     }
 
                     if (x[1] > y_c)
                     {
                         y_ip    = y_c + sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*cos(theta), 2));
-
                     }
                     else
                     {
-                        y_ip    = y_c - sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*cos(theta), 2));
-                    
+                        y_ip    = y_c - sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*cos(theta), 2));               
                     }
 
                     // AFK 03/14/23  Finding the image point indexes and bilinear interpolation coefficients
 
-                    ip_location_index_0[idx]    = floor((x_ip - half * dx[0]) / dx[0]);      // x axis index of the bottom-left cell in the interpolation stencil
-                    ip_location_index_1[idx]    = floor((y_ip - half * dx[1]) / dx[1]);      // y axis index of the bottom-left cell in the interpolation stencil
+                    ip_location_index_0[idx]    = floor((x_ip - patch_xlo[0] - half * dx[0]) / dx[0]);      // AFK local x index of the bottom-left cell in the interpolation stencil
+                    ip_location_index_1[idx]    = floor((y_ip - patch_xlo[1] - half * dx[1]) / dx[1]);      // AFK local y index of the bottom-left cell in the interpolation stencil
                     
-                    x_ip_BL = patch_xlo[0] + (ip_location_index_0[idx] + double(1)/double(2))*dx[0]; // AFK
-                    y_ip_BL = patch_xlo[1] + (ip_location_index_1[idx] + double(1)/double(2))*dx[1]; // AFK
+                    x_ip_BL = patch_xlo[0] + (ip_location_index_0[idx] + double(1)/double(2))*dx[0]; // AFK global x coordinate of ip
+                    y_ip_BL = patch_xlo[1] + (ip_location_index_1[idx] + double(1)/double(2))*dx[1]; // AFK global y coordinate of ip
   
                     ip_ratio_0[idx]             = (x_ip - x_ip_BL) / dx[0];      // AFK x coefficient in the bilinear interpolation 
                     ip_ratio_1[idx]             = (y_ip - y_ip_BL) / dx[1];      // AFK y coefficient in the bilinear interpolation

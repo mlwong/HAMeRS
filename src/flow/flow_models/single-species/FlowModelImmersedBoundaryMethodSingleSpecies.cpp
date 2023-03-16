@@ -274,14 +274,13 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
         Real* ip_location_index_1 = data_ip_index->getPointer(1);    // AFK
         
         Real* ip_ratio_0          = data_ip_corr->getPointer(0);     // AFK 03/15/23 
-        Real* ip_ratio_1          = data_ip_corr->getPointer(1);     //AFK
+        Real* ip_ratio_1          = data_ip_corr->getPointer(1);     //AFK        
 
-        double inter_first[4];           // AFK 03/15/23 first step of interpolation
-        double inter_second[4];          // AFK 03/15/23 second step of interpolation
+        double one                = double(1);                       // AFK one
         
-        double image_point_values[4];    // AFK 03/15/23 values at the image point
-
-        double one     = double(1);      // AFK 03/15/23 one
+        double rho_f1             = double(0);                       // AFK variables needed in interpolating density
+        double rho_f2             = double(0);
+        double rho_ip             = double(0);
 
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
@@ -294,7 +293,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                 
                 const int idx_IB = (i + offset_0_IB) +
                     (j + offset_1_IB)*ghostcell_dim_0_IB;
-                
+
                 if (mask[idx_IB] == int(IB_MASK::IB_GHOST))
                 {
                     // NEED TO BE CHANGED!!!
@@ -304,11 +303,25 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                     // // Compute the density at the image point
                     // inter_first[0]     = (one - ip_ratio[0]) * rho[idx_cons_var_ip] + ip_ratio[0] * rho[?]
 
+                    const int idx_IP_BL  = idx_IB;                              // AFK declaration of the indexes of the cells in interpolation
+                    const int idx_IP_BR  = idx_IB + 1;
+                    const int idx_IP_TL  = idx_IB + ghostcell_dim_0_IB;
+                    const int idx_IP_TR  = idx_IB + ghostcell_dim_0_IB + 1;
 
-                         
+                    rho_f1     = (one - ip_ratio_0[idx_IB]) * rho[idx_IP_BL] + ip_ratio_0[idx_IB] * rho[idx_IP_BR];
+                    rho_f2     = (one - ip_ratio_0[idx_IB]) * rho[idx_IP_TL] + ip_ratio_0[idx_IB] * rho[idx_IP_TR];
+                    rho_ip     = (one - ip_ratio_1[idx_IB]) * rho_f1         + ip_ratio_1[idx_IB] * rho_f2;
 
+                    rho[idx_cons_var]  = rho_ip;
+                    /*
+                    
+                    u_BL[idx_cons_var] = V[0, ip_index_0[idx_cons_var], ip_index_1[idx_cons_var]]*data_ip_corr_0[idx_cons_var] + V[0, ip_index_0[idx_cons_var] + 1, ip_index_1[idx_cons_var]]*(1.0 - data_ip_corr_0[idx_cons_var])
+                    u_BR[idx_cons_var] = 
+                    u_TL[idx_cons_var] = 
+                    u_TR[idx_cons_var] = 
+                    */   
 
-                    rho[idx_cons_var]   = rho_body;
+                    //rho[idx_cons_var]   = rho_body;
                     rho_u[idx_cons_var] = rho_u_body;
                     rho_v[idx_cons_var] = rho_v_body;
                     E[idx_cons_var]     = E_body;
