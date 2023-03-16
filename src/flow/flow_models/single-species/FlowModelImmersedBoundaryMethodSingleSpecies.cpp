@@ -278,10 +278,36 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
 
         double one                = double(1);                       // AFK one
         
-        double rho_f1             = double(0);                       // AFK variables needed in interpolating density
-        double rho_f2             = double(0);
-        double rho_ip             = double(0);
+        double d_ip = sqrt(double(2)) + double(0.000001);            // AFK distance from cylinder boundary to the image point sqrt(2 + epsilon)
 
+        double rho_f1           = double(0);                       // AFK variables needed in interpolating density
+        double rho_f2           = double(0);
+        double rho_ip           = double(0);
+        
+        double u_f1             = double(0);                       // AFK variables needed in interpolating u velocity
+        double u_f2             = double(0);
+        double u_ip             = double(0);
+
+        double v_f1             = double(0);                       // AFK variables needed in interpolating v velocity
+        double v_f2             = double(0);
+        double v_ip             = double(0);
+
+        double u_IP_BL          = double(0);                       // AFK values of velocity in x axis for cells in the interpolation stencil
+        double u_IP_BR          = double(0);
+        double u_IP_TL          = double(0);
+        double u_IP_TR          = double(0);
+
+        double u_body           = double(0);                       // AFK u velocity of the body
+        double u_gc             = double(0);                       // AFK u velocity of the ghost cell
+
+        double v_IP_BL          = double(0);                       // AFK values of velocity in y axis for cells in the interpolation stencil
+        double v_IP_BR          = double(0);
+        double v_IP_TL          = double(0);
+        double v_IP_TR          = double(0);
+
+        double v_body           = double(0);                       // AFK v velocity of the body
+        double v_gc             = double(0);                       // AFK u velocity of the ghost cell
+        
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
             HAMERS_PRAGMA_SIMD
@@ -298,32 +324,45 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                 {
                     // NEED TO BE CHANGED!!!
                     
-                    // const int idx_cons_var_ip = (int(ip_location_index[0]) + offset_0_cons_var) * (int(ip_location_index[1]) + offset_1_cons_var) * ghostcell_dim_0_cons_var;
-
-                    // // Compute the density at the image point
-                    // inter_first[0]     = (one - ip_ratio[0]) * rho[idx_cons_var_ip] + ip_ratio[0] * rho[?]
-
                     const int idx_IP_BL  = idx_IB;                              // AFK declaration of the indexes of the cells in interpolation
                     const int idx_IP_BR  = idx_IB + 1;
                     const int idx_IP_TL  = idx_IB + ghostcell_dim_0_IB;
                     const int idx_IP_TR  = idx_IB + ghostcell_dim_0_IB + 1;
-
+                    
+                    // AFK bilinear interpolation to find image point density value
                     rho_f1     = (one - ip_ratio_0[idx_IB]) * rho[idx_IP_BL] + ip_ratio_0[idx_IB] * rho[idx_IP_BR];
                     rho_f2     = (one - ip_ratio_0[idx_IB]) * rho[idx_IP_TL] + ip_ratio_0[idx_IB] * rho[idx_IP_TR];
                     rho_ip     = (one - ip_ratio_1[idx_IB]) * rho_f1         + ip_ratio_1[idx_IB] * rho_f2;
-
-                    rho[idx_cons_var]  = rho_ip;
-                    /*
                     
-                    u_BL[idx_cons_var] = V[0, ip_index_0[idx_cons_var], ip_index_1[idx_cons_var]]*data_ip_corr_0[idx_cons_var] + V[0, ip_index_0[idx_cons_var] + 1, ip_index_1[idx_cons_var]]*(1.0 - data_ip_corr_0[idx_cons_var])
-                    u_BR[idx_cons_var] = 
-                    u_TL[idx_cons_var] = 
-                    u_TR[idx_cons_var] = 
-                    */   
+                    u_IP_BL    = rho_u[idx_IP_BL] / rho[idx_IP_BL];
+                    u_IP_BR    = rho_u[idx_IP_BR] / rho[idx_IP_BR];
+                    u_IP_TL    = rho_u[idx_IP_TL] / rho[idx_IP_TL];
+                    u_IP_TR    = rho_u[idx_IP_TR] / rho[idx_IP_TR];
+                    u_body     = rho_u_body       / rho[idx_IB];
 
+                    u_f1       = (one - ip_ratio_0[idx_IB]) * u_IP_BL + ip_ratio_0[idx_IB] * u_IP_BR; 
+                    u_f2       = (one - ip_ratio_0[idx_IB]) * u_IP_TL + ip_ratio_0[idx_IB] * u_IP_TR;
+                    u_ip       = (one - ip_ratio_1[idx_IB]) * u_f1    + ip_ratio_1[idx_IB] * u_f2;
+                    u_gc       = u_ip - ((d_ip + dist[idx_IB])/d_ip) * (u_ip - u_body);
+
+                    v_IP_BL    = rho_v[idx_IP_BL] / rho[idx_IP_BL];
+                    v_IP_BR    = rho_v[idx_IP_BR] / rho[idx_IP_BR];
+                    v_IP_TL    = rho_v[idx_IP_TL] / rho[idx_IP_TL];
+                    v_IP_TR    = rho_v[idx_IP_TR] / rho[idx_IP_TR];
+                    v_body     = rho_v_body       / rho[idx_IB];
+
+                    v_f1       = (one - ip_ratio_0[idx_IB]) * v_IP_BL + ip_ratio_0[idx_IB] * v_IP_BR; 
+                    v_f2       = (one - ip_ratio_0[idx_IB]) * v_IP_TL + ip_ratio_0[idx_IB] * v_IP_TR;
+                    v_ip       = (one - ip_ratio_1[idx_IB]) * v_f1    + ip_ratio_1[idx_IB] * v_f2;
+                    v_gc       = v_ip - ((d_ip + dist[idx_IB])/d_ip) * (v_ip - v_body);
+
+                    rho[idx_cons_var]   = rho_ip;
+                    rho_u[idx_cons_var] = rho[idx_cons_var] * u_gc;
+                    rho_v[idx_cons_var] = rho[idx_cons_var] * v_gc;
+                    
                     //rho[idx_cons_var]   = rho_body;
-                    rho_u[idx_cons_var] = rho_u_body;
-                    rho_v[idx_cons_var] = rho_v_body;
+                    //rho_u[idx_cons_var] = rho_u_body;
+                    //rho_v[idx_cons_var] = rho_v_body;
                     E[idx_cons_var]     = E_body;
                 }
                 else if (mask[idx_IB] == int(IB_MASK::BODY))
