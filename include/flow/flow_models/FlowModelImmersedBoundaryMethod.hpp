@@ -39,6 +39,15 @@ class FlowModelImmersedBoundaryMethod
         }
         
         /*
+         * Get the additional number of ghost cells needed by the immersed boundary method.
+         */
+        hier::IntVector
+        getImmersedBoundaryMethodAdditionalNumberOfGhostCells() const
+        {
+            return d_num_IBM_ghosts;
+        }
+        
+        /*
          * Get the pointer to the immersed boundaries.
          */
         HAMERS_SHARED_PTR<ImmersedBoundaries> getImmersedBoundaries() const
@@ -126,6 +135,11 @@ class FlowModelImmersedBoundaryMethod
          * HAMERS_SHARED_PTR to the grid geometry.
          */
         const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
+        
+        /*
+         * Number of ghost cells needed by the immersed boundary method.
+         */
+        hier::IntVector d_num_IBM_ghosts;
         
         /*
          * Number of species.

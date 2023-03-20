@@ -286,6 +286,17 @@ Euler::registerModelVariables(
         num_ghosts_intermediate,
         d_convective_flux_reconstructor->getConvectiveFluxNumberOfGhostCells());
     
+    if (d_use_immersed_boundaries)
+    {
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        hier::IntVector num_ghosts_IB = flow_model_immersed_boundary_method->
+            getImmersedBoundaryMethodAdditionalNumberOfGhostCells();
+        
+        num_ghosts_intermediate = num_ghosts_intermediate + num_ghosts_IB;
+    }
+    
     hier::IntVector num_ghosts = num_ghosts_intermediate;
     
     if (d_value_tagger != nullptr)
@@ -558,7 +569,7 @@ Euler::initializeDataOnPatch(
         TBOX_ASSERT(workload_data);
         workload_data->fillAll(1.0);
     }
-
+    
     t_init->stop();
 }
 

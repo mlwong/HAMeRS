@@ -369,6 +369,17 @@ NavierStokes::registerModelVariables(
     
     num_ghosts_intermediate = hier::IntVector::max(num_ghosts_intermediate, num_ghosts_diffusive_flux);
     
+    if (d_use_immersed_boundaries)
+    {
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        hier::IntVector num_ghosts_IB = flow_model_immersed_boundary_method->
+            getImmersedBoundaryMethodAdditionalNumberOfGhostCells();
+        
+        num_ghosts_intermediate = num_ghosts_intermediate + num_ghosts_IB;
+    }
+    
     hier::IntVector num_ghosts = num_ghosts_intermediate;
     
     if (d_value_tagger != nullptr)
