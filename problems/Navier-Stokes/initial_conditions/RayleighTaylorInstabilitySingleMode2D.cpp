@@ -95,8 +95,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         double eta_0  = 0.01*lambda;      // 1% perturbation
         // const double eta_0  = 0.0*lambda;      // no perturbation
         
-        const double W_1 = 0.03328; // molecular weight of heavier gas
-        const double W_2 = 0.03072; // molecular weight of lighter gas
+        const double W_1 = 0.03328; //0.04000; //0.03328; // molecular weight of heavier gas
+        const double W_2 = 0.03072; //0.02400; //0.03072; // molecular weight of lighter gas
         
         const double p_i = 100000.0; // interface pressure
         const double T_0 = 300.0;    // background temperature
@@ -164,7 +164,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         }
         else if (d_project_name == "2D smooth Rayleigh-Taylor instability")
         {
-            const double delta = 0.01*lambda; // characteristic length of interface.
+            const double delta = 0.02*lambda; // characteristic length of interface.
             
             for (int j = 0; j < patch_dims[1]; j++)
             {
@@ -189,7 +189,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     double integral = 0.0;
                     for (int ii = 0; ii < N_int; ii++)
                     {
-                        const double x_p = x[0] + ii*dx_p;
+                        // const double x_p = x[0] + ii*dx_p;  //Bug fixed 3.22.2023 OLD
+                        const double x_p = 0 + ii*dx_p;  //Bug fixed 3.22.2023
                         integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - eta)/delta) + 0.5*(R_1 + R_2))*dx_p;
                     }
                     
@@ -536,7 +537,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     double integral = 0.0;
                     for (int ii = 0; ii < N_int; ii++)
                     {
-                        const double x_p = x[0] + ii*dx_p;
+			// const double x_p = x[0] + ii*dx_p;  //Bug fixed 3.22.2023 OLD
+			const double x_p = 0.0 + ii*dx_p;  //Bug fixed 3.22.2023
                         integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - eta)/delta) + 0.5*(R_1 + R_2))*dx_p;
                     }
                     
