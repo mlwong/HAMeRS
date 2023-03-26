@@ -18,6 +18,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
     
     if ((d_project_name != "2D discontinuous Rayleigh-Taylor instability") &&
         (d_project_name != "2D smooth Rayleigh-Taylor instability") &&
+        (d_project_name != "2D smooth isopycnic Rayleigh-Taylor instability") &&
+        (d_project_name != "2D smooth isopycnic Rayleigh-Taylor instability 3 species") &&
         (d_project_name != "2D smooth multi-mode Rayleigh-Taylor instability")
        ) 
     {
@@ -25,6 +27,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             << ": "
             << "Can only initialize data for 'project_name' = '2D discontinuous Rayleigh-Taylor instability' or "
             << "'2D smooth Rayleigh-Taylor instability' or "
+            << "'2D smooth isopycnic Rayleigh-Taylor instability' or "
+            << "'2D smooth isopycnic Rayleigh-Taylor instability 3 species' or "
             << "'2D smooth multi-mode Rayleigh-Taylor instability'!\n"
             << "'project_name' = '"
             << d_project_name
@@ -97,7 +101,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         
         const double W_1 = 0.03328; //0.04000; //0.03328; // molecular weight of heavier gas
         const double W_2 = 0.03072; //0.02400; //0.03072; // molecular weight of lighter gas
-        
+        const double W_3 = 0.03328;  // molecular weight of lighter gas
         const double p_i = 100000.0; // interface pressure
         const double T_0 = 300.0;    // background temperature
         
@@ -110,6 +114,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         const double R_u = 8.31446261815324; // universal gas constant
         const double R_1 = R_u/W_1;          // gas constant of heavier gas
         const double R_2 = R_u/W_2;          // gas constant of lighter gas
+        const double R_3 = R_u/W_3;          // gas constant of third gas
         
         // const double rho_i = p_i/(R_u*T_0)*(W_1 + W_2)/2.0;
         
@@ -165,6 +170,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         else if (d_project_name == "2D smooth Rayleigh-Taylor instability")
         {
             const double delta = 0.02*lambda; // characteristic length of interface.
+            const double shift = 0.0; // location of interface.
             
             for (int j = 0; j < patch_dims[1]; j++)
             {
@@ -180,22 +186,45 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     
                     const double eta = eta_0*cos(2.0*M_PI/lambda*x[1]);
                     
-                    const double X_2_H = 0.5*(1.0 + erf((x[0] - eta)/delta)); // mass fraction of second species (Y_2)
+                    double X_2_H = 0.5*(1.0 + erf((x[0] - eta - shift)/delta)); // mass fraction of second species (Y_2)
+                    // if (std::abs(x[0] - shift)/delta > 5.0*delta)
+                    // {
+                    //     X_2_H = 0.5*(1.0 + erf((x[0] - shift)/delta));
+                    // }
+
                     const double R_H   = R_1*(1.0 - X_2_H) + X_2_H*R_2;
                     
-                    const int N_int = 10000; // number of numerical quadrature points
-                    const double dx_p = x[0]/(N_int - 1.0);
+                    const int N_int = 100000; // number of numerical quadrature points
+                    const double dx_p = (x[0] - shift)/(N_int - 1.0);
                     
                     double integral = 0.0;
-                    for (int ii = 0; ii < N_int; ii++)
+                    double p_H = 0.0;
+                    double rho_H = 0.0;
+                    if (std::abs(x[0] - shift)/delta > 5.0*delta)
                     {
-                        // const double x_p = x[0] + ii*dx_p;  //Bug fixed 3.22.2023 OLD
-                        const double x_p = 0 + ii*dx_p;  //Bug fixed 3.22.2023
-                        integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - eta)/delta) + 0.5*(R_1 + R_2))*dx_p;
+                        {
+                            for (int ii = 0; ii < N_int; ii++)
+                            {
+                                const double x_p = shift + ii*dx_p;  //Bug fixed 3.22.2023
+                                integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - shift)/(delta)) + 0.5*(R_1 + R_2))*dx_p;
+                            }
+                            p_H = p_i*exp(g/T_0*integral);
+                            rho_H = p_H/(R_H*T_0);
+                        }
+
+                    }
+                    else
+                    {
+                        for (int ii = 0; ii < N_int; ii++)
+                        {
+                            // const double x_p = x[0] + ii*dx_p;  //Bug fixed 3.22.2023 OLD
+                            const double x_p = shift + ii*dx_p;  //Bug fixed 3.22.2023
+                            integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - shift)/(delta)) + 0.5*(R_1 + R_2))*dx_p;
+                        }
+                        p_H = p_i*exp(g/T_0*integral);
+                        rho_H = p_H/(R_H*T_0);
                     }
                     
-                    const double p_H = p_i*exp(g/T_0*integral);
-                    const double rho_H = p_H/(R_H*T_0);
                     
                     // Scott's implementation
                     // const double dX_2_H_dx = 1.0/(delta*sqrt(M_PI))*exp(-(x[0]/delta)*(x[0]/delta));
@@ -244,6 +273,128 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     rho_u[idx_cell] = rho*u;
                     rho_v[idx_cell] = rho*v;
                     E[idx_cell]     = p/(gamma - double(1)) + double(1)/double(2)*rho*(u*u + v*v);
+                }
+            }
+        }
+        else if (d_project_name == "2D smooth isopycnic Rayleigh-Taylor instability")
+        {
+            const double delta = 0.02*lambda; // characteristic length of interface.
+            const double shift = 0.0;
+            const double rho_1 = p_i/(R_1*T_0);
+            const double rho_2 = p_i/(R_2*T_0); 
+            
+            for (int j = 0; j < patch_dims[1]; j++)
+            {
+                for (int i = 0; i < patch_dims[0]; i++)
+                {
+                    // Compute index into linear data array.
+                    int idx_cell = i + j*patch_dims[0];
+                    
+                    // Compute the coordinates.
+                    double x[2];
+                    x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
+                    x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
+                    
+                    const double x_shifted = x[0]-shift;
+
+                    const double eta = eta_0*cos(2.0*M_PI/lambda*x[1]);
+                    
+                    const double Z_2_H = 0.5*(1.0 + erf((x_shifted - eta)/delta)); // mass fraction of second species (Y_2)
+                    // const double R_H   = R_1*(1.0 - Y_2_H) + Y_2_H*R_2;
+
+                    const double rho = rho_1*(1 - Z_2_H) + rho_2*Z_2_H;
+
+                    
+                    const double p_H = p_i + 0.5*(rho_1+rho_2)*g*(x_shifted) + 
+                        0.5*(rho_1-rho_2)*g*delta*(exp(-pow(x_shifted/delta,2.0))-1.0)/sqrt(M_PI) + x_shifted*erf(x_shifted/delta);
+                    const double p   = p_H;
+
+                    rho_Y_0[idx_cell] = rho_1*(1.0 - Z_2_H);
+                    rho_Y_1[idx_cell] = rho_2*Z_2_H;
+                    
+                    const double u = 0.0;
+                    const double v = 0.0;
+                    
+                    rho_u[idx_cell] = rho*u;
+                    rho_v[idx_cell] = rho*v;
+                    E[idx_cell]     = p/(gamma - double(1)) + double(1)/double(2)*rho*(u*u + v*v);
+                }
+            }
+        }
+        else if (d_project_name == "2D smooth isopycnic Rayleigh-Taylor instability 3 species")
+        {
+            const double delta = 0.02*lambda; // characteristic length of interface.
+            const double shift = 200.0;
+            double* rho_Y_2 = partial_density->getPointer(2);
+
+
+            for (int j = 0; j < patch_dims[1]; j++)
+            {
+                for (int i = 0; i < patch_dims[0]; i++)
+                {
+                    // Compute index into linear data array.
+                    int idx_cell = i + j*patch_dims[0];
+                    
+                    // Compute the coordinates.
+                    double x[2];
+                    x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
+                    x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
+                    
+                    const double eta   = eta_0*cos(2.0*M_PI/lambda*x[1]);
+                    const double rho_1 = p_i/(R_1*T_0);
+                    const double rho_2 = p_i/(R_2*T_0);
+                    const double rho_3 = p_i/(R_3*T_0);
+                    
+                    double X_2_H = 0.0;
+                    double X_3_H = 0.0;
+                    double p_H   = 0.0;
+                    double p     = 0.0;
+                    double R_H   = 0.0;
+
+
+                    if (x[0] < 0.0)                    
+                    {
+                        X_2_H = 0.5*(1.0 + erf(((x[0] - eta + shift)/delta)));
+                        R_H   = R_1*(1.0 - X_2_H) + X_2_H*R_2;
+                        if (x[0] < -1.0*shift)
+                        {
+                            p = p_i + rho_1*g*(x[0]+shift) - shift*g*rho_2;
+                        }
+                        else
+                        {
+                            p = p_i + rho_2*g*x[0];
+                        }
+                    }    
+                    else
+                    {
+                        X_3_H = 0.5*(1.0 + erf(((x[0] - eta - shift)/delta)));
+                        X_2_H = 1.0 - X_3_H;
+                        R_H   = R_2*(1.0 - X_3_H) + X_3_H*R_3;
+                        if ( x[0] > shift )
+                        {
+                            p = p_i + rho_3*g*(x[0]-shift) + shift*g*rho_2;
+                        }
+                        else
+                        {
+                            p = p_i + rho_2*g*x[0];
+                        }
+                    }
+                    
+                    const double rho  = p_i/(R_H*T_0); 
+                    // Assume that densities are constant in the domain (isopycnic IC), 
+                    // so the densities can be calculated by the interface T and P
+                    // without calculating T and P at x[0]
+
+                    rho_Y_0[idx_cell] = rho*(1.0 - X_2_H - X_3_H);
+                    rho_Y_1[idx_cell] = rho*X_2_H;
+                    rho_Y_2[idx_cell] = rho*X_3_H;
+                    
+                    const double u    = 0.0;
+                    const double v    = 0.0;
+                    
+                    rho_u[idx_cell]   = rho*u;
+                    rho_v[idx_cell]   = rho*v;
+                    E[idx_cell]       = p/(gamma - double(1)) + double(1)/double(2)*rho*(u*u + v*v);
                 }
             }
         }
