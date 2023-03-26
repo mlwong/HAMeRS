@@ -286,17 +286,6 @@ Euler::registerModelVariables(
         num_ghosts_intermediate,
         d_convective_flux_reconstructor->getConvectiveFluxNumberOfGhostCells());
     
-    if (d_use_immersed_boundaries)
-    {
-        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
-            d_flow_model->getFlowModelImmersedBoundaryMethod();
-        
-        hier::IntVector num_ghosts_IB = flow_model_immersed_boundary_method->
-            getImmersedBoundaryMethodAdditionalNumberOfGhostCells();
-        
-        num_ghosts_intermediate = num_ghosts_intermediate + num_ghosts_IB;
-    }
-    
     hier::IntVector num_ghosts = num_ghosts_intermediate;
     
     if (d_value_tagger != nullptr)
@@ -318,6 +307,18 @@ Euler::registerModelVariables(
         num_ghosts = hier::IntVector::max(
             num_ghosts,
             d_multiresolution_tagger->getMultiresolutionTaggerNumberOfGhostCells());
+    }
+    
+    if (d_use_immersed_boundaries)
+    {
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        hier::IntVector num_ghosts_IB = flow_model_immersed_boundary_method->
+            getImmersedBoundaryMethodAdditionalNumberOfGhostCells();
+        
+        num_ghosts_intermediate = num_ghosts_intermediate + num_ghosts_IB;
+        num_ghosts              = num_ghosts              + num_ghosts_IB;
     }
     
     /*
