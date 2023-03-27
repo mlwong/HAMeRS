@@ -269,10 +269,10 @@ FlowModelImmersedBoundaryMethod::setConservativeVariablesCellDataImmersedBoundar
         
         const hier::IntVector num_ghosts_domain = num_ghosts_cons_var - d_num_IBM_ghosts;
         
-        domain_lo = -num_ghosts_domain;
-        domain_dims = interior_box.numberCells() + num_ghosts_domain*2;
-        // domain_lo = hier::IntVector::getZero(d_dim);
-        // domain_dims = interior_box.numberCells();
+        // domain_lo = -num_ghosts_domain;
+        // domain_dims = interior_box.numberCells() + num_ghosts_domain*2;
+        domain_lo = hier::IntVector::getZero(d_dim);
+        domain_dims = interior_box.numberCells();
         
         offset_cons_var = num_ghosts_cons_var;
         offset_IB = num_ghosts_IB;

@@ -1743,9 +1743,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
                 t_advance_bdry_fill_comm->start();
             }
             
-            // Not needed anymore due to larger halo region set by immersed boundary method.
-            // // One more communication for exchanging the immersed boundary ghost cells in the halo regions.
-            // fill_schedule_intermediate->fillData(current_time);
+            // One more communication for exchanging the immersed boundary ghost cells in the halo regions.
+            fill_schedule_intermediate->fillData(current_time);
             
             if (regrid_advance)
             {
