@@ -77,7 +77,7 @@ class ImmersedBoundaries
             const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal,
-            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_ip_index,
+            const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_ip_index,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_ip_corr)   // AFK 03/14/23
         {
             NULL_USE(data_time);
@@ -147,7 +147,7 @@ class ImmersedBoundaries
             const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal,
-            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_ip_index,
+            const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_ip_index,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_ip_corr);   // AFK 03/14/23
         
     private:

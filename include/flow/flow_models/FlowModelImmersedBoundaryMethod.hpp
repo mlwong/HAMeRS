@@ -97,7 +97,7 @@ class FlowModelImmersedBoundaryMethod
             const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal,
-            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_ip_index, // AFK 03/14/23
+            const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_ip_index, // AFK 03/14/23
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_ip_corr,  // AFK 03/14/23
             const hier::IntVector& offset_cons_var,
             const hier::IntVector& offset_IB,
@@ -160,7 +160,7 @@ class FlowModelImmersedBoundaryMethod
         static HAMERS_SHARED_PTR<pdat::CellVariable<int> > s_variable_mask;
         static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_wall_distance;
         static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_surface_normal;
-        static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_ip_index;
+        static HAMERS_SHARED_PTR<pdat::CellVariable<int> > s_variable_ip_index;
         static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_ip_corr;
         
 };

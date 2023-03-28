@@ -3,7 +3,7 @@
 HAMERS_SHARED_PTR<pdat::CellVariable<int> > FlowModelImmersedBoundaryMethod::s_variable_mask;
 HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelImmersedBoundaryMethod::s_variable_wall_distance;
 HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelImmersedBoundaryMethod::s_variable_surface_normal;
-HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelImmersedBoundaryMethod::s_variable_ip_index;
+HAMERS_SHARED_PTR<pdat::CellVariable<int> > FlowModelImmersedBoundaryMethod::s_variable_ip_index;
 HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelImmersedBoundaryMethod::s_variable_ip_corr;
 
 FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod(
@@ -36,8 +36,8 @@ FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod(
     s_variable_surface_normal = HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
         new pdat::CellVariable<Real>(d_dim, "surface_normal", dim.getValue()));
    
-    s_variable_ip_index = HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
-        new pdat::CellVariable<Real>(d_dim, "ip_index", 1));  //AFK
+    s_variable_ip_index = HAMERS_SHARED_PTR<pdat::CellVariable<int> > (
+        new pdat::CellVariable<int>(d_dim, "ip_index", 1));  //AFK
   
     s_variable_ip_corr = HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
         new pdat::CellVariable<Real>(d_dim, "ip_corr", 1));   //AFK
@@ -171,8 +171,8 @@ FlowModelImmersedBoundaryMethod::setImmersedBoundaryMethodVariables(
         HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(s_variable_surface_normal, data_context)));
    
-    const HAMERS_SHARED_PTR<pdat::CellData<Real> > data_ip_index(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
+    const HAMERS_SHARED_PTR<pdat::CellData<int> > data_ip_index(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
             patch.getPatchData(s_variable_ip_index, data_context)));
 
     const HAMERS_SHARED_PTR<pdat::CellData<Real> > data_ip_corr(
@@ -250,8 +250,8 @@ FlowModelImmersedBoundaryMethod::setConservativeVariablesCellDataImmersedBoundar
         HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(s_variable_surface_normal, data_context_IB)));
 
-    const HAMERS_SHARED_PTR<pdat::CellData<Real> > data_ip_index(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
+    const HAMERS_SHARED_PTR<pdat::CellData<int> > data_ip_index(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
             patch.getPatchData(s_variable_ip_index, data_context_IB)));
   
     const HAMERS_SHARED_PTR<pdat::CellData<Real> > data_ip_corr(

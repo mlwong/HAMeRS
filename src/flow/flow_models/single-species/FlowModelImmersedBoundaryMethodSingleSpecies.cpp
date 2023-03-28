@@ -110,7 +110,7 @@ FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSin
             &d_rho_body,
             &T_body,
             thermo_properties_const_ptr);
-    
+
     d_mom_body.resize(d_dim.getValue());
     
     if (d_dim == tbox::Dimension(1))
@@ -160,7 +160,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
     const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
     const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
     const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal,
-    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_ip_index,          // AFK
+    const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_ip_index,          // AFK
     const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_ip_corr,           // AFK
     const hier::IntVector& offset_cons_var,
     const hier::IntVector& offset_IB,
@@ -184,8 +184,8 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
     TBOX_ASSERT(patch_geom);
 #endif
     
-    // const double* const dx = patch_geom->getDx();
-    // const double* const patch_xlo = patch_geom->getXLower();
+    const double* const dx = patch_geom->getDx();
+    const double* const patch_xlo = patch_geom->getXLower();
     
     /*
      * Get the data of the conservative variables.
@@ -270,44 +270,108 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
         Real* norm_0 = data_surface_normal->getPointer(0);           // AFK 03/15/23 norm_0 variable uncommented
         Real* norm_1 = data_surface_normal->getPointer(1);           // AFK 03/15/23 norm_1 variable uncommented
         
-        Real* ip_location_index_0 = data_ip_index->getPointer(0);    // AFK 03/15/23 
-        Real* ip_location_index_1 = data_ip_index->getPointer(1);    // AFK
+        //int* ip_location_index_0 = data_ip_index->getPointer(0);    // AFK 03/15/23 
+        //int* ip_location_index_1 = data_ip_index->getPointer(1);    // AFK
         
-        Real* ip_ratio_0          = data_ip_corr->getPointer(0);     // AFK 03/15/23 
-        Real* ip_ratio_1          = data_ip_corr->getPointer(1);     //AFK        
+        //Real* ip_ratio_0          = data_ip_corr->getPointer(0);     // AFK 03/15/23 
+        //Real* ip_ratio_1          = data_ip_corr->getPointer(1);     //AFK        
 
-        double one                = double(1);                       // AFK one
+        Real one              = Real(1);                                // AFK one
+        Real half             = Real(1) / Real(2);
+        Real d_ip             = sqrt(Real(2)) + Real(1) / Real(1000000000);     // AFK distance from cylinder boundary to the image point sqrt(2 + epsilon)
+
+        Real x_ip                   = Real(0);                  // AFK x and y locations of image points
+        Real y_ip                   = Real(0); 
+
+        Real ip_location_index_0    = Real(0);               // AFK x index of bottom left in the bilinear interpolation stencil 
+        Real ip_location_index_1    = Real(0);               // AFK y index of bottom left in the bilinear interpolation stencil 
+
+        Real x_ip_BL                = Real(0);               // AFK x location of the bottom left cell in bilinear interpolation stencil
+        Real y_ip_BL                = Real(0);               // AFK y location of the bottom left cell in bilinear interpolation stencil
+
+        Real ip_ratio_0             = Real(0);               // AFK x ratio of the bilinear interpolation
+        Real ip_ratio_1             = Real(0);               // AFK y ratio of the bilinear interpolation 
+
+        Real rho_f1           = Real(0);                       // AFK variables needed in interpolating density
+        Real rho_f2           = Real(0);
+        Real rho_ip           = Real(0);
+        Real rho_gc           = Real(0);
         
-        double d_ip = sqrt(double(2)) + double(0.000001);            // AFK distance from cylinder boundary to the image point sqrt(2 + epsilon)
+        Real u_f1             = Real(0);                       // AFK variables needed in interpolating u velocity
+        Real u_f2             = Real(0);
+        Real u_ip             = Real(0);
 
-        double rho_f1           = double(0);                       // AFK variables needed in interpolating density
-        double rho_f2           = double(0);
-        double rho_ip           = double(0);
+        Real v_f1             = Real(0);                       // AFK variables needed in interpolating v velocity
+        Real v_f2             = Real(0);
+        Real v_ip             = Real(0);
+
+        Real temp_f1          = Real(0);                       // AFK variables needed in interpolating v velocity
+        Real temp_f2          = Real(0);
+        Real temp_ip          = Real(0);
+        Real temp_gc          = Real(0);
+
+        Real u_IP_BL          = Real(0);                       // AFK values of velocity in x axis for cells in the interpolation stencil
+        Real u_IP_BR          = Real(0);
+        Real u_IP_TL          = Real(0);
+        Real u_IP_TR          = Real(0);
+
+        Real u_body           = Real(0);                       // AFK u velocity of the body
+        Real u_gc             = Real(0);                       // AFK u velocity of the ghost cell
+
+        Real v_IP_BL          = Real(0);                       // AFK values of velocity in y axis for cells in the interpolation stencil
+        Real v_IP_BR          = Real(0);
+        Real v_IP_TL          = Real(0);
+        Real v_IP_TR          = Real(0);
+
+        Real v_body           = Real(0);                       // AFK v velocity of the body
+        Real v_gc             = Real(0);                       // AFK u velocity of the ghost cell
         
-        double u_f1             = double(0);                       // AFK variables needed in interpolating u velocity
-        double u_f2             = double(0);
-        double u_ip             = double(0);
+        Real epsilon_BL       = Real(0);       // AFK
+        Real epsilon_TL       = Real(0);       // AFK
+        Real epsilon_BR       = Real(0);       // AFK
+        Real epsilon_TR       = Real(0);       // AFK
 
-        double v_f1             = double(0);                       // AFK variables needed in interpolating v velocity
-        double v_f2             = double(0);
-        double v_ip             = double(0);
+        Real p_BL             = Real(0);       // AFK
+        Real p_TL             = Real(0);       // AFK
+        Real p_BR             = Real(0);       // AFK
+        Real p_TR             = Real(0);       // AFK
 
-        double u_IP_BL          = double(0);                       // AFK values of velocity in x axis for cells in the interpolation stencil
-        double u_IP_BR          = double(0);
-        double u_IP_TL          = double(0);
-        double u_IP_TR          = double(0);
+        Real temp_BL          = Real(0);       // AFK
+        Real temp_TL          = Real(0);       // AFK
+        Real temp_BR          = Real(0);       // AFK
+        Real temp_TR          = Real(0);       // AFK
 
-        double u_body           = double(0);                       // AFK u velocity of the body
-        double u_gc             = double(0);                       // AFK u velocity of the ghost cell
+        Real internal_energy_gc = Real(0);    // AFK
+        Real E_gc               = Real(0);    // AFK
 
-        double v_IP_BL          = double(0);                       // AFK values of velocity in y axis for cells in the interpolation stencil
-        double v_IP_BR          = double(0);
-        double v_IP_TL          = double(0);
-        double v_IP_TR          = double(0);
+        const bool is_euler     = true;       // AFK
 
-        double v_body           = double(0);                       // AFK v velocity of the body
-        double v_gc             = double(0);                       // AFK u velocity of the ghost cell
+        const Real radius_c   = Real(1) / Real(20);        // AFK radius of the cylinder
+        const Real x_c        = half;                      // AFK
+        const Real y_c        = half;                      // AFK
+
+        const Real c_v        = Real(5) / Real(2);                 // AFK isochoric specific heat to get internal energy from temperature
         
+        std::vector<Real*> thermo_properties_ptr;
+        std::vector<const Real*> thermo_properties_const_ptr;
+    
+        const int num_thermo_properties = d_equation_of_state_mixing_rules->
+            getNumberOfSpeciesThermodynamicProperties();
+    
+        thermo_properties_ptr.reserve(num_thermo_properties);
+        thermo_properties_const_ptr.reserve(num_thermo_properties);
+        d_thermo_properties.resize(num_thermo_properties);
+    
+        for (int ti = 0; ti < num_thermo_properties; ti++)
+        {
+            thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+            thermo_properties_const_ptr.push_back(&d_thermo_properties[ti]);
+        }
+    
+        d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
+            thermo_properties_ptr,
+            0);
+
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
             HAMERS_PRAGMA_SIMD
@@ -320,50 +384,195 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                 const int idx_IB = (i + offset_0_IB) +
                     (j + offset_1_IB)*ghostcell_dim_0_IB;
 
+                // Compute the coordinates.
+                Real x[2];
+                x[0] = patch_xlo[0] + (Real(i) + half)*dx[0]; // AFK local x coordinates 
+                x[1] = patch_xlo[1] + (Real(j) + half)*dx[1]; // AFK local y coordinates
+            
                 if (mask[idx_IB] == int(IB_MASK::IB_GHOST))
                 {
-                    // NEED TO BE CHANGED!!!
+                    // AFK Compute image point locations 
+
+                    if (x[0] > x_c)
+                    {
+                        x_ip    = x_c + sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*norm_1[idx_IB], 2));
+                    }
+                    else
+                    { 
+                        x_ip    = x_c - sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*norm_1[idx_IB], 2));
+                    }
+                    if (x[1] > y_c)
+                    {
+                        y_ip    = y_c + sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*norm_0[idx_IB], 2));
+                    }
+                    else
+                    {
+                        y_ip    = y_c - sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*norm_0[idx_IB], 2));               
+                    }
+
+                    ip_location_index_0    = floor((x_ip - patch_xlo[0] - half * dx[0]) / dx[0]);      
+                    ip_location_index_1    = floor((y_ip - patch_xlo[1] - half * dx[1]) / dx[1]);      
+
+                    x_ip_BL                = patch_xlo[0] + (ip_location_index_0 + half) * dx[0];    
+                    y_ip_BL                = patch_xlo[1] + (ip_location_index_1 + half) * dx[1];    
+  
+                    ip_ratio_0             = (x_ip - x_ip_BL) / dx[0];       
+                    ip_ratio_1             = (y_ip - y_ip_BL) / dx[1];      
                     
-                    const int idx_IP_BL  = idx_IB;                              // AFK declaration of the indexes of the cells in interpolation
+                    /*
+                    // Probably these are unnecessary
+                    const int idx_IP_BL  = idx_IB;                                         // AFK declaration of the indexes of the cells in interpolation
                     const int idx_IP_BR  = idx_IB + 1;
                     const int idx_IP_TL  = idx_IB + ghostcell_dim_0_IB;
                     const int idx_IP_TR  = idx_IB + ghostcell_dim_0_IB + 1;
                     
-                    // AFK bilinear interpolation to find image point density value
-                    rho_f1     = (one - ip_ratio_0[idx_IB]) * rho[idx_IP_BL] + ip_ratio_0[idx_IB] * rho[idx_IP_BR];
-                    rho_f2     = (one - ip_ratio_0[idx_IB]) * rho[idx_IP_TL] + ip_ratio_0[idx_IB] * rho[idx_IP_TR];
-                    rho_ip     = (one - ip_ratio_1[idx_IB]) * rho_f1         + ip_ratio_1[idx_IB] * rho_f2;
+                    const int idx_cons_var_BL  = idx_cons_var;                              // AFK declaration of the indexes of the cells in interpolation
+                    const int idx_cons_var_BR  = idx_cons_var + 1;
+                    const int idx_cons_var_TL  = idx_cons_var + ghostcell_dim_0_cons_var;
+                    const int idx_cons_var_TR  = idx_cons_var + ghostcell_dim_0_cons_var + 1;
+                    */
+                     
+                    // AFK declaration of the indexes of the cells in interpolation
+                    const int idx_cons_var_BL  = (ip_location_index_0 + offset_0_cons_var) +
+                                                 (ip_location_index_1 + offset_1_cons_var) * ghostcell_dim_0_cons_var;                              
                     
-                    u_IP_BL    = rho_u[idx_IP_BL] / rho[idx_IP_BL];
-                    u_IP_BR    = rho_u[idx_IP_BR] / rho[idx_IP_BR];
-                    u_IP_TL    = rho_u[idx_IP_TL] / rho[idx_IP_TL];
-                    u_IP_TR    = rho_u[idx_IP_TR] / rho[idx_IP_TR];
-                    u_body     = rho_u_body       / rho[idx_IB];
+                    const int idx_cons_var_BR  = idx_cons_var_BL + 1;
+                    const int idx_cons_var_TL  = idx_cons_var_BL + ghostcell_dim_0_cons_var;
+                    const int idx_cons_var_TR  = idx_cons_var_BL + ghostcell_dim_0_cons_var + 1;
 
-                    u_f1       = (one - ip_ratio_0[idx_IB]) * u_IP_BL + ip_ratio_0[idx_IB] * u_IP_BR; 
-                    u_f2       = (one - ip_ratio_0[idx_IB]) * u_IP_TL + ip_ratio_0[idx_IB] * u_IP_TR;
-                    u_ip       = (one - ip_ratio_1[idx_IB]) * u_f1    + ip_ratio_1[idx_IB] * u_f2;
-                    u_gc       = u_ip - ((d_ip + dist[idx_IB])/d_ip) * (u_ip - u_body);
+                    // AFK bilinear interpolation to find image point density value
+                    rho_f1     = (one - ip_ratio_0) * rho[idx_cons_var_BL] + ip_ratio_0 * rho[idx_cons_var_BR];
+                    rho_f2     = (one - ip_ratio_0) * rho[idx_cons_var_TL] + ip_ratio_0 * rho[idx_cons_var_TR];
+                    rho_ip     = (one - ip_ratio_1) * rho_f1               + ip_ratio_1 * rho_f2;
+                    rho_gc     = rho_ip;
 
-                    v_IP_BL    = rho_v[idx_IP_BL] / rho[idx_IP_BL];
-                    v_IP_BR    = rho_v[idx_IP_BR] / rho[idx_IP_BR];
-                    v_IP_TL    = rho_v[idx_IP_TL] / rho[idx_IP_TL];
-                    v_IP_TR    = rho_v[idx_IP_TR] / rho[idx_IP_TR];
-                    v_body     = rho_v_body       / rho[idx_IB];
+                    // AFK bilinear interpolation to find image point x velocity value
+                    u_IP_BL    = rho_u[idx_cons_var_BL] / rho[idx_cons_var_BL];
+                    u_IP_BR    = rho_u[idx_cons_var_BR] / rho[idx_cons_var_BR];
+                    u_IP_TL    = rho_u[idx_cons_var_TL] / rho[idx_cons_var_TL];
+                    u_IP_TR    = rho_u[idx_cons_var_TR] / rho[idx_cons_var_TR];
+                    
+                    u_body     = rho_u_body / rho[idx_cons_var];
 
-                    v_f1       = (one - ip_ratio_0[idx_IB]) * v_IP_BL + ip_ratio_0[idx_IB] * v_IP_BR; 
-                    v_f2       = (one - ip_ratio_0[idx_IB]) * v_IP_TL + ip_ratio_0[idx_IB] * v_IP_TR;
-                    v_ip       = (one - ip_ratio_1[idx_IB]) * v_f1    + ip_ratio_1[idx_IB] * v_f2;
-                    v_gc       = v_ip - ((d_ip + dist[idx_IB])/d_ip) * (v_ip - v_body);
+                    u_f1       = (one - ip_ratio_0) * u_IP_BL + ip_ratio_0 * u_IP_BR; 
+                    u_f2       = (one - ip_ratio_0) * u_IP_TL + ip_ratio_0 * u_IP_TR;
+                    u_ip       = (one - ip_ratio_1) * u_f1    + ip_ratio_1 * u_f2;
+                   
+                    // AFK bilinear interpolation to find image point x velocity value
+                    v_IP_BL    = rho_v[idx_cons_var_BL] / rho[idx_cons_var_BL];
+                    v_IP_BR    = rho_v[idx_cons_var_BR] / rho[idx_cons_var_BR];
+                    v_IP_TL    = rho_v[idx_cons_var_TL] / rho[idx_cons_var_TL];
+                    v_IP_TR    = rho_v[idx_cons_var_TR] / rho[idx_cons_var_TR];
+                    
+                    v_body     = rho_v_body / rho[idx_cons_var];
 
-                    rho[idx_cons_var]   = rho_ip;
+                    v_f1       = (one - ip_ratio_0) * v_IP_BL + ip_ratio_0 * v_IP_BR; 
+                    v_f2       = (one - ip_ratio_0) * v_IP_TL + ip_ratio_0 * v_IP_TR;
+                    v_ip       = (one - ip_ratio_1) * v_f1    + ip_ratio_1 * v_f2;
+                    
+                    // Compute velocities at the ghost cell for Euler equation (no-slip for normal direction and slip for tangential direction)
+                    if (is_euler == true)
+                    {
+                        Real vel_ip_n    =  Real(0);
+                        Real vel_ip_t    =  Real(0);
+                        Real vel_gc_n    =  Real(0);
+                        Real vel_gc_t    =  Real(0);
+                        Real vel_body_n  =  Real(0);
+                        
+                        vel_body_n    =  u_body * norm_0[idx_IB] + v_body * norm_1[idx_IB];
+                        
+                        vel_ip_n      =  u_ip   * norm_0[idx_IB] + v_ip   * norm_1[idx_IB];
+                        vel_ip_t      = -u_ip   * norm_1[idx_IB] + v_ip   * norm_0[idx_IB];
+
+                        vel_gc_n        =  vel_ip_n - ((d_ip + dist[idx_IB]) / d_ip) * (vel_ip_n - vel_body_n);
+                        vel_gc_t        =  vel_ip_t;
+
+                        u_gc            = vel_gc_n * norm_0[idx_IB] - vel_gc_t * norm_1[idx_IB];
+                        v_gc            = vel_gc_n * norm_0[idx_IB] + vel_gc_t * norm_1[idx_IB]; 
+
+                    }
+                    
+                    // Compute velocities at the ghost cell for NS equations (no-slip bcs)
+                    else{
+
+                        u_gc       = u_ip - ((d_ip + dist[idx_IB])/d_ip) * (u_ip - u_body);
+                        v_gc       = v_ip - ((d_ip + dist[idx_IB])/d_ip) * (v_ip - v_body);
+
+                    }
+
+                    // AFK bilinear interpolation to find image point energy
+                    epsilon_BL = E[idx_cons_var_BL] / rho[idx_cons_var_BL] - half*(u_IP_BL*u_IP_BL + v_IP_BL*v_IP_BL);
+                    epsilon_TL = E[idx_cons_var_TL] / rho[idx_cons_var_TL] - half*(u_IP_TL*u_IP_TL + v_IP_TL*v_IP_TL);
+                    epsilon_BR = E[idx_cons_var_BR] / rho[idx_cons_var_BR] - half*(u_IP_BR*u_IP_BR + v_IP_BR*v_IP_BR);
+                    epsilon_TR = E[idx_cons_var_TR] / rho[idx_cons_var_TR] - half*(u_IP_TR*u_IP_TR + v_IP_TR*v_IP_TR);
+                    
+                    temp_BL    = epsilon_BL / c_v;
+                    temp_TL    = epsilon_TL / c_v;
+                    temp_BR    = epsilon_BR / c_v;
+                    temp_TR    = epsilon_TR / c_v;
+
+                    /*
+                    p_BL    = d_equation_of_state_mixing_rules->getEquationOfState()->
+                        getPressure(
+                            &rho[idx_cons_var_BL],
+                            &epsilon_BL,
+                            thermo_properties_const_ptr);
+
+                    p_TL    = d_equation_of_state_mixing_rules->getEquationOfState()->
+                        getPressure(
+                            &rho[idx_cons_var_TL],
+                            &epsilon_TL,
+                            thermo_properties_const_ptr);
+                            
+                    p_BR    = d_equation_of_state_mixing_rules->getEquationOfState()->
+                        getPressure(
+                            &rho[idx_cons_var_BR],
+                            &epsilon_BR,
+                            thermo_properties_const_ptr);
+
+                    p_TR    = d_equation_of_state_mixing_rules->getEquationOfState()->
+                        getPressure(
+                            &rho[idx_cons_var_TR],
+                            &epsilon_TR,
+                            thermo_properties_const_ptr);
+
+                    temp_BL = d_equation_of_state_mixing_rules->getEquationOfState()->
+                        getTemperature(
+                            &rho[idx_cons_var_BL],
+                            &p_BL,
+                            thermo_properties_const_ptr);
+
+                    temp_TL = d_equation_of_state_mixing_rules->getEquationOfState()->
+                        getTemperature(
+                            &rho[idx_cons_var_TL],
+                            &p_TL,
+                            thermo_properties_const_ptr);
+
+                    temp_BR = d_equation_of_state_mixing_rules->getEquationOfState()->
+                        getTemperature(
+                            &rho[idx_cons_var_BR],
+                            &p_BR,
+                            thermo_properties_const_ptr);
+
+                    temp_TR = d_equation_of_state_mixing_rules->getEquationOfState()->
+                        getTemperature(
+                            &rho[idx_cons_var_TR],
+                            &p_TR,
+                            thermo_properties_const_ptr);                        
+                    */
+
+                    temp_f1     = (one - ip_ratio_0) * temp_BL + ip_ratio_0 * temp_BR; 
+                    temp_f2     = (one - ip_ratio_0) * temp_TL + ip_ratio_0 * temp_TR;
+                    temp_ip     = (one - ip_ratio_1) * temp_f1 + ip_ratio_1 * temp_f2;
+                    
+                    temp_gc     = temp_ip;                  
+   
+                    E_gc = rho_gc * ( c_v * temp_gc + half*(u_gc*u_gc + v_gc*v_gc));     // Calculating the energy at the ghost cell value by hard coding the internal energy
+
+                    rho[idx_cons_var]   = rho_gc;
                     rho_u[idx_cons_var] = rho[idx_cons_var] * u_gc;
                     rho_v[idx_cons_var] = rho[idx_cons_var] * v_gc;
-                    
-                    //rho[idx_cons_var]   = rho_body;
-                    //rho_u[idx_cons_var] = rho_u_body;
-                    //rho_v[idx_cons_var] = rho_v_body;
-                    E[idx_cons_var]     = E_body;
+                    E[idx_cons_var]     = E_gc;
                 }
                 else if (mask[idx_IB] == int(IB_MASK::BODY))
                 {
