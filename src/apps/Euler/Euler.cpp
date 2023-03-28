@@ -309,6 +309,18 @@ Euler::registerModelVariables(
             d_multiresolution_tagger->getMultiresolutionTaggerNumberOfGhostCells());
     }
     
+    if (d_use_immersed_boundaries)
+    {
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        hier::IntVector num_ghosts_IB = flow_model_immersed_boundary_method->
+            getImmersedBoundaryMethodAdditionalNumberOfGhostCells();
+        
+        num_ghosts_intermediate = num_ghosts_intermediate + num_ghosts_IB;
+        num_ghosts              = num_ghosts              + num_ghosts_IB;
+    }
+    
     /*
      * Register the conservative variables of d_flow_model.
      */
@@ -558,7 +570,7 @@ Euler::initializeDataOnPatch(
         TBOX_ASSERT(workload_data);
         workload_data->fillAll(1.0);
     }
-
+    
     t_init->stop();
 }
 

@@ -18,11 +18,20 @@ FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod(
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
+        d_num_IBM_ghosts(hier::IntVector::getZero(d_dim)),
         d_num_species(num_species),
         d_num_eqn(num_eqn),
         d_immersed_boundaries(immersed_boundaries),
         d_equation_of_state_mixing_rules(equation_of_state_mixing_rules)
 {
+    /*
+     * Hard-code the additional number of cells required by the immersed boundary method to be 3.
+     * 2D: ceiling of sqrt(2) + 1
+     * 3D: ceiling of sqrt(3) + 1
+     */
+    
+    d_num_IBM_ghosts = hier::IntVector::getOne(d_dim)*3;
+    
     /*
      * Initialize the variables.
      */
@@ -298,9 +307,15 @@ FlowModelImmersedBoundaryMethod::setConservativeVariablesCellDataImmersedBoundar
         TBOX_ASSERT(data_mask->getBox().isSpatiallyEqual(interior_box));
         TBOX_ASSERT(data_wall_distance->getBox().isSpatiallyEqual(interior_box));
         TBOX_ASSERT(data_surface_normal->getBox().isSpatiallyEqual(interior_box));
+        
+        TBOX_ASSERT(num_ghosts_cons_var >= d_num_IBM_ghosts);
 #endif
         
-        domain_lo = hier::IntVector::getZero(d_dim);;
+        const hier::IntVector num_ghosts_domain = num_ghosts_cons_var - d_num_IBM_ghosts;
+        
+        // domain_lo = -num_ghosts_domain;
+        // domain_dims = interior_box.numberCells() + num_ghosts_domain*2;
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = interior_box.numberCells();
         
         offset_cons_var = num_ghosts_cons_var;

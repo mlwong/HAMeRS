@@ -47,7 +47,7 @@ class DiffusiveFluxReconstructor
          * reconstructor.
          */
         hier::IntVector
-        getDiffusiveFluxNumberOfGhostCells(void) const
+        getDiffusiveFluxNumberOfGhostCells() const
         {
             return d_num_diff_ghosts;
         }

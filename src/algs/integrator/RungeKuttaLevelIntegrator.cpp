@@ -1710,6 +1710,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
             }
         }
         
+        d_patch_strategy->clearDataContext();
+        
         if (d_patch_strategy->useGhostCellImmersedBoundaryMethod())
         {
             for (hier::PatchLevel::iterator ip(level->begin());
@@ -1752,6 +1754,9 @@ RungeKuttaLevelIntegrator::advanceLevel(
             {
                 t_advance_bdry_fill_comm->stop();
             }
+            
+            d_patch_strategy->clearDataContext();
+        
         }
         
         d_patch_strategy->setDataContext(d_scratch);

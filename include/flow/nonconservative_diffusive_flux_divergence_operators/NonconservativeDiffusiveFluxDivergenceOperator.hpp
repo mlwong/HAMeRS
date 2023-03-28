@@ -47,7 +47,7 @@ class NonconservativeDiffusiveFluxDivergenceOperator
          * operator.
          */
         hier::IntVector
-        getNonconservativeDiffusiveFluxDivergenceOperatorNumberOfGhostCells(void) const
+        getNonconservativeDiffusiveFluxDivergenceOperatorNumberOfGhostCells() const
         {
             return d_num_diff_ghosts;
         }
