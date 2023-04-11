@@ -392,6 +392,18 @@ NavierStokes::registerModelVariables(
             d_multiresolution_tagger->getMultiresolutionTaggerNumberOfGhostCells());
     }
     
+    if (d_use_immersed_boundaries)
+    {
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        hier::IntVector num_ghosts_IB = flow_model_immersed_boundary_method->
+            getImmersedBoundaryMethodAdditionalNumberOfGhostCells();
+        
+        num_ghosts_intermediate = num_ghosts_intermediate + num_ghosts_IB;
+        num_ghosts              = num_ghosts              + num_ghosts_IB;
+    }
+    
     /*
      * Register the conservative variables of d_flow_model.
      */
@@ -638,6 +650,12 @@ NavierStokes::initializeDataOnPatch(
         const hier::Box empty_box = hier::Box::getEmptyBox(d_dim);
         
         flow_model_immersed_boundary_method->setImmersedBoundaryMethodVariables(
+            empty_box,
+            data_time,
+            initial_time,
+            getDataContext());
+        
+        flow_model_immersed_boundary_method->setConservativeVariablesCellDataImmersedBoundaryGhosts(
             empty_box,
             data_time,
             initial_time,
@@ -1385,7 +1403,13 @@ NavierStokes::setImmersedBoundaryGhostCells(
             getDataContext());
     }
     
-    // Compute the immersed boundary ghost cells here...
+    // Compute the immersed boundary ghost cells here.
+    
+    flow_model_immersed_boundary_method->setConservativeVariablesCellDataImmersedBoundaryGhosts(
+        empty_box,
+        time,
+        false,
+        getDataContext());
     
     d_flow_model->unregisterPatch();
 }

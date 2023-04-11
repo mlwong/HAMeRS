@@ -31,7 +31,7 @@ class Difference
          * Get the number of ghost cells needed by the difference operation.
          */
         hier::IntVector
-        getDifferenceNumberOfGhostCells(void) const
+        getDifferenceNumberOfGhostCells() const
         {
             return d_num_difference_ghosts;
         }

@@ -6,7 +6,7 @@
 void
 EulerInitialConditions::initializeDataOnPatch(
     hier::Patch& patch,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
     const double data_time,
     const bool initial_time)
 {
@@ -70,22 +70,22 @@ EulerInitialConditions::initializeDataOnPatch(
         
         if (d_flow_model_type == FLOW_MODEL::SINGLE_SPECIES)
         {
-            HAMERS_SHARED_PTR<pdat::CellData<double> > density      = conservative_variables[0];
-            HAMERS_SHARED_PTR<pdat::CellData<double> > momentum     = conservative_variables[1];
-            HAMERS_SHARED_PTR<pdat::CellData<double> > total_energy = conservative_variables[2];
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > density      = conservative_variables[0];
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > momentum     = conservative_variables[1];
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > total_energy = conservative_variables[2];
             
-            double* rho   = density->getPointer(0);
-            double* rho_u = momentum->getPointer(0);
-            double* rho_v = momentum->getPointer(1);
-            double* E     = total_energy->getPointer(0);
+            Real* rho   = density->getPointer(0);
+            Real* rho_u = momentum->getPointer(0);
+            Real* rho_v = momentum->getPointer(1);
+            Real* E     = total_energy->getPointer(0);
             
-            double gamma = double(7)/double(5);
+            Real gamma = Real(7)/Real(5);
             
             // Initial conditions.
-            double rho_inf = double(1);
-            double u_inf   = double(1);
-            double v_inf   = double(1);
-            double p_inf   = double(1);
+            Real rho_inf = Real(1);
+            Real u_inf   = Real(1);
+            Real v_inf   = Real(1);
+            Real p_inf   = Real(1);
             
             if (d_initial_conditions_db != nullptr)
             {
@@ -94,10 +94,10 @@ EulerInitialConditions::initializeDataOnPatch(
                 TBOX_ASSERT(d_initial_conditions_db->keyExists("v_inf"));
                 TBOX_ASSERT(d_initial_conditions_db->keyExists("p_inf"));
                 
-                rho_inf = d_initial_conditions_db->getDouble("rho_inf");
-                u_inf   = d_initial_conditions_db->getDouble("u_inf");
-                v_inf   = d_initial_conditions_db->getDouble("v_inf");
-                p_inf   = d_initial_conditions_db->getDouble("p_inf");
+                rho_inf = d_initial_conditions_db->getReal("rho_inf");
+                u_inf   = d_initial_conditions_db->getReal("u_inf");
+                v_inf   = d_initial_conditions_db->getReal("v_inf");
+                p_inf   = d_initial_conditions_db->getReal("p_inf");
             }
             
             for (int j = 0; j < patch_dims[1]; j++)
@@ -110,40 +110,40 @@ EulerInitialConditions::initializeDataOnPatch(
                     rho[idx_cell]   = rho_inf;
                     rho_u[idx_cell] = rho_inf*u_inf;
                     rho_v[idx_cell] = rho_inf*v_inf;
-                    E[idx_cell]     = p_inf/(gamma - double(1)) + double(1)/double(2)*rho_inf*
+                    E[idx_cell]     = p_inf/(gamma - Real(1)) + Real(1)/Real(2)*rho_inf*
                         (u_inf*u_inf + v_inf*v_inf);
                 }
             }
         }
         else if (d_flow_model_type == FLOW_MODEL::FIVE_EQN_ALLAIRE)
         {
-            HAMERS_SHARED_PTR<pdat::CellData<double> > partial_density = conservative_variables[0];
-            HAMERS_SHARED_PTR<pdat::CellData<double> > momentum        = conservative_variables[1];
-            HAMERS_SHARED_PTR<pdat::CellData<double> > total_energy    = conservative_variables[2];
-            HAMERS_SHARED_PTR<pdat::CellData<double> > volume_fraction = conservative_variables[3];
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > partial_density = conservative_variables[0];
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > momentum        = conservative_variables[1];
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > total_energy    = conservative_variables[2];
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > volume_fraction = conservative_variables[3];
             
-            double* Z_rho_1 = partial_density->getPointer(0);
-            double* Z_rho_2 = partial_density->getPointer(1);
-            double* rho_u   = momentum->getPointer(0);
-            double* rho_v   = momentum->getPointer(1);
-            double* E       = total_energy->getPointer(0);
-            double* Z_1     = volume_fraction->getPointer(0);
-            double* Z_2     = volume_fraction->getPointer(1);
+            Real* Z_rho_1 = partial_density->getPointer(0);
+            Real* Z_rho_2 = partial_density->getPointer(1);
+            Real* rho_u   = momentum->getPointer(0);
+            Real* rho_v   = momentum->getPointer(1);
+            Real* E       = total_energy->getPointer(0);
+            Real* Z_1     = volume_fraction->getPointer(0);
+            Real* Z_2     = volume_fraction->getPointer(1);
             
             // Species 1.
-            double gamma_1 = double(8)/double(5); // 1.6
+            Real gamma_1 = Real(8)/Real(5); // 1.6
             
             // Species 2.
-            double gamma_2 = double(7)/double(5); // 1.4
+            Real gamma_2 = Real(7)/Real(5); // 1.4
             
             // Initial conditions.
-            double Z_rho_1_inf = double(1);
-            double Z_rho_2_inf = double(1);
-            double u_inf       = double(1);
-            double v_inf       = double(1);
-            double p_inf       = double(1);
-            double Z_1_inf     = double(1)/double(2);
-            double Z_2_inf     = double(1)/double(2);
+            Real Z_rho_1_inf = Real(1);
+            Real Z_rho_2_inf = Real(1);
+            Real u_inf       = Real(1);
+            Real v_inf       = Real(1);
+            Real p_inf       = Real(1);
+            Real Z_1_inf     = Real(1)/Real(2);
+            Real Z_2_inf     = Real(1)/Real(2);
             
             if (d_initial_conditions_db != nullptr)
             {
@@ -155,17 +155,17 @@ EulerInitialConditions::initializeDataOnPatch(
                 TBOX_ASSERT(d_initial_conditions_db->keyExists("Z_1_inf"));
                 TBOX_ASSERT(d_initial_conditions_db->keyExists("Z_2_inf"));
                 
-                Z_rho_1_inf = d_initial_conditions_db->getDouble("Z_rho_1_inf");
-                Z_rho_2_inf = d_initial_conditions_db->getDouble("Z_rho_2_inf");
-                u_inf       = d_initial_conditions_db->getDouble("u_inf");
-                v_inf       = d_initial_conditions_db->getDouble("v_inf");
-                p_inf       = d_initial_conditions_db->getDouble("p_inf");
-                Z_1_inf     = d_initial_conditions_db->getDouble("Z_1_inf");
-                Z_2_inf     = d_initial_conditions_db->getDouble("Z_2_inf");
+                Z_rho_1_inf = d_initial_conditions_db->getReal("Z_rho_1_inf");
+                Z_rho_2_inf = d_initial_conditions_db->getReal("Z_rho_2_inf");
+                u_inf       = d_initial_conditions_db->getReal("u_inf");
+                v_inf       = d_initial_conditions_db->getReal("v_inf");
+                p_inf       = d_initial_conditions_db->getReal("p_inf");
+                Z_1_inf     = d_initial_conditions_db->getReal("Z_1_inf");
+                Z_2_inf     = d_initial_conditions_db->getReal("Z_2_inf");
             }
             
-            const double rho_inf = Z_rho_1_inf + Z_rho_2_inf;
-            const double gamma_m = double(1)/(Z_1_inf/(gamma_1 - double(1)) + Z_2_inf/(gamma_2 - double(1))) + double(1);
+            const Real rho_inf = Z_rho_1_inf + Z_rho_2_inf;
+            const Real gamma_m = Real(1)/(Z_1_inf/(gamma_1 - Real(1)) + Z_2_inf/(gamma_2 - Real(1))) + Real(1);
             
             for (int j = 0; j < patch_dims[1]; j++)
             {
@@ -178,7 +178,7 @@ EulerInitialConditions::initializeDataOnPatch(
                     Z_rho_2[idx_cell] = Z_rho_2_inf;
                     rho_u[idx_cell]   = rho_inf*u_inf;
                     rho_v[idx_cell]   = rho_inf*v_inf;
-                    E[idx_cell]       = p_inf/(gamma_m - double(1)) + double(1)/double(2)*rho_inf*
+                    E[idx_cell]       = p_inf/(gamma_m - Real(1)) + Real(1)/Real(2)*rho_inf*
                         (u_inf*u_inf + v_inf*v_inf);
                     Z_1[idx_cell]     = Z_1_inf;
                     Z_2[idx_cell]     = Z_2_inf;

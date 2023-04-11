@@ -34,7 +34,7 @@ class WaveletTransform
          * Get the number of ghost cells needed by the wavelet transformation.
          */
         hier::IntVector
-        getWaveletTransformNumberOfGhostCells(void) const
+        getWaveletTransformNumberOfGhostCells() const
         {
             return d_num_wavelet_ghosts;
         }
