@@ -266,7 +266,7 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
     TBOX_ASSERT(hierarchy->getPatchLevel(level_number));
     TBOX_ASSERT(tag_index >= 0);
     
-    bool usesRefineRegions =
+    bool usesRefineReg =
         usesRefineRegions(regrid_cycle, regrid_time);
     
     bool usesValue =
@@ -308,6 +308,7 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
             regrid_time,
             tag_index,
             initial_time,
+            usesRefineReg,
             usesValue,
             usesGradient,
             usesMultiresolution,
@@ -324,6 +325,7 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
             regrid_time,
             tag_index,
             initial_time,
+            usesRefineReg,
             usesValue,
             usesGradient,
             usesIntegral,
@@ -340,6 +342,7 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
             regrid_time,
             tag_index,
             initial_time,
+            usesRefineReg,
             usesValue,
             usesMultiresolution,
             usesIntegral,
@@ -356,13 +359,14 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
             regrid_time,
             tag_index,
             initial_time,
+            usesRefineReg,
             usesGradient,
             usesMultiresolution,
             usesIntegral,
             usesRichExtrap);
     }
     
-    if (usesRefineRegions)
+    if (usesRefineReg)
     {
         TBOX_ASSERT(d_tag_strategy != 0);
         
@@ -372,6 +376,7 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
             regrid_time,
             tag_index,
             initial_time,
+            usesValue,
             usesGradient,
             usesMultiresolution,
             usesIntegral,
@@ -688,6 +693,7 @@ ExtendedTagAndInitialize::tagCellsUsingRichardsonExtrapolation(
         dt,
         d_error_coarsen_ratio,
         initial_time,
+        usesRefineRegions(regrid_cycle, regrid_time),
         usesValueDetector(regrid_cycle, regrid_time),
         usesGradientDetector(regrid_cycle, regrid_time),
         usesMultiresolutionDetector(regrid_cycle, regrid_time),
@@ -3045,7 +3051,7 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
         // boxes changed.
         if ((old_use_re != new_use_re) || (old_use_in != new_use_in) ||
             (old_use_mr != new_use_mr) || (old_use_gd != new_use_gd) ||
-            (old_use_vl != new_use_vl) || (old_use_rr != new_use_rr)
+            (old_use_vl != new_use_vl) || (old_use_rr != new_use_rr) ||
             (old_use_rb != new_use_rb))
         {
             // If one of the tagging methods which was used is now not used or

@@ -542,6 +542,39 @@ RungeKuttaLevelIntegrator::resetHierarchyConfiguration(
 /*
  **************************************************************************************************
  *
+ * Call patch routines to tag cells in user-defined refine regions. These cells will be refined.
+ *
+ **************************************************************************************************
+ */
+void
+RungeKuttaLevelIntegrator::applyRefineRegions(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
+    const int level_number,
+    const double error_data_time,
+    const int tag_index,
+    const bool initial_time,
+    const bool uses_value_detector_too,
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
+{
+    NULL_USE(hierarchy);
+    NULL_USE(level_number);
+    NULL_USE(error_data_time);
+    NULL_USE(tag_index);
+    NULL_USE(initial_time);
+    NULL_USE(uses_value_detector_too);
+    NULL_USE(uses_gradient_detector_too);
+    NULL_USE(uses_multiresolution_detector_too);
+    NULL_USE(uses_integral_detector_too);
+    NULL_USE(uses_richardson_extrapolation_too);
+}
+
+
+/*
+ **************************************************************************************************
+ *
  * Call patch routines to tag cells near large gradients. These cells will be refined.
  *
  **************************************************************************************************
@@ -553,6 +586,7 @@ RungeKuttaLevelIntegrator::applyValueDetector(
     const double error_data_time,
     const int tag_index,
     const bool initial_time,
+    const bool uses_refine_regions_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -591,6 +625,7 @@ RungeKuttaLevelIntegrator::applyValueDetector(
         level_number,
         error_data_time,
         initial_time,
+        uses_refine_regions_too,
         uses_gradient_detector_too,
         uses_multiresolution_detector_too,
         uses_integral_detector_too,
@@ -607,6 +642,7 @@ RungeKuttaLevelIntegrator::applyValueDetector(
             error_data_time,
             initial_time,
             tag_index,
+            uses_refine_regions_too,
             uses_gradient_detector_too,
             uses_multiresolution_detector_too,
             uses_integral_detector_too,
@@ -619,6 +655,7 @@ RungeKuttaLevelIntegrator::applyValueDetector(
         level_number,
         error_data_time,
         initial_time,
+        uses_refine_regions_too,
         uses_gradient_detector_too,
         uses_multiresolution_detector_too,
         uses_integral_detector_too,
@@ -642,6 +679,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
     const double error_data_time,
     const int tag_index,
     const bool initial_time,
+    const bool uses_refine_regions_too,
     const bool uses_value_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -680,6 +718,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
         level_number,
         error_data_time,
         initial_time,
+        uses_refine_regions_too,
         uses_value_detector_too,
         uses_multiresolution_detector_too,
         uses_integral_detector_too,
@@ -696,6 +735,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
             error_data_time,
             initial_time,
             tag_index,
+            uses_refine_regions_too,
             uses_value_detector_too,
             uses_multiresolution_detector_too,
             uses_integral_detector_too,
@@ -708,6 +748,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
         level_number,
         error_data_time,
         initial_time,
+        uses_refine_regions_too,
         uses_value_detector_too,
         uses_multiresolution_detector_too,
         uses_integral_detector_too,
@@ -738,6 +779,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
     const double error_data_time,
     const int tag_index,
     const bool initial_time,
+    const bool uses_refine_regions_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_integral_detector_too,
@@ -776,6 +818,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
         level_number,
         error_data_time,
         initial_time,
+        uses_refine_regions_too,
         uses_value_detector_too,
         uses_gradient_detector_too,
         uses_integral_detector_too,
@@ -792,6 +835,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
             error_data_time,
             initial_time,
             tag_index,
+            uses_refine_regions_too,
             uses_value_detector_too,
             uses_gradient_detector_too,
             uses_integral_detector_too,
@@ -804,6 +848,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
         level_number,
         error_data_time,
         initial_time,
+        uses_refine_regions_too,
         uses_value_detector_too,
         uses_gradient_detector_too,
         uses_integral_detector_too,
@@ -834,6 +879,7 @@ RungeKuttaLevelIntegrator::applyIntegralDetector(
     const double error_data_time,
     const int tag_index,
     const bool initial_time,
+    const bool uses_refine_regions_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
@@ -872,6 +918,7 @@ RungeKuttaLevelIntegrator::applyIntegralDetector(
         level_number,
         error_data_time,
         initial_time,
+        uses_refine_regions_too,
         uses_value_detector_too,
         uses_gradient_detector_too,
         uses_multiresolution_detector_too,
@@ -888,6 +935,7 @@ RungeKuttaLevelIntegrator::applyIntegralDetector(
             error_data_time,
             initial_time,
             tag_index,
+            uses_refine_regions_too,
             uses_value_detector_too,
             uses_gradient_detector_too,
             uses_multiresolution_detector_too,
@@ -900,6 +948,7 @@ RungeKuttaLevelIntegrator::applyIntegralDetector(
         level_number,
         error_data_time,
         initial_time,
+        uses_refine_regions_too,
         uses_value_detector_too,
         uses_gradient_detector_too,
         uses_multiresolution_detector_too,
@@ -934,6 +983,7 @@ RungeKuttaLevelIntegrator::applyRichardsonExtrapolation(
     const double deltat,
     const int error_coarsen_ratio,
     const bool initial_time,
+    const bool uses_refine_regions_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
@@ -967,6 +1017,7 @@ RungeKuttaLevelIntegrator::applyRichardsonExtrapolation(
             error_coarsen_ratio,
             initial_time,
             tag_index,
+            uses_refine_regions_too,
             uses_value_detector_too,
             uses_gradient_detector_too,
             uses_multiresolution_detector_too,

@@ -32,12 +32,13 @@ ExtendedTagAndInitStrategy::~ExtendedTagAndInitStrategy()
  */
 
 void
-ExtendedTagAndInitStrategy::applyValueDetector(
+ExtendedTagAndInitStrategy::applyRefineRegions(
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
     const int level_number,
     const double error_data_time,
     const int tag_index,
     const bool initial_time,
+    const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -48,6 +49,44 @@ ExtendedTagAndInitStrategy::applyValueDetector(
     NULL_USE(error_data_time);
     NULL_USE(tag_index);
     NULL_USE(initial_time);
+    NULL_USE(uses_value_detector_too);
+    NULL_USE(uses_gradient_detector_too);
+    NULL_USE(uses_multiresolution_detector_too);
+    NULL_USE(uses_integral_detector_too);
+    NULL_USE(uses_richardson_extrapolation_too);
+    TBOX_ERROR("ExtendedTagAndInitStrategy::applyRefineRegions()"
+        << "\nNo derived class supplies a concrete implementation for "
+        << "\nthis method." << std::endl);
+}
+
+
+/*
+ *************************************************************************
+ *
+ * Default virtual function implementations.
+ *
+ *************************************************************************
+ */
+
+void
+ExtendedTagAndInitStrategy::applyValueDetector(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
+    const int level_number,
+    const double error_data_time,
+    const int tag_index,
+    const bool initial_time,
+    const bool uses_refine_regions_too,
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
+{
+    NULL_USE(hierarchy);
+    NULL_USE(level_number);
+    NULL_USE(error_data_time);
+    NULL_USE(tag_index);
+    NULL_USE(initial_time);
+    NULL_USE(uses_refine_regions_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -65,6 +104,7 @@ ExtendedTagAndInitStrategy::applyGradientDetector(
     const double error_data_time,
     const int tag_index,
     const bool initial_time,
+    const bool uses_refine_regions_too,
     const bool uses_value_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -75,6 +115,7 @@ ExtendedTagAndInitStrategy::applyGradientDetector(
     NULL_USE(error_data_time);
     NULL_USE(tag_index);
     NULL_USE(initial_time);
+    NULL_USE(uses_refine_regions_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -92,6 +133,7 @@ ExtendedTagAndInitStrategy::applyMultiresolutionDetector(
     const double error_data_time,
     const int tag_index,
     const bool initial_time,
+    const bool uses_refine_regions_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_integral_detector_too,
@@ -102,6 +144,7 @@ ExtendedTagAndInitStrategy::applyMultiresolutionDetector(
     NULL_USE(error_data_time);
     NULL_USE(tag_index);
     NULL_USE(initial_time);
+    NULL_USE(uses_refine_regions_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -119,6 +162,7 @@ ExtendedTagAndInitStrategy::applyIntegralDetector(
     const double error_data_time,
     const int tag_index,
     const bool initial_time,
+    const bool uses_refine_regions_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
@@ -129,6 +173,7 @@ ExtendedTagAndInitStrategy::applyIntegralDetector(
     NULL_USE(error_data_time);
     NULL_USE(tag_index);
     NULL_USE(initial_time);
+    NULL_USE(uses_refine_regions_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
@@ -147,6 +192,7 @@ ExtendedTagAndInitStrategy::applyRichardsonExtrapolation(
     const double deltat,
     const int error_coarsen_ratio,
     const bool initial_time,
+    const bool uses_refine_regions_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
@@ -158,6 +204,7 @@ ExtendedTagAndInitStrategy::applyRichardsonExtrapolation(
     NULL_USE(deltat);
     NULL_USE(error_coarsen_ratio);
     NULL_USE(initial_time);
+    NULL_USE(uses_refine_regions_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);

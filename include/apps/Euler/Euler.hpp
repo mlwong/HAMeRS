@@ -190,6 +190,7 @@ class Euler:
             const int level_number,
             const double regrid_time,
             const bool initial_error,
+            const bool uses_refine_regions_too,
             const bool uses_gradient_detector_too,
             const bool uses_multiresolution_detector_too,
             const bool uses_integral_detector_too,
@@ -204,6 +205,7 @@ class Euler:
             const double regrid_time,
             const bool initial_error,
             const int tag_indx,
+            const bool uses_refine_regions_too,
             const bool uses_gradient_detector_too,
             const bool uses_multiresolution_detector_too,
             const bool uses_integral_detector_too,
@@ -214,14 +216,15 @@ class Euler:
          */
         void
         preprocessTagCellsGradientDetector(
-           const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-           const int level_number,
-           const double regrid_time,
-           const bool initial_error,
-           const bool uses_value_detector_too,
-           const bool uses_multiresolution_detector_too,
-           const bool uses_integral_detector_too,
-           const bool uses_richardson_extrapolation_too);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const int level_number,
+            const double regrid_time,
+            const bool initial_error,
+            const bool uses_refine_regions_too,
+            const bool uses_value_detector_too,
+            const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
+            const bool uses_richardson_extrapolation_too);
         
         /**
          * Tag cells for refinement using gradient detector.
@@ -232,6 +235,7 @@ class Euler:
             const double regrid_time,
             const bool initial_error,
             const int tag_indx,
+            const bool uses_refine_regions_too,
             const bool uses_value_detector_too,
             const bool uses_multiresolution_detector_too,
             const bool uses_integral_detector_too,
@@ -246,6 +250,7 @@ class Euler:
             const int level_number,
             const double regrid_time,
             const bool initial_error,
+            const bool uses_refine_regions_too,
             const bool uses_value_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_integral_detector_too,
@@ -260,6 +265,7 @@ class Euler:
             const double regrid_time,
             const bool initial_error,
             const int tag_indx,
+            const bool uses_refine_regions_too,
             const bool uses_value_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_integral_detector_too,

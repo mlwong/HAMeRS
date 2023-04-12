@@ -2567,17 +2567,19 @@ Euler::synchronizeFluxes(
  */
 void
 Euler::preprocessTagCellsValueDetector(
-   const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-   const int level_number,
-   const double regrid_time,
-   const bool initial_error,
-   const bool uses_gradient_detector_too,
-   const bool uses_multiresolution_detector_too,
-   const bool uses_integral_detector_too,
-   const bool uses_richardson_extrapolation_too)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const int level_number,
+    const double regrid_time,
+    const bool initial_error,
+    const bool uses_refine_regions_too,
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -2616,6 +2618,7 @@ Euler::tagCellsOnPatchValueDetector(
     const double regrid_time,
     const bool initial_error,
     const int tag_indx,
+    const bool uses_refine_regions_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -2623,6 +2626,7 @@ Euler::tagCellsOnPatchValueDetector(
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
     
     t_tagvalue->start();
     
@@ -2640,7 +2644,7 @@ Euler::tagCellsOnPatchValueDetector(
     if ((!uses_richardson_extrapolation_too) &&
         (!uses_integral_detector_too) &&
         (!uses_multiresolution_detector_too) &&
-        (!uses_gradient_detector_too)) 
+        (!uses_gradient_detector_too))
     {
         tags->fillAll(0);
     }
@@ -2663,17 +2667,19 @@ Euler::tagCellsOnPatchValueDetector(
  */
 void
 Euler::preprocessTagCellsGradientDetector(
-   const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-   const int level_number,
-   const double regrid_time,
-   const bool initial_error,
-   const bool uses_value_detector_too,
-   const bool uses_multiresolution_detector_too,
-   const bool uses_integral_detector_too,
-   const bool uses_richardson_extrapolation_too)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const int level_number,
+    const double regrid_time,
+    const bool initial_error,
+    const bool uses_refine_regions_too,
+    const bool uses_value_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -2712,6 +2718,7 @@ Euler::tagCellsOnPatchGradientDetector(
     const double regrid_time,
     const bool initial_error,
     const int tag_indx,
+    const bool uses_refine_regions_too,
     const bool uses_value_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -2719,6 +2726,7 @@ Euler::tagCellsOnPatchGradientDetector(
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
     NULL_USE(uses_value_detector_too);
     
     t_taggradient->start();
@@ -2759,17 +2767,19 @@ Euler::tagCellsOnPatchGradientDetector(
  */
 void
 Euler::preprocessTagCellsMultiresolutionDetector(
-   const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-   const int level_number,
-   const double regrid_time,
-   const bool initial_error,
-   const bool uses_value_detector_too,
-   const bool uses_gradient_detector_too,
-   const bool uses_integral_detector_too,
-   const bool uses_richardson_extrapolation_too)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const int level_number,
+    const double regrid_time,
+    const bool initial_error,
+    const bool uses_refine_regions_too,
+    const bool uses_value_detector_too,
+    const bool uses_gradient_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -2808,6 +2818,7 @@ Euler::tagCellsOnPatchMultiresolutionDetector(
     const double regrid_time,
     const bool initial_error,
     const int tag_indx,
+    const bool uses_refine_regions_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_integral_detector_too,
@@ -2815,6 +2826,7 @@ Euler::tagCellsOnPatchMultiresolutionDetector(
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     
