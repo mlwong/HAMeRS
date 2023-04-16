@@ -122,8 +122,8 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                     y_p = y_c - sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));
                 }
                 
-                if ((fabs(x_p - x[0]) < (double(d_num_immersed_boundary_ghosts[0]))*dx[0]) ||
-                    (fabs(y_p - x[1]) < (double(d_num_immersed_boundary_ghosts[1]))*dx[1]))
+                if ((fabs(x_p - x[0]) < (double(d_num_immersed_boundary_ghosts[0]) - 3.0)*dx[0]) ||
+                    (fabs(y_p - x[1]) < (double(d_num_immersed_boundary_ghosts[1]) - 3.0)*dx[1]))
                 {
                     mask[idx]   = int(IB_MASK::IB_GHOST);
                     dist[idx]   = radius_c - radius;      // AFK 03/14/23 instead of distance from center storing distance from the boundary
