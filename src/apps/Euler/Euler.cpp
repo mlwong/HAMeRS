@@ -2572,6 +2572,7 @@ Euler::preprocessTagCellsValueDetector(
     const double regrid_time,
     const bool initial_error,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -2580,6 +2581,7 @@ Euler::preprocessTagCellsValueDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -2619,6 +2621,7 @@ Euler::tagCellsOnPatchValueDetector(
     const bool initial_error,
     const int tag_indx,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -2627,6 +2630,7 @@ Euler::tagCellsOnPatchValueDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     
     t_tagvalue->start();
     
@@ -2672,6 +2676,7 @@ Euler::preprocessTagCellsGradientDetector(
     const double regrid_time,
     const bool initial_error,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -2680,6 +2685,7 @@ Euler::preprocessTagCellsGradientDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -2719,6 +2725,7 @@ Euler::tagCellsOnPatchGradientDetector(
     const bool initial_error,
     const int tag_indx,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -2727,6 +2734,7 @@ Euler::tagCellsOnPatchGradientDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     
     t_taggradient->start();
@@ -2772,6 +2780,7 @@ Euler::preprocessTagCellsMultiresolutionDetector(
     const double regrid_time,
     const bool initial_error,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_integral_detector_too,
@@ -2780,6 +2789,7 @@ Euler::preprocessTagCellsMultiresolutionDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -2819,6 +2829,7 @@ Euler::tagCellsOnPatchMultiresolutionDetector(
     const bool initial_error,
     const int tag_indx,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_integral_detector_too,
@@ -2827,6 +2838,7 @@ Euler::tagCellsOnPatchMultiresolutionDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     

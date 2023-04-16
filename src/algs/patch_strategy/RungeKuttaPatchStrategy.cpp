@@ -60,6 +60,7 @@ RungeKuttaPatchStrategy::preprocessTagCellsValueDetector(
     const double regrid_time,
     const bool initial_error,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -70,6 +71,7 @@ RungeKuttaPatchStrategy::preprocessTagCellsValueDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -84,6 +86,7 @@ RungeKuttaPatchStrategy::postprocessTagCellsValueDetector(
     const double regrid_time,
     const bool initial_error,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -94,6 +97,7 @@ RungeKuttaPatchStrategy::postprocessTagCellsValueDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -108,6 +112,7 @@ RungeKuttaPatchStrategy::tagCellsOnPatchValueDetector(
     const bool initial_error,
     const int tag_index,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -118,6 +123,7 @@ RungeKuttaPatchStrategy::tagCellsOnPatchValueDetector(
     NULL_USE(initial_error);
     NULL_USE(tag_index);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -136,6 +142,7 @@ RungeKuttaPatchStrategy::preprocessTagCellsGradientDetector(
     const double regrid_time,
     const bool initial_error,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -146,6 +153,7 @@ RungeKuttaPatchStrategy::preprocessTagCellsGradientDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -160,6 +168,7 @@ RungeKuttaPatchStrategy::postprocessTagCellsGradientDetector(
     const double regrid_time,
     const bool initial_error,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -170,6 +179,7 @@ RungeKuttaPatchStrategy::postprocessTagCellsGradientDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -184,6 +194,7 @@ RungeKuttaPatchStrategy::tagCellsOnPatchGradientDetector(
     const bool initial_error,
     const int tag_index,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -194,6 +205,7 @@ RungeKuttaPatchStrategy::tagCellsOnPatchGradientDetector(
     NULL_USE(initial_error);
     NULL_USE(tag_index);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -212,6 +224,7 @@ RungeKuttaPatchStrategy::preprocessTagCellsMultiresolutionDetector(
     const double regrid_time,
     const bool initial_error,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_integral_detector_too,
@@ -222,6 +235,7 @@ RungeKuttaPatchStrategy::preprocessTagCellsMultiresolutionDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -236,6 +250,7 @@ RungeKuttaPatchStrategy::postprocessTagCellsMultiresolutionDetector(
     const double regrid_time,
     const bool initial_error,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_integral_detector_too,
@@ -246,6 +261,7 @@ RungeKuttaPatchStrategy::postprocessTagCellsMultiresolutionDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -260,6 +276,7 @@ RungeKuttaPatchStrategy::tagCellsOnPatchMultiresolutionDetector(
     const bool initial_error,
     const int tag_index,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_integral_detector_too,
@@ -270,6 +287,7 @@ RungeKuttaPatchStrategy::tagCellsOnPatchMultiresolutionDetector(
     NULL_USE(initial_error);
     NULL_USE(tag_index);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -288,6 +306,7 @@ RungeKuttaPatchStrategy::preprocessTagCellsIntegralDetector(
     const double regrid_time,
     const bool initial_error,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
@@ -298,6 +317,7 @@ RungeKuttaPatchStrategy::preprocessTagCellsIntegralDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
@@ -312,6 +332,7 @@ RungeKuttaPatchStrategy::postprocessTagCellsIntegralDetector(
     const double regrid_time,
     const bool initial_error,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
@@ -322,6 +343,7 @@ RungeKuttaPatchStrategy::postprocessTagCellsIntegralDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
@@ -336,6 +358,7 @@ RungeKuttaPatchStrategy::tagCellsOnPatchIntegralDetector(
     const bool initial_error,
     const int tag_index,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
@@ -346,6 +369,7 @@ RungeKuttaPatchStrategy::tagCellsOnPatchIntegralDetector(
     NULL_USE(initial_error);
     NULL_USE(tag_index);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
@@ -369,6 +393,7 @@ RungeKuttaPatchStrategy::tagCellsOnPatchRichardsonExtrapolation(
     const bool initial_error,
     const int tag_index,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
@@ -384,6 +409,7 @@ RungeKuttaPatchStrategy::tagCellsOnPatchRichardsonExtrapolation(
     NULL_USE(initial_error);
     NULL_USE(tag_index);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);

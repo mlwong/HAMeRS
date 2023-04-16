@@ -38,6 +38,7 @@ ExtendedTagAndInitStrategy::applyRefineRegions(
     const double error_data_time,
     const int tag_index,
     const bool initial_time,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
@@ -49,12 +50,53 @@ ExtendedTagAndInitStrategy::applyRefineRegions(
     NULL_USE(error_data_time);
     NULL_USE(tag_index);
     NULL_USE(initial_time);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
     NULL_USE(uses_richardson_extrapolation_too);
     TBOX_ERROR("ExtendedTagAndInitStrategy::applyRefineRegions()"
+        << "\nNo derived class supplies a concrete implementation for "
+        << "\nthis method." << std::endl);
+}
+
+
+
+/*
+ *************************************************************************
+ *
+ * Default virtual function implementations.
+ *
+ *************************************************************************
+ */
+
+void
+ExtendedTagAndInitStrategy::applyImmersedBdryDetector(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
+    const int level_number,
+    const double error_data_time,
+    const int tag_index,
+    const bool initial_time,
+    const bool uses_refine_regions_too,
+    const bool uses_value_detector_too,
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
+{
+    NULL_USE(hierarchy);
+    NULL_USE(level_number);
+    NULL_USE(error_data_time);
+    NULL_USE(tag_index);
+    NULL_USE(initial_time);
+    NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_value_detector_too);
+    NULL_USE(uses_gradient_detector_too);
+    NULL_USE(uses_multiresolution_detector_too);
+    NULL_USE(uses_integral_detector_too);
+    NULL_USE(uses_richardson_extrapolation_too);
+    TBOX_ERROR("ExtendedTagAndInitStrategy::applyImmersedBdryDetector()"
         << "\nNo derived class supplies a concrete implementation for "
         << "\nthis method." << std::endl);
 }
@@ -76,6 +118,7 @@ ExtendedTagAndInitStrategy::applyValueDetector(
     const int tag_index,
     const bool initial_time,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -87,6 +130,7 @@ ExtendedTagAndInitStrategy::applyValueDetector(
     NULL_USE(tag_index);
     NULL_USE(initial_time);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -105,6 +149,7 @@ ExtendedTagAndInitStrategy::applyGradientDetector(
     const int tag_index,
     const bool initial_time,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -116,6 +161,7 @@ ExtendedTagAndInitStrategy::applyGradientDetector(
     NULL_USE(tag_index);
     NULL_USE(initial_time);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -134,6 +180,7 @@ ExtendedTagAndInitStrategy::applyMultiresolutionDetector(
     const int tag_index,
     const bool initial_time,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_integral_detector_too,
@@ -145,6 +192,7 @@ ExtendedTagAndInitStrategy::applyMultiresolutionDetector(
     NULL_USE(tag_index);
     NULL_USE(initial_time);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -163,6 +211,7 @@ ExtendedTagAndInitStrategy::applyIntegralDetector(
     const int tag_index,
     const bool initial_time,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
@@ -174,6 +223,7 @@ ExtendedTagAndInitStrategy::applyIntegralDetector(
     NULL_USE(tag_index);
     NULL_USE(initial_time);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
@@ -193,6 +243,7 @@ ExtendedTagAndInitStrategy::applyRichardsonExtrapolation(
     const int error_coarsen_ratio,
     const bool initial_time,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
@@ -205,6 +256,7 @@ ExtendedTagAndInitStrategy::applyRichardsonExtrapolation(
     NULL_USE(error_coarsen_ratio);
     NULL_USE(initial_time);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);

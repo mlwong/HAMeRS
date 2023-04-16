@@ -269,6 +269,9 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
     bool usesRefineReg =
         usesRefineRegions(regrid_cycle, regrid_time);
     
+    bool usesImmersedBdry =
+        usesImmersedBdryDetector(regrid_cycle, regrid_time);
+    
     bool usesValue =
         usesValueDetector(regrid_cycle, regrid_time);
     
@@ -309,6 +312,7 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
             tag_index,
             initial_time,
             usesRefineReg,
+            usesImmersedBdry,
             usesValue,
             usesGradient,
             usesMultiresolution,
@@ -326,6 +330,7 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
             tag_index,
             initial_time,
             usesRefineReg,
+            usesImmersedBdry,
             usesValue,
             usesGradient,
             usesIntegral,
@@ -343,6 +348,7 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
             tag_index,
             initial_time,
             usesRefineReg,
+            usesImmersedBdry,
             usesValue,
             usesMultiresolution,
             usesIntegral,
@@ -360,6 +366,25 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
             tag_index,
             initial_time,
             usesRefineReg,
+            usesImmersedBdry,
+            usesGradient,
+            usesMultiresolution,
+            usesIntegral,
+            usesRichExtrap);
+    }
+    
+    if (usesImmersedBdry)
+    {
+        TBOX_ASSERT(d_tag_strategy != 0);
+        
+        d_tag_strategy->applyImmersedBdryDetector(
+            hierarchy,
+            level_number,
+            regrid_time,
+            tag_index,
+            initial_time,
+            usesRefineReg,
+            usesValue,
             usesGradient,
             usesMultiresolution,
             usesIntegral,
@@ -376,6 +401,7 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
             regrid_time,
             tag_index,
             initial_time,
+            usesImmersedBdry,
             usesValue,
             usesGradient,
             usesMultiresolution,
@@ -694,6 +720,7 @@ ExtendedTagAndInitialize::tagCellsUsingRichardsonExtrapolation(
         d_error_coarsen_ratio,
         initial_time,
         usesRefineRegions(regrid_cycle, regrid_time),
+        usesImmersedBdryDetector(regrid_cycle, regrid_time),
         usesValueDetector(regrid_cycle, regrid_time),
         usesGradientDetector(regrid_cycle, regrid_time),
         usesMultiresolutionDetector(regrid_cycle, regrid_time),
@@ -1478,6 +1505,67 @@ ExtendedTagAndInitialize::usesValueDetector(
              i++)
         {
             if (i->d_tagging_method == "VALUE_DETECTOR")
+            {
+                result = true;
+                break;
+            }
+        }
+    }
+    
+    return result;
+}
+
+
+/*
+ *************************************************************************
+ * Returns true if there is ever an immersed boundary detector tagging crtieria.
+ *************************************************************************
+ */
+bool
+ExtendedTagAndInitialize::everUsesImmersedBdryDetector() const
+{
+    return d_ever_uses_immersed_bdry_detector;
+}
+
+
+/*
+ *************************************************************************
+ * Returns true if there is an immersed boundary detector tagging crtieria
+ * for the supplied cycle/time.
+ *************************************************************************
+ */
+bool
+ExtendedTagAndInitialize::usesImmersedBdryDetector(
+    int cycle,
+    double time)
+{
+    TBOX_ASSERT(!d_use_cycle_criteria || !d_use_time_criteria);
+    
+    bool result = false;
+    
+    setCurrentTaggingCriteria(cycle, time);
+    if (d_use_cycle_criteria)
+    {
+        for (std::vector<TagCriteria>::const_iterator i =
+                d_cur_cycle_criteria->d_tag_criteria.begin();
+             i != d_cur_cycle_criteria->d_tag_criteria.end();
+             i++)
+        {
+            if (i->d_tagging_method == "IMMERSED_BDRY_DETECTOR")
+            {
+                result = true;
+                break;
+            }
+        }
+    }
+    else if (d_use_time_criteria)
+    {
+        for (std::vector<TagCriteria>::const_iterator i =
+                d_cur_time_criteria->d_tag_criteria.begin();
+             i != d_cur_time_criteria->d_tag_criteria.end();
+             i++)
+        {
+            if (i->d_tagging_method == "IMMERSED_BDRY_DETECTOR")
             {
                 result = true;
                 break;
@@ -2354,6 +2442,86 @@ ExtendedTagAndInitialize::turnOffRefineRegions(
             while (j != tag_crits.end())
             {
                 if (j->d_tagging_method == "REFINE_REGIONS")
+                {
+                    tag_crits.erase(j);
+                }
+                else
+                {
+                    j++;
+                }
+            }
+            break;
+        }
+    }
+}
+
+
+void
+ExtendedTagAndInitialize::turnOnImmersedBdryDetector(
+    double time)
+{
+    if (!d_tag_strategy)
+    {
+        TBOX_ERROR("ExtendedTagAndInitialize::turnOnImmersedBdryDetector\n"
+            << "A tagging strategy must be defined if immersed boundary detector is used.\n");
+    }
+    
+    TimeTagCriteria search_for;
+    search_for.d_time = time;
+    std::set<TimeTagCriteria, time_tag_criteria_less>::iterator existing =
+        d_time_criteria.find(search_for);
+    if (existing == d_time_criteria.end())
+    {
+        TimeTagCriteria this_time_crit;
+        TagCriteria this_tag_crit;
+        this_tag_crit.d_tagging_method = "IMMERSED_BDRY_DETECTOR";
+        this_time_crit.d_time = time;
+        this_time_crit.d_tag_criteria.push_back(this_tag_crit);
+        d_cur_time_criteria = d_time_criteria.insert(this_time_crit).first;
+    }
+    else
+    {
+        bool immersed_bdry_detect_already_on = false;
+        for (std::vector<TagCriteria>::const_iterator i =
+                existing->d_tag_criteria.begin();
+             i != existing->d_tag_criteria.end();
+             i++)
+        {
+            if (i->d_tagging_method == "IMMERSED_BDRY_DETECTOR")
+            {
+                immersed_bdry_detect_already_on = true;
+                break;
+            }
+        }
+        if (!immersed_bdry_detect_already_on)
+        {
+            TagCriteria this_tag_crit;
+            this_tag_crit.d_tagging_method = "IMMERSED_BDRY_DETECTOR";
+            std::vector<TagCriteria>& this_tag_criteria =
+                const_cast<std::vector<TagCriteria>&>(existing->d_tag_criteria);
+            this_tag_criteria.push_back(this_tag_crit);
+        }
+    }
+}
+
+
+void
+ExtendedTagAndInitialize::turnOffImmersedBdryDetector(
+    double time)
+{
+    for (std::set<TimeTagCriteria, time_tag_criteria_less>::iterator i =
+            d_time_criteria.begin();
+         i != d_time_criteria.end();
+         i++)
+    {
+        if (i->d_time <= time)
+        {
+            std::vector<TagCriteria>& tag_crits =
+                const_cast<std::vector<TagCriteria>&>(i->d_tag_criteria);
+            std::vector<TagCriteria>::iterator j = tag_crits.begin();
+            while (j != tag_crits.end())
+            {
+                if (j->d_tagging_method == "IMMERSED_BDRY_DETECTOR")
                 {
                     tag_crits.erase(j);
                 }

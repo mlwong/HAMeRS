@@ -3884,6 +3884,7 @@ NavierStokes::preprocessTagCellsValueDetector(
     const double regrid_time,
     const bool initial_error,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -3892,6 +3893,7 @@ NavierStokes::preprocessTagCellsValueDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -3931,6 +3933,7 @@ NavierStokes::tagCellsOnPatchValueDetector(
     const bool initial_error,
     const int tag_indx,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -3939,6 +3942,7 @@ NavierStokes::tagCellsOnPatchValueDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     
     t_tagvalue->start();
     
@@ -3984,6 +3988,7 @@ NavierStokes::preprocessTagCellsGradientDetector(
     const double regrid_time,
     const bool initial_error,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -3992,6 +3997,7 @@ NavierStokes::preprocessTagCellsGradientDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -4031,6 +4037,7 @@ NavierStokes::tagCellsOnPatchGradientDetector(
     const bool initial_error,
     const int tag_indx,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -4039,6 +4046,7 @@ NavierStokes::tagCellsOnPatchGradientDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     
     t_taggradient->start();
@@ -4084,6 +4092,7 @@ NavierStokes::preprocessTagCellsMultiresolutionDetector(
     const double regrid_time,
     const bool initial_error,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_integral_detector_too,
@@ -4092,6 +4101,7 @@ NavierStokes::preprocessTagCellsMultiresolutionDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -4131,6 +4141,7 @@ NavierStokes::tagCellsOnPatchMultiresolutionDetector(
     const bool initial_error,
     const int tag_indx,
     const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_integral_detector_too,
@@ -4139,6 +4150,7 @@ NavierStokes::tagCellsOnPatchMultiresolutionDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     
