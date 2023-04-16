@@ -350,7 +350,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
         Real vel_gc_t    =  Real(0);
         Real vel_body_n  =  Real(0);
         
-        const Real radius_c   = Real(1) / Real(20);        // AFK radius of the cylinder
+        const Real radius_c   = Real(1) / Real(20);        // AFK radius of the cylinder.
         const Real x_c        = half;                      // AFK
         const Real y_c        = half;                      // AFK
 
