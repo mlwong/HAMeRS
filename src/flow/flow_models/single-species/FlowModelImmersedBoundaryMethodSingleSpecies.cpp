@@ -170,8 +170,9 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
     const hier::IntVector& domain_dims)
 {
     NULL_USE(data_time);
-    NULL_USE(initial_time);
     
+    if (!initial_time)
+    {
     /*
      * Get the grid spacings and the lower coordinates.
      */
@@ -278,7 +279,8 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
 
         Real one              = Real(1);                                // AFK one
         Real half             = Real(1) / Real(2);
-        Real d_ip             = sqrt(Real(2)) + Real(1) / Real(1000000000);     // AFK distance from cylinder boundary to the image point sqrt(2 + epsilon)
+        Real d_ip             = sqrt(Real(2))*dx[0] + HAMERS_REAL_EPSILON;     // AFK distance from cylinder boundary to the image point sqrt(2 + epsilon)
+                                                                               // ML: assuming isotropic grid cells
 
         Real x_ip                   = Real(0);               // AFK x and y locations of image points
         Real y_ip                   = Real(0); 
@@ -397,22 +399,26 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                 {
                     // AFK Compute image point locations 
 
-                    if (x[0] > x_c)
-                    {
-                        x_ip    = x_c + sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*norm_1[idx_IB], 2));
-                    }
-                    else
-                    { 
-                        x_ip    = x_c - sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*norm_1[idx_IB], 2));
-                    }
-                    if (x[1] > y_c)
-                    {
-                        y_ip    = y_c + sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*norm_0[idx_IB], 2));
-                    }
-                    else
-                    {
-                        y_ip    = y_c - sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*norm_0[idx_IB], 2));               
-                    }
+                    // General computation of image point locations.
+                    x_ip = x[0] + (dist[idx_IB] + d_ip)*norm_0[idx_IB];
+                    y_ip = x[1] + (dist[idx_IB] + d_ip)*norm_1[idx_IB];
+                    
+                    // if (x[0] > x_c)
+                    // {
+                    //     x_ip    = x_c + sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*norm_1[idx_IB], 2));
+                    // }
+                    // else
+                    // { 
+                    //     x_ip    = x_c - sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*norm_1[idx_IB], 2)); // ML: BUGGY with the sign?
+                    // }
+                    // if (x[1] > y_c)
+                    // {
+                    //     y_ip    = y_c + sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*norm_0[idx_IB], 2));
+                    // }
+                    // else
+                    // {
+                    //     y_ip    = y_c - sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*norm_0[idx_IB], 2)); // ML: BUGGY with the sign?
+                    // }
 
                     ip_location_index_0    = floor((x_ip - patch_xlo[0] - half * dx[0]) / dx[0]);      
                     ip_location_index_1    = floor((y_ip - patch_xlo[1] - half * dx[1]) / dx[1]);      
@@ -646,5 +652,6 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                 }
             }
         }
+    }
     }
 }
