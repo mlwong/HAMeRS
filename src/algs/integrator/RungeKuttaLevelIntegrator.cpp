@@ -1850,6 +1850,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
             }
             
             // One more communication for exchanging the immersed boundary ghost cells in the halo regions.
+            copyTimeDependentData(level, d_intermediate[sn], d_scratch);
             fill_schedule_intermediate->fillData(current_time);
             
             if (regrid_advance)

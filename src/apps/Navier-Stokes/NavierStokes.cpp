@@ -848,7 +848,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         {
             const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
             
-            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1")
+            // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -869,7 +869,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         }
         else
         {
-            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1")
+            // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -894,7 +894,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         {
             const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
             
-            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
+            // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -913,7 +913,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         }
         else
         {
-            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
+            // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -991,7 +991,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2")
+                // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -1023,7 +1023,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2")
+                // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -1060,7 +1060,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
+                // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -1089,7 +1089,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
+                // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -1186,7 +1186,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-                    HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3")
+                    // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -1229,7 +1229,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-                    HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3")
+                    // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -1278,7 +1278,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-                    HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
+                    // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -1317,7 +1317,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-                    HAMERS_PRAGMA_VEC("max: spectral_radius_tmp")
+                    // HAMERS_PRAGMA_VEC("max: spectral_radius_tmp")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -1849,6 +1849,10 @@ NavierStokes::advanceSingleStepOnPatch(
                             {
                                 Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
                             }
+                            else
+                            {
+                                Q[ei][idx] = Q_intermediate[ei][idx_intermediate];
+                            }
                         }
                     }
                     else
@@ -2105,6 +2109,10 @@ NavierStokes::advanceSingleStepOnPatch(
                                 if (IB_mask[idx_IB_mask] == fluid)
                                 {
                                     Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                                }
+                                else
+                                {
+                                    Q[ei][idx] = Q_intermediate[ei][idx_intermediate];
                                 }
                             }
                         }
@@ -2538,6 +2546,10 @@ NavierStokes::advanceSingleStepOnPatch(
                                     if (IB_mask[idx_IB_mask] == fluid)
                                     {
                                         Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                                    }
+                                    else
+                                    {
+                                        Q[ei][idx] = Q_intermediate[ei][idx_intermediate];
                                     }
                                 }
                             }

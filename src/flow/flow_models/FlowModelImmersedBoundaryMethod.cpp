@@ -222,7 +222,7 @@ FlowModelImmersedBoundaryMethod::setConservativeVariablesCellDataImmersedBoundar
     const HAMERS_SHARED_PTR<pdat::CellData<Real> > data_surface_normal(
         HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(s_variable_surface_normal, data_context_IB)));
-    
+
     // Get the dimensions of the ghost cell boxes.
     const hier::Box ghost_box_cons_var = conservative_var_data[0]->getGhostBox();
     const hier::IntVector ghostcell_dims_cons_var = ghost_box_cons_var.numberCells();
@@ -267,10 +267,10 @@ FlowModelImmersedBoundaryMethod::setConservativeVariablesCellDataImmersedBoundar
         TBOX_ASSERT(num_ghosts_cons_var >= d_num_IBM_ghosts);
 #endif
         
-        const hier::IntVector num_ghosts_domain = num_ghosts_cons_var - d_num_IBM_ghosts;
-        
+        // const hier::IntVector num_ghosts_domain = num_ghosts_cons_var - d_num_IBM_ghosts;
         // domain_lo = -num_ghosts_domain;
         // domain_dims = interior_box.numberCells() + num_ghosts_domain*2;
+        
         domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = interior_box.numberCells();
         
