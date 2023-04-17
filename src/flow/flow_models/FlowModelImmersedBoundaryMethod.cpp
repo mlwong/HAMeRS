@@ -3,8 +3,6 @@
 HAMERS_SHARED_PTR<pdat::CellVariable<int> > FlowModelImmersedBoundaryMethod::s_variable_mask;
 HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelImmersedBoundaryMethod::s_variable_wall_distance;
 HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelImmersedBoundaryMethod::s_variable_surface_normal;
-HAMERS_SHARED_PTR<pdat::CellVariable<int> > FlowModelImmersedBoundaryMethod::s_variable_ip_index;
-HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelImmersedBoundaryMethod::s_variable_ip_corr;
 
 FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod(
     const std::string& object_name,
@@ -44,12 +42,6 @@ FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod(
     
     s_variable_surface_normal = HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
         new pdat::CellVariable<Real>(d_dim, "surface_normal", dim.getValue()));
-   
-    s_variable_ip_index = HAMERS_SHARED_PTR<pdat::CellVariable<int> > (
-        new pdat::CellVariable<int>(d_dim, "ip_index", 1));  //AFK
-  
-    s_variable_ip_corr = HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
-        new pdat::CellVariable<Real>(d_dim, "ip_corr", 1));   //AFK
 }
 
 
@@ -90,24 +82,6 @@ FlowModelImmersedBoundaryMethod::registerImmersedBoundaryMethodVariables(
     
     integrator->registerVariable(
         s_variable_surface_normal,
-        num_ghosts,
-        num_ghosts_intermediate,
-        RungeKuttaLevelIntegrator::NO_FILL,
-        d_grid_geometry,
-        "NO_COARSEN",
-        "NO_REFINE");
- 
-    integrator->registerVariable(   // AFK
-        s_variable_ip_index,
-        num_ghosts,
-        num_ghosts_intermediate,
-        RungeKuttaLevelIntegrator::NO_FILL,
-        d_grid_geometry,
-        "NO_COARSEN",
-        "NO_REFINE");
-
-    integrator->registerVariable(    // AFK
-        s_variable_ip_corr,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::NO_FILL,
@@ -179,14 +153,6 @@ FlowModelImmersedBoundaryMethod::setImmersedBoundaryMethodVariables(
     const HAMERS_SHARED_PTR<pdat::CellData<Real> > data_surface_normal(
         HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(s_variable_surface_normal, data_context)));
-   
-    const HAMERS_SHARED_PTR<pdat::CellData<int> > data_ip_index(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
-            patch.getPatchData(s_variable_ip_index, data_context)));
-
-    const HAMERS_SHARED_PTR<pdat::CellData<Real> > data_ip_corr(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
-            patch.getPatchData(s_variable_ip_corr, data_context)));
     
     d_immersed_boundaries->setImmersedBoundaryVariablesOnPatch(
         patch,
@@ -195,9 +161,7 @@ FlowModelImmersedBoundaryMethod::setImmersedBoundaryMethodVariables(
         domain,
         data_mask,
         data_wall_distance,
-        data_surface_normal,
-        data_ip_index, //AFK
-        data_ip_corr); //AFK
+        data_surface_normal);
 }
 
 
@@ -259,14 +223,6 @@ FlowModelImmersedBoundaryMethod::setConservativeVariablesCellDataImmersedBoundar
         HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(s_variable_surface_normal, data_context_IB)));
 
-    const HAMERS_SHARED_PTR<pdat::CellData<int> > data_ip_index(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
-            patch.getPatchData(s_variable_ip_index, data_context_IB)));
-  
-    const HAMERS_SHARED_PTR<pdat::CellData<Real> > data_ip_corr(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
-            patch.getPatchData(s_variable_ip_corr, data_context_IB)));
-    
     // Get the dimensions of the ghost cell boxes.
     const hier::Box ghost_box_cons_var = conservative_var_data[0]->getGhostBox();
     const hier::IntVector ghostcell_dims_cons_var = ghost_box_cons_var.numberCells();
@@ -349,8 +305,6 @@ FlowModelImmersedBoundaryMethod::setConservativeVariablesCellDataImmersedBoundar
         data_mask,
         data_wall_distance,
         data_surface_normal,
-        data_ip_index,
-        data_ip_corr,
         offset_cons_var,
         offset_IB,
         ghostcell_dims_cons_var,
