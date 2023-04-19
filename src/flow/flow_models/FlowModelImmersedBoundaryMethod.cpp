@@ -180,13 +180,13 @@ FlowModelImmersedBoundaryMethod::setImmersedBoundaryMethodVariables(
         HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(s_variable_surface_normal, data_context)));
     
-    const HAMERS_SHARED_PTR<pdat::CellData<int> > data_ip_index(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
-            patch.getPatchData(s_variable_ip_index, data_context)));
+    // const HAMERS_SHARED_PTR<pdat::CellData<int> > data_ip_index(
+    //     HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
+    //         patch.getPatchData(s_variable_ip_index, data_context)));
     
-    const HAMERS_SHARED_PTR<pdat::CellData<Real> > data_ip_corr(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
-            patch.getPatchData(s_variable_ip_corr, data_context)));
+    // const HAMERS_SHARED_PTR<pdat::CellData<Real> > data_ip_corr(
+    //     HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
+    //         patch.getPatchData(s_variable_ip_corr, data_context)));
     
     d_immersed_boundaries->setImmersedBoundaryVariablesOnPatch(
         patch,
@@ -195,9 +195,7 @@ FlowModelImmersedBoundaryMethod::setImmersedBoundaryMethodVariables(
         domain,
         data_mask,
         data_wall_distance,
-        data_surface_normal,
-        data_ip_index,  //AFK
-        data_ip_corr);  //AFK
+        data_surface_normal);
 }
 
 
