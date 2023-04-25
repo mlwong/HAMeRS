@@ -75,6 +75,22 @@ FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSin
             << std::endl);
     }
     
+    /*
+     * Read the problem type. (Euler or NS)
+     */
+
+    if (immersed_boundary_method_db->keyExists("problem_type"))
+    {
+        d_type = immersed_boundary_method_db->getString("problem_type");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSingleSpecies()\n"
+            << "Required 'problem_type' entry from input database missing."
+            << std::endl);
+    }
+    
     std::vector<Real*> thermo_properties_ptr;
     std::vector<const Real*> thermo_properties_const_ptr;
     
@@ -401,25 +417,6 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         x_ip = x[0] + (dist[idx_IB] + d_ip)*norm_0[idx_IB];
                         y_ip = x[1] + (dist[idx_IB] + d_ip)*norm_1[idx_IB];
                         
-                        // The following is NOT general implementation
-                        // AFK Compute image point locations 
-                        // if (x[0] > x_c)
-                        // {
-                        //     x_ip    = x_c + sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*norm_1[idx_IB], 2));
-                        // }
-                        // else
-                        // { 
-                        //     x_ip    = x_c - sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*norm_1[idx_IB], 2)); // ML: BUGGY with the sign?
-                        // }
-                        // if (x[1] > y_c)
-                        // {
-                        //     y_ip    = y_c + sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*norm_0[idx_IB], 2));
-                        // }
-                        // else
-                        // {
-                        //     y_ip    = y_c - sqrt(pow(radius_c + d_ip, 2) - pow((radius_c + d_ip)*norm_0[idx_IB], 2)); // ML: BUGGY with the sign?
-                        // }
-                        
                         ip_location_index_0 = int(floor((x_ip - patch_xlo[0] - half * dx[0]) / dx[0]));
                         ip_location_index_1 = int(floor((y_ip - patch_xlo[1] - half * dx[1]) / dx[1]));
                         
@@ -429,18 +426,6 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         ip_ratio_0 = (x_ip - x_ip_BL) / dx[0];
                         ip_ratio_1 = (y_ip - y_ip_BL) / dx[1];
                         
-                        /*
-                        // Probably these are unnecessary
-                        const int idx_IP_BL  = idx_IB;                                         // AFK declaration of the indexes of the cells in interpolation
-                        const int idx_IP_BR  = idx_IB + 1;
-                        const int idx_IP_TL  = idx_IB + ghostcell_dim_0_IB;
-                        const int idx_IP_TR  = idx_IB + ghostcell_dim_0_IB + 1;
-                        
-                        const int idx_cons_var_BL  = idx_cons_var;                              // AFK declaration of the indexes of the cells in interpolation
-                        const int idx_cons_var_BR  = idx_cons_var + 1;
-                        const int idx_cons_var_TL  = idx_cons_var + ghostcell_dim_0_cons_var;
-                        const int idx_cons_var_TR  = idx_cons_var + ghostcell_dim_0_cons_var + 1;
-                        */
                          
                         // AFK declaration of the indexes of the cells in interpolation
                         const int idx_cons_var_BL  = (ip_location_index_0 + offset_0_cons_var) +
@@ -481,16 +466,22 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         v_ip = (one - ip_ratio_1) * v_f1    + ip_ratio_1 * v_f2;
                         
                         // Compute velocities at the ghost cell for Euler equation (no-slip for normal direction and slip for tangential direction)
+                        if(d_type == "Euler")
+                        {
+                            vel_ip_n =  u_ip * norm_0[idx_IB] + v_ip * norm_1[idx_IB];
+                            vel_ip_t = -u_ip * norm_1[idx_IB] + v_ip * norm_0[idx_IB];
                         
-                        vel_ip_n =  u_ip * norm_0[idx_IB] + v_ip * norm_1[idx_IB];
-                        vel_ip_t = -u_ip * norm_1[idx_IB] + v_ip * norm_0[idx_IB];
+                            vel_gc_n = vel_ip_n - ((d_ip + dist[idx_IB]) / d_ip) * (vel_ip_n);
+                            vel_gc_t = vel_ip_t;
                         
-                        vel_gc_n = vel_ip_n - ((d_ip + dist[idx_IB]) / d_ip) * (vel_ip_n);
-                        vel_gc_t = vel_ip_t;
-                        
-                        u_gc = vel_gc_n * norm_0[idx_IB] - vel_gc_t * norm_1[idx_IB];
-                        v_gc = vel_gc_n * norm_1[idx_IB] + vel_gc_t * norm_0[idx_IB]; 
-                        
+                            u_gc = vel_gc_n * norm_0[idx_IB] - vel_gc_t * norm_1[idx_IB];
+                            v_gc = vel_gc_n * norm_1[idx_IB] + vel_gc_t * norm_0[idx_IB]; 
+                        }
+                        else
+                        {
+                            u_gc       = u_ip - ((d_ip + dist[idx_IB])/d_ip) * (u_ip);
+                            v_gc       = v_ip - ((d_ip + dist[idx_IB])/d_ip) * (v_ip);
+                        }
                         // Compute velocities at the ghost cell for NS equations (no-slip bcs)
                             //u_gc       = u_ip - ((d_ip + dist[idx_IB])/d_ip) * (u_ip);
                             //v_gc       = v_ip - ((d_ip + dist[idx_IB])/d_ip) * (v_ip);
@@ -506,56 +497,6 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         T_TL    = epsilon_TL / c_v;
                         T_BR    = epsilon_BR / c_v;
                         T_TR    = epsilon_TR / c_v;
-                        
-                        /*
-                        p_BL    = d_equation_of_state_mixing_rules->getEquationOfState()->
-                            getPressure(
-                                &rho[idx_cons_var_BL],
-                                &epsilon_BL,
-                                thermo_properties_const_ptr);
-                        
-                        p_TL    = d_equation_of_state_mixing_rules->getEquationOfState()->
-                            getPressure(
-                                &rho[idx_cons_var_TL],
-                                &epsilon_TL,
-                                thermo_properties_const_ptr);
-                        
-                        p_BR    = d_equation_of_state_mixing_rules->getEquationOfState()->
-                            getPressure(
-                                &rho[idx_cons_var_BR],
-                                &epsilon_BR,
-                                thermo_properties_const_ptr);
-                        
-                        p_TR    = d_equation_of_state_mixing_rules->getEquationOfState()->
-                            getPressure(
-                                &rho[idx_cons_var_TR],
-                                &epsilon_TR,
-                                thermo_properties_const_ptr);
-                        
-                        T_BL = d_equation_of_state_mixing_rules->getEquationOfState()->
-                            getTemperature(
-                                &rho[idx_cons_var_BL],
-                                &p_BL,
-                                thermo_properties_const_ptr);
-                        
-                        T_TL = d_equation_of_state_mixing_rules->getEquationOfState()->
-                            getTemperature(
-                                &rho[idx_cons_var_TL],
-                                &p_TL,
-                                thermo_properties_const_ptr);
-                        
-                        T_BR = d_equation_of_state_mixing_rules->getEquationOfState()->
-                            getTemperature(
-                                &rho[idx_cons_var_BR],
-                                &p_BR,
-                                thermo_properties_const_ptr);
-                        
-                        T_TR = d_equation_of_state_mixing_rules->getEquationOfState()->
-                            getTemperature(
-                                &rho[idx_cons_var_TR],
-                                &p_TR,
-                                thermo_properties_const_ptr);
-                        */
                         
                         T_f1 = (one - ip_ratio_0) * T_BL + ip_ratio_0 * T_BR;
                         T_f2 = (one - ip_ratio_0) * T_TL + ip_ratio_0 * T_TR;

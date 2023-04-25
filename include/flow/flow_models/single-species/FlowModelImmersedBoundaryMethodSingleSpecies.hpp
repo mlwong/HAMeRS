@@ -45,6 +45,8 @@ class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoun
         Real d_rho_body;
         std::vector<Real> d_vel_body;
         Real d_p_body;
+        // Real d_type;
+        std::string d_type;
         
         /* 
          * Values of conservative variables inside the body.
