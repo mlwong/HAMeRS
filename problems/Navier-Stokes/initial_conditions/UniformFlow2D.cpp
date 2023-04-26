@@ -62,6 +62,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         // Get the dimensions of box that covers the interior of Patch.
         hier::Box patch_box = patch.getBox();
         const hier::IntVector patch_dims = patch_box.numberCells();
+        const double* const dx = patch_geom->getDx();            //AFK
+        const double* const patch_xlo = patch_geom->getXLower(); //AFK
         
         /*
          * Initialize data for a 2D density wave advection problem.
@@ -85,7 +87,17 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             Real u_inf   = Real(1);
             Real v_inf   = Real(1);
             Real p_inf   = Real(1);
-            
+            Real x_c     = Real(1);
+            Real y_c     = Real(1); 
+            Real D       = Real(1);
+            Real r       = Real(1);
+            Real theta   = Real(1);
+            Real V_r     = Real(1); 
+            Real V_theta = Real(1);
+            Real u       = Real(1);
+            Real v       = Real(1);
+            Real p       = Real(1); 
+
             if (d_initial_conditions_db != nullptr)
             {
                 TBOX_ASSERT(d_initial_conditions_db->keyExists("rho_inf"));
@@ -97,6 +109,9 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 u_inf   = d_initial_conditions_db->getReal("u_inf");
                 v_inf   = d_initial_conditions_db->getReal("v_inf");
                 p_inf   = d_initial_conditions_db->getReal("p_inf");
+                x_c     = d_initial_conditions_db->getReal("x_c");
+                y_c     = d_initial_conditions_db->getReal("y_c");
+                D       = d_initial_conditions_db->getReal("D");
             }
             
             for (int j = 0; j < patch_dims[1]; j++)
@@ -106,11 +121,27 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     // Compute index into linear data array.
                     int idx_cell = i + j*patch_dims[0];
                     
+                    Real x[2];
+                    x[0] = patch_xlo[0] + (Real(i) + Real(1)/Real(2))*dx[0]; // x coordinates of the point.
+                    x[1] = patch_xlo[1] + (Real(j) + Real(1)/Real(2))*dx[1];
                     rho[idx_cell]   = rho_inf;
-                    rho_u[idx_cell] = rho_inf*u_inf;
-                    rho_v[idx_cell] = rho_inf*v_inf;
-                    E[idx_cell]     = p_inf/(gamma - Real(1)) + Real(1)/Real(2)*rho_inf*
-                        (u_inf*u_inf + v_inf*v_inf);
+                    r               = pow((x[0]-x_c), 2.0) + pow((x[1]-y_c), 2.0);
+                    r               = pow(r, 0.5);
+                    theta           = atan((x[1]-y_c)/(x[0]-x_c));
+                    V_r             = u_inf*(1.0-D*D/(4.0*r*r))*cos(theta);
+                    V_theta         = -u_inf*(1.0+D*D/(4.0*r*r))*sin(theta);
+                    if(r<D/4.0)
+                    {
+                        V_r = 0.0;
+                        V_theta = 0.0;
+                    }
+                    u               = (V_r*cos(theta) - V_theta*sin(theta));
+                    v               = (V_r*sin(theta) + V_theta*cos(theta));
+                    rho_u[idx_cell] = rho_inf*u;
+                    rho_v[idx_cell] = rho_inf*v;
+                    p               = p_inf+0.5*rho_inf*(u_inf*u_inf-pow((V_r*V_r+V_theta*V_theta),0.5));
+                    E[idx_cell]     = p/(gamma - Real(1)) + Real(1)/Real(2)*rho_inf*
+                        (u*u + v*v);
                 }
             }
         }

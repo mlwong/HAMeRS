@@ -63,9 +63,12 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
     
     const double half = double(1)/double(2);
     
-    const double radius_c = double(1)/double(20);
-    const double x_c = half;
-    const double y_c = half;
+    /*
+     * These will be read from the input file.
+     */
+    const double radius_c = half; //double(20); AFK 
+    const double x_c = double(5); //half;  AFK
+    const double y_c = double(4); //half;  AFK
     
     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
     {
