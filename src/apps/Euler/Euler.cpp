@@ -309,8 +309,14 @@ Euler::registerModelVariables(
             d_multiresolution_tagger->getMultiresolutionTaggerNumberOfGhostCells());
     }
     
+    /*
+     * Set the number of immersed boundary ghost cells of d_immersed_boundaries.
+     */
+    
     if (d_use_immersed_boundaries)
     {
+        d_immersed_boundaries->setNumberOfImmersedBoundaryGhosts(num_ghosts_intermediate);
+        
         HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
             d_flow_model->getFlowModelImmersedBoundaryMethod();
         
@@ -331,16 +337,13 @@ Euler::registerModelVariables(
         num_ghosts_intermediate);
     
     /*
-     * Set the number of immersed boundary ghost cells of d_immersed_boundaries and register the variables of
-     * flow model immersed boundary method.
+     * Register the variables of flow model immersed boundary method.
      */
     
     if (d_use_immersed_boundaries)
     {
         HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
             d_flow_model->getFlowModelImmersedBoundaryMethod();
-        
-        d_immersed_boundaries->setNumberOfImmersedBoundaryGhosts(num_ghosts);
         
         flow_model_immersed_boundary_method->registerImmersedBoundaryMethodVariables(
             integrator,
