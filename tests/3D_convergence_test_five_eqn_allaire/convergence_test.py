@@ -8,11 +8,13 @@ import os
 convective_flux_schemes = [
     "WCNS5_JS_HLLC_HLL", "WCNS5_Z_HLLC_HLL", "WCNS6_LD_HLLC_HLL", \
     "DRP4_9PT", "DRP4_11PT", "DRP4_13PT", \
+    "CENTRAL2", "CENTRAL4", "CENTRAL6", \
     "CENTRAL8", "CENTRAL10", "CENTRAL12"]
 
 L2_convergence_rates_schemes_expected = [
     4.8, 4.8, 5.8, \
     3.8, 3.8, 3.8, \
+    1.8, 3.8, 5.8, \
     7.8, 9.8, 11.5]
 
 num_grid_levels = 4
