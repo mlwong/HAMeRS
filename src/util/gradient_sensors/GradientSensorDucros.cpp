@@ -131,8 +131,9 @@ GradientSensorDucros::computeGradient(
                     
                     const Real S_sq = S_11*S_11 + S_22*S_22 + two*S_12*S_12;
                     const Real omega = dv_dx - du_dy;
+                    const Real Omega = omega*omega;
                     
-                    psi[idx_gradient] = S_sq/(S_sq + omega*omega + Real(EPSILON));
+                    psi[idx_gradient] = Omega/(S_sq + Omega + Real(EPSILON));
                 }
             }
         }
@@ -270,10 +271,9 @@ GradientSensorDucros::computeGradient(
                         const Real omega_x = dw_dy - dv_dz;
                         const Real omega_y = du_dz - dw_dx;
                         const Real omega_z = dv_dx - du_dy;
+                        const Real Omega = omega_x*omega_x + omega_y*omega_y + omega_z*omega_z;
                         
-                        psi[idx_gradient] = S_sq/(S_sq +
-                            omega_x*omega_x + omega_y*omega_y + omega_z*omega_z +
-                            Real(EPSILON));
+                        psi[idx_gradient] = Omega/(S_sq + Omega + Real(EPSILON));
                     }
                 }
             }

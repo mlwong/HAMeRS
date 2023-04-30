@@ -142,7 +142,7 @@ class GradientTagger
         const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
-         * Number of ghost cells needed by the the gradient tagger.
+         * Number of ghost cells needed by the gradient tagger.
          */
         hier::IntVector d_num_gradient_ghosts;
         

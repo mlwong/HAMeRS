@@ -1385,8 +1385,6 @@ GradientTagger::printClassData(std::ostream& os) const
     os << "\nPrint GradientTagger object..."
        << std::endl;
     
-    os << std::endl;
-    
     os << "d_gradient_sensors = ";
     for (int si = 0; si < static_cast<int>(d_gradient_sensors.size()); si++)
     {
