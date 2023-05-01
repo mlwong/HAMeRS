@@ -203,7 +203,8 @@ class GradientTagger
         /*
          * Settings and tolerance for the Ducros gradient sensor.
          */
-        bool d_Ducros_gradient_use_strain_rate_instead_of_dilatation;
+        bool d_Ducros_gradient_use_dilatation;
+        bool d_Ducros_gradient_use_strain_rate;
         Real d_Ducros_gradient_tol;
         
         /*

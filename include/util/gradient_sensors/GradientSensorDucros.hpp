@@ -15,7 +15,8 @@ class GradientSensorDucros: public GradientSensor
         GradientSensorDucros(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const bool use_strain_rate_instead_of_dilatation);
+            const bool use_dilatation,
+            const bool use_strain_rate);
         
         ~GradientSensorDucros() {}
         
@@ -30,7 +31,8 @@ class GradientSensorDucros: public GradientSensor
             const int depth = 0);
         
     private:
-        const bool d_use_strain_rate_instead_of_dilatation;
+        const bool d_use_dilatation;
+        const bool d_use_strain_rate;
 };
 
 #endif /* GRADIENT_SENSOR_DUCROS_HPP */

@@ -624,22 +624,43 @@ GradientTagger::GradientTagger(
                 }
                 else if (sensor_db && sensor_key == "DUCROS_GRADIENT")
                 {
-                    if (sensor_db->keyExists("Ducros_gradient_use_strain_rate_instead_of_dilatation"))
+                    if (sensor_db->keyExists("Ducros_gradient_use_dilatation"))
                     {
-                        d_Ducros_gradient_use_strain_rate_instead_of_dilatation =
-                            sensor_db->getBool("Ducros_gradient_use_strain_rate_instead_of_dilatation");
+                        d_Ducros_gradient_use_dilatation =
+                            sensor_db->getBool("Ducros_gradient_use_dilatation");
                     }
-                    else if (sensor_db->keyExists("d_Ducros_gradient_use_strain_rate_instead_of_dilatation"))
+                    else if (sensor_db->keyExists("d_Ducros_gradient_use_dilatation"))
                     {
-                        d_Ducros_gradient_use_strain_rate_instead_of_dilatation =
-                            sensor_db->getBool("d_Ducros_gradient_use_strain_rate_instead_of_dilatation");
+                        d_Ducros_gradient_use_dilatation =
+                            sensor_db->getBool("d_Ducros_gradient_use_dilatation");
                     }
                     else
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "No key 'Ducros_gradient_use_strain_rate_instead_of_dilatation'/"
-                            << "'d_Ducros_gradient_use_strain_rate_instead_of_dilatation' found in data for "
+                            << "No key 'Ducros_gradient_use_dilatation'/"
+                            << "'d_Ducros_gradient_use_dilatation' found in data for "
+                            << sensor_key
+                            << "."
+                            << std::endl);
+                    }
+                    
+                    if (sensor_db->keyExists("Ducros_gradient_use_strain_rate"))
+                    {
+                        d_Ducros_gradient_use_strain_rate =
+                            sensor_db->getBool("Ducros_gradient_use_strain_rate");
+                    }
+                    else if (sensor_db->keyExists("d_Ducros_gradient_use_strain_rate"))
+                    {
+                        d_Ducros_gradient_use_strain_rate =
+                            sensor_db->getBool("d_Ducros_gradient_use_strain_rate");
+                    }
+                    else
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": "
+                            << "No key 'Ducros_gradient_use_strain_rate'/"
+                            << "'d_Ducros_gradient_use_strain_rate' found in data for "
                             << sensor_key
                             << "."
                             << std::endl);
@@ -648,7 +669,8 @@ GradientTagger::GradientTagger(
                     d_gradient_sensor_Ducros.reset(new GradientSensorDucros(
                         "Ducros gradient sensor",
                         d_dim,
-                        d_Ducros_gradient_use_strain_rate_instead_of_dilatation));
+                        d_Ducros_gradient_use_dilatation,
+                        d_Ducros_gradient_use_strain_rate));
                     
                     if (sensor_db->keyExists("Ducros_gradient_tol"))
                     {
@@ -1579,7 +1601,8 @@ GradientTagger::printClassData(std::ostream& os) const
     if (d_gradient_sensor_Ducros != nullptr)
     {
         os << std::endl;
-        os << "d_Ducros_gradient_use_strain_rate_instead_of_dilatation = " << d_Ducros_gradient_use_strain_rate_instead_of_dilatation << std::endl;
+        os << "d_Ducros_gradient_use_dilatation = " << d_Ducros_gradient_use_dilatation << std::endl;
+        os << "d_Ducros_gradient_use_strain_rate = " << d_Ducros_gradient_use_strain_rate << std::endl;
         os << "d_Ducros_gradient_tol = " << d_Ducros_gradient_tol << std::endl;
     }
 }
@@ -1694,8 +1717,11 @@ GradientTagger::putToRestart(
             HAMERS_SHARED_PTR<tbox::Database> sensor_db =
                 restart_db->putDatabase("DUCROS_GRADIENT");
             
-            sensor_db->putBool("d_Ducros_gradient_use_strain_rate_instead_of_dilatation",
-                d_Ducros_gradient_use_strain_rate_instead_of_dilatation);
+            sensor_db->putBool("d_Ducros_gradient_use_dilatation",
+                d_Ducros_gradient_use_dilatation);
+            
+            sensor_db->putBool("d_Ducros_gradient_use_strain_rate",
+                d_Ducros_gradient_use_strain_rate);
             
             sensor_db->putReal("d_Ducros_gradient_tol",
                 d_Ducros_gradient_tol);
