@@ -96,7 +96,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         // const double gamma_1 = double(7)/double(5);
         
         double lambda = 701.53278340668; // wavelength of single-mode perturbation
-        double eta_0  = 0.01*lambda;      // 1% perturbation
+        double eta_0  = 0.01*lambda*0.0;      // 1% perturbation // DEBUGGING
         // const double eta_0  = 0.0*lambda;      // no perturbation
         
         
@@ -166,13 +166,18 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         rho_u[idx_cell] = rho*u;
                         rho_v[idx_cell] = rho*v;
                         E[idx_cell]     = p/(gamma - double(1)) + double(1)/double(2)*rho*(u*u + v*v);
+                        
+                        // if (j == 0)
+                        // {
+                        //     std::cout << "x[0]: " << x[0] << ", p_i: " << p_i << ", gamma: " << gamma << ", R_2: " << R_2 << ", T_0: " << T_0 << ", p: " << p << std::endl;
+                        // }
                     }
                 }
             }
         }
         else if (d_project_name == "2D smooth Rayleigh-Taylor instability")
         {
-            const double delta = 0.02*lambda; // characteristic length of interface.
+            const double delta = 0.00012*lambda; // characteristic length of interface.
             const double shift = 0.0; // location of interface.
             
             for (int j = 0; j < patch_dims[1]; j++)
@@ -197,7 +202,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
 
                     const double R_H   = R_1*(1.0 - X_2_H) + X_2_H*R_2;
                     
-                    const int N_int = 100000; // number of numerical quadrature points
+                    const int N_int = 1000; // number of numerical quadrature points
                     const double dx_p = (x[0] - shift)/(N_int - 1.0);
                     
                     double integral = 0.0;
