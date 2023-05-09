@@ -94,9 +94,14 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             Real theta   = Real(1);
             Real V_r     = Real(1); 
             Real V_theta = Real(1);
+            Real u_ic    = Real(1);
+            Real v_ic    = Real(1);
+            Real p_ic    = Real(1);
             Real u       = Real(1);
             Real v       = Real(1);
-            Real p       = Real(1); 
+            Real p       = Real(1);
+            Real spongeR = Real(1);
+            Real spongeL = Real(1);
 
             if (d_initial_conditions_db != nullptr)
             {
@@ -105,13 +110,15 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 TBOX_ASSERT(d_initial_conditions_db->keyExists("v_inf"));
                 TBOX_ASSERT(d_initial_conditions_db->keyExists("p_inf"));
                 
-                rho_inf = d_initial_conditions_db->getReal("rho_inf");
-                u_inf   = d_initial_conditions_db->getReal("u_inf");
-                v_inf   = d_initial_conditions_db->getReal("v_inf");
-                p_inf   = d_initial_conditions_db->getReal("p_inf");
-                x_c     = d_initial_conditions_db->getReal("x_c");
-                y_c     = d_initial_conditions_db->getReal("y_c");
-                D       = d_initial_conditions_db->getReal("D");
+                rho_inf      = d_initial_conditions_db->getReal("rho_inf");
+                u_inf        = d_initial_conditions_db->getReal("u_inf");
+                v_inf        = d_initial_conditions_db->getReal("v_inf");
+                p_inf        = d_initial_conditions_db->getReal("p_inf");
+                x_c          = d_initial_conditions_db->getReal("x_c");
+                y_c          = d_initial_conditions_db->getReal("y_c");
+                D            = d_initial_conditions_db->getReal("D");
+                spongeL      = d_initial_conditions_db->getReal("spongeL");
+                spongeR      = d_initial_conditions_db->getReal("spongeR");
             }
             
             for (int j = 0; j < patch_dims[1]; j++)
@@ -135,11 +142,25 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         V_r = 0.0;
                         V_theta = 0.0;
                     }
-                    u               = (V_r*cos(theta) - V_theta*sin(theta));
-                    v               = (V_r*sin(theta) + V_theta*cos(theta));
+                    u_ic            = (V_r*cos(theta) - V_theta*sin(theta));
+                    v_ic            = (V_r*sin(theta) + V_theta*cos(theta));
+                    p_ic            = p_inf+0.5*rho_inf*(u_inf*u_inf-(V_r*V_r+V_theta*V_theta));
+
+
+                    if(x[0]<x_c)
+                    {
+                        u = 0.5 * (u_inf + u_ic) + 0.5 * (u_ic - u_inf)*erf((x[0]-spongeL)/(D/5.0));
+                        v = 0.5 * (v_inf + v_ic) + 0.5 * (v_ic - v_inf)*erf((x[0]-spongeL)/(D/5.0));
+                        p = 0.5 * (p_inf + p_ic) + 0.5 * (p_ic - p_inf)*erf((x[0]-spongeL)/(D/5.0));
+                    }
+                    else
+                    {
+                        u = 0.5 * (u_inf + u_ic) - 0.5 * (u_ic - u_inf)*erf((x[0]-spongeR)/(D/5.0));
+                        v = 0.5 * (v_inf + v_ic) - 0.5 * (v_ic - v_inf)*erf((x[0]-spongeR)/(D/5.0));
+                        p = 0.5 * (p_inf + p_ic) - 0.5 * (p_ic - p_inf)*erf((x[0]-spongeR)/(D/5.0));
+                    }
                     rho_u[idx_cell] = rho_inf*u;
                     rho_v[idx_cell] = rho_inf*v;
-                    p               = p_inf+0.5*rho_inf*(u_inf*u_inf-pow((V_r*V_r+V_theta*V_theta),0.5));
                     E[idx_cell]     = p/(gamma - Real(1)) + Real(1)/Real(2)*rho_inf*
                         (u*u + v*v);
                 }

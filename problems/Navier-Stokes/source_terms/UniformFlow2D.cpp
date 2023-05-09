@@ -94,7 +94,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     Real v_inf = Real(0);
     if (d_source_terms_db->keyExists("v_inf"))
     {
-        rho_inf = d_source_terms_db->getReal("v_inf");
+        v_inf = d_source_terms_db->getReal("v_inf");
     }
     else
     {
@@ -118,52 +118,6 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << "No key 'p_inf' found in data for source terms."
             << std::endl);
     }
-    /*
-    TBOX_ASSERT(d_source_terms_db->keyExists("U_jet"));
-    
-    double U_jet = double(0);
-    if (d_source_terms_db->keyExists("U_jet"))
-    {
-        U_jet = d_source_terms_db->getDouble("U_jet");
-    }
-    else
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "No key 'U_jet' found in data for source terms."
-            << std::endl);
-    }
-    
-    TBOX_ASSERT(d_source_terms_db->keyExists("theta_0"));
-    
-    double theta_0 = double(0);
-    if (d_source_terms_db->keyExists("theta_0"))
-    {
-        theta_0 = d_source_terms_db->getDouble("theta_0");
-    }
-    else
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "No key 'theta_0' found in data for source terms."
-            << std::endl);
-    }
-
-    TBOX_ASSERT(d_source_terms_db->keyExists("D_jet"));
-    
-    double D_jet = double(0);
-    if (d_source_terms_db->keyExists("D_jet"))
-    {
-        D_jet = d_source_terms_db->getDouble("D_jet");
-    }
-    else
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "No key 'D_jet' found in data for source terms."
-            << std::endl);
-    }
-    */
     const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
         HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
@@ -195,10 +149,6 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     hier::Box patch_box = patch.getBox();
     const hier::IntVector patch_dims = patch_box.numberCells();
     
-    /*
-     * Initialize data for a 2D Rayleigh-Taylor instability problem (At = 0.04, M = 0.3).
-     */
-    
     HAMERS_SHARED_PTR<pdat::CellData<double> > density         = conservative_variables[0];
     HAMERS_SHARED_PTR<pdat::CellData<double> > momentum        = conservative_variables[1];
     HAMERS_SHARED_PTR<pdat::CellData<double> > total_energy    = conservative_variables[2];
@@ -206,51 +156,11 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     Real* rho     = density->getPointer(0);
     Real* rho_u   = momentum->getPointer(0);
     Real* rho_v   = momentum->getPointer(1);
-    Real* rho_w   = momentum->getPointer(2);
     Real* E       = total_energy->getPointer(0);
     
     const Real gamma = double(7)/double(5); // assume both gases have the same ratio of specific heat ratios
     
-    const double p_ref = 100000.0; // interface pressure
-    const double T_ref = 300.0;    // background temperature
-    
     TBOX_ASSERT(d_source_terms_db != nullptr);
-    // TBOX_ASSERT(d_source_terms_db->keyExists("has_gravity") || d_source_terms_db->keyExists("d_has_gravity"));
-    
-    // std::vector<double> gravity_vector;
-    
-    // if (d_source_terms_db->keyExists("has_gravity"))
-    // {
-    //     if (d_source_terms_db->keyExists("gravity"))
-    //     {
-    //         d_source_terms_db->getVector("gravity", gravity_vector);
-    //     }
-    //     else
-    //     {
-    //         TBOX_ERROR(d_object_name
-    //             << ": "
-    //             << "No key 'gravity' found in data for source terms."
-    //             << std::endl);
-    //     }
-    // }
-    // else if (d_source_terms_db->keyExists("d_has_gravity"))
-    // {
-    //     if (d_source_terms_db->keyExists("d_gravity"))
-    //     {
-    //         d_source_terms_db->getVector("d_gravity", gravity_vector);
-    //     }
-    //     else
-    //     {
-    //         TBOX_ERROR(d_object_name
-    //             << ": "
-    //             << "No key 'd_gravity' found in data for source terms."
-    //             << std::endl);
-    //     }
-    // }
-    
-    // const double g = gravity_vector[0]; // gravity
-    
-    // const double R_1 = R_u/W_1;          // gas constant of lighter gas
 
     const double* const domain_xlo = d_grid_geometry->getXLower();
     const double* const domain_xhi = d_grid_geometry->getXUpper();
@@ -280,8 +190,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                 if (x[0] <= d_special_source_box_lo[0])
                 {                    
                     const Real u_ref = u_inf;
-                    const Real  v_ref = v_inf;
-                    // const double Z_ref = 0.5*(1.0-tanh(r_0/(4.0*theta_0)*(r/r_0-r_0/r)));
+                    const Real v_ref = v_inf;
                     
                     const Real rho_ref = rho_inf;
                     const Real p_ref   = p_inf;
@@ -319,9 +228,6 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     Real xi_b      = pow((x[0]-d_special_source_box_hi[0])/(domain_xhi[0]-d_special_source_box_hi[0]),3.0); // mask value needs to be improved 
                     xi_b           = xi_b * sponge_rate;
 
-                    //sponge_rate_tot = (pow((p_ref/rho_ref),0.5))*sponge_rate;
-                    //xi_b            = -(x[0])/(701.0-600.0); // mask value needs to be improved 
-                    
                     const double rho_p     = rho[idx_cons_var] - rho_ref;
                     const double rho_u_p   = rho_u[idx_cons_var]   - rho_u_ref;
                     const double rho_v_p   = rho_v[idx_cons_var]   - rho_v_ref;
