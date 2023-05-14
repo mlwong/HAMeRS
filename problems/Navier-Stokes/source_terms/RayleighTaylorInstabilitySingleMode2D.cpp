@@ -707,12 +707,12 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     S[4][idx_source] -= dt*sponge_rate_tot*xi_b*rho_v_p;
                     S[5][idx_source] -= dt*sponge_rate_tot*xi_b*E_p;
 
-                    S[0][idx_source] += dt*sponge_nu*xi_b*( ((rho_Y_0_p_L - 2.0*rho_Y_0_p + rho_Y_0_p_R)/pow(dx[0], 2.0)) + ((rho_Y_0_p_B - 2.0*rho_Y_0_p + rho_Y_0_p_T)/pow(dx[1], 2.0)) );
-                    S[1][idx_source] += dt*sponge_nu*xi_b*( ((rho_Y_1_p_L - 2.0*rho_Y_1_p + rho_Y_1_p_R)/pow(dx[0], 2.0)) + ((rho_Y_1_p_B - 2.0*rho_Y_1_p + rho_Y_1_p_T)/pow(dx[1], 2.0)) );
-                    S[2][idx_source] += dt*sponge_nu*xi_b*( ((rho_Y_2_p_L - 2.0*rho_Y_2_p + rho_Y_2_p_R)/pow(dx[0], 2.0)) + ((rho_Y_2_p_B - 2.0*rho_Y_2_p + rho_Y_2_p_T)/pow(dx[1], 2.0)) );
-                    S[3][idx_source] += dt*sponge_nu*xi_b*( ((rho_u_p_L - 2.0*rho_u_p + rho_u_p_R)/pow(dx[0], 2.0)) + ((rho_u_p_B - 2.0*rho_u_p + rho_u_p_T)/pow(dx[1], 2.0)) );
-                    S[4][idx_source] += dt*sponge_nu*xi_b*( ((rho_v_p_L - 2.0*rho_v_p + rho_v_p_R)/pow(dx[0], 2.0)) + ((rho_v_p_B - 2.0*rho_v_p + rho_v_p_T)/pow(dx[1], 2.0)) );
-                    S[5][idx_source] += dt*sponge_nu*xi_b*( ((E_p_L - 2.0*E_p + E_p_R)/pow(dx[0], 2.0)) + ((E_p_B - 2.0*E_p + E_p_T)/pow(dx[1], 2.0)) );
+                    // S[0][idx_source] += dt*sponge_nu*xi_b*( ((rho_Y_0_p_L - 2.0*rho_Y_0_p + rho_Y_0_p_R)/pow(dx[0], 2.0)) + ((rho_Y_0_p_B - 2.0*rho_Y_0_p + rho_Y_0_p_T)/pow(dx[1], 2.0)) );
+                    // S[1][idx_source] += dt*sponge_nu*xi_b*( ((rho_Y_1_p_L - 2.0*rho_Y_1_p + rho_Y_1_p_R)/pow(dx[0], 2.0)) + ((rho_Y_1_p_B - 2.0*rho_Y_1_p + rho_Y_1_p_T)/pow(dx[1], 2.0)) );
+                    // S[2][idx_source] += dt*sponge_nu*xi_b*( ((rho_Y_2_p_L - 2.0*rho_Y_2_p + rho_Y_2_p_R)/pow(dx[0], 2.0)) + ((rho_Y_2_p_B - 2.0*rho_Y_2_p + rho_Y_2_p_T)/pow(dx[1], 2.0)) );
+                    // S[3][idx_source] += dt*sponge_nu*xi_b*( ((rho_u_p_L - 2.0*rho_u_p + rho_u_p_R)/pow(dx[0], 2.0)) + ((rho_u_p_B - 2.0*rho_u_p + rho_u_p_T)/pow(dx[1], 2.0)) );
+                    // S[4][idx_source] += dt*sponge_nu*xi_b*( ((rho_v_p_L - 2.0*rho_v_p + rho_v_p_R)/pow(dx[0], 2.0)) + ((rho_v_p_B - 2.0*rho_v_p + rho_v_p_T)/pow(dx[1], 2.0)) );
+                    // S[5][idx_source] += dt*sponge_nu*xi_b*( ((E_p_L - 2.0*E_p + E_p_R)/pow(dx[0], 2.0)) + ((E_p_B - 2.0*E_p + E_p_T)/pow(dx[1], 2.0)) );
                 }
             }
         }

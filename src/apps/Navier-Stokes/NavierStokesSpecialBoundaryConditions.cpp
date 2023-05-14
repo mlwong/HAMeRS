@@ -1,1 +1,1 @@
-/home/daslangil/063022_intel/HAMeRS/problems/Navier-Stokes/boundary_conditions/RayleighTaylorInstabilitySingleMode2D.cpp
+/home/daslangil/063022_intel/HAMeRS/problems/Navier-Stokes/boundary_conditions/RayleighTaylorInstabilityIsopycnic2D.cpp

@@ -104,7 +104,7 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             
             if (patch_geom->getTouchesRegularBoundary(0, 0))
             {
-                for (int j = 0; j < interior_dims[1]; j++)
+                for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
                 {
                     for (int i = -ghost_width_to_fill[0];
                          i < 0;
@@ -140,7 +140,7 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             
             if (patch_geom->getTouchesRegularBoundary(0, 1))
             {
-                for (int j = 0; j < interior_dims[1]; j++)
+                for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
                 {
                     for (int i = interior_dims[0];
                          i < interior_dims[0] + ghost_width_to_fill[0];
@@ -213,7 +213,7 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             
             if (patch_geom->getTouchesRegularBoundary(0, 0))
             {
-                for (int j = 0; j < interior_dims[1]; j++)
+                for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
                 {
                     for (int i = -ghost_width_to_fill[0];
                          i < 0;
@@ -286,7 +286,7 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             
             if (patch_geom->getTouchesRegularBoundary(0, 1))
             {
-                for (int j = 0; j < interior_dims[1]; j++)
+                for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
                 {
                     for (int i = interior_dims[0];
                          i < interior_dims[0] + ghost_width_to_fill[0];
