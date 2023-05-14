@@ -367,10 +367,21 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     const double ksi_1 = (x[0] + shift)/delta;
                     const double ksi_2 = (x[0] - shift)/delta;
                    
-                    const double p = p_i + (g*rho_1*x[0]) +
-                        ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
-                        ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
-                        (0.5*g*x[0]*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
+                    // const double p = p_i + (g*rho_1*x[0]) +
+                    //     ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
+                    //     ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
+                    //     (0.5*g*x[0]*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
+                    
+                    // refactored above
+                    // const double p = p_i + 0.5*g*(rho_1 + rho_3)*x[0] +
+                    //     0.5*g*delta*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI))) +
+                    //     0.5*g*delta*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI))) +
+                    //     0.5*g*delta*(rho_3 - rho_1)*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI));
+                    
+                    // ML:
+                    const double p = pi + 0.5*g*(rho_1 + rho_3)*x[0] +
+                        0.5*g*delta*(rho_2 - rho_1)*( -(shift/delta)*erf(shift/delta) + ksi_1*erf(ksi_1) + (exp(-ksi_1*ksi_1) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) ) +
+                        0.5*g*delta*(rho_3 - rho_2)*( -(shift/delta)*erf(shift/delta) + ksi_2*erf(ksi_2) + (exp(-ksi_2*ksi_2) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) );
                     
                     rho_Y_0[idx_cell] = rho_1*Z_1_H;
                     rho_Y_1[idx_cell] = rho_2*Z_2_H;
