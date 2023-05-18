@@ -283,7 +283,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     }
     else if (d_project_name == "2D smooth isopycnic Rayleigh-Taylor instability 3 species")
     {
-        const double delta = 0.02*lambda; // characteristic length of interface.
+        const double delta = 0.01*lambda; // characteristic length of interface.
         const double shift = lambda/4.0;
         
         double* rho_Y_2  = partial_density->getPointer(2);
@@ -342,9 +342,14 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     const double ksi_1 = (x[0] + shift)/delta;
                     const double ksi_2 = (x[0] - shift)/delta;
                    
-                    const double p_ref = p_i + (g*rho_1*x[0]) + ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
-                        ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
-                        (0.5*g*x[0]*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
+                    // const double p_ref = p_i + (g*rho_1*x[0]) + ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
+                    //    ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
+                    //    (0.5*g*x[0]*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
+
+                    // ML:
+                    const double p_ref = p_i + 0.5*g*(rho_1 + rho_3)*x[0] +
+                        0.5*g*delta*(rho_2 - rho_1)*( -(shift/delta)*erf(shift/delta) + ksi_1*erf(ksi_1) + (exp(-ksi_1*ksi_1) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) ) +
+                        0.5*g*delta*(rho_3 - rho_2)*( -(shift/delta)*erf(shift/delta) + ksi_2*erf(ksi_2) + (exp(-ksi_2*ksi_2) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) );
 
                     const double u_ref = 0.0;
                     const double v_ref = 0.0;

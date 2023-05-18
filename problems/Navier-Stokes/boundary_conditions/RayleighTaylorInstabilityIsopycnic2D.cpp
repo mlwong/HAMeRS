@@ -199,9 +199,9 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             
             
             double lambda = 701.53278340668; // wavelength of single-mode perturbation
-            double eta_0  = 0.01*lambda;      // 1% perturbation // DEBUGGING
+            double eta_0  = 0.02*lambda;      // 1% perturbation // DEBUGGING
             
-            const double delta = 0.02*lambda; // characteristic length of interface.
+            const double delta = 0.01*lambda; // characteristic length of interface.
             const double shift = lambda/4.0;
             const double rho_1 = p_i/(R_1*T_0);
             const double rho_2 = p_i/(R_2*T_0);
@@ -244,10 +244,15 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
                             const double ksi_1 = (x[0] + shift)/delta;
                             const double ksi_2 = (x[0] - shift)/delta;
                             
-                            const double p = p_i + (g*rho_1*x[0]) + ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
-                                ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
-                                (0.5*g*x[0]*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
+                            // const double p = p_i + (g*rho_1*x[0]) + ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
+                            //    ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
+                            //    (0.5*g*x[0]*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
                             
+                            // ML:
+                            const double p = p_i + 0.5*g*(rho_1 + rho_3)*x[0] +
+                            0.5*g*delta*(rho_2 - rho_1)*( -(shift/delta)*erf(shift/delta) + ksi_1*erf(ksi_1) + (exp(-ksi_1*ksi_1) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) ) +
+                            0.5*g*delta*(rho_3 - rho_2)*( -(shift/delta)*erf(shift/delta) + ksi_2*erf(ksi_2) + (exp(-ksi_2*ksi_2) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) );
+
                             rho_Y_0[idx_cell] = rho_1*Z_1_H;
                             rho_Y_1[idx_cell] = rho_2*Z_2_H;
                             rho_Y_2[idx_cell] = rho_3*Z_3_H;
@@ -264,7 +269,7 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             }
         }
     }
-    else if(d_project_name == "2D smooth isopycnic Rayleigh-Taylor instability 3 species")
+    else if(d_project_name == "2D smooth multi-mode isopycnic Rayleigh-Taylor instability")
     {
         if (patch_geom->getTouchesRegularBoundary(0, 0) ||
             patch_geom->getTouchesRegularBoundary(0, 1))
@@ -377,10 +382,15 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
                             const double ksi_1 = (x[0] + shift)/delta;
                             const double ksi_2 = (x[0] - shift)/delta;
                             
-                            const double p = p_i + (g*rho_1*x[0]) + ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
-                                ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
-                                (0.5*g*x[0]*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
+                            // const double p = p_i + (g*rho_1*x[0]) + ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
+                            //    ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
+                            //    (0.5*g*x[0]*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
                             
+                            // ML:
+                            const double p = p_i + 0.5*g*(rho_1 + rho_3)*x[0] +
+                            0.5*g*delta*(rho_2 - rho_1)*( -(shift/delta)*erf(shift/delta) + ksi_1*erf(ksi_1) + (exp(-ksi_1*ksi_1) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) ) +
+                            0.5*g*delta*(rho_3 - rho_2)*( -(shift/delta)*erf(shift/delta) + ksi_2*erf(ksi_2) + (exp(-ksi_2*ksi_2) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) );
+
                             rho_Y_0[idx_cell] = rho*Z_1_H;
                             rho_Y_1[idx_cell] = rho*Z_2_H;
                             rho_Y_2[idx_cell] = rho*Z_3_H;

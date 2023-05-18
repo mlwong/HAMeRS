@@ -330,7 +330,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         }
         else if (d_project_name == "2D smooth isopycnic Rayleigh-Taylor instability 3 species")
         {
-            const double delta = 0.02*lambda; // characteristic length of interface.
+            const double delta = 0.01*lambda; // characteristic length of interface.
             const double shift = lambda/4.0;
             double* rho_Y_2 = partial_density->getPointer(2);
 
@@ -353,7 +353,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
                     x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
                     
-                    const double eta   = eta_0*cos(2.0*M_PI/lambda*x[1])*0.0;
+                    const double eta   = eta_0*cos(2.0*M_PI/lambda*x[1]);
                     
                     const double Z_2_H = 0.5*(1.0 + erf(((x[0] - eta + shift)/delta))) - 0.5*(1.0 + erf(((x[0] - eta - shift)/delta)));
                     const double Z_3_H = 0.5*(1.0 + erf(((x[0] - eta - shift)/delta)));
@@ -379,7 +379,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     //     0.5*g*delta*(rho_3 - rho_1)*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI));
                     
                     // ML:
-                    const double p = pi + 0.5*g*(rho_1 + rho_3)*x[0] +
+                    const double p = p_i + 0.5*g*(rho_1 + rho_3)*x[0] +
                         0.5*g*delta*(rho_2 - rho_1)*( -(shift/delta)*erf(shift/delta) + ksi_1*erf(ksi_1) + (exp(-ksi_1*ksi_1) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) ) +
                         0.5*g*delta*(rho_3 - rho_2)*( -(shift/delta)*erf(shift/delta) + ksi_2*erf(ksi_2) + (exp(-ksi_2*ksi_2) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) );
                     
