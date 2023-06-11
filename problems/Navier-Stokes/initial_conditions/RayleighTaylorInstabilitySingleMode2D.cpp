@@ -20,7 +20,9 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         (d_project_name != "2D smooth Rayleigh-Taylor instability") &&
         (d_project_name != "2D smooth isopycnic Rayleigh-Taylor instability") &&
         (d_project_name != "2D smooth isopycnic Rayleigh-Taylor instability 3 species") &&
-        (d_project_name != "2D smooth multi-mode Rayleigh-Taylor instability")
+        (d_project_name != "2D smooth multi-mode Rayleigh-Taylor instability") &&
+        (d_project_name != "2D smooth multi-mode isopycnic Rayleigh-Taylor instability")
+
        ) 
     {
         TBOX_ERROR(d_object_name
@@ -29,7 +31,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             << "'2D smooth Rayleigh-Taylor instability' or "
             << "'2D smooth isopycnic Rayleigh-Taylor instability' or "
             << "'2D smooth isopycnic Rayleigh-Taylor instability 3 species' or "
-            << "'2D smooth multi-mode Rayleigh-Taylor instability'!\n"
+            << "'2D smooth multi-mode Rayleigh-Taylor instability' or"
+            << "'2D smooth multi-mode isopycnic Rayleigh-Taylor instability' !\n"
             << "'project_name' = '"
             << d_project_name
             << "' is given."
@@ -403,7 +406,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             eta_0   = lambda*0.04;
             const double delta   = 0.04*lambda; // characteristic length of interface
             const int    waven   = 16;          // dominant wave number
-            const double width   = 16.0*lambda; // domain size in y direction
+            const double width   = lambda; // domain size in y direction
             
             // Seed for "random" phase shifts.
             int random_seed = 0;
@@ -718,7 +721,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             const double delta   = 0.04*lambda; // characteristic length of interface
             const int    waven   = 16;          // dominant wave number
             const double width   = 16.0*lambda; // domain size in y direction
-            const double shift = lambda;
+            const double shift = lambda/4.0;
             double* rho_Y_2 = partial_density->getPointer(2);
             const double W_3 = W_vector[2]; // molecular weight of third fluid if any
             const double R_3 = R_u/W_3;          // gas constant of third gas
@@ -1273,10 +1276,12 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     const double ksi_1 = (x[0] + shift)/delta;
                     const double ksi_2 = (x[0] - shift)/delta;
                     
-                    const double p = p_i + (g*rho_1*x[0]) + ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
-                        ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
-                        (0.5*g*x[0]*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
-                    
+                    // ML:
+                    const double p = p_i + 0.5*g*(rho_1 + rho_3)*x[0] +
+                        0.5*g*delta*(rho_2 - rho_1)*( -(shift/delta)*erf(shift/delta) + ksi_1*erf(ksi_1) + (exp(-ksi_1*ksi_1) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) ) +
+                        0.5*g*delta*(rho_3 - rho_2)*( -(shift/delta)*erf(shift/delta) + ksi_2*erf(ksi_2) + (exp(-ksi_2*ksi_2) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) );
+
+
                     rho_Y_0[idx_cell] = rho*Z_1_H;
                     rho_Y_1[idx_cell] = rho*Z_2_H;
                     rho_Y_2[idx_cell] = rho*Z_3_H;

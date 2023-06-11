@@ -189,8 +189,8 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             const double T_0 = 300.0; 
             
             const double W_1 = 0.03328; // molecular mass of heavier gas
-            const double W_2 = 0.03200; // molecular mass of lighter gas
-            const double W_3 = 0.03072; // molecular mass of lighter gas
+            const double W_2 = 0.03072; // molecular mass of lighter gas
+            const double W_3 = 0.03200; // molecular mass of lighter gas
             
             const double R_u = 8.31446261815324; // universal gas constant
             const double R_1 = R_u/W_1;          // gas constant of heavier gas
@@ -294,9 +294,9 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             const double p_i = 100000.0; // interface pressure
             const double T_0 = 300.0; 
             
-            const double W_1 = 0.0400; // molecular mass of heavier gas
-            const double W_2 = 0.0240; // molecular mass of lighter gas
-            const double W_3 = 0.0400; // molecular mass of lighter gas
+            const double W_1 = 0.03328; // molecular mass of heavier gas
+            const double W_2 = 0.03200;
+            const double W_3 = 0.03078; // molecular mass of lighter gas
             
             const double R_u = 8.31446261815324; // universal gas constant
             const double R_1 = R_u/W_1;          // gas constant of heavier gas
@@ -312,7 +312,7 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             const double delta   = 0.04*lambda; // characteristic length of interface
             const int    waven   = 16;          // dominant wave number
             const double width   = 16.0*lambda; // domain size in y direction
-            const double shift = lambda;
+            const double shift = lambda/4.0;
             
             double rmod[9]; // random seed
             rmod[0] = 6.031966614958411e+000;
@@ -326,15 +326,15 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             rmod[8] = 5.027899324302027e+000;
             
             double rmod_2[9]; // random seed
-            rmod_2[0] = 6.031966614958411e+000;
-            rmod_2[1] = 1.273017034173460e+000;
-            rmod_2[2] = 5.934447177754063e+000;
-            rmod_2[3] = 3.101658133166612e+000;
-            rmod_2[4] = 2.294026034817427e+000;
-            rmod_2[5] = 4.916046917518752e+000;
-            rmod_2[6] = 0.571212135466553e+000;
-            rmod_2[7] = 4.966766749458944e+000;
-            rmod_2[8] = 5.027899324302027e+000;
+            rmod_2[0] = 2.620226532717789200e+000;
+            rmod_2[1] = 4.525932273597345700e+000;
+            rmod_2[2] = 7.186381718527406600e-004;
+            rmod_2[3] = 1.899611578242180700e+000;
+            rmod_2[4] = 9.220944569241362700e-001;
+            rmod_2[5] = 5.801805019369201700e-001;
+            rmod_2[6] = 1.170307423440345900e+000;
+            rmod_2[7] = 2.171222082895173200e+000;
+            rmod_2[8] = 2.492963564452900500e+000;
             
             // Assume it is left boundary first.
             int i_lo = -ghost_width_to_fill[0];

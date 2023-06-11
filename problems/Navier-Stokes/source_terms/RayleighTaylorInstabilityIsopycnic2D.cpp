@@ -486,15 +486,16 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     const double ksi_1 = (x[0] + shift)/delta;
                     const double ksi_2 = (x[0] - shift)/delta;
                     
-                    const double p_ref = p_i + (g*rho_1*x[0]) + ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
-                        ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
-                          (0.5*g*x[0]*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
+                    // ML:
+                    const double p_ref = p_i + 0.5*g*(rho_1 + rho_3)*x[0] +
+                        0.5*g*delta*(rho_2 - rho_1)*( -(shift/delta)*erf(shift/delta) + ksi_1*erf(ksi_1) + (exp(-ksi_1*ksi_1) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) ) +
+                        0.5*g*delta*(rho_3 - rho_2)*( -(shift/delta)*erf(shift/delta) + ksi_2*erf(ksi_2) + (exp(-ksi_2*ksi_2) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) );
                     
                     const double u_ref = 0.0;
                     const double v_ref = 0.0;
                     
-                    rho_u_ref = rho_1*u_ref;
-                    rho_v_ref = rho_1*v_ref;
+                    rho_u_ref = rho_ref*u_ref;
+                    rho_v_ref = rho_ref*v_ref;
                     E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
                     
                     sponge_rate_tot = (pow((gamma*p_ref/rho_ref),0.5))*sponge_rate;
@@ -516,7 +517,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     
                     const double rho_Y_0_p = rho_Y_0[idx_cons_var] - rho_Y_0_ref;
                     const double rho_Y_1_p = rho_Y_1[idx_cons_var] - rho_Y_1_ref;
-                    const double rho_Y_2_p = rho_Y_1[idx_cons_var] - rho_Y_2_ref;
+                    const double rho_Y_2_p = rho_Y_2[idx_cons_var] - rho_Y_2_ref;
                     const double rho_u_p   = rho_u[idx_cons_var]   - rho_u_ref;
                     const double rho_v_p   = rho_v[idx_cons_var]   - rho_v_ref;
                     const double E_p       = E[idx_cons_var]       - E_ref;
