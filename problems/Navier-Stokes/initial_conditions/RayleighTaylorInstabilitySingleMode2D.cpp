@@ -92,9 +92,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         // const double gamma_1 = double(7)/double(5);
         
         double lambda = 701.53278340668; // wavelength of single-mode perturbation
-        double eta_0  = 0.02*lambda;      // 1% perturbation // DEBUGGING
-        // const double eta_0  = 0.0*lambda;      // no perturbation
-        
+        //double eta_0  = 0.02*lambda;      // 1% perturbation // DEBUGGING
+        double eta_0  = 0.0*lambda;      // no perturbation
         
         const double p_i = 100000.0; // interface pressure
         const double T_0 = 300.0;    // background temperature
@@ -172,7 +171,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         }
         else if (d_project_name == "2D smooth Rayleigh-Taylor instability")
         {
-            const double delta = 0.00012*lambda; // characteristic length of interface.
+            const double delta = 0.04*lambda; // characteristic length of interface.
             const double shift = 0.0; // location of interface.
             
             for (int j = 0; j < patch_dims[1]; j++)
@@ -197,37 +196,21 @@ NavierStokesInitialConditions::initializeDataOnPatch(
 
                     const double R_H   = R_1*(1.0 - X_2_H) + X_2_H*R_2;
                     
-                    const int N_int = 1000000000; // number of numerical quadrature points
+                    const int N_int = 100000; // number of numerical quadrature points
                     const double dx_p = (x[0] - shift)/(N_int - 1.0);
                     
                     double integral = 0.0;
                     double p_H = 0.0;
                     double rho_H = 0.0;
-                    if (std::abs(x[0] - shift)/delta > 5.0*delta)
-                    {
-                        {
-                            for (int ii = 0; ii < N_int; ii++)
-                            {
-                                const double x_p = shift + ii*dx_p;  //Bug fixed 3.22.2023
-                                integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - shift)/(delta)) + 0.5*(R_1 + R_2))*dx_p;
-                            }
-                            p_H = p_i*exp(g/T_0*integral);
-                            rho_H = p_H/(R_H*T_0);
-                        }
 
-                    }
-                    else
+                    for (int ii = 0; ii < N_int; ii++)
                     {
-                        for (int ii = 0; ii < N_int; ii++)
-                        {
-                            // const double x_p = x[0] + ii*dx_p;  //Bug fixed 3.22.2023 OLD
-                            const double x_p = shift + ii*dx_p;  //Bug fixed 3.22.2023
-                            integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - shift)/(delta)) + 0.5*(R_1 + R_2))*dx_p;
-                        }
-                        p_H = p_i*exp(g/T_0*integral);
-                        rho_H = p_H/(R_H*T_0);
+                        // const double x_p = x[0] + ii*dx_p;  //Bug fixed 3.22.2023 OLD
+                        const double x_p = shift + ii*dx_p;  //Bug fixed 3.22.2023
+                        integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - shift)/(delta)) + 0.5*(R_1 + R_2))*dx_p;
                     }
-                    
+                    p_H = p_i*exp(g/T_0*integral);
+                    rho_H = p_H/(R_H*T_0);
                     
                     // Scott's implementation
                     // const double dX_2_H_dx = 1.0/(delta*sqrt(M_PI))*exp(-(x[0]/delta)*(x[0]/delta));
@@ -241,31 +224,6 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     
                     rho = rho_H;
                     p   = p_H;
-                    
-                    // if (x[0] < eta)
-                    // {
-                    //     const double p_1_H   = p_i*exp((g*x[0])/(R_1*T_0));
-                    //     const double rho_1_H = p_i/(R_1*T_0)*exp((g*x[0])/(R_1*T_0));
-                    //     
-                    //     const double p_1   = p_i*exp((g*x[0])/(R_1*T_0));
-                    //     const double rho_1 = p_i/(R_1*T_0)*exp((g*x[0])/(R_1*T_0));
-                    //     
-                    //     p   = p_1*p_H/p_1_H;
-                    //     rho = rho_1*rho_H/rho_1_H;
-                    //     
-                    //     
-                    // }
-                    // else
-                    // {
-                    //     const double p_2_H   = p_i*exp((g*x[0])/(R_2*T_0));
-                    //     const double rho_2_H = p_i/(R_2*T_0)*exp((g*x[0])/(R_2*T_0));
-                    //     
-                    //     const double p_2   = p_i*exp((g*x[0])/(R_2*T_0));
-                    //     const double rho_2 = p_i/(R_2*T_0)*exp((g*x[0])/(R_2*T_0));
-                    //     
-                    //     p   = p_2*p_H/p_2_H;
-                    //     rho = rho_2*rho_H/rho_2_H;
-                    // }
                     
                     rho_Y_0[idx_cell] = rho*(1.0 - X_2_H);
                     rho_Y_1[idx_cell] = rho*X_2_H;
@@ -281,7 +239,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         }
         else if (d_project_name == "2D smooth multi-mode Rayleigh-Taylor instability")
         {
-            lambda  = lambda/4.0;
+            lambda = lambda/4.0;
             eta_0   = lambda*0.04;
             const double delta   = 0.04*lambda; // characteristic length of interface
             const int    waven   = 16;          // dominant wave number

@@ -86,13 +86,13 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             double* E       = total_energy->getPointer(0);
             
             const double gamma = double(7)/double(5);
-            const double g     = 250.0; // HARD-CODED for now!
+            const double g     = 10.0; // HARD-CODED for now!
             
             const double p_i = 100000.0; // interface pressure
             const double T_0 = 300.0; 
             
-            const double W_1 = 0.0400; // molecular mass of heavier gas
-            const double W_2 = 0.0240; // molecular mass of lighter gas
+            const double W_1 = 0.033280; //0.0400; // molecular mass of heavier gas
+            const double W_2 = 0.030720; //0.0240; // molecular mass of lighter gas
             
             const double R_u = 8.31446261815324; // universal gas constant
             const double R_1 = R_u/W_1;          // gas constant of heavier gas
@@ -190,13 +190,13 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             double* E       = total_energy->getPointer(0);
             
             const double gamma = double(7)/double(5);
-            const double g     = 250.0; // HARD-CODED for now!
+            const double g     = 10.0; // HARD-CODED for now!
             
             const double p_i = 100000.0; // interface pressure
             const double T_0 = 300.0; 
             
-            const double W_1 = 0.0400; // molecular mass of heavier gas
-            const double W_2 = 0.0240; // molecular mass of lighter gas
+            const double W_1 = 0.033280; // molecular mass of heavier gas
+            const double W_2 = 0.030720; // molecular mass of lighter gas
             
             const double R_u = 8.31446261815324; // universal gas constant
             const double R_1 = R_u/W_1;          // gas constant of heavier gas
@@ -204,152 +204,72 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             
             const double lambda = 701.53278340668; // wavelength of single-mode perturbation
             const double eta_0  = 0.01*lambda*0.0;
-            const double delta  = 0.00012*lambda; // characteristic length of interface.
+            const double delta  = 0.04*lambda; // characteristic length of interface.
             const double shift  = 0.0; // location of interface.
             
-            /*
-             * Update the left boundary conditions.
-             */
             
-            if (patch_geom->getTouchesRegularBoundary(0, 0))
+            // Assume it is left boundary first.
+            int i_lo = -ghost_width_to_fill[0];
+            int i_hi = 0;
+            
+            for (int bi = 0; bi < 2; bi++) // loop over left and righ boundaries
             {
-                for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
+                if (patch_geom->getTouchesRegularBoundary(0, bi))
                 {
-                    for (int i = -ghost_width_to_fill[0];
-                         i < 0;
-                         i++)
+                    if (bi == 1) // for right boundary
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0];
-                        
-                        // Compute the coordinates.
-                        double x[2];
-                        x[0] = patch_xlo[0] + (i + double(1)/double(2))*dx[0];
-                        x[1] = patch_xlo[1] + (j + double(1)/double(2))*dx[1];
-                        
-                        const double eta = eta_0*cos(2.0*M_PI/lambda*x[1]);
-                        
-                        double X_2_H = 0.5*(1.0 + erf((x[0] - eta - shift)/delta)); // mass fraction of second species (Y_2)
-                        
-                        const double R_H   = R_1*(1.0 - X_2_H) + X_2_H*R_2;
-                        
-                        const int N_int = 1000; // number of numerical quadrature points
-                        const double dx_p = (x[0] - shift)/(N_int - 1.0);
-                        
-                        double integral = 0.0;
-                        double p_H = 0.0;
-                        double rho_H = 0.0;
-                        
-                        if (std::abs(x[0] - shift)/delta > 5.0*delta)
-                        {
-                            for (int ii = 0; ii < N_int; ii++)
-                            {
-                                const double x_p = shift + ii*dx_p;  //Bug fixed 3.22.2023
-                                integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - shift)/(delta)) + 0.5*(R_1 + R_2))*dx_p;
-                            }
-                            p_H = p_i*exp(g/T_0*integral);
-                            rho_H = p_H/(R_H*T_0);
-                        }
-                        else
-                        {
-                            for (int ii = 0; ii < N_int; ii++)
-                            {
-                                // const double x_p = x[0] + ii*dx_p;  //Bug fixed 3.22.2023 OLD
-                                const double x_p = shift + ii*dx_p;  //Bug fixed 3.22.2023
-                                integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - shift)/(delta)) + 0.5*(R_1 + R_2))*dx_p;
-                            }
-                            p_H = p_i*exp(g/T_0*integral);
-                            rho_H = p_H/(R_H*T_0);
-                        }
-                        
-                        double rho, p;
-                        
-                        rho = rho_H;
-                        p   = p_H;
-                        
-                        rho_Y_0[idx_cell] = rho;
-                        rho_Y_1[idx_cell] = 0.0;
-                        
-                        const double u = 0.0;
-                        const double v = 0.0;
-                        
-                        rho_u[idx_cell] = rho*u;
-                        rho_v[idx_cell] = rho*v;
-                        E[idx_cell]     = p/(gamma - double(1)) + double(1)/double(2)*rho*(u*u + v*v);
+                        i_lo = interior_dims[0];
+                        i_hi = interior_dims[0] + ghost_width_to_fill[0];
                     }
-                }
-            }
-            
-            /*
-             * Update the right boundary conditions.
-             */
-            
-            if (patch_geom->getTouchesRegularBoundary(0, 1))
-            {
-                for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
-                {
-                    for (int i = interior_dims[0];
-                         i < interior_dims[0] + ghost_width_to_fill[0];
-                         i++)
+                    
+                    for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
                     {
-
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0];
-                        
-                        // Compute the coordinates.
-                        double x[2];
-                        x[0] = patch_xlo[0] + (i + double(1)/double(2))*dx[0];
-                        x[1] = patch_xlo[1] + (j + double(1)/double(2))*dx[1];
-                        
-                        const double eta = eta_0*cos(2.0*M_PI/lambda*x[1]);
-                        
-                        double X_2_H = 0.5*(1.0 + erf((x[0] - eta - shift)/delta)); // mass fraction of second species (Y_2)
-                        
-                        const double R_H   = R_1*(1.0 - X_2_H) + X_2_H*R_2;
-                        
-                        const int N_int = 100000; // number of numerical quadrature points
-                        const double dx_p = (x[0] - shift)/(N_int - 1.0);
-                        
-                        double integral = 0.0;
-                        double p_H = 0.0;
-                        double rho_H = 0.0;
-                        
-                        if (std::abs(x[0] - shift)/delta > 5.0*delta)
+                        for (int i = i_lo; i < i_hi; i++)
                         {
-                            for (int ii = 0; ii < N_int; ii++)
-                            {
-                                const double x_p = shift + ii*dx_p;  //Bug fixed 3.22.2023
-                                integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - shift)/(delta)) + 0.5*(R_1 + R_2))*dx_p;
-                            }
-                            p_H = p_i*exp(g/T_0*integral);
-                            rho_H = p_H/(R_H*T_0);
-                        }
-                        else
-                        {
-                            for (int ii = 0; ii < N_int; ii++)
-                            {
-                                // const double x_p = x[0] + ii*dx_p;  //Bug fixed 3.22.2023 OLD
-                                const double x_p = shift + ii*dx_p;  //Bug fixed 3.22.2023
-                                integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - shift)/(delta)) + 0.5*(R_1 + R_2))*dx_p;
-                            }
-                            p_H = p_i*exp(g/T_0*integral);
-                            rho_H = p_H/(R_H*T_0);
-                        }
-                        
-                        double rho, p;
-                        
-                        rho = rho_H;
-                        p   = p_H;
-                        
-                        rho_Y_0[idx_cell] = 0.0;
-                        rho_Y_1[idx_cell] = rho;
-                        
-                        const double u = 0.0;
-                        const double v = 0.0;
+                            const int idx_cell = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0];
                             
-                        rho_u[idx_cell] = rho*u;
-                        rho_v[idx_cell] = rho*v;
-                        E[idx_cell]     = p/(gamma - double(1)) + double(1)/double(2)*rho*(u*u + v*v);
+                            // Compute the coordinates.
+                            double x[2];
+                            x[0] = patch_xlo[0] + (i + double(1)/double(2))*dx[0];
+                            x[1] = patch_xlo[1] + (j + double(1)/double(2))*dx[1];
+                            
+                            const double eta = eta_0*cos(2.0*M_PI/lambda*x[1]);
+                            
+                            double X_2_H = 0.5*(1.0 + erf((x[0] - eta - shift)/delta)); // mass fraction of second species (Y_2)
+                            
+                            const double R_H   = R_1*(1.0 - X_2_H) + X_2_H*R_2;
+                            
+                            const int N_int = 100000; // number of numerical quadrature points
+                            const double dx_p = (x[0] - shift)/(N_int - 1.0);
+                            
+                            double integral = 0.0;
+                            double p_H = 0.0;
+                            double rho_H = 0.0;
+                            
+                            for (int ii = 0; ii < N_int; ii++)
+                            {
+                                const double x_p = shift + ii*dx_p;  //Bug fixed 3.22.2023
+                                integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - shift)/(delta)) + 0.5*(R_1 + R_2))*dx_p;
+                            }
+                            p_H = p_i*exp(g/T_0*integral);
+                            rho_H = p_H/(R_H*T_0);
+                            
+                            double rho, p;
+                            
+                            rho = rho_H;
+                            p   = p_H;
+                            
+                            rho_Y_0[idx_cell] = rho*(1.0 - X_2_H);
+                            rho_Y_1[idx_cell] = rho*X_2_H;
+                            
+                            const double u = 0.0;
+                            const double v = 0.0;
+                            
+                            rho_u[idx_cell] = rho*u;
+                            rho_v[idx_cell] = rho*v;
+                            E[idx_cell]     = p/(gamma - double(1)) + double(1)/double(2)*rho*(u*u + v*v);
+                        }
                     }
                 }
             }

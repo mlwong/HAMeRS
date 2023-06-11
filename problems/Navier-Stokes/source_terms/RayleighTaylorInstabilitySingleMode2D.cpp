@@ -18,16 +18,12 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     
     if ((d_project_name != "2D discontinuous Rayleigh-Taylor instability") && 
         (d_project_name != "2D smooth Rayleigh-Taylor instability") && 
-        (d_project_name != "2D smooth multi-mode Rayleigh-Taylor instability") &&
-        (d_project_name !="2D smooth multi-mode isopycnic Rayleigh-Taylor instability") &&
-        (d_project_name != "2D smooth isopycnic Rayleigh-Taylor instability 3 species")) 
+        (d_project_name != "2D smooth multi-mode Rayleigh-Taylor instability")) 
     {
         TBOX_ERROR(d_object_name
             << ": "
             << "Can only initialize data for 'project_name' = '2D discontinuous Rayleigh-Taylor instability' or "
             << "'2D smooth Rayleigh-Taylor instability' or "
-            << "'2D smooth multi-mode isopycnic Rayleigh-Taylor instability' or "
-            << "'2D smooth isopycnic Rayleigh-Taylor instability 3 species' or "
             << "'2D smooth multi-mode Rayleigh-Taylor instability'!\n"
             << "'project_name' = '"
             << d_project_name
@@ -406,20 +402,13 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     S[2][idx_source] -= dt*sponge_rate_tot*xi_b*rho_u_p;
                     S[3][idx_source] -= dt*sponge_rate_tot*xi_b*rho_v_p;
                     S[4][idx_source] -= dt*sponge_rate_tot*xi_b*E_p;
-                    
-                    // S[0][idx_source] += dt*sponge_nu*xi_b*( ((rho_Y_0_p_L - 2.0*rho_Y_0_p + rho_Y_0_p_R)/pow(dx[0], 2.0)) + ((rho_Y_0_p_B - 2.0*rho_Y_0_p + rho_Y_0_p_T)/pow(dx[1], 2.0)) );
-                    // S[1][idx_source] += dt*sponge_nu*xi_b*( ((rho_Y_1_p_L - 2.0*rho_Y_1_p + rho_Y_1_p_R)/pow(dx[0], 2.0)) + ((rho_Y_1_p_B - 2.0*rho_Y_1_p + rho_Y_1_p_T)/pow(dx[1], 2.0)) );
-                    // S[2][idx_source] += dt*sponge_nu*xi_b*( ((rho_u_p_L - 2.0*rho_u_p + rho_u_p_R)/pow(dx[0], 2.0)) + ((rho_u_p_B - 2.0*rho_u_p + rho_u_p_T)/pow(dx[1], 2.0)) );
-                    // S[3][idx_source] += dt*sponge_nu*xi_b*( ((rho_v_p_L - 2.0*rho_v_p + rho_v_p_R)/pow(dx[0], 2.0)) + ((rho_v_p_B - 2.0*rho_v_p + rho_v_p_T)/pow(dx[1], 2.0)) );
-                    // S[4][idx_source] += dt*sponge_nu*xi_b*( ((E_p_L - 2.0*E_p + E_p_R)/pow(dx[0], 2.0)) + ((E_p_B - 2.0*E_p + E_p_T)/pow(dx[1], 2.0)) );
                 }
             }
         }
     }
-
-    if (d_project_name == "2D smooth Rayleigh-Taylor instability")
+    else if (d_project_name == "2D smooth Rayleigh-Taylor instability")
     {
-        const double delta = 0.00012*lambda; // characteristic length of interface.
+        const double delta = 0.04*lambda; // characteristic length of interface.
         const double shift = 0.0; // location of interface.
         
         for (int j = 0; j < patch_dims[1]; j++)
@@ -443,7 +432,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                 double X_2_H = 0.5*(1.0 + erf((x[0] - eta - shift)/delta)); // mass fraction of second species (Y_2)
                 const double R_H   = R_1*(1.0 - X_2_H) + X_2_H*R_2;
     
-                //if (!(x[0] >= d_special_source_box_lo[0] && x[0] <= d_special_source_box_hi[0]))
+                if (!(x[0] >= d_special_source_box_lo[0] && x[0] <= d_special_source_box_hi[0]))
                 {
                     double rho_Y_0_ref;
                     double rho_Y_1_ref;
@@ -453,7 +442,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     double sponge_rate_tot;
                     double xi_b;
                     
-                    const int N_int = 1000; // number of numerical quadrature points
+                    const int N_int = 100000; // number of numerical quadrature points
                     const double dx_p = (x[0] - shift)/(N_int - 1.0);
                 
                     double integral = 0.0;
@@ -508,211 +497,6 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     S[2][idx_source] -= dt*sponge_rate_tot*xi_b*rho_u_p;
                     S[3][idx_source] -= dt*sponge_rate_tot*xi_b*rho_v_p;
                     S[4][idx_source] -= dt*sponge_rate_tot*xi_b*E_p;
-                }
-            }
-        }
-    }
-    else if ((d_project_name == "2D smooth multi-mode isopycnic Rayleigh-Taylor instability") ||
-             (d_project_name == "2D smooth isopycnic Rayleigh-Taylor instability 3 species"))
-    {
-        const double delta = 0.02*lambda; // characteristic length of interface.
-        const double shift = lambda/4.0;
-        double* rho_Y_2    = partial_density->getPointer(2);
-
-        const double W_3 = species_mass[2]; // molecular weight of third fluid if any
-        const double R_3 = R_u/W_3;          // gas constant of third gas
-        
-        const double rho_1 = p_i/(R_1*T_0);
-        const double rho_2 = p_i/(R_2*T_0);
-        const double rho_3 = p_i/(R_3*T_0);
-
-        for (int j = 0; j < patch_dims[1]; j++)
-        {
-            for (int i = 0; i < patch_dims[0]; i++)
-            {
-                // Compute the linear indices.
-                const int idx_source = (i + num_ghosts_source[0]) +
-                    (j + num_ghosts_source[1])*ghostcell_dims_source[0];
-        
-                const int idx_cons_var = (i + num_ghosts_cons_var[0]) +
-                    (j + num_ghosts_cons_var[1])*ghostcell_dims_cons_var[0];
-        
-                const int idx_cons_var_L = (i - 1 + num_ghosts_cons_var[0]) +
-                    (j + num_ghosts_cons_var[1])*ghostcell_dims_cons_var[0];
-
-                const int idx_cons_var_R = (i + 1 + num_ghosts_cons_var[0]) +
-                    (j + num_ghosts_cons_var[1])*ghostcell_dims_cons_var[0];
-
-                const int idx_cons_var_B = (i + num_ghosts_cons_var[0]) +
-                    (j - 1 + num_ghosts_cons_var[1])*ghostcell_dims_cons_var[0];
-
-                const int idx_cons_var_T = (i + num_ghosts_cons_var[0]) +
-                    (j + 1 + num_ghosts_cons_var[1])*ghostcell_dims_cons_var[0];
-                
-                // Compute the coordinates.
-                double x[2];
-                x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
-                x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
-                double x_L;
-                x_L = patch_xlo[0] + (double(i) - 1.0 + double(1)/double(2))*dx[0];
-        
-                double x_R;
-                x_R = patch_xlo[0] + (double(i) + 1.0 + double(1)/double(2))*dx[0];
-                    
-                // Check whether it is outside the special source box.
-                if (!(x[0] >= d_special_source_box_lo[0] && x[0] <= d_special_source_box_hi[0]))
-                {
-        
-                    double rho_Y_0_ref;
-                    double rho_Y_1_ref;
-                    double rho_Y_2_ref;
-                    double rho_u_ref;
-                    double rho_v_ref;
-                    double E_ref;
-                    double sponge_rate_tot;
-                    double xi_b;
-
-                    double E_ref_L;
-
-                    double E_ref_R;
-
-                    double E_ref_B;
-
-                    double E_ref_T; 
-
-                    const double Z_2_H = 0.5*(1.0 + erf(((x[0] + shift)/delta))) - 0.5*(1.0 + erf(((x[0] - shift)/delta)));
-                    const double Z_3_H = 0.5*(1.0 + erf(((x[0] - shift)/delta)));
-                    const double Z_1_H = 1.0 - Z_2_H - Z_3_H;
-
-                    if (x[0] < 0.0) // left-side
-                    {
-    
-                        //Gideon's Code on 04/19/2023
-
-                        const double ksi_1 = (x[0] + shift)/delta;
-                        const double ksi_2 = (x[0] - shift)/delta;
-
-                        const double p = p_i + (g*rho_1*x[0]) + ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
-                            ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
-                              (0.5*g*x[0]*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
-
-                        const double p_L = p_i + (g*rho_1*x_L) + ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
-                            ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
-                            (0.5*g*x_L*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
-
-                        const double p_R = p_i + (g*rho_1*x_R) + ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
-                            ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
-                            (0.5*g*x_R*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
-                    
-                        rho_Y_0_ref = rho_1;
-
-                        rho_Y_1_ref = 0.0;
-                        rho_Y_2_ref = 0.0;
-                    
-                        const double u    = 0.0;
-                        const double v    = 0.0;
-                    
-                        rho_u_ref         = rho_1*u;
-                        rho_v_ref         = rho_1*v;
-                        E_ref             = p/(gamma - double(1)) + double(1)/double(2)*rho_1*(u*u + v*v);
-                        E_ref_L           = p_L/(gamma - double(1)) + double(1)/double(2)*rho_1*(u*u + v*v);
-                        E_ref_R           = p_R/(gamma - double(1)) + double(1)/double(2)*rho_1*(u*u + v*v);
-
-
-                        sponge_rate_tot   = (pow((gamma*p/rho_1),0.5))*sponge_rate;
-                        const double erf_start_lo  = double(0.75)*(domain_xlo[0]-d_special_source_box_lo[0]) + d_special_source_box_lo[0]; //center of erf is 3/4 of the way into sponge
-                        const double erf_offset_lo = double(-0.5) * erf((d_special_source_box_lo[0]-erf_start_lo)/(abs(erf_start_lo)*double(0.35))) + double(0.5); //value of erf at start of sponge
-                        xi_b        = double(-0.5) * erf((x[0]-erf_start_lo)/(abs(erf_start_lo)*double(0.35))) + double(0.5) - erf_offset_lo; //subtract value of erf at start of sponge to start xi_b at zero
-                        // xi_b            = pow((x[0]-d_special_source_box_lo[0])/(domain_xlo[0]-d_special_source_box_lo[0]),3.0);
-                    }
-                    else // right-side
-                    {
-                        const double ksi_1 = (x[0] + shift)/delta;
-                        const double ksi_2 = (x[0] - shift)/delta;
-
-                        const double p = p_i + (g*rho_1*x[0]) + ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
-                            ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
-                              (0.5*g*x[0]*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
-
-                        const double p_L = p_i + (g*rho_1*x_L) + ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
-                            ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
-                            (0.5*g*x_L*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
-
-                        const double p_R = p_i + (g*rho_1*x_R) + ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
-                            ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
-                            (0.5*g*x_R*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
-
-                        rho_Y_0_ref = rho_1;
-
-                        rho_Y_1_ref = 0.0;
-                        rho_Y_2_ref = 0.0;
-                    
-                        const double u    = 0.0;
-                        const double v    = 0.0;
-                    
-                        rho_u_ref         = rho_1*u;
-                        rho_v_ref         = rho_1*v;
-                        E_ref             = p/(gamma - double(1)) + double(1)/double(2)*rho_1*(u*u + v*v);
-                        E_ref_L           = p_L/(gamma - double(1)) + double(1)/double(2)*rho_1*(u*u + v*v);
-                        E_ref_R           = p_R/(gamma - double(1)) + double(1)/double(2)*rho_1*(u*u + v*v);
-
-
-                        sponge_rate_tot = (pow((gamma*p/rho_3),0.5))*sponge_rate;
-                        const double erf_start_hi = double(0.75)*(domain_xhi[0]-d_special_source_box_hi[0]) + d_special_source_box_hi[0]; //center of erf is 3/4 of the way into sponge
-                        const double erf_offset_hi = double(0.5) * erf((d_special_source_box_hi[0]-erf_start_hi)/(abs(erf_start_hi)*double(0.35))) + double(0.5); //value of erf at start of sponge
-                        xi_b            = double(0.5) * erf((x[0]-erf_start_hi)/(abs(erf_start_hi)*double(0.35))) + double(0.5) - erf_offset_hi; //subtract value of erf at start of sponge to start xi_b at zero
-
-                    }
-
-                    const double rho_Y_0_p = rho_Y_0[idx_cons_var] - rho_Y_0_ref;
-                    const double rho_Y_1_p = rho_Y_1[idx_cons_var] - rho_Y_1_ref;
-                    const double rho_Y_2_p = rho_Y_1[idx_cons_var] - rho_Y_2_ref;
-                    const double rho_u_p   = rho_u[idx_cons_var]   - rho_u_ref;
-                    const double rho_v_p   = rho_v[idx_cons_var]   - rho_v_ref;
-                    const double E_p       = E[idx_cons_var]       - E_ref;
-                   
-                    const double rho_Y_0_p_L = rho_Y_0[idx_cons_var_L] - rho_Y_0_ref;
-                    const double rho_Y_1_p_L = rho_Y_1[idx_cons_var_L] - rho_Y_1_ref;
-                    const double rho_Y_2_p_L = rho_Y_2[idx_cons_var_L] - rho_Y_2_ref;
-                    const double rho_u_p_L   = rho_u[idx_cons_var_L]   - rho_u_ref;
-                    const double rho_v_p_L   = rho_v[idx_cons_var_L]   - rho_v_ref;
-                    const double E_p_L       = E[idx_cons_var_L]       - E_ref_L;
-
-                    const double rho_Y_0_p_R = rho_Y_0[idx_cons_var_R] - rho_Y_0_ref;
-                    const double rho_Y_1_p_R = rho_Y_1[idx_cons_var_R] - rho_Y_1_ref;
-                    const double rho_Y_2_p_R = rho_Y_2[idx_cons_var_R] - rho_Y_2_ref;
-                    const double rho_u_p_R   = rho_u[idx_cons_var_R]   - rho_u_ref;
-                    const double rho_v_p_R   = rho_v[idx_cons_var_R]   - rho_v_ref;
-                    const double E_p_R       = E[idx_cons_var_R]       - E_ref_R;
-                  
-                    const double rho_Y_0_p_B = rho_Y_0[idx_cons_var_B] - rho_Y_0_ref;
-                    const double rho_Y_1_p_B = rho_Y_1[idx_cons_var_B] - rho_Y_1_ref;
-                    const double rho_Y_2_p_B = rho_Y_2[idx_cons_var_B] - rho_Y_2_ref;
-                    const double rho_u_p_B   = rho_u[idx_cons_var_B]   - rho_u_ref;
-                    const double rho_v_p_B   = rho_v[idx_cons_var_B]   - rho_v_ref;
-                    const double E_p_B       = E[idx_cons_var_B]       - E_ref;
-
-                    const double rho_Y_0_p_T = rho_Y_0[idx_cons_var_T] - rho_Y_0_ref;
-                    const double rho_Y_1_p_T = rho_Y_1[idx_cons_var_T] - rho_Y_1_ref;
-                    const double rho_Y_2_p_T = rho_Y_2[idx_cons_var_T] - rho_Y_2_ref;
-                    const double rho_u_p_T   = rho_u[idx_cons_var_T]   - rho_u_ref;
-                    const double rho_v_p_T   = rho_v[idx_cons_var_T]   - rho_v_ref;
-                    const double E_p_T       = E[idx_cons_var_T]       - E_ref;
-
-                    
-                    S[0][idx_source] -= dt*sponge_rate_tot*xi_b*rho_Y_0_p;
-                    S[1][idx_source] -= dt*sponge_rate_tot*xi_b*rho_Y_1_p;
-                    S[2][idx_source] -= dt*sponge_rate_tot*xi_b*rho_Y_2_p;
-                    S[3][idx_source] -= dt*sponge_rate_tot*xi_b*rho_u_p;
-                    S[4][idx_source] -= dt*sponge_rate_tot*xi_b*rho_v_p;
-                    S[5][idx_source] -= dt*sponge_rate_tot*xi_b*E_p;
-
-                    // S[0][idx_source] += dt*sponge_nu*xi_b*( ((rho_Y_0_p_L - 2.0*rho_Y_0_p + rho_Y_0_p_R)/pow(dx[0], 2.0)) + ((rho_Y_0_p_B - 2.0*rho_Y_0_p + rho_Y_0_p_T)/pow(dx[1], 2.0)) );
-                    // S[1][idx_source] += dt*sponge_nu*xi_b*( ((rho_Y_1_p_L - 2.0*rho_Y_1_p + rho_Y_1_p_R)/pow(dx[0], 2.0)) + ((rho_Y_1_p_B - 2.0*rho_Y_1_p + rho_Y_1_p_T)/pow(dx[1], 2.0)) );
-                    // S[2][idx_source] += dt*sponge_nu*xi_b*( ((rho_Y_2_p_L - 2.0*rho_Y_2_p + rho_Y_2_p_R)/pow(dx[0], 2.0)) + ((rho_Y_2_p_B - 2.0*rho_Y_2_p + rho_Y_2_p_T)/pow(dx[1], 2.0)) );
-                    // S[3][idx_source] += dt*sponge_nu*xi_b*( ((rho_u_p_L - 2.0*rho_u_p + rho_u_p_R)/pow(dx[0], 2.0)) + ((rho_u_p_B - 2.0*rho_u_p + rho_u_p_T)/pow(dx[1], 2.0)) );
-                    // S[4][idx_source] += dt*sponge_nu*xi_b*( ((rho_v_p_L - 2.0*rho_v_p + rho_v_p_R)/pow(dx[0], 2.0)) + ((rho_v_p_B - 2.0*rho_v_p + rho_v_p_T)/pow(dx[1], 2.0)) );
-                    // S[5][idx_source] += dt*sponge_nu*xi_b*( ((E_p_L - 2.0*E_p + E_p_R)/pow(dx[0], 2.0)) + ((E_p_B - 2.0*E_p + E_p_T)/pow(dx[1], 2.0)) );
                 }
             }
         }
