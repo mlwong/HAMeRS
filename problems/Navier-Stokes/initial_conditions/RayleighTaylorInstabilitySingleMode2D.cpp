@@ -171,8 +171,69 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         }
         else if (d_project_name == "2D smooth Rayleigh-Taylor instability")
         {
+            const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+            
             const double delta = 0.04*lambda; // characteristic length of interface.
             const double shift = 0.0; // location of interface.
+            
+            std::string integral_filename = "integral.dat";
+            const int integral_N_x = 10000;
+            const int integral_N_int = 100000; // number of numerical quadrature points
+            
+            // Discretize the domain in x-direction for the approximated integral.
+            
+            double x_domain_lo = -1.5*lambda; // Hard coded but read from input
+            double x_domain_hi =  1.5*lambda; // Hard coded but read from input
+            
+            x_domain_lo -= 0.1*lambda; // enlarge the domain for domain ghost cells
+            x_domain_hi += 0.1*lambda; // enlarge the domain for domain ghost cells
+            const double dx_uniform  = (x_domain_hi - x_domain_lo)/double(integral_N_x);
+            
+            std::vector<double> integral_vector(integral_N_x + 3);
+            integral_vector[integral_N_x + 0] = x_domain_lo;
+            integral_vector[integral_N_x + 1] = x_domain_hi;
+            integral_vector[integral_N_x + 2] = dx_uniform;
+            
+            std::ifstream f_in;
+            f_in.open(integral_filename, std::ios::in | std::ios::binary);
+            
+            if (!f_in.is_open())
+            {
+                for (int i = 0; i < integral_N_x; i++)
+                {
+                    integral_vector[i] = 0.0;
+                    const double x_pos = i*dx_uniform + 0.5*dx_uniform + x_domain_lo;
+                    const double dx_p = (x_pos - shift)/(double(integral_N_int) - 1.0);
+                    for (int ii = 0; ii < integral_N_int; ii++)
+                    {
+                        const double x_p = shift + ii*dx_p;  //Bug fixed 3.22.2023
+                        integral_vector[i] += 1.0/(0.5*(R_2 - R_1)*erf((x_p - shift)/(delta)) + 0.5*(R_1 + R_2))*dx_p;
+                    }
+                }
+                
+                mpi.Barrier();
+                if (mpi.getRank() == 0)
+                {
+                    std::ofstream f_out;
+                    f_out.open(integral_filename, std::ios::out | std::ios::binary);
+                    if (!f_out.is_open())
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": "
+                            << "Failed to open file to output integral!"
+                            << std::endl);
+                    }
+                    
+                    f_out.write((char*)&integral_vector[0], sizeof(double)*integral_vector.size());
+                    f_out.close();
+                }
+                mpi.Barrier();
+            }
+            else
+            {
+                f_in.read((char*)&integral_vector[0], sizeof(double)*integral_vector.size());
+                f_in.close();
+            }
             
             for (int j = 0; j < patch_dims[1]; j++)
             {
@@ -193,7 +254,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     // {
                     //     X_2_H = 0.5*(1.0 + erf((x[0] - shift)/delta));
                     // }
-
+                    
                     const double R_H   = R_1*(1.0 - X_2_H) + X_2_H*R_2;
                     
                     const int N_int = 100000; // number of numerical quadrature points
@@ -202,13 +263,25 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     double integral = 0.0;
                     double p_H = 0.0;
                     double rho_H = 0.0;
-
-                    for (int ii = 0; ii < N_int; ii++)
-                    {
-                        // const double x_p = x[0] + ii*dx_p;  //Bug fixed 3.22.2023 OLD
-                        const double x_p = shift + ii*dx_p;  //Bug fixed 3.22.2023
-                        integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - shift)/(delta)) + 0.5*(R_1 + R_2))*dx_p;
-                    }
+                    
+                    // Compute the integral with linear interpolation.
+                    const int idx_integral_vector_lo = int(std::floor((x[0] - x_domain_lo)/dx_uniform));
+                    const int idx_integral_vector_hi = idx_integral_vector_lo + 1;
+                    
+                    const double x_integral_vector_lo = double(idx_integral_vector_lo)*dx_uniform + 0.5*dx_uniform + x_domain_lo;
+                    const double x_integral_vector_hi = x_integral_vector_lo + dx_uniform;
+                    
+                    const double weight_lo = ( x_integral_vector_hi - x[0])/dx_uniform;
+                    const double weight_hi = (-x_integral_vector_lo + x[0])/dx_uniform;
+                    
+                    integral = weight_lo*integral_vector[idx_integral_vector_lo] + weight_hi*integral_vector[idx_integral_vector_hi];
+                    
+                    // for (int ii = 0; ii < N_int; ii++)
+                    // {
+                    //     // const double x_p = x[0] + ii*dx_p;  //Bug fixed 3.22.2023 OLD
+                    //     const double x_p = shift + ii*dx_p;  //Bug fixed 3.22.2023
+                    //     integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - shift)/(delta)) + 0.5*(R_1 + R_2))*dx_p;
+                    // }
                     p_H = p_i*exp(g/T_0*integral);
                     rho_H = p_H/(R_H*T_0);
                     

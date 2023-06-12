@@ -411,6 +411,21 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
         const double delta = 0.04*lambda; // characteristic length of interface.
         const double shift = 0.0; // location of interface.
         
+        // Discretize the domain in x-direction for the approximated integral.
+        const int integral_N_x = 10000;
+        
+        std::vector<double> integral_vector(integral_N_x + 3);
+        
+        std::ifstream f_in;
+        std::string integral_filename = "integral.dat";
+        f_in.open(integral_filename, std::ios::in | std::ios::binary);
+        f_in.read((char*)&integral_vector[0], sizeof(double)*integral_vector.size());
+        f_in.close();
+        
+        const double x_domain_lo = integral_vector[integral_N_x + 0];
+        const double x_domain_hi = integral_vector[integral_N_x + 1];
+        const double dx_uniform  = integral_vector[integral_N_x + 2];
+        
         for (int j = 0; j < patch_dims[1]; j++)
         {
             for (int i = 0; i < patch_dims[0]; i++)
@@ -448,11 +463,28 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     double integral = 0.0;
                     double p_H = 0.0;
                     double rho_H = 0.0;
-                    for (int ii = 0; ii < N_int; ii++)
-                    {
-                        const double x_p = shift + ii*dx_p;  //Bug fixed 3.22.2023
-                        integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - shift)/(delta)) + 0.5*(R_1 + R_2))*dx_p;
-                    }
+                    
+                    
+                    // Compute the integral with linear interpolation.
+                    
+                    const int idx_integral_vector_lo = int(std::floor((x[0] - x_domain_lo)/dx_uniform));
+                    const int idx_integral_vector_hi = idx_integral_vector_lo + 1;
+                    
+                    const double x_integral_vector_lo = double(idx_integral_vector_lo)*dx_uniform + 0.5*dx_uniform + x_domain_lo;
+                    const double x_integral_vector_hi = x_integral_vector_lo + dx_uniform;
+                    
+                    const double weight_lo = ( x_integral_vector_hi - x[0])/dx_uniform;
+                    const double weight_hi = (-x_integral_vector_lo + x[0])/dx_uniform;
+                    
+                    integral = weight_lo*integral_vector[idx_integral_vector_lo] + weight_hi*integral_vector[idx_integral_vector_hi];
+                    
+                    //for (int ii = 0; ii < N_int; ii++)
+                    //{
+                    //    const double x_p = shift + ii*dx_p;  //Bug fixed 3.22.2023
+                    //    integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - shift)/(delta)) + 0.5*(R_1 + R_2))*dx_p;
+                    //}
+                    
+                    
                     p_H = p_i*exp(g/T_0*integral);
                     rho_H = p_H/(R_H*T_0);
                     
