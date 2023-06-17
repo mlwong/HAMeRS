@@ -57,7 +57,14 @@ class EquationOfMassDiffusivityMixingRulesConstant: public EquationOfMassDiffusi
         getNumberOfSpeciesMolecularProperties(const int species_index = 0) const
         {
             NULL_USE(species_index);
-            return 1;
+            if (d_num_species > 2)
+            {
+                return 1;
+            }
+            else
+            {
+                return getNumberOfSpeciesMolecularPropertiesForTwoSpecies(species_index);
+            }
         }
         
         /*
@@ -69,10 +76,47 @@ class EquationOfMassDiffusivityMixingRulesConstant: public EquationOfMassDiffusi
             const int species_index = 0) const;
         
     private:
+        void
+        getMassDiffusivitiesForTwoSpecies(
+            std::vector<Real*>& mass_diffusivities,
+            const Real* const pressure,
+            const Real* const temperature,
+            const std::vector<const Real*>& mass_fractions) const;
+        
+        void
+        computeMassDiffusivitiesForTwoSpecies(
+            HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_diffusivities,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_mass_fractions,
+            const hier::Box& domain) const;
+        
+        int
+        getNumberOfSpeciesMolecularPropertiesForTwoSpecies(const int species_index = 0) const
+        {
+            NULL_USE(species_index);
+            return 1;
+        }
+        
+        void
+        getSpeciesMolecularPropertiesForTwoSpecies(
+            std::vector<Real*>& species_molecular_properties,
+            const int species_index = 0) const;
+        
         /*
-         * Mass diffusivity of different species.
+         * Mass diffusivity of different species when number of species is two.
          */
         std::vector<Real> d_species_D;
+        
+        /*
+         * Mass diffusivity of each pair of species when number of species is greater than two.
+         */
+        std::vector<Real> d_D_ij;
+        
+        /*
+         * Molecular weight of different species.
+         */
+        std::vector<Real> d_species_M;
         
 };
 
