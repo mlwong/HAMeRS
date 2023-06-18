@@ -106,6 +106,7 @@ ExtendedTagAndInitialize::ExtendedTagAndInitialize(
     d_ever_uses_multiresolution_detector(false),
     d_ever_uses_gradient_detector(false),
     d_ever_uses_value_detector(false),
+    d_ever_uses_immersed_bdry_detector(false),
     d_ever_uses_refine_regions(false),
     d_ever_uses_refine_boxes(false),
     d_boxes_changed(false),
@@ -121,13 +122,14 @@ ExtendedTagAndInitialize::ExtendedTagAndInitialize(
     /*
      * If the user wishes to only use the REFINE_BOXES tagging option,
      * the registered strategy class may be null.  In order to use
-     * the REFINE_REGIONS, VALUE_DETECTOR, GRADIENT_DETECTOR, MULTIRESOLUTION_DETECTOR,
-     * INTEGRAL_DETECTOR or RICHARDSON_EXTRAPOLATION options, the registered
-     * ExtendedTagAndInitStrategy must be non-NULL.
+     * the REFINE_REGIONS, IMMERSED_BDRY_DETECTOR, VALUE_DETECTOR, GRADIENT_DETECTOR,
+     * MULTIRESOLUTION_DETECTOR, INTEGRAL_DETECTOR or RICHARDSON_EXTRAPOLATION options,
+     * the registered ExtendedTagAndInitStrategy must be non-NULL.
      */
     if ((d_ever_uses_richardson_extrapolation || d_ever_uses_integral_detector ||
          d_ever_uses_multiresolution_detector || d_ever_uses_gradient_detector ||
-         d_ever_uses_value_detector || d_ever_uses_refine_regions) &&
+         d_ever_uses_value_detector || d_ever_uses_immersed_bdry_detector ||
+         d_ever_uses_refine_regions) &&
         tag_strategy == 0)
     {
         TBOX_ERROR(getObjectName()
@@ -135,6 +137,7 @@ ExtendedTagAndInitialize::ExtendedTagAndInitialize(
             << "\nThe supplied implementation of the "
             << "\nExtendedTagAndInitStrategy is NULL.  It must be"
             << "\nnon-NULL to use the REFINE_REGIONS, "
+            << "\nIMMERSED_BDRY_DETECTOR, "
             << "\nVALUE_DETECTOR, "
             << "\nGRADIENT_DETECTOR, "
             << "\nMULTIRESOLUTION_DETECTOR, "
@@ -1716,6 +1719,7 @@ ExtendedTagAndInitialize::refineUserBoxInputOnly(
     {
         use_only_refine_boxes = true;
         if (usesRefineRegions(cycle, time) ||
+            usesImmersedBdryDetector(cycle, time) ||
             usesValueDetector(cycle, time) ||
             usesGradientDetector(cycle, time) ||
             usesMultiresolutionDetector(cycle, time) ||
@@ -1764,6 +1768,7 @@ ExtendedTagAndInitialize::getFromInput(
                   tagging_method == "MULTIRESOLUTION_DETECTOR" ||
                   tagging_method == "GRADIENT_DETECTOR" ||
                   tagging_method == "VALUE_DETECTOR" ||
+                  tagging_method == "IMMERSED_BDRY_DETECTOR" ||
                   tagging_method == "REFINE_REGIONS" ||
                   tagging_method == "REFINE_BOXES" ||
                   tagging_method == "NONE"))
@@ -1874,6 +1879,10 @@ ExtendedTagAndInitialize::getFromInput(
             {
                 d_ever_uses_value_detector = true;
             }
+            else if (tagging_method == "IMMERSED_BDRY_DETECTOR")
+            {
+                d_ever_uses_immersed_bdry_detector = true;
+            }
             else if (tagging_method == "REFINE_REGIONS")
             {
                 d_ever_uses_refine_regions = true;
@@ -1979,6 +1988,7 @@ ExtendedTagAndInitialize::getFromInput(
                         tagging_method != "MULTIRESOLUTION_DETECTOR" &&
                         tagging_method != "GRADIENT_DETECTOR" &&
                         tagging_method != "VALUE_DETECTOR" &&
+                        tagging_method != "IMMERSED_BDRY_DETECTOR" &&
                         tagging_method != "REFINE_REGIONS" &&
                         tagging_method != "REFINE_BOXES" &&
                         tagging_method != "NONE")
@@ -2097,6 +2107,10 @@ ExtendedTagAndInitialize::getFromInput(
                     else if (tagging_method == "VALUE_DETECTOR")
                     {
                         d_ever_uses_value_detector = true;
+                    }
+                    else if (tagging_method == "IMMERSED_BDRY_DETECTOR")
+                    {
+                        d_ever_uses_immersed_bdry_detector = true;
                     }
                     else if (tagging_method == "REFINE_REGIONS")
                     {
@@ -2971,9 +2985,10 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
         bool old_use_in = false;
         bool old_use_mr = false;
         bool old_use_gd = false;
-        bool old_use_rb = false;
         bool old_use_vl = false;
+        bool old_use_ib = false;
         bool old_use_rr = false;
+        bool old_use_rb = false;
         if (d_use_cycle_criteria)
         {
             for (std::vector<TagCriteria>::const_iterator i =
@@ -2997,9 +3012,13 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
                 {
                     old_use_gd = true;
                 }
-                else if (i->d_tagging_method == "VAlUE_DETECTOR")
+                else if (i->d_tagging_method == "VALUE_DETECTOR")
                 {
                     old_use_vl = true;
+                }
+                else if (i->d_tagging_method == "IMMERSED_BDRY_DETECTOR")
+                {
+                    old_use_ib = true;
                 }
                 else if (i->d_tagging_method == "REFINE_REGIONS")
                 {
@@ -3037,6 +3056,10 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
                 else if (i->d_tagging_method == "VALUE_DETECTOR")
                 {
                     old_use_vl = true;
+                }
+                else if (i->d_tagging_method == "IMMERSED_BDRY_DETECTOR")
+                {
+                    old_use_ib = true;
                 }
                 else if (i->d_tagging_method == "REFINE_REGIONS")
                 {
@@ -3138,6 +3161,7 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
         bool new_use_mr = false;
         bool new_use_gd = false;
         bool new_use_vl = false;
+        bool new_use_ib = false;
         bool new_use_rr = false;
         bool new_use_rb = false;
         if (d_use_cycle_criteria)
@@ -3166,6 +3190,10 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
                 else if (i->d_tagging_method == "VALUE_DETECTOR")
                 {
                     new_use_vl = true;
+                }
+                else if (i->d_tagging_method == "IMMERSED_BDRY_DETECTOR")
+                {
+                    new_use_ib = true;
                 }
                 else if (i->d_tagging_method == "REFINE_REGIONS")
                 {
@@ -3204,6 +3232,10 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
                 {
                     new_use_vl = true;
                 }
+                else if (i->d_tagging_method == "IMMERSED_BDRY_DETECTOR")
+                {
+                    new_use_ib = true;
+                }
                 else if (i->d_tagging_method == "REFINE_REGIONS")
                 {
                     new_use_rr = true;
@@ -3219,8 +3251,8 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
         // boxes changed.
         if ((old_use_re != new_use_re) || (old_use_in != new_use_in) ||
             (old_use_mr != new_use_mr) || (old_use_gd != new_use_gd) ||
-            (old_use_vl != new_use_vl) || (old_use_rr != new_use_rr) ||
-            (old_use_rb != new_use_rb))
+            (old_use_vl != new_use_vl) || (old_use_ib != new_use_ib) ||
+            (old_use_rr != new_use_rr) || (old_use_rb != new_use_rb))
         {
             // If one of the tagging methods which was used is now not used or
             // vice-versa, then the tagged boxes have changed.
@@ -3229,10 +3261,10 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
         else
         {
             // The tagging methods are the same as they were last cycle.
-            if (new_use_re || new_use_in || new_use_mr || new_use_gd || new_use_vl || new_use_rr)
+            if (new_use_re || new_use_in || new_use_mr || new_use_gd || new_use_vl || new_use_ib || new_use_rr)
             {
-                // If we're using either Richardson extrapolation, refine regions, value detector,
-                // gradient detector, multiresolution detector, or integral detector
+                // If we're using either Richardson extrapolation, refine regions, immersed boundary detector,
+                // value detector, gradient detector, multiresolution detector, or integral detector
                 // we must assume that the boxes have changed.
                 d_boxes_changed = true;
             }

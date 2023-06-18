@@ -5,6 +5,8 @@
 
 #include "HAMeRS_memory.hpp"
 
+#include "flow/flow_models/FlowModels.hpp"
+
 #include "SAMRAI/math/HierarchyCellDataOpsReal.h"
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
@@ -21,6 +23,7 @@ class ImmersedBoundaryTagger
             const std::string& object_name,
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<FlowModel>& flow_model,
             const hier::IntVector& num_cells_buffer);
         
         /*
@@ -46,7 +49,7 @@ class ImmersedBoundaryTagger
         //     const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
         /*
-         * Tag cells on a patch for refinement using gradient sensors.
+         * Tag cells on a patch for refinement using immersed boundary masks.
          */
         void
         tagCellsOnPatch(
@@ -69,6 +72,11 @@ class ImmersedBoundaryTagger
          * HAMERS_SHARED_PTR to the grid geometry.
          */
         const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
+        
+        /*
+         * Flow model.
+         */
+        const HAMERS_SHARED_PTR<FlowModel> d_flow_model;
         
         /*
          * Number of cells in buffer zone from immersed boundaries for tagging.

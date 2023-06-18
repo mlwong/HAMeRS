@@ -231,6 +231,7 @@ Euler::Euler(
             "d_immersed_boundary_tagger",
             d_dim,
             d_grid_geometry,
+            d_flow_model,
             num_cells_buffer_required));
     }
     else
@@ -2675,6 +2676,31 @@ Euler::tagCellsOnPatchImmersedBdryDetector(
     // Tag the cells by using d_immersed_boundary_tagger.
     if (d_immersed_boundary_tagger != nullptr)
     {
+        d_flow_model->registerPatchWithDataContext(patch, getDataContext());
+        
+        /*
+         * Compute the immersed boundary method variables.
+         */
+        
+        d_flow_model->setupImmersedBoundaryMethod();
+        
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        const hier::Box empty_box = hier::Box::getEmptyBox(d_dim);
+        
+        flow_model_immersed_boundary_method->setImmersedBoundaryMethodVariables(
+            empty_box,
+            regrid_time,
+            false,
+            getDataContext());
+        
+        d_flow_model->unregisterPatch();
+        
+        /*
+         * Tag the cells using immersed boundary method variables.
+         */
+        
         d_immersed_boundary_tagger->tagCellsOnPatch(
             patch,
             tags,
