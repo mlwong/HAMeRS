@@ -71,12 +71,12 @@ class ImmersedBoundaries
         
         void setImmersedBoundaryVariablesOnPatch(
             const hier::Patch& patch,
+            const double data_time,
+            const bool initial_time,
             const hier::Box& domain,
             const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
-            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal,
-            const double data_time,
-            const bool initial_time)
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal)
         {
             NULL_USE(data_time);
             
@@ -88,7 +88,7 @@ class ImmersedBoundaries
             TBOX_ASSERT(patch_geom);
 #endif
             
-            // Get the dimensions of box that covers the interior of Patch.
+            // Get the dimensions of box that covers the interior of patch.
             hier::Box interior_box = patch.getBox();
             
             const hier::IntVector num_ghosts = data_mask->getGhostCellWidth();
@@ -125,24 +125,24 @@ class ImmersedBoundaries
             
             setImmersedBoundaryVariablesOnPatch(
                 patch,
+                data_time,
+                initial_time,
                 domain_lo,
                 domain_dims,
                 data_mask,
                 data_wall_distance,
-                data_surface_normal,
-                data_time,
-                initial_time);
+                data_surface_normal);
         }
         
         void setImmersedBoundaryVariablesOnPatch(
             const hier::Patch& patch,
+            const double data_time,
+            const bool initial_time,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims,
             const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
-            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal,
-            const double data_time,
-            const bool initial_time);
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal);
         
     private:
         /*

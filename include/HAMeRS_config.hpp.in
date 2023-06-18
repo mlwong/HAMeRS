@@ -2,6 +2,7 @@
 #define HAMERS_CONFIG_HPP
 
 #include "SAMRAI/SAMRAI_config.h"
+#include <cfloat>
 
 /* Enable SIMD */
 #cmakedefine HAMERS_ENABLE_SIMD

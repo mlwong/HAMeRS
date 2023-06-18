@@ -477,7 +477,8 @@ FlowModelSingleSpecies::initializeImmersedBoundaryMethod(
             d_num_species,
             d_num_eqn,
             immersed_boundaries,
-            immersed_boundary_method_db));
+            immersed_boundary_method_db,
+            d_equation_of_state_mixing_rules));
 }
 
 

@@ -393,6 +393,24 @@ NavierStokes::registerModelVariables(
     }
     
     /*
+     * Set the number of immersed boundary ghost cells of d_immersed_boundaries.
+     */
+    
+    if (d_use_immersed_boundaries)
+    {
+        d_immersed_boundaries->setNumberOfImmersedBoundaryGhosts(num_ghosts_intermediate);
+        
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        hier::IntVector num_ghosts_IB = flow_model_immersed_boundary_method->
+            getImmersedBoundaryMethodAdditionalNumberOfGhostCells();
+        
+        num_ghosts_intermediate = num_ghosts_intermediate + num_ghosts_IB;
+        num_ghosts              = num_ghosts              + num_ghosts_IB;
+    }
+    
+    /*
      * Register the conservative variables of d_flow_model.
      */
     
@@ -402,16 +420,13 @@ NavierStokes::registerModelVariables(
         num_ghosts_intermediate);
     
     /*
-     * Set the number of immersed boundary ghost cells of d_immersed_boundaries and register the variables of
-     * flow model immersed boundary method.
+     * Register the variables of flow model immersed boundary method.
      */
     
     if (d_use_immersed_boundaries)
     {
         HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
             d_flow_model->getFlowModelImmersedBoundaryMethod();
-        
-        d_immersed_boundaries->setNumberOfImmersedBoundaryGhosts(num_ghosts);
         
         flow_model_immersed_boundary_method->registerImmersedBoundaryMethodVariables(
             integrator,
@@ -642,6 +657,12 @@ NavierStokes::initializeDataOnPatch(
             data_time,
             initial_time,
             getDataContext());
+        
+        flow_model_immersed_boundary_method->setConservativeVariablesCellDataImmersedBoundaryGhosts(
+            empty_box,
+            data_time,
+            initial_time,
+            getDataContext());
     }
     
     d_flow_model->unregisterPatch();
@@ -830,7 +851,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         {
             const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
             
-            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1")
+            // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -851,7 +872,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         }
         else
         {
-            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1")
+            // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -876,7 +897,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         {
             const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
             
-            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
+            // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -895,7 +916,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         }
         else
         {
-            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
+            // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -973,7 +994,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2")
+                // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -1005,7 +1026,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2")
+                // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -1042,7 +1063,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
+                // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -1071,7 +1092,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
+                // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -1168,7 +1189,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-                    HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3")
+                    // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -1211,7 +1232,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-                    HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3")
+                    // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -1260,7 +1281,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-                    HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
+                    // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -1299,7 +1320,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-                    HAMERS_PRAGMA_VEC("max: spectral_radius_tmp")
+                    // HAMERS_PRAGMA_VEC("max: spectral_radius_tmp")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -1385,7 +1406,13 @@ NavierStokes::setImmersedBoundaryGhostCells(
             getDataContext());
     }
     
-    // Compute the immersed boundary ghost cells here...
+    // Compute the immersed boundary ghost cells here.
+    
+    flow_model_immersed_boundary_method->setConservativeVariablesCellDataImmersedBoundaryGhosts(
+        empty_box,
+        time,
+        false,
+        getDataContext());
     
     d_flow_model->unregisterPatch();
 }
@@ -1825,6 +1852,10 @@ NavierStokes::advanceSingleStepOnPatch(
                             {
                                 Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
                             }
+                            else
+                            {
+                                Q[ei][idx] = Q_intermediate[ei][idx_intermediate];
+                            }
                         }
                     }
                     else
@@ -2081,6 +2112,10 @@ NavierStokes::advanceSingleStepOnPatch(
                                 if (IB_mask[idx_IB_mask] == fluid)
                                 {
                                     Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                                }
+                                else
+                                {
+                                    Q[ei][idx] = Q_intermediate[ei][idx_intermediate];
                                 }
                             }
                         }
@@ -2514,6 +2549,10 @@ NavierStokes::advanceSingleStepOnPatch(
                                     if (IB_mask[idx_IB_mask] == fluid)
                                     {
                                         Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                                    }
+                                    else
+                                    {
+                                        Q[ei][idx] = Q_intermediate[ei][idx_intermediate];
                                     }
                                 }
                             }
