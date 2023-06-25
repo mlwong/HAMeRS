@@ -5,17 +5,14 @@
  */
 void
 FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& source,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& source,
     const hier::Patch& patch,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
-    const std::unordered_map<std::string, double>& monitoring_statistics_map,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
+    const std::unordered_map<std::string, Real>& monitoring_statistics_map,
     const double time,
     const double dt,
     const int RK_step_number)
 {
-    // Follow Reckinger, Scott J., Daniel Livescu, and Oleg V. Vasilyev.
-    // "Comprehensive numerical methodology for direct numerical simulations of compressible Rayleigh–Taylor instability."
-    
     if ((d_project_name != "2D uniform flow") ) 
     {
         TBOX_ERROR(d_object_name
@@ -26,7 +23,6 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << "' is given."
             << std::endl);
     }
-    
     
     if (d_dim != tbox::Dimension(2))
     {
@@ -46,10 +42,10 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     
     TBOX_ASSERT(d_source_terms_db->keyExists("sponge_rate"));
     
-    double sponge_rate = double(0);
+    Real sponge_rate = Real(0);
     if (d_source_terms_db->keyExists("sponge_rate"))
     {
-        sponge_rate = d_source_terms_db->getDouble("sponge_rate");
+        sponge_rate = d_source_terms_db->getReal("sponge_rate");
     }
     else
     {
@@ -58,7 +54,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << "No key 'sponge_rate' found in data for source terms."
             << std::endl);
     }
-
+    
     TBOX_ASSERT(d_source_terms_db->keyExists("rho_inf"));
     
     Real rho_inf = Real(0);
@@ -88,7 +84,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << "No key 'u_inf' found in data for source terms."
             << std::endl);
     }
-
+    
     TBOX_ASSERT(d_source_terms_db->keyExists("v_inf"));
     
     Real v_inf = Real(0);
@@ -103,7 +99,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << "No key 'v_inf' found in data for source terms."
             << std::endl);
     }
-
+    
     TBOX_ASSERT(d_source_terms_db->keyExists("p_inf"));
     
     Real p_inf = Real(0);
@@ -126,7 +122,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     TBOX_ASSERT(patch_geom);
 #endif
     
-    std::vector<double*> S;
+    std::vector<Real*> S;
     S.reserve(d_num_eqn);
     for (int si = 0; si < d_num_eqn; si++)
     {
@@ -149,19 +145,19 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     hier::Box patch_box = patch.getBox();
     const hier::IntVector patch_dims = patch_box.numberCells();
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > density         = conservative_variables[0];
-    HAMERS_SHARED_PTR<pdat::CellData<double> > momentum        = conservative_variables[1];
-    HAMERS_SHARED_PTR<pdat::CellData<double> > total_energy    = conservative_variables[2];
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > density      = conservative_variables[0];
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > momentum     = conservative_variables[1];
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > total_energy = conservative_variables[2];
     
-    Real* rho     = density->getPointer(0);
-    Real* rho_u   = momentum->getPointer(0);
-    Real* rho_v   = momentum->getPointer(1);
-    Real* E       = total_energy->getPointer(0);
+    Real* rho   = density->getPointer(0);
+    Real* rho_u = momentum->getPointer(0);
+    Real* rho_v = momentum->getPointer(1);
+    Real* E     = total_energy->getPointer(0);
     
-    const Real gamma = double(7)/double(5); // assume both gases have the same ratio of specific heat ratios
+    const Real gamma = Real(7)/Real(5); // assume both gases have the same ratio of specific heat ratios
     
     TBOX_ASSERT(d_source_terms_db != nullptr);
-
+    
     const double* const domain_xlo = d_grid_geometry->getXLower();
     const double* const domain_xhi = d_grid_geometry->getXUpper();
     
@@ -170,7 +166,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
         for (int j = 0; j < patch_dims[1]; j++)
         {
             for (int i = 0; i < patch_dims[0]; i++)
-            {   
+            {
                 // Compute the linear indices.
                 const int idx_source = (i + num_ghosts_source[0]) +
                     (j + num_ghosts_source[1])*ghostcell_dims_source[0];
@@ -179,34 +175,33 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     (j + num_ghosts_cons_var[1])*ghostcell_dims_cons_var[0];
                 
                 // Compute the coordinates.
-
-                double x[2];
-                x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
-                x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
                 
-                const double r = fabs(x[1]); //distance from jet center in y-direction
-
+                Real x[2];
+                x[0] = patch_xlo[0] + (Real(i) + Real(1)/Real(2))*Real(dx[0]);
+                x[1] = patch_xlo[1] + (Real(j) + Real(1)/Real(2))*Real(dx[1]);
+                
+                const Real r = std::abs(x[1]); //distance from jet center in y-direction
+                
                 // Check whether it is outside the special source box.
                 if (x[0] <= d_special_source_box_lo[0])
-                {                    
+                {
                     const Real u_ref = u_inf;
                     const Real v_ref = v_inf;
                     
                     const Real rho_ref = rho_inf;
                     const Real p_ref   = p_inf;
-
-
-                    const Real rho_u_ref   = rho_ref * u_ref;
-                    const Real rho_v_ref   = rho_ref * v_ref;
-                    const Real E_ref       = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
-
-                    Real xi_b              = pow((1.0-(x[0]-domain_xlo[0])/(d_special_source_box_lo[0]-domain_xlo[0])),3.0);
-                    xi_b                   = xi_b * sponge_rate; // mask value needs to be improved 
-
-                    const Real rho_p     = rho[idx_cons_var]     - rho_ref;
-                    const Real rho_u_p   = rho_u[idx_cons_var]   - rho_u_ref;
-                    const Real rho_v_p   = rho_v[idx_cons_var]   - rho_v_ref;
-                    const Real E_p       = E[idx_cons_var]       - E_ref;
+                    
+                    const Real rho_u_ref = rho_ref * u_ref;
+                    const Real rho_v_ref = rho_ref * v_ref;
+                    const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
+                    
+                    Real xi_b = std::pow((Real(1) - (x[0] - domain_xlo[0])/(d_special_source_box_lo[0] - domain_xlo[0])), Real(3));
+                    xi_b      *= sponge_rate; // mask value needs to be improved 
+                    
+                    const Real rho_p   = rho[idx_cons_var]   - rho_ref;
+                    const Real rho_u_p = rho_u[idx_cons_var] - rho_u_ref;
+                    const Real rho_v_p = rho_v[idx_cons_var] - rho_v_ref;
+                    const Real E_p     = E[idx_cons_var]     - E_ref;
                     
                     S[0][idx_source] -= dt*xi_b*rho_p;
                     S[1][idx_source] -= dt*xi_b*rho_u_p;
@@ -218,20 +213,20 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     const Real u_ref = u_inf;
                     const Real v_ref = v_inf;
                     
-                    const Real rho_ref   = rho_inf;
-                    const Real p_ref     = p_inf;
+                    const Real rho_ref = rho_inf;
+                    const Real p_ref   = p_inf;
 
                     const Real rho_u_ref = rho_ref * u_ref;
                     const Real rho_v_ref = rho_ref * v_ref;
-                    const Real E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
+                    const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
 
-                    Real xi_b      = pow((x[0]-d_special_source_box_hi[0])/(domain_xhi[0]-d_special_source_box_hi[0]),3.0); // mask value needs to be improved 
+                    Real xi_b      = std::pow((x[0]-d_special_source_box_hi[0])/(domain_xhi[0]-d_special_source_box_hi[0]), Real(3)); // mask value needs to be improved 
                     xi_b           = xi_b * sponge_rate;
 
-                    const double rho_p     = rho[idx_cons_var] - rho_ref;
-                    const double rho_u_p   = rho_u[idx_cons_var]   - rho_u_ref;
-                    const double rho_v_p   = rho_v[idx_cons_var]   - rho_v_ref;
-                    const double E_p       = E[idx_cons_var]       - E_ref;
+                    const Real rho_p   = rho[idx_cons_var]   - rho_ref;
+                    const Real rho_u_p = rho_u[idx_cons_var] - rho_u_ref;
+                    const Real rho_v_p = rho_v[idx_cons_var] - rho_v_ref;
+                    const Real E_p     = E[idx_cons_var]     - E_ref;
                     
                     S[0][idx_source] -= dt*xi_b*rho_p;
                     S[1][idx_source] -= dt*xi_b*rho_u_p;

@@ -87,7 +87,7 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
             // Distance from the cylinder center.
             const double radius = sqrt(pow(x[0] - x_c, 2) + pow(x[1] - y_c, 2));
             // Angle between x axis and a line passing through center and current cell.
-            const double theta  = atan2(x[1] - y_c, x[0] - x_c);                 
+            const double theta  = atan2(x[1] - y_c, x[0] - x_c);
             
             if (radius < radius_c) // Condition that should be satisfied to be in cylinder.
             {

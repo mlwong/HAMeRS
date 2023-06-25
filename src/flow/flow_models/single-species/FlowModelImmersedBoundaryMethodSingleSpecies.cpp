@@ -78,7 +78,7 @@ FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSin
     /*
      * Read the problem type. (Euler or NS)
      */
-
+    
     if (immersed_boundary_method_db->keyExists("problem_type"))
     {
         d_type = immersed_boundary_method_db->getString("problem_type");
@@ -126,7 +126,7 @@ FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSin
             &d_rho_body,
             &T_body,
             thermo_properties_const_ptr);
-
+    
     d_mom_body.resize(d_dim.getValue());
     
     if (d_dim == tbox::Dimension(1))
@@ -294,8 +294,8 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
             //Real* ip_ratio_1          = data_ip_corr->getPointer(1);  // AFK
             
             Real one  = Real(1);                                    // AFK one
-            Real half = Real(1) / Real(2);
-            Real d_ip = sqrt(Real(2))*dx[0] + HAMERS_REAL_EPSILON;  // AFK distance from cylinder boundary to the image point sqrt(2 + epsilon)
+            Real half = Real(1)/Real(2);
+            Real d_ip = sqrt(Real(2))*Real(dx[0]) + HAMERS_REAL_EPSILON;  // AFK distance from cylinder boundary to the image point sqrt(2 + epsilon)
                                                                     // ML: assuming isotropic grid cells
             
             Real x_ip = Real(0);  // AFK x and y locations of image points
@@ -319,9 +319,9 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
             Real u_f2 = Real(0);
             Real u_ip = Real(0);
             
-            Real v_f1    = Real(0);  // AFK variables needed in interpolating v velocity
-            Real v_f2    = Real(0);
-            Real v_ip    = Real(0);
+            Real v_f1 = Real(0);  // AFK variables needed in interpolating v velocity
+            Real v_f2 = Real(0);
+            Real v_ip = Real(0);
             Real T_f1 = Real(0);  // AFK variables needed in interpolating v velocity
             Real T_f2 = Real(0);
             Real T_ip = Real(0);
@@ -367,10 +367,6 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
             Real vel_gc_t   =  Real(0);
             Real vel_body_n =  Real(0);
             
-            // DONT NEED TO USE THIS: const Real radius_c = Real(1) / Real(20);  // AFK radius of the cylinder
-            // DONT NEED TO USE THIS: const Real x_c      = half;                // AFK
-            // DONT NEED TO USE THIS: const Real y_c      = half;                // AFK
-            
             // !!! SHOULD NOT HARD-CODE c_v
             const Real c_v = Real(5) / Real(2);  // AFK isochoric specific heat to get internal energy from temperature
             
@@ -408,8 +404,8 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                     
                     // Compute the coordinates.
                     Real x[2];
-                    x[0] = patch_xlo[0] + (Real(i) + half)*dx[0];  // AFK local x coordinates
-                    x[1] = patch_xlo[1] + (Real(j) + half)*dx[1];  // AFK local y coordinates
+                    x[0] = patch_xlo[0] + (Real(i) + half)*Real(dx[0]); // local x coordinates
+                    x[1] = patch_xlo[1] + (Real(j) + half)*Real(dx[1]); // local y coordinates
                     
                     if (mask[idx_IB] == int(IB_MASK::IB_GHOST))
                     {
@@ -417,16 +413,15 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         x_ip = x[0] + (dist[idx_IB] + d_ip)*norm_0[idx_IB];
                         y_ip = x[1] + (dist[idx_IB] + d_ip)*norm_1[idx_IB];
                         
-                        ip_location_index_0 = int(floor((x_ip - patch_xlo[0] - half * dx[0]) / dx[0]));
-                        ip_location_index_1 = int(floor((y_ip - patch_xlo[1] - half * dx[1]) / dx[1]));
+                        ip_location_index_0 = int(floor((x_ip - patch_xlo[0] - half * Real(dx[0])) / Real(dx[0])));
+                        ip_location_index_1 = int(floor((y_ip - patch_xlo[1] - half * Real(dx[1])) / Real(dx[1])));
                         
-                        x_ip_BL = patch_xlo[0] + (Real(ip_location_index_0) + half) * dx[0];
-                        y_ip_BL = patch_xlo[1] + (Real(ip_location_index_1) + half) * dx[1];
-                          
-                        ip_ratio_0 = (x_ip - x_ip_BL) / dx[0];
-                        ip_ratio_1 = (y_ip - y_ip_BL) / dx[1];
+                        x_ip_BL = patch_xlo[0] + (Real(ip_location_index_0) + half) * Real(dx[0]);
+                        y_ip_BL = patch_xlo[1] + (Real(ip_location_index_1) + half) * Real(dx[1]);
                         
-                         
+                        ip_ratio_0 = (x_ip - x_ip_BL) / Real(dx[0]);
+                        ip_ratio_1 = (y_ip - y_ip_BL) / Real(dx[1]);
+                        
                         // AFK declaration of the indexes of the cells in interpolation
                         const int idx_cons_var_BL  = (ip_location_index_0 + offset_0_cons_var) +
                                                      (ip_location_index_1 + offset_1_cons_var) * ghostcell_dim_0_cons_var;
@@ -452,7 +447,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         u_f1 = (one - ip_ratio_0) * u_IP_BL + ip_ratio_0 * u_IP_BR;
                         u_f2 = (one - ip_ratio_0) * u_IP_TL + ip_ratio_0 * u_IP_TR;
                         u_ip = (one - ip_ratio_1) * u_f1    + ip_ratio_1 * u_f2;
-                       
+                        
                         // AFK bilinear interpolation to find image point x velocity value
                         v_IP_BL = rho_v[idx_cons_var_BL] / rho[idx_cons_var_BL];
                         v_IP_BR = rho_v[idx_cons_var_BR] / rho[idx_cons_var_BR];
@@ -470,22 +465,23 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         {
                             vel_ip_n =  u_ip * norm_0[idx_IB] + v_ip * norm_1[idx_IB];
                             vel_ip_t = -u_ip * norm_1[idx_IB] + v_ip * norm_0[idx_IB];
-                        
+                            
                             vel_gc_n = vel_ip_n - ((d_ip + dist[idx_IB]) / d_ip) * (vel_ip_n);
                             vel_gc_t = vel_ip_t;
-                        
+                            
                             u_gc = vel_gc_n * norm_0[idx_IB] - vel_gc_t * norm_1[idx_IB];
                             v_gc = vel_gc_n * norm_1[idx_IB] + vel_gc_t * norm_0[idx_IB]; 
                         }
                         else
                         {
-                            u_gc       = u_ip - ((d_ip + dist[idx_IB])/d_ip) * (u_ip);
-                            v_gc       = v_ip - ((d_ip + dist[idx_IB])/d_ip) * (v_ip);
+                            u_gc = u_ip - ((d_ip + dist[idx_IB])/d_ip) * (u_ip);
+                            v_gc = v_ip - ((d_ip + dist[idx_IB])/d_ip) * (v_ip);
                         }
+                        
                         // Compute velocities at the ghost cell for NS equations (no-slip bcs)
-                            //u_gc       = u_ip - ((d_ip + dist[idx_IB])/d_ip) * (u_ip);
-                            //v_gc       = v_ip - ((d_ip + dist[idx_IB])/d_ip) * (v_ip);
-                            
+                        // u_gc       = u_ip - ((d_ip + dist[idx_IB])/d_ip) * (u_ip);
+                        // v_gc       = v_ip - ((d_ip + dist[idx_IB])/d_ip) * (v_ip);
+                        
                         // AFK bilinear interpolation to find image point energy
                         epsilon_BL = E[idx_cons_var_BL] / rho[idx_cons_var_BL] - half*(u_IP_BL*u_IP_BL + v_IP_BL*v_IP_BL);
                         epsilon_TL = E[idx_cons_var_TL] / rho[idx_cons_var_TL] - half*(u_IP_TL*u_IP_TL + v_IP_TL*v_IP_TL);
