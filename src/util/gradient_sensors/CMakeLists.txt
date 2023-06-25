@@ -1,6 +1,7 @@
 # Define a variable gradient_sensors_source_files containing
 # a list of the source files for the gradient_sensors library
 set(gradient_sensors_source_files
+    GradientSensorDucros.cpp
     GradientSensorJameson.cpp
     )
 

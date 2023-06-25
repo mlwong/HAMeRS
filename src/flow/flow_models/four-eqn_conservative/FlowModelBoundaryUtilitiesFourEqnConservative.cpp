@@ -660,7 +660,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
                          * Compute the mixture density of the pivot.
                          */
                         
-                        Real rho_pivot = 0.0;
+                        Real rho_pivot = Real(0);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -776,7 +776,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
                          * Compute the mixture density of the pivot.
                          */
                         
-                        Real rho_pivot = 0.0;
+                        Real rho_pivot = Real(0);
                         for (int si = 0; si < d_num_species; si++)
                         {
                             rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -1136,7 +1136,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mixture density of the pivot.
                              */
                             
-                            Real rho_pivot = 0.0;
+                            Real rho_pivot = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -1313,7 +1313,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                              * Compute the mixture density of the pivot.
                              */
                             
-                            Real rho_pivot = 0.0;
+                            Real rho_pivot = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -4452,7 +4452,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Compute the mixture density of the pivot.
                              */
                             
-                            Real rho_pivot = 0.0;
+                            Real rho_pivot = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -4595,7 +4595,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Compute the mixture density of the pivot.
                              */
                             
-                            Real rho_pivot = 0.0;
+                            Real rho_pivot = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -4738,7 +4738,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Compute the mixture density of the pivot.
                              */
                             
-                            Real rho_pivot = 0.0;
+                            Real rho_pivot = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -4888,7 +4888,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                              * Compute the mixture density of the pivot.
                              */
                             
-                            Real rho_pivot = 0.0;
+                            Real rho_pivot = Real(0);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -5353,7 +5353,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                Real rho_pivot = 0.0;
+                                Real rho_pivot = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -5635,7 +5635,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                Real rho_pivot = 0.0;
+                                Real rho_pivot = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -12395,7 +12395,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                Real rho_pivot = 0.0;
+                                Real rho_pivot = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -12573,7 +12573,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                Real rho_pivot = 0.0;
+                                Real rho_pivot = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -12751,7 +12751,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                Real rho_pivot = 0.0;
+                                Real rho_pivot = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -12929,7 +12929,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                Real rho_pivot = 0.0;
+                                Real rho_pivot = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -13114,7 +13114,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                Real rho_pivot = 0.0;
+                                Real rho_pivot = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -13299,7 +13299,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                Real rho_pivot = 0.0;
+                                Real rho_pivot = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -13733,7 +13733,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                Real rho_pivot = 0.0;
+                                Real rho_pivot = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -13911,7 +13911,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                Real rho_pivot = 0.0;
+                                Real rho_pivot = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -14089,7 +14089,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                Real rho_pivot = 0.0;
+                                Real rho_pivot = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -14267,7 +14267,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                Real rho_pivot = 0.0;
+                                Real rho_pivot = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -14452,7 +14452,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                Real rho_pivot = 0.0;
+                                Real rho_pivot = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -14637,7 +14637,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
                                  * Compute the mixture density of the pivot.
                                  */
                                 
-                                Real rho_pivot = 0.0;
+                                Real rho_pivot = Real(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     rho_pivot += Q[si][idx_cell_pivot_rho_Y];
@@ -16026,7 +16026,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::readIsothermalNoSlip(
     TBOX_ASSERT(db);
     TBOX_ASSERT(!db_name.empty());
     
-    Real data_T = 0.0;
+    Real data_T = Real(0);
     std::vector<Real> data_vel;
     
     if (db->keyExists("temperature"))
@@ -16117,10 +16117,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::readNonreflectingOutflow(
     TBOX_ASSERT(db);
     TBOX_ASSERT(!db_name.empty());
 
-    Real p_t = 0.0;
+    Real p_t = Real(0);
     Real sigma = Real(1)/Real(4); // 0.25
-    Real beta = 0.0;
-    Real length_char = 0.0;
+    Real beta = Real(0);
+    Real length_char = Real(0);
 
     if (db->keyExists("pressure_target"))
     {

@@ -30,7 +30,7 @@ class Filter
          * Get the number of ghost cells needed by the filtering operation.
          */
         hier::IntVector
-        getFilterNumberOfGhostCells(void) const
+        getFilterNumberOfGhostCells() const
         {
             return d_num_filter_ghosts;
         }

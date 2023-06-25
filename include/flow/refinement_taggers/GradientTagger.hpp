@@ -11,6 +11,7 @@
 #include "util/differences/DifferenceFirstOrder.hpp"
 #include "util/differences/DifferenceSecondOrder.hpp"
 #include "util/gradient_sensors/GradientSensorJameson.hpp"
+#include "util/gradient_sensors/GradientSensorDucros.hpp"
 
 // #include "SAMRAI/appu/VisItDataWriter.h"
 #include "SAMRAI/math/HierarchyCellDataOpsReal.h"
@@ -141,7 +142,7 @@ class GradientTagger
         const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
-         * Number of ghost cells needed by the the gradient tagger.
+         * Number of ghost cells needed by the gradient tagger.
          */
         hier::IntVector d_num_gradient_ghosts;
         
@@ -174,6 +175,11 @@ class GradientTagger
         HAMERS_SHARED_PTR<GradientSensorJameson> d_gradient_sensor_Jameson;
         
         /*
+         * HAMERS_SHARED_PTR to GradientSensorDucros.
+         */
+        HAMERS_SHARED_PTR<GradientSensorDucros> d_gradient_sensor_Ducros;
+        
+        /*
          * Variables, tolerances and settings for the gradient sensors.
          */
         std::vector<std::string> d_difference_first_order_variables;
@@ -195,6 +201,13 @@ class GradientTagger
         std::vector<Real> d_Jameson_gradient_tol;
         
         /*
+         * Settings and tolerance for the Ducros gradient sensor.
+         */
+        bool d_Ducros_gradient_use_dilatation;
+        bool d_Ducros_gradient_use_strain_rate;
+        Real d_Ducros_gradient_tol;
+        
+        /*
          * HAMERS_SHARED_PTR to differences.
          */
         HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_difference_first_order_density;
@@ -212,6 +225,11 @@ class GradientTagger
         HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_Jameson_gradient_total_energy;
         HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_Jameson_gradient_pressure;
         
+        /*
+         * HAMERS_SHARED_PTR to of value of Ducros gradient sensor.
+         */
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_Ducros_gradient;
+         
         /*
          * Statistics of sensor values.
          */

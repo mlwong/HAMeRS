@@ -30,7 +30,20 @@ ConvectiveFluxReconstructorCentral::ConvectiveFluxReconstructorCentral(
     d_order = d_convective_flux_reconstructor_db->
         getIntegerWithDefault("d_order", d_order);
     
-    if (d_order == 8)
+    
+    if (d_order == 2)
+    {
+        d_num_conv_ghosts = hier::IntVector::getOne(d_dim);
+    }
+    else if (d_order == 4)
+    {
+        d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*2;
+    }
+    else if (d_order == 6)
+    {
+        d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*3;
+    }
+    else if (d_order == 8)
     {
         d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*4;
     }
@@ -45,7 +58,7 @@ ConvectiveFluxReconstructorCentral::ConvectiveFluxReconstructorCentral(
     else
     {
         TBOX_ERROR("ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch:"
-            " Only 8th, 10th, 12th order central schemes are implemented!");
+            " Only 2nd, 4th, 6th, 8th, 10th, 12th order central schemes are implemented!");
     }
     
     d_eqn_form = d_flow_model->getEquationsForm();
@@ -139,7 +152,31 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
     Real e_m = Real(0);
     Real f_m = Real(0);
     
-    if (d_order == 8)
+    if (d_order == 2)
+    {
+        a_n =  Real(1)/Real(2);
+        
+        a_m = a_n;
+    }
+    else if (d_order == 4)
+    {
+        a_n =  Real(2)/Real(3);
+        b_n = -Real(1)/Real(12);
+        
+        a_m = a_n + b_n;
+        b_m = b_n;
+    }
+    else if (d_order == 6)
+    {
+        a_n =  Real(3)/Real(4);
+        b_n = -Real(3)/Real(20);
+        c_n =  Real(1)/Real(60);
+        
+        a_m = a_n + b_n + c_n;
+        b_m = b_n + c_n;
+        c_m = c_n;
+    }
+    else if (d_order == 8)
     {
         a_n =  Real(4)/Real(5);
         b_n = -Real(1)/Real(5);
@@ -275,7 +312,79 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
          * Reconstruct the flux in the x-direction.
          */
         
-        if (d_order == 8)
+        if (d_order == 2)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_x = convective_flux->getPointer(0, ei);
+                
+                HAMERS_PRAGMA_SIMD
+                for (int i = 0; i < interior_dim_0 + 1; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face_x = i;
+                    
+                    const int idx_node_L = i - 1 + num_subghosts_0_convective_flux_x;
+                    const int idx_node_R = i     + num_subghosts_0_convective_flux_x;
+                    
+                    F_face_x[idx_face_x] = Real(dt)*(
+                        a_m*(F_node_x[ei][idx_node_L] + F_node_x[ei][idx_node_R])
+                        );
+                }
+            }
+        }
+        else if (d_order == 4)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_x = convective_flux->getPointer(0, ei);
+                
+                HAMERS_PRAGMA_SIMD
+                for (int i = 0; i < interior_dim_0 + 1; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face_x = i;
+                    
+                    const int idx_node_LL = i - 2 + num_subghosts_0_convective_flux_x;
+                    const int idx_node_L  = i - 1 + num_subghosts_0_convective_flux_x;
+                    const int idx_node_R  = i     + num_subghosts_0_convective_flux_x;
+                    const int idx_node_RR = i + 1 + num_subghosts_0_convective_flux_x;
+                    
+                    F_face_x[idx_face_x] = Real(dt)*(
+                        a_m*(F_node_x[ei][idx_node_L]  + F_node_x[ei][idx_node_R]) +
+                        b_m*(F_node_x[ei][idx_node_LL] + F_node_x[ei][idx_node_RR])
+                        );
+                }
+            }
+        }
+        else if (d_order == 6)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_x = convective_flux->getPointer(0, ei);
+                
+                HAMERS_PRAGMA_SIMD
+                for (int i = 0; i < interior_dim_0 + 1; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face_x = i;
+                    
+                    const int idx_node_LLL = i - 3 + num_subghosts_0_convective_flux_x;
+                    const int idx_node_LL  = i - 2 + num_subghosts_0_convective_flux_x;
+                    const int idx_node_L   = i - 1 + num_subghosts_0_convective_flux_x;
+                    const int idx_node_R   = i     + num_subghosts_0_convective_flux_x;
+                    const int idx_node_RR  = i + 1 + num_subghosts_0_convective_flux_x;
+                    const int idx_node_RRR = i + 2 + num_subghosts_0_convective_flux_x;
+                    
+                    F_face_x[idx_face_x] = Real(dt)*(
+                        a_m*(F_node_x[ei][idx_node_L]   + F_node_x[ei][idx_node_R]) +
+                        b_m*(F_node_x[ei][idx_node_LL]  + F_node_x[ei][idx_node_RR]) +
+                        c_m*(F_node_x[ei][idx_node_LLL] + F_node_x[ei][idx_node_RRR])
+                        );
+                }
+            }
+        }
+        else if (d_order == 8)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -429,12 +538,78 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                     
                     const int num_subghosts_0_conservative_var = num_subghosts_conservative_var[ei][0];
                     
-                    if (d_order == 8)
+                    if (d_order == 2)
                     {
                         HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            // Compute the linear indices. 
+                            // Compute the linear indices.
+                            const int idx_cell_wghost = i + num_subghosts_0_conservative_var;
+                            
+                            const int idx_cell_wghost_x_L = i - 1 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_R = i + 1 + num_subghosts_0_velocity;
+                            
+                            const int idx_cell_nghost = i;
+                            
+                            S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                (
+                                a_n*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L])
+                                )/Real(dx[0]));
+                        }
+                    }
+                    else if (d_order == 4)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_cell_wghost = i + num_subghosts_0_conservative_var;
+                            
+                            const int idx_cell_wghost_x_LL = i - 2 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_L  = i - 1 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_R  = i + 1 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_RR = i + 2 + num_subghosts_0_velocity;
+                            
+                            const int idx_cell_nghost = i;
+                            
+                            S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                (
+                                a_n*(u[idx_cell_wghost_x_R]  - u[idx_cell_wghost_x_L]) +
+                                b_n*(u[idx_cell_wghost_x_RR] - u[idx_cell_wghost_x_LL])
+                                )/Real(dx[0]));
+                        }
+                    }
+                    else if (d_order == 6)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_cell_wghost = i + num_subghosts_0_conservative_var;
+                            
+                            const int idx_cell_wghost_x_LLL = i - 3 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_LL  = i - 2 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_L   = i - 1 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_R   = i + 1 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_RR  = i + 2 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_RRR = i + 3 + num_subghosts_0_velocity;
+                            
+                            const int idx_cell_nghost = i;
+                            
+                            S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                (
+                                a_n*(u[idx_cell_wghost_x_R]   - u[idx_cell_wghost_x_L]) +
+                                b_n*(u[idx_cell_wghost_x_RR]  - u[idx_cell_wghost_x_LL]) +
+                                c_n*(u[idx_cell_wghost_x_RRR] - u[idx_cell_wghost_x_LLL])
+                                )/Real(dx[0]));
+                        }
+                    }
+                    else if (d_order == 8)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
                             const int idx_cell_wghost = i + num_subghosts_0_conservative_var;
                             
                             const int idx_cell_wghost_x_LLLL = i - 4 + num_subghosts_0_velocity;
@@ -462,7 +637,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                         HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            // Compute the linear indices. 
+                            // Compute the linear indices.
                             const int idx_cell_wghost = i + num_subghosts_0_conservative_var;
                             
                             const int idx_cell_wghost_x_LLLLL = i - 5 + num_subghosts_0_velocity;
@@ -493,7 +668,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                         HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            // Compute the linear indices. 
+                            // Compute the linear indices.
                             const int idx_cell_wghost = i + num_subghosts_0_conservative_var;
                             
                             const int idx_cell_wghost_x_LLLLLL = i - 6 + num_subghosts_0_velocity;
@@ -605,7 +780,112 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
          * Reconstruct the flux in the x-direction.
          */
         
-        if (d_order == 8)
+        if (d_order == 2)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_x = convective_flux->getPointer(0, ei);
+                
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = 0; i < interior_dim_0 + 1; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_x = i +
+                            j*(interior_dim_0 + 1);
+                        
+                        const int idx_node_L = (i - 1 + num_subghosts_0_convective_flux_x) +
+                            (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
+                        
+                        const int idx_node_R = (i + num_subghosts_0_convective_flux_x) +
+                            (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
+                        
+                        F_face_x[idx_face_x] = Real(dt)*(
+                            a_m*(F_node_x[ei][idx_node_L] + F_node_x[ei][idx_node_R])
+                            );
+                    }
+                }
+            }
+        }
+        else if (d_order == 4)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_x = convective_flux->getPointer(0, ei);
+                
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = 0; i < interior_dim_0 + 1; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_x = i +
+                            j*(interior_dim_0 + 1);
+                        
+                        const int idx_node_LL = (i - 2 + num_subghosts_0_convective_flux_x) +
+                            (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
+                        
+                        const int idx_node_L  = (i - 1 + num_subghosts_0_convective_flux_x) +
+                            (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
+                        
+                        const int idx_node_R  = (i + num_subghosts_0_convective_flux_x) +
+                            (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
+                        
+                        const int idx_node_RR = (i + 1 + num_subghosts_0_convective_flux_x) +
+                            (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
+                        
+                        F_face_x[idx_face_x] = Real(dt)*(
+                            a_m*(F_node_x[ei][idx_node_L]  + F_node_x[ei][idx_node_R]) +
+                            b_m*(F_node_x[ei][idx_node_LL] + F_node_x[ei][idx_node_RR])
+                            );
+                    }
+                }
+            }
+        }
+        else if (d_order == 6)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_x = convective_flux->getPointer(0, ei);
+                
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = 0; i < interior_dim_0 + 1; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_x = i +
+                            j*(interior_dim_0 + 1);
+                        
+                        const int idx_node_LLL = (i - 3 + num_subghosts_0_convective_flux_x) +
+                            (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
+                        
+                        const int idx_node_LL  = (i - 2 + num_subghosts_0_convective_flux_x) +
+                            (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
+                        
+                        const int idx_node_L   = (i - 1 + num_subghosts_0_convective_flux_x) +
+                            (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
+                        
+                        const int idx_node_R   = (i + num_subghosts_0_convective_flux_x) +
+                            (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
+                        
+                        const int idx_node_RR  = (i + 1 + num_subghosts_0_convective_flux_x) +
+                            (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
+                        
+                        const int idx_node_RRR = (i + 2 + num_subghosts_0_convective_flux_x) +
+                            (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
+                        
+                        F_face_x[idx_face_x] = Real(dt)*(
+                            a_m*(F_node_x[ei][idx_node_L]   + F_node_x[ei][idx_node_R]) +
+                            b_m*(F_node_x[ei][idx_node_LL]  + F_node_x[ei][idx_node_RR]) +
+                            c_m*(F_node_x[ei][idx_node_LLL] + F_node_x[ei][idx_node_RRR])
+                            );
+                    }
+                }
+            }
+        }
+        else if (d_order == 8)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -778,7 +1058,112 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
          * Reconstruct the flux in the y-direction.
          */
         
-        if (d_order == 8)
+        if (d_order == 2)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_y = convective_flux->getPointer(1, ei);
+                
+                for (int j = 0; j < interior_dim_1 + 1; j++)
+                {
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_y = i +
+                            j*interior_dim_0;
+                        
+                        const int idx_node_B = (i + num_subghosts_0_convective_flux_y) +
+                            (j - 1 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
+                        
+                        const int idx_node_T = (i + num_subghosts_0_convective_flux_y) +
+                            (j + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
+                        
+                        F_face_y[idx_face_y] = Real(dt)*(
+                            a_m*(F_node_y[ei][idx_node_B] + F_node_y[ei][idx_node_T])
+                            );
+                    }
+                }
+            }
+        }
+        else if (d_order == 4)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_y = convective_flux->getPointer(1, ei);
+                
+                for (int j = 0; j < interior_dim_1 + 1; j++)
+                {
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_y = i +
+                            j*interior_dim_0;
+                        
+                        const int idx_node_BB = (i + num_subghosts_0_convective_flux_y) +
+                            (j - 2 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
+                        
+                        const int idx_node_B  = (i + num_subghosts_0_convective_flux_y) +
+                            (j - 1 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
+                        
+                        const int idx_node_T  = (i + num_subghosts_0_convective_flux_y) +
+                            (j + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
+                        
+                        const int idx_node_TT = (i + num_subghosts_0_convective_flux_y) +
+                            (j + 1 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
+                        
+                        F_face_y[idx_face_y] = Real(dt)*(
+                            a_m*(F_node_y[ei][idx_node_B]  + F_node_y[ei][idx_node_T]) +
+                            b_m*(F_node_y[ei][idx_node_BB] + F_node_y[ei][idx_node_TT])
+                            );
+                    }
+                }
+            }
+        }
+        else if (d_order == 6)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_y = convective_flux->getPointer(1, ei);
+                
+                for (int j = 0; j < interior_dim_1 + 1; j++)
+                {
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_y = i +
+                            j*interior_dim_0;
+                        
+                        const int idx_node_BBB = (i + num_subghosts_0_convective_flux_y) +
+                            (j - 3 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
+                        
+                        const int idx_node_BB  = (i + num_subghosts_0_convective_flux_y) +
+                            (j - 2 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
+                        
+                        const int idx_node_B   = (i + num_subghosts_0_convective_flux_y) +
+                            (j - 1 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
+                        
+                        const int idx_node_T   = (i + num_subghosts_0_convective_flux_y) +
+                            (j + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
+                        
+                        const int idx_node_TT  = (i + num_subghosts_0_convective_flux_y) +
+                            (j + 1 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
+                        
+                        const int idx_node_TTT = (i + num_subghosts_0_convective_flux_y) +
+                            (j + 2 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
+                        
+                        F_face_y[idx_face_y] = Real(dt)*(
+                            a_m*(F_node_y[ei][idx_node_B]   + F_node_y[ei][idx_node_T]) +
+                            b_m*(F_node_y[ei][idx_node_BB]  + F_node_y[ei][idx_node_TT]) +
+                            c_m*(F_node_y[ei][idx_node_BBB] + F_node_y[ei][idx_node_TTT])
+                            );
+                    }
+                }
+            }
+        }
+        else if (d_order == 8)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -1013,7 +1398,157 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                     const int num_subghosts_1_conservative_var = num_subghosts_conservative_var[ei][1];
                     const int subghostcell_dim_0_conservative_var = subghostcell_dims_conservative_var[ei][0];
                     
-                    if (d_order == 8)
+                    if (d_order == 2)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute the linear indices.
+                                const int idx_cell_wghost = (i + num_subghosts_0_conservative_var) +
+                                    (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var;
+                                
+                                const int idx_cell_wghost_x_L = (i - 1 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_R = (i + 1 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_B = (i + num_subghosts_0_velocity) +
+                                    (j - 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_T = (i + num_subghosts_0_velocity) +
+                                    (j + 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_nghost = i + j*interior_dim_0;
+                                
+                                S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                    (
+                                    a_n*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L])
+                                    )/Real(dx[0]) +
+                                    (
+                                    a_n*(v[idx_cell_wghost_y_T] - v[idx_cell_wghost_y_B])
+                                    )/Real(dx[1])
+                                    );
+                            }
+                        }
+                    }
+                    else if (d_order == 4)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute the linear indices.
+                                const int idx_cell_wghost = (i + num_subghosts_0_conservative_var) +
+                                    (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var;
+                                
+                                const int idx_cell_wghost_x_LL = (i - 2 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_L  = (i - 1 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_R  = (i + 1 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_RR = (i + 2 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_BB = (i + num_subghosts_0_velocity) +
+                                    (j - 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_B  = (i + num_subghosts_0_velocity) +
+                                    (j - 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_T  = (i + num_subghosts_0_velocity) +
+                                    (j + 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_TT = (i + num_subghosts_0_velocity) +
+                                    (j + 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_nghost = i + j*interior_dim_0;
+                                
+                                S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                    (
+                                    a_n*(u[idx_cell_wghost_x_R]  - u[idx_cell_wghost_x_L]) +
+                                    b_n*(u[idx_cell_wghost_x_RR] - u[idx_cell_wghost_x_LL])
+                                    )/Real(dx[0]) +
+                                    (
+                                    a_n*(v[idx_cell_wghost_y_T]  - v[idx_cell_wghost_y_B]) +
+                                    b_n*(v[idx_cell_wghost_y_TT] - v[idx_cell_wghost_y_BB])
+                                    )/Real(dx[1])
+                                    );
+                            }
+                        }
+                    }
+                    else if (d_order == 6)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute the linear indices.
+                                const int idx_cell_wghost = (i + num_subghosts_0_conservative_var) +
+                                    (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var;
+                                
+                                const int idx_cell_wghost_x_LLL = (i - 3 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_LL  = (i - 2 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_L   = (i - 1 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_R   = (i + 1 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_RR  = (i + 2 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_RRR = (i + 3 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_BBB = (i + num_subghosts_0_velocity) +
+                                    (j - 3 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_BB  = (i + num_subghosts_0_velocity) +
+                                    (j - 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_B   = (i + num_subghosts_0_velocity) +
+                                    (j - 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_T   = (i + num_subghosts_0_velocity) +
+                                    (j + 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_TT  = (i + num_subghosts_0_velocity) +
+                                    (j + 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_TTT = (i + num_subghosts_0_velocity) +
+                                    (j + 3 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_nghost = i + j*interior_dim_0;
+                                
+                                S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                    (
+                                    a_n*(u[idx_cell_wghost_x_R]   - u[idx_cell_wghost_x_L]) +
+                                    b_n*(u[idx_cell_wghost_x_RR]  - u[idx_cell_wghost_x_LL]) +
+                                    c_n*(u[idx_cell_wghost_x_RRR] - u[idx_cell_wghost_x_LLL])
+                                    )/Real(dx[0]) +
+                                    (
+                                    a_n*(v[idx_cell_wghost_y_T]   - v[idx_cell_wghost_y_B]) +
+                                    b_n*(v[idx_cell_wghost_y_TT]  - v[idx_cell_wghost_y_BB]) +
+                                    c_n*(v[idx_cell_wghost_y_TTT] - v[idx_cell_wghost_y_BBB])
+                                    )/Real(dx[1])
+                                    );
+                            }
+                        }
+                    }
+                    else if (d_order == 8)
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
@@ -1391,7 +1926,148 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
          * Reconstruct the flux in the x-direction.
          */
         
-        if (d_order == 8)
+        if (d_order == 2)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_x = convective_flux->getPointer(0, ei);
+                
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0 + 1; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_x = i +
+                                j*(interior_dim_0 + 1) +
+                                k*(interior_dim_0 + 1)*interior_dim_1;
+                            
+                            const int idx_node_L = (i - 1 + num_subghosts_0_convective_flux_x) +
+                                (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x + 
+                                (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
+                                    subghostcell_dim_1_convective_flux_x;
+                            
+                            const int idx_node_R = (i + num_subghosts_0_convective_flux_x) +
+                                (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x +
+                                (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
+                                    subghostcell_dim_1_convective_flux_x;
+                            
+                            F_face_x[idx_face_x] = Real(dt)*(
+                                a_m*(F_node_x[ei][idx_node_L] + F_node_x[ei][idx_node_R])
+                                );
+                        }
+                    }
+                }
+            }
+        }
+        else if (d_order == 4)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_x = convective_flux->getPointer(0, ei);
+                
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0 + 1; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_x = i +
+                                j*(interior_dim_0 + 1) +
+                                k*(interior_dim_0 + 1)*interior_dim_1;
+                            
+                            const int idx_node_LL = (i - 2 + num_subghosts_0_convective_flux_x) +
+                                (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x +
+                                (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
+                                    subghostcell_dim_1_convective_flux_x;
+                            
+                            const int idx_node_L  = (i - 1 + num_subghosts_0_convective_flux_x) +
+                                (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x + 
+                                (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
+                                    subghostcell_dim_1_convective_flux_x;
+                            
+                            const int idx_node_R  = (i + num_subghosts_0_convective_flux_x) +
+                                (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x +
+                                (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
+                                    subghostcell_dim_1_convective_flux_x;
+                            
+                            const int idx_node_RR = (i + 1 + num_subghosts_0_convective_flux_x) +
+                                (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x +
+                                (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
+                                    subghostcell_dim_1_convective_flux_x;
+                            
+                            F_face_x[idx_face_x] = Real(dt)*(
+                                a_m*(F_node_x[ei][idx_node_L]  + F_node_x[ei][idx_node_R]) +
+                                b_m*(F_node_x[ei][idx_node_LL] + F_node_x[ei][idx_node_RR])
+                                );
+                        }
+                    }
+                }
+            }
+        }
+        else if (d_order == 6)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_x = convective_flux->getPointer(0, ei);
+                
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0 + 1; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_x = i +
+                                j*(interior_dim_0 + 1) +
+                                k*(interior_dim_0 + 1)*interior_dim_1;
+                            
+                            const int idx_node_LLL = (i - 3 + num_subghosts_0_convective_flux_x) +
+                                (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x +
+                                (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
+                                    subghostcell_dim_1_convective_flux_x;
+                            
+                            const int idx_node_LL  = (i - 2 + num_subghosts_0_convective_flux_x) +
+                                (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x +
+                                (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
+                                    subghostcell_dim_1_convective_flux_x;
+                            
+                            const int idx_node_L   = (i - 1 + num_subghosts_0_convective_flux_x) +
+                                (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x + 
+                                (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
+                                    subghostcell_dim_1_convective_flux_x;
+                            
+                            const int idx_node_R   = (i + num_subghosts_0_convective_flux_x) +
+                                (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x +
+                                (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
+                                    subghostcell_dim_1_convective_flux_x;
+                            
+                            const int idx_node_RR  = (i + 1 + num_subghosts_0_convective_flux_x) +
+                                (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x +
+                                (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
+                                    subghostcell_dim_1_convective_flux_x;
+                            
+                            const int idx_node_RRR = (i + 2 + num_subghosts_0_convective_flux_x) +
+                                (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x +
+                                (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
+                                    subghostcell_dim_1_convective_flux_x;
+                            
+                            F_face_x[idx_face_x] = Real(dt)*(
+                                a_m*(F_node_x[ei][idx_node_L]   + F_node_x[ei][idx_node_R]) +
+                                b_m*(F_node_x[ei][idx_node_LL]  + F_node_x[ei][idx_node_RR]) +
+                                c_m*(F_node_x[ei][idx_node_LLL] + F_node_x[ei][idx_node_RRR])
+                                );
+                        }
+                    }
+                }
+            }
+        }
+        else if (d_order == 8)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -1636,7 +2312,148 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
          * Reconstruct the flux in the y-direction.
          */
         
-        if (d_order == 8)
+        if (d_order == 2)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_y = convective_flux->getPointer(1, ei);
+                
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1 + 1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_y = i +
+                                j*interior_dim_0 + 
+                                k*interior_dim_0*(interior_dim_1 + 1);
+                            
+                            const int idx_node_B = (i + num_subghosts_0_convective_flux_y) +
+                                (j - 1 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
+                                (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
+                                    subghostcell_dim_1_convective_flux_y;
+                            
+                            const int idx_node_T = (i + num_subghosts_0_convective_flux_y) +
+                                (j + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
+                                (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
+                                    subghostcell_dim_1_convective_flux_y;
+                            
+                            F_face_y[idx_face_y] = Real(dt)*(
+                                a_m*(F_node_y[ei][idx_node_B] + F_node_y[ei][idx_node_T])
+                                );
+                        }
+                    }
+                }
+            }
+        }
+        else if (d_order == 4)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_y = convective_flux->getPointer(1, ei);
+                
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1 + 1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_y = i +
+                                j*interior_dim_0 + 
+                                k*interior_dim_0*(interior_dim_1 + 1);
+                            
+                            const int idx_node_BB = (i + num_subghosts_0_convective_flux_y) +
+                                (j - 2 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
+                                (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
+                                    subghostcell_dim_1_convective_flux_y;
+                            
+                            const int idx_node_B  = (i + num_subghosts_0_convective_flux_y) +
+                                (j - 1 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
+                                (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
+                                    subghostcell_dim_1_convective_flux_y;
+                            
+                            const int idx_node_T  = (i + num_subghosts_0_convective_flux_y) +
+                                (j + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
+                                (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
+                                    subghostcell_dim_1_convective_flux_y;
+                            
+                            const int idx_node_TT = (i + num_subghosts_0_convective_flux_y) +
+                                (j + 1 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
+                                (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
+                                    subghostcell_dim_1_convective_flux_y;
+                            
+                            F_face_y[idx_face_y] = Real(dt)*(
+                                a_m*(F_node_y[ei][idx_node_B]  + F_node_y[ei][idx_node_T]) +
+                                b_m*(F_node_y[ei][idx_node_BB] + F_node_y[ei][idx_node_TT])
+                                );
+                        }
+                    }
+                }
+            }
+        }
+        else if (d_order == 6)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_y = convective_flux->getPointer(1, ei);
+                
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1 + 1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_y = i +
+                                j*interior_dim_0 + 
+                                k*interior_dim_0*(interior_dim_1 + 1);
+                            
+                            const int idx_node_BBB = (i + num_subghosts_0_convective_flux_y) +
+                                (j - 3 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
+                                (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
+                                    subghostcell_dim_1_convective_flux_y;
+                            
+                            const int idx_node_BB  = (i + num_subghosts_0_convective_flux_y) +
+                                (j - 2 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
+                                (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
+                                    subghostcell_dim_1_convective_flux_y;
+                            
+                            const int idx_node_B   = (i + num_subghosts_0_convective_flux_y) +
+                                (j - 1 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
+                                (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
+                                    subghostcell_dim_1_convective_flux_y;
+                            
+                            const int idx_node_T   = (i + num_subghosts_0_convective_flux_y) +
+                                (j + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
+                                (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
+                                    subghostcell_dim_1_convective_flux_y;
+                            
+                            const int idx_node_TT  = (i + num_subghosts_0_convective_flux_y) +
+                                (j + 1 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
+                                (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
+                                    subghostcell_dim_1_convective_flux_y;
+                            
+                            const int idx_node_TTT = (i + num_subghosts_0_convective_flux_y) +
+                                (j + 2 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
+                                (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
+                                    subghostcell_dim_1_convective_flux_y;
+                            
+                            F_face_y[idx_face_y] = Real(dt)*(
+                                a_m*(F_node_y[ei][idx_node_B]   + F_node_y[ei][idx_node_T]) +
+                                b_m*(F_node_y[ei][idx_node_BB]  + F_node_y[ei][idx_node_TT]) +
+                                c_m*(F_node_y[ei][idx_node_BBB] + F_node_y[ei][idx_node_TTT])
+                                );
+                        }
+                    }
+                }
+            }
+        }
+        else if (d_order == 8)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -1881,7 +2698,148 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
          * Reconstruct the flux in the z-direction.
          */
         
-        if (d_order == 8)
+        if (d_order == 2)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_z = convective_flux->getPointer(2, ei);
+                
+                for (int k = 0; k < interior_dim_2 + 1; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_z = i +
+                                j*interior_dim_0 + 
+                                k*interior_dim_0*interior_dim_1;
+                            
+                            const int idx_node_B = (i + num_subghosts_0_convective_flux_z) +
+                                (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
+                                (k - 1 + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
+                                    subghostcell_dim_1_convective_flux_z;
+                            
+                            const int idx_node_F = (i + num_subghosts_0_convective_flux_z) +
+                                (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
+                                (k + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
+                                    subghostcell_dim_1_convective_flux_z;
+                            
+                            F_face_z[idx_face_z] = Real(dt)*(
+                                a_m*(F_node_z[ei][idx_node_B] + F_node_z[ei][idx_node_F])
+                                );
+                        }
+                    }
+                }
+            }
+        }
+        else if (d_order == 4)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_z = convective_flux->getPointer(2, ei);
+                
+                for (int k = 0; k < interior_dim_2 + 1; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_z = i +
+                                j*interior_dim_0 + 
+                                k*interior_dim_0*interior_dim_1;
+                            
+                            const int idx_node_BB = (i + num_subghosts_0_convective_flux_z) +
+                                (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
+                                (k - 2 + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
+                                    subghostcell_dim_1_convective_flux_z;
+                            
+                            const int idx_node_B  = (i + num_subghosts_0_convective_flux_z) +
+                                (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
+                                (k - 1 + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
+                                    subghostcell_dim_1_convective_flux_z;
+                            
+                            const int idx_node_F  = (i + num_subghosts_0_convective_flux_z) +
+                                (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
+                                (k + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
+                                    subghostcell_dim_1_convective_flux_z;
+                            
+                            const int idx_node_FF = (i + num_subghosts_0_convective_flux_z) +
+                                (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
+                                (k + 1 + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
+                                    subghostcell_dim_1_convective_flux_z;
+                            
+                            F_face_z[idx_face_z] = Real(dt)*(
+                                a_m*(F_node_z[ei][idx_node_B]  + F_node_z[ei][idx_node_F]) +
+                                b_m*(F_node_z[ei][idx_node_BB] + F_node_z[ei][idx_node_FF])
+                                );
+                        }
+                    }
+                }
+            }
+        }
+        else if (d_order == 6)
+        {
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                Real* F_face_z = convective_flux->getPointer(2, ei);
+                
+                for (int k = 0; k < interior_dim_2 + 1; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_z = i +
+                                j*interior_dim_0 + 
+                                k*interior_dim_0*interior_dim_1;
+                            
+                            const int idx_node_BBB = (i + num_subghosts_0_convective_flux_z) +
+                                (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
+                                (k - 3 + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
+                                    subghostcell_dim_1_convective_flux_z;
+                            
+                            const int idx_node_BB  = (i + num_subghosts_0_convective_flux_z) +
+                                (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
+                                (k - 2 + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
+                                    subghostcell_dim_1_convective_flux_z;
+                            
+                            const int idx_node_B   = (i + num_subghosts_0_convective_flux_z) +
+                                (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
+                                (k - 1 + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
+                                    subghostcell_dim_1_convective_flux_z;
+                            
+                            const int idx_node_F   = (i + num_subghosts_0_convective_flux_z) +
+                                (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
+                                (k + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
+                                    subghostcell_dim_1_convective_flux_z;
+                            
+                            const int idx_node_FF  = (i + num_subghosts_0_convective_flux_z) +
+                                (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
+                                (k + 1 + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
+                                    subghostcell_dim_1_convective_flux_z;
+                            
+                            const int idx_node_FFF = (i + num_subghosts_0_convective_flux_z) +
+                                (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
+                                (k + 2 + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
+                                    subghostcell_dim_1_convective_flux_z;
+                            
+                            F_face_z[idx_face_z] = Real(dt)*(
+                                a_m*(F_node_z[ei][idx_node_B]   + F_node_z[ei][idx_node_F]) +
+                                b_m*(F_node_z[ei][idx_node_BB]  + F_node_z[ei][idx_node_FF]) +
+                                c_m*(F_node_z[ei][idx_node_BBB] + F_node_z[ei][idx_node_FFF])
+                                );
+                        }
+                    }
+                }
+            }
+        }
+        else if (d_order == 8)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -2193,7 +3151,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                     const int subghostcell_dim_0_conservative_var = subghostcell_dims_conservative_var[ei][0];
                     const int subghostcell_dim_1_conservative_var = subghostcell_dims_conservative_var[ei][1];
                     
-                    if (d_order == 8)
+                    if (d_order == 2)
                     {
                         for (int k = 0; k < interior_dim_2; k++)
                         {
@@ -2202,7 +3160,301 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                                 HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
-                                    // Compute the linear indices. 
+                                    // Compute the linear indices.
+                                    const int idx_cell_wghost = (i + num_subghosts_0_conservative_var) +
+                                        (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                        (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                            subghostcell_dim_1_conservative_var;
+                                    
+                                    const int idx_cell_wghost_x_L = (i - 1 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_R = (i + 1 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_B = (i + num_subghosts_0_velocity) +
+                                        (j - 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_T = (i + num_subghosts_0_velocity) +
+                                        (j + 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_B = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 1 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_F = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 1 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_nghost = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*
+                                            interior_dim_1;
+                                    
+                                    S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                        (
+                                        a_n*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L])
+                                        )/Real(dx[0]) +
+                                        (
+                                        a_n*(v[idx_cell_wghost_y_T] - v[idx_cell_wghost_y_B])
+                                        )/Real(dx[1]) +
+                                        (
+                                        a_n*(w[idx_cell_wghost_z_F] - w[idx_cell_wghost_z_B])
+                                        )/Real(dx[2])
+                                        );
+                                }
+                            }
+                        }
+                    }
+                    else if (d_order == 4)
+                    {
+                        for (int k = 0; k < interior_dim_2; k++)
+                        {
+                            for (int j = 0; j < interior_dim_1; j++)
+                            {
+                                HAMERS_PRAGMA_SIMD
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute the linear indices.
+                                    const int idx_cell_wghost = (i + num_subghosts_0_conservative_var) +
+                                        (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                        (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                            subghostcell_dim_1_conservative_var;
+                                    
+                                    const int idx_cell_wghost_x_LL = (i - 2 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_L  = (i - 1 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_R  = (i + 1 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_RR = (i + 2 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_BB = (i + num_subghosts_0_velocity) +
+                                        (j - 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_B  = (i + num_subghosts_0_velocity) +
+                                        (j - 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_T  = (i + num_subghosts_0_velocity) +
+                                        (j + 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_TT = (i + num_subghosts_0_velocity) +
+                                        (j + 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_BB = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 2 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_B  = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 1 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_F  = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 1 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_FF = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 2 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_nghost = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*
+                                            interior_dim_1;
+                                    
+                                    S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                        (
+                                        a_n*(u[idx_cell_wghost_x_R]  - u[idx_cell_wghost_x_L]) +
+                                        b_n*(u[idx_cell_wghost_x_RR] - u[idx_cell_wghost_x_LL])
+                                        )/Real(dx[0]) +
+                                        (
+                                        a_n*(v[idx_cell_wghost_y_T]  - v[idx_cell_wghost_y_B]) +
+                                        b_n*(v[idx_cell_wghost_y_TT] - v[idx_cell_wghost_y_BB])
+                                        )/Real(dx[1]) +
+                                        (
+                                        a_n*(w[idx_cell_wghost_z_F]  - w[idx_cell_wghost_z_B]) +
+                                        b_n*(w[idx_cell_wghost_z_FF] - w[idx_cell_wghost_z_BB])
+                                        )/Real(dx[2])
+                                        );
+                                }
+                            }
+                        }
+                    }
+                    else if (d_order == 6)
+                    {
+                        for (int k = 0; k < interior_dim_2; k++)
+                        {
+                            for (int j = 0; j < interior_dim_1; j++)
+                            {
+                                HAMERS_PRAGMA_SIMD
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute the linear indices.
+                                    const int idx_cell_wghost = (i + num_subghosts_0_conservative_var) +
+                                        (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                        (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                            subghostcell_dim_1_conservative_var;
+                                    
+                                    const int idx_cell_wghost_x_LLL = (i - 3 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_LL  = (i - 2 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_L   = (i - 1 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_R   = (i + 1 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_RR  = (i + 2 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_RRR = (i + 3 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_BBB = (i + num_subghosts_0_velocity) +
+                                        (j - 3 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_BB  = (i + num_subghosts_0_velocity) +
+                                        (j - 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_B   = (i + num_subghosts_0_velocity) +
+                                        (j - 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_T   = (i + num_subghosts_0_velocity) +
+                                        (j + 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_TT  = (i + num_subghosts_0_velocity) +
+                                        (j + 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_TTT = (i + num_subghosts_0_velocity) +
+                                        (j + 3 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_BBB = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 3 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_BB  = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 2 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_B   = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 1 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_F   = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 1 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_FF  = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 2 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_FFF = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 3 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_nghost = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*
+                                            interior_dim_1;
+                                    
+                                    S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                        (
+                                        a_n*(u[idx_cell_wghost_x_R]   - u[idx_cell_wghost_x_L]) +
+                                        b_n*(u[idx_cell_wghost_x_RR]  - u[idx_cell_wghost_x_LL]) +
+                                        c_n*(u[idx_cell_wghost_x_RRR] - u[idx_cell_wghost_x_LLL])
+                                        )/Real(dx[0]) +
+                                        (
+                                        a_n*(v[idx_cell_wghost_y_T]   - v[idx_cell_wghost_y_B]) +
+                                        b_n*(v[idx_cell_wghost_y_TT]  - v[idx_cell_wghost_y_BB]) +
+                                        c_n*(v[idx_cell_wghost_y_TTT] - v[idx_cell_wghost_y_BBB])
+                                        )/Real(dx[1]) +
+                                        (
+                                        a_n*(w[idx_cell_wghost_z_F]   - w[idx_cell_wghost_z_B]) +
+                                        b_n*(w[idx_cell_wghost_z_FF]  - w[idx_cell_wghost_z_BB]) +
+                                        c_n*(w[idx_cell_wghost_z_FFF] - w[idx_cell_wghost_z_BBB])
+                                        )/Real(dx[2])
+                                        );
+                                }
+                            }
+                        }
+                    }
+                    else if (d_order == 8)
+                    {
+                        for (int k = 0; k < interior_dim_2; k++)
+                        {
+                            for (int j = 0; j < interior_dim_1; j++)
+                            {
+                                HAMERS_PRAGMA_SIMD
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute the linear indices.
                                     const int idx_cell_wghost = (i + num_subghosts_0_conservative_var) +
                                         (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
                                         (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
@@ -2366,7 +3618,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                                 HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
-                                    // Compute the linear indices. 
+                                    // Compute the linear indices.
                                     const int idx_cell_wghost = (i + num_subghosts_0_conservative_var) +
                                         (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
                                         (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
@@ -2563,7 +3815,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
                                 HAMERS_PRAGMA_SIMD
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
-                                    // Compute the linear indices. 
+                                    // Compute the linear indices.
                                     const int idx_cell_wghost = (i + num_subghosts_0_conservative_var) +
                                         (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
                                         (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*

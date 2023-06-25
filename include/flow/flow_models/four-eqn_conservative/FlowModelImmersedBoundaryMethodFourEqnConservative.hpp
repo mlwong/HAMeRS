@@ -13,9 +13,42 @@ class FlowModelImmersedBoundaryMethodFourEqnConservative: public FlowModelImmers
             const int& num_species,
             const int& num_eqn,
             const HAMERS_SHARED_PTR<ImmersedBoundaries>& immersed_boundaries,
-            const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db);
+            const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db,
+            const HAMERS_SHARED_PTR<EquationOfStateMixingRules>& equation_of_state_mixing_rules);
         
         ~FlowModelImmersedBoundaryMethodFourEqnConservative() {}
+        
+        /*
+         * Set the immersed boundary method ghost cells for the cell data of conservative variables.
+         */
+        void setConservativeVariablesCellDataImmersedBoundaryGhosts(
+            const hier::Patch& patch,
+            const double data_time,
+            const bool initial_time,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
+            const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal,
+            const hier::IntVector& offset_cons_var,
+            const hier::IntVector& offset_IB,
+            const hier::IntVector& ghostcell_dims_cons_var,
+            const hier::IntVector& ghostcell_dims_IB,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims);
+        
+    private:
+        /* 
+         * Values of primitive variables inside the body.
+         */
+        std::vector<Real> d_rho_Y_body;
+        std::vector<Real> d_vel_body;
+        Real d_p_body;
+        
+        /* 
+         * Values of conservative variables inside the body.
+         */
+        std::vector<Real> d_mom_body;
+        Real d_E_body;
         
 };
 

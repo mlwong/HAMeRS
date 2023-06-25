@@ -32,7 +32,7 @@ class GradientSensor
          * Get the number of ghost cells needed by the gradient sensor.
          */
         hier::IntVector
-        getGradientSensorNumberOfGhostCells(void) const
+        getGradientSensorNumberOfGhostCells() const
         {
             return d_num_gradient_ghosts;
         }

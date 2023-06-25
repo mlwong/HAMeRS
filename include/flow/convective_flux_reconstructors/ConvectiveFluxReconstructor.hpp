@@ -48,7 +48,7 @@ class ConvectiveFluxReconstructor
          * reconstructor.
          */
         hier::IntVector
-        getConvectiveFluxNumberOfGhostCells(void) const
+        getConvectiveFluxNumberOfGhostCells() const
         {
             return d_num_conv_ghosts;
         }

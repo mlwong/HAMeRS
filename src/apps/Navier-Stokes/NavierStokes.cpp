@@ -46,6 +46,7 @@ HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_advance_step;
 HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_synchronize_fluxes;
 HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_setphysbcs;
 HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_tagvalue;
+HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_tagimmersedbdry;
 HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_taggradient;
 HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_tagmultiresolution;
 
@@ -86,12 +87,14 @@ NavierStokes::NavierStokes(
             getTimer("NavierStokes::synchronizeHyperbolicFluxes()");
         t_setphysbcs = tbox::TimerManager::getManager()->
             getTimer("NavierStokes::setPhysicalBoundaryConditions()");
+        t_tagimmersedbdry = tbox::TimerManager::getManager()->
+            getTimer("NavierStokes::tagCellsOnPatchImmersedBdryDetector()");
         t_tagvalue = tbox::TimerManager::getManager()->
-            getTimer("NavierStokes::tagValueDetectorCells()");
+            getTimer("NavierStokes::tagCellsOnPatchValueDetector()");
         t_taggradient = tbox::TimerManager::getManager()->
-            getTimer("NavierStokes::tagGradientDetectorCells()");
+            getTimer("NavierStokes::tagCellsOnPatchGradientDetector()");
         t_tagmultiresolution = tbox::TimerManager::getManager()->
-            getTimer("NavierStokes::tagMultiresolutionDetectorCells()");
+            getTimer("NavierStokes::tagCellsOnPatchMultiresolutionDetector()");
     }
     
     /*
@@ -237,6 +240,70 @@ NavierStokes::NavierStokes(
         d_flow_model));
     
     /*
+     * Initialize d_immersed_boundary_tagger.
+     */
+    
+    if (d_use_immersed_boundaries)
+    {
+        hier::IntVector num_cells_buffer_required = hier::IntVector::getZero(d_dim);
+        num_cells_buffer_required = hier::IntVector::max(
+            num_cells_buffer_required,
+            d_convective_flux_reconstructor->getConvectiveFluxNumberOfGhostCells());
+        
+        hier::IntVector num_ghosts_diffusive_flux = hier::IntVector::getZero(d_dim);
+        
+        if (d_use_conservative_form_diffusive_flux)
+        {
+            num_ghosts_diffusive_flux = d_diffusive_flux_reconstructor->getDiffusiveFluxNumberOfGhostCells();
+        }
+        else
+        {
+            num_ghosts_diffusive_flux = d_nonconservative_diffusive_flux_divergence_operator->
+                getNonconservativeDiffusiveFluxDivergenceOperatorNumberOfGhostCells();
+        }
+        
+        bool use_transverse_derivatives_bc = d_Navier_Stokes_boundary_conditions->useTransverseDerivativesBoundaryConditions();
+        
+        // Increase the number of ghosts for computing transverse derivatives at corner ghost cells for diffusive/viscous flux.
+        // Euler assumes corner ghost cells are not used.
+        if (use_transverse_derivatives_bc)
+        {
+            hier::IntVector num_ghosts_transverse_derivatives_bc = d_Navier_Stokes_boundary_conditions->
+                getBoundaryConditionsTransverseDerivativesNumberOfGhostCells();
+            
+            num_ghosts_diffusive_flux = num_ghosts_diffusive_flux + num_ghosts_transverse_derivatives_bc;
+        }
+        
+        num_cells_buffer_required = hier::IntVector::max(num_cells_buffer_required, num_ghosts_diffusive_flux);
+        
+        if (hier::IntVector::getOne(d_dim)*d_immersed_boundary_tagger_num_cells_buffer >= hier::IntVector::getZero(d_dim))
+        {
+            if (hier::IntVector::getOne(d_dim)*d_immersed_boundary_tagger_num_cells_buffer < num_cells_buffer_required)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "d_immersed_boundary_tagger_num_cells_buffer is smaller than the required number!"
+                    << std::endl);
+            }
+            else
+            {
+                num_cells_buffer_required = hier::IntVector::getOne(d_dim)*d_immersed_boundary_tagger_num_cells_buffer;
+            }
+        }
+        
+        d_immersed_boundary_tagger.reset(new ImmersedBoundaryTagger(
+            "d_immersed_boundary_tagger",
+            d_dim,
+            d_grid_geometry,
+            d_flow_model,
+            num_cells_buffer_required));
+    }
+    else
+    {
+        d_immersed_boundary_tagger = nullptr;
+    }
+    
+    /*
      * Initialize d_value_tagger.
      */
     
@@ -248,6 +315,10 @@ NavierStokes::NavierStokes(
             d_grid_geometry,
             d_flow_model,
             d_value_tagger_db));
+    }
+    else
+    {
+        d_value_tagger = nullptr;
     }
     
     /*
@@ -263,6 +334,10 @@ NavierStokes::NavierStokes(
             d_flow_model,
             d_gradient_tagger_db));
     }
+    else
+    {
+        d_gradient_tagger = nullptr;
+    }
     
     /*
      * Initialize d_multiresolution_tagger.
@@ -276,6 +351,10 @@ NavierStokes::NavierStokes(
             d_grid_geometry,
             d_flow_model,
             d_multiresolution_tagger_db));
+    }
+    else
+    {
+        d_multiresolution_tagger = nullptr;
     }
     
     /*
@@ -321,6 +400,7 @@ NavierStokes::~NavierStokes()
     t_advance_step.reset();
     t_synchronize_fluxes.reset();
     t_setphysbcs.reset();
+    t_tagimmersedbdry.reset();
     t_tagvalue.reset();
     t_taggradient.reset();
     t_tagmultiresolution.reset();
@@ -393,6 +473,24 @@ NavierStokes::registerModelVariables(
     }
     
     /*
+     * Set the number of immersed boundary ghost cells of d_immersed_boundaries.
+     */
+    
+    if (d_use_immersed_boundaries)
+    {
+        d_immersed_boundaries->setNumberOfImmersedBoundaryGhosts(num_ghosts_intermediate);
+        
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        hier::IntVector num_ghosts_IB = flow_model_immersed_boundary_method->
+            getImmersedBoundaryMethodAdditionalNumberOfGhostCells();
+        
+        num_ghosts_intermediate = num_ghosts_intermediate + num_ghosts_IB;
+        num_ghosts              = num_ghosts              + num_ghosts_IB;
+    }
+    
+    /*
      * Register the conservative variables of d_flow_model.
      */
     
@@ -402,16 +500,13 @@ NavierStokes::registerModelVariables(
         num_ghosts_intermediate);
     
     /*
-     * Set the number of immersed boundary ghost cells of d_immersed_boundaries and register the variables of
-     * flow model immersed boundary method.
+     * Register the variables of flow model immersed boundary method.
      */
     
     if (d_use_immersed_boundaries)
     {
         HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
             d_flow_model->getFlowModelImmersedBoundaryMethod();
-        
-        d_immersed_boundaries->setNumberOfImmersedBoundaryGhosts(num_ghosts);
         
         flow_model_immersed_boundary_method->registerImmersedBoundaryMethodVariables(
             integrator,
@@ -642,6 +737,12 @@ NavierStokes::initializeDataOnPatch(
             data_time,
             initial_time,
             getDataContext());
+        
+        flow_model_immersed_boundary_method->setConservativeVariablesCellDataImmersedBoundaryGhosts(
+            empty_box,
+            data_time,
+            initial_time,
+            getDataContext());
     }
     
     d_flow_model->unregisterPatch();
@@ -830,7 +931,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         {
             const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
             
-            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1")
+            // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -851,7 +952,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         }
         else
         {
-            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1")
+            // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -876,7 +977,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         {
             const int num_ghosts_0_IB_mask = num_ghosts_IB_mask[0];
             
-            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
+            // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -895,7 +996,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         }
         else
         {
-            HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
+            // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
                  i++)
@@ -973,7 +1074,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2")
+                // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -1005,7 +1106,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2")
+                // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -1042,7 +1143,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
+                // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -1071,7 +1172,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j < interior_dim_1 + num_ghosts_1;
                  j++)
             {
-                HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
+                // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
                      i++)
@@ -1168,7 +1269,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-                    HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3")
+                    // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -1211,7 +1312,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-                    HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3")
+                    // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -1260,7 +1361,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-                    HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
+                    // HAMERS_PRAGMA_VEC("omp simd reduction(max: spectral_radius_tmp")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -1299,7 +1400,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                      j < interior_dim_1 + num_ghosts_1;
                      j++)
                 {
-                    HAMERS_PRAGMA_VEC("max: spectral_radius_tmp")
+                    // HAMERS_PRAGMA_VEC("max: spectral_radius_tmp")
                     for (int i = -num_ghosts_0;
                          i < interior_dim_0 + num_ghosts_0;
                          i++)
@@ -1385,7 +1486,13 @@ NavierStokes::setImmersedBoundaryGhostCells(
             getDataContext());
     }
     
-    // Compute the immersed boundary ghost cells here...
+    // Compute the immersed boundary ghost cells here.
+    
+    flow_model_immersed_boundary_method->setConservativeVariablesCellDataImmersedBoundaryGhosts(
+        empty_box,
+        time,
+        false,
+        getDataContext());
     
     d_flow_model->unregisterPatch();
 }
@@ -1825,6 +1932,10 @@ NavierStokes::advanceSingleStepOnPatch(
                             {
                                 Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
                             }
+                            else
+                            {
+                                Q[ei][idx] = Q_intermediate[ei][idx_intermediate];
+                            }
                         }
                     }
                     else
@@ -2081,6 +2192,10 @@ NavierStokes::advanceSingleStepOnPatch(
                                 if (IB_mask[idx_IB_mask] == fluid)
                                 {
                                     Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                                }
+                                else
+                                {
+                                    Q[ei][idx] = Q_intermediate[ei][idx_intermediate];
                                 }
                             }
                         }
@@ -2514,6 +2629,10 @@ NavierStokes::advanceSingleStepOnPatch(
                                     if (IB_mask[idx_IB_mask] == fluid)
                                     {
                                         Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                                    }
+                                    else
+                                    {
+                                        Q[ei][idx] = Q_intermediate[ei][idx_intermediate];
                                     }
                                 }
                             }
@@ -3851,21 +3970,105 @@ NavierStokes::synchronizeFluxes(
 
 
 /*
+ * Tag cells for refinement using immersed boundary detector.
+ */
+void
+NavierStokes::tagCellsOnPatchImmersedBdryDetector(
+    hier::Patch& patch,
+    const double regrid_time,
+    const bool initial_error,
+    const int tag_index,
+    const bool uses_refine_regions_too,
+    const bool uses_value_detector_too,
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
+{
+    NULL_USE(regrid_time);
+    NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
+    
+    t_tagimmersedbdry->start();
+    
+    // Get the tags.
+    HAMERS_SHARED_PTR<pdat::CellData<int> > tags(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
+            patch.getPatchData(tag_index)));
+    
+#ifdef DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(tags);
+    TBOX_ASSERT(tags->getGhostCellWidth() == 0);
+#endif
+    
+    // Initialize values of all tags to zero.
+    if ((!uses_richardson_extrapolation_too) &&
+        (!uses_integral_detector_too) &&
+        (!uses_multiresolution_detector_too) &&
+        (!uses_gradient_detector_too) &&
+        (!uses_value_detector_too))
+    {
+        tags->fillAll(0);
+    }
+    
+    // Tag the cells by using d_immersed_boundary_tagger.
+    if (d_immersed_boundary_tagger != nullptr)
+    {
+        d_flow_model->registerPatchWithDataContext(patch, getDataContext());
+        
+        /*
+         * Compute the immersed boundary method variables.
+         */
+        
+        d_flow_model->setupImmersedBoundaryMethod();
+        
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        const hier::Box empty_box = hier::Box::getEmptyBox(d_dim);
+        
+        flow_model_immersed_boundary_method->setImmersedBoundaryMethodVariables(
+            empty_box,
+            regrid_time,
+            false,
+            getDataContext());
+        
+        d_flow_model->unregisterPatch();
+        
+        /*
+         * Tag the cells using immersed boundary method variables.
+         */
+        
+        d_immersed_boundary_tagger->tagCellsOnPatch(
+            patch,
+            tags,
+            getDataContext());
+    }
+    
+    t_tagimmersedbdry->stop();
+}
+
+
+/*
  * Preprocess before tagging cells using value detector.
  */
 void
 NavierStokes::preprocessTagCellsValueDetector(
-   const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-   const int level_number,
-   const double regrid_time,
-   const bool initial_error,
-   const bool uses_gradient_detector_too,
-   const bool uses_multiresolution_detector_too,
-   const bool uses_integral_detector_too,
-   const bool uses_richardson_extrapolation_too)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const int level_number,
+    const double regrid_time,
+    const bool initial_error,
+    const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -3903,7 +4106,9 @@ NavierStokes::tagCellsOnPatchValueDetector(
     hier::Patch& patch,
     const double regrid_time,
     const bool initial_error,
-    const int tag_indx,
+    const int tag_index,
+    const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -3911,13 +4116,15 @@ NavierStokes::tagCellsOnPatchValueDetector(
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     
     t_tagvalue->start();
     
     // Get the tags.
     HAMERS_SHARED_PTR<pdat::CellData<int> > tags(
         HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
-            patch.getPatchData(tag_indx)));
+            patch.getPatchData(tag_index)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags);
@@ -3951,17 +4158,21 @@ NavierStokes::tagCellsOnPatchValueDetector(
  */
 void
 NavierStokes::preprocessTagCellsGradientDetector(
-   const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-   const int level_number,
-   const double regrid_time,
-   const bool initial_error,
-   const bool uses_value_detector_too,
-   const bool uses_multiresolution_detector_too,
-   const bool uses_integral_detector_too,
-   const bool uses_richardson_extrapolation_too)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const int level_number,
+    const double regrid_time,
+    const bool initial_error,
+    const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
+    const bool uses_value_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -3999,7 +4210,9 @@ NavierStokes::tagCellsOnPatchGradientDetector(
     hier::Patch& patch,
     const double regrid_time,
     const bool initial_error,
-    const int tag_indx,
+    const int tag_index,
+    const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -4007,6 +4220,8 @@ NavierStokes::tagCellsOnPatchGradientDetector(
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     
     t_taggradient->start();
@@ -4014,7 +4229,7 @@ NavierStokes::tagCellsOnPatchGradientDetector(
     // Get the tags.
     HAMERS_SHARED_PTR<pdat::CellData<int> > tags(
         HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
-            patch.getPatchData(tag_indx)));
+            patch.getPatchData(tag_index)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags);
@@ -4047,17 +4262,21 @@ NavierStokes::tagCellsOnPatchGradientDetector(
  */
 void
 NavierStokes::preprocessTagCellsMultiresolutionDetector(
-   const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-   const int level_number,
-   const double regrid_time,
-   const bool initial_error,
-   const bool uses_value_detector_too,
-   const bool uses_gradient_detector_too,
-   const bool uses_integral_detector_too,
-   const bool uses_richardson_extrapolation_too)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const int level_number,
+    const double regrid_time,
+    const bool initial_error,
+    const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
+    const bool uses_value_detector_too,
+    const bool uses_gradient_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -4095,7 +4314,9 @@ NavierStokes::tagCellsOnPatchMultiresolutionDetector(
     hier::Patch& patch,
     const double regrid_time,
     const bool initial_error,
-    const int tag_indx,
+    const int tag_index,
+    const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_integral_detector_too,
@@ -4103,6 +4324,8 @@ NavierStokes::tagCellsOnPatchMultiresolutionDetector(
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     
@@ -4111,7 +4334,7 @@ NavierStokes::tagCellsOnPatchMultiresolutionDetector(
     // Get the tags.
     HAMERS_SHARED_PTR<pdat::CellData<int> > tags(
         HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
-            patch.getPatchData(tag_indx)));
+            patch.getPatchData(tag_index)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags);
@@ -4219,6 +4442,8 @@ NavierStokes::putToRestart(
         
         flow_model_immersed_boundary_method->putToRestart(immersed_boundary_method_db);
     }
+    
+    restart_db->putInteger("d_immersed_boundary_tagger_num_cells_buffer", d_immersed_boundary_tagger_num_cells_buffer);
     
     if (d_value_tagger != nullptr)
     {
@@ -4919,6 +5144,16 @@ NavierStokes::getFromInput(
                     << "Key data 'Nonconservative_diffusive_flux_divergence_operator' not found in input database."
                     << std::endl);
             }
+        }
+        
+        if (input_db->keyExists("immersed_boundary_tagger_num_cells_buffer"))
+        {
+            d_immersed_boundary_tagger_num_cells_buffer =
+                input_db->getInteger("immersed_boundary_tagger_num_cells_buffer");
+        }
+        else
+        {
+            d_immersed_boundary_tagger_num_cells_buffer = -1;
         }
         
         if (input_db->keyExists("Value_tagger"))

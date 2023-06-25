@@ -119,7 +119,8 @@ GradientTagger::GradientTagger(
             {
                 if (!((sensor_key == "DIFFERENCE_FIRST_ORDER") ||
                       (sensor_key == "DIFFERENCE_SECOND_ORDER") ||
-                      (sensor_key == "JAMESON_GRADIENT")))
+                      (sensor_key == "JAMESON_GRADIENT") ||
+                      (sensor_key == "DUCROS_GRADIENT")))
                 {
                     TBOX_ERROR(d_object_name
                         << ": "
@@ -621,6 +622,75 @@ GradientTagger::GradientTagger(
                             << std::endl);
                     }
                 }
+                else if (sensor_db && sensor_key == "DUCROS_GRADIENT")
+                {
+                    if (sensor_db->keyExists("Ducros_gradient_use_dilatation"))
+                    {
+                        d_Ducros_gradient_use_dilatation =
+                            sensor_db->getBool("Ducros_gradient_use_dilatation");
+                    }
+                    else if (sensor_db->keyExists("d_Ducros_gradient_use_dilatation"))
+                    {
+                        d_Ducros_gradient_use_dilatation =
+                            sensor_db->getBool("d_Ducros_gradient_use_dilatation");
+                    }
+                    else
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": "
+                            << "No key 'Ducros_gradient_use_dilatation'/"
+                            << "'d_Ducros_gradient_use_dilatation' found in data for "
+                            << sensor_key
+                            << "."
+                            << std::endl);
+                    }
+                    
+                    if (sensor_db->keyExists("Ducros_gradient_use_strain_rate"))
+                    {
+                        d_Ducros_gradient_use_strain_rate =
+                            sensor_db->getBool("Ducros_gradient_use_strain_rate");
+                    }
+                    else if (sensor_db->keyExists("d_Ducros_gradient_use_strain_rate"))
+                    {
+                        d_Ducros_gradient_use_strain_rate =
+                            sensor_db->getBool("d_Ducros_gradient_use_strain_rate");
+                    }
+                    else
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": "
+                            << "No key 'Ducros_gradient_use_strain_rate'/"
+                            << "'d_Ducros_gradient_use_strain_rate' found in data for "
+                            << sensor_key
+                            << "."
+                            << std::endl);
+                    }
+                    
+                    d_gradient_sensor_Ducros.reset(new GradientSensorDucros(
+                        "Ducros gradient sensor",
+                        d_dim,
+                        d_Ducros_gradient_use_dilatation,
+                        d_Ducros_gradient_use_strain_rate));
+                    
+                    if (sensor_db->keyExists("Ducros_gradient_tol"))
+                    {
+                        d_Ducros_gradient_tol = sensor_db->getReal("Ducros_gradient_tol");
+                    }
+                    else if (sensor_db->keyExists("d_Ducros_gradient_tol"))
+                    {
+                        d_Ducros_gradient_tol = sensor_db->getReal("d_Ducros_gradient_tol");
+                    }
+                    else
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": "
+                            << "No key 'Ducros_gradient_tol'/"
+                            << "'d_Ducros_gradient_tol' found in data for "
+                            << sensor_key
+                            << "."
+                            << std::endl);
+                    }
+                }
             }
         } // Loop over sensors.
         
@@ -685,6 +755,12 @@ GradientTagger::GradientTagger(
             d_num_gradient_ghosts = hier::IntVector::max(
                 d_num_gradient_ghosts,
                 d_gradient_sensor_Jameson->getGradientSensorNumberOfGhostCells());
+        }
+        else if (sensor_key == "DUCROS_GRADIENT")
+        {
+            d_num_gradient_ghosts = hier::IntVector::max(
+                d_num_gradient_ghosts,
+                d_gradient_sensor_Ducros->getGradientSensorNumberOfGhostCells());
         }
     }
 }
@@ -1157,6 +1233,24 @@ GradientTagger::registerGradientTaggerVariables(
                 }
             }
         }
+        else if (sensor_key == "DUCROS_GRADIENT")
+        {
+            d_Ducros_gradient =
+                HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
+                    new pdat::CellVariable<Real>(
+                        d_dim,
+                        "Jameson density gradient",
+                        1));
+            
+            integrator->registerVariable(
+                d_Ducros_gradient,
+                hier::IntVector::getOne(d_dim),
+                hier::IntVector::getOne(d_dim),
+                RungeKuttaLevelIntegrator::TIME_DEP,
+                    d_grid_geometry,
+                    "NO_COARSEN",
+                    "NO_REFINE");
+        }
     }
 }
 
@@ -1290,6 +1384,15 @@ GradientTagger::registerPlotQuantities(
                 }
             }
         }
+        else if (sensor_key == "DUCROS_GRADIENT")
+        {
+            visit_writer->registerPlotQuantity(
+                "Ducros gradient",
+                "SCALAR",
+                vardb->mapVariableAndContextToIndex(
+                   d_Ducros_gradient,
+                   plot_context));
+        }
     }
 #endif
 }
@@ -1303,8 +1406,6 @@ GradientTagger::printClassData(std::ostream& os) const
 {
     os << "\nPrint GradientTagger object..."
        << std::endl;
-    
-    os << std::endl;
     
     os << "d_gradient_sensors = ";
     for (int si = 0; si < static_cast<int>(d_gradient_sensors.size()); si++)
@@ -1496,6 +1597,14 @@ GradientTagger::printClassData(std::ostream& os) const
         }
         os << std::endl;
     }
+    
+    if (d_gradient_sensor_Ducros != nullptr)
+    {
+        os << std::endl;
+        os << "d_Ducros_gradient_use_dilatation = " << d_Ducros_gradient_use_dilatation << std::endl;
+        os << "d_Ducros_gradient_use_strain_rate = " << d_Ducros_gradient_use_strain_rate << std::endl;
+        os << "d_Ducros_gradient_tol = " << d_Ducros_gradient_tol << std::endl;
+    }
 }
 
 
@@ -1601,6 +1710,21 @@ GradientTagger::putToRestart(
             
             sensor_db->putRealVector("d_Jameson_gradient_tol",
                 d_Jameson_gradient_tol);
+        }
+        
+        if (d_gradient_sensors[si] == "DUCROS_GRADIENT")
+        {
+            HAMERS_SHARED_PTR<tbox::Database> sensor_db =
+                restart_db->putDatabase("DUCROS_GRADIENT");
+            
+            sensor_db->putBool("d_Ducros_gradient_use_dilatation",
+                d_Ducros_gradient_use_dilatation);
+            
+            sensor_db->putBool("d_Ducros_gradient_use_strain_rate",
+                d_Ducros_gradient_use_strain_rate);
+            
+            sensor_db->putReal("d_Ducros_gradient_tol",
+                d_Ducros_gradient_tol);
         }
     }
 }
@@ -2643,6 +2767,57 @@ GradientTagger::tagCellsOnPatch(
                         << std::endl);
                 }
             } // Loop over variables chosen.
+        }
+        else if (sensor_key == "DUCROS_GRADIENT")
+        {
+            /*
+             * Register the patch and velocity in the flow model and compute the
+             * corresponding cell data.
+             */
+            
+            d_flow_model->registerPatchWithDataContext(patch, data_context);
+            
+            std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+            
+            num_subghosts_of_data.insert(
+                std::pair<std::string, hier::IntVector>("VELOCITY", d_num_gradient_ghosts));
+            
+            d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+            
+            d_flow_model->allocateMemoryForDerivedCellData();
+            
+            d_flow_model->computeDerivedCellData();
+            
+            /*
+             * Get the pointer to velocity data inside the flow model.
+             */
+            
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > data_velocity = d_flow_model->getCellData("VELOCITY");
+            
+            // Get the cell data of the gradient.
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > gradient(
+                HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
+                    patch.getPatchData(
+                        d_Ducros_gradient,
+                        data_context)));
+            
+            // Compute the gradient.
+            d_gradient_sensor_Ducros->computeGradient(gradient, data_velocity, patch);
+            
+            // Tag the cells.
+            tagCellsOnPatchWithGradientSensor(
+                patch,
+                tags,
+                gradient,
+                sensor_key,
+                d_Ducros_gradient_tol);
+            
+            /*
+             * Unregister the patch and data of all registered derived cell variables in
+             * the flow model.
+             */
+            
+            d_flow_model->unregisterPatch();
         }
     } // Loop over gradient sensors chosen.
 }

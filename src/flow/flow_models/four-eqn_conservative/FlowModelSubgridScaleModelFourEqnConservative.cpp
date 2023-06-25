@@ -442,12 +442,13 @@ FlowModelSubgridScaleModelFourEqnConservative::updateSideDataOfDiffusiveFluxDiff
                     (k + num_ghosts_2_der)*ghostcell_dim_0_der*
                         ghostcell_dim_1_der;
                 
-                const Real g_11 = ddx_u[idx_der]*ddx_u[idx_der] + ddx_v[idx_der]*ddx_v[idx_der] + ddx_w[idx_der]*ddx_w[idx_der];
-                const Real g_12 = ddx_u[idx_der]*ddy_u[idx_der] + ddx_v[idx_der]*ddy_v[idx_der] + ddx_w[idx_der]*ddy_w[idx_der];
-                const Real g_13 = ddx_u[idx_der]*ddz_u[idx_der] + ddx_v[idx_der]*ddz_v[idx_der] + ddx_w[idx_der]*ddz_w[idx_der];
-                const Real g_22 = ddy_u[idx_der]*ddy_u[idx_der] + ddy_v[idx_der]*ddy_v[idx_der] + ddy_w[idx_der]*ddy_w[idx_der];
-                const Real g_23 = ddy_u[idx_der]*ddz_u[idx_der] + ddy_v[idx_der]*ddz_v[idx_der] + ddy_w[idx_der]*ddz_w[idx_der];
-                const Real g_33 = ddz_u[idx_der]*ddz_u[idx_der] + ddz_v[idx_der]*ddz_v[idx_der] + ddz_w[idx_der]*ddz_w[idx_der];
+                const Real g_11 = ddx_u[idx_der]*ddx_u[idx_der] + ddy_u[idx_der]*ddy_u[idx_der] + ddz_u[idx_der]*ddz_u[idx_der];
+                const Real g_22 = ddx_v[idx_der]*ddx_v[idx_der] + ddy_v[idx_der]*ddy_v[idx_der] + ddz_v[idx_der]*ddz_v[idx_der];
+                const Real g_33 = ddx_w[idx_der]*ddx_w[idx_der] + ddy_w[idx_der]*ddy_w[idx_der] + ddz_w[idx_der]*ddz_w[idx_der];
+                
+                const Real g_12 = ddx_u[idx_der]*ddx_v[idx_der] + ddy_u[idx_der]*ddy_v[idx_der] + ddz_u[idx_der]*ddz_v[idx_der];
+                const Real g_13 = ddx_u[idx_der]*ddx_w[idx_der] + ddy_u[idx_der]*ddy_w[idx_der] + ddz_u[idx_der]*ddz_w[idx_der];
+                const Real g_23 = ddx_v[idx_der]*ddx_w[idx_der] + ddy_v[idx_der]*ddy_w[idx_der] + ddz_v[idx_der]*ddz_w[idx_der];
                 
                 Real sig_D = g_11*g_22 - g_12*g_12 + g_11*g_33 - g_13*g_13 + g_22*g_33 - g_23*g_23;
                 sig_D = std::max(sig_D, Real(0));
