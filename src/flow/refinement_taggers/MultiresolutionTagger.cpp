@@ -852,8 +852,6 @@ MultiresolutionTagger::printClassData(std::ostream& os) const
     os << "\nPrint MultiresolutionTagger object..."
        << std::endl;
     
-    os << std::endl;
-    
     os << "d_multiresolution_sensors = ";
     for (int si = 0; si < static_cast<int>(d_multiresolution_sensors.size()); si++)
     {

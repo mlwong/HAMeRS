@@ -523,8 +523,6 @@ ValueTagger::printClassData(std::ostream& os) const
     os << "\nPrint ValueTagger object..."
        << std::endl;
     
-    os << std::endl;
-    
     os << "d_variables = ";
     for (int vi = 0; vi < static_cast<int>(d_variables.size()); vi++)
     {

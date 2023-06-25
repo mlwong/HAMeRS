@@ -14,6 +14,7 @@
 #include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorManager.hpp"
 #include "flow/flow_models/FlowModelManager.hpp"
 #include "flow/refinement_taggers/GradientTagger.hpp"
+#include "flow/refinement_taggers/ImmersedBoundaryTagger.hpp"
 #include "flow/refinement_taggers/MultiresolutionTagger.hpp"
 #include "flow/refinement_taggers/ValueTagger.hpp"
 
@@ -182,6 +183,22 @@ class Euler:
             const double dt);
         
         /**
+         * Tag cells for refinement using immersed boundary detector.
+         */
+        void
+        tagCellsOnPatchImmersedBdryDetector(
+            hier::Patch& patch,
+            const double regrid_time,
+            const bool initial_error,
+            const int tag_index,
+            const bool uses_refine_regions_too,
+            const bool uses_value_detector_too,
+            const bool uses_gradient_detector_too,
+            const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
+            const bool uses_richardson_extrapolation_too);
+        
+        /**
          * Preprocess before tagging cells using value detector.
          */
         void
@@ -190,6 +207,8 @@ class Euler:
             const int level_number,
             const double regrid_time,
             const bool initial_error,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_multiresolution_detector_too,
             const bool uses_integral_detector_too,
@@ -203,7 +222,9 @@ class Euler:
             hier::Patch& patch,
             const double regrid_time,
             const bool initial_error,
-            const int tag_indx,
+            const int tag_index,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_multiresolution_detector_too,
             const bool uses_integral_detector_too,
@@ -214,14 +235,16 @@ class Euler:
          */
         void
         preprocessTagCellsGradientDetector(
-           const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-           const int level_number,
-           const double regrid_time,
-           const bool initial_error,
-           const bool uses_value_detector_too,
-           const bool uses_multiresolution_detector_too,
-           const bool uses_integral_detector_too,
-           const bool uses_richardson_extrapolation_too);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const int level_number,
+            const double regrid_time,
+            const bool initial_error,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
+            const bool uses_value_detector_too,
+            const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
+            const bool uses_richardson_extrapolation_too);
         
         /**
          * Tag cells for refinement using gradient detector.
@@ -231,7 +254,9 @@ class Euler:
             hier::Patch& patch,
             const double regrid_time,
             const bool initial_error,
-            const int tag_indx,
+            const int tag_index,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
             const bool uses_value_detector_too,
             const bool uses_multiresolution_detector_too,
             const bool uses_integral_detector_too,
@@ -246,6 +271,8 @@ class Euler:
             const int level_number,
             const double regrid_time,
             const bool initial_error,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
             const bool uses_value_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_integral_detector_too,
@@ -259,7 +286,9 @@ class Euler:
             hier::Patch& patch,
             const double regrid_time,
             const bool initial_error,
-            const int tag_indx,
+            const int tag_index,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
             const bool uses_value_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_integral_detector_too,
@@ -625,6 +654,12 @@ class Euler:
         HAMERS_SHARED_PTR<EulerErrorStatistics> d_Euler_error_statistics;
         
         /*
+         * HAMERS_SHARED_PTR to ImmersedBoundaryTagger and its settings.
+         */
+        HAMERS_SHARED_PTR<ImmersedBoundaryTagger> d_immersed_boundary_tagger;
+        int d_immersed_boundary_tagger_num_cells_buffer;
+        
+        /*
          * HAMERS_SHARED_PTR to ValueTagger and its database.
          */
         HAMERS_SHARED_PTR<ValueTagger> d_value_tagger;
@@ -676,6 +711,7 @@ class Euler:
         static HAMERS_SHARED_PTR<tbox::Timer> t_advance_step;
         static HAMERS_SHARED_PTR<tbox::Timer> t_synchronize_fluxes;
         static HAMERS_SHARED_PTR<tbox::Timer> t_setphysbcs;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_tagimmersedbdry;
         static HAMERS_SHARED_PTR<tbox::Timer> t_tagvalue;
         static HAMERS_SHARED_PTR<tbox::Timer> t_taggradient;
         static HAMERS_SHARED_PTR<tbox::Timer> t_tagmultiresolution;
