@@ -9,7 +9,7 @@ import re
 
 from pyhamers.upsampling import Lagrange_upsampler
 
-from base_reader import BaseReader
+from pyhamers.readers.base_reader import BaseReader
 
 class SamraiDataReader(BaseReader):
     """
