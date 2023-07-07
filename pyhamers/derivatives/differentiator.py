@@ -1,7 +1,7 @@
 import numpy
 
-import explicit.first as first_der
-import explicit.second as second_der
+import pyhamers.derivatives.explicit.first as first_der
+import pyhamers.derivatives.explicit.second as second_der
 
 class Differentiator(object):
     """
