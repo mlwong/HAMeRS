@@ -9,6 +9,7 @@ static inline __attribute__((always_inline)) Real computeTriangleArea(
     return std::abs(Real(1)/Real(2)*(x_0*(y_1 - y_2) + x_1*(y_2 - y_0) + x_2*(y_0 - y_1)));
 }
 
+
 RefineRegionsTagger::RefineRegionsTagger(
     const std::string& object_name,
     const tbox::Dimension& dim,
@@ -792,7 +793,7 @@ RefineRegionsTagger::tagCellsOnPatchUsingRefineTriangles(
                         
                         // Tag if the point is inside the refine triangle.
                         if (std::abs(area_1 + area_2 + area_3 - area_refine_triangle)/area_refine_triangle
-                            < Real(10)*HAMERS_EPSILON)
+                            < Real(1000)*HAMERS_EPSILON)
                         {
                             tag_ptr[idx_cell] = 1;
                         }
@@ -942,7 +943,7 @@ RefineRegionsTagger::tagCellsOnPatchUsingRefineTriangles(
                                 
                                 // Tag if the point is inside the refine triangle.
                                 if (std::abs(area_1 + area_2 + area_3 - area_refine_triangle)/area_refine_triangle
-                                    < Real(10)*HAMERS_EPSILON)
+                                    < Real(1000)*HAMERS_EPSILON)
                                 {
                                     tag_ptr[idx_cell] = 1;
                                 }
