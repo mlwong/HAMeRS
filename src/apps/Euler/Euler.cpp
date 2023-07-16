@@ -47,6 +47,7 @@ HAMERS_SHARED_PTR<tbox::Timer> Euler::t_compute_fluxes_sources;
 HAMERS_SHARED_PTR<tbox::Timer> Euler::t_advance_step;
 HAMERS_SHARED_PTR<tbox::Timer> Euler::t_synchronize_fluxes;
 HAMERS_SHARED_PTR<tbox::Timer> Euler::t_setphysbcs;
+HAMERS_SHARED_PTR<tbox::Timer> Euler::t_tagrefineregions;
 HAMERS_SHARED_PTR<tbox::Timer> Euler::t_tagimmersedbdry;
 HAMERS_SHARED_PTR<tbox::Timer> Euler::t_tagvalue;
 HAMERS_SHARED_PTR<tbox::Timer> Euler::t_taggradient;
@@ -88,6 +89,8 @@ Euler::Euler(
             getTimer("Euler::synchronizeHyperbolicFluxes()");
         t_setphysbcs = tbox::TimerManager::getManager()->
             getTimer("Euler::setPhysicalBoundaryConditions()");
+        t_tagrefineregions = tbox::TimerManager::getManager()->
+            getTimer("Euler::tagCellsOnPatchRefineRegions()");
         t_tagimmersedbdry = tbox::TimerManager::getManager()->
             getTimer("Euler::tagCellsOnPatchImmersedBdryDetector()");
         t_tagvalue = tbox::TimerManager::getManager()->
@@ -200,6 +203,24 @@ Euler::Euler(
         d_grid_geometry,
         d_flow_model_manager->getFlowModelType(),
         d_flow_model));
+    
+    /*
+     * Initialize d_refine_regions_tagger.
+     */
+    
+    if (d_refine_regions_tagger_db != nullptr)
+    {
+        d_refine_regions_tagger.reset(new RefineRegionsTagger(
+            "d_refine_regions_tagger",
+            d_dim,
+            d_grid_geometry,
+            d_refine_regions_tagger_db,
+            is_from_restart));
+    }
+    else
+    {
+        d_refine_regions_tagger = nullptr;
+    }
     
     /*
      * Initialize d_immersed_boundary_tagger.
@@ -317,6 +338,7 @@ Euler::~Euler()
     t_advance_step.reset();
     t_synchronize_fluxes.reset();
     t_setphysbcs.reset();
+    t_tagrefineregions.reset();
     t_tagimmersedbdry.reset();
     t_tagvalue.reset();
     t_taggradient.reset();
@@ -2632,6 +2654,59 @@ Euler::synchronizeFluxes(
 
 
 /*
+ * Tag cells for refinement using user-defined refine regions.
+ */
+void
+Euler::tagCellsOnPatchRefineRegions(
+    hier::Patch& patch,
+    const double regrid_time,
+    const bool initial_error,
+    const int tag_index,
+    const bool uses_immersed_bdry_detector_too,
+    const bool uses_value_detector_too,
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
+{
+    NULL_USE(regrid_time);
+    NULL_USE(initial_error);
+    
+    t_tagrefineregions->start();
+    
+    // Get the tags.
+    HAMERS_SHARED_PTR<pdat::CellData<int> > tags(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
+            patch.getPatchData(tag_index)));
+    
+#ifdef DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(tags);
+    TBOX_ASSERT(tags->getGhostCellWidth() == 0);
+#endif
+    
+    // Initialize values of all tags to zero.
+    if ((!uses_richardson_extrapolation_too) &&
+        (!uses_integral_detector_too) &&
+        (!uses_multiresolution_detector_too) &&
+        (!uses_gradient_detector_too) &&
+        (!uses_value_detector_too) &&
+        (!uses_immersed_bdry_detector_too))
+    {
+        tags->fillAll(0);
+    }
+    
+    if (d_refine_regions_tagger != nullptr)
+    {
+        d_refine_regions_tagger->tagCellsOnPatch(
+            patch,
+            tags);
+    }
+    
+    t_tagrefineregions->stop();
+}
+
+
+/*
  * Tag cells for refinement using immersed boundary detector.
  */
 void
@@ -3074,12 +3149,20 @@ Euler::putToRestart(
     if (d_use_ghost_cell_immersed_boundary_method)
     {
         HAMERS_SHARED_PTR<tbox::Database> immersed_boundary_method_db =
-            restart_db->putDatabase("immersed_boundary_method_db");
+            restart_db->putDatabase("d_immersed_boundary_method_db");
         
         HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
             d_flow_model->getFlowModelImmersedBoundaryMethod();
         
-        flow_model_immersed_boundary_method->putToRestart(immersed_boundary_method_db);
+        flow_model_immersed_boundary_method->putToRestart(d_immersed_boundary_method_db);
+    }
+    
+    if (d_refine_regions_tagger != nullptr)
+    {
+        HAMERS_SHARED_PTR<tbox::Database> restart_refine_regions_tagger_db =
+            restart_db->putDatabase("d_refine_regions_tagger_db");
+        
+        d_refine_regions_tagger->putToRestart(restart_refine_regions_tagger_db);
     }
     
     restart_db->putInteger("d_immersed_boundary_tagger_num_cells_buffer", d_immersed_boundary_tagger_num_cells_buffer);
@@ -3698,6 +3781,12 @@ Euler::getFromInput(
                 << std::endl);
         }
         
+        if (input_db->keyExists("Refine_regions_tagger"))
+        {
+            d_refine_regions_tagger_db =
+                input_db->getDatabase("Refine_regions_tagger");
+        }
+        
         if (input_db->keyExists("immersed_boundary_tagger_num_cells_buffer"))
         {
             d_immersed_boundary_tagger_num_cells_buffer =
@@ -3821,6 +3910,11 @@ void Euler::getFromRestart()
     if (d_use_ghost_cell_immersed_boundary_method)
     {
         d_immersed_boundary_method_db = db->getDatabase("d_immersed_boundary_method_db");
+    }
+    
+    if (db->keyExists("d_refine_regions_tagger_db"))
+    {
+        d_refine_regions_tagger_db = db->getDatabase("d_refine_regions_tagger_db");
     }
     
     d_immersed_boundary_tagger_num_cells_buffer = db->getInteger("d_immersed_boundary_tagger_num_cells_buffer");

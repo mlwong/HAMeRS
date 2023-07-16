@@ -29,22 +29,6 @@ RungeKuttaPatchStrategy::~RungeKuttaPatchStrategy()
 }
 
 
-/**
- **************************************************************************************************
- * Set the immersed boundary ghost cells.
- **************************************************************************************************
- */
-void
-RungeKuttaPatchStrategy::setImmersedBoundaryGhostCells(
-    hier::Patch& patch,
-    const double time,
-    const int RK_step_number,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
-{
-    
-}
-
-
 /*
  **************************************************************************************************
  *
@@ -52,6 +36,47 @@ RungeKuttaPatchStrategy::setImmersedBoundaryGhostCells(
  *
  **************************************************************************************************
  */
+
+
+void
+RungeKuttaPatchStrategy::setImmersedBoundaryGhostCells(
+    hier::Patch& patch,
+    const double time,
+    const int RK_step_number,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    NULL_USE(patch);
+    NULL_USE(time);
+    NULL_USE(RK_step_number);
+    NULL_USE(data_context);
+}
+
+
+void
+RungeKuttaPatchStrategy::tagCellsOnPatchRefineRegions(
+    hier::Patch& patch,
+    const double regrid_time,
+    const bool initial_error,
+    const int tag_index,
+    const bool uses_immersed_bdry_detector_too,
+    const bool uses_value_detector_too,
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
+{
+    NULL_USE(patch);
+    NULL_USE(regrid_time);
+    NULL_USE(initial_error);
+    NULL_USE(tag_index);
+    NULL_USE(uses_immersed_bdry_detector_too);
+    NULL_USE(uses_value_detector_too);
+    NULL_USE(uses_gradient_detector_too);
+    NULL_USE(uses_multiresolution_detector_too);
+    NULL_USE(uses_integral_detector_too);
+    NULL_USE(uses_richardson_extrapolation_too);
+}
+
 
 void
 RungeKuttaPatchStrategy::tagCellsOnPatchImmersedBdryDetector(

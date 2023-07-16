@@ -19,6 +19,7 @@
 #include "flow/refinement_taggers/ImmersedBoundaryTagger.hpp"
 #include "flow/refinement_taggers/MultiresolutionTagger.hpp"
 #include "flow/refinement_taggers/ValueTagger.hpp"
+#include "util/refinement_regions_taggers/RefineRegionsTagger.hpp"
 
 #include "SAMRAI/appu/VisDerivedDataStrategy.h"
 // #include "SAMRAI/appu/VisItDataWriter.h"
@@ -184,6 +185,22 @@ class NavierStokes:
             hier::Patch& patch,
             const double time,
             const double dt);
+        
+        /*
+         * Tag cells for refinement using user-defined refine regions.
+         */
+        void
+        tagCellsOnPatchRefineRegions(
+            hier::Patch& patch,
+            const double regrid_time,
+            const bool initial_error,
+            const int tag_index,
+            const bool uses_immersed_bdry_detector_too,
+            const bool uses_value_detector_too,
+            const bool uses_gradient_detector_too,
+            const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
+            const bool uses_richardson_extrapolation_too);
         
         /**
          * Tag cells for refinement using immersed boundary detector.
@@ -685,6 +702,12 @@ class NavierStokes:
         HAMERS_SHARED_PTR<NavierStokesErrorStatistics> d_Navier_Stokes_error_statistics;
         
         /*
+         * HAMERS_SHARED_PTR to RefineRegionsTagger and its database.
+         */
+        HAMERS_SHARED_PTR<RefineRegionsTagger> d_refine_regions_tagger;
+        HAMERS_SHARED_PTR<tbox::Database> d_refine_regions_tagger_db;
+        
+        /*
          * HAMERS_SHARED_PTR to ImmersedBoundaryTagger and its settings.
          */
         HAMERS_SHARED_PTR<ImmersedBoundaryTagger> d_immersed_boundary_tagger;
@@ -763,6 +786,7 @@ class NavierStokes:
         static HAMERS_SHARED_PTR<tbox::Timer> t_advance_step;
         static HAMERS_SHARED_PTR<tbox::Timer> t_synchronize_fluxes;
         static HAMERS_SHARED_PTR<tbox::Timer> t_setphysbcs;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_tagrefineregions;
         static HAMERS_SHARED_PTR<tbox::Timer> t_tagimmersedbdry;
         static HAMERS_SHARED_PTR<tbox::Timer> t_tagvalue;
         static HAMERS_SHARED_PTR<tbox::Timer> t_taggradient;

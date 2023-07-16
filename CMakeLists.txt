@@ -112,8 +112,10 @@ link_directories(${HAMeRS_BINARY_DIR}/algs/patch_strategy
                  ${HAMeRS_BINARY_DIR}/util/derivatives
                  ${HAMeRS_BINARY_DIR}/util/differences
                  ${HAMeRS_BINARY_DIR}/util/gradient_sensors
+                 ${HAMeRS_BINARY_DIR}/util/immersed_boundaries
                  ${HAMeRS_BINARY_DIR}/util/mixing_rules
                  ${HAMeRS_BINARY_DIR}/util/mixing_rules/equations_of_state
+                 ${HAMeRS_BINARY_DIR}/util/refinement_regions_taggers
                  ${HAMeRS_BINARY_DIR}/util/wavelet_transform
                  ${HAMeRS_BINARY_DIR}/util/MPI_helpers)
 
@@ -139,5 +141,6 @@ add_subdirectory(src/util/gradient_sensors)
 add_subdirectory(src/util/immersed_boundaries)
 add_subdirectory(src/util/mixing_rules)
 add_subdirectory(src/util/mixing_rules/equations_of_state)
+add_subdirectory(src/util/refinement_regions_taggers)
 add_subdirectory(src/util/wavelet_transform)
 add_subdirectory(src/util/MPI_helpers)

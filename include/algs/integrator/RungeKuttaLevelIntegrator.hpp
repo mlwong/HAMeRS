@@ -1453,6 +1453,7 @@ class RungeKuttaLevelIntegrator:
         static HAMERS_SHARED_PTR<tbox::Timer> t_init_level_fill_interior;
         static HAMERS_SHARED_PTR<tbox::Timer> t_advance_bdry_fill_create;
         static HAMERS_SHARED_PTR<tbox::Timer> t_new_advance_bdry_fill_create;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_apply_refine_regions;
         static HAMERS_SHARED_PTR<tbox::Timer> t_apply_immersed_bdry_detector;
         static HAMERS_SHARED_PTR<tbox::Timer> t_apply_value_detector;
         static HAMERS_SHARED_PTR<tbox::Timer> t_apply_gradient_detector;

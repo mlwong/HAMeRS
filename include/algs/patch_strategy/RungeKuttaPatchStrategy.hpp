@@ -272,6 +272,38 @@ class RungeKuttaPatchStrategy:
             bool regrid_advance);
         
         /**
+         * Tag cells on the given patch that require refinement based on user-defined refinement regions.
+         * The tag index argument indicates the index of the tag data on the patch data array. The boolean
+         * argument initial_error is true if tagging is being done at the initial simulation time; otherwise,
+         * it is false.
+         *
+         * The boolean uses_immersed_bdry_detector_too is true when immersed boundary detector is used in
+         * additional to the refinement regions. The boolean uses_value_detector is true when value detector
+         * is used in additional to the refinement regions. The boolean uses_gradient_detector is true when
+         * gradient detector is used in additional to the refinement regions. The boolearn
+         * uses_multiresolution_detector_too is true when multiresolution detector is used in addition to the
+         * refinement regions. The boolean uses_integral_detector_too is true when integral detector is used
+         * in addition to the refinement regions. The boolean uses_richardson_extrapolation_too is true when
+         * Richardson extrapolation is used in addition to the refinement regions. These flags help users
+         * manage multiple regridding criteria.
+         *
+         * Note that this function is not pure virtual. It is given a dummy implementation here so
+         * that users may ignore it when inheriting from this class.
+         */
+        virtual void
+        tagCellsOnPatchRefineRegions(
+            hier::Patch& patch,
+            const double regrid_time,
+            const bool initial_error,
+            const int tag_index,
+            const bool uses_immersed_bdry_detector_too,
+            const bool uses_value_detector_too,
+            const bool uses_gradient_detector_too,
+            const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
+            const bool uses_richardson_extrapolation_too);
+        
+        /**
          * Tag cells on the given patch that require refinement based on application-specific numerical
          * quantities. The tag index argument indicates the index of the tag data on the patch data
          * array. The boolean argument initial_error is true if tagging is being done at the initial
