@@ -22,6 +22,12 @@ path_FlowModelStatisticsUtilitiesFiveEqnAllaire_cpp      = ""
 # Immersed boundaries.
 path_ImmersedBoundaries_cpp = ""
 
+
+
+#######################################
+### Do not change anything below!!! ###
+#######################################
+
 ### Default paths.
 
 # Euler application.
@@ -59,7 +65,10 @@ def symlinkHAMeRSFile(path_src, path_src_default, path_des):
         path = path_src
     if path != os.readlink(path_des):
         symlinkForce(path, path_des)
-        pathlib.Path(path_des)
+        cmd = 'touch ' + path_des
+        os.system(cmd)
+        print(cmd)
+        # pathlib.Path(path_des)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

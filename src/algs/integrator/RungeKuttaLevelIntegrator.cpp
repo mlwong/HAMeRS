@@ -213,6 +213,7 @@ HAMERS_SHARED_PTR<tbox::Timer> RungeKuttaLevelIntegrator::t_init_level_fill_data
 HAMERS_SHARED_PTR<tbox::Timer> RungeKuttaLevelIntegrator::t_init_level_fill_interior;
 HAMERS_SHARED_PTR<tbox::Timer> RungeKuttaLevelIntegrator::t_advance_bdry_fill_create;
 HAMERS_SHARED_PTR<tbox::Timer> RungeKuttaLevelIntegrator::t_new_advance_bdry_fill_create;
+HAMERS_SHARED_PTR<tbox::Timer> RungeKuttaLevelIntegrator::t_apply_refine_regions;
 HAMERS_SHARED_PTR<tbox::Timer> RungeKuttaLevelIntegrator::t_apply_immersed_bdry_detector;
 HAMERS_SHARED_PTR<tbox::Timer> RungeKuttaLevelIntegrator::t_apply_value_detector;
 HAMERS_SHARED_PTR<tbox::Timer> RungeKuttaLevelIntegrator::t_apply_gradient_detector;
@@ -561,17 +562,38 @@ RungeKuttaLevelIntegrator::applyRefineRegions(
     const bool uses_integral_detector_too,
     const bool uses_richardson_extrapolation_too)
 {
-    NULL_USE(hierarchy);
-    NULL_USE(level_number);
-    NULL_USE(error_data_time);
-    NULL_USE(tag_index);
-    NULL_USE(initial_time);
-    NULL_USE(uses_immersed_bdry_detector_too);
-    NULL_USE(uses_value_detector_too);
-    NULL_USE(uses_gradient_detector_too);
-    NULL_USE(uses_multiresolution_detector_too);
-    NULL_USE(uses_integral_detector_too);
-    NULL_USE(uses_richardson_extrapolation_too);
+    TBOX_ASSERT(hierarchy);
+    TBOX_ASSERT((level_number >= 0) &&
+                (level_number <= hierarchy->getFinestLevelNumber()));
+    TBOX_ASSERT(hierarchy->getPatchLevel(level_number));
+    
+    t_apply_refine_regions->start();
+    
+    HAMERS_SHARED_PTR<hier::PatchLevel> level(
+        hierarchy->getPatchLevel(level_number));
+    
+    t_tag_cells->start();
+    for (hier::PatchLevel::iterator ip(level->begin());
+         ip != level->end();
+         ip++)
+    {
+        const HAMERS_SHARED_PTR<hier::Patch>& patch = *ip;
+        
+        d_patch_strategy->tagCellsOnPatchRefineRegions(
+            *patch,
+            error_data_time,
+            initial_time,
+            tag_index,
+            uses_immersed_bdry_detector_too,
+            uses_value_detector_too,
+            uses_gradient_detector_too,
+            uses_multiresolution_detector_too,
+            uses_integral_detector_too,
+            uses_richardson_extrapolation_too);
+    }
+    t_tag_cells->stop();
+    
+    t_apply_refine_regions->stop();
 }
 
 
@@ -4251,6 +4273,8 @@ RungeKuttaLevelIntegrator::initializeCallback()
         getTimer("RungeKuttaLevelIntegrator::advance_bdry_fill_create");
     t_new_advance_bdry_fill_create = tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::new_advance_bdry_fill_create");
+    t_apply_refine_regions = tbox::TimerManager::getManager()->
+        getTimer("RungeKuttaLevelIntegrator::applyRefineRegions()");
     t_apply_immersed_bdry_detector = tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::applyImmersedBdryDetector()");
     t_apply_value_detector = tbox::TimerManager::getManager()->
@@ -4317,6 +4341,7 @@ RungeKuttaLevelIntegrator::finalizeCallback()
     t_init_level_fill_interior.reset();
     t_advance_bdry_fill_create.reset();
     t_new_advance_bdry_fill_create.reset();
+    t_apply_refine_regions.reset();
     t_apply_immersed_bdry_detector.reset();
     t_apply_value_detector.reset();
     t_apply_gradient_detector.reset();
