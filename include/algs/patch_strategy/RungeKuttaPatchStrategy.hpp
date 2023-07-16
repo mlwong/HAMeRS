@@ -272,6 +272,71 @@ class RungeKuttaPatchStrategy:
             bool regrid_advance);
         
         /**
+         * Tag cells on the given patch that require refinement based on user-defined refinement regions.
+         * The tag index argument indicates the index of the tag data on the patch data array. The boolean
+         * argument initial_error is true if tagging is being done at the initial simulation time; otherwise,
+         * it is false.
+         *
+         * The boolean uses_immersed_bdry_detector_too is true when immersed boundary detector is used in
+         * additional to the refinement regions. The boolean uses_value_detector is true when value detector
+         * is used in additional to the refinement regions. The boolean uses_gradient_detector is true when
+         * gradient detector is used in additional to the refinement regions. The boolearn
+         * uses_multiresolution_detector_too is true when multiresolution detector is used in addition to the
+         * refinement regions. The boolean uses_integral_detector_too is true when integral detector is used
+         * in addition to the refinement regions. The boolean uses_richardson_extrapolation_too is true when
+         * Richardson extrapolation is used in addition to the refinement regions. These flags help users
+         * manage multiple regridding criteria.
+         *
+         * Note that this function is not pure virtual. It is given a dummy implementation here so
+         * that users may ignore it when inheriting from this class.
+         */
+        virtual void
+        tagCellsOnPatchRefineRegions(
+            hier::Patch& patch,
+            const double regrid_time,
+            const bool initial_error,
+            const int tag_index,
+            const bool uses_immersed_bdry_detector_too,
+            const bool uses_value_detector_too,
+            const bool uses_gradient_detector_too,
+            const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
+            const bool uses_richardson_extrapolation_too);
+        
+        /**
+         * Tag cells on the given patch that require refinement based on application-specific numerical
+         * quantities. The tag index argument indicates the index of the tag data on the patch data
+         * array. The boolean argument initial_error is true if tagging is being done at the initial
+         * simulation time; otherwise, it is false.
+         *
+         * The boolean uses_refine_regions_too is true when user-defined refine regions are used in
+         * additional to the immersed boundary detector. The boolean uses_value_detector is true when value
+         * detector is used in additional to the immersed boundary detector. The boolean
+         * uses_gradient_detector is true when gradient detector is used in additional to the immersed
+         * boundary detector. The boolearn uses_multiresolution_detector_too is true when multiresolution
+         * detector is used in addition to the immersed boundary detector. The boolean
+         * uses_integral_detector_too is true when integral detector is used in addition to the immersed
+         * boundary detector. The boolean uses_richardson_extrapolation_too is true when Richardson
+         * extrapolation is used in addition to the immersed boundary detector. These flags help users
+         * manage multiple regridding criteria.
+         *
+         * Note that this function is not pure virtual. It is given a dummy implementation here so
+         * that users may ignore it when inheriting from this class.
+         */
+        virtual void
+        tagCellsOnPatchImmersedBdryDetector(
+            hier::Patch& patch,
+            const double regrid_time,
+            const bool initial_error,
+            const int tag_index,
+            const bool uses_refine_regions_too,
+            const bool uses_value_detector_too,
+            const bool uses_gradient_detector_too,
+            const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
+            const bool uses_richardson_extrapolation_too);
+        
+        /**
          * This is an optional routine for user to process any application-specific patch strategy
          * data BEFORE cells are tagged on the given level using value detector.
          */
@@ -281,6 +346,8 @@ class RungeKuttaPatchStrategy:
             const int level_number,
             const double regrid_time,
             const bool initial_error,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_multiresolution_detector_too,
             const bool uses_integral_detector_too,
@@ -296,6 +363,8 @@ class RungeKuttaPatchStrategy:
             const int level_number,
             const double regrid_time,
             const bool initial_error,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_multiresolution_detector_too,
             const bool uses_integral_detector_too,
@@ -307,27 +376,31 @@ class RungeKuttaPatchStrategy:
          * array. The boolean argument initial_error is true if tagging is being done at the initial
          * simulation time; otherwise, it is false.
          *
-         * The boolean uses_gradient_detector is true when gradient detector is used in additional
-         * to the value detector. The boolearn uses_multiresolution_detector_too is true when
-         * multiresolution detector is used in addition to the value detector. The boolean
-         * uses_integral_detector_too is true when integral detector is used in addition to the value
-         * detector. The boolean uses_richardson_extrapolation_too is true when Richardson
-         * extrapolation is used in addition to the value detector. These flags help users manage
-         * multiple regridding criteria.
+         * The boolean uses_refine_regions_too is true when user-defined refine regions are used in
+         * additional to the value detector. The boolean uses_immersed_bdry_detector_too is true when
+         * immersed boundary detector is used in additional to the value detector. The boolean
+         * uses_gradient_detector is true when gradient detector is used in additional to the value
+         * detector. The boolearn uses_multiresolution_detector_too is true when multiresolution detector
+         * is used in addition to the value detector. The boolean uses_integral_detector_too is true when
+         * integral detector is used in addition to the value detector. The boolean
+         * uses_richardson_extrapolation_too is true when Richardson extrapolation is used in addition to
+         * the value detector. These flags help users manage multiple regridding criteria.
          *
          * Note that this function is not pure virtual. It is given a dummy implementation here so
          * that users may ignore it when inheriting from this class.
          */
         virtual void
         tagCellsOnPatchValueDetector(
-           hier::Patch& patch,
-           const double regrid_time,
-           const bool initial_error,
-           const int tag_index,
-           const bool uses_gradient_detector_too,
-           const bool uses_multiresolution_detector_too,
-           const bool uses_integral_detector_too,
-           const bool uses_richardson_extrapolation_too);
+            hier::Patch& patch,
+            const double regrid_time,
+            const bool initial_error,
+            const int tag_index,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
+            const bool uses_gradient_detector_too,
+            const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
+            const bool uses_richardson_extrapolation_too);
         
         /**
          * This is an optional routine for user to process any application-specific patch strategy
@@ -339,6 +412,8 @@ class RungeKuttaPatchStrategy:
             const int level_number,
             const double regrid_time,
             const bool initial_error,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
             const bool uses_value_detector_too,
             const bool uses_multiresolution_detector_too,
             const bool uses_integral_detector_too,
@@ -354,6 +429,8 @@ class RungeKuttaPatchStrategy:
             const int level_number,
             const double regrid_time,
             const bool initial_error,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
             const bool uses_value_detector_too,
             const bool uses_multiresolution_detector_too,
             const bool uses_integral_detector_too,
@@ -365,10 +442,13 @@ class RungeKuttaPatchStrategy:
          * patch data array. The boolean argument initial_error is true if tagging is being done at
          * the initial simulation time; otherwise, it is false.
          *
-         * The boolean uses_value_detector is true when value detector is used in additional to the
-         * gradient detector. The boolearn uses_multiresolution_detector_too is true when multiresolution
-         * detector is used in addition to the gradient detector. The boolean uses_integral_detector_too
-         * is true when integral detector is used in addition to the gradient detector. The boolean
+         * The boolean uses_refine_regions_too is true when user-defined refine regions are used in
+         * additional to the gradient detector. The boolean uses_immersed_bdry_detector_too is true when
+         * immersed boundary detector is used in additional to the gradient detector. The boolean
+         * uses_value_detector is true when value detector is used in additional to the gradient detector.
+         * The boolearn uses_multiresolution_detector_too is true when multiresolution detector is used in
+         * addition to the gradient detector. The boolean uses_integral_detector_too is true when integral
+         * detector is used in addition to the gradient detector. The boolean
          * uses_richardson_extrapolation_too is true when Richardson extrapolation is used in addition
          * to the gradient detector. These flags help users manage multiple regridding criteria.
          *
@@ -377,14 +457,16 @@ class RungeKuttaPatchStrategy:
          */
         virtual void
         tagCellsOnPatchGradientDetector(
-           hier::Patch& patch,
-           const double regrid_time,
-           const bool initial_error,
-           const int tag_index,
-           const bool uses_value_detector_too,
-           const bool uses_multiresolution_detector_too,
-           const bool uses_integral_detector_too,
-           const bool uses_richardson_extrapolation_too);
+            hier::Patch& patch,
+            const double regrid_time,
+            const bool initial_error,
+            const int tag_index,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
+            const bool uses_value_detector_too,
+            const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
+            const bool uses_richardson_extrapolation_too);
         
         /**
          * This is an optional routine for user to process any application-specific patch strategy
@@ -396,6 +478,8 @@ class RungeKuttaPatchStrategy:
             const int level_number,
             const double regrid_time,
             const bool initial_error,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
             const bool uses_value_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_integral_detector_too,
@@ -411,6 +495,8 @@ class RungeKuttaPatchStrategy:
             const int level_number,
             const double regrid_time,
             const bool initial_error,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
             const bool uses_value_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_integral_detector_too,
@@ -422,27 +508,31 @@ class RungeKuttaPatchStrategy:
          * array. The boolean argument initial_error is true if tagging is being done at the initial
          * simulation time; otherwise, it is false.
          *
-         * The boolean uses_value_detector_too is true when value detector is used in addition to
-         * the multiresolution detector. The boolean uses_gradient_detector_too is true when gradient
-         * detector is used in addition to the multiresolution detector. The boolean
-         * uses_integral_detector_too is true when integral detector is used in addition to the
-         * multiresolution detector. The boolean uses_richardson_extrapolation_too is true when
-         * Richardson extrapolation is used in addition to the gradient detector. These flags help
-         * users manage multiple regridding criteria.
+         * The boolean uses_refine_regions_too is true when user-defined refine regions are used in
+         * additional to the multiresolution detector. The boolean uses_immersed_bdry_detector_too is true
+         * when immersed boundary detector is used in additional to the multiresolution detector. The
+         * boolean uses_value_detector_too is true when value detector is used in addition to the
+         * multiresolution detector. The boolean uses_gradient_detector_too is true when gradient detector
+         * is used in addition to the multiresolution detector. The boolean uses_integral_detector_too is
+         * true when integral detector is used in addition to the multiresolution detector. The boolean
+         * uses_richardson_extrapolation_too is true when Richardson extrapolation is used in addition to
+         * the gradient detector. These flags help users manage multiple regridding criteria.
          *
          * Note that this function is not pure virtual. It is given a dummy implementation here so
          * that users may ignore it when inheriting from this class.
          */
         virtual void
         tagCellsOnPatchMultiresolutionDetector(
-           hier::Patch& patch,
-           const double regrid_time,
-           const bool initial_error,
-           const int tag_index,
-           const bool uses_value_detector_too,
-           const bool uses_gradient_detector_too,
-           const bool uses_integral_detector_too,
-           const bool uses_richardson_extrapolation_too);
+            hier::Patch& patch,
+            const double regrid_time,
+            const bool initial_error,
+            const int tag_index,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
+            const bool uses_value_detector_too,
+            const bool uses_gradient_detector_too,
+            const bool uses_integral_detector_too,
+            const bool uses_richardson_extrapolation_too);
         
         /**
          * This is an optional routine for user to process any application-specific patch strategy
@@ -454,6 +544,8 @@ class RungeKuttaPatchStrategy:
             const int level_number,
             const double regrid_time,
             const bool initial_error,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
             const bool uses_value_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_multiresolution_detector_too,
@@ -469,6 +561,8 @@ class RungeKuttaPatchStrategy:
             const int level_number,
             const double regrid_time,
             const bool initial_error,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
             const bool uses_value_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_multiresolution_detector_too,
@@ -480,27 +574,31 @@ class RungeKuttaPatchStrategy:
          * array. The boolean argument initial_error is true if tagging is being done at the initial
          * simulation time; otherwise, it is false.
          *
-         * The boolean uses_value_detector_too is true when value detector is used in addition to
-         * the integral detector. The boolean uses_gradient_detector_too is true when gradient
-         * detector is used in addition to the integral detector. The boolean
-         * uses_multiresolution_detector_too is true when multiresolution detector is used in addition
-         * to the integral detector. The boolean uses_richardson_extrapolation_too is true when
-         * Richardson extrapolation is used in addition to the integral detector. These flags help
-         * users manage multiple regridding criteria.
+         * The boolean uses_refine_regions_too is true when user-defined refine regions are used in
+         * additional to the integral detector. The boolean uses_immersed_bdry_detector_too is true when
+         * immersed boundary detector is used in additional to the integral detector. The boolean
+         * uses_value_detector_too is true when value detector is used in addition to the integral
+         * detector. The boolean uses_gradient_detector_too  is true when gradient detector is used in
+         * addition to the integral detector. The boolean uses_multiresolution_detector_too is true when
+         * multiresolution detector is used in addition to the integral detector. The boolean
+         * uses_richardson_extrapolation_too is true when Richardson extrapolation is used in addition
+         * to the integral detector. These flags help users manage multiple regridding criteria.
          *
          * Note that this function is not pure virtual. It is given a dummy implementation here so
          * that users may ignore it when inheriting from this class.
          */
         virtual void
         tagCellsOnPatchIntegralDetector(
-           hier::Patch& patch,
-           const double regrid_time,
-           const bool initial_error,
-           const int tag_index,
-           const bool uses_value_detector_too,
-           const bool uses_gradient_detector_too,
-           const bool uses_multiresolution_detector_too,
-           const bool uses_richardson_extrapolation_too);
+            hier::Patch& patch,
+            const double regrid_time,
+            const bool initial_error,
+            const int tag_index,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
+            const bool uses_value_detector_too,
+            const bool uses_gradient_detector_too,
+            const bool uses_multiresolution_detector_too,
+            const bool uses_richardson_extrapolation_too);
         
         /**
          * Tag cells based from differences computed in the Richardson extrapolation. The Richardson
@@ -533,13 +631,15 @@ class RungeKuttaPatchStrategy:
          * gradient detector scheme is used in addition to Richardson extrapolation. This flag helps
          * users manage multiple regridding criteria.
          *
-         * The boolean uses_value_detector_too is true when value detector is used addition to the
-         * Richardson extrapolation. The boolean uses_gradient_detector_too is true when gradient
-         * detector is used in addition to the Richardson extrapolation. The boolean
-         * uses_multiresolution_detector_too is true when multiresolution detector is used in addition
-         * to the Richardson extrapolation. The boolean uses_integral_detector_too is true when
-         * integral detector is used in addition to the Richardson extrapolation. These flags help
-         * users manage multiple regridding criteria.
+         * The boolean uses_refine_regions_too is true when user-defined refine regions are used in
+         * additional to the Richardson extrapolation. The boolean uses_immersed_bdry_detector_too is true
+         * when immersed boundary detector is used in additional to the Richardson extrapolation. The
+         * boolean uses_value_detector_too is true when value detector is used addition to the Richardson
+         * extrapolation. The boolean uses_gradient_detector_too is true when gradient detector is used in
+         * addition to the Richardson extrapolation. The boolean uses_multiresolution_detector_too is true
+         * when multiresolution detector is used in addition to the Richardson extrapolation. The boolean
+         * uses_integral_detector_too is true when integral detector is used in addition to the Richardson
+         * extrapolation. These flags help users manage multiple regridding criteria.
          * 
          * Note that this function is not pure virtual. It is given a dummy implementation here so
          * that users may ignore it when inheriting from this class.
@@ -555,6 +655,8 @@ class RungeKuttaPatchStrategy:
             const int error_coarsen_ratio,
             const bool initial_error,
             const int tag_index,
+            const bool uses_refine_regions_too,
+            const bool uses_immersed_bdry_detector_too,
             const bool uses_value_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_multiresolution_detector_too,

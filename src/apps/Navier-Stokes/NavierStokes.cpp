@@ -45,7 +45,9 @@ HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_compute_fluxes_sources;
 HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_advance_step;
 HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_synchronize_fluxes;
 HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_setphysbcs;
+HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_tagrefineregions;
 HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_tagvalue;
+HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_tagimmersedbdry;
 HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_taggradient;
 HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_tagmultiresolution;
 
@@ -86,12 +88,16 @@ NavierStokes::NavierStokes(
             getTimer("NavierStokes::synchronizeHyperbolicFluxes()");
         t_setphysbcs = tbox::TimerManager::getManager()->
             getTimer("NavierStokes::setPhysicalBoundaryConditions()");
+        t_tagrefineregions = tbox::TimerManager::getManager()->
+            getTimer("NavierStokes::tagCellsOnPatchRefineRegions()");
+        t_tagimmersedbdry = tbox::TimerManager::getManager()->
+            getTimer("NavierStokes::tagCellsOnPatchImmersedBdryDetector()");
         t_tagvalue = tbox::TimerManager::getManager()->
-            getTimer("NavierStokes::tagValueDetectorCells()");
+            getTimer("NavierStokes::tagCellsOnPatchValueDetector()");
         t_taggradient = tbox::TimerManager::getManager()->
-            getTimer("NavierStokes::tagGradientDetectorCells()");
+            getTimer("NavierStokes::tagCellsOnPatchGradientDetector()");
         t_tagmultiresolution = tbox::TimerManager::getManager()->
-            getTimer("NavierStokes::tagMultiresolutionDetectorCells()");
+            getTimer("NavierStokes::tagCellsOnPatchMultiresolutionDetector()");
     }
     
     /*
@@ -237,6 +243,88 @@ NavierStokes::NavierStokes(
         d_flow_model));
     
     /*
+     * Initialize d_refine_regions_tagger.
+     */
+    
+    if (d_refine_regions_tagger_db != nullptr)
+    {
+        d_refine_regions_tagger.reset(new RefineRegionsTagger(
+            "d_refine_regions_tagger",
+            d_dim,
+            d_grid_geometry,
+            d_refine_regions_tagger_db,
+            is_from_restart));
+    }
+    else
+    {
+        d_refine_regions_tagger = nullptr;
+    }
+    
+    /*
+     * Initialize d_immersed_boundary_tagger.
+     */
+    
+    if (d_use_immersed_boundaries)
+    {
+        hier::IntVector num_cells_buffer_required = hier::IntVector::getZero(d_dim);
+        num_cells_buffer_required = hier::IntVector::max(
+            num_cells_buffer_required,
+            d_convective_flux_reconstructor->getConvectiveFluxNumberOfGhostCells());
+        
+        hier::IntVector num_ghosts_diffusive_flux = hier::IntVector::getZero(d_dim);
+        
+        if (d_use_conservative_form_diffusive_flux)
+        {
+            num_ghosts_diffusive_flux = d_diffusive_flux_reconstructor->getDiffusiveFluxNumberOfGhostCells();
+        }
+        else
+        {
+            num_ghosts_diffusive_flux = d_nonconservative_diffusive_flux_divergence_operator->
+                getNonconservativeDiffusiveFluxDivergenceOperatorNumberOfGhostCells();
+        }
+        
+        bool use_transverse_derivatives_bc = d_Navier_Stokes_boundary_conditions->useTransverseDerivativesBoundaryConditions();
+        
+        // Increase the number of ghosts for computing transverse derivatives at corner ghost cells for diffusive/viscous flux.
+        // Euler assumes corner ghost cells are not used.
+        if (use_transverse_derivatives_bc)
+        {
+            hier::IntVector num_ghosts_transverse_derivatives_bc = d_Navier_Stokes_boundary_conditions->
+                getBoundaryConditionsTransverseDerivativesNumberOfGhostCells();
+            
+            num_ghosts_diffusive_flux = num_ghosts_diffusive_flux + num_ghosts_transverse_derivatives_bc;
+        }
+        
+        num_cells_buffer_required = hier::IntVector::max(num_cells_buffer_required, num_ghosts_diffusive_flux);
+        
+        if (hier::IntVector::getOne(d_dim)*d_immersed_boundary_tagger_num_cells_buffer >= hier::IntVector::getZero(d_dim))
+        {
+            if (hier::IntVector::getOne(d_dim)*d_immersed_boundary_tagger_num_cells_buffer < num_cells_buffer_required)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "d_immersed_boundary_tagger_num_cells_buffer is smaller than the required number!"
+                    << std::endl);
+            }
+            else
+            {
+                num_cells_buffer_required = hier::IntVector::getOne(d_dim)*d_immersed_boundary_tagger_num_cells_buffer;
+            }
+        }
+        
+        d_immersed_boundary_tagger.reset(new ImmersedBoundaryTagger(
+            "d_immersed_boundary_tagger",
+            d_dim,
+            d_grid_geometry,
+            d_flow_model,
+            num_cells_buffer_required));
+    }
+    else
+    {
+        d_immersed_boundary_tagger = nullptr;
+    }
+    
+    /*
      * Initialize d_value_tagger.
      */
     
@@ -248,6 +336,10 @@ NavierStokes::NavierStokes(
             d_grid_geometry,
             d_flow_model,
             d_value_tagger_db));
+    }
+    else
+    {
+        d_value_tagger = nullptr;
     }
     
     /*
@@ -263,6 +355,10 @@ NavierStokes::NavierStokes(
             d_flow_model,
             d_gradient_tagger_db));
     }
+    else
+    {
+        d_gradient_tagger = nullptr;
+    }
     
     /*
      * Initialize d_multiresolution_tagger.
@@ -276,6 +372,10 @@ NavierStokes::NavierStokes(
             d_grid_geometry,
             d_flow_model,
             d_multiresolution_tagger_db));
+    }
+    else
+    {
+        d_multiresolution_tagger = nullptr;
     }
     
     /*
@@ -321,6 +421,8 @@ NavierStokes::~NavierStokes()
     t_advance_step.reset();
     t_synchronize_fluxes.reset();
     t_setphysbcs.reset();
+    t_tagrefineregions.reset();
+    t_tagimmersedbdry.reset();
     t_tagvalue.reset();
     t_taggradient.reset();
     t_tagmultiresolution.reset();
@@ -3890,21 +3992,158 @@ NavierStokes::synchronizeFluxes(
 
 
 /*
+ * Tag cells for refinement using user-defined refine regions.
+ */
+void
+NavierStokes::tagCellsOnPatchRefineRegions(
+    hier::Patch& patch,
+    const double regrid_time,
+    const bool initial_error,
+    const int tag_index,
+    const bool uses_immersed_bdry_detector_too,
+    const bool uses_value_detector_too,
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
+{
+    NULL_USE(regrid_time);
+    NULL_USE(initial_error);
+    
+    t_tagrefineregions->start();
+    
+    // Get the tags.
+    HAMERS_SHARED_PTR<pdat::CellData<int> > tags(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
+            patch.getPatchData(tag_index)));
+    
+#ifdef DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(tags);
+    TBOX_ASSERT(tags->getGhostCellWidth() == 0);
+#endif
+    
+    // Initialize values of all tags to zero.
+    if ((!uses_richardson_extrapolation_too) &&
+        (!uses_integral_detector_too) &&
+        (!uses_multiresolution_detector_too) &&
+        (!uses_gradient_detector_too) &&
+        (!uses_value_detector_too) &&
+        (!uses_immersed_bdry_detector_too))
+    {
+        tags->fillAll(0);
+    }
+    
+    if (d_refine_regions_tagger != nullptr)
+    {
+        d_refine_regions_tagger->tagCellsOnPatch(
+            patch,
+            tags);
+    }
+    
+    t_tagrefineregions->stop();
+}
+
+
+/*
+ * Tag cells for refinement using immersed boundary detector.
+ */
+void
+NavierStokes::tagCellsOnPatchImmersedBdryDetector(
+    hier::Patch& patch,
+    const double regrid_time,
+    const bool initial_error,
+    const int tag_index,
+    const bool uses_refine_regions_too,
+    const bool uses_value_detector_too,
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
+{
+    NULL_USE(regrid_time);
+    NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
+    
+    t_tagimmersedbdry->start();
+    
+    // Get the tags.
+    HAMERS_SHARED_PTR<pdat::CellData<int> > tags(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
+            patch.getPatchData(tag_index)));
+    
+#ifdef DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(tags);
+    TBOX_ASSERT(tags->getGhostCellWidth() == 0);
+#endif
+    
+    // Initialize values of all tags to zero.
+    if ((!uses_richardson_extrapolation_too) &&
+        (!uses_integral_detector_too) &&
+        (!uses_multiresolution_detector_too) &&
+        (!uses_gradient_detector_too) &&
+        (!uses_value_detector_too))
+    {
+        tags->fillAll(0);
+    }
+    
+    // Tag the cells by using d_immersed_boundary_tagger.
+    if (d_immersed_boundary_tagger != nullptr)
+    {
+        d_flow_model->registerPatchWithDataContext(patch, getDataContext());
+        
+        /*
+         * Compute the immersed boundary method variables.
+         */
+        
+        d_flow_model->setupImmersedBoundaryMethod();
+        
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        const hier::Box empty_box = hier::Box::getEmptyBox(d_dim);
+        
+        flow_model_immersed_boundary_method->setImmersedBoundaryMethodVariables(
+            empty_box,
+            regrid_time,
+            false,
+            getDataContext());
+        
+        d_flow_model->unregisterPatch();
+        
+        /*
+         * Tag the cells using immersed boundary method variables.
+         */
+        
+        d_immersed_boundary_tagger->tagCellsOnPatch(
+            patch,
+            tags,
+            getDataContext());
+    }
+    
+    t_tagimmersedbdry->stop();
+}
+
+
+/*
  * Preprocess before tagging cells using value detector.
  */
 void
 NavierStokes::preprocessTagCellsValueDetector(
-   const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-   const int level_number,
-   const double regrid_time,
-   const bool initial_error,
-   const bool uses_gradient_detector_too,
-   const bool uses_multiresolution_detector_too,
-   const bool uses_integral_detector_too,
-   const bool uses_richardson_extrapolation_too)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const int level_number,
+    const double regrid_time,
+    const bool initial_error,
+    const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -3942,7 +4181,9 @@ NavierStokes::tagCellsOnPatchValueDetector(
     hier::Patch& patch,
     const double regrid_time,
     const bool initial_error,
-    const int tag_indx,
+    const int tag_index,
+    const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -3950,13 +4191,15 @@ NavierStokes::tagCellsOnPatchValueDetector(
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     
     t_tagvalue->start();
     
     // Get the tags.
     HAMERS_SHARED_PTR<pdat::CellData<int> > tags(
         HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
-            patch.getPatchData(tag_indx)));
+            patch.getPatchData(tag_index)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags);
@@ -3990,17 +4233,21 @@ NavierStokes::tagCellsOnPatchValueDetector(
  */
 void
 NavierStokes::preprocessTagCellsGradientDetector(
-   const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-   const int level_number,
-   const double regrid_time,
-   const bool initial_error,
-   const bool uses_value_detector_too,
-   const bool uses_multiresolution_detector_too,
-   const bool uses_integral_detector_too,
-   const bool uses_richardson_extrapolation_too)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const int level_number,
+    const double regrid_time,
+    const bool initial_error,
+    const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
+    const bool uses_value_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_multiresolution_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -4038,7 +4285,9 @@ NavierStokes::tagCellsOnPatchGradientDetector(
     hier::Patch& patch,
     const double regrid_time,
     const bool initial_error,
-    const int tag_indx,
+    const int tag_index,
+    const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
@@ -4046,6 +4295,8 @@ NavierStokes::tagCellsOnPatchGradientDetector(
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     
     t_taggradient->start();
@@ -4053,7 +4304,7 @@ NavierStokes::tagCellsOnPatchGradientDetector(
     // Get the tags.
     HAMERS_SHARED_PTR<pdat::CellData<int> > tags(
         HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
-            patch.getPatchData(tag_indx)));
+            patch.getPatchData(tag_index)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags);
@@ -4086,17 +4337,21 @@ NavierStokes::tagCellsOnPatchGradientDetector(
  */
 void
 NavierStokes::preprocessTagCellsMultiresolutionDetector(
-   const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-   const int level_number,
-   const double regrid_time,
-   const bool initial_error,
-   const bool uses_value_detector_too,
-   const bool uses_gradient_detector_too,
-   const bool uses_integral_detector_too,
-   const bool uses_richardson_extrapolation_too)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const int level_number,
+    const double regrid_time,
+    const bool initial_error,
+    const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
+    const bool uses_value_detector_too,
+    const bool uses_gradient_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_integral_detector_too);
@@ -4134,7 +4389,9 @@ NavierStokes::tagCellsOnPatchMultiresolutionDetector(
     hier::Patch& patch,
     const double regrid_time,
     const bool initial_error,
-    const int tag_indx,
+    const int tag_index,
+    const bool uses_refine_regions_too,
+    const bool uses_immersed_bdry_detector_too,
     const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_integral_detector_too,
@@ -4142,6 +4399,8 @@ NavierStokes::tagCellsOnPatchMultiresolutionDetector(
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_refine_regions_too);
+    NULL_USE(uses_immersed_bdry_detector_too);
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     
@@ -4150,7 +4409,7 @@ NavierStokes::tagCellsOnPatchMultiresolutionDetector(
     // Get the tags.
     HAMERS_SHARED_PTR<pdat::CellData<int> > tags(
         HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
-            patch.getPatchData(tag_indx)));
+            patch.getPatchData(tag_index)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags);
@@ -4251,13 +4510,23 @@ NavierStokes::putToRestart(
     if (d_use_ghost_cell_immersed_boundary_method)
     {
         HAMERS_SHARED_PTR<tbox::Database> immersed_boundary_method_db =
-            restart_db->putDatabase("immersed_boundary_method_db");
+            restart_db->putDatabase("d_immersed_boundary_method_db");
         
         HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
             d_flow_model->getFlowModelImmersedBoundaryMethod();
         
         flow_model_immersed_boundary_method->putToRestart(immersed_boundary_method_db);
     }
+    
+    if (d_refine_regions_tagger != nullptr)
+    {
+        HAMERS_SHARED_PTR<tbox::Database> restart_refine_regions_tagger_db =
+            restart_db->putDatabase("d_refine_regions_tagger_db");
+        
+        d_refine_regions_tagger->putToRestart(restart_refine_regions_tagger_db);
+    }
+    
+    restart_db->putInteger("d_immersed_boundary_tagger_num_cells_buffer", d_immersed_boundary_tagger_num_cells_buffer);
     
     if (d_value_tagger != nullptr)
     {
@@ -4960,6 +5229,22 @@ NavierStokes::getFromInput(
             }
         }
         
+        if (input_db->keyExists("Refine_regions_tagger"))
+        {
+            d_refine_regions_tagger_db =
+                input_db->getDatabase("Refine_regions_tagger");
+        }
+        
+        if (input_db->keyExists("immersed_boundary_tagger_num_cells_buffer"))
+        {
+            d_immersed_boundary_tagger_num_cells_buffer =
+                input_db->getInteger("immersed_boundary_tagger_num_cells_buffer");
+        }
+        else
+        {
+            d_immersed_boundary_tagger_num_cells_buffer = -1;
+        }
+        
         if (input_db->keyExists("Value_tagger"))
         {
             d_value_tagger_db =
@@ -5089,6 +5374,13 @@ void NavierStokes::getFromRestart()
     {
         d_immersed_boundary_method_db = db->getDatabase("d_immersed_boundary_method_db");
     }
+    
+    if (db->keyExists("d_refine_regions_tagger_db"))
+    {
+        d_refine_regions_tagger_db = db->getDatabase("d_refine_regions_tagger_db");
+    }
+    
+    d_immersed_boundary_tagger_num_cells_buffer = db->getInteger("d_immersed_boundary_tagger_num_cells_buffer");
     
     if (db->keyExists("d_value_tagger_db"))
     {
