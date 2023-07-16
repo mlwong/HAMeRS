@@ -86,13 +86,13 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             double* E       = total_energy->getPointer(0);
             
             const double gamma = double(7)/double(5);
-            const double g     = 10.0; // HARD-CODED for now!
+            const double g     = 90.0; // HARD-CODED for now!
             
             const double p_i = 100000.0; // interface pressure
             const double T_0 = 300.0; 
             
-            const double W_1 = 0.033280; //0.0400; // molecular mass of heavier gas
-            const double W_2 = 0.030720; //0.0240; // molecular mass of lighter gas
+            const double W_1 = 0.0600; //0.033280; //0.0400; // molecular mass of heavier gas
+            const double W_2 = 0.0200; //0.030720; //0.0240; // molecular mass of lighter gas
             
             const double R_u = 8.31446261815324; // universal gas constant
             const double R_1 = R_u/W_1;          // gas constant of heavier gas
@@ -190,20 +190,20 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             double* E       = total_energy->getPointer(0);
             
             const double gamma = double(7)/double(5);
-            const double g     = 10.0; // HARD-CODED for now!
+            const double g     = 90.0; // HARD-CODED for now!
             
             const double p_i = 100000.0; // interface pressure
             const double T_0 = 300.0; 
             
-            const double W_1 = 0.033280; // molecular mass of heavier gas
-            const double W_2 = 0.030720; // molecular mass of lighter gas
+            const double W_1 = 0.060; // molecular mass of heavier gas
+            const double W_2 = 0.020; // molecular mass of lighter gas
             
             const double R_u = 8.31446261815324; // universal gas constant
             const double R_1 = R_u/W_1;          // gas constant of heavier gas
             const double R_2 = R_u/W_2;
             
             const double lambda = 701.53278340668; // wavelength of single-mode perturbation
-            const double eta_0  = 0.01*lambda*0.0;
+            const double eta_0  = 0.04*lambda;
             const double delta  = 0.04*lambda; // characteristic length of interface.
             const double shift  = 0.0; // location of interface.
             
@@ -255,8 +255,8 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
                             
                             const double R_H   = R_1*(1.0 - X_2_H) + X_2_H*R_2;
                             
-                            const int N_int = 100000; // number of numerical quadrature points
-                            const double dx_p = (x[0] - shift)/(N_int - 1.0);
+                            // const int N_int = 100000; // number of numerical quadrature points
+                            // const double dx_p = (x[0] - shift)/(N_int - 1.0);
                             
                             double integral = 0.0;
                             double p_H = 0.0;

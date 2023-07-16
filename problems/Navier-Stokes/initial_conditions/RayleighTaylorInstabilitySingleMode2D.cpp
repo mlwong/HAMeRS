@@ -93,7 +93,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         
         double lambda = 701.53278340668; // wavelength of single-mode perturbation
         //double eta_0  = 0.02*lambda;      // 1% perturbation // DEBUGGING
-        double eta_0  = 0.0*lambda;      // no perturbation
+        double eta_0  = 0.04*lambda;      // no perturbation
         
         const double p_i = 100000.0; // interface pressure
         const double T_0 = 300.0;    // background temperature
@@ -178,11 +178,11 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             
             std::string integral_filename = "integral.dat";
             const int integral_N_x = 10000;
-            const int integral_N_int = 100000; // number of numerical quadrature points
+            const int integral_N_int = 1000000; // number of numerical quadrature points
             
             // Discretize the domain in x-direction for the approximated integral.
             
-            double x_domain_lo = -1.5*lambda; // Hard coded but read from input
+            double x_domain_lo = -3.0*lambda; // Hard coded but read from input
             double x_domain_hi =  1.5*lambda; // Hard coded but read from input
             
             x_domain_lo -= 0.1*lambda; // enlarge the domain for domain ghost cells

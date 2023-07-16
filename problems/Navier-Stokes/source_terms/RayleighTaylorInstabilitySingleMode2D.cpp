@@ -141,7 +141,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     const double gamma = double(7)/double(5); // assume both gases have the same ratio of specific heat ratios
     
     const double lambda = 701.53278340668; // wavelength of single-mode perturbation
-    const double eta_0  = 0.01*lambda*0.0;
+    const double eta_0  = 0.04*lambda;
     
     const double p_i = 100000.0; // interface pressure
     const double T_0 = 300.0;    // background temperature
@@ -502,19 +502,19 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     rho_v_ref = rho_ref*v_ref;
                     E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
                     
-                    sponge_rate_tot = (pow((gamma*p_ref/rho_ref),0.5))*sponge_rate;
+                    sponge_rate_tot = sponge_rate*300.0; //300.0 is roughly (gamma*p_i/rho_i)^.05 OLD:(pow((gamma*p_ref/rho_ref),0.5))*sponge_rate;
                     if(x[0] < 0.0)
                     {
                         const double erf_start_lo  = double(0.75)*(domain_xlo[0]-d_special_source_box_lo[0]) + d_special_source_box_lo[0]; //center of erf is 3/4 of the way into sponge
-                        const double erf_offset_lo = double(-0.5) * erf((d_special_source_box_lo[0]-erf_start_lo)/(abs(erf_start_lo)*double(0.35))) + double(0.5); //value of erf at start of sponge
-                        xi_b        = double(-0.5) * erf((x[0]-erf_start_lo)/(abs(erf_start_lo)*double(0.35))) + double(0.5) - erf_offset_lo; //subtract value of erf at start of sponge to start xi_b at zero
+                        const double erf_offset_lo = double(-0.5) * erf((d_special_source_box_lo[0]-erf_start_lo)/(abs(erf_start_lo)*double(0.1))) + double(0.5); //value of erf at start of sponge
+                        xi_b        = double(-0.5) * erf((x[0]-erf_start_lo)/(abs(erf_start_lo)*double(0.1))) + double(0.5) - erf_offset_lo; //subtract value of erf at start of sponge to start xi_b at zero
                         // xi_b        = 1.0;
                     }
                     else
                     {
                         const double erf_start_hi = double(0.75)*(domain_xhi[0]-d_special_source_box_hi[0]) + d_special_source_box_hi[0]; //center of erf is 3/4 of the way into sponge
-                        const double erf_offset_hi = double(0.5) * erf((d_special_source_box_hi[0]-erf_start_hi)/(abs(erf_start_hi)*double(0.35))) + double(0.5); //value of erf at start of sponge
-                        xi_b            = double(0.5) * erf((x[0]-erf_start_hi)/(abs(erf_start_hi)*double(0.35))) + double(0.5) - erf_offset_hi; //subtract value of erf at start of sponge to start xi_b at zero
+                        const double erf_offset_hi = double(0.5) * erf((d_special_source_box_hi[0]-erf_start_hi)/(abs(erf_start_hi)*double(0.1))) + double(0.5); //value of erf at start of sponge
+                        xi_b            = double(0.5) * erf((x[0]-erf_start_hi)/(abs(erf_start_hi)*double(0.1))) + double(0.5) - erf_offset_hi; //subtract value of erf at start of sponge to start xi_b at zero
                         // xi_b = 1.0;
                     }
 
