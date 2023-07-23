@@ -6,6 +6,7 @@
 #include "HAMeRS_memory.hpp"
 
 #include "util/refinement_regions_taggers/RefineBox.hpp"
+#include "util/refinement_regions_taggers/RefineCircle.hpp"
 #include "util/refinement_regions_taggers/RefineTriangle.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
@@ -60,6 +61,14 @@ class RefineRegionsTagger
             const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags) const;
         
         /*
+         * Tag cells on a patch for refinement using refine circles.
+         */
+        void
+        tagCellsOnPatchUsingRefineCircles(
+            hier::Patch& patch,
+            const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags) const;
+        
+        /*
          * Tag cells on a patch for refinement using refine triangles.
          */
         void
@@ -88,6 +97,13 @@ class RefineRegionsTagger
         bool d_use_refine_boxes;
         int d_num_refine_boxes;
         std::vector<RefineBox> d_refine_boxes;
+        
+        /*
+         * Refine circles settings.
+         */
+        bool d_use_refine_circles;
+        int d_num_refine_circles;
+        std::vector<RefineCircle> d_refine_circles;
         
         /*
          * Refine triangles settings.
