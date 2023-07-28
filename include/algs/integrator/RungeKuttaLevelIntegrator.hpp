@@ -1251,6 +1251,11 @@ class RungeKuttaLevelIntegrator:
         std::vector<std::vector<double> > d_gamma;
         
         /*
+         * Whether to use flux correction for conservative coarse-fine interface.
+         */
+        bool d_use_flux_correction;
+        
+        /*
          * Number of times of filtering before computing statistics.
          */
         int d_num_filtering_stats;

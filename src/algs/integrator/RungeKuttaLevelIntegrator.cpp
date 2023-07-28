@@ -270,6 +270,7 @@ RungeKuttaLevelIntegrator::RungeKuttaLevelIntegrator(
     d_lag_dt_computation(true),
     d_use_ghosts_for_dt(false),
     d_dt(tbox::MathUtilities<double>::getSignalingNaN()),
+    d_use_flux_correction(true),
     d_flux_is_face(true),
     d_flux_face_registered(false),
     d_flux_side_registered(false),
@@ -2167,20 +2168,23 @@ RungeKuttaLevelIntegrator::standardLevelSynchronization(
     const double sync_time,
     const double old_time)
 {
-    TBOX_ASSERT(hierarchy);
-    
-    std::vector<double> old_times(finest_level - coarsest_level + 1);
-    for (int i = coarsest_level; i <= finest_level; i++)
+    if (false)
     {
-        old_times[i] = old_time;
+        TBOX_ASSERT(hierarchy);
+        
+        std::vector<double> old_times(finest_level - coarsest_level + 1);
+        for (int i = coarsest_level; i <= finest_level; i++)
+        {
+            old_times[i] = old_time;
+        }
+        
+        standardLevelSynchronization(
+            hierarchy,
+            coarsest_level,
+            finest_level,
+            sync_time,
+            old_times);
     }
-    
-    standardLevelSynchronization(
-        hierarchy,
-        coarsest_level,
-        finest_level,
-        sync_time,
-        old_times);
 }
 
 
@@ -2192,59 +2196,62 @@ RungeKuttaLevelIntegrator::standardLevelSynchronization(
     const double sync_time,
     const std::vector<double>& old_times)
 {
-    TBOX_ASSERT(hierarchy);
-    TBOX_ASSERT((coarsest_level >= 0)
-                && (coarsest_level < finest_level)
-                && (finest_level <= hierarchy->getFinestLevelNumber()));
-    TBOX_ASSERT(static_cast<int>(old_times.size()) >= finest_level);
+    if (false)
+    {
+        TBOX_ASSERT(hierarchy);
+        TBOX_ASSERT((coarsest_level >= 0)
+                    && (coarsest_level < finest_level)
+                    && (finest_level <= hierarchy->getFinestLevelNumber()));
+        TBOX_ASSERT(static_cast<int>(old_times.size()) >= finest_level);
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    for (int ln = coarsest_level; ln < finest_level; ln++)
-    {
-        TBOX_ASSERT(hierarchy->getPatchLevel(ln));
-        TBOX_ASSERT(sync_time >= old_times[ln]);
-    }
-#endif
-    TBOX_ASSERT(hierarchy->getPatchLevel(finest_level));
-    
-    t_std_level_sync->start();
-    
-    for (int fine_ln = finest_level; fine_ln > coarsest_level; --fine_ln)
-    {
-        const int coarse_ln = fine_ln - 1;
-        
-        HAMERS_SHARED_PTR<hier::PatchLevel> fine_level(
-           hierarchy->getPatchLevel(fine_ln));
-        
-        HAMERS_SHARED_PTR<hier::PatchLevel> coarse_level(
-           hierarchy->getPatchLevel(coarse_ln));
-        
-        synchronizeLevelWithCoarser(
-            fine_level,
-            coarse_level,
-            sync_time,
-            old_times[coarse_ln]);
-        
-        fine_level->deallocatePatchData(d_fluxsum_data);
-        fine_level->deallocatePatchData(d_flux_var_data);
-        fine_level->deallocatePatchData(d_source_var_data);
-        
-        if (coarse_ln > coarsest_level)
+        for (int ln = coarsest_level; ln < finest_level; ln++)
         {
-            coarse_level->deallocatePatchData(d_flux_var_data);
-            coarse_level->deallocatePatchData(d_source_var_data);
+            TBOX_ASSERT(hierarchy->getPatchLevel(ln));
+            TBOX_ASSERT(sync_time >= old_times[ln]);
         }
-        else
+#endif
+        TBOX_ASSERT(hierarchy->getPatchLevel(finest_level));
+        
+        t_std_level_sync->start();
+        
+        for (int fine_ln = finest_level; fine_ln > coarsest_level; --fine_ln)
         {
-            if (coarsest_level == 0)
+            const int coarse_ln = fine_ln - 1;
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> fine_level(
+               hierarchy->getPatchLevel(fine_ln));
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> coarse_level(
+               hierarchy->getPatchLevel(coarse_ln));
+            
+            synchronizeLevelWithCoarser(
+                fine_level,
+                coarse_level,
+                sync_time,
+                old_times[coarse_ln]);
+            
+            fine_level->deallocatePatchData(d_fluxsum_data);
+            fine_level->deallocatePatchData(d_flux_var_data);
+            fine_level->deallocatePatchData(d_source_var_data);
+            
+            if (coarse_ln > coarsest_level)
             {
                 coarse_level->deallocatePatchData(d_flux_var_data);
-                d_have_flux_on_level_zero = false;
                 coarse_level->deallocatePatchData(d_source_var_data);
             }
+            else
+            {
+                if (coarsest_level == 0)
+                {
+                    coarse_level->deallocatePatchData(d_flux_var_data);
+                    d_have_flux_on_level_zero = false;
+                    coarse_level->deallocatePatchData(d_source_var_data);
+                }
+            }
         }
+        
+        t_std_level_sync->stop();
     }
-    
-    t_std_level_sync->stop();
 }
 
 
@@ -2364,58 +2371,62 @@ RungeKuttaLevelIntegrator::synchronizeLevelWithCoarser(
     TBOX_ASSERT_OBJDIM_EQUALITY2(*fine_level, *coarse_level);
     TBOX_ASSERT(sync_time > coarse_sim_time);
     
-    /*
-     * Coarsen flux integrals around fine patch boundaries to coarser level and replace coarse flux
-     * information where appropriate. NULL patch model is passed in to avoid over complicating coarsen
-     * process; i.e. patch model is not needed in coarsening of flux integrals.
-     */
+    HAMERS_SHARED_PTR<xfer::CoarsenSchedule> sched;
     
-    t_coarsen_fluxsum_create->start();
-    HAMERS_SHARED_PTR<xfer::CoarsenSchedule> sched(
-        d_coarsen_fluxsum->createSchedule(
+    if (d_use_flux_correction)
+    {
+        /*
+         * Coarsen flux integrals around fine patch boundaries to coarser level and replace coarse flux
+         * information where appropriate. NULL patch model is passed in to avoid over complicating coarsen
+         * process; i.e. patch model is not needed in coarsening of flux integrals.
+         */
+        
+        t_coarsen_fluxsum_create->start();
+        sched = d_coarsen_fluxsum->createSchedule(
             coarse_level,
             fine_level,
-            0));
-    t_coarsen_fluxsum_create->stop();
-    
-    t_coarsen_fluxsum_comm->start();
-    sched->coarsenData();
-    t_coarsen_fluxsum_comm->stop();
-    
-    /*
-     * Repeat conservative difference on coarser level.
-     */
-    coarse_level->allocatePatchData(d_saved_var_scratch_data, coarse_sim_time);
-    coarse_level->setTime(coarse_sim_time, d_flux_var_data);
-    
-    d_patch_strategy->setDataContext(d_scratch);
-    
-    t_advance_bdry_fill_comm->start();
-    d_bdry_sched_advance[coarse_level->getLevelNumber()]->
-        fillData(coarse_sim_time);
-    t_advance_bdry_fill_comm->stop();
-    
-    const double reflux_dt = sync_time - coarse_sim_time;
-    
-    for (hier::PatchLevel::iterator ip(coarse_level->begin());
-         ip != coarse_level->end();
-         ip++)
-    {
-        const HAMERS_SHARED_PTR<hier::Patch>& patch = *ip;
+            0);
+        t_coarsen_fluxsum_create->stop();
         
-        patch->allocatePatchData(d_temp_var_scratch_data, coarse_sim_time);
+        t_coarsen_fluxsum_comm->start();
+        sched->coarsenData();
+        t_coarsen_fluxsum_comm->stop();
+        
+        /*
+         * Repeat conservative difference on coarser level.
+         */
+        coarse_level->allocatePatchData(d_saved_var_scratch_data, coarse_sim_time);
+        coarse_level->setTime(coarse_sim_time, d_flux_var_data);
+        
+        d_patch_strategy->setDataContext(d_scratch);
+        
+        t_advance_bdry_fill_comm->start();
+        d_bdry_sched_advance[coarse_level->getLevelNumber()]->
+            fillData(coarse_sim_time);
+        t_advance_bdry_fill_comm->stop();
+        
+        const double reflux_dt = sync_time - coarse_sim_time;
+        
+        for (hier::PatchLevel::iterator ip(coarse_level->begin());
+             ip != coarse_level->end();
+             ip++)
+        {
+            const HAMERS_SHARED_PTR<hier::Patch>& patch = *ip;
             
-        d_patch_strategy->synchronizeFluxes(*patch,
-           coarse_sim_time,
-           reflux_dt);
-        patch->deallocatePatchData(d_temp_var_scratch_data);
+            patch->allocatePatchData(d_temp_var_scratch_data, coarse_sim_time);
+                
+            d_patch_strategy->synchronizeFluxes(*patch,
+               coarse_sim_time,
+               reflux_dt);
+            patch->deallocatePatchData(d_temp_var_scratch_data);
+        }
+        
+        d_patch_strategy->clearDataContext();
+        
+        copyTimeDependentData(coarse_level, d_scratch, d_new);
+        
+        coarse_level->deallocatePatchData(d_saved_var_scratch_data);
     }
-    
-    d_patch_strategy->clearDataContext();
-    
-    copyTimeDependentData(coarse_level, d_scratch, d_new);
-    
-    coarse_level->deallocatePatchData(d_saved_var_scratch_data);
     
     /*
      * Coarsen time-dependent data from fine patch interiors to coarse patches.
@@ -3790,6 +3801,8 @@ RungeKuttaLevelIntegrator::putToRestart(
         
         RK_db->putDoubleVector(gamma_array_name, gamma_array);
     }
+    
+    RK_db->putBool("use_flux_correction", d_use_flux_correction);
 }
 
 
@@ -4136,6 +4149,8 @@ RungeKuttaLevelIntegrator::getFromInput(
             d_gamma[2][1] = 0.0;
             d_gamma[2][2] = 2.0/3.0;
         }
+        
+        d_use_flux_correction = input_db->getBoolWithDefault("use_flux_correction", true);
     }
     else if (input_db)
     {
@@ -4167,6 +4182,8 @@ RungeKuttaLevelIntegrator::getFromInput(
             d_distinguish_mpi_reduction_costs =
                 input_db->getBoolWithDefault("DEV_distinguish_mpi_reduction_costs",
                     d_distinguish_mpi_reduction_costs);
+            
+            d_use_flux_correction = input_db->getBoolWithDefault("use_flux_correction", true);
         }
         
         d_num_filtering_stats = input_db->getIntegerWithDefault("num_filtering_stats", 0); 
@@ -4235,6 +4252,8 @@ RungeKuttaLevelIntegrator::getFromRestart()
         d_beta[sn] = RK_db->getDoubleVector(beta_array_name);
         d_gamma[sn] = RK_db->getDoubleVector(gamma_array_name);
     }
+    
+    d_use_flux_correction = RK_db->getBool("use_flux_correction");
 }
 
 
