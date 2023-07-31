@@ -3,6 +3,7 @@
 set(nonconservative_diffusive_flux_divergence_operators_source_files
     NonconservativeDiffusiveFluxDivergenceOperatorManager.cpp
     NonconservativeDiffusiveFluxDivergenceOperator.cpp
+    NonconservativeDiffusiveFluxDivergenceOperatorSecondOrder.cpp
     NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder.cpp
     NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder.cpp
     NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder.cpp

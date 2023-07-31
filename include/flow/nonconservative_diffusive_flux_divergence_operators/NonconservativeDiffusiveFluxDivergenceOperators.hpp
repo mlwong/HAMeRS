@@ -1,6 +1,7 @@
 #ifndef NONCONSERVATIVE_DIFFUSIVE_FLUX_DIVERGENCE_OPERATORS_HPP
 #define NONCONSERVATIVE_DIFFUSIVE_FLUX_DIVERGENCE_OPERATORS_HPP
 
+#include "flow/nonconservative_diffusive_flux_divergence_operators/NonconservativeDiffusiveFluxDivergenceOperatorSecondOrder.hpp"
 #include "flow/nonconservative_diffusive_flux_divergence_operators/NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder.hpp"
 #include "flow/nonconservative_diffusive_flux_divergence_operators/NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder.hpp"
 #include "flow/nonconservative_diffusive_flux_divergence_operators/NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder.hpp"
@@ -11,7 +12,8 @@
 
 namespace NONCONSERVATIVE_DIFFUSIVE_FLUX_DIVERGENCE_OPERATOR
 {
-    enum TYPE { SIXTH_ORDER,
+    enum TYPE { SECOND_ORDER,
+                SIXTH_ORDER,
                 EIGHTH_ORDER,
                 TENTH_ORDER,
                 TWELFTH_ORDER };
@@ -29,6 +31,7 @@ inline std::ostream& operator<<(
     if (strings.size() == 0)
     {
 #define INSERT_ELEMENT(p) strings[p] = #p
+        INSERT_ELEMENT(NONCONSERVATIVE_DIFFUSIVE_FLUX_DIVERGENCE_OPERATOR::SECOND_ORDER);
         INSERT_ELEMENT(NONCONSERVATIVE_DIFFUSIVE_FLUX_DIVERGENCE_OPERATOR::SIXTH_ORDER);
         INSERT_ELEMENT(NONCONSERVATIVE_DIFFUSIVE_FLUX_DIVERGENCE_OPERATOR::EIGHTH_ORDER);
         INSERT_ELEMENT(NONCONSERVATIVE_DIFFUSIVE_FLUX_DIVERGENCE_OPERATOR::TENTH_ORDER);
