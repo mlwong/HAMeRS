@@ -137,6 +137,151 @@ RefineRegionsTagger::RefineRegionsTagger(
             d_num_refine_boxes = static_cast<int>(d_refine_boxes.size());
             
             /*
+             * Get the refine circles in the sequence of 'refine_circle_0', 'refine_circle_1', ...
+             */
+            
+            d_use_refine_circles = false;
+            int ci = 0;
+            bool refine_circle_exists = false;
+            std::string refine_circle_name = "refine_circle_" + std::to_string(ci);
+            refine_circle_exists = refine_regions_tagger_db->keyExists(refine_circle_name);
+            
+            if (refine_circle_exists)
+            {
+                d_use_refine_circles = true;
+            }
+            
+            // Check whether the problem is one-dimensional.
+            if (d_dim == tbox::Dimension(1))
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Refine circles are not allowed for one-dimensional problem."
+                    << std::endl);
+            }
+            
+            while (refine_circle_exists)
+            {
+                std::shared_ptr<tbox::Database> refine_circle_db = refine_regions_tagger_db->getDatabase(refine_circle_name);
+                
+                // Get the center and radius of the refine circle.
+                std::vector<Real> center_coord;
+                Real radius = Real(0);
+                
+                if (refine_circle_db->keyExists("center_coord"))
+                {
+                    center_coord = refine_circle_db->getRealVector("center_coord");
+                }
+                else
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": "
+                        << "Key data 'center_coord' not found for '" << refine_circle_name << "' in input database."
+                        << std::endl);
+                }
+                
+                if (refine_circle_db->keyExists("radius"))
+                {
+                    radius = refine_circle_db->getDouble("radius");
+                }
+                else
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": "
+                        << "Key data 'radius' not found for '" << refine_circle_name << "' in input database."
+                        << std::endl);
+                }
+                
+                // Check the size of the vector.
+                if (static_cast<int>(center_coord.size()) != d_dim.getValue())
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": "
+                        << "The size of the vector 'center_coord' for '" << refine_circle_name << "' is not correct."
+                        << std::endl);
+                }
+                
+                // Check that the radius is positive.
+                if (radius <= 0)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": "
+                        << "The radius is not positive for '" << refine_circle_name << "'."
+                        << std::endl);
+                }
+                
+                // Get the number of refine levels.
+                int num_refine_levels = 0;
+                
+                if (refine_circle_db->keyExists("num_refine_levels"))
+                {
+                    num_refine_levels = refine_circle_db->getInteger("num_refine_levels");
+                }
+                else
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": "
+                        << "Key data 'num_refine_levels' not found for '" << refine_circle_name << "' in input database."
+                        << std::endl);
+                }
+                
+                // Check that the number of refine levels is positive.
+                if (num_refine_levels <= 0)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": "
+                        << "The number of refine levels is not positive for '" << refine_circle_name << "'."
+                        << std::endl);
+                }
+                
+                // Get the direction of the refine circle if the problem is three-dimensional.
+                DIRECTION::TYPE direction = DIRECTION::Z_DIRECTION;
+                if (d_dim == tbox::Dimension(3))
+                {
+                    if (refine_circle_db->keyExists("direction"))
+                    {
+                        const std::string direction_str = refine_circle_db->getString("direction");
+                        if (direction_str == "x" || direction_str == "X")
+                        {
+                            direction = DIRECTION::X_DIRECTION;
+                        }
+                        else if (direction_str == "y" || direction_str == "Y")
+                        {
+                            direction = DIRECTION::Y_DIRECTION;
+                        }
+                        else if (direction_str == "z" || direction_str == "Z")
+                        {
+                            direction = DIRECTION::Z_DIRECTION;
+                        }
+                        else
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Unknown direction '" << direction_str << "' for '" << refine_circle_name << "'."
+                                << std::endl);
+                        }
+                    }
+                    else
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": "
+                            << "Key data 'direction' not found for '" << refine_circle_name << "' in input database."
+                            << std::endl);
+                    }
+                }
+                
+                // Add the circle to the refine circles.
+                d_refine_circles.push_back(RefineCircle(center_coord, radius, direction, num_refine_levels));
+                
+                // Search for next refine circle.
+                ci++;
+                refine_circle_name = "refine_circle_" + std::to_string(ci);
+                refine_circle_exists = refine_regions_tagger_db->keyExists(refine_circle_name);
+            }
+            
+            d_num_refine_circles = static_cast<int>(d_refine_circles.size());
+            
+            /*
              * Get the refine triangles in the sequence of 'refine_triangle_0', 'refine_triangle_1', ...
              */
             
@@ -156,7 +301,7 @@ RefineRegionsTagger::RefineRegionsTagger(
             {
                 TBOX_ERROR(d_object_name
                     << ": "
-                    << "Refine triangles are not allowed in one-dimensional problem."
+                    << "Refine triangles are not allowed for one-dimensional problem."
                     << std::endl);
             }
             
@@ -245,9 +390,18 @@ RefineRegionsTagger::RefineRegionsTagger(
                         << std::endl);
                 }
                 
+                // Check the number of refine levels is positive.
+                if (num_refine_levels <= 0)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": "
+                        << "The number of refine levels is not positive for '" << refine_triangle_name << "'."
+                        << std::endl);
+                }
+                
                 // Get the direction if the problem is three-dimensional.
                 
-                DIRECTION::TYPE direction = DIRECTION::X_DIRECTION;
+                DIRECTION::TYPE direction = DIRECTION::Z_DIRECTION;
                 if (d_dim == tbox::Dimension(3))
                 {
                     if (refine_triangle_db->keyExists("direction"))
@@ -323,19 +477,10 @@ RefineRegionsTagger::RefineRegionsTagger(
                     }
                 }
                 
-                // Check the number of refine levels is positive.
-                if (num_refine_levels <= 0)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": "
-                        << "The number of refine levels is not positive for '" << refine_triangle_name << "'."
-                        << std::endl);
-                }
-                
                 // Add the triangle to the refine triangles.
                 d_refine_triangles.push_back(RefineTriangle(point_coord_0, point_coord_1, point_coord_2, direction, num_refine_levels));
                 
-                // Search for next refine trapezoid.
+                // Search for next refine triangle.
                 ti++;
                 refine_triangle_name = "refine_triangle_" + std::to_string(ti);
                 refine_triangle_exists = refine_regions_tagger_db->keyExists(refine_triangle_name);
@@ -384,6 +529,37 @@ RefineRegionsTagger::putToRestart(const HAMERS_SHARED_PTR<tbox::Database>& resta
     }
     
     /*
+     * Put the refine circles into the restart database.
+     */
+    
+    restart_db->putBool("d_use_refine_circles", d_use_refine_circles);
+    restart_db->putInteger("d_num_refine_circles", d_num_refine_circles);
+    for (int ic = 0; ic < static_cast<int>(d_refine_circles.size()); ic++)
+    {
+        std::string refine_circle_name = "refine_circle_" + std::to_string(ic);
+        std::shared_ptr<tbox::Database> refine_circle_db = restart_db->putDatabase(refine_circle_name);
+        
+        refine_circle_db->putRealVector("center_coord", d_refine_circles[ic].center_coord);
+        refine_circle_db->putReal("radius", d_refine_circles[ic].radius);
+        
+        const DIRECTION::TYPE& direction = d_refine_circles[ic].direction;
+        if (direction == DIRECTION::X_DIRECTION)
+        {
+            refine_circle_db->putString("direction", "x");
+        }
+        else if (direction == DIRECTION::Y_DIRECTION)
+        {
+            refine_circle_db->putString("direction", "y");
+        }
+        else if (direction == DIRECTION::Z_DIRECTION)
+        {
+            refine_circle_db->putString("direction", "z");
+        }
+        
+        refine_circle_db->putInteger("num_refine_levels", d_refine_circles[ic].num_refine_levels);
+    }
+    
+    /*
      * Put the refine triangles into the restart database.
      */
     
@@ -411,6 +587,7 @@ RefineRegionsTagger::putToRestart(const HAMERS_SHARED_PTR<tbox::Database>& resta
         {
             refine_triangle_db->putString("direction", "z");
         }
+        
         refine_triangle_db->putInteger("num_refine_levels", d_refine_triangles[it].num_refine_levels);
     }
 }
@@ -443,6 +620,50 @@ RefineRegionsTagger::getFromRestart(const HAMERS_SHARED_PTR<tbox::Database>& res
         const int num_refine_levels = refine_box_db->getInteger("num_refine_levels");
         
         d_refine_boxes.push_back(RefineBox(x_lo, x_hi, num_refine_levels));
+    }
+    
+    /*
+     * Get the refine circles from the restart database.
+     */
+    
+    d_use_refine_circles = restart_db->getBool("d_use_refine_circles");
+    d_num_refine_circles = restart_db->getInteger("d_num_refine_circles");
+    for (int ic = 0; ic < d_num_refine_circles; ic++)
+    {
+        std::string refine_circle_name = "refine_circle_" + std::to_string(ic);
+        std::shared_ptr<tbox::Database> refine_circle_db = restart_db->getDatabase(refine_circle_name);
+        
+        // Get the coordinates of the center of the refine circle.
+        std::vector<Real> center_coord;
+        center_coord = refine_circle_db->getRealVector("center_coord");
+        const Real radius = refine_circle_db->getDouble("radius");
+        
+        // Get the direction of the refine circle.
+        std::string direction_str = refine_circle_db->getString("direction");
+        DIRECTION::TYPE direction = DIRECTION::Z_DIRECTION;
+        if (direction_str == "x")
+        {
+            direction = DIRECTION::X_DIRECTION;
+        }
+        else if (direction_str == "y")
+        {
+            direction = DIRECTION::Y_DIRECTION;
+        }
+        else if (direction_str == "z")
+        {
+            direction = DIRECTION::Z_DIRECTION;
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": RefineRegionsTagger::getFromRestart()\n"
+                << "Unknown direction of refine circle encountered in restart file."
+                << std::endl);
+        }
+        
+        const int num_refine_levels = refine_circle_db->getInteger("num_refine_levels");
+        
+        d_refine_circles.push_back(RefineCircle(center_coord, radius, direction, num_refine_levels));
     }
     
     /*
@@ -483,7 +704,7 @@ RefineRegionsTagger::getFromRestart(const HAMERS_SHARED_PTR<tbox::Database>& res
         {
             TBOX_ERROR(d_object_name
                 << ": RefineRegionsTagger::getFromRestart()\n"
-                << "Unknown direction of refine triangle encountered in input file."
+                << "Unknown direction of refine triangle encountered in restart file."
                 << std::endl);
         }
         
@@ -509,6 +730,11 @@ RefineRegionsTagger::tagCellsOnPatch(
     if (d_use_refine_boxes)
     {
         tagCellsOnPatchUsingRefineBoxes(patch, tags);
+    }
+    
+    if (d_use_refine_circles)
+    {
+        tagCellsOnPatchUsingRefineCircles(patch, tags);
     }
     
     if (d_use_refine_triangles)
@@ -691,6 +917,222 @@ RefineRegionsTagger::tagCellsOnPatchUsingRefineBoxes(
                                 x[2] >= refine_box_x_lo_2 && x[2] <= refine_box_x_hi_2)
                             {
                                 tag_ptr[idx_cell] = 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+/*
+ * Tag cells on a patch for refinement using refine circles.
+ */
+void
+RefineRegionsTagger::tagCellsOnPatchUsingRefineCircles(
+    hier::Patch& patch,
+    const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags) const
+{
+    // Get the patch level and path dimensions.
+    const int patch_level = patch.getPatchLevelNumber();
+    
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+            patch.getPatchGeometry()));
+            
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(patch_geom);
+#endif
+    
+    const double* const dx = patch_geom->getDx();
+    const double* const patch_xlo = patch_geom->getXLower();
+    
+    // Get the dimensions of box that covers the interior of Patch.
+    hier::Box patch_box = patch.getBox();
+    const hier::IntVector patch_dims = patch_box.numberCells();
+    
+    // Get the pointer to the tags.
+    int* tag_ptr = tags->getPointer(0);
+    
+    const Real half = Real(1)/Real(2);
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        // One-dimensional problem is not supported.
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Cannot tag cells on patch for one-dimensional problem using refine triangles."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const int patch_dim_0 = patch_dims[0];
+        const int patch_dim_1 = patch_dims[1];
+        
+        const Real patch_xlo_0 = Real(patch_xlo[0]);
+        const Real patch_xlo_1 = Real(patch_xlo[1]);
+        
+        const Real dx_0 = Real(dx[0]);
+        const Real dx_1 = Real(dx[1]);
+        
+        // Loop over the refine circles to tag cells for refinement.
+        for (int ic = 0; ic < static_cast<int>(d_refine_circles.size()); ic++)
+        {
+            // Get the center and radius of the refine circle.
+            const std::vector<Real>& center_coord = d_refine_circles[ic].center_coord;
+            const Real radius = d_refine_circles[ic].radius;
+            
+            const Real center_coord_0 = center_coord[0];
+            const Real center_coord_1 = center_coord[1];
+            
+            // Get the number of refine levels.
+            const int num_refine_levels = d_refine_circles[ic].num_refine_levels;
+            
+            if (patch_level < num_refine_levels)
+            {
+                for (int j = 0; j < patch_dim_1; j++)
+                {
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = 0; i < patch_dim_0; i++)
+                    {
+                        // Compute index into linear data array.
+                        int idx_cell = i + j*patch_dim_0;
+                        
+                        // Compute the coordinates.
+                        Real x[2];
+                        x[0] = patch_xlo_0 + (Real(i) + half)*dx_0;
+                        x[1] = patch_xlo_1 + (Real(j) + half)*dx_1;
+                        
+                        const Real x_c_0 = x[0] - center_coord_0;
+                        const Real x_c_1 = x[1] - center_coord_1;
+                        
+                        if (x_c_0*x_c_0 + x_c_1*x_c_1 <= radius*radius)
+                        {
+                            tag_ptr[idx_cell] = 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int patch_dim_0 = patch_dims[0];
+        const int patch_dim_1 = patch_dims[1];
+        const int patch_dim_2 = patch_dims[2];
+        
+        const Real patch_xlo_0 = Real(patch_xlo[0]);
+        const Real patch_xlo_1 = Real(patch_xlo[1]);
+        const Real patch_xlo_2 = Real(patch_xlo[2]);
+        
+        const Real dx_0 = Real(dx[0]);
+        const Real dx_1 = Real(dx[1]);
+        const Real dx_2 = Real(dx[2]);
+        
+        // Loop over the refine circles to tag cells for refinement.
+        for (int ic = 0; ic < static_cast<int>(d_refine_circles.size()); ic++)
+        {
+            // Get the center and radius of the refine circle.
+            const std::vector<Real>& center_coord = d_refine_circles[ic].center_coord;
+            const Real radius = d_refine_circles[ic].radius;
+            
+            const Real center_coord_0 = center_coord[0];
+            const Real center_coord_1 = center_coord[1];
+            const Real center_coord_2 = center_coord[2];
+            
+            // Get the number of refine levels.
+            const int num_refine_levels = d_refine_circles[ic].num_refine_levels;
+            
+            if (patch_level < num_refine_levels)
+            {
+                if (d_refine_circles[ic].direction == DIRECTION::TYPE::X_DIRECTION)
+                {
+                    for (int k = 0; k < patch_dim_2; k++)
+                    {
+                        for (int j = 0; j < patch_dim_1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = 0; i < patch_dim_0; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dim_0 + k*patch_dim_0*patch_dim_1;
+                                
+                                // Compute the coordinates.
+                                Real x[3];
+                                x[0] = patch_xlo_0 + (Real(i) + half)*dx_0;
+                                x[1] = patch_xlo_1 + (Real(j) + half)*dx_1;
+                                x[2] = patch_xlo_2 + (Real(k) + half)*dx_2;
+                                
+                                // const Real x_c_0 = x[0] - center_coord_0;
+                                const Real x_c_1 = x[1] - center_coord_1;
+                                const Real x_c_2 = x[2] - center_coord_2;
+                                
+                                if (x_c_1*x_c_1 + x_c_2*x_c_2 <= radius*radius)
+                                {
+                                    tag_ptr[idx_cell] = 1;
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (d_refine_circles[ic].direction == DIRECTION::TYPE::Y_DIRECTION)
+                {
+                    for (int k = 0; k < patch_dim_2; k++)
+                    {
+                        for (int j = 0; j < patch_dim_1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = 0; i < patch_dim_0; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dim_0 + k*patch_dim_0*patch_dim_1;
+                                
+                                // Compute the coordinates.
+                                Real x[3];
+                                x[0] = patch_xlo_0 + (Real(i) + half)*dx_0;
+                                x[1] = patch_xlo_1 + (Real(j) + half)*dx_1;
+                                x[2] = patch_xlo_2 + (Real(k) + half)*dx_2;
+                                
+                                const Real x_c_0 = x[0] - center_coord_0;
+                                // const Real x_c_1 = x[1] - center_coord_1;
+                                const Real x_c_2 = x[2] - center_coord_2;
+                                
+                                if (x_c_0*x_c_0 + x_c_2*x_c_2 <= radius*radius)
+                                {
+                                    tag_ptr[idx_cell] = 1;
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (d_refine_circles[ic].direction == DIRECTION::TYPE::Z_DIRECTION)
+                {
+                    for (int k = 0; k < patch_dim_2; k++)
+                    {
+                        for (int j = 0; j < patch_dim_1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = 0; i < patch_dim_0; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dim_0 + k*patch_dim_0*patch_dim_1;
+                                
+                                // Compute the coordinates.
+                                Real x[3];
+                                x[0] = patch_xlo_0 + (Real(i) + half)*dx_0;
+                                x[1] = patch_xlo_1 + (Real(j) + half)*dx_1;
+                                x[2] = patch_xlo_2 + (Real(k) + half)*dx_2;
+                                
+                                const Real x_c_0 = x[0] - center_coord_0;
+                                const Real x_c_1 = x[1] - center_coord_1;
+                                // const Real x_c_2 = x[2] - center_coord_2;
+                                
+                                if (x_c_0*x_c_0 + x_c_1*x_c_1 <= radius*radius)
+                                {
+                                    tag_ptr[idx_cell] = 1;
+                                }
                             }
                         }
                     }
