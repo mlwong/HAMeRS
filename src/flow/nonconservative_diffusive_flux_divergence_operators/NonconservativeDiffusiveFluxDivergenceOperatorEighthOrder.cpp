@@ -229,7 +229,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativ
                     const int num_subghosts_1_data = num_subghosts_data[1];
                     const int subghostcell_dim_0_data = subghostcell_dims_data[0];
                     
-                    for (int j = -3; j < interior_dim_1 + 3; j++)
+                    for (int j = -4; j < interior_dim_1 + 4; j++)
                     {
                         HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
@@ -339,9 +339,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativ
                     const int subghostcell_dim_0_data = subghostcell_dims_data[0];
                     const int subghostcell_dim_1_data = subghostcell_dims_data[1];
                     
-                    for (int k = -3; k < interior_dim_2 + 3; k++)
+                    for (int k = -4; k < interior_dim_2 + 4; k++)
                     {
-                        for (int j = -3; j < interior_dim_1 + 3; j++)
+                        for (int j = -4; j < interior_dim_1 + 4; j++)
                         {
                             HAMERS_PRAGMA_SIMD
                             for (int i = 0; i < interior_dim_0; i++)
@@ -524,7 +524,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativ
                     for (int j = 0; j < interior_dim_1; j++)
                     {
                         HAMERS_PRAGMA_SIMD
-                        for (int i = -3; i < interior_dim_0 + 3; i++)
+                        for (int i = -4; i < interior_dim_0 + 4; i++)
                         {
                             // Compute the linear indices.
                             const int idx = (i + num_diff_ghosts_0) +
@@ -631,12 +631,12 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativ
                     const int subghostcell_dim_0_data = subghostcell_dims_data[0];
                     const int subghostcell_dim_1_data = subghostcell_dims_data[1];
                     
-                    for (int k = -3; k < interior_dim_2 + 3; k++)
+                    for (int k = -4; k < interior_dim_2 + 4; k++)
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
                             HAMERS_PRAGMA_SIMD
-                            for (int i = -3; i < interior_dim_0 + 3; i++)
+                            for (int i = -4; i < interior_dim_0 + 4; i++)
                             {
                                 // Compute the linear indices.
                                 const int idx = (i + num_diff_ghosts_0) +
@@ -828,10 +828,10 @@ NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder::computeFirstDerivativ
                     
                     for (int k = 0; k < interior_dim_2; k++)
                     {
-                        for (int j = -3; j < interior_dim_1 + 3; j++)
+                        for (int j = -4; j < interior_dim_1 + 4; j++)
                         {
                             HAMERS_PRAGMA_SIMD
-                            for (int i = -3; i < interior_dim_0 + 3; i++)
+                            for (int i = -4; i < interior_dim_0 + 4; i++)
                             {
                                 // Compute the linear indices.
                                 const int idx = (i + num_diff_ghosts_0) +
