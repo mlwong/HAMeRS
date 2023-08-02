@@ -2,6 +2,7 @@
 
 #include "HAMeRS_memory.hpp"
 
+#include "algs/integrator/TimeRefinementIntegrator.hpp"
 #include "algs/integrator/ExtendedTagAndInitialize.hpp"
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "apps/Euler/Euler.hpp"
@@ -31,7 +32,7 @@
 
 // Headers for major algorithm/data structure objects
 
-#include "SAMRAI/algs/TimeRefinementIntegrator.h"
+// #include "SAMRAI/algs/TimeRefinementIntegrator.h"
 #include "SAMRAI/algs/TimeRefinementLevelStrategy.h"
 // #include "SAMRAI/appu/VisItDataWriter.h"
 #include "SAMRAI/geom/CartesianGridGeometry.h"
@@ -81,7 +82,7 @@ using namespace SAMRAI;
  * A single overarching algorithm object drives the time integration
  * and adaptive gridding processes:
  *
- *    algs::TimeRefinementIntegrator - Coordinates time integration and
+ *    TimeRefinementIntegrator - Coordinates time integration and
  *       adaptive gridding procedures for the various levels
  *       in the AMR patch hierarchy.  Local time refinement is
  *       employed during hierarchy integration; i.e., finer
