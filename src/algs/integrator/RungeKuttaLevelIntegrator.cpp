@@ -2588,14 +2588,15 @@ RungeKuttaLevelIntegrator::resetDataToPreadvanceState(
  *             CURRENT index is added to d_new_patch_init_data.
  *
  * NO_FILL:
- *             Only one time level of data is stored and no scratch space is used. Data may be set
+ *             Two time levels of data are stored and a scratch space is used. Data may be set
  *             and manipulated at will in user routines. Data (including ghost values) is never
  *             touched outside of user routines.
  *
- *             Two factories are needed: CURRENT, SCRATCH.
+ *             Three factories are needed: SCRATCH, CURRENT, NEW.
  *
+ *             SCRATCH index is added to d_saved_var_scratch_data.
  *             CURRENT index is added to d_new_patch_init_data.
- *             SCRATCH index is needed only for temporary work space to fill new patch levels.
+ *             NEW index is added to d_new_time_dep_data.
  *
  * FLUX:
  *             One factory is needed: SCRATCH.
@@ -2861,12 +2862,19 @@ RungeKuttaLevelIntegrator::registerVariable(
                 d_current,
                 ghosts);
             
+            int new_id = variable_db->registerVariableAndContext(
+                var,
+                d_new,
+                ghosts);
+            
             int scr_id = variable_db->registerVariableAndContext(
                 var,
                 d_scratch,
                 ghosts);
             
             d_new_patch_init_data.setFlag(cur_id);
+            
+            d_new_time_dep_data.setFlag(new_id);
             
             d_saved_var_scratch_data.setFlag(scr_id);
             
