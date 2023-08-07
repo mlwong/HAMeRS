@@ -64,6 +64,13 @@ EulerInitialConditions::initializeDataOnPatch(
         hier::Box patch_box = patch.getBox();
         const hier::IntVector patch_dims = patch_box.numberCells();
         
+        // Get the numbers of ghost cells.
+        const hier::IntVector num_ghosts_cons_var = conservative_variables[0]->getGhostCellWidth();
+        
+        // Get the dimensions of the ghost cell boxes.
+        const hier::Box ghost_box_cons_var = conservative_variables[0]->getGhostBox();
+        const hier::IntVector ghostcell_dims_cons_var = ghost_box_cons_var.numberCells();
+        
         /*
          * Initialize data for a 2D density wave advection problem.
          */
@@ -100,12 +107,13 @@ EulerInitialConditions::initializeDataOnPatch(
                 p_inf   = d_initial_conditions_db->getReal("p_inf");
             }
             
-            for (int j = 0; j < patch_dims[1]; j++)
+            for (int j = -num_ghosts_cons_var[1]; j < patch_dims[1] + num_ghosts_cons_var[1]; j++)
             {
-                for (int i = 0; i < patch_dims[0]; i++)
+                for (int i = -num_ghosts_cons_var[0]; i < patch_dims[0] + num_ghosts_cons_var[0]; i++)
                 {
                     // Compute index into linear data array.
-                    int idx_cell = i + j*patch_dims[0];
+                    int idx_cell = (i + num_ghosts_cons_var[0]) +
+                        (j + num_ghosts_cons_var[1])*ghostcell_dims_cons_var[0];
                     
                     rho[idx_cell]   = rho_inf;
                     rho_u[idx_cell] = rho_inf*u_inf;
@@ -167,12 +175,13 @@ EulerInitialConditions::initializeDataOnPatch(
             const Real rho_inf = Z_rho_1_inf + Z_rho_2_inf;
             const Real gamma_m = Real(1)/(Z_1_inf/(gamma_1 - Real(1)) + Z_2_inf/(gamma_2 - Real(1))) + Real(1);
             
-            for (int j = 0; j < patch_dims[1]; j++)
+            for (int j = -num_ghosts_cons_var[1]; j < patch_dims[1] + num_ghosts_cons_var[1]; j++)
             {
-                for (int i = 0; i < patch_dims[0]; i++)
+                for (int i = -num_ghosts_cons_var[0]; i < patch_dims[0] + num_ghosts_cons_var[0]; i++)
                 {
                     // Compute index into linear data array.
-                    int idx_cell = i + j*patch_dims[0];
+                    int idx_cell = (i + num_ghosts_cons_var[0]) +
+                        (j + num_ghosts_cons_var[1])*ghostcell_dims_cons_var[0];
                     
                     Z_rho_1[idx_cell] = Z_rho_1_inf;
                     Z_rho_2[idx_cell] = Z_rho_2_inf;
