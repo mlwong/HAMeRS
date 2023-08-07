@@ -594,13 +594,29 @@ Euler::initializeDataOnPatch(
     hier::Patch& patch,
     const double data_time,
     const bool initial_time)
-{   
+{
     t_init->start();
     
     d_flow_model->registerPatchWithDataContext(patch, getDataContext());
     
     std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_var_data =
         d_flow_model->getCellDataOfConservativeVariables();
+    
+    if (d_use_ghost_cell_immersed_boundary_method)
+    {
+        // Check that conservative variable data has ghost cells.
+        for (int ei = 0; ei < static_cast<int>(conservative_var_data.size()); ei++)
+        {
+            const hier::IntVector num_ghosts_cons_var = conservative_var_data[ei]->getGhostCellWidth();
+            if (num_ghosts_cons_var == hier::IntVector::getZero(d_dim))
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Numbers of ghost cells of conservative variables are zero while ghost cell immersed boundary method is used!"
+                    << std::endl);
+            }
+        }
+    }
     
     d_Euler_initial_conditions->initializeDataOnPatch(
         patch,
@@ -627,11 +643,22 @@ Euler::initializeDataOnPatch(
             initial_time,
             getDataContext());
         
-        flow_model_immersed_boundary_method->setConservativeVariablesCellDataImmersedBoundaryGhosts(
-            empty_box,
-            data_time,
-            initial_time,
-            getDataContext());
+        if (d_use_ghost_cell_immersed_boundary_method)
+        {
+            // Compute the immersed boundary ghost cells here.
+            flow_model_immersed_boundary_method->setConservativeVariablesCellDataImmersedBoundaryGhosts(
+                empty_box,
+                data_time,
+                initial_time,
+                getDataContext());
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Only ghost cell immersed boundary method is implemented as the immersed boundary method!"
+                << std::endl);
+        }
     }
     
     d_flow_model->unregisterPatch();
@@ -1140,11 +1167,11 @@ Euler::setImmersedBoundaryGhostCells(
     const int RK_step_number,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    if (!d_use_immersed_boundaries || !d_use_ghost_cell_immersed_boundary_method)
+    if (!d_use_immersed_boundaries)
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "d_use_immersed_boundaries or d_use_ghost_cell_immersed_boundary_method are set to false!"
+            << "d_use_immersed_boundaries is set to false!"
             << std::endl);
     }
     
@@ -1170,13 +1197,22 @@ Euler::setImmersedBoundaryGhostCells(
             getDataContext());
     }
     
-    // Compute the immersed boundary ghost cells here.
-    
-    flow_model_immersed_boundary_method->setConservativeVariablesCellDataImmersedBoundaryGhosts(
-        empty_box,
-        time,
-        false,
-        getDataContext());
+    if (d_use_ghost_cell_immersed_boundary_method)
+    {
+        // Compute the immersed boundary ghost cells here.
+        flow_model_immersed_boundary_method->setConservativeVariablesCellDataImmersedBoundaryGhosts(
+            empty_box,
+            time,
+            false,
+            getDataContext());
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Only ghost cell immersed boundary method is implemented as the immersed boundary method!"
+            << std::endl);
+    }
     
     d_flow_model->unregisterPatch();
 }

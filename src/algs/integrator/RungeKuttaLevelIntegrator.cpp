@@ -445,14 +445,38 @@ RungeKuttaLevelIntegrator::initializeLevelData(
             }
         }
     }
-
+    
     mpi.Barrier();
-    t_init_level_fill_interior->start();
     
     /*
      * Initialize data on patch interiors.
      */
-    d_patch_strategy->setDataContext(d_current);
+    
+    if (d_patch_strategy->useGhostCellImmersedBoundaryMethod())
+    {
+        // Need to use scratch data with ghost cells to fill immersed boundary ghost cells.
+        level->allocatePatchData(d_saved_var_scratch_data, init_data_time);
+        
+        // Generate temporary communication schedule to fill ghost cells.
+        
+        HAMERS_SHARED_PTR<xfer::RefineSchedule> fill_schedule_scratch =
+            d_bdry_fill_init_w_gcibm->createSchedule(
+                level,
+                d_patch_strategy);
+        
+        t_init_level_fill_data->start();
+        fill_schedule_scratch->fillData(init_data_time);
+        mpi.Barrier();
+        t_init_level_fill_data->stop();
+        
+        d_patch_strategy->setDataContext(d_scratch);
+    }
+    else
+    {
+        d_patch_strategy->setDataContext(d_current);
+    }
+    
+    t_init_level_fill_interior->start();
     
     for (hier::PatchLevel::iterator p(level->begin()); p != level->end(); p++)
     {
@@ -468,6 +492,16 @@ RungeKuttaLevelIntegrator::initializeLevelData(
         patch->deallocatePatchData(d_temp_var_scratch_data);
     }
     d_patch_strategy->clearDataContext();
+    
+    if (d_patch_strategy->useGhostCellImmersedBoundaryMethod())
+    {
+        // Copy the scratch data to current data.
+        copyTimeDependentData(level, d_scratch, d_current);
+        copyNoFillData(level, d_scratch, d_current);
+        
+        level->deallocatePatchData(d_saved_var_scratch_data);
+    }
+    
     mpi.Barrier();
     t_init_level_fill_interior->stop();
     
@@ -1411,7 +1445,7 @@ RungeKuttaLevelIntegrator::getLevelDt(
                 }
                 
                 spectral_radius_sum += spectral_radiuses[si];
-            } 
+            }
             
             dt = tbox::MathUtilities<double>::Min(dt, 1.0/spectral_radius_sum);
             
@@ -1470,7 +1504,7 @@ RungeKuttaLevelIntegrator::getLevelDt(
                 }
                 
                 spectral_radius_sum += spectral_radiuses[si];
-            } 
+            }
             
             dt = tbox::MathUtilities<double>::Min(dt, 1.0/spectral_radius_sum);
             
@@ -1802,7 +1836,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
             d_flux_variables.begin();
         
         while (flux_var != d_flux_variables.end())
-        {            
+        {
             if (d_flux_is_face)
             {
                 HAMERS_SHARED_PTR<pdat::FaceData<double> > flux_data(
@@ -2089,7 +2123,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
                 }
                 
                 spectral_radius_sum += spectral_radiuses[si];
-            } 
+            }
             
             dt_next = tbox::MathUtilities<double>::Min(dt_next, 1.0/spectral_radius_sum);
             
@@ -2649,6 +2683,7 @@ RungeKuttaLevelIntegrator::registerVariable(
         d_bdry_fill_advance.reset(new xfer::RefineAlgorithm());
         d_bdry_fill_advance_new.reset(new xfer::RefineAlgorithm());
         d_bdry_fill_advance_old.reset(new xfer::RefineAlgorithm());
+        d_bdry_fill_init_w_gcibm.reset(new xfer::RefineAlgorithm());
         
         d_bdry_fill_intermediate.resize(d_number_steps);
         for (int sn = 0; sn < d_number_steps; sn++)
@@ -2742,6 +2777,17 @@ RungeKuttaLevelIntegrator::registerVariable(
                 scr_id, new_id, cur_id, new_id, scr_id, refine_op, time_int);
             d_fill_new_level->registerRefine(
                 cur_id, cur_id, cur_id, new_id, scr_id, refine_op, time_int);
+            
+            /*
+             * Set boundary fill schedules for data used in the initialization of the integration data
+             * when ghost cell immersed boundary method is used.
+             */
+            
+            d_bdry_fill_init_w_gcibm->registerRefine(
+                scr_id,
+                cur_id,
+                scr_id,
+                refine_op);
             
             /*
              * Set boundary fill schedules for data used in the intermediate steps of the Runge-Kutta
@@ -2857,6 +2903,8 @@ RungeKuttaLevelIntegrator::registerVariable(
         }
         case NO_FILL:
         {
+            d_no_fill_variables.push_back(var);
+            
             int cur_id = variable_db->registerVariableAndContext(
                 var,
                 d_current,
@@ -3490,6 +3538,48 @@ RungeKuttaLevelIntegrator::copyTimeDependentData(
             dst_data->copy(*src_data);
             
             time_dep_var++;
+        }
+    }
+}
+
+
+/*
+ **************************************************************************************************
+ *
+ * Copy no-fill data from source to destination on level.
+ *
+ **************************************************************************************************
+ */
+void
+RungeKuttaLevelIntegrator::copyNoFillData(
+    const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& src_context,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& dst_context)
+{
+    TBOX_ASSERT(level);
+    TBOX_ASSERT(src_context);
+    TBOX_ASSERT(dst_context);
+    
+    for (hier::PatchLevel::iterator ip(level->begin());
+         ip != level->end();
+         ip++)
+    {
+        const HAMERS_SHARED_PTR<hier::Patch>& patch = *ip;
+        
+        std::list<HAMERS_SHARED_PTR<hier::Variable> >::iterator no_fill_var =
+            d_no_fill_variables.begin();
+            
+        while (no_fill_var != d_no_fill_variables.end())
+        {
+            HAMERS_SHARED_PTR<hier::PatchData> src_data(
+                patch->getPatchData(*no_fill_var, src_context));
+            
+            HAMERS_SHARED_PTR<hier::PatchData> dst_data(
+                patch->getPatchData(*no_fill_var, dst_context));
+            
+            dst_data->copy(*src_data);
+            
+            no_fill_var++;
         }
     }
 }
