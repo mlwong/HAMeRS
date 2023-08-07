@@ -180,8 +180,6 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                 x[0] = patch_xlo[0] + (Real(i) + Real(1)/Real(2))*Real(dx[0]);
                 x[1] = patch_xlo[1] + (Real(j) + Real(1)/Real(2))*Real(dx[1]);
                 
-                const Real r = std::abs(x[1]); //distance from jet center in y-direction
-                
                 // Check whether it is outside the special source box.
                 if (x[0] <= d_special_source_box_lo[0])
                 {

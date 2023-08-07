@@ -65,6 +65,13 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         const double* const dx = patch_geom->getDx();            //AFK
         const double* const patch_xlo = patch_geom->getXLower(); //AFK
         
+        // Get the numbers of ghost cells.
+        const hier::IntVector num_ghosts_cons_var = conservative_variables[0]->getGhostCellWidth();
+        
+        // Get the dimensions of the ghost cell boxes.
+        const hier::Box ghost_box_cons_var = conservative_variables[0]->getGhostBox();
+        const hier::IntVector ghostcell_dims_cons_var = ghost_box_cons_var.numberCells();
+        
         /*
          * Initialize data for a 2D density wave advection problem.
          */
@@ -123,12 +130,13 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 spongeR = d_initial_conditions_db->getReal("spongeR");
             }
             
-            for (int j = 0; j < patch_dims[1]; j++)
+            for (int j = -num_ghosts_cons_var[1]; j < patch_dims[1] + num_ghosts_cons_var[1]; j++)
             {
-                for (int i = 0; i < patch_dims[0]; i++)
+                for (int i = -num_ghosts_cons_var[0]; i < patch_dims[0] + num_ghosts_cons_var[0]; i++)
                 {
                     // Compute index into linear data array.
-                    int idx_cell = i + j*patch_dims[0];
+                    int idx_cell = (i + num_ghosts_cons_var[0]) +
+                        (j + num_ghosts_cons_var[1])*ghostcell_dims_cons_var[0];
                     
                     Real x[2];
                     x[0] = patch_xlo[0] + (Real(i) + half)*Real(dx[0]); // x coordinates of the point.
