@@ -593,7 +593,8 @@ void
 Euler::initializeDataOnPatch(
     hier::Patch& patch,
     const double data_time,
-    const bool initial_time)
+    const bool initial_time,
+    const bool set_immersed_boundary_method_ghosts)
 {
     t_init->start();
     
@@ -602,7 +603,7 @@ Euler::initializeDataOnPatch(
     std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_var_data =
         d_flow_model->getCellDataOfConservativeVariables();
     
-    if (d_use_ghost_cell_immersed_boundary_method)
+    if (d_use_ghost_cell_immersed_boundary_method && set_immersed_boundary_method_ghosts)
     {
         // Check that conservative variable data has ghost cells.
         for (int ei = 0; ei < static_cast<int>(conservative_var_data.size()); ei++)
@@ -645,12 +646,15 @@ Euler::initializeDataOnPatch(
         
         if (d_use_ghost_cell_immersed_boundary_method)
         {
-            // Compute the immersed boundary ghost cells here.
-            flow_model_immersed_boundary_method->setConservativeVariablesCellDataImmersedBoundaryGhosts(
-                empty_box,
-                data_time,
-                initial_time,
-                getDataContext());
+            if (set_immersed_boundary_method_ghosts)
+            {
+                // Compute the immersed boundary ghost cells here.
+                flow_model_immersed_boundary_method->setConservativeVariablesCellDataImmersedBoundaryGhosts(
+                    empty_box,
+                    data_time,
+                    initial_time,
+                    getDataContext());
+            }
         }
         else
         {

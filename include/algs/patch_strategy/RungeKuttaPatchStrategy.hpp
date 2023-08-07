@@ -115,7 +115,8 @@ class RungeKuttaPatchStrategy:
         initializeDataOnPatch(
             hier::Patch& patch,
             const double data_time,
-            const bool initial_time) = 0;
+            const bool initial_time,
+            const bool set_immersed_boundary_method_ghosts) = 0;
         
         /**
          * Get the number of spectral radiuses.

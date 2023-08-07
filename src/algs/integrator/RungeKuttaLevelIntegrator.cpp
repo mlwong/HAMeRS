@@ -464,12 +464,12 @@ RungeKuttaLevelIntegrator::initializeLevelData(
                 level,
                 d_patch_strategy);
         
+        d_patch_strategy->setDataContext(d_scratch);
+        
         t_init_level_fill_data->start();
         fill_schedule_scratch->fillData(init_data_time);
         mpi.Barrier();
         t_init_level_fill_data->stop();
-        
-        d_patch_strategy->setDataContext(d_scratch);
     }
     else
     {
@@ -487,7 +487,8 @@ RungeKuttaLevelIntegrator::initializeLevelData(
         d_patch_strategy->initializeDataOnPatch(
             *patch,
             init_data_time,
-            initial_time);
+            initial_time,
+            d_patch_strategy->useGhostCellImmersedBoundaryMethod());
         
         patch->deallocatePatchData(d_temp_var_scratch_data);
     }
@@ -2365,7 +2366,8 @@ RungeKuttaLevelIntegrator::synchronizeNewLevels(
                 d_patch_strategy->initializeDataOnPatch(
                     *patch,
                     sync_time,
-                    initial_time);
+                    initial_time,
+                    false);
                 
                 patch->deallocatePatchData(d_temp_var_scratch_data);
             }
