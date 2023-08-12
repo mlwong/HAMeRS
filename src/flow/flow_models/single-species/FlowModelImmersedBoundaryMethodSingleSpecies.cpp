@@ -176,8 +176,6 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
     const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
     const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
     const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal,
-    const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_ip_index,          // AFK
-    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_ip_corr,           // AFK
     const hier::IntVector& offset_cons_var,
     const hier::IntVector& offset_IB,
     const hier::IntVector& ghostcell_dims_cons_var,
@@ -288,9 +286,6 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
         
         //int* ip_location_index_0 = data_ip_index->getPointer(0);  // AFK 03/15/23 
         //int* ip_location_index_1 = data_ip_index->getPointer(1);  // AFK
-        
-        //Real* ip_ratio_0          = data_ip_corr->getPointer(0);  // AFK 03/15/23 
-        //Real* ip_ratio_1          = data_ip_corr->getPointer(1);  // AFK
         
         Real one  = Real(1);                                    // AFK one
         Real half = Real(1)/Real(2);
