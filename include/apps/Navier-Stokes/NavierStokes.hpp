@@ -113,7 +113,8 @@ class NavierStokes:
         initializeDataOnPatch(
             hier::Patch& patch,
             const double data_time,
-            const bool initial_time);
+            const bool initial_time,
+            const bool set_immersed_boundary_method_ghosts);
         
         /**
          * Get the number of spectral radiuses.

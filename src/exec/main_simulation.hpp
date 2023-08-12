@@ -443,8 +443,8 @@ void runSimulation(
     
     time_integrator_db = input_db->getDatabase("TimeRefinementIntegrator");
     
-    HAMERS_SHARED_PTR<algs::TimeRefinementIntegrator> time_integrator(
-        new algs::TimeRefinementIntegrator(
+    HAMERS_SHARED_PTR<TimeRefinementIntegrator> time_integrator(
+        new TimeRefinementIntegrator(
             "TimeRefinementIntegrator",
             time_integrator_db,
             patch_hierarchy,
@@ -574,7 +574,7 @@ void runSimulation(
     
     /*
      * Time step loop. Note that the step count and integration
-     * time are maintained by algs::TimeRefinementIntegrator.
+     * time are maintained by TimeRefinementIntegrator.
      */
     
     double loop_time = time_integrator->getIntegratorTime();

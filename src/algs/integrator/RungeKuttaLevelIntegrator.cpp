@@ -270,6 +270,7 @@ RungeKuttaLevelIntegrator::RungeKuttaLevelIntegrator(
     d_lag_dt_computation(true),
     d_use_ghosts_for_dt(false),
     d_dt(tbox::MathUtilities<double>::getSignalingNaN()),
+    d_use_flux_correction(true),
     d_flux_is_face(true),
     d_flux_face_registered(false),
     d_flux_side_registered(false),
@@ -444,14 +445,38 @@ RungeKuttaLevelIntegrator::initializeLevelData(
             }
         }
     }
-
+    
     mpi.Barrier();
-    t_init_level_fill_interior->start();
     
     /*
      * Initialize data on patch interiors.
      */
-    d_patch_strategy->setDataContext(d_current);
+    
+    if (d_patch_strategy->useGhostCellImmersedBoundaryMethod())
+    {
+        // Need to use scratch data with ghost cells to fill immersed boundary ghost cells.
+        level->allocatePatchData(d_saved_var_scratch_data, init_data_time);
+        
+        // Generate temporary communication schedule to fill ghost cells.
+        
+        HAMERS_SHARED_PTR<xfer::RefineSchedule> fill_schedule_scratch =
+            d_bdry_fill_init_w_gcibm->createSchedule(
+                level,
+                d_patch_strategy);
+        
+        d_patch_strategy->setDataContext(d_scratch);
+        
+        t_init_level_fill_data->start();
+        fill_schedule_scratch->fillData(init_data_time);
+        mpi.Barrier();
+        t_init_level_fill_data->stop();
+    }
+    else
+    {
+        d_patch_strategy->setDataContext(d_current);
+    }
+    
+    t_init_level_fill_interior->start();
     
     for (hier::PatchLevel::iterator p(level->begin()); p != level->end(); p++)
     {
@@ -462,11 +487,22 @@ RungeKuttaLevelIntegrator::initializeLevelData(
         d_patch_strategy->initializeDataOnPatch(
             *patch,
             init_data_time,
-            initial_time);
+            initial_time,
+            d_patch_strategy->useGhostCellImmersedBoundaryMethod());
         
         patch->deallocatePatchData(d_temp_var_scratch_data);
     }
     d_patch_strategy->clearDataContext();
+    
+    if (d_patch_strategy->useGhostCellImmersedBoundaryMethod())
+    {
+        // Copy the scratch data to current data.
+        copyTimeDependentData(level, d_scratch, d_current);
+        copyNoFillData(level, d_scratch, d_current);
+        
+        level->deallocatePatchData(d_saved_var_scratch_data);
+    }
+    
     mpi.Barrier();
     t_init_level_fill_interior->stop();
     
@@ -1410,7 +1446,7 @@ RungeKuttaLevelIntegrator::getLevelDt(
                 }
                 
                 spectral_radius_sum += spectral_radiuses[si];
-            } 
+            }
             
             dt = tbox::MathUtilities<double>::Min(dt, 1.0/spectral_radius_sum);
             
@@ -1469,7 +1505,7 @@ RungeKuttaLevelIntegrator::getLevelDt(
                 }
                 
                 spectral_radius_sum += spectral_radiuses[si];
-            } 
+            }
             
             dt = tbox::MathUtilities<double>::Min(dt, 1.0/spectral_radius_sum);
             
@@ -1801,7 +1837,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
             d_flux_variables.begin();
         
         while (flux_var != d_flux_variables.end())
-        {            
+        {
             if (d_flux_is_face)
             {
                 HAMERS_SHARED_PTR<pdat::FaceData<double> > flux_data(
@@ -2088,7 +2124,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
                 }
                 
                 spectral_radius_sum += spectral_radiuses[si];
-            } 
+            }
             
             dt_next = tbox::MathUtilities<double>::Min(dt_next, 1.0/spectral_radius_sum);
             
@@ -2167,20 +2203,23 @@ RungeKuttaLevelIntegrator::standardLevelSynchronization(
     const double sync_time,
     const double old_time)
 {
-    TBOX_ASSERT(hierarchy);
-    
-    std::vector<double> old_times(finest_level - coarsest_level + 1);
-    for (int i = coarsest_level; i <= finest_level; i++)
+    if (false)
     {
-        old_times[i] = old_time;
+        TBOX_ASSERT(hierarchy);
+        
+        std::vector<double> old_times(finest_level - coarsest_level + 1);
+        for (int i = coarsest_level; i <= finest_level; i++)
+        {
+            old_times[i] = old_time;
+        }
+        
+        standardLevelSynchronization(
+            hierarchy,
+            coarsest_level,
+            finest_level,
+            sync_time,
+            old_times);
     }
-    
-    standardLevelSynchronization(
-        hierarchy,
-        coarsest_level,
-        finest_level,
-        sync_time,
-        old_times);
 }
 
 
@@ -2192,59 +2231,62 @@ RungeKuttaLevelIntegrator::standardLevelSynchronization(
     const double sync_time,
     const std::vector<double>& old_times)
 {
-    TBOX_ASSERT(hierarchy);
-    TBOX_ASSERT((coarsest_level >= 0)
-                && (coarsest_level < finest_level)
-                && (finest_level <= hierarchy->getFinestLevelNumber()));
-    TBOX_ASSERT(static_cast<int>(old_times.size()) >= finest_level);
+    if (false)
+    {
+        TBOX_ASSERT(hierarchy);
+        TBOX_ASSERT((coarsest_level >= 0)
+                    && (coarsest_level < finest_level)
+                    && (finest_level <= hierarchy->getFinestLevelNumber()));
+        TBOX_ASSERT(static_cast<int>(old_times.size()) >= finest_level);
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    for (int ln = coarsest_level; ln < finest_level; ln++)
-    {
-        TBOX_ASSERT(hierarchy->getPatchLevel(ln));
-        TBOX_ASSERT(sync_time >= old_times[ln]);
-    }
-#endif
-    TBOX_ASSERT(hierarchy->getPatchLevel(finest_level));
-    
-    t_std_level_sync->start();
-    
-    for (int fine_ln = finest_level; fine_ln > coarsest_level; --fine_ln)
-    {
-        const int coarse_ln = fine_ln - 1;
-        
-        HAMERS_SHARED_PTR<hier::PatchLevel> fine_level(
-           hierarchy->getPatchLevel(fine_ln));
-        
-        HAMERS_SHARED_PTR<hier::PatchLevel> coarse_level(
-           hierarchy->getPatchLevel(coarse_ln));
-        
-        synchronizeLevelWithCoarser(
-            fine_level,
-            coarse_level,
-            sync_time,
-            old_times[coarse_ln]);
-        
-        fine_level->deallocatePatchData(d_fluxsum_data);
-        fine_level->deallocatePatchData(d_flux_var_data);
-        fine_level->deallocatePatchData(d_source_var_data);
-        
-        if (coarse_ln > coarsest_level)
+        for (int ln = coarsest_level; ln < finest_level; ln++)
         {
-            coarse_level->deallocatePatchData(d_flux_var_data);
-            coarse_level->deallocatePatchData(d_source_var_data);
+            TBOX_ASSERT(hierarchy->getPatchLevel(ln));
+            TBOX_ASSERT(sync_time >= old_times[ln]);
         }
-        else
+#endif
+        TBOX_ASSERT(hierarchy->getPatchLevel(finest_level));
+        
+        t_std_level_sync->start();
+        
+        for (int fine_ln = finest_level; fine_ln > coarsest_level; --fine_ln)
         {
-            if (coarsest_level == 0)
+            const int coarse_ln = fine_ln - 1;
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> fine_level(
+               hierarchy->getPatchLevel(fine_ln));
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> coarse_level(
+               hierarchy->getPatchLevel(coarse_ln));
+            
+            synchronizeLevelWithCoarser(
+                fine_level,
+                coarse_level,
+                sync_time,
+                old_times[coarse_ln]);
+            
+            fine_level->deallocatePatchData(d_fluxsum_data);
+            fine_level->deallocatePatchData(d_flux_var_data);
+            fine_level->deallocatePatchData(d_source_var_data);
+            
+            if (coarse_ln > coarsest_level)
             {
                 coarse_level->deallocatePatchData(d_flux_var_data);
-                d_have_flux_on_level_zero = false;
                 coarse_level->deallocatePatchData(d_source_var_data);
             }
+            else
+            {
+                if (coarsest_level == 0)
+                {
+                    coarse_level->deallocatePatchData(d_flux_var_data);
+                    d_have_flux_on_level_zero = false;
+                    coarse_level->deallocatePatchData(d_source_var_data);
+                }
+            }
         }
+        
+        t_std_level_sync->stop();
     }
-    
-    t_std_level_sync->stop();
 }
 
 
@@ -2324,7 +2366,8 @@ RungeKuttaLevelIntegrator::synchronizeNewLevels(
                 d_patch_strategy->initializeDataOnPatch(
                     *patch,
                     sync_time,
-                    initial_time);
+                    initial_time,
+                    false);
                 
                 patch->deallocatePatchData(d_temp_var_scratch_data);
             }
@@ -2364,58 +2407,62 @@ RungeKuttaLevelIntegrator::synchronizeLevelWithCoarser(
     TBOX_ASSERT_OBJDIM_EQUALITY2(*fine_level, *coarse_level);
     TBOX_ASSERT(sync_time > coarse_sim_time);
     
-    /*
-     * Coarsen flux integrals around fine patch boundaries to coarser level and replace coarse flux
-     * information where appropriate. NULL patch model is passed in to avoid over complicating coarsen
-     * process; i.e. patch model is not needed in coarsening of flux integrals.
-     */
+    HAMERS_SHARED_PTR<xfer::CoarsenSchedule> sched;
     
-    t_coarsen_fluxsum_create->start();
-    HAMERS_SHARED_PTR<xfer::CoarsenSchedule> sched(
-        d_coarsen_fluxsum->createSchedule(
+    if (d_use_flux_correction)
+    {
+        /*
+         * Coarsen flux integrals around fine patch boundaries to coarser level and replace coarse flux
+         * information where appropriate. NULL patch model is passed in to avoid over complicating coarsen
+         * process; i.e. patch model is not needed in coarsening of flux integrals.
+         */
+        
+        t_coarsen_fluxsum_create->start();
+        sched = d_coarsen_fluxsum->createSchedule(
             coarse_level,
             fine_level,
-            0));
-    t_coarsen_fluxsum_create->stop();
-    
-    t_coarsen_fluxsum_comm->start();
-    sched->coarsenData();
-    t_coarsen_fluxsum_comm->stop();
-    
-    /*
-     * Repeat conservative difference on coarser level.
-     */
-    coarse_level->allocatePatchData(d_saved_var_scratch_data, coarse_sim_time);
-    coarse_level->setTime(coarse_sim_time, d_flux_var_data);
-    
-    d_patch_strategy->setDataContext(d_scratch);
-    
-    t_advance_bdry_fill_comm->start();
-    d_bdry_sched_advance[coarse_level->getLevelNumber()]->
-        fillData(coarse_sim_time);
-    t_advance_bdry_fill_comm->stop();
-    
-    const double reflux_dt = sync_time - coarse_sim_time;
-    
-    for (hier::PatchLevel::iterator ip(coarse_level->begin());
-         ip != coarse_level->end();
-         ip++)
-    {
-        const HAMERS_SHARED_PTR<hier::Patch>& patch = *ip;
+            0);
+        t_coarsen_fluxsum_create->stop();
         
-        patch->allocatePatchData(d_temp_var_scratch_data, coarse_sim_time);
+        t_coarsen_fluxsum_comm->start();
+        sched->coarsenData();
+        t_coarsen_fluxsum_comm->stop();
+        
+        /*
+         * Repeat conservative difference on coarser level.
+         */
+        coarse_level->allocatePatchData(d_saved_var_scratch_data, coarse_sim_time);
+        coarse_level->setTime(coarse_sim_time, d_flux_var_data);
+        
+        d_patch_strategy->setDataContext(d_scratch);
+        
+        t_advance_bdry_fill_comm->start();
+        d_bdry_sched_advance[coarse_level->getLevelNumber()]->
+            fillData(coarse_sim_time);
+        t_advance_bdry_fill_comm->stop();
+        
+        const double reflux_dt = sync_time - coarse_sim_time;
+        
+        for (hier::PatchLevel::iterator ip(coarse_level->begin());
+             ip != coarse_level->end();
+             ip++)
+        {
+            const HAMERS_SHARED_PTR<hier::Patch>& patch = *ip;
             
-        d_patch_strategy->synchronizeFluxes(*patch,
-           coarse_sim_time,
-           reflux_dt);
-        patch->deallocatePatchData(d_temp_var_scratch_data);
+            patch->allocatePatchData(d_temp_var_scratch_data, coarse_sim_time);
+                
+            d_patch_strategy->synchronizeFluxes(*patch,
+               coarse_sim_time,
+               reflux_dt);
+            patch->deallocatePatchData(d_temp_var_scratch_data);
+        }
+        
+        d_patch_strategy->clearDataContext();
+        
+        copyTimeDependentData(coarse_level, d_scratch, d_new);
+        
+        coarse_level->deallocatePatchData(d_saved_var_scratch_data);
     }
-    
-    d_patch_strategy->clearDataContext();
-    
-    copyTimeDependentData(coarse_level, d_scratch, d_new);
-    
-    coarse_level->deallocatePatchData(d_saved_var_scratch_data);
     
     /*
      * Coarsen time-dependent data from fine patch interiors to coarse patches.
@@ -2577,14 +2624,15 @@ RungeKuttaLevelIntegrator::resetDataToPreadvanceState(
  *             CURRENT index is added to d_new_patch_init_data.
  *
  * NO_FILL:
- *             Only one time level of data is stored and no scratch space is used. Data may be set
+ *             Two time levels of data are stored and a scratch space is used. Data may be set
  *             and manipulated at will in user routines. Data (including ghost values) is never
  *             touched outside of user routines.
  *
- *             Two factories are needed: CURRENT, SCRATCH.
+ *             Three factories are needed: SCRATCH, CURRENT, NEW.
  *
+ *             SCRATCH index is added to d_saved_var_scratch_data.
  *             CURRENT index is added to d_new_patch_init_data.
- *             SCRATCH index is needed only for temporary work space to fill new patch levels.
+ *             NEW index is added to d_new_time_dep_data.
  *
  * FLUX:
  *             One factory is needed: SCRATCH.
@@ -2637,6 +2685,7 @@ RungeKuttaLevelIntegrator::registerVariable(
         d_bdry_fill_advance.reset(new xfer::RefineAlgorithm());
         d_bdry_fill_advance_new.reset(new xfer::RefineAlgorithm());
         d_bdry_fill_advance_old.reset(new xfer::RefineAlgorithm());
+        d_bdry_fill_init_w_gcibm.reset(new xfer::RefineAlgorithm());
         
         d_bdry_fill_intermediate.resize(d_number_steps);
         for (int sn = 0; sn < d_number_steps; sn++)
@@ -2730,6 +2779,17 @@ RungeKuttaLevelIntegrator::registerVariable(
                 scr_id, new_id, cur_id, new_id, scr_id, refine_op, time_int);
             d_fill_new_level->registerRefine(
                 cur_id, cur_id, cur_id, new_id, scr_id, refine_op, time_int);
+            
+            /*
+             * Set boundary fill schedules for data used in the initialization of the integration data
+             * when ghost cell immersed boundary method is used.
+             */
+            
+            d_bdry_fill_init_w_gcibm->registerRefine(
+                scr_id,
+                cur_id,
+                scr_id,
+                refine_op);
             
             /*
              * Set boundary fill schedules for data used in the intermediate steps of the Runge-Kutta
@@ -2845,9 +2905,16 @@ RungeKuttaLevelIntegrator::registerVariable(
         }
         case NO_FILL:
         {
+            d_no_fill_variables.push_back(var);
+            
             int cur_id = variable_db->registerVariableAndContext(
                 var,
                 d_current,
+                ghosts);
+            
+            int new_id = variable_db->registerVariableAndContext(
+                var,
+                d_new,
                 ghosts);
             
             int scr_id = variable_db->registerVariableAndContext(
@@ -2856,6 +2923,8 @@ RungeKuttaLevelIntegrator::registerVariable(
                 ghosts);
             
             d_new_patch_init_data.setFlag(cur_id);
+            
+            d_new_time_dep_data.setFlag(new_id);
             
             d_saved_var_scratch_data.setFlag(scr_id);
             
@@ -3478,6 +3547,48 @@ RungeKuttaLevelIntegrator::copyTimeDependentData(
 
 /*
  **************************************************************************************************
+ *
+ * Copy no-fill data from source to destination on level.
+ *
+ **************************************************************************************************
+ */
+void
+RungeKuttaLevelIntegrator::copyNoFillData(
+    const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& src_context,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& dst_context)
+{
+    TBOX_ASSERT(level);
+    TBOX_ASSERT(src_context);
+    TBOX_ASSERT(dst_context);
+    
+    for (hier::PatchLevel::iterator ip(level->begin());
+         ip != level->end();
+         ip++)
+    {
+        const HAMERS_SHARED_PTR<hier::Patch>& patch = *ip;
+        
+        std::list<HAMERS_SHARED_PTR<hier::Variable> >::iterator no_fill_var =
+            d_no_fill_variables.begin();
+            
+        while (no_fill_var != d_no_fill_variables.end())
+        {
+            HAMERS_SHARED_PTR<hier::PatchData> src_data(
+                patch->getPatchData(*no_fill_var, src_context));
+            
+            HAMERS_SHARED_PTR<hier::PatchData> dst_data(
+                patch->getPatchData(*no_fill_var, dst_context));
+            
+            dst_data->copy(*src_data);
+            
+            no_fill_var++;
+        }
+    }
+}
+
+
+/*
+ **************************************************************************************************
  **************************************************************************************************
  */
 void
@@ -3790,6 +3901,8 @@ RungeKuttaLevelIntegrator::putToRestart(
         
         RK_db->putDoubleVector(gamma_array_name, gamma_array);
     }
+    
+    RK_db->putBool("use_flux_correction", d_use_flux_correction);
 }
 
 
@@ -4136,6 +4249,8 @@ RungeKuttaLevelIntegrator::getFromInput(
             d_gamma[2][1] = 0.0;
             d_gamma[2][2] = 2.0/3.0;
         }
+        
+        d_use_flux_correction = input_db->getBoolWithDefault("use_flux_correction", true);
     }
     else if (input_db)
     {
@@ -4167,6 +4282,8 @@ RungeKuttaLevelIntegrator::getFromInput(
             d_distinguish_mpi_reduction_costs =
                 input_db->getBoolWithDefault("DEV_distinguish_mpi_reduction_costs",
                     d_distinguish_mpi_reduction_costs);
+            
+            d_use_flux_correction = input_db->getBoolWithDefault("use_flux_correction", true);
         }
         
         d_num_filtering_stats = input_db->getIntegerWithDefault("num_filtering_stats", 0); 
@@ -4235,6 +4352,8 @@ RungeKuttaLevelIntegrator::getFromRestart()
         d_beta[sn] = RK_db->getDoubleVector(beta_array_name);
         d_gamma[sn] = RK_db->getDoubleVector(gamma_array_name);
     }
+    
+    d_use_flux_correction = RK_db->getBool("use_flux_correction");
 }
 
 

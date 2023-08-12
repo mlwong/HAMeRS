@@ -333,8 +333,8 @@ void runPostProcessing(
     time_integrator_db->putDouble("end_time", tbox::MathUtilities<double>::getMax());
     time_integrator_db->putInteger("max_integrator_steps", tbox::MathUtilities<int>::getMax());
     
-    HAMERS_SHARED_PTR<algs::TimeRefinementIntegrator> time_integrator(
-        new algs::TimeRefinementIntegrator(
+    HAMERS_SHARED_PTR<TimeRefinementIntegrator> time_integrator(
+        new TimeRefinementIntegrator(
             "TimeRefinementIntegrator",
             time_integrator_db,
             patch_hierarchy,
