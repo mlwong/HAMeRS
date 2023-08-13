@@ -2355,21 +2355,24 @@ RungeKuttaLevelIntegrator::synchronizeNewLevels(
             sched->coarsenData();
             t_sync_initial_comm->stop();
             
-            for (hier::PatchLevel::iterator p(coarse_level->begin());
-                 p != coarse_level->end();
-                 p++)
+            if (!d_patch_strategy->useGhostCellImmersedBoundaryMethod())
             {
-                const HAMERS_SHARED_PTR<hier::Patch>& patch = *p;
-                
-                patch->allocatePatchData(d_temp_var_scratch_data, sync_time);
-                
-                d_patch_strategy->initializeDataOnPatch(
-                    *patch,
-                    sync_time,
-                    initial_time,
-                    false);
-                
-                patch->deallocatePatchData(d_temp_var_scratch_data);
+                for (hier::PatchLevel::iterator p(coarse_level->begin());
+                     p != coarse_level->end();
+                     p++)
+                {
+                    const HAMERS_SHARED_PTR<hier::Patch>& patch = *p;
+                    
+                    patch->allocatePatchData(d_temp_var_scratch_data, sync_time);
+                    
+                    d_patch_strategy->initializeDataOnPatch(
+                        *patch,
+                        sync_time,
+                        initial_time,
+                        false);
+                    
+                    patch->deallocatePatchData(d_temp_var_scratch_data);
+                }
             }
         }
         
@@ -3091,7 +3094,7 @@ RungeKuttaLevelIntegrator::registerVariable(
                 ghosts);
             
             d_temp_var_scratch_data.setFlag(scr_id);
-          
+            
           break;
         }
         case STATISTICS:
