@@ -75,22 +75,6 @@ FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSin
             << std::endl);
     }
     
-    /*
-     * Read the problem type. (Euler or NS)
-     */
-    
-    if (immersed_boundary_method_db->keyExists("problem_type"))
-    {
-        d_type = immersed_boundary_method_db->getString("problem_type");
-    }
-    else
-    {
-        TBOX_ERROR(d_object_name
-            << ": FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSingleSpecies()\n"
-            << "Required 'problem_type' entry from input database missing."
-            << std::endl);
-    }
-    
     std::vector<Real*> thermo_properties_ptr;
     std::vector<const Real*> thermo_properties_const_ptr;
     
@@ -377,7 +361,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                     Real vel_gc_n = Real(0);
                     Real vel_gc_t = Real(0);
                     
-                    if(d_type == "Euler")
+                    if(d_bc_type_velocity == VELOCITY_IBC::SLIP)
                     {
                         vel_ip_n =  u_ip*norm_0[idx_IB] + v_ip*norm_1[idx_IB];
                         vel_ip_t = -u_ip*norm_1[idx_IB] + v_ip*norm_0[idx_IB];
@@ -388,7 +372,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         u_gc = vel_gc_n*norm_0[idx_IB] - vel_gc_t*norm_1[idx_IB];
                         v_gc = vel_gc_n*norm_1[idx_IB] + vel_gc_t*norm_0[idx_IB]; 
                     }
-                    else
+                    else if(d_bc_type_velocity == VELOCITY_IBC::NO_SLIP)
                     {
                         u_gc = u_ip - ((d_ip + dist[idx_IB])/d_ip) * (u_ip);
                         v_gc = v_ip - ((d_ip + dist[idx_IB])/d_ip) * (v_ip);
@@ -429,36 +413,41 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                             &epsilon_TR,
                             thermo_properties_ptr);
                     
-                    // Compute the temperature values in the stencils.
-                    const Real T_BL = d_equation_of_state_mixing_rules->getEquationOfState()->
-                        getTemperature(
-                            &rho[idx_cons_var_BL],
-                            &p_BL,
-                            thermo_properties_ptr);
+                    Real T_gc = Real(0);
                     
-                    const Real T_TL = d_equation_of_state_mixing_rules->getEquationOfState()->
-                        getTemperature(
-                            &rho[idx_cons_var_TL],
-                            &p_TL,
-                            thermo_properties_ptr);
-                    
-                    const Real T_BR = d_equation_of_state_mixing_rules->getEquationOfState()->
-                        getTemperature(
-                            &rho[idx_cons_var_BR],
-                            &p_BR,
-                            thermo_properties_ptr);
-                    
-                    const Real T_TR = d_equation_of_state_mixing_rules->getEquationOfState()->
-                        getTemperature(
-                            &rho[idx_cons_var_TR],
-                            &p_TR,
-                            thermo_properties_ptr);
-                    
-                    const Real T_f1 = (one - ip_ratio_0)*T_BL + ip_ratio_0*T_BR;
-                    const Real T_f2 = (one - ip_ratio_0)*T_TL + ip_ratio_0*T_TR;
-                    const Real T_ip = (one - ip_ratio_1)*T_f1 + ip_ratio_1*T_f2;
-                    
-                    const Real T_gc = T_ip;
+                    if (d_bc_type_temperature == TEMPERATURE_IBC::ADIABATIC)
+                    {
+                        // Compute the temperature values in the stencils.
+                        const Real T_BL = d_equation_of_state_mixing_rules->getEquationOfState()->
+                            getTemperature(
+                                &rho[idx_cons_var_BL],
+                                &p_BL,
+                                thermo_properties_ptr);
+                        
+                        const Real T_TL = d_equation_of_state_mixing_rules->getEquationOfState()->
+                            getTemperature(
+                                &rho[idx_cons_var_TL],
+                                &p_TL,
+                                thermo_properties_ptr);
+                        
+                        const Real T_BR = d_equation_of_state_mixing_rules->getEquationOfState()->
+                            getTemperature(
+                                &rho[idx_cons_var_BR],
+                                &p_BR,
+                                thermo_properties_ptr);
+                        
+                        const Real T_TR = d_equation_of_state_mixing_rules->getEquationOfState()->
+                            getTemperature(
+                                &rho[idx_cons_var_TR],
+                                &p_TR,
+                                thermo_properties_ptr);
+                        
+                        const Real T_f1 = (one - ip_ratio_0)*T_BL + ip_ratio_0*T_BR;
+                        const Real T_f2 = (one - ip_ratio_0)*T_TL + ip_ratio_0*T_TR;
+                        const Real T_ip = (one - ip_ratio_1)*T_f1 + ip_ratio_1*T_f2;
+                        
+                        T_gc = T_ip;
+                    }
                     
                     // Calculating the total energy at the ghost cell value.
                     const Real epsilon_gc = d_equation_of_state_mixing_rules->getEquationOfState()->
