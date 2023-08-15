@@ -74,6 +74,22 @@ FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSin
             << "Required 'body_pressure' entry from input database missing."
             << std::endl);
     }
+
+    /*
+     * Read the body temperature.
+     */
+    
+    if (immersed_boundary_method_db->keyExists("body_temperature"))
+    {
+        d_temp_body = immersed_boundary_method_db->getReal("body_temperature");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSingleSpecies()\n"
+            << "Required 'body_temperature' entry from input database missing."
+            << std::endl);
+    }
     
     std::vector<Real*> thermo_properties_ptr;
     std::vector<const Real*> thermo_properties_const_ptr;
@@ -203,9 +219,10 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
     int* mask = data_mask->getPointer(0);
     Real* dist = data_wall_distance->getPointer(0);  // AFK 03/15/23 distance variable uncommented 
     
-    const Real& rho_body = d_rho_body;
-    const Real& E_body   = d_E_body;
-    
+    const Real& rho_body  = d_rho_body;
+    const Real& E_body    = d_E_body;
+    const Real& T_body    = d_temp_body;
+
     // Get the thermodynamic properties of the species.
     std::vector<const Real*> thermo_properties_ptr;
     thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
@@ -323,12 +340,6 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                     const int idx_cons_var_TL  = idx_cons_var_BL + ghostcell_dim_0_cons_var;
                     const int idx_cons_var_TR  = idx_cons_var_BL + ghostcell_dim_0_cons_var + 1;
                     
-                    // AFK bilinear interpolation to find image point density value
-                    const Real rho_f1 = (one - ip_ratio_0)*rho[idx_cons_var_BL] + ip_ratio_0*rho[idx_cons_var_BR];
-                    const Real rho_f2 = (one - ip_ratio_0)*rho[idx_cons_var_TL] + ip_ratio_0*rho[idx_cons_var_TR];
-                    const Real rho_ip = (one - ip_ratio_1)*rho_f1               + ip_ratio_1*rho_f2;
-                    const Real rho_gc = rho_ip;
-                    
                     // Bilinear interpolation to find image point x velocity value.
                     const Real u_IP_BL = rho_u[idx_cons_var_BL]/rho[idx_cons_var_BL];
                     const Real u_IP_BR = rho_u[idx_cons_var_BR]/rho[idx_cons_var_BR];
@@ -377,11 +388,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         u_gc = u_ip - ((d_ip + dist[idx_IB])/d_ip) * (u_ip);
                         v_gc = v_ip - ((d_ip + dist[idx_IB])/d_ip) * (v_ip);
                     }
-                    
-                    // Compute velocities at the ghost cell for NS equations (no-slip bcs)
-                    // u_gc       = u_ip - ((d_ip + dist[idx_IB])/d_ip) * (u_ip);
-                    // v_gc       = v_ip - ((d_ip + dist[idx_IB])/d_ip) * (v_ip);
-                    
+                        
                     // Bilinear interpolation to find image point energy.
                     const Real epsilon_BL = E[idx_cons_var_BL]/rho[idx_cons_var_BL] - half*(u_IP_BL*u_IP_BL + v_IP_BL*v_IP_BL);
                     const Real epsilon_TL = E[idx_cons_var_TL]/rho[idx_cons_var_TL] - half*(u_IP_TL*u_IP_TL + v_IP_TL*v_IP_TL);
@@ -415,40 +422,54 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                     
                     Real T_gc = Real(0);
                     
+                    // Compute the temperature values in the stencils.
+                    const Real T_BL = d_equation_of_state_mixing_rules->getEquationOfState()->
+                        getTemperature(
+                            &rho[idx_cons_var_BL],
+                            &p_BL,
+                            thermo_properties_ptr);
+                    
+                    const Real T_TL = d_equation_of_state_mixing_rules->getEquationOfState()->
+                        getTemperature(
+                            &rho[idx_cons_var_TL],
+                            &p_TL,
+                            thermo_properties_ptr);
+                    
+                    const Real T_BR = d_equation_of_state_mixing_rules->getEquationOfState()->
+                        getTemperature(
+                            &rho[idx_cons_var_BR],
+                            &p_BR,
+                            thermo_properties_ptr);
+                    
+                    const Real T_TR = d_equation_of_state_mixing_rules->getEquationOfState()->
+                        getTemperature(
+                            &rho[idx_cons_var_TR],
+                            &p_TR,
+                            thermo_properties_ptr);
+
+                    // Bilinear interpolation to find image point temperature.
+                    const Real T_f1 = (one - ip_ratio_0)*T_BL + ip_ratio_0*T_BR;
+                    const Real T_f2 = (one - ip_ratio_0)*T_TL + ip_ratio_0*T_TR;
+                    const Real T_ip = (one - ip_ratio_1)*T_f1 + ip_ratio_1*T_f2;
+                    
+                    // AFK bilinear interpolation to find image point density value.
+                    const Real rho_f1 = (one - ip_ratio_0)*rho[idx_cons_var_BL] + ip_ratio_0*rho[idx_cons_var_BR];
+                    const Real rho_f2 = (one - ip_ratio_0)*rho[idx_cons_var_TL] + ip_ratio_0*rho[idx_cons_var_TR];
+                    const Real rho_ip = (one - ip_ratio_1)*rho_f1               + ip_ratio_1*rho_f2;
+                    
+                    Real rho_gc = Real(0);
+                    
                     if (d_bc_type_temperature == TEMPERATURE_IBC::ADIABATIC)
                     {
-                        // Compute the temperature values in the stencils.
-                        const Real T_BL = d_equation_of_state_mixing_rules->getEquationOfState()->
-                            getTemperature(
-                                &rho[idx_cons_var_BL],
-                                &p_BL,
-                                thermo_properties_ptr);
-                        
-                        const Real T_TL = d_equation_of_state_mixing_rules->getEquationOfState()->
-                            getTemperature(
-                                &rho[idx_cons_var_TL],
-                                &p_TL,
-                                thermo_properties_ptr);
-                        
-                        const Real T_BR = d_equation_of_state_mixing_rules->getEquationOfState()->
-                            getTemperature(
-                                &rho[idx_cons_var_BR],
-                                &p_BR,
-                                thermo_properties_ptr);
-                        
-                        const Real T_TR = d_equation_of_state_mixing_rules->getEquationOfState()->
-                            getTemperature(
-                                &rho[idx_cons_var_TR],
-                                &p_TR,
-                                thermo_properties_ptr);
-                        
-                        const Real T_f1 = (one - ip_ratio_0)*T_BL + ip_ratio_0*T_BR;
-                        const Real T_f2 = (one - ip_ratio_0)*T_TL + ip_ratio_0*T_TR;
-                        const Real T_ip = (one - ip_ratio_1)*T_f1 + ip_ratio_1*T_f2;
-                        
+                        rho_gc = rho_ip;
                         T_gc = T_ip;
                     }
-                    
+                    else if (d_bc_type_temperature == TEMPERATURE_IBC::ISOTHERMAL)
+                    {
+                        T_gc = T_ip - ((d_ip + dist[idx_IB])/d_ip) * (T_ip - T_body);
+                        rho_gc = (rho_ip * T_ip) / T_gc;
+                    }
+
                     // Calculating the total energy at the ghost cell value.
                     const Real epsilon_gc = d_equation_of_state_mixing_rules->getEquationOfState()->
                         getInternalEnergyFromTemperature(

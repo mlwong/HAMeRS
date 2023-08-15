@@ -86,10 +86,10 @@ FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod(
             d_bc_type_temperature = TEMPERATURE_IBC::ADIABATIC;
         }
         // ISOTHERMAL BC NOT IMPLEMENTED YET!
-        // else if (bc_type_temperature_str == "ISOTHERMAL")
-        // {
-        //     d_bc_type_temperature = TEMPERATURE_IBC::ISOTHERMAL;
-        // }
+        else if (bc_type_temperature_str == "ISOTHERMAL")
+        {
+            d_bc_type_temperature = TEMPERATURE_IBC::ISOTHERMAL;
+        }
         else
         {
             TBOX_ERROR(d_object_name
@@ -101,12 +101,12 @@ FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod(
     else
     {
         // Default is adiabatic wall.
-        d_bc_type_temperature = TEMPERATURE_IBC::ADIABATIC;
+        // d_bc_type_temperature = TEMPERATURE_IBC::ADIABATIC;
         
-        // TBOX_ERROR(d_object_name
-        //     << ": FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod()\n"
-        //     << "Required 'bc_type_temperature' entry from input database missing."
-        //     << std::endl);
+        TBOX_ERROR(d_object_name
+            << ": FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod()\n"
+            << "Required 'bc_type_temperature' entry from input database missing."
+            << std::endl);
     }
 }
 

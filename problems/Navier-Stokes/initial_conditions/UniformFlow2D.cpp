@@ -146,7 +146,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     
                     r       = std::pow((x[0] - x_c), Real(2)) + std::pow((x[1] - y_c), Real(2));
                     r       = std::pow(r, half);
-                    theta   = std::atan((x[1] - y_c)/(x[0] - x_c)) + 22.5*M_PI/180.0;
+                    theta   = std::atan((x[1] - y_c)/(x[0] - x_c));
                     V_r     =  u_inf*(Real(1) - D*D/(Real(4)*r*r))*std::cos(theta);
                     V_theta = -u_inf*(Real(1) + D*D/(Real(4)*r*r))*std::sin(theta);
                     if (r < D/Real(4))
