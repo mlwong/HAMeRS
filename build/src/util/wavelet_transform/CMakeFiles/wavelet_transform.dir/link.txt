@@ -1,0 +1,2 @@
+/usr/bin/ar qc libwavelet_transform.a  CMakeFiles/wavelet_transform.dir/WaveletTransformHarten.cpp.o
+/usr/bin/ranlib libwavelet_transform.a

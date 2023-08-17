@@ -1,0 +1,2304 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINING OPTION VALUES:
+  -inline-factor: 100
+  -inline-min-size: 30
+  -inline-max-size: 230
+  -inline-max-total-size: 2000
+  -inline-max-per-routine: 10000
+  -inline-max-per-compile: 500000
+
+
+Begin optimization report for: FlowModelImmersedBoundaryMethod::~FlowModelImmersedBoundaryMethod(FlowModelImmersedBoundaryMethod *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelImmersedBoundaryMethod::~FlowModelImmersedBoundaryMethod(FlowModelImmersedBoundaryMethod *const)) [4] /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModelImmersedBoundaryMethod.hpp(45,17)
+  -> INLINE: (45,17) FlowModelImmersedBoundaryMethod::~FlowModelImmersedBoundaryMethod(FlowModelImmersedBoundaryMethod *)
+    -> INLINE: (45,53) std::weak_ptr<FlowModel>::~weak_ptr(std::weak_ptr<FlowModel> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (45,53) std::shared_ptr<EquationOfStateMixingRules>::~shared_ptr(std::shared_ptr<EquationOfStateMixingRules> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (45,53) std::shared_ptr<ImmersedBoundaries>::~shared_ptr(std::shared_ptr<ImmersedBoundaries> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (45,53) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (45,53) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModelImmersedBoundaryMethod.hpp(45,17):remark #34051: REGISTER ALLOCATION : [_ZN31FlowModelImmersedBoundaryMethodD0Ev] /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModelImmersedBoundaryMethod.hpp:45
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    8[ rax rdx rcx rbx rbp rsi rdi r15]
+        
+    Routine temporaries
+        Total         :      72
+            Global    :      32
+            Local     :      40
+        Regenerable   :      16
+        Spilled       :       3
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelImmersedBoundaryMethod::~FlowModelImmersedBoundaryMethod(FlowModelImmersedBoundaryMethod *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (FlowModelImmersedBoundaryMethod::~FlowModelImmersedBoundaryMethod(FlowModelImmersedBoundaryMethod *const)) /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModelImmersedBoundaryMethod.hpp(45,17)
+
+===========================================================================
+
+Begin optimization report for: FlowModelImmersedBoundaryMethodFiveEqnAllaire::FlowModelImmersedBoundaryMethodFiveEqnAllaire(FlowModelImmersedBoundaryMethodFiveEqnAllaire *const, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const int &, const std::shared_ptr<ImmersedBoundaries> &, const std::shared_ptr<SAMRAI::tbox::Database> &, const std::shared_ptr<EquationOfStateMixingRules> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelImmersedBoundaryMethodFiveEqnAllaire::FlowModelImmersedBoundaryMethodFiveEqnAllaire(FlowModelImmersedBoundaryMethodFiveEqnAllaire *const, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const int &, const std::shared_ptr<ImmersedBoundaries> &, const std::shared_ptr<SAMRAI::tbox::Database> &, const std::shared_ptr<EquationOfStateMixingRules> &)) [6] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(3,48)
+  -> (3,48) FlowModelImmersedBoundaryMethodFiveEqnAllaire::FlowModelImmersedBoundaryMethodFiveEqnAllaire(FlowModelImmersedBoundaryMethodFiveEqnAllaire *, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const int &, const std::shared_ptr<ImmersedBoundaries> &, const std::shared_ptr<SAMRAI::tbox::Database> &, const std::shared_ptr<EquationOfStateMixingRules> &)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(3,48):remark #34051: REGISTER ALLOCATION : [_ZN45FlowModelImmersedBoundaryMethodFiveEqnAllaireC2ERKSsRKN6SAMRAI4tbox9DimensionERKSt10shared_ptrINS2_4geom21CartesianGridGeometryEERKiSE_RKS7_I18ImmersedBoundariesERKS7_INS3_8DatabaseEERKS7_I26EquationOfStateMixingRulesE] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp:3
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rdx rcx rsi rdi r8-r9]
+        
+    Routine temporaries
+        Total         :      24
+            Global    :       0
+            Local     :      24
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelImmersedBoundaryMethodFiveEqnAllaire::FlowModelImmersedBoundaryMethodFiveEqnAllaire(FlowModelImmersedBoundaryMethodFiveEqnAllaire *, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const int &, const std::shared_ptr<ImmersedBoundaries> &, const std::shared_ptr<SAMRAI::tbox::Database> &, const std::shared_ptr<EquationOfStateMixingRules> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelImmersedBoundaryMethodFiveEqnAllaire::FlowModelImmersedBoundaryMethodFiveEqnAllaire(FlowModelImmersedBoundaryMethodFiveEqnAllaire *, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const int &, const std::shared_ptr<ImmersedBoundaries> &, const std::shared_ptr<SAMRAI::tbox::Database> &, const std::shared_ptr<EquationOfStateMixingRules> &)) [7] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(21,1)
+  -> (3,48) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+  -> (3,48) std::vector<double, std::allocator<double>>::vector(std::vector<double, std::allocator<double>> *)
+  -> (3,48) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+  -> (3,48) std::vector<double, std::allocator<double>>::vector(std::vector<double, std::allocator<double>> *)
+  -> (3,48) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+  -> (3,48) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+  -> (3,48) std::vector<double, std::allocator<double>>::vector(std::vector<double, std::allocator<double>> *)
+  -> (3,48) std::vector<double, std::allocator<double>>::vector(std::vector<double, std::allocator<double>> *)
+  -> INLINE: (20,13) FlowModelImmersedBoundaryMethod::~FlowModelImmersedBoundaryMethod(FlowModelImmersedBoundaryMethod *const)
+    -> /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModelImmersedBoundaryMethod.hpp:(45,17) FlowModelImmersedBoundaryMethod::~FlowModelImmersedBoundaryMethod(FlowModelImmersedBoundaryMethod *)
+  -> INLINE: (26,36) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (26,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (26,48) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (26,48) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INDIRECT- (VIRTUAL): (26,48)  EXPR_CONV.SI64.P64(*((SI64*) (__$U42_V$745.0.322->__vptr_V$758 + EXPR_CONV.SI32.I64(5(SI32)) * 8(I64))))
+  -> INLINE: (26,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (26,48) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (28,22) std::vector<double, std::allocator<double>>::operator=(std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>> &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (28,22) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (28,22) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (28,22) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (28,51) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (28,67) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (28,67) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (28,67) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INDIRECT- (VIRTUAL): (28,67)  EXPR_CONV.SI64.P64(*((SI64*) (__$U4f_V$757.0.322->__vptr_V$758 + EXPR_CONV.SI32.I64(51(SI32)) * 8(I64))))
+  -> INLINE: (32,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (32,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (32,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (32,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (32,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (32,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (32,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (32,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (32,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (32,9) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (32,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (32,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (32,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (32,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (32,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (38,39) std::vector<double, std::allocator<double>>::size(const std::vector<double, std::allocator<double>> *) const
+  -> INLINE: (40,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (40,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (40,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (40,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (40,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (40,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (40,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (40,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (40,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (40,9) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (40,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (40,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (40,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (40,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (40,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (50,36) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (50,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (50,48) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (50,48) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INDIRECT- (VIRTUAL): (50,48)  EXPR_CONV.SI64.P64(*((SI64*) (__$U44_V$747.0.322->__vptr_V$758 + EXPR_CONV.SI32.I64(5(SI32)) * 8(I64))))
+  -> INLINE: (50,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (50,48) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (52,20) std::vector<double, std::allocator<double>>::operator=(std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>> &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (52,20) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (52,20) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (52,20) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (52,49) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (52,65) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (52,65) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (52,65) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INDIRECT- (VIRTUAL): (52,65)  EXPR_CONV.SI64.P64(*((SI64*) (__$U59_V$76e.0.322->__vptr_V$758 + EXPR_CONV.SI32.I64(51(SI32)) * 8(I64))))
+  -> INLINE: (56,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (56,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (56,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (56,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (56,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (56,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (56,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (56,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (56,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (56,9) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (56,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (56,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (56,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (56,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (56,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (62,37) std::vector<double, std::allocator<double>>::size(const std::vector<double, std::allocator<double>> *) const
+  -> INLINE: (62,54) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+  -> INLINE: (64,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (64,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (64,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (64,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (64,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (64,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (64,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (64,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (64,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (64,9) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (64,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (64,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (64,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (64,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (64,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (74,36) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (74,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (74,48) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (74,48) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INDIRECT- (VIRTUAL): (74,48)  EXPR_CONV.SI64.P64(*((SI64*) (__$U46_V$749.0.322->__vptr_V$758 + EXPR_CONV.SI32.I64(5(SI32)) * 8(I64))))
+  -> INLINE: (74,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (74,48) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (76,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (76,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (76,47) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (76,57) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (76,57) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (76,57) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INDIRECT- (VIRTUAL): (76,57)  EXPR_CONV.SI64.P64(*((SI64*) (__$U62_V$77f.0.322->__vptr_V$758 + EXPR_CONV.SI32.I64(49(SI32)) * 8(I64))))
+  -> INLINE: (80,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (80,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (80,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (80,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (80,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (80,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (80,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (80,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (80,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (80,9) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (80,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (80,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (80,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (80,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (80,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (90,36) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (90,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (90,48) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (90,48) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INDIRECT- (VIRTUAL): (90,48)  EXPR_CONV.SI64.P64(*((SI64*) (__$U48_V$74b.0.322->__vptr_V$758 + EXPR_CONV.SI32.I64(5(SI32)) * 8(I64))))
+  -> INLINE: (90,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (90,48) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (92,18) std::vector<double, std::allocator<double>>::operator=(std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>> &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (92,18) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (92,18) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (92,18) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (92,47) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (92,63) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (92,63) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (92,63) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INDIRECT- (VIRTUAL): (92,63)  EXPR_CONV.SI64.P64(*((SI64*) (__$U69_V$789.0.322->__vptr_V$758 + EXPR_CONV.SI32.I64(51(SI32)) * 8(I64))))
+  -> INLINE: (96,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (96,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (96,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (96,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (96,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (96,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (96,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (96,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (96,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (96,9) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (96,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (96,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (96,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (96,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (96,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (102,35) std::vector<double, std::allocator<double>>::size(const std::vector<double, std::allocator<double>> *) const
+  -> INLINE: (104,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (104,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (104,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (104,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (104,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (104,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (104,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (104,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (104,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (104,9) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (104,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (104,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (104,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (104,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (104,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (113,26) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (116,9) std::abs(double)
+  -> INLINE: (118,9) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (118,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (118,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (118,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (118,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (118,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (118,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (118,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (118,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (118,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (118,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (118,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (118,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (118,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (118,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (126,17) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (129,21) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (129,52) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (140,33) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> (147,30) std::vector<const Real *, std::allocator<const Real *>>::~vector(std::vector<const Real *, std::allocator<const Real *>> *)
+  -> (147,30) std::vector<const Real *, std::allocator<const Real *>>::vector(std::vector<const Real *, std::allocator<const Real *>> *)
+  -> (148,16) std::vector<const Real *, std::allocator<const Real *>>::reserve(std::vector<const Real *, std::allocator<const Real *>> *, std::vector<const Real *, std::allocator<const Real *>>::size_type)
+  -> INLINE: (151,20) std::vector<const Real *, std::allocator<const Real *>>::push_back(std::vector<const Real *, std::allocator<const Real *>> *, std::vector<const Real *, std::allocator<const Real *>>::value_type &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (151,39) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> (162,27) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+  -> (162,27) std::vector<double, std::allocator<double>>::vector(std::vector<double, std::allocator<double>> *)
+  -> (163,28) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (163,28) std::vector<Real *, std::allocator<Real *>>::vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (164,34) std::vector<const Real *, std::allocator<const Real *>>::~vector(std::vector<const Real *, std::allocator<const Real *>> *)
+  -> (164,34) std::vector<const Real *, std::allocator<const Real *>>::vector(std::vector<const Real *, std::allocator<const Real *>> *)
+  -> INLINE: (166,75) std::__shared_ptr<EquationOfStateMixingRules, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<EquationOfStateMixingRules, __gnu_cxx::_S_atomic> *) const
+  -> INDIRECT- (VIRTUAL): (167,55)  EXPR_CONV.SI64.P64(*((SI64*) (__$U74_V$7a4.0.322->__vptr_V$125 + EXPR_CONV.SI32.I64(47(SI32)) * 8(I64))))
+  -> INLINE: (169,35) std::vector<double, std::allocator<double>>::resize(std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (170,39) std::vector<Real *, std::allocator<Real *>>::reserve(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> (171,45) std::vector<const Real *, std::allocator<const Real *>>::reserve(std::vector<const Real *, std::allocator<const Real *>> *, std::vector<const Real *, std::allocator<const Real *>>::size_type)
+  -> INLINE: (175,43) std::vector<Real *, std::allocator<Real *>>::push_back(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::value_type &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (175,79) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (176,49) std::vector<const Real *, std::allocator<const Real *>>::push_back(std::vector<const Real *, std::allocator<const Real *>> *, std::vector<const Real *, std::allocator<const Real *>>::value_type &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (176,85) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (179,41) std::__shared_ptr<EquationOfStateMixingRules, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<EquationOfStateMixingRules, __gnu_cxx::_S_atomic> *) const
+  -> INDIRECT- (VIRTUAL): (181,13)  EXPR_CONV.SI64.P64(*((SI64*) (__$U75_V$7a5.0.322->__vptr_V$125 + EXPR_CONV.SI32.I64(48(SI32)) * 8(I64))))
+  -> INLINE: (183,45) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (183,58) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (185,63) std::__shared_ptr<EquationOfStateMixingRules, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<EquationOfStateMixingRules, __gnu_cxx::_S_atomic> *) const
+  -> INDIRECT- (VIRTUAL): (185,84)  EXPR_CONV.SI64.P64(*((SI64*) (__$U76_V$7a6.0.322->__vptr_V$125 + EXPR_CONV.SI32.I64(2(SI32)) * 8(I64))))
+  -> INLINE: (185,87) std::__shared_ptr<EquationOfState, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<EquationOfState, __gnu_cxx::_S_atomic> *) const
+  -> INDIRECT- (VIRTUAL): (189,17)  EXPR_CONV.SI64.P64(*((SI64*) (__$U77_V$7a7.0.322->__vptr_V$11b + EXPR_CONV.SI32.I64(23(SI32)) * 8(I64))))
+  -> INLINE: (191,69) std::__shared_ptr<EquationOfStateMixingRules, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<EquationOfStateMixingRules, __gnu_cxx::_S_atomic> *) const
+  -> INDIRECT- (VIRTUAL): (191,90)  EXPR_CONV.SI64.P64(*((SI64*) (__$U78_V$7a8.0.322->__vptr_V$125 + EXPR_CONV.SI32.I64(2(SI32)) * 8(I64))))
+  -> INLINE: (191,93) std::__shared_ptr<EquationOfState, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<EquationOfState, __gnu_cxx::_S_atomic> *) const
+  -> INDIRECT- (VIRTUAL): (195,17)  EXPR_CONV.SI64.P64(*((SI64*) (__$U79_V$7a9.0.322->__vptr_V$11b + EXPR_CONV.SI32.I64(28(SI32)) * 8(I64))))
+  -> INLINE: (197,52) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (198,5) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (198,5) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (198,5) std::vector<const Real *, std::allocator<const Real *>>::~vector(std::vector<const Real *, std::allocator<const Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (202,16) std::vector<double, std::allocator<double>>::resize(std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (202,29) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+  -> INLINE: (204,5) std::vector<const Real *, std::allocator<const Real *>>::~vector(std::vector<const Real *, std::allocator<const Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (204,15) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (206,40) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (208,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (213,20) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (215,40) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (216,40) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (218,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (219,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (224,20) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (226,40) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (227,40) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (228,40) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (230,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (231,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (232,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(111,5)
+<Peeled loop for vectorization>
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(111,5)
+   remark #15300: LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(111,5)
+<Remainder loop for vectorization>
+   remark #15301: REMAINDER LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(111,5)
+<Remainder loop for vectorization>
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(127,9)
+   remark #15523: loop was not vectorized: loop control variable si was found, but loop iteration count cannot be computed before executing the loop
+   remark #25478: While Loop Unrolled by 2  
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(138,5)
+<Peeled loop for vectorization>
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(138,5)
+   remark #15300: LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(138,5)
+<Remainder loop for vectorization>
+   remark #15301: REMAINDER LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(138,5)
+<Remainder loop for vectorization>
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(149,5)
+   remark #15523: loop was not vectorized: loop control variable si was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(160,5)
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(173,9)
+      remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/bits/vector.tcc(101,4) ]
+      remark #25439: unrolled with remainder by 2  
+   LOOP END
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(173,9)
+   <Remainder>
+   LOOP END
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/basic_string.h(1725,18):remark #34000: call to memcpy implemented inline with loads and stores with proven source (alignment, offset): (16, 0), and destination (alignment, offset): (1, 0)
+/usr/include/c++/4.8.5/bits/basic_string.h(1725,18):remark #34000: call to memcpy implemented inline with loads and stores with proven source (alignment, offset): (16, 0), and destination (alignment, offset): (1, 0)
+/usr/include/c++/4.8.5/bits/basic_string.h(1725,18):remark #34000: call to memcpy implemented inline with loads and stores with proven source (alignment, offset): (16, 0), and destination (alignment, offset): (1, 0)
+/usr/include/c++/4.8.5/bits/basic_string.h(1725,18):remark #34000: call to memcpy implemented inline with loads and stores with proven source (alignment, offset): (16, 0), and destination (alignment, offset): (1, 0)
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/basic_string.h(1725,18):remark #34000: call to memcpy implemented inline with loads and stores with proven source (alignment, offset): (16, 0), and destination (alignment, offset): (1, 0)
+/usr/include/c++/4.8.5/bits/basic_string.h(1725,18):remark #34000: call to memcpy implemented inline with loads and stores with proven source (alignment, offset): (16, 0), and destination (alignment, offset): (1, 0)
+/usr/include/c++/4.8.5/bits/stl_vector.h(444,9):remark #34000: call to memcpy implemented inline with loads and stores with proven source (alignment, offset): (16, 0), and destination (alignment, offset): (1, 0)
+/usr/include/c++/4.8.5/bits/stl_vector.h(444,9):remark #34000: call to memcpy implemented inline with loads and stores with proven source (alignment, offset): (16, 0), and destination (alignment, offset): (1, 0)
+/usr/include/c++/4.8.5/bits/stl_vector.h(444,9):remark #34000: call to memcpy implemented inline with loads and stores with proven source (alignment, offset): (16, 0), and destination (alignment, offset): (1, 0)
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(21,1):remark #34051: REGISTER ALLOCATION : [_ZN45FlowModelImmersedBoundaryMethodFiveEqnAllaireC1ERKSsRKN6SAMRAI4tbox9DimensionERKSt10shared_ptrINS2_4geom21CartesianGridGeometryEERKiSE_RKS7_I18ImmersedBoundariesERKS7_INS3_8DatabaseEERKS7_I26EquationOfStateMixingRulesE] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp:21
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   24[ rax rdx rcx rbx rsi rdi r8-r15 zmm0-zmm9]
+        
+    Routine temporaries
+        Total         :    2935
+            Global    :     685
+            Local     :    2250
+        Regenerable   :    1086
+        Spilled       :      16
+        
+    Routine stack
+        Variables     :    3546 bytes*
+            Reads     :     237 [3.12e+02 ~ 11.6%]
+            Writes    :     447 [3.29e+02 ~ 12.2%]
+        Spills        :      88 bytes*
+            Reads     :      39 [9.47e+01 ~ 3.5%]
+            Writes    :      19 [3.34e+01 ~ 1.2%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::char_traits<char>::length(const std::char_traits<char>::char_type *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(259,7):remark #34051: REGISTER ALLOCATION : [_ZNSt11char_traitsIcE6lengthEPKc] /usr/include/c++/4.8.5/bits/char_traits.h:259
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      12
+            Global    :       7
+            Local     :       5
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::basic_string<char, std::char_traits<char>, std::allocator<char>>::_S_construct<char *>(char *, char *, const std::allocator<char> &, std::forward_iterator_tag)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/basic_string.tcc(126,7):remark #34051: REGISTER ALLOCATION : [_ZNSs12_S_constructIPcEES0_T_S1_RKSaIcESt20forward_iterator_tag] /usr/include/c++/4.8.5/bits/basic_string.tcc:126
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    9[ rax rdx rcx rsi rdi r12-r15]
+        
+    Routine temporaries
+        Total         :      30
+            Global    :      13
+            Local     :      17
+        Regenerable   :       7
+        Spilled       :       4
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<const Real *, std::allocator<const Real *>>::_M_emplace_back_aux<std::remove_reference<std::vector<const Real *, std::allocator<const Real *>>::value_type &>::type>(std::vector<const Real *, std::allocator<const Real *>> *, std::remove_reference<std::vector<const Real *, std::allocator<const Real *>>::value_type &>::type &&)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/vector.tcc(401,7):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIPKdSaIS1_EE19_M_emplace_back_auxIIS1_EEEvDpOT_] /usr/include/c++/4.8.5/bits/vector.tcc:401
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    9[ rax rdx rbp rsi rdi r12-r15]
+        
+    Routine temporaries
+        Total         :      33
+            Global    :      16
+            Local     :      17
+        Regenerable   :       2
+        Spilled       :       5
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<const Real *, std::allocator<const Real *>>::size(const std::vector<const Real *, std::allocator<const Real *>> *) const
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(646,7):remark #34051: REGISTER ALLOCATION : [_ZNKSt6vectorIPKdSaIS1_EE4sizeEv] /usr/include/c++/4.8.5/bits/stl_vector.h:646
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rax rdi]
+        
+    Routine temporaries
+        Total         :      12
+            Global    :       0
+            Local     :      12
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<const Real *, std::allocator<const Real *>>::_M_get_Tp_allocator(std::_Vector_base<const Real *, std::allocator<const Real *>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(114,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIPKdSaIS1_EE19_M_get_Tp_allocatorEv] /usr/include/c++/4.8.5/bits/stl_vector.h:114
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rax rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<const Real *, std::allocator<const Real *>>::_M_deallocate(std::_Vector_base<const Real *, std::allocator<const Real *>> *, std::_Vector_base<const Real *, std::allocator<const Real *>>::pointer, std::size_t)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(172,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIPKdSaIS1_EE13_M_deallocateEPS1_m] /usr/include/c++/4.8.5/bits/stl_vector.h:172
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      11
+            Global    :       7
+            Local     :       4
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<Real *, std::allocator<Real *>>::_M_emplace_back_aux<std::remove_reference<std::_Vector_base<double, std::allocator<double>>::pointer &>::type>(std::vector<Real *, std::allocator<Real *>> *, std::remove_reference<std::_Vector_base<double, std::allocator<double>>::pointer &>::type &&)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/vector.tcc(401,7):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIPdSaIS0_EE19_M_emplace_back_auxIIS0_EEEvDpOT_] /usr/include/c++/4.8.5/bits/vector.tcc:401
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    9[ rax rdx rbp rsi rdi r12-r15]
+        
+    Routine temporaries
+        Total         :      33
+            Global    :      16
+            Local     :      17
+        Regenerable   :       2
+        Spilled       :       5
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<Real *, std::allocator<Real *>>::~_Vector_base(std::_Vector_base<Real *, std::allocator<Real *>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(160,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIPdSaIS0_EED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:160
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       7
+            Local     :       3
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<double, std::allocator<double>>::vector(std::vector<double, std::allocator<double>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(249,17):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIdSaIdEEC1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:249
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rax rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<Real *, std::allocator<Real *>>::vector(std::vector<Real *, std::allocator<Real *>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(249,17):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIPdSaIS0_EEC1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:249
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rax rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<const Real *, std::allocator<const Real *>>::vector(std::vector<const Real *, std::allocator<const Real *>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(249,17):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIPKdSaIS1_EEC1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:249
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rax rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<const Real *, std::allocator<const Real *>>::reserve(std::vector<const Real *, std::allocator<const Real *>> *, std::vector<const Real *, std::allocator<const Real *>>::size_type)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/vector.tcc(67,5):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIPKdSaIS1_EE7reserveEm] /usr/include/c++/4.8.5/bits/vector.tcc:67
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   11[ rax rdx rcx rbx rbp rsi rdi r12-r15]
+        
+    Routine temporaries
+        Total         :      34
+            Global    :      18
+            Local     :      16
+        Regenerable   :       3
+        Spilled       :       6
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<Real *, std::allocator<Real *>>::reserve(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/vector.tcc(67,5):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIPdSaIS0_EE7reserveEm] /usr/include/c++/4.8.5/bits/vector.tcc:67
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   11[ rax rdx rcx rbx rbp rsi rdi r12-r15]
+        
+    Routine temporaries
+        Total         :      34
+            Global    :      18
+            Local     :      16
+        Regenerable   :       3
+        Spilled       :       6
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::basic_stringbuf<char, std::char_traits<char>, std::allocator<char>>::~basic_stringbuf(std::basic_stringbuf<char, std::char_traits<char>, std::allocator<char>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/iosfwd(93,11):remark #34051: REGISTER ALLOCATION : [_ZNSt15basic_stringbufIcSt11char_traitsIcESaIcEED1Ev] /usr/include/c++/4.8.5/iosfwd:93
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rbp rsi rdi]
+        
+    Routine temporaries
+        Total         :      21
+            Global    :      11
+            Local     :      10
+        Regenerable   :       5
+        Spilled       :       1
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: __gnu_cxx::__exchange_and_add_dispatch(_Atomic_word *, int)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/ext/atomicity.h(79,3):remark #34051: REGISTER ALLOCATION : [_ZN17_INTERNAL2bab096a9__gnu_cxx27__exchange_and_add_dispatchEPii] /usr/include/c++/4.8.5/ext/atomicity.h:79
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    4[ rax rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      16
+            Global    :       8
+            Local     :       8
+        Regenerable   :       2
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<double, std::allocator<double>>::~_Vector_base(std::_Vector_base<double, std::allocator<double>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(160,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIdSaIdEED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:160
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       7
+            Local     :       3
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<double, std::allocator<double>>::_M_move_assign(std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>> &&, std::true_type)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(1363,7):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIdSaIdEE14_M_move_assignEOS1_St17integral_constantIbLb1EE] /usr/include/c++/4.8.5/bits/stl_vector.h:1363
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   11[ rax rdx rcx rsi rdi r8-r13]
+        
+    Routine temporaries
+        Total         :      26
+            Global    :      11
+            Local     :      15
+        Regenerable   :       4
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :      25 bytes*
+            Reads     :       3 [3.00e+00 ~ 6.6%]
+            Writes    :       3 [8.35e-01 ~ 1.9%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<double, std::allocator<double>>::vector(std::vector<double, std::allocator<double>> *, const std::vector<double, std::allocator<double>>::allocator_type &)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(257,20):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIdSaIdEEC1ERKS0_] /usr/include/c++/4.8.5/bits/stl_vector.h:257
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rsi rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       0
+            Local     :      10
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<const Real *, std::allocator<const Real *>>::~_Vector_base(std::_Vector_base<const Real *, std::allocator<const Real *>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(160,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIPKdSaIS1_EED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:160
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       7
+            Local     :       3
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(415,7):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIdSaIdEED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:415
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       7
+            Local     :       3
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelImmersedBoundaryMethod::~FlowModelImmersedBoundaryMethod(FlowModelImmersedBoundaryMethod *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelImmersedBoundaryMethod::~FlowModelImmersedBoundaryMethod(FlowModelImmersedBoundaryMethod *)) [48] /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModelImmersedBoundaryMethod.hpp(45,52)
+  -> INLINE: (45,53) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (45,53) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (45,53) std::shared_ptr<ImmersedBoundaries>::~shared_ptr(std::shared_ptr<ImmersedBoundaries> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (45,53) std::shared_ptr<EquationOfStateMixingRules>::~shared_ptr(std::shared_ptr<EquationOfStateMixingRules> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (45,53) std::weak_ptr<FlowModel>::~weak_ptr(std::weak_ptr<FlowModel> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModelImmersedBoundaryMethod.hpp(45,52):remark #34051: REGISTER ALLOCATION : [_ZN31FlowModelImmersedBoundaryMethodD1Ev] /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModelImmersedBoundaryMethod.hpp:45
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    8[ rax rdx rcx rbx rsi rdi r14-r15]
+        
+    Routine temporaries
+        Total         :      71
+            Global    :      32
+            Local     :      39
+        Regenerable   :      16
+        Spilled       :       3
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<const Real *, std::allocator<const Real *>>::~vector(std::vector<const Real *, std::allocator<const Real *>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(415,7):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIPKdSaIS1_EED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:415
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       7
+            Local     :       3
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelImmersedBoundaryMethodFiveEqnAllaire::~FlowModelImmersedBoundaryMethodFiveEqnAllaire(FlowModelImmersedBoundaryMethodFiveEqnAllaire *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelImmersedBoundaryMethodFiveEqnAllaire::~FlowModelImmersedBoundaryMethodFiveEqnAllaire(FlowModelImmersedBoundaryMethodFiveEqnAllaire *)) [50] /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.hpp(19,58)
+  -> INLINE: (19,59) FlowModelImmersedBoundaryMethod::~FlowModelImmersedBoundaryMethod(FlowModelImmersedBoundaryMethod *const)
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModelImmersedBoundaryMethod.hpp:(45,17) FlowModelImmersedBoundaryMethod::~FlowModelImmersedBoundaryMethod(FlowModelImmersedBoundaryMethod *)
+      -> INLINE: (45,53) std::weak_ptr<FlowModel>::~weak_ptr(std::weak_ptr<FlowModel> *)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+      -> INLINE: (45,53) std::shared_ptr<EquationOfStateMixingRules>::~shared_ptr(std::shared_ptr<EquationOfStateMixingRules> *)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+      -> INLINE: (45,53) std::shared_ptr<ImmersedBoundaries>::~shared_ptr(std::shared_ptr<ImmersedBoundaries> *)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+      -> INLINE: (45,53) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+      -> INLINE: (45,53) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (19,59) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (19,59) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (19,59) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (19,59) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.hpp(19,58):remark #34051: REGISTER ALLOCATION : [_ZN45FlowModelImmersedBoundaryMethodFiveEqnAllaireD1Ev] /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.hpp:19
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    8[ rax rdx rcx rbx rsi rdi r14-r15]
+        
+    Routine temporaries
+        Total         :      79
+            Global    :      36
+            Local     :      43
+        Regenerable   :      16
+        Spilled       :       3
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelImmersedBoundaryMethodFiveEqnAllaire::~FlowModelImmersedBoundaryMethodFiveEqnAllaire(FlowModelImmersedBoundaryMethodFiveEqnAllaire *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelImmersedBoundaryMethodFiveEqnAllaire::~FlowModelImmersedBoundaryMethodFiveEqnAllaire(FlowModelImmersedBoundaryMethodFiveEqnAllaire *const)) [51] /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.hpp(19,9)
+  -> INLINE: (19,9) FlowModelImmersedBoundaryMethodFiveEqnAllaire::~FlowModelImmersedBoundaryMethodFiveEqnAllaire(FlowModelImmersedBoundaryMethodFiveEqnAllaire *)
+    -> INLINE: (19,59) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (19,59) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (19,59) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (19,59) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (19,59) FlowModelImmersedBoundaryMethod::~FlowModelImmersedBoundaryMethod(FlowModelImmersedBoundaryMethod *const)
+      -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModelImmersedBoundaryMethod.hpp:(45,17) FlowModelImmersedBoundaryMethod::~FlowModelImmersedBoundaryMethod(FlowModelImmersedBoundaryMethod *)
+        -> INLINE: (45,53) std::weak_ptr<FlowModel>::~weak_ptr(std::weak_ptr<FlowModel> *)
+           {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+        -> INLINE: (45,53) std::shared_ptr<EquationOfStateMixingRules>::~shared_ptr(std::shared_ptr<EquationOfStateMixingRules> *)
+           {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+        -> INLINE: (45,53) std::shared_ptr<ImmersedBoundaries>::~shared_ptr(std::shared_ptr<ImmersedBoundaries> *)
+           {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+        -> INLINE: (45,53) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+           {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+        -> INLINE: (45,53) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+           {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.hpp(19,9):remark #34051: REGISTER ALLOCATION : [_ZN45FlowModelImmersedBoundaryMethodFiveEqnAllaireD0Ev] /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.hpp:19
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    8[ rax rdx rcx rbx rsi rdi r14-r15]
+        
+    Routine temporaries
+        Total         :      80
+            Global    :      36
+            Local     :      44
+        Regenerable   :      16
+        Spilled       :       3
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelImmersedBoundaryMethodFiveEqnAllaire::setConservativeVariablesCellDataImmersedBoundaryGhosts(FlowModelImmersedBoundaryMethodFiveEqnAllaire *, const SAMRAI::hier::Patch &, double, bool, const std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>> &, const std::shared_ptr<SAMRAI::pdat::CellData<int>> &, const std::shared_ptr<SAMRAI::pdat::CellData<Real>> &, const std::shared_ptr<SAMRAI::pdat::CellData<Real>> &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelImmersedBoundaryMethodFiveEqnAllaire::setConservativeVariablesCellDataImmersedBoundaryGhosts(FlowModelImmersedBoundaryMethodFiveEqnAllaire *, const SAMRAI::hier::Patch &, double, bool, const std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>> &, const std::shared_ptr<SAMRAI::pdat::CellData<int>> &, const std::shared_ptr<SAMRAI::pdat::CellData<Real>> &, const std::shared_ptr<SAMRAI::pdat::CellData<Real>> &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &)) [52] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(257,1)
+  -> INLINE: (265,59) std::shared_ptr<SAMRAI::hier::PatchGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::hier::PatchGeometry> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (266,9) std::shared_ptr<SAMRAI::geom::CartesianPatchGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianPatchGeometry> *)
+  -> INLINE: (266,9) std::static_pointer_cast<SAMRAI::geom::CartesianPatchGeometry, SAMRAI::hier::PatchGeometry>(std::shared_ptr<SAMRAI::geom::CartesianPatchGeometry> *, const std::shared_ptr<SAMRAI::hier::PatchGeometry> &)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (267,19) SAMRAI::hier::Patch::getPatchGeometry(std::shared_ptr<SAMRAI::hier::PatchGeometry> *, const SAMRAI::hier::Patch *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Patch.h:(346,14) std::shared_ptr<SAMRAI::hier::PatchGeometry>::shared_ptr(std::shared_ptr<SAMRAI::hier::PatchGeometry> *, const std::shared_ptr<SAMRAI::hier::PatchGeometry> &)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (280,92) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::~shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *)
+  -> INLINE: (280,92) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *, const std::shared_ptr<SAMRAI::pdat::CellData<Real>> &)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (280,92) std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>>::operator[](const std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>>::size_type) const
+  -> (281,92) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::~shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *)
+  -> INLINE: (281,92) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *, const std::shared_ptr<SAMRAI::pdat::CellData<Real>> &)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (281,92) std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>>::operator[](const std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>>::size_type) const
+  -> (282,92) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::~shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *)
+  -> INLINE: (282,92) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *, const std::shared_ptr<SAMRAI::pdat::CellData<Real>> &)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (282,92) std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>>::operator[](const std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>>::size_type) const
+  -> (283,92) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::~shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *)
+  -> INLINE: (283,92) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *, const std::shared_ptr<SAMRAI::pdat::CellData<Real>> &)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (283,92) std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>>::operator[](const std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>>::size_type) const
+  -> (289,24) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (289,24) std::vector<Real *, std::allocator<Real *>>::vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> INLINE: (290,11) std::vector<Real *, std::allocator<Real *>>::reserve(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (293,15) std::vector<Real *, std::allocator<Real *>>::push_back(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::value_type &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (293,47) std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (293,49) SAMRAI::pdat::CellData<Real>::getPointer(SAMRAI::pdat::CellData<Real> *, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,17) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,19) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (295,32) std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (295,34) SAMRAI::pdat::CellData<Real>::getPointer(SAMRAI::pdat::CellData<Real> *, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,17) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,19) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> (296,24) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (296,24) std::vector<Real *, std::allocator<Real *>>::vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> INLINE: (297,7) std::vector<Real *, std::allocator<Real *>>::reserve(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (300,11) std::vector<Real *, std::allocator<Real *>>::push_back(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::value_type &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (300,42) std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (300,44) SAMRAI::pdat::CellData<Real>::getPointer(SAMRAI::pdat::CellData<Real> *, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,17) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,19) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (303,26) std::__shared_ptr<SAMRAI::pdat::CellData<int>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::CellData<int>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (303,28) SAMRAI::pdat::CellData<int>::getPointer(SAMRAI::pdat::CellData<int> *, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,17) std::__shared_ptr<SAMRAI::pdat::ArrayData<int>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<int>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,19) SAMRAI::pdat::ArrayData<int>::getPointer(SAMRAI::pdat::ArrayData<int> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type)
+  -> INLINE: (306,5) std::shared_ptr<SAMRAI::geom::CartesianPatchGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianPatchGeometry> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (306,5) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::~shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (306,5) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::~shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (306,5) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::~shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (306,5) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::~shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (306,5) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (306,5) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (306,15) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (308,44) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (310,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (311,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (313,54) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (314,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (317,36) std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (317,38) SAMRAI::pdat::CellData<Real>::getPointer(SAMRAI::pdat::CellData<Real> *, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,17) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,19) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (333,26) std::vector<Real *, std::allocator<Real *>>::operator[](std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (333,59) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (334,22) std::vector<Real *, std::allocator<Real *>>::operator[](std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (334,55) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (338,26) std::vector<Real *, std::allocator<Real *>>::operator[](std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (338,59) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (339,22) std::vector<Real *, std::allocator<Real *>>::operator[](std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (339,55) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (364,20) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (366,44) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (367,44) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (369,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (370,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (371,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (372,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (374,54) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (375,54) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (376,69) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (378,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (379,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (380,57) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (383,36) std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (383,38) SAMRAI::pdat::CellData<Real>::getPointer(SAMRAI::pdat::CellData<Real> *, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,17) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,19) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (384,36) std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (384,38) SAMRAI::pdat::CellData<Real>::getPointer(SAMRAI::pdat::CellData<Real> *, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,17) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,19) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (406,30) std::vector<Real *, std::allocator<Real *>>::operator[](std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (406,63) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (407,26) std::vector<Real *, std::allocator<Real *>>::operator[](std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (407,59) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (411,30) std::vector<Real *, std::allocator<Real *>>::operator[](std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (411,63) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (412,26) std::vector<Real *, std::allocator<Real *>>::operator[](std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (412,59) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (446,20) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (448,44) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (449,44) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (450,44) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (452,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (453,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (454,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (455,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (456,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (457,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (459,54) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (460,54) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (461,54) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (462,69) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (463,69) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (465,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (466,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (467,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (468,57) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (469,57) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (472,36) std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (472,38) SAMRAI::pdat::CellData<Real>::getPointer(SAMRAI::pdat::CellData<Real> *, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,17) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,19) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (473,36) std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (473,38) SAMRAI::pdat::CellData<Real>::getPointer(SAMRAI::pdat::CellData<Real> *, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,17) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,19) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (474,36) std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::CellData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (474,38) SAMRAI::pdat::CellData<Real>::getPointer(SAMRAI::pdat::CellData<Real> *, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,17) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp:(128,19) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (503,34) std::vector<Real *, std::allocator<Real *>>::operator[](std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (503,67) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (504,30) std::vector<Real *, std::allocator<Real *>>::operator[](std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (504,63) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (508,34) std::vector<Real *, std::allocator<Real *>>::operator[](std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (508,67) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (509,30) std::vector<Real *, std::allocator<Real *>>::operator[](std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (509,63) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(291,5)
+   remark #15523: loop was not vectorized: loop control variable si was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(298,5)
+   remark #15523: loop was not vectorized: loop control variable si was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(321,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between Z_rho.Z_rho.Z_rho.Z_rho[si][idx_cons_var] (333:26) and Z.Z.Z.Z[si][idx_cons_var] (339:22)
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(324,13)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed OUTPUT dependence between Z_rho.Z_rho.Z_rho.Z_rho[si][idx_cons_var] (333:26) and Z.Z.Z.Z[si][idx_cons_var] (339:22)
+      remark #25439: unrolled with remainder by 2  
+   LOOP END
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(324,13)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(345,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between rho_u[idx_cons_var] (354:17) and E[idx_cons_var] (360:17)
+   remark #25439: unrolled with remainder by 2  
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(345,9)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(389,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between Z_rho.Z_rho.Z_rho.Z_rho[si][idx_cons_var] (406:30) and Z.Z.Z.Z[si][idx_cons_var] (412:26)
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(391,13)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed OUTPUT dependence between Z_rho.Z_rho.Z_rho.Z_rho[si][idx_cons_var] (406:30) and Z.Z.Z.Z[si][idx_cons_var] (412:26)
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(394,17)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+         remark #15346: vector dependence: assumed OUTPUT dependence between Z_rho.Z_rho.Z_rho.Z_rho[si][idx_cons_var] (406:30) and Z.Z.Z.Z[si][idx_cons_var] (412:26)
+         remark #25439: unrolled with remainder by 2  
+      LOOP END
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(394,17)
+      <Remainder>
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(418,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between rho_u[idx_cons_var] (433:21) and E[idx_cons_var] (441:21)
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(421,13)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed OUTPUT dependence between rho_u[idx_cons_var] (433:21) and E[idx_cons_var] (441:21)
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(480,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between Z_rho.Z_rho.Z_rho.Z_rho[si][idx_cons_var] (503:34) and Z.Z.Z.Z[si][idx_cons_var] (509:30)
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(482,13)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed OUTPUT dependence between Z_rho.Z_rho.Z_rho.Z_rho[si][idx_cons_var] (503:34) and Z.Z.Z.Z[si][idx_cons_var] (509:30)
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(484,17)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+         remark #15346: vector dependence: assumed OUTPUT dependence between Z_rho.Z_rho.Z_rho.Z_rho[si][idx_cons_var] (503:34) and Z.Z.Z.Z[si][idx_cons_var] (509:30)
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(487,21)
+            remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+            remark #15346: vector dependence: assumed OUTPUT dependence between Z_rho.Z_rho.Z_rho.Z_rho[si][idx_cons_var] (503:34) and Z.Z.Z.Z[si][idx_cons_var] (509:30)
+            remark #25439: unrolled with remainder by 2  
+         LOOP END
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(487,21)
+         <Remainder>
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(516,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between rho_u[idx_cons_var] (537:25) and E[idx_cons_var] (547:25)
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(518,13)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed OUTPUT dependence between rho_u[idx_cons_var] (537:25) and E[idx_cons_var] (547:25)
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(521,17)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+         remark #15346: vector dependence: assumed OUTPUT dependence between rho_u[idx_cons_var] (537:25) and E[idx_cons_var] (547:25)
+      LOOP END
+   LOOP END
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp(257,1):remark #34051: REGISTER ALLOCATION : [_ZN45FlowModelImmersedBoundaryMethodFiveEqnAllaire54setConservativeVariablesCellDataImmersedBoundaryGhostsERKN6SAMRAI4hier5PatchEdbRKSt6vectorISt10shared_ptrINS0_4pdat8CellDataIdEEESaISA_EERKS6_INS8_IiEEERKSA_SK_RKNS1_9IntVectorESN_SN_SN_SN_SN_] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/five-eqn_Allaire/FlowModelImmersedBoundaryMethodFiveEqnAllaire.cpp:257
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   16[ rax rdx rcx rbx rbp rsi rdi r8-r15 zmm0]
+        
+    Routine temporaries
+        Total         :     709
+            Global    :     232
+            Local     :     477
+        Regenerable   :      77
+        Spilled       :      85
+        
+    Routine stack
+        Variables     :     156 bytes*
+            Reads     :      40 [5.06e+01 ~ 1.7%]
+            Writes    :      29 [3.21e+01 ~ 1.1%]
+        Spills        :     632 bytes*
+            Reads     :     150 [2.94e+02 ~ 10.0%]
+            Writes    :     102 [1.14e+02 ~ 3.9%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<Real *, std::allocator<Real *>>::_M_get_Tp_allocator(std::_Vector_base<Real *, std::allocator<Real *>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(114,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIPdSaIS0_EE19_M_get_Tp_allocatorEv] /usr/include/c++/4.8.5/bits/stl_vector.h:114
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rax rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<Real *, std::allocator<Real *>>::size(const std::vector<Real *, std::allocator<Real *>> *) const
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(646,7):remark #34051: REGISTER ALLOCATION : [_ZNKSt6vectorIPdSaIS0_EE4sizeEv] /usr/include/c++/4.8.5/bits/stl_vector.h:646
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rax rdi]
+        
+    Routine temporaries
+        Total         :      12
+            Global    :       0
+            Local     :      12
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::shared_ptr<SAMRAI::pdat::CellData<Real>>::~shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr.h(93,11):remark #34051: REGISTER ALLOCATION : [_ZNSt10shared_ptrIN6SAMRAI4pdat8CellDataIdEEED1Ev] /usr/include/c++/4.8.5/bits/shared_ptr.h:93
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rdi r12-r13]
+        
+    Routine temporaries
+        Total         :      24
+            Global    :      12
+            Local     :      12
+        Regenerable   :       3
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<Real *, std::allocator<Real *>>::_M_deallocate(std::_Vector_base<Real *, std::allocator<Real *>> *, std::_Vector_base<Real *, std::allocator<Real *>>::pointer, std::size_t)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(172,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIPdSaIS0_EE13_M_deallocateEPS0_m] /usr/include/c++/4.8.5/bits/stl_vector.h:172
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      11
+            Global    :       7
+            Local     :       4
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(415,7):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIPdSaIS0_EED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:415
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       7
+            Local     :       3
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::shared_ptr<SAMRAI::geom::CartesianPatchGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianPatchGeometry> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr.h(93,11):remark #34051: REGISTER ALLOCATION : [_ZNSt10shared_ptrIN6SAMRAI4geom22CartesianPatchGeometryEED1Ev] /usr/include/c++/4.8.5/bits/shared_ptr.h:93
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rdi r12-r13]
+        
+    Routine temporaries
+        Total         :      24
+            Global    :      12
+            Local     :      12
+        Regenerable   :       3
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const) /home/akula/libraries/SAMRAI/include/SAMRAI/tbox/Dimension.h(73,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/tbox/Dimension.h(137,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(269,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Patch::getPatchGeometry(std::shared_ptr<SAMRAI::hier::PatchGeometry> *, const SAMRAI::hier::Patch *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Patch::getPatchGeometry(std::shared_ptr<SAMRAI::hier::PatchGeometry> *, const SAMRAI::hier::Patch *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Patch.h(345,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::pdat::CellData<int>::getPointer(SAMRAI::pdat::CellData<int> *, int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::pdat::CellData<int>::getPointer(SAMRAI::pdat::CellData<int> *, int)) /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp(125,1)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::pdat::CellData<Real>::getPointer(SAMRAI::pdat::CellData<Real> *, int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::pdat::CellData<Real>::getPointer(SAMRAI::pdat::CellData<Real> *, int)) /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/CellData.cpp(125,1)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::pdat::ArrayData<int>::getPointer(SAMRAI::pdat::ArrayData<int> *, unsigned int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::pdat::ArrayData<int>::getPointer(SAMRAI::pdat::ArrayData<int> *, unsigned int)) /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp(207,1)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)) /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp(207,1)
+
+===========================================================================
+
+Begin optimization report for: __sti__$E()
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (__sti__$E()) [305] <compiler generated>
+
+
+    Report from: Code generation optimizations [cg]
+
+<compiler generated>:remark #34051: REGISTER ALLOCATION : [__sti__$E] (null):0
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       7
+            Local     :       6
+        Regenerable   :       7
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<double, std::allocator<double>>::_M_get_Tp_allocator(std::_Vector_base<double, std::allocator<double>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(114,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIdSaIdEE19_M_get_Tp_allocatorEv] /usr/include/c++/4.8.5/bits/stl_vector.h:114
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rax rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<double, std::allocator<double>>::_M_deallocate(std::_Vector_base<double, std::allocator<double>> *, std::_Vector_base<double, std::allocator<double>>::pointer, std::size_t)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(172,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIdSaIdEE13_M_deallocateEPdm] /usr/include/c++/4.8.5/bits/stl_vector.h:172
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      11
+            Global    :       7
+            Local     :       4
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<double, std::allocator<double>>::_M_default_append(std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into /usr/include/c++/4.8.5/bits/vector.tcc(541,8)
+   remark #25408: memset generated
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into /usr/include/c++/4.8.5/bits/vector.tcc(541,8)
+      remark #15300: LOOP WAS VECTORIZED
+   LOOP END
+
+   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into /usr/include/c++/4.8.5/bits/vector.tcc(541,8)
+   <Remainder loop for vectorization>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into /usr/include/c++/4.8.5/bits/vector.tcc(558,5)
+   remark #25408: memset generated
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into /usr/include/c++/4.8.5/bits/vector.tcc(558,5)
+      remark #15300: LOOP WAS VECTORIZED
+   LOOP END
+
+   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into /usr/include/c++/4.8.5/bits/vector.tcc(558,5)
+   <Remainder loop for vectorization>
+   LOOP END
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(749,7):remark #34026: call to memset implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(749,7):remark #34026: call to memset implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/vector.tcc(534,5):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIdSaIdEE17_M_default_appendEm] /usr/include/c++/4.8.5/bits/vector.tcc:534
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   12[ rax rdx rcx rbx rsi rdi r8 r12-r15 zmm0]
+        
+    Routine temporaries
+        Total         :      56
+            Global    :      28
+            Local     :      28
+        Regenerable   :      11
+        Spilled       :       7
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :      16 bytes*
+            Reads     :       3 [8.34e-01 ~ 0.8%]
+            Writes    :       3 [8.34e-01 ~ 0.8%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================

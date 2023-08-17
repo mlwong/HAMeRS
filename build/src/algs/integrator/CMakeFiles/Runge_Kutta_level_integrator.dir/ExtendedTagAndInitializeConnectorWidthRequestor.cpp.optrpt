@@ -1,0 +1,878 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINING OPTION VALUES:
+  -inline-factor: 100
+  -inline-min-size: 30
+  -inline-max-size: 230
+  -inline-max-total-size: 2000
+  -inline-max-per-routine: 10000
+  -inline-max-per-compile: 500000
+
+
+Begin optimization report for: GCD(int, int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (GCD(int, int)) /home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp(33,1)
+
+===========================================================================
+
+Begin optimization report for: std::_Destroy_aux<false>::__destroy<std::_Vector_base<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::pointer>(std::_Vector_base<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::pointer, std::_Vector_base<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::pointer)
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_construct.h(102,4)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_construct.h(101,2):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Destroy_auxILb0EE9__destroyIPN6SAMRAI4hier9IntVectorEEEvT_S6_] /usr/include/c++/4.8.5/bits/stl_construct.h:101
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    5[ rax rsi rdi r12-r13]
+        
+    Routine temporaries
+        Total         :      12
+            Global    :       8
+            Local     :       4
+        Regenerable   :       0
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :      16 bytes*
+            Reads     :       2 [1.97e+00 ~ 3.5%]
+            Writes    :       2 [1.97e+00 ~ 3.5%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/tbox/Dimension.h(137,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::tbox::MathUtilities<int>::Min(int, int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::tbox::MathUtilities<int>::Min(int, int)) /home/akula/libraries/SAMRAI/include/SAMRAI/tbox/MathUtilities.cpp(200,1)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::tbox::MathUtilities<int>::Max(int, int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::tbox::MathUtilities<int>::Max(int, int)) /home/akula/libraries/SAMRAI/include/SAMRAI/tbox/MathUtilities.cpp(209,1)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::IntVector::operator=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::IntVector::operator=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(186,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::IntVector::operator()(const SAMRAI::hier::IntVector *, unsigned int) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::IntVector::operator()(const SAMRAI::hier::IntVector *, unsigned int) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(301,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::IntVector::getDim(const SAMRAI::hier::IntVector *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::IntVector::getDim(const SAMRAI::hier::IntVector *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(1119,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::PatchHierarchy::getMaxNumberOfLevels(const SAMRAI::hier::PatchHierarchy *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::PatchHierarchy::getMaxNumberOfLevels(const SAMRAI::hier::PatchHierarchy *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/PatchHierarchy.h(747,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::PatchHierarchy::getRatioToCoarserLevel(const SAMRAI::hier::PatchHierarchy *, int) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::PatchHierarchy::getRatioToCoarserLevel(const SAMRAI::hier::PatchHierarchy *, int) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/PatchHierarchy.h(780,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::PatchHierarchy::getDim(const SAMRAI::hier::PatchHierarchy *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::PatchHierarchy::getDim(const SAMRAI::hier::PatchHierarchy *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/PatchHierarchy.h(1087,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::PatchHierarchy::ConnectorWidthRequestorStrategy::ConnectorWidthRequestorStrategy(SAMRAI::hier::PatchHierarchy::ConnectorWidthRequestorStrategy *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::PatchHierarchy::ConnectorWidthRequestorStrategy::ConnectorWidthRequestorStrategy(SAMRAI::hier::PatchHierarchy::ConnectorWidthRequestorStrategy *)) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/PatchHierarchy.h(278,10)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::PatchHierarchy::ConnectorWidthRequestorStrategy::ConnectorWidthRequestorStrategy(SAMRAI::hier::PatchHierarchy::ConnectorWidthRequestorStrategy *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::PatchHierarchy::ConnectorWidthRequestorStrategy::ConnectorWidthRequestorStrategy(SAMRAI::hier::PatchHierarchy::ConnectorWidthRequestorStrategy *const)) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/PatchHierarchy.h(278,10)
+
+===========================================================================
+
+Begin optimization report for: __sti__$E()
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (__sti__$E()) [140] <compiler generated>
+
+
+    Report from: Code generation optimizations [cg]
+
+<compiler generated>:remark #34051: REGISTER ALLOCATION : [__sti__$E] (null):0
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       7
+            Local     :       6
+        Regenerable   :       7
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::char_traits<char>::length(const std::char_traits<char>::char_type *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(259,7):remark #34051: REGISTER ALLOCATION : [_ZNSt11char_traitsIcE6lengthEPKc] /usr/include/c++/4.8.5/bits/char_traits.h:259
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      12
+            Global    :       7
+            Local     :       5
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::basic_stringbuf<char, std::char_traits<char>, std::allocator<char>>::~basic_stringbuf(std::basic_stringbuf<char, std::char_traits<char>, std::allocator<char>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/iosfwd(93,11):remark #34051: REGISTER ALLOCATION : [_ZNSt15basic_stringbufIcSt11char_traitsIcESaIcEED1Ev] /usr/include/c++/4.8.5/iosfwd:93
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rbp rsi rdi]
+        
+    Routine temporaries
+        Total         :      21
+            Global    :      11
+            Local     :      10
+        Regenerable   :       5
+        Spilled       :       1
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<int, std::allocator<int>>::_M_deallocate(std::_Vector_base<int, std::allocator<int>> *, std::_Vector_base<int, std::allocator<int>>::pointer, std::size_t)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(172,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIiSaIiEE13_M_deallocateEPim] /usr/include/c++/4.8.5/bits/stl_vector.h:172
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      11
+            Global    :       7
+            Local     :       4
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::vector(std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> *, std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::size_type, const std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::value_type &, const std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::allocator_type &)
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_uninitialized.h(186,8) inlined into /usr/include/c++/4.8.5/bits/stl_vector.h(285,9)
+   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/bits/stl_construct.h(75,42) ]
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(284,7):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIN6SAMRAI4hier9IntVectorESaIS2_EEC1EmRKS2_RKS3_] /usr/include/c++/4.8.5/bits/stl_vector.h:284
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   10[ rax rdx rcx rbx rbp rsi rdi r13-r15]
+        
+    Routine temporaries
+        Total         :      39
+            Global    :      15
+            Local     :      24
+        Regenerable   :       2
+        Spilled       :       7
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       2 [0.00e+00 ~ 0.0%]
+        Spills        :      24 bytes*
+            Reads     :       4 [9.59e-01 ~ 1.1%]
+            Writes    :       3 [9.59e-01 ~ 1.1%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::~_Vector_base(std::_Vector_base<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(160,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIN6SAMRAI4hier9IntVectorESaIS2_EED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:160
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       7
+            Local     :       3
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::~vector(std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> *)
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_construct.h(102,4) inlined into /usr/include/c++/4.8.5/bits/stl_vector.h(416,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(415,7):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIN6SAMRAI4hier9IntVectorESaIS2_EED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:415
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    7[ rax rdx rcx rbx rbp rdi r15]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       9
+            Local     :       4
+        Regenerable   :       0
+        Spilled       :       3
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :      24 bytes*
+            Reads     :       3 [2.96e+00 ~ 4.4%]
+            Writes    :       3 [2.96e+00 ~ 4.4%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::xfer::RefineScheduleConnectorWidthRequestor::~RefineScheduleConnectorWidthRequestor(SAMRAI::xfer::RefineScheduleConnectorWidthRequestor *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (SAMRAI::xfer::RefineScheduleConnectorWidthRequestor::~RefineScheduleConnectorWidthRequestor(SAMRAI::xfer::RefineScheduleConnectorWidthRequestor *)) [155] /home/akula/libraries/SAMRAI/include/SAMRAI/xfer/RefineScheduleConnectorWidthRequestor.h(27,7)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/libraries/SAMRAI/include/SAMRAI/xfer/RefineScheduleConnectorWidthRequestor.h(27,7):remark #34051: REGISTER ALLOCATION : [_ZN6SAMRAI4xfer37RefineScheduleConnectorWidthRequestorD1Ev] /home/akula/libraries/SAMRAI/include/SAMRAI/xfer/RefineScheduleConnectorWidthRequestor.h:27
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      18
+            Global    :       6
+            Local     :      12
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       1 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: __gnu_cxx::__exchange_and_add_dispatch(_Atomic_word *, int)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/ext/atomicity.h(79,3):remark #34051: REGISTER ALLOCATION : [_ZN17_INTERNALeddb91d29__gnu_cxx27__exchange_and_add_dispatchEPii] /usr/include/c++/4.8.5/ext/atomicity.h:79
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    4[ rax rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      16
+            Global    :       8
+            Local     :       8
+        Regenerable   :       2
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: ExtendedTagAndInitializeConnectorWidthRequestor::~ExtendedTagAndInitializeConnectorWidthRequestor(ExtendedTagAndInitializeConnectorWidthRequestor *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (ExtendedTagAndInitializeConnectorWidthRequestor::~ExtendedTagAndInitializeConnectorWidthRequestor(ExtendedTagAndInitializeConnectorWidthRequestor *const)) [173] /home/akula/HAMeRS_IB/HAMeRS/include/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.hpp(35,7)
+  -> INLINE: (35,7) ExtendedTagAndInitializeConnectorWidthRequestor::~ExtendedTagAndInitializeConnectorWidthRequestor(ExtendedTagAndInitializeConnectorWidthRequestor *)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.hpp(35,7):remark #34051: REGISTER ALLOCATION : [_ZN47ExtendedTagAndInitializeConnectorWidthRequestorD0Ev] /home/akula/HAMeRS_IB/HAMeRS/include/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.hpp:35
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    4[ rax rdx rdi r15]
+        
+    Routine temporaries
+        Total         :      19
+            Global    :       7
+            Local     :      12
+        Regenerable   :       1
+        Spilled       :       1
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       1 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: ExtendedTagAndInitializeConnectorWidthRequestor::~ExtendedTagAndInitializeConnectorWidthRequestor(ExtendedTagAndInitializeConnectorWidthRequestor *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (ExtendedTagAndInitializeConnectorWidthRequestor::~ExtendedTagAndInitializeConnectorWidthRequestor(ExtendedTagAndInitializeConnectorWidthRequestor *)) [174] /home/akula/HAMeRS_IB/HAMeRS/include/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.hpp(35,7)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.hpp(35,7):remark #34051: REGISTER ALLOCATION : [_ZN47ExtendedTagAndInitializeConnectorWidthRequestorD1Ev] /home/akula/HAMeRS_IB/HAMeRS/include/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.hpp:35
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      18
+            Global    :       6
+            Local     :      12
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       1 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: ExtendedTagAndInitializeConnectorWidthRequestor::computeCoarsenRatio(const ExtendedTagAndInitializeConnectorWidthRequestor *, const std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (ExtendedTagAndInitializeConnectorWidthRequestor::computeCoarsenRatio(const ExtendedTagAndInitializeConnectorWidthRequestor *, const std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> &) const) [175] /home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp(137,1)
+  -> INLINE: (138,49) std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::operator[](const std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> *, std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::size_type) const
+  -> INLINE: (138,53) SAMRAI::hier::IntVector::getDim(const SAMRAI::hier::IntVector *) const
+  -> INLINE: (143,39) std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::operator[](const std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> *, std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::size_type) const
+  -> INLINE: (143,42) SAMRAI::hier::IntVector::operator()(const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(304,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (154,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (154,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (154,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (154,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (154,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (154,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (154,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (154,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (154,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> INLINE: (154,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (154,9) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (154,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (154,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (154,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (154,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (154,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> INLINE: (154,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (167,62) std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::size(const std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> *) const
+  -> INLINE: (167,62) std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::size(const std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> *) const
+  -> INLINE: (169,33) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+  -> INLINE: (169,33) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+  -> INLINE: (171,23) GCD(int, int)
+    -> INLINE: (34,14) SAMRAI::tbox::MathUtilities<int>::Min(int, int)
+    -> INLINE: (35,14) SAMRAI::tbox::MathUtilities<int>::Max(int, int)
+  -> INLINE: (171,65) std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::operator[](const std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> *, std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::size_type) const
+  -> INLINE: (171,69) SAMRAI::hier::IntVector::operator()(const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(304,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (174,40) std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::operator[](const std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> *, std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::size_type) const
+  -> INLINE: (174,44) SAMRAI::hier::IntVector::operator()(const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(304,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (175,17) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (175,17) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (175,17) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (175,17) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (175,17) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (175,17) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (175,17) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (175,17) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (175,17) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (175,17) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (175,17) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (175,17) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (175,17) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (175,17) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (175,17) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (175,17) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (175,17) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (175,17) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (175,17) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (175,17) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (175,17) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (175,17) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (175,17) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> INLINE: (175,17) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (175,17) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (175,17) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (175,17) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> INLINE: (175,17) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp(169,33)
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp(46,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp(171,23)
+      remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   LOOP END
+LOOP END
+
+
+Non-optimizable loops:
+
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp(167,62)
+   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/ostream(385,15) ]
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp(137,1):remark #34051: REGISTER ALLOCATION : [_ZNK47ExtendedTagAndInitializeConnectorWidthRequestor19computeCoarsenRatioERKSt6vectorIN6SAMRAI4hier9IntVectorESaIS3_EE] /home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp:137
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   15[ rax rdx rcx rbx rbp rsi rdi r8-r15]
+        
+    Routine temporaries
+        Total         :     749
+            Global    :     194
+            Local     :     555
+        Regenerable   :     277
+        Spilled       :      13
+        
+    Routine stack
+        Variables     :     826 bytes*
+            Reads     :      48 [1.01e+02 ~ 2.5%]
+            Writes    :     102 [4.25e+02 ~ 10.4%]
+        Spills        :      56 bytes*
+            Reads     :      11 [3.17e+01 ~ 0.8%]
+            Writes    :       7 [1.10e+01 ~ 0.3%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: ExtendedTagAndInitializeConnectorWidthRequestor::computeRequiredConnectorWidths(const ExtendedTagAndInitializeConnectorWidthRequestor *, std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> &, std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> &, const SAMRAI::hier::PatchHierarchy &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (ExtendedTagAndInitializeConnectorWidthRequestor::computeRequiredConnectorWidths(const ExtendedTagAndInitializeConnectorWidthRequestor *, std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> &, std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> &, const SAMRAI::hier::PatchHierarchy &) const) [176] /home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp(91,1)
+  -> INLINE: (92,48) SAMRAI::hier::PatchHierarchy::getDim(const SAMRAI::hier::PatchHierarchy *) const
+  -> DELETED: (99,34) std::allocator<SAMRAI::hier::IntVector>::~allocator(std::allocator<SAMRAI::hier::IntVector> *)
+  -> INLINE: (100,25) SAMRAI::hier::PatchHierarchy::getMaxNumberOfLevels(const SAMRAI::hier::PatchHierarchy *) const
+  -> (101,9) std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::~vector(std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> *)
+  -> DELETED: (101,9) std::allocator<SAMRAI::hier::IntVector>::~allocator(std::allocator<SAMRAI::hier::IntVector> *)
+  -> (101,9) std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::vector(std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> *, std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::size_type, const std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::value_type &, const std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::allocator_type &)
+  -> INLINE: (101,9) std::allocator<SAMRAI::hier::IntVector>::allocator(std::allocator<SAMRAI::hier::IntVector> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (103,43) SAMRAI::hier::PatchHierarchy::getMaxNumberOfLevels(const SAMRAI::hier::PatchHierarchy *) const
+  -> INLINE: (103,43) SAMRAI::hier::PatchHierarchy::getMaxNumberOfLevels(const SAMRAI::hier::PatchHierarchy *) const
+  -> INLINE: (105,26) std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::operator[](std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> *, std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::size_type)
+  -> INLINE: (105,31) SAMRAI::hier::IntVector::operator=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(189,16) std::vector<int, std::allocator<int>>::operator=(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>> &)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (105,49) SAMRAI::hier::PatchHierarchy::getRatioToCoarserLevel(const SAMRAI::hier::PatchHierarchy *, int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/PatchHierarchy.h:(782,32) std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::operator[](const std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> *, std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::size_type) const
+  -> (108,31) ExtendedTagAndInitializeConnectorWidthRequestor::computeCoarsenRatio(const ExtendedTagAndInitializeConnectorWidthRequestor *, const std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> &) const
+  -> (114,49) SAMRAI::xfer::RefineScheduleConnectorWidthRequestor::~RefineScheduleConnectorWidthRequestor(SAMRAI::xfer::RefineScheduleConnectorWidthRequestor *)
+  -> INLINE: (116,12) std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::~vector(std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (116,12) SAMRAI::xfer::RefineScheduleConnectorWidthRequestor::~RefineScheduleConnectorWidthRequestor(SAMRAI::xfer::RefineScheduleConnectorWidthRequestor *)
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp(103,43)
+   remark #15523: loop was not vectorized: loop control variable ln was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_construct.h(102,4) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp(116,12)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp(91,1):remark #34051: REGISTER ALLOCATION : [_ZNK47ExtendedTagAndInitializeConnectorWidthRequestor30computeRequiredConnectorWidthsERSt6vectorIN6SAMRAI4hier9IntVectorESaIS3_EES6_RKNS2_14PatchHierarchyE] /home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp:91
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   13[ rax rdx rcx rbx rbp rsi rdi r8-r9 r12-r15]
+        
+    Routine temporaries
+        Total         :     125
+            Global    :      37
+            Local     :      88
+        Regenerable   :      23
+        Spilled       :      12
+        
+    Routine stack
+        Variables     :      97 bytes*
+            Reads     :       7 [8.51e+00 ~ 2.6%]
+            Writes    :       4 [0.00e+00 ~ 0.0%]
+        Spills        :      48 bytes*
+            Reads     :      13 [1.42e+01 ~ 4.4%]
+            Writes    :       7 [4.63e+00 ~ 1.4%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: ExtendedTagAndInitializeConnectorWidthRequestor::ExtendedTagAndInitializeConnectorWidthRequestor(ExtendedTagAndInitializeConnectorWidthRequestor *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (ExtendedTagAndInitializeConnectorWidthRequestor::ExtendedTagAndInitializeConnectorWidthRequestor(ExtendedTagAndInitializeConnectorWidthRequestor *const)) [177] /home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp(62,50)
+  -> INLINE: (62,50) ExtendedTagAndInitializeConnectorWidthRequestor::ExtendedTagAndInitializeConnectorWidthRequestor(ExtendedTagAndInitializeConnectorWidthRequestor *)
+    -> INLINE: (62,50) SAMRAI::hier::PatchHierarchy::ConnectorWidthRequestorStrategy::ConnectorWidthRequestorStrategy(SAMRAI::hier::PatchHierarchy::ConnectorWidthRequestorStrategy *const)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/PatchHierarchy.h:(278,10) SAMRAI::hier::PatchHierarchy::ConnectorWidthRequestorStrategy::ConnectorWidthRequestorStrategy(SAMRAI::hier::PatchHierarchy::ConnectorWidthRequestorStrategy *)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp(62,50):remark #34051: REGISTER ALLOCATION : [_ZN47ExtendedTagAndInitializeConnectorWidthRequestorC2Ev] /home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp:62
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       8
+            Global    :       0
+            Local     :       8
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: ExtendedTagAndInitializeConnectorWidthRequestor::ExtendedTagAndInitializeConnectorWidthRequestor(ExtendedTagAndInitializeConnectorWidthRequestor *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (ExtendedTagAndInitializeConnectorWidthRequestor::ExtendedTagAndInitializeConnectorWidthRequestor(ExtendedTagAndInitializeConnectorWidthRequestor *)) [178] /home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp(63,1)
+  -> INLINE: (62,50) SAMRAI::hier::PatchHierarchy::ConnectorWidthRequestorStrategy::ConnectorWidthRequestorStrategy(SAMRAI::hier::PatchHierarchy::ConnectorWidthRequestorStrategy *const)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/PatchHierarchy.h:(278,10) SAMRAI::hier::PatchHierarchy::ConnectorWidthRequestorStrategy::ConnectorWidthRequestorStrategy(SAMRAI::hier::PatchHierarchy::ConnectorWidthRequestorStrategy *)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp(63,1):remark #34051: REGISTER ALLOCATION : [_ZN47ExtendedTagAndInitializeConnectorWidthRequestorC1Ev] /home/akula/HAMeRS_IB/HAMeRS/src/algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.cpp:63
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       8
+            Global    :       0
+            Local     :       8
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================

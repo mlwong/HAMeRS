@@ -66,7 +66,41 @@ class FlowModelSpecialSourceTerms
                     << "No key 'special_source_box_hi' or 'd_special_source_box_hi' found in data for source terms."
                     << std::endl);
             }
+
+            // AFK 8/16/23 bottom sponge region 
+            if (source_terms_db->keyExists("special_source_box_bo"))
+            {
+                d_special_source_box_bo = source_terms_db->getRealVector("special_source_box_bo");
+            }
+            else if (source_terms_db->keyExists("d_special_source_box_bo"))
+            {
+                d_special_source_box_bo = source_terms_db->getRealVector("d_special_source_box_bo");
+            }
+            else
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "No key 'special_source_box_bo' or 'd_special_source_box_bo' found in data for source terms."
+                    << std::endl);
+            }
             
+            // AFK 8/16/23 top sponge region 
+            if (source_terms_db->keyExists("special_source_box_to"))
+            {
+                d_special_source_box_to = source_terms_db->getRealVector("special_source_box_to");
+            }
+            else if (source_terms_db->keyExists("d_special_source_box_to"))
+            {
+                d_special_source_box_to = source_terms_db->getRealVector("d_special_source_box_to");
+            }
+            else
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "No key 'special_source_box_to' or 'd_special_source_box_to' found in data for source terms."
+                    << std::endl);
+            }
+
             d_special_source_exterior = source_terms_db->getBoolWithDefault("special_source_exterior", true);
             d_special_source_exterior = source_terms_db->getBoolWithDefault("d_special_source_exterior", d_special_source_exterior);
             
@@ -83,6 +117,22 @@ class FlowModelSpecialSourceTerms
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSpecialSourceTerms::FlowModelSpecialSourceTerms\n"
                     << "Size of 'special_source_box_hi' or 'd_special_source_box_hi' is not consistent with problem dimension."
+                    << std::endl);
+            }
+
+            if (d_special_source_box_bo.size() != d_dim.getValue()) // AFK 8/16/23
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSpecialSourceTerms::FlowModelSpecialSourceTerms\n"
+                    << "Size of 'special_source_box_bo' or 'd_special_source_box_bo' is not consistent with problem dimension."
+                    << std::endl);
+            }
+
+            if (d_special_source_box_to.size() != d_dim.getValue()) // AFK 8/16/23
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSpecialSourceTerms::FlowModelSpecialSourceTerms\n"
+                    << "Size of 'special_source_box_to' or 'd_special_source_box_to' is not consistent with problem dimension."
                     << std::endl);
             }
         }
@@ -109,6 +159,16 @@ class FlowModelSpecialSourceTerms
         {
             return d_special_source_box_hi;
         }
+
+        std::vector<Real> getSpecialSourceBoxBo() const // AFK 8/16/23
+        {
+            return d_special_source_box_bo;
+        }
+
+        std::vector<Real> getSpecialSourceBoxTo() const // AFK 8/16/23
+        {
+            return d_special_source_box_to;
+        }
         
         bool getSpecialSourceExterior() const
         {
@@ -123,6 +183,8 @@ class FlowModelSpecialSourceTerms
         {
             restart_source_terms_db->putRealVector("d_special_source_box_lo", d_special_source_box_lo);
             restart_source_terms_db->putRealVector("d_special_source_box_hi", d_special_source_box_hi);
+            restart_source_terms_db->putRealVector("d_special_source_box_bo", d_special_source_box_bo); // AFK 8/16/23
+            restart_source_terms_db->putRealVector("d_special_source_box_to", d_special_source_box_to); // AFK 8/16/23
         
             restart_source_terms_db->putBool("d_special_source_exterior", d_special_source_exterior);
         }
@@ -161,7 +223,9 @@ class FlowModelSpecialSourceTerms
          * Special source box definition.
          */
         std::vector<Real> d_special_source_box_lo; // Lower spatial coordinates.
-        std::vector<Real> d_special_source_box_hi; // Upper spatial coordinates.
+        std::vector<Real> d_special_source_box_hi; // Uppe/r spatial coordinates.
+        std::vector<Real> d_special_source_box_bo; // AFK 8/16/23 Bottom spatial coordinates.
+        std::vector<Real> d_special_source_box_to; // AFK 8/16/23 Top spatial coordinates.
         bool d_special_source_exterior;
         
 };

@@ -1,0 +1,1189 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINING OPTION VALUES:
+  -inline-factor: 100
+  -inline-min-size: 30
+  -inline-max-size: 230
+  -inline-max-total-size: 2000
+  -inline-max-per-routine: 10000
+  -inline-max-per-compile: 500000
+
+
+Begin optimization report for: operator<<(std::ostream &, const EQN_SHEAR_VISCOSITY::TYPE &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (operator<<(std::ostream &, const EQN_SHEAR_VISCOSITY::TYPE &)) /home/akula/HAMeRS_IB/HAMeRS/include/util/mixing_rules/equations_of_shear_viscosity/EquationsOfShearViscosity.hpp(20,1)
+
+===========================================================================
+
+Begin optimization report for: EquationOfShearViscosityMixingRulesManager::EquationOfShearViscosityMixingRulesManager(EquationOfShearViscosityMixingRulesManager *, const std::string &, const SAMRAI::tbox::Dimension &, const int &, const MIXING_CLOSURE_MODEL::TYPE &, const std::shared_ptr<SAMRAI::tbox::Database> &, const std::string &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (EquationOfShearViscosityMixingRulesManager::EquationOfShearViscosityMixingRulesManager(EquationOfShearViscosityMixingRulesManager *, const std::string &, const SAMRAI::tbox::Dimension &, const int &, const MIXING_CLOSURE_MODEL::TYPE &, const std::shared_ptr<SAMRAI::tbox::Database> &, const std::string &)) [4] /home/akula/HAMeRS_IB/HAMeRS/src/util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.cpp(11,1)
+  -> (3,45) std::shared_ptr<EquationOfShearViscosityMixingRules>::~shared_ptr(std::shared_ptr<EquationOfShearViscosityMixingRules> *)
+  -> INLINE: (3,45) std::shared_ptr<EquationOfShearViscosityMixingRules>::shared_ptr(std::shared_ptr<EquationOfShearViscosityMixingRules> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (10,23) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (14,41) std::operator==<char, std::char_traits<char>, std::allocator<char>>(const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &, const char *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (18,52) std::__shared_ptr<EquationOfShearViscosityMixingRules, __gnu_cxx::_S_atomic>::reset<EquationOfShearViscosityMixingRulesConstant>(std::__shared_ptr<EquationOfShearViscosityMixingRules, __gnu_cxx::_S_atomic> *, EquationOfShearViscosityMixingRulesConstant *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (18,52) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (18,52) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (19,17) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (19,17) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (19,17) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (25,46) std::operator==<char, std::char_traits<char>, std::allocator<char>>(const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &, const char *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (29,52) std::__shared_ptr<EquationOfShearViscosityMixingRules, __gnu_cxx::_S_atomic>::reset<EquationOfShearViscosityMixingRulesChapmanEnskog>(std::__shared_ptr<EquationOfShearViscosityMixingRules, __gnu_cxx::_S_atomic> *, EquationOfShearViscosityMixingRulesChapmanEnskog *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (29,52) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (29,52) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (30,17) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (30,17) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (30,17) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (38,9) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (38,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (38,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (38,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (38,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (38,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (38,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (38,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (38,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (38,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (38,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (38,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (38,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (38,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (38,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (38,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (38,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(733,17):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (1, 0)
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.cpp(11,1):remark #34051: REGISTER ALLOCATION : [_ZN42EquationOfShearViscosityMixingRulesManagerC1ERKSsRKN6SAMRAI4tbox9DimensionERKiRKN20MIXING_CLOSURE_MODEL4TYPEERKSt10shared_ptrINS3_8DatabaseEES1_] /home/akula/HAMeRS_IB/HAMeRS/src/util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.cpp:11
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   13[ rax rdx rcx rbx rbp rsi rdi r8-r9 r12-r15]
+        
+    Routine temporaries
+        Total         :     495
+            Global    :     134
+            Local     :     361
+        Regenerable   :     171
+        Spilled       :      11
+        
+    Routine stack
+        Variables     :     444 bytes*
+            Reads     :      28 [3.83e+00 ~ 3.1%]
+            Writes    :      60 [1.13e+01 ~ 9.2%]
+        Spills        :      40 bytes*
+            Reads     :      14 [1.61e+00 ~ 1.3%]
+            Writes    :       5 [1.58e+00 ~ 1.3%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::char_traits<char>::length(const std::char_traits<char>::char_type *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(259,7):remark #34051: REGISTER ALLOCATION : [_ZNSt11char_traitsIcE6lengthEPKc] /usr/include/c++/4.8.5/bits/char_traits.h:259
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      12
+            Global    :       7
+            Local     :       5
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: __gnu_cxx::__exchange_and_add_dispatch(_Atomic_word *, int)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/ext/atomicity.h(79,3):remark #34051: REGISTER ALLOCATION : [_ZN17_INTERNAL5b3716979__gnu_cxx27__exchange_and_add_dispatchEPii] /usr/include/c++/4.8.5/ext/atomicity.h:79
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    4[ rax rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      16
+            Global    :       8
+            Local     :       8
+        Regenerable   :       2
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::__enable_shared_from_this_helper<__gnu_cxx::_S_atomic>(const std::__shared_count<__gnu_cxx::_S_atomic> &, ...)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(724,5):remark #34051: REGISTER ALLOCATION : [_ZSt32__enable_shared_from_this_helperILN9__gnu_cxx12_Lock_policyE2EEvRKSt14__shared_countIXT_EEz] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:724
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       7
+            Global    :       0
+            Local     :       7
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :     176 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::basic_stringbuf<char, std::char_traits<char>, std::allocator<char>>::~basic_stringbuf(std::basic_stringbuf<char, std::char_traits<char>, std::allocator<char>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/iosfwd(93,11):remark #34051: REGISTER ALLOCATION : [_ZNSt15basic_stringbufIcSt11char_traitsIcESaIcEED1Ev] /usr/include/c++/4.8.5/iosfwd:93
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rbp rsi rdi]
+        
+    Routine temporaries
+        Total         :      21
+            Global    :      11
+            Local     :      10
+        Regenerable   :       5
+        Spilled       :       1
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::shared_ptr<EquationOfShearViscosityMixingRules>::~shared_ptr(std::shared_ptr<EquationOfShearViscosityMixingRules> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr.h(93,11):remark #34051: REGISTER ALLOCATION : [_ZNSt10shared_ptrI35EquationOfShearViscosityMixingRulesED1Ev] /usr/include/c++/4.8.5/bits/shared_ptr.h:93
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rdi r12-r13]
+        
+    Routine temporaries
+        Total         :      24
+            Global    :      12
+            Local     :      12
+        Regenerable   :       3
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: EquationOfShearViscosityMixingRulesManager::EquationOfShearViscosityMixingRulesManager(EquationOfShearViscosityMixingRulesManager *const, const std::string &, const SAMRAI::tbox::Dimension &, const int &, const MIXING_CLOSURE_MODEL::TYPE &, const std::shared_ptr<SAMRAI::tbox::Database> &, const std::string &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (EquationOfShearViscosityMixingRulesManager::EquationOfShearViscosityMixingRulesManager(EquationOfShearViscosityMixingRulesManager *const, const std::string &, const SAMRAI::tbox::Dimension &, const int &, const MIXING_CLOSURE_MODEL::TYPE &, const std::shared_ptr<SAMRAI::tbox::Database> &, const std::string &)) [20] /home/akula/HAMeRS_IB/HAMeRS/src/util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.cpp(3,45)
+  -> INLINE: (3,45) EquationOfShearViscosityMixingRulesManager::EquationOfShearViscosityMixingRulesManager(EquationOfShearViscosityMixingRulesManager *, const std::string &, const SAMRAI::tbox::Dimension &, const int &, const MIXING_CLOSURE_MODEL::TYPE &, const std::shared_ptr<SAMRAI::tbox::Database> &, const std::string &)
+    -> INLINE: (3,45) std::shared_ptr<EquationOfShearViscosityMixingRules>::shared_ptr(std::shared_ptr<EquationOfShearViscosityMixingRules> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> (3,45) std::shared_ptr<EquationOfShearViscosityMixingRules>::~shared_ptr(std::shared_ptr<EquationOfShearViscosityMixingRules> *)
+    -> INLINE: (10,23) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (14,41) std::operator==<char, std::char_traits<char>, std::allocator<char>>(const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &, const char *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (18,52) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (18,52) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (18,52) std::__shared_ptr<EquationOfShearViscosityMixingRules, __gnu_cxx::_S_atomic>::reset<EquationOfShearViscosityMixingRulesConstant>(std::__shared_ptr<EquationOfShearViscosityMixingRules, __gnu_cxx::_S_atomic> *, EquationOfShearViscosityMixingRulesConstant *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (19,17) std::allocator<char>::allocator(std::allocator<char> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (19,17) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (19,17) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (25,46) std::operator==<char, std::char_traits<char>, std::allocator<char>>(const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &, const char *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (29,52) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (29,52) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (29,52) std::__shared_ptr<EquationOfShearViscosityMixingRules, __gnu_cxx::_S_atomic>::reset<EquationOfShearViscosityMixingRulesChapmanEnskog>(std::__shared_ptr<EquationOfShearViscosityMixingRules, __gnu_cxx::_S_atomic> *, EquationOfShearViscosityMixingRulesChapmanEnskog *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (30,17) std::allocator<char>::allocator(std::allocator<char> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (30,17) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (30,17) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (38,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (38,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (38,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> (38,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+    -> (38,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+    -> (38,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+    -> (38,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+    -> (38,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+    -> (38,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+    -> INLINE: (38,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (38,9) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (38,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (38,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (38,9) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (38,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (38,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (38,9) std::allocator<char>::allocator(std::allocator<char> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(733,17):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (1, 0)
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.cpp(3,45):remark #34051: REGISTER ALLOCATION : [_ZN42EquationOfShearViscosityMixingRulesManagerC2ERKSsRKN6SAMRAI4tbox9DimensionERKiRKN20MIXING_CLOSURE_MODEL4TYPEERKSt10shared_ptrINS3_8DatabaseEES1_] /home/akula/HAMeRS_IB/HAMeRS/src/util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.cpp:3
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   13[ rax rdx rcx rbx rbp rsi rdi r8-r9 r12-r15]
+        
+    Routine temporaries
+        Total         :     495
+            Global    :     134
+            Local     :     361
+        Regenerable   :     171
+        Spilled       :      11
+        
+    Routine stack
+        Variables     :     444 bytes*
+            Reads     :      28 [3.83e+00 ~ 3.1%]
+            Writes    :      60 [1.13e+01 ~ 9.2%]
+        Spills        :      40 bytes*
+            Reads     :      14 [1.61e+00 ~ 1.3%]
+            Writes    :       5 [1.58e+00 ~ 1.3%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: EquationOfShearViscosityMixingRulesManager::printClassData(const EquationOfShearViscosityMixingRulesManager *, std::ostream &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (EquationOfShearViscosityMixingRulesManager::printClassData(const EquationOfShearViscosityMixingRulesManager *, std::ostream &) const) [21] /home/akula/HAMeRS_IB/HAMeRS/src/util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.cpp(53,1)
+  -> (54,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (55,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (57,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (59,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (60,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, const void *)
+  -> (61,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (63,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (64,8) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (65,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (67,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> INLINE: (68,8) operator<<(std::ostream &, const EQN_SHEAR_VISCOSITY::TYPE &)
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/util/mixing_rules/equations_of_shear_viscosity/EquationsOfShearViscosity.hpp:(21,61) std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::map(std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/util/mixing_rules/equations_of_shear_viscosity/EquationsOfShearViscosity.hpp:(23,17) std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::size(const std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>> *) const
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/util/mixing_rules/equations_of_shear_viscosity/EquationsOfShearViscosity.hpp:(26,9) std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::operator[](std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>> *, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_type &&)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/util/mixing_rules/equations_of_shear_viscosity/EquationsOfShearViscosity.hpp:(26,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::operator=(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *, const char *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/util/mixing_rules/equations_of_shear_viscosity/EquationsOfShearViscosity.hpp:(27,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::operator=(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *, const char *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/util/mixing_rules/equations_of_shear_viscosity/EquationsOfShearViscosity.hpp:(27,9) std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::operator[](std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>> *, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_type &&)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> /home/akula/HAMeRS_IB/HAMeRS/include/util/mixing_rules/equations_of_shear_viscosity/EquationsOfShearViscosity.hpp:(31,15) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/util/mixing_rules/equations_of_shear_viscosity/EquationsOfShearViscosity.hpp:(31,25) std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::operator[](std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>> *, const std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_type &)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (69,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (71,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> INLINE: (72,47) std::__shared_ptr<EquationOfShearViscosityMixingRules, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<EquationOfShearViscosityMixingRules, __gnu_cxx::_S_atomic> *) const
+  -> INDIRECT- (VIRTUAL): (72,64)  EXPR_CONV.SI64.P64(*((SI64*) (__$U7b_V$473.0.235->__vptr_V$aa + EXPR_CONV.SI32.I64(3(SI32)) * 8(I64))))
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1140,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.cpp(68,8)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   remark #25478: While Loop Unrolled by 2  
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1140,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.cpp(68,8)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   remark #25478: While Loop Unrolled by 2  
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1140,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.cpp(68,8)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   remark #25478: While Loop Unrolled by 2  
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_tree.h(445,4):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (8, 0)
+/usr/include/c++/4.8.5/bits/stl_tree.h(140,51):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (1, 0)
+/usr/include/c++/4.8.5/bits/stl_tree.h(140,51):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (1, 0)
+/usr/include/c++/4.8.5/bits/stl_tree.h(140,51):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (1, 0)
+/home/akula/HAMeRS_IB/HAMeRS/src/util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.cpp(53,1):remark #34051: REGISTER ALLOCATION : [_ZNK42EquationOfShearViscosityMixingRulesManager14printClassDataERSo] /home/akula/HAMeRS_IB/HAMeRS/src/util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.cpp:53
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   10[ rax rdx rcx rbx rbp rsi rdi r13 r15 zmm0]
+        
+    Routine temporaries
+        Total         :     216
+            Global    :      67
+            Local     :     149
+        Regenerable   :      66
+        Spilled       :       4
+        
+    Routine stack
+        Variables     :      83 bytes*
+            Reads     :       7 [1.34e+00 ~ 0.9%]
+            Writes    :      10 [3.58e+00 ~ 2.3%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Rb_tree<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_type, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type, std::_Select1st<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type>, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_compare, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::_Pair_alloc_type>::_M_put_node(std::_Rb_tree<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_type, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type, std::_Select1st<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type>, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_compare, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::_Pair_alloc_type> *, std::_Rb_tree<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_type, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type, std::_Select1st<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type>, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_compare, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::_Pair_alloc_type>::_Link_type)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_tree.h(374,7):remark #34051: REGISTER ALLOCATION : [_ZNSt8_Rb_treeIN19EQN_SHEAR_VISCOSITY4TYPEESt4pairIKS1_SsESt10_Select1stIS4_ESt4lessIS1_ESaIS4_EE11_M_put_nodeEPSt13_Rb_tree_nodeIS4_E] /usr/include/c++/4.8.5/bits/stl_tree.h:374
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rsi rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       0
+            Local     :      10
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Rb_tree<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_type, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type, std::_Select1st<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type>, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_compare, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::_Pair_alloc_type>::_M_get_insert_hint_unique_pos(std::_Rb_tree<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_type, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type, std::_Select1st<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type>, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_compare, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::_Pair_alloc_type> *, std::_Rb_tree<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_type, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type, std::_Select1st<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type>, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_compare, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::_Pair_alloc_type>::const_iterator, const std::_Rb_tree<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_type, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type, std::_Select1st<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type>, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_compare, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::_Pair_alloc_type>::key_type &)
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1321,7) inlined into /usr/include/c++/4.8.5/bits/stl_tree.h(1426,38)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   remark #25478: While Loop Unrolled by 2  
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1321,7) inlined into /usr/include/c++/4.8.5/bits/stl_tree.h(1442,38)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   remark #25478: While Loop Unrolled by 2  
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1321,7) inlined into /usr/include/c++/4.8.5/bits/stl_tree.h(1458,38)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   remark #25478: While Loop Unrolled by 2  
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_tree.h(1414,5):remark #34051: REGISTER ALLOCATION : [_ZNSt8_Rb_treeIN19EQN_SHEAR_VISCOSITY4TYPEESt4pairIKS1_SsESt10_Select1stIS4_ESt4lessIS1_ESaIS4_EE29_M_get_insert_hint_unique_posESt23_Rb_tree_const_iteratorIS4_ERS3_] /usr/include/c++/4.8.5/bits/stl_tree.h:1414
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   10[ rax rdx rcx rbx rbp rsi rdi r12 r14-r15]
+        
+    Routine temporaries
+        Total         :      66
+            Global    :      28
+            Local     :      38
+        Regenerable   :       5
+        Spilled       :       5
+        
+    Routine stack
+        Variables     :      48 bytes*
+            Reads     :       6 [5.92e-01 ~ 1.1%]
+            Writes    :      18 [5.92e-01 ~ 1.1%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Rb_tree<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_type, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type, std::_Select1st<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type>, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_compare, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::_Pair_alloc_type>::_M_destroy_node(std::_Rb_tree<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_type, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type, std::_Select1st<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type>, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_compare, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::_Pair_alloc_type> *, std::_Rb_tree<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_type, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type, std::_Select1st<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type>, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_compare, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::_Pair_alloc_type>::_Link_type)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_tree.h(420,7):remark #34051: REGISTER ALLOCATION : [_ZNSt8_Rb_treeIN19EQN_SHEAR_VISCOSITY4TYPEESt4pairIKS1_SsESt10_Select1stIS4_ESt4lessIS1_ESaIS4_EE15_M_destroy_nodeEPSt13_Rb_tree_nodeIS4_E] /usr/include/c++/4.8.5/bits/stl_tree.h:420
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rbp rsi rdi]
+        
+    Routine temporaries
+        Total         :      21
+            Global    :      11
+            Local     :      10
+        Regenerable   :       5
+        Spilled       :       1
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_base<__gnu_cxx::_S_atomic>::~_Sp_counted_base(std::_Sp_counted_base<__gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(114,7):remark #34051: REGISTER ALLOCATION : [_ZNSt16_Sp_counted_baseILN9__gnu_cxx12_Lock_policyE2EED1Ev] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:114
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       8
+            Global    :       0
+            Local     :       8
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_base<__gnu_cxx::_S_atomic>::~_Sp_counted_base(std::_Sp_counted_base<__gnu_cxx::_S_atomic> *const)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(113,7):remark #34051: REGISTER ALLOCATION : [_ZNSt16_Sp_counted_baseILN9__gnu_cxx12_Lock_policyE2EED0Ev] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:113
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_base<__gnu_cxx::_S_atomic>::_M_destroy(std::_Sp_counted_base<__gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(124,7):remark #34051: REGISTER ALLOCATION : [_ZNSt16_Sp_counted_baseILN9__gnu_cxx12_Lock_policyE2EE10_M_destroyEv] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:124
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      19
+            Global    :       7
+            Local     :      12
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       1 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::~map(std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>> *)
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1123,7) inlined into /usr/include/c++/4.8.5/bits/stl_map.h(97,11)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_map.h(96,11):remark #34051: REGISTER ALLOCATION : [_ZNSt3mapIN19EQN_SHEAR_VISCOSITY4TYPEESsSt4lessIS1_ESaISt4pairIKS1_SsEEED1Ev] /usr/include/c++/4.8.5/bits/stl_map.h:96
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   10[ rax rdx rcx rsi rdi r8 r12-r15]
+        
+    Routine temporaries
+        Total         :      25
+            Global    :      13
+            Local     :      12
+        Regenerable   :       5
+        Spilled       :       4
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :      32 bytes*
+            Reads     :       4 [3.99e+00 ~ 3.8%]
+            Writes    :       4 [3.99e+00 ~ 3.8%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Rb_tree<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_type, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type, std::_Select1st<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type>, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_compare, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::_Pair_alloc_type>::_M_erase(std::_Rb_tree<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_type, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type, std::_Select1st<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type>, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_compare, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::_Pair_alloc_type> *, std::_Rb_tree<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_type, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type, std::_Select1st<std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::value_type>, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::key_compare, std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string, std::less<EQN_SHEAR_VISCOSITY::TYPE>, std::allocator<std::pair<const EQN_SHEAR_VISCOSITY::TYPE, std::string>>>::_Pair_alloc_type>::_Link_type)
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1123,7)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_tree.h(1121,5):remark #34051: REGISTER ALLOCATION : [_ZNSt8_Rb_treeIN19EQN_SHEAR_VISCOSITY4TYPEESt4pairIKS1_SsESt10_Select1stIS4_ESt4lessIS1_ESaIS4_EE8_M_eraseEPSt13_Rb_tree_nodeIS4_E] /usr/include/c++/4.8.5/bits/stl_tree.h:1121
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   10[ rax rdx rcx rsi rdi r8 r12-r15]
+        
+    Routine temporaries
+        Total         :      26
+            Global    :      13
+            Local     :      13
+        Regenerable   :       5
+        Spilled       :       4
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :      32 bytes*
+            Reads     :       4 [3.99e+00 ~ 3.8%]
+            Writes    :       4 [3.99e+00 ~ 3.8%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesConstant *, __gnu_cxx::_S_atomic>::_M_dispose(std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesConstant *, __gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(290,7):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP43EquationOfShearViscosityMixingRulesConstantLN9__gnu_cxx12_Lock_policyE2EE10_M_disposeEv] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:290
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      20
+            Global    :       7
+            Local     :      13
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       1 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesConstant *, __gnu_cxx::_S_atomic>::_M_destroy(std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesConstant *, __gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(294,7):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP43EquationOfShearViscosityMixingRulesConstantLN9__gnu_cxx12_Lock_policyE2EE10_M_destroyEv] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:294
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      19
+            Global    :       7
+            Local     :      12
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       1 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesConstant *, __gnu_cxx::_S_atomic>::_M_get_deleter(std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesConstant *, __gnu_cxx::_S_atomic> *, const std::type_info &)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(298,7):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP43EquationOfShearViscosityMixingRulesConstantLN9__gnu_cxx12_Lock_policyE2EE14_M_get_deleterERKSt9type_info] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:298
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rsi rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesConstant *, __gnu_cxx::_S_atomic>::~_Sp_counted_ptr(std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesConstant *, __gnu_cxx::_S_atomic> *const)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(281,11):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP43EquationOfShearViscosityMixingRulesConstantLN9__gnu_cxx12_Lock_policyE2EED0Ev] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:281
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesConstant *, __gnu_cxx::_S_atomic>::~_Sp_counted_ptr(std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesConstant *, __gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(281,11):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP43EquationOfShearViscosityMixingRulesConstantLN9__gnu_cxx12_Lock_policyE2EED1Ev] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:281
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       7
+            Global    :       0
+            Local     :       7
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesChapmanEnskog *, __gnu_cxx::_S_atomic>::_M_dispose(std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesChapmanEnskog *, __gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(290,7):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP48EquationOfShearViscosityMixingRulesChapmanEnskogLN9__gnu_cxx12_Lock_policyE2EE10_M_disposeEv] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:290
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      20
+            Global    :       7
+            Local     :      13
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       1 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesChapmanEnskog *, __gnu_cxx::_S_atomic>::_M_destroy(std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesChapmanEnskog *, __gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(294,7):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP48EquationOfShearViscosityMixingRulesChapmanEnskogLN9__gnu_cxx12_Lock_policyE2EE10_M_destroyEv] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:294
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      19
+            Global    :       7
+            Local     :      12
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       1 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesChapmanEnskog *, __gnu_cxx::_S_atomic>::_M_get_deleter(std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesChapmanEnskog *, __gnu_cxx::_S_atomic> *, const std::type_info &)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(298,7):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP48EquationOfShearViscosityMixingRulesChapmanEnskogLN9__gnu_cxx12_Lock_policyE2EE14_M_get_deleterERKSt9type_info] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:298
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rsi rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesChapmanEnskog *, __gnu_cxx::_S_atomic>::~_Sp_counted_ptr(std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesChapmanEnskog *, __gnu_cxx::_S_atomic> *const)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(281,11):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP48EquationOfShearViscosityMixingRulesChapmanEnskogLN9__gnu_cxx12_Lock_policyE2EED0Ev] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:281
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesChapmanEnskog *, __gnu_cxx::_S_atomic>::~_Sp_counted_ptr(std::_Sp_counted_ptr<EquationOfShearViscosityMixingRulesChapmanEnskog *, __gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(281,11):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP48EquationOfShearViscosityMixingRulesChapmanEnskogLN9__gnu_cxx12_Lock_policyE2EED1Ev] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:281
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       7
+            Global    :       0
+            Local     :       7
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: __sti__$E()
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (__sti__$E()) [235] <compiler generated>
+
+
+    Report from: Code generation optimizations [cg]
+
+<compiler generated>:remark #34051: REGISTER ALLOCATION : [__sti__$E] (null):0
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       7
+            Local     :       6
+        Regenerable   :       7
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================

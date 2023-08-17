@@ -219,7 +219,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
 
                     Real xi_b      = std::pow((x[0]-d_special_source_box_hi[0])/(domain_xhi[0]-d_special_source_box_hi[0]), Real(3)); // mask value needs to be improved 
-                    xi_b           = xi_b * sponge_rate;
+                    xi_b          *= sponge_rate;
 
                     const Real rho_p   = rho[idx_cons_var]   - rho_ref;
                     const Real rho_u_p = rho_u[idx_cons_var] - rho_u_ref;
@@ -231,6 +231,59 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     S[2][idx_source] -= dt*xi_b*rho_v_p;
                     S[3][idx_source] -= dt*xi_b*E_p;
                 }
+                // AFK 8/16/23 Bottom Sponge Forcing
+                if (x[1] <= d_special_source_box_lo[0])
+                {
+                    const Real u_ref = u_inf;
+                    const Real v_ref = v_inf;
+                    
+                    const Real rho_ref = rho_inf;
+                    const Real p_ref   = p_inf;
+                    
+                    const Real rho_u_ref = rho_ref * u_ref;
+                    const Real rho_v_ref = rho_ref * v_ref;
+                    const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
+                    
+                    Real yi_b = std::pow((Real(1) - (x[1] - domain_xlo[1])/(d_special_source_box_bo[0] - domain_xlo[1])), Real(3));
+                    yi_b     *= sponge_rate; // mask value needs to be improved 
+                    
+                    const Real rho_p   = rho[idx_cons_var]   - rho_ref;
+                    const Real rho_u_p = rho_u[idx_cons_var] - rho_u_ref;
+                    const Real rho_v_p = rho_v[idx_cons_var] - rho_v_ref;
+                    const Real E_p     = E[idx_cons_var]     - E_ref;
+                    
+                    S[0][idx_source] -= dt*yi_b*rho_p;
+                    S[1][idx_source] -= dt*yi_b*rho_u_p;
+                    S[2][idx_source] -= dt*yi_b*rho_v_p;
+                    S[3][idx_source] -= dt*yi_b*E_p;
+                }
+                // AFK 8/16/23 Top Sponge Forcing
+                if (x[1] >= d_special_source_box_to[0])
+                {                    
+                    const Real u_ref = u_inf;
+                    const Real v_ref = v_inf;
+                    
+                    const Real rho_ref = rho_inf;
+                    const Real p_ref   = p_inf;
+
+                    const Real rho_u_ref = rho_ref * u_ref;
+                    const Real rho_v_ref = rho_ref * v_ref;
+                    const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
+
+                    Real yi_b      = std::pow((x[1]-d_special_source_box_to[0])/(domain_xhi[1]-d_special_source_box_to[0]), Real(3)); // mask value needs to be improved 
+                    yi_b          *= sponge_rate;
+
+                    const Real rho_p   = rho[idx_cons_var]   - rho_ref;
+                    const Real rho_u_p = rho_u[idx_cons_var] - rho_u_ref;
+                    const Real rho_v_p = rho_v[idx_cons_var] - rho_v_ref;
+                    const Real E_p     = E[idx_cons_var]     - E_ref;
+                    
+                    S[0][idx_source] -= dt*yi_b*rho_p;
+                    S[1][idx_source] -= dt*yi_b*rho_u_p;
+                    S[2][idx_source] -= dt*yi_b*rho_v_p;
+                    S[3][idx_source] -= dt*yi_b*E_p;
+                }
+
             }
         }
     }

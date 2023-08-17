@@ -1,0 +1,2 @@
+/usr/bin/ar qc libgradient_sensors.a  CMakeFiles/gradient_sensors.dir/GradientSensorDucros.cpp.o CMakeFiles/gradient_sensors.dir/GradientSensorJameson.cpp.o
+/usr/bin/ranlib libgradient_sensors.a

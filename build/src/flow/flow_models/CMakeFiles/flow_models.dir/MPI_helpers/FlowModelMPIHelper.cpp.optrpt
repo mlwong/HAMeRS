@@ -1,0 +1,382 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINING OPTION VALUES:
+  -inline-factor: 100
+  -inline-min-size: 30
+  -inline-max-size: 230
+  -inline-max-total-size: 2000
+  -inline-max-per-routine: 10000
+  -inline-max-per-compile: 500000
+
+
+Begin optimization report for: FlowModel::getFlowModelDiffusiveFluxUtilities(const FlowModel *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (FlowModel::getFlowModelDiffusiveFluxUtilities(const FlowModel *) const) /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModel.hpp(168,9)
+
+===========================================================================
+
+Begin optimization report for: FlowModelMPIHelper::setupFlowModelAndRegisterPatchWithDataContext(FlowModelMPIHelper *, const SAMRAI::hier::Patch &, const std::shared_ptr<SAMRAI::hier::VariableContext> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelMPIHelper::setupFlowModelAndRegisterPatchWithDataContext(FlowModelMPIHelper *, const SAMRAI::hier::Patch &, const std::shared_ptr<SAMRAI::hier::VariableContext> &)) [3] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp(9,1)
+  -> INLINE: (12,21) std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (13,36) std::shared_ptr<FlowModelDiffusiveFluxUtilities>::operator=(std::shared_ptr<FlowModelDiffusiveFluxUtilities> *, const std::shared_ptr<FlowModelDiffusiveFluxUtilities> &)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (13,50) std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (13,52) FlowModel::getFlowModelDiffusiveFluxUtilities(const FlowModel *) const
+  -> INLINE: (16,17) std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic> *) const
+  -> INDIRECT- (VIRTUAL): (16,55)  EXPR_CONV.SI64.P64(*((SI64*) (__$Uf_V$48a.0.57->__vptr_V$1f8_2.3 + EXPR_CONV.SI32.I64(13(SI32)) * 8(I64))))
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp(9,1):remark #34051: REGISTER ALLOCATION : [_ZN18FlowModelMPIHelper45setupFlowModelAndRegisterPatchWithDataContextERKN6SAMRAI4hier5PatchERKSt10shared_ptrINS1_15VariableContextEE] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp:9
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   12[ rax rdx rcx rbx rbp rsi rdi r8 r12-r15]
+        
+    Routine temporaries
+        Total         :      40
+            Global    :      18
+            Local     :      22
+        Regenerable   :       5
+        Spilled       :       6
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelMPIHelper::registerDerivedVariables(FlowModelMPIHelper *, const std::unordered_map<std::string, SAMRAI::hier::IntVector, std::hash<std::string>, std::equal_to<std::string>, std::allocator<std::pair<const std::string, SAMRAI::hier::IntVector>>> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelMPIHelper::registerDerivedVariables(FlowModelMPIHelper *, const std::unordered_map<std::string, SAMRAI::hier::IntVector, std::hash<std::string>, std::equal_to<std::string>, std::allocator<std::pair<const std::string, SAMRAI::hier::IntVector>>> &)) [4] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp(25,1)
+  -> INLINE: (26,17) std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic> *) const
+  -> INDIRECT- (VIRTUAL): (26,44)  EXPR_CONV.SI64.P64(*((SI64*) (__$U10_V$49f.0.58->__vptr_V$1f8_2.3 + EXPR_CONV.SI32.I64(14(SI32)) * 8(I64))))
+  -> INLINE: (30,35) std::__shared_ptr<FlowModelDiffusiveFluxUtilities, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<FlowModelDiffusiveFluxUtilities, __gnu_cxx::_S_atomic> *) const
+  -> INDIRECT- (VIRTUAL): (30,62)  EXPR_CONV.SI64.P64(*((SI64*) (__$U11_V$4a0.0.58->__vptr_V$165 + EXPR_CONV.SI32.I64(2(SI32)) * 8(I64))))
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp(25,1):remark #34051: REGISTER ALLOCATION : [_ZN18FlowModelMPIHelper24registerDerivedVariablesERKSt13unordered_mapISsN6SAMRAI4hier9IntVectorESt4hashISsESt8equal_toISsESaISt4pairIKSsS3_EEE] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp:25
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    5[ rax rsi rdi r14-r15]
+        
+    Routine temporaries
+        Total         :      20
+            Global    :       8
+            Local     :      12
+        Regenerable   :       0
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelMPIHelper::allocateMemoryForDerivedCellData(FlowModelMPIHelper *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelMPIHelper::allocateMemoryForDerivedCellData(FlowModelMPIHelper *)) [5] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp(39,1)
+  -> INDIRECT- (VIRTUAL): (40,17)  EXPR_CONV.SI64.P64(*((SI64*) (__$U12_V$4a2.0.59->__vptr_V$1f8_2.3 + EXPR_CONV.SI32.I64(16(SI32)) * 8(I64))))
+  -> INLINE: (40,17) std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic> *) const
+  -> INDIRECT- (VIRTUAL): (44,35)  EXPR_CONV.SI64.P64(*((SI64*) (__$U13_V$4a3.0.59->__vptr_V$165 + EXPR_CONV.SI32.I64(4(SI32)) * 8(I64))))
+  -> INLINE: (44,35) std::__shared_ptr<FlowModelDiffusiveFluxUtilities, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<FlowModelDiffusiveFluxUtilities, __gnu_cxx::_S_atomic> *) const
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp(39,1):remark #34051: REGISTER ALLOCATION : [_ZN18FlowModelMPIHelper32allocateMemoryForDerivedCellDataEv] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp:39
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdi r15]
+        
+    Routine temporaries
+        Total         :      16
+            Global    :       7
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       1
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelMPIHelper::computeDerivedCellData(FlowModelMPIHelper *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelMPIHelper::computeDerivedCellData(FlowModelMPIHelper *)) [6] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp(54,1)
+  -> INDIRECT- (VIRTUAL): (55,17)  EXPR_CONV.SI64.P64(*((SI64*) (__$U14_V$4a5.0.60->__vptr_V$1f8_2.3 + EXPR_CONV.SI32.I64(17(SI32)) * 8(I64))))
+  -> INLINE: (55,17) std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic> *) const
+  -> INDIRECT- (VIRTUAL): (59,35)  EXPR_CONV.SI64.P64(*((SI64*) (__$U15_V$4a6.0.60->__vptr_V$165 + EXPR_CONV.SI32.I64(7(SI32)) * 8(I64))))
+  -> INLINE: (59,35) std::__shared_ptr<FlowModelDiffusiveFluxUtilities, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<FlowModelDiffusiveFluxUtilities, __gnu_cxx::_S_atomic> *) const
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp(54,1):remark #34051: REGISTER ALLOCATION : [_ZN18FlowModelMPIHelper22computeDerivedCellDataEv] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp:54
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdi r15]
+        
+    Routine temporaries
+        Total         :      16
+            Global    :       7
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       1
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelMPIHelper::getCellData(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *, FlowModelMPIHelper *, const std::string &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelMPIHelper::getCellData(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *, FlowModelMPIHelper *, const std::string &)) [7] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp(69,1)
+  -> (70,46) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::~shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *)
+  -> INLINE: (70,46) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (74,19) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::operator=(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *, std::shared_ptr<SAMRAI::pdat::CellData<Real>> &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (74,19) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::~shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (74,47) std::__shared_ptr<FlowModelDiffusiveFluxUtilities, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<FlowModelDiffusiveFluxUtilities, __gnu_cxx::_S_atomic> *) const
+  -> INDIRECT- (VIRTUAL): (74,61)  EXPR_CONV.SI64.P64(*((SI64*) (__$U17_V$4ac.0.61->__vptr_V$165 + EXPR_CONV.SI32.I64(8(SI32)) * 8(I64))))
+  -> INLINE: (77,19) std::operator==<SAMRAI::pdat::CellData<Real>>(const std::shared_ptr<SAMRAI::pdat::CellData<Real>> &, std::nullptr_t)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (79,19) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::~shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (79,19) std::shared_ptr<SAMRAI::pdat::CellData<Real>>::operator=(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *, std::shared_ptr<SAMRAI::pdat::CellData<Real>> &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (79,33) std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic> *) const
+  -> INDIRECT- (VIRTUAL): (79,47)  EXPR_CONV.SI64.P64(*((SI64*) (__$U19_V$4ae.0.61->__vptr_V$1f8_2.3 + EXPR_CONV.SI32.I64(18(SI32)) * 8(I64))))
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(733,17):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (1, 0)
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(789,7):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (32, 8)
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(789,7):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (32, 8)
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp(69,1):remark #34051: REGISTER ALLOCATION : [_ZN18FlowModelMPIHelper11getCellDataERKSs] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp:69
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   10[ rax rdx rcx rbx rsi rdi r12-r15]
+        
+    Routine temporaries
+        Total         :      96
+            Global    :      33
+            Local     :      63
+        Regenerable   :      17
+        Spilled       :       5
+        
+    Routine stack
+        Variables     :      72 bytes*
+            Reads     :      11 [4.30e+00 ~ 6.3%]
+            Writes    :      13 [5.52e+00 ~ 8.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::shared_ptr<SAMRAI::pdat::CellData<Real>>::~shared_ptr(std::shared_ptr<SAMRAI::pdat::CellData<Real>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr.h(93,11):remark #34051: REGISTER ALLOCATION : [_ZNSt10shared_ptrIN6SAMRAI4pdat8CellDataIdEEED1Ev] /usr/include/c++/4.8.5/bits/shared_ptr.h:93
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rdi r12-r13]
+        
+    Routine temporaries
+        Total         :      24
+            Global    :      12
+            Local     :      12
+        Regenerable   :       3
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelMPIHelper::unregisterPatch(FlowModelMPIHelper *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelMPIHelper::unregisterPatch(FlowModelMPIHelper *)) [9] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp(90,1)
+  -> INDIRECT- (VIRTUAL): (91,17)  EXPR_CONV.SI64.P64(*((SI64*) (__$U1a_V$4b0.0.62->__vptr_V$1f8_2.3 + EXPR_CONV.SI32.I64(15(SI32)) * 8(I64))))
+  -> INLINE: (91,17) std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (92,32) std::__shared_ptr<FlowModelDiffusiveFluxUtilities, __gnu_cxx::_S_atomic>::reset(std::__shared_ptr<FlowModelDiffusiveFluxUtilities, __gnu_cxx::_S_atomic> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(733,17):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (32, 8)
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp(90,1):remark #34051: REGISTER ALLOCATION : [_ZN18FlowModelMPIHelper15unregisterPatchEv] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/MPI_helpers/FlowModelMPIHelper.cpp:90
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rdi r14-r15]
+        
+    Routine temporaries
+        Total         :      31
+            Global    :      14
+            Local     :      17
+        Regenerable   :       4
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :      16 bytes*
+            Reads     :       2 [2.00e+00 ~ 5.2%]
+            Writes    :       4 [3.35e+00 ~ 8.7%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: __sti__$E()
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (__sti__$E()) [63] <compiler generated>
+
+
+    Report from: Code generation optimizations [cg]
+
+<compiler generated>:remark #34051: REGISTER ALLOCATION : [__sti__$E] (null):0
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       7
+            Local     :       6
+        Regenerable   :       7
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================

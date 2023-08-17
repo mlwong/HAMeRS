@@ -1,0 +1,1360 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINING OPTION VALUES:
+  -inline-factor: 100
+  -inline-min-size: 30
+  -inline-max-size: 230
+  -inline-max-total-size: 2000
+  -inline-max-per-routine: 10000
+  -inline-max-per-compile: 500000
+
+
+Begin optimization report for: operator<<(std::ostream &, const FLOW_MODEL::TYPE &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (operator<<(std::ostream &, const FLOW_MODEL::TYPE &)) /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModels.hpp(23,1)
+
+===========================================================================
+
+Begin optimization report for: FlowModelManager::FlowModelManager(FlowModelManager *const, const std::string &, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const std::shared_ptr<SAMRAI::tbox::Database> &, const std::string &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelManager::FlowModelManager(FlowModelManager *const, const std::string &, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const std::shared_ptr<SAMRAI::tbox::Database> &, const std::string &)) [4] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelManager.cpp(3,19)
+  -> (3,19) FlowModelManager::FlowModelManager(FlowModelManager *, const std::string &, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const std::shared_ptr<SAMRAI::tbox::Database> &, const std::string &)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelManager.cpp(3,19):remark #34051: REGISTER ALLOCATION : [_ZN16FlowModelManagerC2ERKSsS1_RKN6SAMRAI4tbox9DimensionERKSt10shared_ptrINS2_4geom21CartesianGridGeometryEERKiRKS7_INS3_8DatabaseEES1_] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelManager.cpp:3
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rdx rcx rsi rdi r8-r9]
+        
+    Routine temporaries
+        Total         :      24
+            Global    :       0
+            Local     :      24
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelManager::FlowModelManager(FlowModelManager *, const std::string &, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const std::shared_ptr<SAMRAI::tbox::Database> &, const std::string &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelManager::FlowModelManager(FlowModelManager *, const std::string &, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const std::shared_ptr<SAMRAI::tbox::Database> &, const std::string &)) [5] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelManager.cpp(16,1)
+  -> INLINE: (3,19) std::shared_ptr<FlowModel>::shared_ptr(std::shared_ptr<FlowModel> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (3,19) std::shared_ptr<FlowModel>::~shared_ptr(std::shared_ptr<FlowModel> *)
+  -> INLINE: (11,23) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (12,24) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (14,25) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (14,25) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+  -> INLINE: (20,24) std::operator==<char, std::char_traits<char>, std::allocator<char>>(const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &, const char *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (24,22) std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic>::reset<FlowModelSingleSpecies>(std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic> *, FlowModelSingleSpecies *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (24,22) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (24,22) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (25,13) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (25,13) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (25,13) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (32,29) std::operator==<char, std::char_traits<char>, std::allocator<char>>(const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &, const char *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (36,22) std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic>::reset<FlowModelFourEqnConservative>(std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic> *, FlowModelFourEqnConservative *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (36,22) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (36,22) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (37,13) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (37,13) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (37,13) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (44,29) std::operator==<char, std::char_traits<char>, std::allocator<char>>(const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &, const char *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (48,22) std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic>::reset<FlowModelFiveEqnAllaire>(std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic> *, FlowModelFiveEqnAllaire *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (48,22) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (48,22) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (49,13) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (49,13) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (49,13) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (58,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (58,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (58,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (58,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (58,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (58,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (58,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (58,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (58,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (58,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (58,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (58,9) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (58,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (58,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (58,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (58,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (58,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (68,9) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (68,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (68,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (68,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (68,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (68,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (68,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (68,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (68,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (68,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (68,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (68,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (68,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (68,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (68,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (68,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(733,17):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (1, 0)
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelManager.cpp(16,1):remark #34051: REGISTER ALLOCATION : [_ZN16FlowModelManagerC1ERKSsS1_RKN6SAMRAI4tbox9DimensionERKSt10shared_ptrINS2_4geom21CartesianGridGeometryEERKiRKS7_INS3_8DatabaseEES1_] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelManager.cpp:16
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   15[ rax rdx rcx rbx rbp rsi rdi r8-r15]
+        
+    Routine temporaries
+        Total         :     930
+            Global    :     254
+            Local     :     676
+        Regenerable   :     320
+        Spilled       :      21
+        
+    Routine stack
+        Variables     :     861 bytes*
+            Reads     :      52 [7.13e+00 ~ 3.2%]
+            Writes    :     117 [2.17e+01 ~ 9.7%]
+        Spills        :     120 bytes*
+            Reads     :      31 [1.73e+00 ~ 0.8%]
+            Writes    :      20 [3.21e+00 ~ 1.4%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::char_traits<char>::length(const std::char_traits<char>::char_type *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(259,7):remark #34051: REGISTER ALLOCATION : [_ZNSt11char_traitsIcE6lengthEPKc] /usr/include/c++/4.8.5/bits/char_traits.h:259
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      12
+            Global    :       7
+            Local     :       5
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: __gnu_cxx::__exchange_and_add_dispatch(_Atomic_word *, int)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/ext/atomicity.h(79,3):remark #34051: REGISTER ALLOCATION : [_ZN17_INTERNAL264627689__gnu_cxx27__exchange_and_add_dispatchEPii] /usr/include/c++/4.8.5/ext/atomicity.h:79
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    4[ rax rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      16
+            Global    :       8
+            Local     :       8
+        Regenerable   :       2
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::basic_stringbuf<char, std::char_traits<char>, std::allocator<char>>::~basic_stringbuf(std::basic_stringbuf<char, std::char_traits<char>, std::allocator<char>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/iosfwd(93,11):remark #34051: REGISTER ALLOCATION : [_ZNSt15basic_stringbufIcSt11char_traitsIcESaIcEED1Ev] /usr/include/c++/4.8.5/iosfwd:93
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rbp rsi rdi]
+        
+    Routine temporaries
+        Total         :      21
+            Global    :      11
+            Local     :      10
+        Regenerable   :       5
+        Spilled       :       1
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr.h(93,11):remark #34051: REGISTER ALLOCATION : [_ZNSt10shared_ptrIN6SAMRAI4geom21CartesianGridGeometryEED1Ev] /usr/include/c++/4.8.5/bits/shared_ptr.h:93
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rdi r12-r13]
+        
+    Routine temporaries
+        Total         :      24
+            Global    :      12
+            Local     :      12
+        Regenerable   :       3
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::shared_ptr<FlowModel>::~shared_ptr(std::shared_ptr<FlowModel> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr.h(93,11):remark #34051: REGISTER ALLOCATION : [_ZNSt10shared_ptrI9FlowModelED1Ev] /usr/include/c++/4.8.5/bits/shared_ptr.h:93
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rdi r12-r13]
+        
+    Routine temporaries
+        Total         :      24
+            Global    :      12
+            Local     :      12
+        Regenerable   :       3
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelManager::printClassData(const FlowModelManager *, std::ostream &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelManager::printClassData(const FlowModelManager *, std::ostream &) const) [21] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelManager.cpp(83,1)
+  -> (84,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (85,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (87,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (89,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (90,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, const void *)
+  -> (91,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (93,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (94,8) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (95,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (97,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> INLINE: (98,8) operator<<(std::ostream &, const FLOW_MODEL::TYPE &)
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModels.hpp:(24,52) std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::map(std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModels.hpp:(26,17) std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::size(const std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>> *) const
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModels.hpp:(29,9) std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::operator[](std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>> *, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_type &&)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModels.hpp:(29,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::operator=(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *, const char *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModels.hpp:(30,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::operator=(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *, const char *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModels.hpp:(30,9) std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::operator[](std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>> *, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_type &&)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModels.hpp:(31,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::operator=(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *, const char *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModels.hpp:(31,9) std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::operator[](std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>> *, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_type &&)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModels.hpp:(35,15) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModels.hpp:(35,25) std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::operator[](std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>> *, const std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_type &)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (99,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (101,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> INLINE: (102,17) std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<FlowModel, __gnu_cxx::_S_atomic> *) const
+  -> INDIRECT- (VIRTUAL): (102,34)  EXPR_CONV.SI64.P64(*((SI64*) (__$U86_V$904.0.264->__vptr_V$202_2.7 + EXPR_CONV.SI32.I64(5(SI32)) * 8(I64))))
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1140,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelManager.cpp(98,8)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   remark #25478: While Loop Unrolled by 2  
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1140,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelManager.cpp(98,8)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   remark #25478: While Loop Unrolled by 2  
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1140,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelManager.cpp(98,8)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   remark #25478: While Loop Unrolled by 2  
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1140,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelManager.cpp(98,8)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   remark #25478: While Loop Unrolled by 2  
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_tree.h(445,4):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (8, 0)
+/usr/include/c++/4.8.5/bits/stl_tree.h(140,51):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (1, 0)
+/usr/include/c++/4.8.5/bits/stl_tree.h(140,51):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (1, 0)
+/usr/include/c++/4.8.5/bits/stl_tree.h(140,51):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (1, 0)
+/usr/include/c++/4.8.5/bits/stl_tree.h(140,51):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (1, 0)
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelManager.cpp(83,1):remark #34051: REGISTER ALLOCATION : [_ZNK16FlowModelManager14printClassDataERSo] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelManager.cpp:83
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   10[ rax rdx rcx rbx rbp rsi rdi r14-r15 zmm0]
+        
+    Routine temporaries
+        Total         :     261
+            Global    :      80
+            Local     :     181
+        Regenerable   :      79
+        Spilled       :       4
+        
+    Routine stack
+        Variables     :     108 bytes*
+            Reads     :       9 [1.54e+00 ~ 0.9%]
+            Writes    :      13 [4.13e+00 ~ 2.5%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Rb_tree<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_type, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type, std::_Select1st<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type>, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_compare, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::_Pair_alloc_type>::_M_put_node(std::_Rb_tree<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_type, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type, std::_Select1st<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type>, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_compare, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::_Pair_alloc_type> *, std::_Rb_tree<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_type, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type, std::_Select1st<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type>, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_compare, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::_Pair_alloc_type>::_Link_type)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_tree.h(374,7):remark #34051: REGISTER ALLOCATION : [_ZNSt8_Rb_treeIN10FLOW_MODEL4TYPEESt4pairIKS1_SsESt10_Select1stIS4_ESt4lessIS1_ESaIS4_EE11_M_put_nodeEPSt13_Rb_tree_nodeIS4_E] /usr/include/c++/4.8.5/bits/stl_tree.h:374
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rsi rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       0
+            Local     :      10
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Rb_tree<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_type, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type, std::_Select1st<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type>, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_compare, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::_Pair_alloc_type>::_M_get_insert_hint_unique_pos(std::_Rb_tree<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_type, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type, std::_Select1st<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type>, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_compare, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::_Pair_alloc_type> *, std::_Rb_tree<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_type, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type, std::_Select1st<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type>, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_compare, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::_Pair_alloc_type>::const_iterator, const std::_Rb_tree<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_type, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type, std::_Select1st<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type>, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_compare, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::_Pair_alloc_type>::key_type &)
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1321,7) inlined into /usr/include/c++/4.8.5/bits/stl_tree.h(1426,38)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   remark #25478: While Loop Unrolled by 2  
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1321,7) inlined into /usr/include/c++/4.8.5/bits/stl_tree.h(1442,38)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   remark #25478: While Loop Unrolled by 2  
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1321,7) inlined into /usr/include/c++/4.8.5/bits/stl_tree.h(1458,38)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   remark #25478: While Loop Unrolled by 2  
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_tree.h(1414,5):remark #34051: REGISTER ALLOCATION : [_ZNSt8_Rb_treeIN10FLOW_MODEL4TYPEESt4pairIKS1_SsESt10_Select1stIS4_ESt4lessIS1_ESaIS4_EE29_M_get_insert_hint_unique_posESt23_Rb_tree_const_iteratorIS4_ERS3_] /usr/include/c++/4.8.5/bits/stl_tree.h:1414
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   10[ rax rdx rcx rbx rbp rsi rdi r12 r14-r15]
+        
+    Routine temporaries
+        Total         :      66
+            Global    :      28
+            Local     :      38
+        Regenerable   :       5
+        Spilled       :       5
+        
+    Routine stack
+        Variables     :      48 bytes*
+            Reads     :       6 [5.92e-01 ~ 1.1%]
+            Writes    :      18 [5.92e-01 ~ 1.1%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Rb_tree<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_type, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type, std::_Select1st<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type>, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_compare, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::_Pair_alloc_type>::_M_destroy_node(std::_Rb_tree<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_type, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type, std::_Select1st<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type>, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_compare, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::_Pair_alloc_type> *, std::_Rb_tree<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_type, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type, std::_Select1st<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type>, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_compare, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::_Pair_alloc_type>::_Link_type)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_tree.h(420,7):remark #34051: REGISTER ALLOCATION : [_ZNSt8_Rb_treeIN10FLOW_MODEL4TYPEESt4pairIKS1_SsESt10_Select1stIS4_ESt4lessIS1_ESaIS4_EE15_M_destroy_nodeEPSt13_Rb_tree_nodeIS4_E] /usr/include/c++/4.8.5/bits/stl_tree.h:420
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rbp rsi rdi]
+        
+    Routine temporaries
+        Total         :      21
+            Global    :      11
+            Local     :      10
+        Regenerable   :       5
+        Spilled       :       1
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_base<__gnu_cxx::_S_atomic>::~_Sp_counted_base(std::_Sp_counted_base<__gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(114,7):remark #34051: REGISTER ALLOCATION : [_ZNSt16_Sp_counted_baseILN9__gnu_cxx12_Lock_policyE2EED1Ev] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:114
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       8
+            Global    :       0
+            Local     :       8
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_base<__gnu_cxx::_S_atomic>::~_Sp_counted_base(std::_Sp_counted_base<__gnu_cxx::_S_atomic> *const)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(113,7):remark #34051: REGISTER ALLOCATION : [_ZNSt16_Sp_counted_baseILN9__gnu_cxx12_Lock_policyE2EED0Ev] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:113
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_base<__gnu_cxx::_S_atomic>::_M_destroy(std::_Sp_counted_base<__gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(124,7):remark #34051: REGISTER ALLOCATION : [_ZNSt16_Sp_counted_baseILN9__gnu_cxx12_Lock_policyE2EE10_M_destroyEv] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:124
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      19
+            Global    :       7
+            Local     :      12
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       1 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::~map(std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>> *)
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1123,7) inlined into /usr/include/c++/4.8.5/bits/stl_map.h(97,11)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_map.h(96,11):remark #34051: REGISTER ALLOCATION : [_ZNSt3mapIN10FLOW_MODEL4TYPEESsSt4lessIS1_ESaISt4pairIKS1_SsEEED1Ev] /usr/include/c++/4.8.5/bits/stl_map.h:96
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   10[ rax rdx rcx rsi rdi r8 r12-r15]
+        
+    Routine temporaries
+        Total         :      25
+            Global    :      13
+            Local     :      12
+        Regenerable   :       5
+        Spilled       :       4
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :      32 bytes*
+            Reads     :       4 [3.99e+00 ~ 3.8%]
+            Writes    :       4 [3.99e+00 ~ 3.8%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Rb_tree<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_type, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type, std::_Select1st<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type>, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_compare, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::_Pair_alloc_type>::_M_erase(std::_Rb_tree<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_type, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type, std::_Select1st<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type>, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_compare, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::_Pair_alloc_type> *, std::_Rb_tree<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_type, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type, std::_Select1st<std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::value_type>, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::key_compare, std::map<FLOW_MODEL::TYPE, std::string, std::less<FLOW_MODEL::TYPE>, std::allocator<std::pair<const FLOW_MODEL::TYPE, std::string>>>::_Pair_alloc_type>::_Link_type)
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1123,7)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_tree.h(1121,5):remark #34051: REGISTER ALLOCATION : [_ZNSt8_Rb_treeIN10FLOW_MODEL4TYPEESt4pairIKS1_SsESt10_Select1stIS4_ESt4lessIS1_ESaIS4_EE8_M_eraseEPSt13_Rb_tree_nodeIS4_E] /usr/include/c++/4.8.5/bits/stl_tree.h:1121
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   10[ rax rdx rcx rsi rdi r8 r12-r15]
+        
+    Routine temporaries
+        Total         :      26
+            Global    :      13
+            Local     :      13
+        Regenerable   :       5
+        Spilled       :       4
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :      32 bytes*
+            Reads     :       4 [3.99e+00 ~ 3.8%]
+            Writes    :       4 [3.99e+00 ~ 3.8%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<FlowModelSingleSpecies *, __gnu_cxx::_S_atomic>::_M_dispose(std::_Sp_counted_ptr<FlowModelSingleSpecies *, __gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(290,7):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP22FlowModelSingleSpeciesLN9__gnu_cxx12_Lock_policyE2EE10_M_disposeEv] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:290
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      20
+            Global    :       7
+            Local     :      13
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       1 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<FlowModelSingleSpecies *, __gnu_cxx::_S_atomic>::_M_destroy(std::_Sp_counted_ptr<FlowModelSingleSpecies *, __gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(294,7):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP22FlowModelSingleSpeciesLN9__gnu_cxx12_Lock_policyE2EE10_M_destroyEv] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:294
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      19
+            Global    :       7
+            Local     :      12
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       1 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<FlowModelSingleSpecies *, __gnu_cxx::_S_atomic>::_M_get_deleter(std::_Sp_counted_ptr<FlowModelSingleSpecies *, __gnu_cxx::_S_atomic> *, const std::type_info &)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(298,7):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP22FlowModelSingleSpeciesLN9__gnu_cxx12_Lock_policyE2EE14_M_get_deleterERKSt9type_info] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:298
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rsi rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<FlowModelSingleSpecies *, __gnu_cxx::_S_atomic>::~_Sp_counted_ptr(std::_Sp_counted_ptr<FlowModelSingleSpecies *, __gnu_cxx::_S_atomic> *const)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(281,11):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP22FlowModelSingleSpeciesLN9__gnu_cxx12_Lock_policyE2EED0Ev] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:281
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<FlowModelSingleSpecies *, __gnu_cxx::_S_atomic>::~_Sp_counted_ptr(std::_Sp_counted_ptr<FlowModelSingleSpecies *, __gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(281,11):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP22FlowModelSingleSpeciesLN9__gnu_cxx12_Lock_policyE2EED1Ev] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:281
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       7
+            Global    :       0
+            Local     :       7
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<FlowModelFourEqnConservative *, __gnu_cxx::_S_atomic>::_M_dispose(std::_Sp_counted_ptr<FlowModelFourEqnConservative *, __gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(290,7):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP28FlowModelFourEqnConservativeLN9__gnu_cxx12_Lock_policyE2EE10_M_disposeEv] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:290
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      20
+            Global    :       7
+            Local     :      13
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       1 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<FlowModelFourEqnConservative *, __gnu_cxx::_S_atomic>::_M_destroy(std::_Sp_counted_ptr<FlowModelFourEqnConservative *, __gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(294,7):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP28FlowModelFourEqnConservativeLN9__gnu_cxx12_Lock_policyE2EE10_M_destroyEv] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:294
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      19
+            Global    :       7
+            Local     :      12
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       1 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<FlowModelFourEqnConservative *, __gnu_cxx::_S_atomic>::_M_get_deleter(std::_Sp_counted_ptr<FlowModelFourEqnConservative *, __gnu_cxx::_S_atomic> *, const std::type_info &)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(298,7):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP28FlowModelFourEqnConservativeLN9__gnu_cxx12_Lock_policyE2EE14_M_get_deleterERKSt9type_info] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:298
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rsi rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<FlowModelFourEqnConservative *, __gnu_cxx::_S_atomic>::~_Sp_counted_ptr(std::_Sp_counted_ptr<FlowModelFourEqnConservative *, __gnu_cxx::_S_atomic> *const)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(281,11):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP28FlowModelFourEqnConservativeLN9__gnu_cxx12_Lock_policyE2EED0Ev] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:281
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<FlowModelFourEqnConservative *, __gnu_cxx::_S_atomic>::~_Sp_counted_ptr(std::_Sp_counted_ptr<FlowModelFourEqnConservative *, __gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(281,11):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP28FlowModelFourEqnConservativeLN9__gnu_cxx12_Lock_policyE2EED1Ev] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:281
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       7
+            Global    :       0
+            Local     :       7
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<FlowModelFiveEqnAllaire *, __gnu_cxx::_S_atomic>::_M_dispose(std::_Sp_counted_ptr<FlowModelFiveEqnAllaire *, __gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(290,7):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP23FlowModelFiveEqnAllaireLN9__gnu_cxx12_Lock_policyE2EE10_M_disposeEv] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:290
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      20
+            Global    :       7
+            Local     :      13
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       1 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<FlowModelFiveEqnAllaire *, __gnu_cxx::_S_atomic>::_M_destroy(std::_Sp_counted_ptr<FlowModelFiveEqnAllaire *, __gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(294,7):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP23FlowModelFiveEqnAllaireLN9__gnu_cxx12_Lock_policyE2EE10_M_destroyEv] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:294
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      19
+            Global    :       7
+            Local     :      12
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       1 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<FlowModelFiveEqnAllaire *, __gnu_cxx::_S_atomic>::_M_get_deleter(std::_Sp_counted_ptr<FlowModelFiveEqnAllaire *, __gnu_cxx::_S_atomic> *, const std::type_info &)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(298,7):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP23FlowModelFiveEqnAllaireLN9__gnu_cxx12_Lock_policyE2EE14_M_get_deleterERKSt9type_info] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:298
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rsi rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<FlowModelFiveEqnAllaire *, __gnu_cxx::_S_atomic>::~_Sp_counted_ptr(std::_Sp_counted_ptr<FlowModelFiveEqnAllaire *, __gnu_cxx::_S_atomic> *const)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(281,11):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP23FlowModelFiveEqnAllaireLN9__gnu_cxx12_Lock_policyE2EED0Ev] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:281
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Sp_counted_ptr<FlowModelFiveEqnAllaire *, __gnu_cxx::_S_atomic>::~_Sp_counted_ptr(std::_Sp_counted_ptr<FlowModelFiveEqnAllaire *, __gnu_cxx::_S_atomic> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(281,11):remark #34051: REGISTER ALLOCATION : [_ZNSt15_Sp_counted_ptrIP23FlowModelFiveEqnAllaireLN9__gnu_cxx12_Lock_policyE2EED1Ev] /usr/include/c++/4.8.5/bits/shared_ptr_base.h:281
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       7
+            Global    :       0
+            Local     :       7
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: __sti__$E()
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (__sti__$E()) [264] <compiler generated>
+
+
+    Report from: Code generation optimizations [cg]
+
+<compiler generated>:remark #34051: REGISTER ALLOCATION : [__sti__$E] (null):0
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       7
+            Local     :       6
+        Regenerable   :       7
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================

@@ -1,0 +1,757 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINING OPTION VALUES:
+  -inline-factor: 100
+  -inline-min-size: 30
+  -inline-max-size: 230
+  -inline-max-total-size: 2000
+  -inline-max-per-routine: 10000
+  -inline-max-per-compile: 500000
+
+
+Begin optimization report for: MPIHelper::MPIHelper(MPIHelper *const, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (MPIHelper::MPIHelper(MPIHelper *const, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &)) [2] /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(3,12)
+  -> (3,12) MPIHelper::MPIHelper(MPIHelper *, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(3,12):remark #34051: REGISTER ALLOCATION : [_ZN9MPIHelperC2ERKSsRKN6SAMRAI4tbox9DimensionERKSt10shared_ptrINS2_4geom21CartesianGridGeometryEERKS7_INS2_4hier14PatchHierarchyEE] /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp:3
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    5[ rdx rcx rsi rdi r8]
+        
+    Routine temporaries
+        Total         :      21
+            Global    :       0
+            Local     :      21
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: MPIHelper::MPIHelper(MPIHelper *, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (MPIHelper::MPIHelper(MPIHelper *, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &)) [3] /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(18,1)
+  -> DELETED: (3,12) std::allocator<double>::~allocator(std::allocator<double> *)
+  -> DELETED: (3,12) std::allocator<double>::~allocator(std::allocator<double> *)
+  -> INLINE: (8,23) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (10,25) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+  -> INLINE: (10,25) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (11,27) std::shared_ptr<SAMRAI::hier::PatchHierarchy>::shared_ptr(std::shared_ptr<SAMRAI::hier::PatchHierarchy> *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (11,27) std::shared_ptr<SAMRAI::hier::PatchHierarchy>::~shared_ptr(std::shared_ptr<SAMRAI::hier::PatchHierarchy> *)
+  -> INLINE: (12,15) SAMRAI::tbox::SAMRAI_MPI::getSAMRAIWorld()
+  -> DELETED: (15,38) std::allocator<double>::~allocator(std::allocator<double> *)
+  -> INLINE: (15,38) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+  -> INLINE: (15,38) std::allocator<double>::allocator(std::allocator<double> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (15,38) std::vector<double, std::allocator<double>>::vector(std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type, const std::vector<double, std::allocator<double>>::allocator_type &)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (15,38) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+  -> DELETED: (17,36) std::allocator<double>::~allocator(std::allocator<double> *)
+  -> INLINE: (17,36) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+  -> INLINE: (17,36) std::allocator<double>::allocator(std::allocator<double> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (17,36) std::vector<double, std::allocator<double>>::vector(std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type, const std::vector<double, std::allocator<double>>::allocator_type &)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (17,36) std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+  -> INLINE: (23,45) std::__shared_ptr<SAMRAI::hier::PatchHierarchy, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::hier::PatchHierarchy, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (23,47) SAMRAI::hier::PatchHierarchy::getNumberOfLevels(const SAMRAI::hier::PatchHierarchy *) const
+  -> INLINE: (25,44) SAMRAI::hier::IntVector::operator=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)
+    -> /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(189,16) std::vector<int, std::allocator<int>>::operator=(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>> &)
+  -> INLINE: (26,26) std::__shared_ptr<SAMRAI::hier::PatchHierarchy, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::hier::PatchHierarchy, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (26,28) SAMRAI::hier::PatchHierarchy::getRatioToCoarserLevel(const SAMRAI::hier::PatchHierarchy *, int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/PatchHierarchy.h:(782,32) std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::operator[](const std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> *, std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::size_type) const
+  -> INLINE: (29,48) SAMRAI::hier::IntVector::operator*=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(520,43) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(521,48) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(521,48) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(522,24) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(522,52) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(526,47) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(528,21) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(528,40) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (29,68) std::__shared_ptr<SAMRAI::hier::PatchHierarchy, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::hier::PatchHierarchy, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (29,70) SAMRAI::hier::PatchHierarchy::getRatioToCoarserLevel(const SAMRAI::hier::PatchHierarchy *, int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/PatchHierarchy.h:(782,32) std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::operator[](const std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>> *, std::vector<SAMRAI::hier::IntVector, std::allocator<SAMRAI::hier::IntVector>>::size_type) const
+  -> INLINE: (36,64) std::__shared_ptr<SAMRAI::geom::CartesianGridGeometry, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::geom::CartesianGridGeometry, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (36,66) SAMRAI::hier::BaseGridGeometry::getPhysicalDomain(const SAMRAI::hier::BaseGridGeometry *) const
+  -> INLINE: (37,60) SAMRAI::hier::BoxContainer::front(const SAMRAI::hier::BoxContainer *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(805,27) std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type>::operator*(const std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(805,29) std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::begin(const std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>> *) const
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(805,53) std::list<SAMRAI::hier::Box, std::allocator<SAMRAI::hier::Box>>::front(const std::list<SAMRAI::hier::Box, std::allocator<SAMRAI::hier::Box>> *) const
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (38,71) SAMRAI::hier::Box::numberCells(SAMRAI::hier::IntVector *, const SAMRAI::hier::Box *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h:(637,11) SAMRAI::hier::Box::empty(const SAMRAI::hier::Box *) const
+      -> INLINE: (604,32) SAMRAI::hier::Box::getDim(const SAMRAI::hier::Box *) const
+        -> INLINE: (1299,19) SAMRAI::hier::Index::getDim(const SAMRAI::hier::Index *) const
+      -> INLINE: (604,32) SAMRAI::hier::Box::getDim(const SAMRAI::hier::Box *) const
+        -> INLINE: (1299,19) SAMRAI::hier::Index::getDim(const SAMRAI::hier::Index *) const
+      -> INLINE: (604,41) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+      -> INLINE: (604,41) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+      -> INLINE: (605,21) SAMRAI::hier::Index::operator()(const SAMRAI::hier::Index *, unsigned int) const
+      -> INLINE: (605,31) SAMRAI::hier::Index::operator()(const SAMRAI::hier::Index *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h:(638,17) SAMRAI::hier::IntVector::getZero(const SAMRAI::tbox::Dimension &)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(1133,28) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h:(638,36) SAMRAI::hier::Box::getDim(const SAMRAI::hier::Box *) const
+      -> INLINE: (1299,19) SAMRAI::hier::Index::getDim(const SAMRAI::hier::Index *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h:(640,32) SAMRAI::hier::Index::operator-(SAMRAI::hier::Index *, const SAMRAI::hier::Index *, const SAMRAI::hier::Index &) const
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h:(284,11) SAMRAI::hier::Index::operator-=(SAMRAI::hier::Index *, const SAMRAI::hier::Index &)
+        -> INLINE: (267,42) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+        -> INLINE: (267,42) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h:(640,39) SAMRAI::hier::Index::operator+(SAMRAI::hier::Index *, const SAMRAI::hier::Index *, int) const
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h:(253,11) SAMRAI::hier::Index::operator+=(SAMRAI::hier::Index *, int)
+        -> INLINE: (239,42) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+        -> INLINE: (239,42) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+  -> INLINE: (40,27) SAMRAI::hier::IntVector::operator=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(189,16) std::vector<int, std::allocator<int>>::operator=(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>> &)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (41,27) SAMRAI::hier::IntVector::operator=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(189,16) std::vector<int, std::allocator<int>>::operator=(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>> &)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (41,49) SAMRAI::hier::IntVector::operator*(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(545,11) SAMRAI::hier::IntVector::operator*=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)
+      -> INLINE: (520,43) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+      -> INLINE: (521,48) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+      -> INLINE: (521,48) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+      -> INLINE: (522,24) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type)
+      -> INLINE: (522,52) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+      -> INLINE: (526,47) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+      -> INLINE: (528,21) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type)
+      -> INLINE: (528,40) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (47,43) std::__shared_ptr<SAMRAI::geom::CartesianGridGeometry, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::geom::CartesianGridGeometry, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (47,45) SAMRAI::geom::CartesianGridGeometry::getDx(const SAMRAI::geom::CartesianGridGeometry *) const
+  -> INLINE: (49,33) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+  -> INLINE: (49,33) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+  -> INLINE: (51,33) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (52,31) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (52,100) SAMRAI::hier::IntVector::operator[](SAMRAI::hier::IntVector *, unsigned int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(256,22) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type)
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(15,38)
+   remark #25408: memset generated
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(15,38)
+      remark #15300: LOOP WAS VECTORIZED
+   LOOP END
+
+   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(15,38)
+   <Remainder loop for vectorization>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(17,36)
+   remark #25408: memset generated
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(17,36)
+      remark #15300: LOOP WAS VECTORIZED
+   LOOP END
+
+   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(17,36)
+   <Remainder loop for vectorization>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(27,5)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed ANTI dependence between this->d_patch_hierarchy (782:32) and *(this+i*4) (528:21)
+
+   LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(519,10) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(29,48)
+      remark #15523: loop was not vectorized: loop control variable b was found, but loop iteration count cannot be computed before executing the loop
+
+      LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(521,48) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(29,48)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+         remark #15346: vector dependence: assumed ANTI dependence between this (522:24) and *(this+(offset+i)*4) (522:24)
+         remark #25439: unrolled with remainder by 2  
+      LOOP END
+
+      LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(521,48) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(29,48)
+      <Remainder>
+      LOOP END
+   LOOP END
+
+   LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(527,10) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(29,48)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed ANTI dependence between this (528:21) and *(this+i*4) (528:21)
+      remark #25439: unrolled with remainder by 2  
+   LOOP END
+
+   LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(527,10) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(29,48)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h(604,41) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(38,71)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h(267,42) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(38,71)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+   remark #25478: While Loop Unrolled by 8  
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h(239,42) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(38,71)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+   remark #25478: While Loop Unrolled by 8  
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(519,10) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(41,49)
+   remark #15523: loop was not vectorized: loop control variable b was found, but loop iteration count cannot be computed before executing the loop
+
+   LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(521,48) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(41,49)
+      remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+      remark #25478: While Loop Unrolled by 8  
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(527,10) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(41,49)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed FLOW dependence between *(U25_V.U25_V.U25_V.U25_V.U25_V+i*4) (528:21) and *(U25_V.U25_V.U25_V.U25_V.U25_V+i*4) (528:21)
+   remark #25439: unrolled with remainder by 2  
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(527,10) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(41,49)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(49,33)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed FLOW dependence between this[di] (51:33) and dx_tmp[di] (52:31)
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(749,7):remark #34026: call to memset implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(749,7):remark #34026: call to memset implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp(18,1):remark #34051: REGISTER ALLOCATION : [_ZN9MPIHelperC1ERKSsRKN6SAMRAI4tbox9DimensionERKSt10shared_ptrINS2_4geom21CartesianGridGeometryEERKS7_INS2_4hier14PatchHierarchyEE] /home/akula/HAMeRS_IB/HAMeRS/src/util/MPI_helpers/MPIHelper.cpp:18
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   17[ rax rdx rcx rbx rsi rdi r8-r15 zmm0-zmm2]
+        
+    Routine temporaries
+        Total         :     493
+            Global    :     129
+            Local     :     364
+        Regenerable   :      44
+        Spilled       :      23
+        
+    Routine stack
+        Variables     :     153 bytes*
+            Reads     :      52 [1.75e+01 ~ 1.1%]
+            Writes    :      27 [9.00e-01 ~ 0.1%]
+        Spills        :     144 bytes*
+            Reads     :      48 [2.08e+01 ~ 1.3%]
+            Writes    :      30 [2.04e+01 ~ 1.3%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<double, std::allocator<double>>::~_Vector_base(std::_Vector_base<double, std::allocator<double>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(160,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIdSaIdEED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:160
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       7
+            Local     :       3
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<int, std::allocator<int>>::_M_deallocate(std::_Vector_base<int, std::allocator<int>> *, std::_Vector_base<int, std::allocator<int>>::pointer, std::size_t)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(172,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIiSaIiEE13_M_deallocateEPim] /usr/include/c++/4.8.5/bits/stl_vector.h:172
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      11
+            Global    :       7
+            Local     :       4
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<double, std::allocator<double>>::~vector(std::vector<double, std::allocator<double>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(415,7):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIdSaIdEED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:415
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       7
+            Local     :       3
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: __gnu_cxx::__exchange_and_add_dispatch(_Atomic_word *, int)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/ext/atomicity.h(79,3):remark #34051: REGISTER ALLOCATION : [_ZN17_INTERNAL433ade509__gnu_cxx27__exchange_and_add_dispatchEPii] /usr/include/c++/4.8.5/ext/atomicity.h:79
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    4[ rax rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      16
+            Global    :       8
+            Local     :       8
+        Regenerable   :       2
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr.h(93,11):remark #34051: REGISTER ALLOCATION : [_ZNSt10shared_ptrIN6SAMRAI4geom21CartesianGridGeometryEED1Ev] /usr/include/c++/4.8.5/bits/shared_ptr.h:93
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rdi r12-r13]
+        
+    Routine temporaries
+        Total         :      24
+            Global    :      12
+            Local     :      12
+        Regenerable   :       3
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::shared_ptr<SAMRAI::hier::PatchHierarchy>::~shared_ptr(std::shared_ptr<SAMRAI::hier::PatchHierarchy> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr.h(93,11):remark #34051: REGISTER ALLOCATION : [_ZNSt10shared_ptrIN6SAMRAI4hier14PatchHierarchyEED1Ev] /usr/include/c++/4.8.5/bits/shared_ptr.h:93
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rdi r12-r13]
+        
+    Routine temporaries
+        Total         :      24
+            Global    :      12
+            Local     :      12
+        Regenerable   :       3
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<int, std::allocator<int>>::operator=(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>> &)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/vector.tcc(162,5):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIiSaIiEEaSERKS1_] /usr/include/c++/4.8.5/bits/vector.tcc:162
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   11[ rax rdx rcx rbx rbp rsi rdi r12-r15]
+        
+    Routine temporaries
+        Total         :      56
+            Global    :      22
+            Local     :      34
+        Regenerable   :       1
+        Spilled       :       6
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::tbox::SAMRAI_MPI::getSAMRAIWorld()
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::tbox::SAMRAI_MPI::getSAMRAIWorld()) /home/akula/libraries/SAMRAI/include/SAMRAI/tbox/SAMRAI_MPI.h(169,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/tbox/Dimension.h(137,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::IntVector::operator=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::IntVector::operator=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(186,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::IntVector::operator[](SAMRAI::hier::IntVector *, unsigned int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::IntVector::operator[](SAMRAI::hier::IntVector *, unsigned int)) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(253,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::IntVector::operator*=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::IntVector::operator*=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(515,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::IntVector::operator*(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::IntVector::operator*(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(542,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::IntVector::getZero(const SAMRAI::tbox::Dimension &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::IntVector::getZero(const SAMRAI::tbox::Dimension &)) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(1132,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Index::operator+=(SAMRAI::hier::Index *, int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Index::operator+=(SAMRAI::hier::Index *, int)) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h(238,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Index::operator+(SAMRAI::hier::Index *, const SAMRAI::hier::Index *, int) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Index::operator+(SAMRAI::hier::Index *, const SAMRAI::hier::Index *, int) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h(251,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Index::operator-=(SAMRAI::hier::Index *, const SAMRAI::hier::Index &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Index::operator-=(SAMRAI::hier::Index *, const SAMRAI::hier::Index &)) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h(265,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Index::operator-(SAMRAI::hier::Index *, const SAMRAI::hier::Index *, const SAMRAI::hier::Index &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Index::operator-(SAMRAI::hier::Index *, const SAMRAI::hier::Index *, const SAMRAI::hier::Index &) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h(281,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Index::operator()(const SAMRAI::hier::Index *, unsigned int) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Index::operator()(const SAMRAI::hier::Index *, unsigned int) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h(515,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Index::getDim(const SAMRAI::hier::Index *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Index::getDim(const SAMRAI::hier::Index *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h(724,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Box::empty(const SAMRAI::hier::Box *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Box::empty(const SAMRAI::hier::Box *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h(598,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Box::numberCells(SAMRAI::hier::IntVector *, const SAMRAI::hier::Box *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Box::numberCells(SAMRAI::hier::IntVector *, const SAMRAI::hier::Box *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h(636,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Box::getDim(const SAMRAI::hier::Box *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Box::getDim(const SAMRAI::hier::Box *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h(1298,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::BoxContainer::front(const SAMRAI::hier::BoxContainer *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::BoxContainer::front(const SAMRAI::hier::BoxContainer *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h(804,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::BaseGridGeometry::getPhysicalDomain(const SAMRAI::hier::BaseGridGeometry *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::BaseGridGeometry::getPhysicalDomain(const SAMRAI::hier::BaseGridGeometry *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BaseGridGeometry.h(339,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::PatchHierarchy::getNumberOfLevels(const SAMRAI::hier::PatchHierarchy *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::PatchHierarchy::getNumberOfLevels(const SAMRAI::hier::PatchHierarchy *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/PatchHierarchy.h(548,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::PatchHierarchy::getRatioToCoarserLevel(const SAMRAI::hier::PatchHierarchy *, int) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::PatchHierarchy::getRatioToCoarserLevel(const SAMRAI::hier::PatchHierarchy *, int) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/PatchHierarchy.h(780,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::geom::CartesianGridGeometry::getDx(const SAMRAI::geom::CartesianGridGeometry *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::geom::CartesianGridGeometry::getDx(const SAMRAI::geom::CartesianGridGeometry *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/geom/CartesianGridGeometry.h(255,4)
+
+===========================================================================
+
+Begin optimization report for: __sti__$E()
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (__sti__$E()) [154] <compiler generated>
+
+
+    Report from: Code generation optimizations [cg]
+
+<compiler generated>:remark #34051: REGISTER ALLOCATION : [__sti__$E] (null):0
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       7
+            Local     :       6
+        Regenerable   :       7
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================

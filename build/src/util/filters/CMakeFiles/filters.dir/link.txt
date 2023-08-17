@@ -1,0 +1,2 @@
+/usr/bin/ar qc libfilters.a  CMakeFiles/filters.dir/Filter.cpp.o CMakeFiles/filters.dir/FilterNone.cpp.o CMakeFiles/filters.dir/FilterTruncatedGaussian.cpp.o
+/usr/bin/ranlib libfilters.a

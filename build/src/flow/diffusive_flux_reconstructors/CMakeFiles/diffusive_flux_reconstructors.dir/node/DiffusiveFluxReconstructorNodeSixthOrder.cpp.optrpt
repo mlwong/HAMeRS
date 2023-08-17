@@ -1,0 +1,1569 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINING OPTION VALUES:
+  -inline-factor: 100
+  -inline-min-size: 30
+  -inline-max-size: 230
+  -inline-max-total-size: 2000
+  -inline-max-per-routine: 10000
+  -inline-max-per-compile: 500000
+
+
+Begin optimization report for: DiffusiveFluxReconstructor::~DiffusiveFluxReconstructor(DiffusiveFluxReconstructor *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (DiffusiveFluxReconstructor::~DiffusiveFluxReconstructor(DiffusiveFluxReconstructor *)) [2] /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/DiffusiveFluxReconstructor.hpp(43,47)
+  -> INLINE: (43,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (43,48) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (43,48) std::shared_ptr<FlowModel>::~shared_ptr(std::shared_ptr<FlowModel> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (43,48) std::shared_ptr<SAMRAI::tbox::Database>::~shared_ptr(std::shared_ptr<SAMRAI::tbox::Database> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/DiffusiveFluxReconstructor.hpp(43,47):remark #34051: REGISTER ALLOCATION : [_ZN26DiffusiveFluxReconstructorD1Ev] /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/DiffusiveFluxReconstructor.hpp:43
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    8[ rax rdx rcx rbx rbp rsi rdi r12]
+        
+    Routine temporaries
+        Total         :      63
+            Global    :      29
+            Local     :      34
+        Regenerable   :      14
+        Spilled       :       3
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: DiffusiveFluxReconstructor::~DiffusiveFluxReconstructor(DiffusiveFluxReconstructor *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (DiffusiveFluxReconstructor::~DiffusiveFluxReconstructor(DiffusiveFluxReconstructor *const)) [3] /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/DiffusiveFluxReconstructor.hpp(43,17)
+  -> INLINE: (43,17) DiffusiveFluxReconstructor::~DiffusiveFluxReconstructor(DiffusiveFluxReconstructor *)
+    -> INLINE: (43,48) std::shared_ptr<SAMRAI::tbox::Database>::~shared_ptr(std::shared_ptr<SAMRAI::tbox::Database> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (43,48) std::shared_ptr<FlowModel>::~shared_ptr(std::shared_ptr<FlowModel> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (43,48) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (43,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/DiffusiveFluxReconstructor.hpp(43,17):remark #34051: REGISTER ALLOCATION : [_ZN26DiffusiveFluxReconstructorD0Ev] /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/DiffusiveFluxReconstructor.hpp:43
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    8[ rax rdx rcx rbx rbp rsi rdi r12]
+        
+    Routine temporaries
+        Total         :      64
+            Global    :      29
+            Local     :      35
+        Regenerable   :      14
+        Spilled       :       3
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: DiffusiveFluxReconstructor::~DiffusiveFluxReconstructor(DiffusiveFluxReconstructor *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (DiffusiveFluxReconstructor::~DiffusiveFluxReconstructor(DiffusiveFluxReconstructor *const)) /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/DiffusiveFluxReconstructor.hpp(43,17)
+
+===========================================================================
+
+Begin optimization report for: DiffusiveFluxReconstructorNode::~DiffusiveFluxReconstructorNode(DiffusiveFluxReconstructorNode *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (DiffusiveFluxReconstructorNode::~DiffusiveFluxReconstructorNode(DiffusiveFluxReconstructorNode *const)) /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNode.hpp(17,17)
+
+===========================================================================
+
+Begin optimization report for: DiffusiveFluxReconstructorNodeSixthOrder::DiffusiveFluxReconstructorNodeSixthOrder(DiffusiveFluxReconstructorNodeSixthOrder *, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const std::shared_ptr<FlowModel> &, const std::shared_ptr<SAMRAI::tbox::Database> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (DiffusiveFluxReconstructorNodeSixthOrder::DiffusiveFluxReconstructorNodeSixthOrder(DiffusiveFluxReconstructorNodeSixthOrder *, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const std::shared_ptr<FlowModel> &, const std::shared_ptr<SAMRAI::tbox::Database> &)) [6] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(21,1)
+  -> INLINE: (20,13) DiffusiveFluxReconstructorNode::~DiffusiveFluxReconstructorNode(DiffusiveFluxReconstructorNode *const)
+    -> /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNode.hpp:(17,17) DiffusiveFluxReconstructorNode::~DiffusiveFluxReconstructorNode(DiffusiveFluxReconstructorNode *)
+  -> INLINE: (22,23) SAMRAI::hier::IntVector::operator=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(189,16) std::vector<int, std::allocator<int>>::operator=(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>> &)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (22,25) SAMRAI::hier::IntVector::getOne(const SAMRAI::tbox::Dimension &)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(1146,27) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+  -> INLINE: (22,55) SAMRAI::hier::IntVector::operator*(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector *, int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(571,11) SAMRAI::hier::IntVector::operator*=(SAMRAI::hier::IntVector *, int)
+      -> INLINE: (556,44) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+      -> INLINE: (558,18) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type)
+  -> INLINE: (24,35) SAMRAI::hier::IntVector::operator=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(189,16) std::vector<int, std::allocator<int>>::operator=(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>> &)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (24,37) SAMRAI::hier::IntVector::getOne(const SAMRAI::tbox::Dimension &)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(1146,27) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+  -> INLINE: (24,67) SAMRAI::hier::IntVector::operator*(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector *, int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(571,11) SAMRAI::hier::IntVector::operator*=(SAMRAI::hier::IntVector *, int)
+      -> INLINE: (556,44) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+      -> INLINE: (558,18) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type)
+  -> INLINE: (25,35) SAMRAI::hier::IntVector::operator=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(189,16) std::vector<int, std::allocator<int>>::operator=(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>> &)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (25,37) SAMRAI::hier::IntVector::getOne(const SAMRAI::tbox::Dimension &)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(1146,27) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+  -> INLINE: (25,67) SAMRAI::hier::IntVector::operator*(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector *, int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(571,11) SAMRAI::hier::IntVector::operator*=(SAMRAI::hier::IntVector *, int)
+      -> INLINE: (556,44) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+      -> INLINE: (558,18) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type)
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(22,55)
+<Peeled loop for vectorization>
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(22,55)
+   remark #15300: LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(22,55)
+<Remainder loop for vectorization>
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(24,67)
+<Peeled loop for vectorization>
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(24,67)
+   remark #15300: LOOP WAS VECTORIZED
+   remark #25456: Number of Array Refs Scalar Replaced In Loop: 2
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(24,67)
+<Remainder loop for vectorization>
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(25,67)
+<Peeled loop for vectorization>
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(25,67)
+   remark #15300: LOOP WAS VECTORIZED
+   remark #25456: Number of Array Refs Scalar Replaced In Loop: 2
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(25,67)
+<Remainder loop for vectorization>
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(21,1):remark #34051: REGISTER ALLOCATION : [_ZN40DiffusiveFluxReconstructorNodeSixthOrderC1ERKSsRKN6SAMRAI4tbox9DimensionERKSt10shared_ptrINS2_4geom21CartesianGridGeometryEERKiRKS7_I9FlowModelERKS7_INS3_8DatabaseEE] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp:21
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   17[ rax rdx rcx rbx rsi rdi r8-r15 zmm0-zmm2]
+        
+    Routine temporaries
+        Total         :     272
+            Global    :      79
+            Local     :     193
+        Regenerable   :      19
+        Spilled       :       7
+        
+    Routine stack
+        Variables     :      56 bytes*
+            Reads     :      22 [1.45e+01 ~ 2.6%]
+            Writes    :       4 [0.00e+00 ~ 0.0%]
+        Spills        :      16 bytes*
+            Reads     :       4 [4.39e-02 ~ 0.0%]
+            Writes    :       4 [4.39e-02 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<int, std::allocator<int>>::_M_deallocate(std::_Vector_base<int, std::allocator<int>> *, std::_Vector_base<int, std::allocator<int>>::pointer, std::size_t)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(172,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIiSaIiEE13_M_deallocateEPim] /usr/include/c++/4.8.5/bits/stl_vector.h:172
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      11
+            Global    :       7
+            Local     :       4
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: DiffusiveFluxReconstructorNode::~DiffusiveFluxReconstructorNode(DiffusiveFluxReconstructorNode *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (DiffusiveFluxReconstructorNode::~DiffusiveFluxReconstructorNode(DiffusiveFluxReconstructorNode *)) [12] /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNode.hpp(17,51)
+  -> INLINE: (17,52) DiffusiveFluxReconstructor::~DiffusiveFluxReconstructor(DiffusiveFluxReconstructor *const)
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/DiffusiveFluxReconstructor.hpp:(43,17) DiffusiveFluxReconstructor::~DiffusiveFluxReconstructor(DiffusiveFluxReconstructor *)
+      -> INLINE: (43,48) std::shared_ptr<SAMRAI::tbox::Database>::~shared_ptr(std::shared_ptr<SAMRAI::tbox::Database> *)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+      -> INLINE: (43,48) std::shared_ptr<FlowModel>::~shared_ptr(std::shared_ptr<FlowModel> *)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+      -> INLINE: (43,48) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+      -> INLINE: (43,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (17,52) std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>>::~vector(std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_construct.h(102,4) inlined into /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNode.hpp(18,52)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed ANTI dependence between __first->_M_refcount->_M_pi (545:2) and *__mem (68:6)
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNode.hpp(17,51):remark #34051: REGISTER ALLOCATION : [_ZN30DiffusiveFluxReconstructorNodeD1Ev] /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNode.hpp:17
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   10[ rax rdx rcx rbx rbp rsi rdi r13-r15]
+        
+    Routine temporaries
+        Total         :      84
+            Global    :      28
+            Local     :      56
+        Regenerable   :      17
+        Spilled       :       5
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :      16 bytes*
+            Reads     :       2 [1.97e+00 ~ 1.4%]
+            Writes    :       2 [1.97e+00 ~ 1.4%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>>::~_Vector_base(std::_Vector_base<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(160,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseISt10shared_ptrIN6SAMRAI4pdat8CellDataIdEEESaIS5_EED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:160
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       7
+            Local     :       3
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: DiffusiveFluxReconstructorNodeSixthOrder::DiffusiveFluxReconstructorNodeSixthOrder(DiffusiveFluxReconstructorNodeSixthOrder *const, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const std::shared_ptr<FlowModel> &, const std::shared_ptr<SAMRAI::tbox::Database> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (DiffusiveFluxReconstructorNodeSixthOrder::DiffusiveFluxReconstructorNodeSixthOrder(DiffusiveFluxReconstructorNodeSixthOrder *const, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const std::shared_ptr<FlowModel> &, const std::shared_ptr<SAMRAI::tbox::Database> &)) [14] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(7,43)
+  -> INLINE: (7,43) DiffusiveFluxReconstructorNodeSixthOrder::DiffusiveFluxReconstructorNodeSixthOrder(DiffusiveFluxReconstructorNodeSixthOrder *, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const std::shared_ptr<FlowModel> &, const std::shared_ptr<SAMRAI::tbox::Database> &)
+    -> INLINE: (20,13) DiffusiveFluxReconstructorNode::~DiffusiveFluxReconstructorNode(DiffusiveFluxReconstructorNode *const)
+      -> /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNode.hpp:(17,17) DiffusiveFluxReconstructorNode::~DiffusiveFluxReconstructorNode(DiffusiveFluxReconstructorNode *)
+    -> INLINE: (22,23) SAMRAI::hier::IntVector::operator=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(189,16) std::vector<int, std::allocator<int>>::operator=(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>> &)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (22,25) SAMRAI::hier::IntVector::getOne(const SAMRAI::tbox::Dimension &)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(1146,27) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+    -> INLINE: (22,55) SAMRAI::hier::IntVector::operator*(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector *, int) const
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(571,11) SAMRAI::hier::IntVector::operator*=(SAMRAI::hier::IntVector *, int)
+        -> INLINE: (556,44) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+        -> INLINE: (558,18) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type)
+    -> INLINE: (24,35) SAMRAI::hier::IntVector::operator=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(189,16) std::vector<int, std::allocator<int>>::operator=(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>> &)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (24,37) SAMRAI::hier::IntVector::getOne(const SAMRAI::tbox::Dimension &)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(1146,27) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+    -> INLINE: (24,67) SAMRAI::hier::IntVector::operator*(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector *, int) const
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(571,11) SAMRAI::hier::IntVector::operator*=(SAMRAI::hier::IntVector *, int)
+        -> INLINE: (556,44) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+        -> INLINE: (558,18) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type)
+    -> INLINE: (25,35) SAMRAI::hier::IntVector::operator=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(189,16) std::vector<int, std::allocator<int>>::operator=(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>> &)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (25,37) SAMRAI::hier::IntVector::getOne(const SAMRAI::tbox::Dimension &)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(1146,27) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+    -> INLINE: (25,67) SAMRAI::hier::IntVector::operator*(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector *, int) const
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(571,11) SAMRAI::hier::IntVector::operator*=(SAMRAI::hier::IntVector *, int)
+        -> INLINE: (556,44) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+        -> INLINE: (558,18) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type)
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(7,43)
+<Peeled loop for vectorization>
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(7,43)
+   remark #15300: LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(7,43)
+<Remainder loop for vectorization>
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(7,43)
+<Peeled loop for vectorization>
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(7,43)
+   remark #15300: LOOP WAS VECTORIZED
+   remark #25456: Number of Array Refs Scalar Replaced In Loop: 2
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(7,43)
+<Remainder loop for vectorization>
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(7,43)
+<Peeled loop for vectorization>
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(7,43)
+   remark #15300: LOOP WAS VECTORIZED
+   remark #25456: Number of Array Refs Scalar Replaced In Loop: 2
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(557,7) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(7,43)
+<Remainder loop for vectorization>
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(7,43):remark #34051: REGISTER ALLOCATION : [_ZN40DiffusiveFluxReconstructorNodeSixthOrderC2ERKSsRKN6SAMRAI4tbox9DimensionERKSt10shared_ptrINS2_4geom21CartesianGridGeometryEERKiRKS7_I9FlowModelERKS7_INS3_8DatabaseEE] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp:7
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   17[ rax rdx rcx rbx rsi rdi r8-r15 zmm0-zmm2]
+        
+    Routine temporaries
+        Total         :     272
+            Global    :      79
+            Local     :     193
+        Regenerable   :      19
+        Spilled       :       7
+        
+    Routine stack
+        Variables     :      56 bytes*
+            Reads     :      22 [1.45e+01 ~ 2.6%]
+            Writes    :       4 [0.00e+00 ~ 0.0%]
+        Spills        :      16 bytes*
+            Reads     :       4 [4.39e-02 ~ 0.0%]
+            Writes    :       4 [4.39e-02 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: DiffusiveFluxReconstructorNodeSixthOrder::~DiffusiveFluxReconstructorNodeSixthOrder(DiffusiveFluxReconstructorNodeSixthOrder *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (DiffusiveFluxReconstructorNodeSixthOrder::~DiffusiveFluxReconstructorNodeSixthOrder(DiffusiveFluxReconstructorNodeSixthOrder *)) [15] /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.hpp(17,53)
+  -> INLINE: (17,54) DiffusiveFluxReconstructorNode::~DiffusiveFluxReconstructorNode(DiffusiveFluxReconstructorNode *const)
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNode.hpp:(17,17) DiffusiveFluxReconstructorNode::~DiffusiveFluxReconstructorNode(DiffusiveFluxReconstructorNode *)
+      -> INLINE: (17,52) std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>>::~vector(std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>> *)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+      -> INLINE: (17,52) DiffusiveFluxReconstructor::~DiffusiveFluxReconstructor(DiffusiveFluxReconstructor *const)
+        -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/DiffusiveFluxReconstructor.hpp:(43,17) DiffusiveFluxReconstructor::~DiffusiveFluxReconstructor(DiffusiveFluxReconstructor *)
+          -> INLINE: (43,48) std::shared_ptr<SAMRAI::tbox::Database>::~shared_ptr(std::shared_ptr<SAMRAI::tbox::Database> *)
+             {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+          -> INLINE: (43,48) std::shared_ptr<FlowModel>::~shared_ptr(std::shared_ptr<FlowModel> *)
+             {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+          -> INLINE: (43,48) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+             {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+          -> INLINE: (43,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+             {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_construct.h(102,4) inlined into /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.hpp(18,54)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed ANTI dependence between __first->_M_refcount->_M_pi (545:2) and *__mem (68:6)
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.hpp(17,53):remark #34051: REGISTER ALLOCATION : [_ZN40DiffusiveFluxReconstructorNodeSixthOrderD1Ev] /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.hpp:17
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   10[ rax rdx rcx rbx rbp rsi rdi r13-r15]
+        
+    Routine temporaries
+        Total         :      84
+            Global    :      28
+            Local     :      56
+        Regenerable   :      17
+        Spilled       :       5
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :      16 bytes*
+            Reads     :       2 [1.97e+00 ~ 1.4%]
+            Writes    :       2 [1.97e+00 ~ 1.4%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: DiffusiveFluxReconstructorNodeSixthOrder::~DiffusiveFluxReconstructorNodeSixthOrder(DiffusiveFluxReconstructorNodeSixthOrder *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (DiffusiveFluxReconstructorNodeSixthOrder::~DiffusiveFluxReconstructorNodeSixthOrder(DiffusiveFluxReconstructorNodeSixthOrder *const)) [16] /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.hpp(17,9)
+  -> INLINE: (17,9) DiffusiveFluxReconstructorNodeSixthOrder::~DiffusiveFluxReconstructorNodeSixthOrder(DiffusiveFluxReconstructorNodeSixthOrder *)
+    -> INLINE: (17,54) DiffusiveFluxReconstructorNode::~DiffusiveFluxReconstructorNode(DiffusiveFluxReconstructorNode *const)
+      -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNode.hpp:(17,17) DiffusiveFluxReconstructorNode::~DiffusiveFluxReconstructorNode(DiffusiveFluxReconstructorNode *)
+        -> INLINE: (17,52) std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>>::~vector(std::vector<std::shared_ptr<SAMRAI::pdat::CellData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::CellData<Real>>>> *)
+           {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+        -> INLINE: (17,52) DiffusiveFluxReconstructor::~DiffusiveFluxReconstructor(DiffusiveFluxReconstructor *const)
+          -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/DiffusiveFluxReconstructor.hpp:(43,17) DiffusiveFluxReconstructor::~DiffusiveFluxReconstructor(DiffusiveFluxReconstructor *)
+            -> INLINE: (43,48) std::shared_ptr<SAMRAI::tbox::Database>::~shared_ptr(std::shared_ptr<SAMRAI::tbox::Database> *)
+               {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+            -> INLINE: (43,48) std::shared_ptr<FlowModel>::~shared_ptr(std::shared_ptr<FlowModel> *)
+               {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+            -> INLINE: (43,48) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+               {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+            -> INLINE: (43,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+               {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_construct.h(102,4) inlined into /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.hpp(18,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed ANTI dependence between __first->_M_refcount->_M_pi (545:2) and *__mem (68:6)
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.hpp(17,9):remark #34051: REGISTER ALLOCATION : [_ZN40DiffusiveFluxReconstructorNodeSixthOrderD0Ev] /home/akula/HAMeRS_IB/HAMeRS/include/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.hpp:17
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   10[ rax rdx rcx rbx rbp rsi rdi r13-r15]
+        
+    Routine temporaries
+        Total         :      85
+            Global    :      28
+            Local     :      57
+        Regenerable   :      17
+        Spilled       :       5
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :      16 bytes*
+            Reads     :       2 [1.97e+00 ~ 1.4%]
+            Writes    :       2 [1.97e+00 ~ 1.4%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: DiffusiveFluxReconstructorNodeSixthOrder::printClassData(const DiffusiveFluxReconstructorNodeSixthOrder *, std::ostream &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (DiffusiveFluxReconstructorNodeSixthOrder::printClassData(const DiffusiveFluxReconstructorNodeSixthOrder *, std::ostream &) const) [17] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(35,1)
+  -> (36,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (37,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (39,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (41,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (42,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, const void *)
+  -> (43,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (44,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (45,8) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (46,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(35,1):remark #34051: REGISTER ALLOCATION : [_ZNK40DiffusiveFluxReconstructorNodeSixthOrder14printClassDataERSo] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp:35
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    5[ rax rsi rdi r12-r13]
+        
+    Routine temporaries
+        Total         :      43
+            Global    :      19
+            Local     :      24
+        Regenerable   :      11
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::char_traits<char>::length(const std::char_traits<char>::char_type *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(259,7):remark #34051: REGISTER ALLOCATION : [_ZNSt11char_traitsIcE6lengthEPKc] /usr/include/c++/4.8.5/bits/char_traits.h:259
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      12
+            Global    :       7
+            Local     :       5
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: DiffusiveFluxReconstructorNodeSixthOrder::putToRestart(const DiffusiveFluxReconstructorNodeSixthOrder *, const std::shared_ptr<SAMRAI::tbox::Database> &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (DiffusiveFluxReconstructorNodeSixthOrder::putToRestart(const DiffusiveFluxReconstructorNodeSixthOrder *, const std::shared_ptr<SAMRAI::tbox::Database> &) const) [26] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(57,1)
+  -> INLINE: (58,15) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (58,27) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (58,27) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (58,27) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (58,61) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (58,61) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (58,61) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (58,61) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INDIRECT- (VIRTUAL): (58,61)  EXPR_CONV.SI64.P64(*((SI64*) (__$U1f_V$77f.0.139->__vptr_V$780 + EXPR_CONV.SI32.I64(70(SI32)) * 8(I64))))
+  -> INLINE: (58,61) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (58,61) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (58,61) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(57,1):remark #34051: REGISTER ALLOCATION : [_ZNK40DiffusiveFluxReconstructorNodeSixthOrder12putToRestartERKSt10shared_ptrIN6SAMRAI4tbox8DatabaseEE] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp:57
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rsi rdi r14]
+        
+    Routine temporaries
+        Total         :      82
+            Global    :      27
+            Local     :      55
+        Regenerable   :      30
+        Spilled       :       1
+        
+    Routine stack
+        Variables     :      30 bytes*
+            Reads     :       5 [2.00e+00 ~ 4.6%]
+            Writes    :       3 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: __gnu_cxx::__exchange_and_add_dispatch(_Atomic_word *, int)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/ext/atomicity.h(79,3):remark #34051: REGISTER ALLOCATION : [_ZN17_INTERNALbf52284e9__gnu_cxx27__exchange_and_add_dispatchEPii] /usr/include/c++/4.8.5/ext/atomicity.h:79
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    4[ rax rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      16
+            Global    :       8
+            Local     :       8
+        Regenerable   :       2
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInX(const DiffusiveFluxReconstructorNodeSixthOrder *, Real *, const Real *, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const Real &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInX(const DiffusiveFluxReconstructorNodeSixthOrder *, Real *, const Real *, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const Real &) const) [31] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(76,1)
+  -> INLINE: (81,15) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (87,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (88,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (90,76) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (92,59) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (114,20) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (120,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (121,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (122,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (123,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (125,76) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (126,76) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (127,83) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (129,59) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (130,59) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (131,66) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (167,20) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (173,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (174,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (175,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (176,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (177,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (178,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (180,76) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (181,76) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (182,76) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (183,83) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (184,83) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (186,59) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (187,59) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (188,59) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (189,66) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (190,66) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(96,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed FLOW dependence between dudx[i+num_ghosts_0_derivative_node] (108:13) and *dx_0_inv (108:13)
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(133,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between dudx[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (160:17) and dudx[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (160:17)
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(136,13)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed FLOW dependence between dudx[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (160:17) and *dx_0_inv (160:17)
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(192,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between dudx[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (235:21) and dudx[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (235:21)
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(194,13)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed OUTPUT dependence between dudx[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (235:21) and dudx[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (235:21)
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(197,17)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+         remark #15346: vector dependence: assumed FLOW dependence between dudx[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (235:21) and *dx_0_inv (235:21)
+      LOOP END
+   LOOP END
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(76,1):remark #34051: REGISTER ALLOCATION : [_ZNK40DiffusiveFluxReconstructorNodeSixthOrder26computeFirstDerivativesInXEPdPKdRKN6SAMRAI4hier9IntVectorES7_S7_S7_S7_S7_RS1_] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp:76
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   26[ rax rdx rcx rbx rbp rsi rdi r8-r15 zmm0-zmm10]
+        
+    Routine temporaries
+        Total         :     174
+            Global    :      87
+            Local     :      87
+        Regenerable   :      28
+        Spilled       :      25
+        
+    Routine stack
+        Variables     :      12 bytes*
+            Reads     :       3 [1.75e+00 ~ 0.5%]
+            Writes    :       3 [1.75e+00 ~ 0.5%]
+        Spills        :     152 bytes*
+            Reads     :      23 [1.10e+01 ~ 3.2%]
+            Writes    :      20 [4.91e+00 ~ 1.4%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInY(const DiffusiveFluxReconstructorNodeSixthOrder *, Real *, const Real *, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const Real &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInY(const DiffusiveFluxReconstructorNodeSixthOrder *, Real *, const Real *, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const Real &) const) [32] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(260,1)
+  -> INLINE: (265,15) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (271,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (272,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (273,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (274,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (276,76) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (277,76) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (278,83) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (280,59) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (281,59) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (282,66) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (318,20) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (324,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (325,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (326,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (327,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (328,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (329,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (331,76) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (332,76) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (333,76) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (334,83) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (335,83) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (337,59) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (338,59) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (339,59) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (340,66) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (341,66) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(284,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between dudy[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (311:17) and dudy[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (311:17)
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(287,13)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed FLOW dependence between dudy[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (311:17) and *dx_1_inv (311:17)
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(343,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between dudy[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (386:21) and dudy[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (386:21)
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(345,13)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed OUTPUT dependence between dudy[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (386:21) and dudy[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (386:21)
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(348,17)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+         remark #15346: vector dependence: assumed FLOW dependence between dudy[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (386:21) and *dx_1_inv (386:21)
+      LOOP END
+   LOOP END
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(260,1):remark #34051: REGISTER ALLOCATION : [_ZNK40DiffusiveFluxReconstructorNodeSixthOrder26computeFirstDerivativesInYEPdPKdRKN6SAMRAI4hier9IntVectorES7_S7_S7_S7_S7_RS1_] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp:260
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   26[ rax rdx rcx rbx rbp rsi rdi r8-r15 zmm0-zmm10]
+        
+    Routine temporaries
+        Total         :     207
+            Global    :     103
+            Local     :     104
+        Regenerable   :      20
+        Spilled       :      47
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [1.50e+00 ~ 0.2%]
+            Writes    :       2 [1.50e+00 ~ 0.2%]
+        Spills        :     328 bytes*
+            Reads     :      49 [7.36e+01 ~ 11.0%]
+            Writes    :      43 [1.64e+01 ~ 2.5%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInZ(const DiffusiveFluxReconstructorNodeSixthOrder *, Real *, const Real *, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const Real &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (DiffusiveFluxReconstructorNodeSixthOrder::computeFirstDerivativesInZ(const DiffusiveFluxReconstructorNodeSixthOrder *, Real *, const Real *, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const Real &) const) [33] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(411,1)
+  -> INLINE: (420,38) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (421,38) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (422,38) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (423,41) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (424,41) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (425,41) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (427,72) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (428,72) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (429,72) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (430,79) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (431,79) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (433,55) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (434,55) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (435,55) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (436,62) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (437,62) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(439,5)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between dudz[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (482:17) and dudz[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (482:17)
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(441,9)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed OUTPUT dependence between dudz[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (482:17) and dudz[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (482:17)
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(444,13)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+         remark #15346: vector dependence: assumed FLOW dependence between dudz[i+num_ghosts_0_derivative_node+(j+num_ghosts_1_derivative_n (482:17) and *dx_2_inv (482:17)
+      LOOP END
+   LOOP END
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(411,1):remark #34051: REGISTER ALLOCATION : [_ZNK40DiffusiveFluxReconstructorNodeSixthOrder26computeFirstDerivativesInZEPdPKdRKN6SAMRAI4hier9IntVectorES7_S7_S7_S7_S7_RS1_] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp:411
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   26[ rax rdx rcx rbx rbp rsi rdi r8-r15 zmm0-zmm10]
+        
+    Routine temporaries
+        Total         :     125
+            Global    :      61
+            Local     :      64
+        Regenerable   :       7
+        Spilled       :      34
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :     224 bytes*
+            Reads     :      34 [3.92e+02 ~ 13.3%]
+            Writes    :      28 [6.16e+01 ~ 2.1%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxX(const DiffusiveFluxReconstructorNodeSixthOrder *, Real *, const Real *, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const double &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxX(const DiffusiveFluxReconstructorNodeSixthOrder *, Real *, const Real *, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const double &) const) [34] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(505,1)
+  -> INLINE: (514,15) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (520,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (521,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (523,64) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (545,20) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (551,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (552,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (553,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (554,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (556,49) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (558,64) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (559,64) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (560,71) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (597,20) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (603,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (604,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (605,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (606,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (607,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (608,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (610,49) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (611,49) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (613,64) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (614,64) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (615,64) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (616,71) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (617,71) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(526,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed FLOW dependence between F_face_x[i] (538:13) and *dt (538:13)
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(562,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between F_face_x[i+j*(interior_dim_0+1)] (589:17) and F_face_x[i+j*(interior_dim_0+1)] (589:17)
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(565,13)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed FLOW dependence between F_face_x[i+j*(interior_dim_0+1)] (589:17) and *dt (589:17)
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(619,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between F_face_x[i+j*(interior_dim_0+1)+(k*(interior_dim_0+1))*interior_ (661:21) and F_face_x[i+j*(interior_dim_0+1)+(k*(interior_dim_0+1))*interior_ (661:21)
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(621,13)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed OUTPUT dependence between F_face_x[i+j*(interior_dim_0+1)+(k*(interior_dim_0+1))*interior_ (661:21) and F_face_x[i+j*(interior_dim_0+1)+(k*(interior_dim_0+1))*interior_ (661:21)
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(624,17)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+         remark #15346: vector dependence: assumed FLOW dependence between F_face_x[i+j*(interior_dim_0+1)+(k*(interior_dim_0+1))*interior_ (661:21) and *dt (661:21)
+      LOOP END
+   LOOP END
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(505,1):remark #34051: REGISTER ALLOCATION : [_ZNK40DiffusiveFluxReconstructorNodeSixthOrder16reconstructFluxXEPdPKdRKN6SAMRAI4hier9IntVectorES7_S7_S7_S7_RS1_] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp:505
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   26[ rax rdx rcx rbx rbp rsi rdi r8-r15 zmm0-zmm10]
+        
+    Routine temporaries
+        Total         :     162
+            Global    :      77
+            Local     :      85
+        Regenerable   :      27
+        Spilled       :      22
+        
+    Routine stack
+        Variables     :      12 bytes*
+            Reads     :       3 [1.75e+00 ~ 0.5%]
+            Writes    :       3 [1.75e+00 ~ 0.5%]
+        Spills        :     128 bytes*
+            Reads     :      21 [8.65e+00 ~ 2.4%]
+            Writes    :      18 [3.55e+00 ~ 1.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxY(const DiffusiveFluxReconstructorNodeSixthOrder *, Real *, const Real *, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const double &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxY(const DiffusiveFluxReconstructorNodeSixthOrder *, Real *, const Real *, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const double &) const) [35] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(686,1)
+  -> INLINE: (695,15) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (701,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (702,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (703,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (704,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (706,49) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (708,64) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (709,64) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (710,71) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (747,20) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (753,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (754,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (755,42) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (756,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (757,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (758,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (760,49) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (761,49) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (763,64) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (764,64) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (765,64) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (766,71) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (767,71) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(712,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between F_face_y[i+j*interior_dim_0] (739:17) and F_face_y[i+j*interior_dim_0] (739:17)
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(715,13)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed FLOW dependence between F_face_y[i+j*interior_dim_0] (739:17) and *dt (739:17)
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(769,9)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between F_face_y[i+j*interior_dim_0+(k*interior_dim_0)*(interior_dim_1+1 (811:21) and F_face_y[i+j*interior_dim_0+(k*interior_dim_0)*(interior_dim_1+1 (811:21)
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(771,13)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed OUTPUT dependence between F_face_y[i+j*interior_dim_0+(k*interior_dim_0)*(interior_dim_1+1 (811:21) and F_face_y[i+j*interior_dim_0+(k*interior_dim_0)*(interior_dim_1+1 (811:21)
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(774,17)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+         remark #15346: vector dependence: assumed FLOW dependence between F_face_y[i+j*interior_dim_0+(k*interior_dim_0)*(interior_dim_1+1 (811:21) and *dt (811:21)
+      LOOP END
+   LOOP END
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(686,1):remark #34051: REGISTER ALLOCATION : [_ZNK40DiffusiveFluxReconstructorNodeSixthOrder16reconstructFluxYEPdPKdRKN6SAMRAI4hier9IntVectorES7_S7_S7_S7_RS1_] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp:686
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   26[ rax rdx rcx rbx rbp rsi rdi r8-r15 zmm0-zmm10]
+        
+    Routine temporaries
+        Total         :     196
+            Global    :      94
+            Local     :     102
+        Regenerable   :      19
+        Spilled       :      44
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [1.50e+00 ~ 0.2%]
+            Writes    :       2 [1.50e+00 ~ 0.2%]
+        Spills        :     304 bytes*
+            Reads     :      48 [7.14e+01 ~ 10.4%]
+            Writes    :      41 [1.58e+01 ~ 2.3%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxZ(const DiffusiveFluxReconstructorNodeSixthOrder *, Real *, const Real *, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const double &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (DiffusiveFluxReconstructorNodeSixthOrder::reconstructFluxZ(const DiffusiveFluxReconstructorNodeSixthOrder *, Real *, const Real *, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const SAMRAI::hier::IntVector &, const double &) const) [36] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(836,1)
+  -> INLINE: (849,38) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (850,38) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (851,38) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (852,41) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (853,41) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (854,41) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (856,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (857,45) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (859,60) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (860,60) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (861,60) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (862,67) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (863,67) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(865,5)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between F_face_z[i+j*interior_dim_0+(k*interior_dim_0)*interior_dim_1] (907:17) and F_face_z[i+j*interior_dim_0+(k*interior_dim_0)*interior_dim_1] (907:17)
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(867,9)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed OUTPUT dependence between F_face_z[i+j*interior_dim_0+(k*interior_dim_0)*interior_dim_1] (907:17) and F_face_z[i+j*interior_dim_0+(k*interior_dim_0)*interior_dim_1] (907:17)
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(870,13)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+         remark #15346: vector dependence: assumed FLOW dependence between F_face_z[i+j*interior_dim_0+(k*interior_dim_0)*interior_dim_1] (907:17) and *dt (907:17)
+      LOOP END
+   LOOP END
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp(836,1):remark #34051: REGISTER ALLOCATION : [_ZNK40DiffusiveFluxReconstructorNodeSixthOrder16reconstructFluxZEPdPKdRKN6SAMRAI4hier9IntVectorES7_S7_S7_S7_RS1_] /home/akula/HAMeRS_IB/HAMeRS/src/flow/diffusive_flux_reconstructors/node/DiffusiveFluxReconstructorNodeSixthOrder.cpp:836
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   26[ rax rdx rcx rbx rbp rsi rdi r8-r15 zmm0-zmm10]
+        
+    Routine temporaries
+        Total         :     116
+            Global    :      57
+            Local     :      59
+        Regenerable   :       6
+        Spilled       :      33
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :     216 bytes*
+            Reads     :      33 [3.91e+02 ~ 12.7%]
+            Writes    :      27 [6.42e+01 ~ 2.1%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const) /home/akula/libraries/SAMRAI/include/SAMRAI/tbox/Dimension.h(73,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/tbox/Dimension.h(137,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::IntVector::operator=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::IntVector::operator=(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector &)) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(186,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(269,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::IntVector::operator*=(SAMRAI::hier::IntVector *, int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::IntVector::operator*=(SAMRAI::hier::IntVector *, int)) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(555,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::IntVector::operator*(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector *, int) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::IntVector::operator*(SAMRAI::hier::IntVector *, const SAMRAI::hier::IntVector *, int) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(569,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::IntVector::getOne(const SAMRAI::tbox::Dimension &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::IntVector::getOne(const SAMRAI::tbox::Dimension &)) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(1145,4)
+
+===========================================================================
+
+Begin optimization report for: __sti__$E()
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (__sti__$E()) [140] <compiler generated>
+
+
+    Report from: Code generation optimizations [cg]
+
+<compiler generated>:remark #34051: REGISTER ALLOCATION : [__sti__$E] (null):0
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       7
+            Local     :       6
+        Regenerable   :       7
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================

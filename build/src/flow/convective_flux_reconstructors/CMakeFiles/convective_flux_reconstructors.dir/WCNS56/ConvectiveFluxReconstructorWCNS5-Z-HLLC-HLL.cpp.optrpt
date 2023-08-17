@@ -1,0 +1,2086 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINING OPTION VALUES:
+  -inline-factor: 100
+  -inline-min-size: 30
+  -inline-max-size: 230
+  -inline-max-total-size: 2000
+  -inline-max-per-routine: 10000
+  -inline-max-per-compile: 500000
+
+
+Begin optimization report for: ipow(Real, const int &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (ipow(Real, const int &)) /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(10,1)
+
+===========================================================================
+
+Begin optimization report for: computeLocalBeta(Real &, Real &, Real &, Real **, const int &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (computeLocalBeta(Real &, Real &, Real &, Real **, const int &)) /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(30,1)
+
+===========================================================================
+
+Begin optimization report for: computeLocalBetaTilde(Real &, Real &, Real &, Real **, const int &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (computeLocalBetaTilde(Real &, Real &, Real &, Real **, const int &)) /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(57,1)
+
+===========================================================================
+
+Begin optimization report for: performLocalWENOInterpolationMinus(Real *, Real **, const int &, const int &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (performLocalWENOInterpolationMinus(Real *, Real **, const int &, const int &)) /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(83,1)
+
+===========================================================================
+
+Begin optimization report for: performLocalWENOInterpolationPlus(Real *, Real **, const int &, const int &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (performLocalWENOInterpolationPlus(Real *, Real **, const int &, const int &)) /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(131,1)
+
+===========================================================================
+
+Begin optimization report for: ConvectiveFluxReconstructor::~ConvectiveFluxReconstructor(ConvectiveFluxReconstructor *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (ConvectiveFluxReconstructor::~ConvectiveFluxReconstructor(ConvectiveFluxReconstructor *)) [9] /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp(44,48)
+  -> INLINE: (44,49) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (44,49) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (44,49) std::shared_ptr<FlowModel>::~shared_ptr(std::shared_ptr<FlowModel> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (44,49) std::shared_ptr<SAMRAI::tbox::Database>::~shared_ptr(std::shared_ptr<SAMRAI::tbox::Database> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp(44,48):remark #34051: REGISTER ALLOCATION : [_ZN27ConvectiveFluxReconstructorD1Ev] /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp:44
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    8[ rax rdx rcx rbx rbp rsi rdi r12]
+        
+    Routine temporaries
+        Total         :      63
+            Global    :      29
+            Local     :      34
+        Regenerable   :      14
+        Spilled       :       3
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: ConvectiveFluxReconstructor::~ConvectiveFluxReconstructor(ConvectiveFluxReconstructor *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (ConvectiveFluxReconstructor::~ConvectiveFluxReconstructor(ConvectiveFluxReconstructor *const)) [10] /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp(44,17)
+  -> INLINE: (44,17) ConvectiveFluxReconstructor::~ConvectiveFluxReconstructor(ConvectiveFluxReconstructor *)
+    -> INLINE: (44,49) std::shared_ptr<SAMRAI::tbox::Database>::~shared_ptr(std::shared_ptr<SAMRAI::tbox::Database> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (44,49) std::shared_ptr<FlowModel>::~shared_ptr(std::shared_ptr<FlowModel> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (44,49) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (44,49) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp(44,17):remark #34051: REGISTER ALLOCATION : [_ZN27ConvectiveFluxReconstructorD0Ev] /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp:44
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    8[ rax rdx rcx rbx rbp rsi rdi r12]
+        
+    Routine temporaries
+        Total         :      64
+            Global    :      29
+            Local     :      35
+        Regenerable   :      14
+        Spilled       :       3
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: ConvectiveFluxReconstructor::~ConvectiveFluxReconstructor(ConvectiveFluxReconstructor *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (ConvectiveFluxReconstructor::~ConvectiveFluxReconstructor(ConvectiveFluxReconstructor *const)) /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp(44,17)
+
+===========================================================================
+
+Begin optimization report for: ConvectiveFluxReconstructorWCNS56::~ConvectiveFluxReconstructorWCNS56(ConvectiveFluxReconstructorWCNS56 *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (ConvectiveFluxReconstructorWCNS56::~ConvectiveFluxReconstructorWCNS56(ConvectiveFluxReconstructorWCNS56 *const)) /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS56-HLLC-HLL.hpp(20,17)
+
+===========================================================================
+
+Begin optimization report for: ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL(ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL *, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const FLOW_MODEL::TYPE &, const std::shared_ptr<FlowModel> &, const std::shared_ptr<SAMRAI::tbox::Database> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL(ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL *, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const FLOW_MODEL::TYPE &, const std::shared_ptr<FlowModel> &, const std::shared_ptr<SAMRAI::tbox::Database> &)) [13] /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(187,1)
+  -> INLINE: (186,13) ConvectiveFluxReconstructorWCNS56::~ConvectiveFluxReconstructorWCNS56(ConvectiveFluxReconstructorWCNS56 *const)
+    -> /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS56-HLLC-HLL.hpp:(20,17) ConvectiveFluxReconstructorWCNS56::~ConvectiveFluxReconstructorWCNS56(ConvectiveFluxReconstructorWCNS56 *)
+  -> INLINE: (192,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (192,5) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (192,54) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (193,31) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (193,31) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (193,31) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INDIRECT- (VIRTUAL): (193,45)  EXPR_CONV.SI64.P64(*((SI64*) (__$U20_V$7dd.0.162->__vptr_V$7df + EXPR_CONV.SI32.I64(66(SI32)) * 8(I64))))
+  -> DELETED: (194,5) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (194,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (194,54) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (195,31) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (195,31) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (195,31) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INDIRECT- (VIRTUAL): (195,47)  EXPR_CONV.SI64.P64(*((SI64*) (__$U21_V$7de.0.162->__vptr_V$7df + EXPR_CONV.SI32.I64(66(SI32)) * 8(I64))))
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(187,1):remark #34051: REGISTER ALLOCATION : [_ZN43ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLLC1ERKSsRKN6SAMRAI4tbox9DimensionERKSt10shared_ptrINS2_4geom21CartesianGridGeometryEERKiRKN10FLOW_MODEL4TYPEERKS7_I9FlowModelERKS7_INS3_8DatabaseEE] /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp:187
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    9[ rax rdx rcx rbx rbp rsi rdi r8-r9]
+        
+    Routine temporaries
+        Total         :     112
+            Global    :      32
+            Local     :      80
+        Regenerable   :      31
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :      25 bytes*
+            Reads     :       5 [2.00e+00 ~ 3.1%]
+            Writes    :       5 [1.00e+00 ~ 1.5%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: ConvectiveFluxReconstructorWCNS56::~ConvectiveFluxReconstructorWCNS56(ConvectiveFluxReconstructorWCNS56 *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (ConvectiveFluxReconstructorWCNS56::~ConvectiveFluxReconstructorWCNS56(ConvectiveFluxReconstructorWCNS56 *)) [14] /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS56-HLLC-HLL.hpp(20,54)
+  -> INLINE: (20,55) ConvectiveFluxReconstructor::~ConvectiveFluxReconstructor(ConvectiveFluxReconstructor *const)
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp:(44,17) ConvectiveFluxReconstructor::~ConvectiveFluxReconstructor(ConvectiveFluxReconstructor *)
+      -> INLINE: (44,49) std::shared_ptr<SAMRAI::tbox::Database>::~shared_ptr(std::shared_ptr<SAMRAI::tbox::Database> *)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+      -> INLINE: (44,49) std::shared_ptr<FlowModel>::~shared_ptr(std::shared_ptr<FlowModel> *)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+      -> INLINE: (44,49) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+      -> INLINE: (44,49) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (20,55) std::vector<EQN_FORM::TYPE, std::allocator<EQN_FORM::TYPE>>::~vector(std::vector<EQN_FORM::TYPE, std::allocator<EQN_FORM::TYPE>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS56-HLLC-HLL.hpp(20,54):remark #34051: REGISTER ALLOCATION : [_ZN33ConvectiveFluxReconstructorWCNS56D1Ev] /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS56-HLLC-HLL.hpp:20
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    8[ rax rdx rcx rbx rbp rsi rdi r12]
+        
+    Routine temporaries
+        Total         :      65
+            Global    :      30
+            Local     :      35
+        Regenerable   :      14
+        Spilled       :       3
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<EQN_FORM::TYPE, std::allocator<EQN_FORM::TYPE>>::~_Vector_base(std::_Vector_base<EQN_FORM::TYPE, std::allocator<EQN_FORM::TYPE>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(160,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIN8EQN_FORM4TYPEESaIS1_EED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:160
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       7
+            Local     :       3
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: __gnu_cxx::__exchange_and_add_dispatch(_Atomic_word *, int)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/ext/atomicity.h(79,3):remark #34051: REGISTER ALLOCATION : [_ZN17_INTERNAL44cb279d9__gnu_cxx27__exchange_and_add_dispatchEPii] /usr/include/c++/4.8.5/ext/atomicity.h:79
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    4[ rax rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      16
+            Global    :       8
+            Local     :       8
+        Regenerable   :       2
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL(ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL *const, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const FLOW_MODEL::TYPE &, const std::shared_ptr<FlowModel> &, const std::shared_ptr<SAMRAI::tbox::Database> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL(ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL *const, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const FLOW_MODEL::TYPE &, const std::shared_ptr<FlowModel> &, const std::shared_ptr<SAMRAI::tbox::Database> &)) [21] /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(171,46)
+  -> INLINE: (171,46) ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL(ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL *, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const FLOW_MODEL::TYPE &, const std::shared_ptr<FlowModel> &, const std::shared_ptr<SAMRAI::tbox::Database> &)
+    -> INLINE: (186,13) ConvectiveFluxReconstructorWCNS56::~ConvectiveFluxReconstructorWCNS56(ConvectiveFluxReconstructorWCNS56 *const)
+      -> /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS56-HLLC-HLL.hpp:(20,17) ConvectiveFluxReconstructorWCNS56::~ConvectiveFluxReconstructorWCNS56(ConvectiveFluxReconstructorWCNS56 *)
+    -> DELETED: (192,5) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (192,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (192,54) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: (193,31) std::allocator<char>::allocator(std::allocator<char> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (193,31) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (193,31) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INDIRECT- (VIRTUAL): (193,45)  EXPR_CONV.SI64.P64(*((SI64*) (__$U20_V$7dd.0.162.1230->__vptr_V$7df + EXPR_CONV.SI32.I64(66(SI32)) * 8(I64))))
+    -> INLINE: (194,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (194,5) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (194,54) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+    -> DELETED: (195,31) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (195,31) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (195,31) std::allocator<char>::allocator(std::allocator<char> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INDIRECT- (VIRTUAL): (195,47)  EXPR_CONV.SI64.P64(*((SI64*) (__$U21_V$7de.0.162.1230->__vptr_V$7df + EXPR_CONV.SI32.I64(66(SI32)) * 8(I64))))
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(171,46):remark #34051: REGISTER ALLOCATION : [_ZN43ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLLC2ERKSsRKN6SAMRAI4tbox9DimensionERKSt10shared_ptrINS2_4geom21CartesianGridGeometryEERKiRKN10FLOW_MODEL4TYPEERKS7_I9FlowModelERKS7_INS3_8DatabaseEE] /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp:171
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    9[ rax rdx rcx rbx rbp rsi rdi r8-r9]
+        
+    Routine temporaries
+        Total         :     112
+            Global    :      32
+            Local     :      80
+        Regenerable   :      31
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :      25 bytes*
+            Reads     :       5 [2.00e+00 ~ 3.1%]
+            Writes    :       5 [1.00e+00 ~ 1.5%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::~ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL(ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::~ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL(ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL *)) [22] /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.hpp(18,56)
+  -> INLINE: (18,57) ConvectiveFluxReconstructorWCNS56::~ConvectiveFluxReconstructorWCNS56(ConvectiveFluxReconstructorWCNS56 *const)
+    -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS56-HLLC-HLL.hpp:(20,17) ConvectiveFluxReconstructorWCNS56::~ConvectiveFluxReconstructorWCNS56(ConvectiveFluxReconstructorWCNS56 *)
+      -> INLINE: (20,55) std::vector<EQN_FORM::TYPE, std::allocator<EQN_FORM::TYPE>>::~vector(std::vector<EQN_FORM::TYPE, std::allocator<EQN_FORM::TYPE>> *)
+         {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+      -> INLINE: (20,55) ConvectiveFluxReconstructor::~ConvectiveFluxReconstructor(ConvectiveFluxReconstructor *const)
+        -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp:(44,17) ConvectiveFluxReconstructor::~ConvectiveFluxReconstructor(ConvectiveFluxReconstructor *)
+          -> INLINE: (44,49) std::shared_ptr<SAMRAI::tbox::Database>::~shared_ptr(std::shared_ptr<SAMRAI::tbox::Database> *)
+             {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+          -> INLINE: (44,49) std::shared_ptr<FlowModel>::~shared_ptr(std::shared_ptr<FlowModel> *)
+             {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+          -> INLINE: (44,49) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+             {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+          -> INLINE: (44,49) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+             {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.hpp(18,56):remark #34051: REGISTER ALLOCATION : [_ZN43ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLLD1Ev] /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.hpp:18
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    8[ rax rdx rcx rbx rbp rsi rdi r12]
+        
+    Routine temporaries
+        Total         :      65
+            Global    :      30
+            Local     :      35
+        Regenerable   :      14
+        Spilled       :       3
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::~ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL(ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::~ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL(ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL *const)) [23] /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.hpp(18,9)
+  -> INLINE: (18,9) ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::~ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL(ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL *)
+    -> INLINE: (18,57) ConvectiveFluxReconstructorWCNS56::~ConvectiveFluxReconstructorWCNS56(ConvectiveFluxReconstructorWCNS56 *const)
+      -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS56-HLLC-HLL.hpp:(20,17) ConvectiveFluxReconstructorWCNS56::~ConvectiveFluxReconstructorWCNS56(ConvectiveFluxReconstructorWCNS56 *)
+        -> INLINE: (20,55) std::vector<EQN_FORM::TYPE, std::allocator<EQN_FORM::TYPE>>::~vector(std::vector<EQN_FORM::TYPE, std::allocator<EQN_FORM::TYPE>> *)
+           {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+        -> INLINE: (20,55) ConvectiveFluxReconstructor::~ConvectiveFluxReconstructor(ConvectiveFluxReconstructor *const)
+          -> INLINE: /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp:(44,17) ConvectiveFluxReconstructor::~ConvectiveFluxReconstructor(ConvectiveFluxReconstructor *)
+            -> INLINE: (44,49) std::shared_ptr<SAMRAI::tbox::Database>::~shared_ptr(std::shared_ptr<SAMRAI::tbox::Database> *)
+               {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+            -> INLINE: (44,49) std::shared_ptr<FlowModel>::~shared_ptr(std::shared_ptr<FlowModel> *)
+               {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+            -> INLINE: (44,49) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+               {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+            -> INLINE: (44,49) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+               {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.hpp(18,9):remark #34051: REGISTER ALLOCATION : [_ZN43ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLLD0Ev] /home/akula/HAMeRS_IB/HAMeRS/include/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.hpp:18
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    8[ rax rdx rcx rbx rbp rsi rdi r12]
+        
+    Routine temporaries
+        Total         :      66
+            Global    :      30
+            Local     :      36
+        Regenerable   :      14
+        Spilled       :       3
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::printClassData(const ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL *, std::ostream &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::printClassData(const ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL *, std::ostream &) const) [24] /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(205,1)
+  -> (206,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (207,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (209,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (211,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (212,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, const void *)
+  -> (213,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (214,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (215,8) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (216,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (217,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (219,8) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(205,1):remark #34051: REGISTER ALLOCATION : [_ZNK43ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL14printClassDataERSo] /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp:205
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    5[ rax rbp rsi rdi r12]
+        
+    Routine temporaries
+        Total         :      55
+            Global    :      23
+            Local     :      32
+        Regenerable   :      14
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::char_traits<char>::length(const std::char_traits<char>::char_type *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(259,7):remark #34051: REGISTER ALLOCATION : [_ZNSt11char_traitsIcE6lengthEPKc] /usr/include/c++/4.8.5/bits/char_traits.h:259
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      12
+            Global    :       7
+            Local     :       5
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::putToRestart(const ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL *, const std::shared_ptr<SAMRAI::tbox::Database> &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::putToRestart(const ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL *, const std::shared_ptr<SAMRAI::tbox::Database> &) const) [33] /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(230,1)
+  -> INLINE: (231,15) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (231,28) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (231,28) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (231,28) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (231,44) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (231,44) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INDIRECT- (VIRTUAL): (231,44)  EXPR_CONV.SI64.P64(*((SI64*) (__$U24_V$7f8.0.165->__vptr_V$7df + EXPR_CONV.SI32.I64(62(SI32)) * 8(I64))))
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(230,1):remark #34051: REGISTER ALLOCATION : [_ZNK43ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL12putToRestartERKSt10shared_ptrIN6SAMRAI4tbox8DatabaseEE] /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp:230
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    7[ rax rdx rcx rbx rsi rdi r13]
+        
+    Routine temporaries
+        Total         :      54
+            Global    :      17
+            Local     :      37
+        Regenerable   :      16
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :      19 bytes*
+            Reads     :       3 [1.00e+00 ~ 2.6%]
+            Writes    :       2 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::performWENOInterpolation(ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> &, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> &, const std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::performWENOInterpolation(ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> &, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> &, const std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>> &)) [34] /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(243,1)
+  -> INLINE: (255,58) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type)
+  -> INLINE: (255,61) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (255,63) SAMRAI::hier::PatchData::getBox(const SAMRAI::hier::PatchData *) const
+  -> (255,72) SAMRAI::hier::Box::numberCells(SAMRAI::hier::IntVector *, const SAMRAI::hier::Box *) const
+  -> INLINE: (281,15) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (287,49) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> (295,32) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (295,32) std::vector<Real *, std::allocator<Real *>>::vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (296,21) std::vector<Real *, std::allocator<Real *>>::reserve(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (300,25) std::vector<Real *, std::allocator<Real *>>::push_back(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::value_type &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (300,44) std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::operator[](const std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>> *, std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::size_type) const
+  -> INLINE: (300,47) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](const std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type) const
+  -> INLINE: (300,51) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (300,53) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (303,40) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type)
+  -> INLINE: (303,44) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (303,46) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (311,17) performLocalWENOInterpolationMinus(Real *, Real **, const int &, const int &)
+    -> INLINE: (90,5) computeLocalBeta(Real &, Real &, Real &, Real **, const int &)
+    -> INLINE: (98,18) std::abs(double)
+    -> INLINE: (100,43) ipow(Real, const int &)
+    -> INLINE: (101,42) ipow(Real, const int &)
+    -> INLINE: (102,43) ipow(Real, const int &)
+  -> INLINE: (313,29) std::vector<Real *, std::allocator<Real *>>::data(std::vector<Real *, std::allocator<Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (317,9) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (321,32) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (321,32) std::vector<Real *, std::allocator<Real *>>::vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (322,21) std::vector<Real *, std::allocator<Real *>>::reserve(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (326,25) std::vector<Real *, std::allocator<Real *>>::push_back(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::value_type &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (326,44) std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::operator[](const std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>> *, std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::size_type) const
+  -> INLINE: (326,47) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](const std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type) const
+  -> INLINE: (326,51) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (326,53) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (329,39) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type)
+  -> INLINE: (329,43) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (329,45) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (337,17) performLocalWENOInterpolationPlus(Real *, Real **, const int &, const int &)
+    -> INLINE: (138,5) computeLocalBetaTilde(Real &, Real &, Real &, Real **, const int &)
+    -> INLINE: (146,24) std::abs(double)
+    -> INLINE: (148,49) ipow(Real, const int &)
+    -> INLINE: (149,48) ipow(Real, const int &)
+    -> INLINE: (150,49) ipow(Real, const int &)
+  -> INLINE: (339,29) std::vector<Real *, std::allocator<Real *>>::data(std::vector<Real *, std::allocator<Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (343,9) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (346,20) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (352,49) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (353,49) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> (361,32) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (361,32) std::vector<Real *, std::allocator<Real *>>::vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (362,21) std::vector<Real *, std::allocator<Real *>>::reserve(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (366,25) std::vector<Real *, std::allocator<Real *>>::push_back(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::value_type &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (366,44) std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::operator[](const std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>> *, std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::size_type) const
+  -> INLINE: (366,47) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](const std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type) const
+  -> INLINE: (366,51) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (366,53) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (369,40) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type)
+  -> INLINE: (369,44) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (369,46) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (380,21) performLocalWENOInterpolationMinus(Real *, Real **, const int &, const int &)
+    -> INLINE: (90,5) computeLocalBeta(Real &, Real &, Real &, Real **, const int &)
+    -> INLINE: (98,18) std::abs(double)
+    -> INLINE: (100,43) ipow(Real, const int &)
+    -> INLINE: (101,42) ipow(Real, const int &)
+    -> INLINE: (102,43) ipow(Real, const int &)
+  -> INLINE: (382,33) std::vector<Real *, std::allocator<Real *>>::data(std::vector<Real *, std::allocator<Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (387,9) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (391,32) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (391,32) std::vector<Real *, std::allocator<Real *>>::vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (392,21) std::vector<Real *, std::allocator<Real *>>::reserve(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (396,25) std::vector<Real *, std::allocator<Real *>>::push_back(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::value_type &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (396,44) std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::operator[](const std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>> *, std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::size_type) const
+  -> INLINE: (396,47) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](const std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type) const
+  -> INLINE: (396,51) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (396,53) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (399,39) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type)
+  -> INLINE: (399,43) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (399,45) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (410,21) performLocalWENOInterpolationPlus(Real *, Real **, const int &, const int &)
+    -> INLINE: (138,5) computeLocalBetaTilde(Real &, Real &, Real &, Real **, const int &)
+    -> INLINE: (146,24) std::abs(double)
+    -> INLINE: (148,49) ipow(Real, const int &)
+    -> INLINE: (149,48) ipow(Real, const int &)
+    -> INLINE: (150,49) ipow(Real, const int &)
+  -> INLINE: (412,33) std::vector<Real *, std::allocator<Real *>>::data(std::vector<Real *, std::allocator<Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (417,9) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (425,32) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (425,32) std::vector<Real *, std::allocator<Real *>>::vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (426,21) std::vector<Real *, std::allocator<Real *>>::reserve(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (430,25) std::vector<Real *, std::allocator<Real *>>::push_back(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::value_type &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (430,44) std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::operator[](const std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>> *, std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::size_type) const
+  -> INLINE: (430,47) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](const std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type) const
+  -> INLINE: (430,51) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (430,53) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (433,40) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type)
+  -> INLINE: (433,44) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (433,46) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (444,21) performLocalWENOInterpolationMinus(Real *, Real **, const int &, const int &)
+    -> INLINE: (90,5) computeLocalBeta(Real &, Real &, Real &, Real **, const int &)
+    -> INLINE: (98,18) std::abs(double)
+    -> INLINE: (100,43) ipow(Real, const int &)
+    -> INLINE: (101,42) ipow(Real, const int &)
+    -> INLINE: (102,43) ipow(Real, const int &)
+  -> INLINE: (446,33) std::vector<Real *, std::allocator<Real *>>::data(std::vector<Real *, std::allocator<Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (451,9) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (455,32) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (455,32) std::vector<Real *, std::allocator<Real *>>::vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (456,21) std::vector<Real *, std::allocator<Real *>>::reserve(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (460,25) std::vector<Real *, std::allocator<Real *>>::push_back(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::value_type &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (460,44) std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::operator[](const std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>> *, std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::size_type) const
+  -> INLINE: (460,47) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](const std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type) const
+  -> INLINE: (460,51) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (460,53) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (463,39) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type)
+  -> INLINE: (463,43) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (463,45) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (474,21) performLocalWENOInterpolationPlus(Real *, Real **, const int &, const int &)
+    -> INLINE: (138,5) computeLocalBetaTilde(Real &, Real &, Real &, Real **, const int &)
+    -> INLINE: (146,24) std::abs(double)
+    -> INLINE: (148,49) ipow(Real, const int &)
+    -> INLINE: (149,48) ipow(Real, const int &)
+    -> INLINE: (150,49) ipow(Real, const int &)
+  -> INLINE: (476,33) std::vector<Real *, std::allocator<Real *>>::data(std::vector<Real *, std::allocator<Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (481,9) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (484,20) SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+  -> INLINE: (490,49) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (491,49) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> INLINE: (492,49) SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(272,22) std::vector<int, std::allocator<int>>::operator[](const std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) const
+  -> (500,32) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (500,32) std::vector<Real *, std::allocator<Real *>>::vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (501,21) std::vector<Real *, std::allocator<Real *>>::reserve(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (505,25) std::vector<Real *, std::allocator<Real *>>::push_back(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::value_type &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (505,44) std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::operator[](const std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>> *, std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::size_type) const
+  -> INLINE: (505,47) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](const std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type) const
+  -> INLINE: (505,51) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (505,53) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (508,40) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type)
+  -> INLINE: (508,44) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (508,46) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (523,25) performLocalWENOInterpolationMinus(Real *, Real **, const int &, const int &)
+    -> INLINE: (90,5) computeLocalBeta(Real &, Real &, Real &, Real **, const int &)
+    -> INLINE: (98,18) std::abs(double)
+    -> INLINE: (100,43) ipow(Real, const int &)
+    -> INLINE: (101,42) ipow(Real, const int &)
+    -> INLINE: (102,43) ipow(Real, const int &)
+  -> (525,37) std::vector<Real *, std::allocator<Real *>>::data(std::vector<Real *, std::allocator<Real *>> *)
+  -> (531,9) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (535,32) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (535,32) std::vector<Real *, std::allocator<Real *>>::vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (536,21) std::vector<Real *, std::allocator<Real *>>::reserve(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (540,25) std::vector<Real *, std::allocator<Real *>>::push_back(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::value_type &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (540,44) std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::operator[](const std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>> *, std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::size_type) const
+  -> INLINE: (540,47) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](const std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type) const
+  -> INLINE: (540,51) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (540,53) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (543,39) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type)
+  -> INLINE: (543,43) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (543,45) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (558,25) performLocalWENOInterpolationPlus(Real *, Real **, const int &, const int &)
+    -> INLINE: (138,5) computeLocalBetaTilde(Real &, Real &, Real &, Real **, const int &)
+    -> INLINE: (146,24) std::abs(double)
+    -> INLINE: (148,49) ipow(Real, const int &)
+    -> INLINE: (149,48) ipow(Real, const int &)
+    -> INLINE: (150,49) ipow(Real, const int &)
+  -> INLINE: (560,37) std::vector<Real *, std::allocator<Real *>>::data(std::vector<Real *, std::allocator<Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (566,9) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (574,32) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (574,32) std::vector<Real *, std::allocator<Real *>>::vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (575,21) std::vector<Real *, std::allocator<Real *>>::reserve(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (579,25) std::vector<Real *, std::allocator<Real *>>::push_back(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::value_type &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (579,44) std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::operator[](const std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>> *, std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::size_type) const
+  -> INLINE: (579,47) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](const std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type) const
+  -> INLINE: (579,51) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (579,53) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (582,40) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type)
+  -> INLINE: (582,44) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (582,46) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (597,25) performLocalWENOInterpolationMinus(Real *, Real **, const int &, const int &)
+    -> INLINE: (90,5) computeLocalBeta(Real &, Real &, Real &, Real **, const int &)
+    -> INLINE: (98,18) std::abs(double)
+    -> INLINE: (100,43) ipow(Real, const int &)
+    -> INLINE: (101,42) ipow(Real, const int &)
+    -> INLINE: (102,43) ipow(Real, const int &)
+  -> INLINE: (599,37) std::vector<Real *, std::allocator<Real *>>::data(std::vector<Real *, std::allocator<Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (605,9) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (609,32) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (609,32) std::vector<Real *, std::allocator<Real *>>::vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (610,21) std::vector<Real *, std::allocator<Real *>>::reserve(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (614,25) std::vector<Real *, std::allocator<Real *>>::push_back(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::value_type &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (614,44) std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::operator[](const std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>> *, std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::size_type) const
+  -> INLINE: (614,47) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](const std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type) const
+  -> INLINE: (614,51) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (614,53) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (617,39) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type)
+  -> INLINE: (617,43) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (617,45) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (632,25) performLocalWENOInterpolationPlus(Real *, Real **, const int &, const int &)
+    -> INLINE: (138,5) computeLocalBetaTilde(Real &, Real &, Real &, Real **, const int &)
+    -> INLINE: (146,24) std::abs(double)
+    -> INLINE: (148,49) ipow(Real, const int &)
+    -> INLINE: (149,48) ipow(Real, const int &)
+    -> INLINE: (150,49) ipow(Real, const int &)
+  -> INLINE: (634,37) std::vector<Real *, std::allocator<Real *>>::data(std::vector<Real *, std::allocator<Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (640,9) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (648,32) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (648,32) std::vector<Real *, std::allocator<Real *>>::vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (649,21) std::vector<Real *, std::allocator<Real *>>::reserve(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (653,25) std::vector<Real *, std::allocator<Real *>>::push_back(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::value_type &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (653,44) std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::operator[](const std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>> *, std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::size_type) const
+  -> INLINE: (653,47) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](const std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type) const
+  -> INLINE: (653,51) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (653,53) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (656,40) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type)
+  -> INLINE: (656,44) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (656,46) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (671,25) performLocalWENOInterpolationMinus(Real *, Real **, const int &, const int &)
+    -> INLINE: (90,5) computeLocalBeta(Real &, Real &, Real &, Real **, const int &)
+    -> INLINE: (98,18) std::abs(double)
+    -> INLINE: (100,43) ipow(Real, const int &)
+    -> INLINE: (101,42) ipow(Real, const int &)
+    -> INLINE: (102,43) ipow(Real, const int &)
+  -> INLINE: (673,37) std::vector<Real *, std::allocator<Real *>>::data(std::vector<Real *, std::allocator<Real *>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (679,9) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (683,32) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (683,32) std::vector<Real *, std::allocator<Real *>>::vector(std::vector<Real *, std::allocator<Real *>> *)
+  -> (684,21) std::vector<Real *, std::allocator<Real *>>::reserve(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+  -> INLINE: (688,25) std::vector<Real *, std::allocator<Real *>>::push_back(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::value_type &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (688,44) std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::operator[](const std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>> *, std::vector<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>::size_type) const
+  -> INLINE: (688,47) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](const std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type) const
+  -> INLINE: (688,51) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (688,53) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (691,39) std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::operator[](std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>::size_type)
+  -> INLINE: (691,43) std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::SideData<Real>, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (691,45) SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,30) std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::pdat::ArrayData<Real>, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp:(162,32) SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+      -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp:(210,19) std::vector<double, std::allocator<double>>::operator[](std::vector<double, std::allocator<double>> *, std::vector<double, std::allocator<double>>::size_type)
+  -> INLINE: (706,25) performLocalWENOInterpolationPlus(Real *, Real **, const int &, const int &)
+    -> INLINE: (138,5) computeLocalBetaTilde(Real &, Real &, Real &, Real **, const int &)
+    -> INLINE: (146,24) std::abs(double)
+    -> INLINE: (148,49) ipow(Real, const int &)
+    -> INLINE: (149,48) ipow(Real, const int &)
+    -> INLINE: (150,49) ipow(Real, const int &)
+  -> (708,37) std::vector<Real *, std::allocator<Real *>>::data(std::vector<Real *, std::allocator<Real *>> *)
+  -> (714,9) std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(293,9)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(298,13)
+      remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/bits/stl_vector.h(920,9) ]
+   LOOP END
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(306,13)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(311,17)
+         remark #25045: Fused Loops: ( 12 12 12 )
+
+         remark #15301: FUSED LOOP WAS VECTORIZED
+      LOOP END
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(311,17)
+         remark #25046: Loop lost in Fusion 
+      LOOP END
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(311,17)
+         remark #25046: Loop lost in Fusion 
+      LOOP END
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(311,17)
+      <Remainder loop for vectorization>
+         remark #15301: REMAINDER LOOP WAS VECTORIZED
+      LOOP END
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(311,17)
+      <Remainder loop for vectorization>
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(319,9)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(324,13)
+      remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/bits/stl_vector.h(920,9) ]
+   LOOP END
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(332,13)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(337,17)
+         remark #25045: Fused Loops: ( 12 12 12 )
+
+         remark #15301: FUSED LOOP WAS VECTORIZED
+      LOOP END
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(337,17)
+         remark #25046: Loop lost in Fusion 
+      LOOP END
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(337,17)
+         remark #25046: Loop lost in Fusion 
+      LOOP END
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(337,17)
+      <Remainder loop for vectorization>
+         remark #15301: REMAINDER LOOP WAS VECTORIZED
+      LOOP END
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(337,17)
+      <Remainder loop for vectorization>
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(359,9)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(364,13)
+      remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/bits/stl_vector.h(920,9) ]
+   LOOP END
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(371,13)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(374,17)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(380,21)
+            remark #25045: Fused Loops: ( 12 12 12 )
+
+            remark #15301: FUSED LOOP WAS VECTORIZED
+         LOOP END
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(380,21)
+            remark #25046: Loop lost in Fusion 
+         LOOP END
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(380,21)
+            remark #25046: Loop lost in Fusion 
+         LOOP END
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(380,21)
+         <Remainder loop for vectorization>
+            remark #15301: REMAINDER LOOP WAS VECTORIZED
+         LOOP END
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(380,21)
+         <Remainder loop for vectorization>
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(389,9)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(394,13)
+      remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/bits/stl_vector.h(920,9) ]
+   LOOP END
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(401,13)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(404,17)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(410,21)
+            remark #25045: Fused Loops: ( 12 12 12 )
+
+            remark #15301: FUSED LOOP WAS VECTORIZED
+         LOOP END
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(410,21)
+            remark #25046: Loop lost in Fusion 
+         LOOP END
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(410,21)
+            remark #25046: Loop lost in Fusion 
+         LOOP END
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(410,21)
+         <Remainder loop for vectorization>
+            remark #15301: REMAINDER LOOP WAS VECTORIZED
+         LOOP END
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(410,21)
+         <Remainder loop for vectorization>
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(423,9)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(428,13)
+      remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/bits/stl_vector.h(920,9) ]
+   LOOP END
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(435,13)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(438,17)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(444,21)
+            remark #25045: Fused Loops: ( 12 12 12 )
+
+            remark #15301: FUSED LOOP WAS VECTORIZED
+         LOOP END
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(444,21)
+            remark #25046: Loop lost in Fusion 
+         LOOP END
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(444,21)
+            remark #25046: Loop lost in Fusion 
+         LOOP END
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(444,21)
+         <Remainder loop for vectorization>
+            remark #15301: REMAINDER LOOP WAS VECTORIZED
+         LOOP END
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(444,21)
+         <Remainder loop for vectorization>
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(453,9)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(458,13)
+      remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/bits/stl_vector.h(920,9) ]
+   LOOP END
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(465,13)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(468,17)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(474,21)
+            remark #25045: Fused Loops: ( 12 12 12 )
+
+            remark #15301: FUSED LOOP WAS VECTORIZED
+         LOOP END
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(474,21)
+            remark #25046: Loop lost in Fusion 
+         LOOP END
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(474,21)
+            remark #25046: Loop lost in Fusion 
+         LOOP END
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(474,21)
+         <Remainder loop for vectorization>
+            remark #15301: REMAINDER LOOP WAS VECTORIZED
+         LOOP END
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(474,21)
+         <Remainder loop for vectorization>
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(498,9)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(503,13)
+      remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/bits/stl_vector.h(920,9) ]
+   LOOP END
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(510,13)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(512,17)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(515,21)
+            remark #15542: loop was not vectorized: inner loop was already vectorized
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(523,25)
+               remark #25045: Fused Loops: ( 12 12 12 )
+
+               remark #15301: FUSED LOOP WAS VECTORIZED
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(523,25)
+               remark #25046: Loop lost in Fusion 
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(523,25)
+               remark #25046: Loop lost in Fusion 
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(523,25)
+            <Remainder loop for vectorization>
+               remark #15301: REMAINDER LOOP WAS VECTORIZED
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(523,25)
+            <Remainder loop for vectorization>
+            LOOP END
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(533,9)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(538,13)
+      remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/bits/stl_vector.h(920,9) ]
+   LOOP END
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(545,13)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(547,17)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(550,21)
+            remark #15542: loop was not vectorized: inner loop was already vectorized
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(558,25)
+               remark #25045: Fused Loops: ( 12 12 12 )
+
+               remark #15301: FUSED LOOP WAS VECTORIZED
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(558,25)
+               remark #25046: Loop lost in Fusion 
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(558,25)
+               remark #25046: Loop lost in Fusion 
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(558,25)
+            <Remainder loop for vectorization>
+               remark #15301: REMAINDER LOOP WAS VECTORIZED
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(558,25)
+            <Remainder loop for vectorization>
+            LOOP END
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(572,9)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(577,13)
+      remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/bits/stl_vector.h(920,9) ]
+   LOOP END
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(584,13)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(586,17)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(589,21)
+            remark #15542: loop was not vectorized: inner loop was already vectorized
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(597,25)
+               remark #25045: Fused Loops: ( 12 12 12 )
+
+               remark #15301: FUSED LOOP WAS VECTORIZED
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(597,25)
+               remark #25046: Loop lost in Fusion 
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(597,25)
+               remark #25046: Loop lost in Fusion 
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(597,25)
+            <Remainder loop for vectorization>
+               remark #15301: REMAINDER LOOP WAS VECTORIZED
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(597,25)
+            <Remainder loop for vectorization>
+            LOOP END
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(607,9)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(612,13)
+      remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/bits/stl_vector.h(920,9) ]
+   LOOP END
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(619,13)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(621,17)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(624,21)
+            remark #15542: loop was not vectorized: inner loop was already vectorized
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(632,25)
+               remark #25045: Fused Loops: ( 12 12 12 )
+
+               remark #15301: FUSED LOOP WAS VECTORIZED
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(632,25)
+               remark #25046: Loop lost in Fusion 
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(632,25)
+               remark #25046: Loop lost in Fusion 
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(632,25)
+            <Remainder loop for vectorization>
+               remark #15301: REMAINDER LOOP WAS VECTORIZED
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(632,25)
+            <Remainder loop for vectorization>
+            LOOP END
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(646,9)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(651,13)
+      remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/bits/stl_vector.h(920,9) ]
+   LOOP END
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(658,13)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(660,17)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(663,21)
+            remark #15542: loop was not vectorized: inner loop was already vectorized
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(671,25)
+               remark #25045: Fused Loops: ( 12 12 12 )
+
+               remark #15301: FUSED LOOP WAS VECTORIZED
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(671,25)
+               remark #25046: Loop lost in Fusion 
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(671,25)
+               remark #25046: Loop lost in Fusion 
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(671,25)
+            <Remainder loop for vectorization>
+               remark #15301: REMAINDER LOOP WAS VECTORIZED
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(671,25)
+            <Remainder loop for vectorization>
+            LOOP END
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(681,9)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(686,13)
+      remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/bits/stl_vector.h(920,9) ]
+   LOOP END
+
+   LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(693,13)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(695,17)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
+
+         LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(698,21)
+            remark #15542: loop was not vectorized: inner loop was already vectorized
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(706,25)
+               remark #25045: Fused Loops: ( 12 12 12 )
+
+               remark #15301: FUSED LOOP WAS VECTORIZED
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(706,25)
+               remark #25046: Loop lost in Fusion 
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(706,25)
+               remark #25046: Loop lost in Fusion 
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(706,25)
+            <Remainder loop for vectorization>
+               remark #15301: REMAINDER LOOP WAS VECTORIZED
+            LOOP END
+
+            LOOP BEGIN at /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(12,5) inlined into /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(706,25)
+            <Remainder loop for vectorization>
+            LOOP END
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp(243,1):remark #34051: REGISTER ALLOCATION : [_ZN43ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL24performWENOInterpolationERSt6vectorISt10shared_ptrIN6SAMRAI4pdat8SideDataIdEEESaIS6_EES9_RKS0_IS8_SaIS8_EE] /home/akula/HAMeRS_IB/HAMeRS/src/flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp:243
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   30[ rax rdx rcx rbx rsi rdi r8-r15 zmm0-zmm15]
+        
+    Routine temporaries
+        Total         :    2439
+            Global    :     680
+            Local     :    1759
+        Regenerable   :     206
+        Spilled       :     131
+        
+    Routine stack
+        Variables     :     452 bytes*
+            Reads     :      17 [1.63e+01 ~ 0.0%]
+            Writes    :      28 [9.60e+01 ~ 0.0%]
+        Spills        :    1488 bytes*
+            Reads     :     256 [2.96e+03 ~ 1.0%]
+            Writes    :     138 [1.82e+03 ~ 0.6%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<Real *, std::allocator<Real *>>::~_Vector_base(std::_Vector_base<Real *, std::allocator<Real *>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(160,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIPdSaIS0_EED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:160
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       7
+            Local     :       3
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<Real *, std::allocator<Real *>>::emplace_back<std::remove_reference<std::_Vector_base<double, std::allocator<double>>::pointer &>::type>(std::vector<Real *, std::allocator<Real *>> *, std::remove_reference<std::_Vector_base<double, std::allocator<double>>::pointer &>::type &&)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/vector.tcc(93,7):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIPdSaIS0_EE12emplace_backIIS0_EEEvDpOT_] /usr/include/c++/4.8.5/bits/vector.tcc:93
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    9[ rax rdx rbp rsi rdi r12-r15]
+        
+    Routine temporaries
+        Total         :      35
+            Global    :      17
+            Local     :      18
+        Regenerable   :       2
+        Spilled       :       5
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<Real *, std::allocator<Real *>>::_M_deallocate(std::_Vector_base<Real *, std::allocator<Real *>> *, std::_Vector_base<Real *, std::allocator<Real *>>::pointer, std::size_t)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(172,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIPdSaIS0_EE13_M_deallocateEPS0_m] /usr/include/c++/4.8.5/bits/stl_vector.h:172
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      11
+            Global    :       7
+            Local     :       4
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<Real *, std::allocator<Real *>>::_M_get_Tp_allocator(std::_Vector_base<Real *, std::allocator<Real *>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(114,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIPdSaIS0_EE19_M_get_Tp_allocatorEv] /usr/include/c++/4.8.5/bits/stl_vector.h:114
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rax rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<Real *, std::allocator<Real *>>::size(const std::vector<Real *, std::allocator<Real *>> *) const
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(646,7):remark #34051: REGISTER ALLOCATION : [_ZNKSt6vectorIPdSaIS0_EE4sizeEv] /usr/include/c++/4.8.5/bits/stl_vector.h:646
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rax rdi]
+        
+    Routine temporaries
+        Total         :      12
+            Global    :       0
+            Local     :      12
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<Real *, std::allocator<Real *>>::reserve(std::vector<Real *, std::allocator<Real *>> *, std::vector<Real *, std::allocator<Real *>>::size_type)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/vector.tcc(67,5):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIPdSaIS0_EE7reserveEm] /usr/include/c++/4.8.5/bits/vector.tcc:67
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   11[ rax rdx rcx rbx rbp rsi rdi r12-r15]
+        
+    Routine temporaries
+        Total         :      34
+            Global    :      18
+            Local     :      16
+        Regenerable   :       3
+        Spilled       :       6
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<Real *, std::allocator<Real *>>::~vector(std::vector<Real *, std::allocator<Real *>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(415,7):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIPdSaIS0_EED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:415
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       7
+            Local     :       3
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<Real *, std::allocator<Real *>>::data(std::vector<Real *, std::allocator<Real *>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(879,7):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIPdSaIS0_EE4dataEv] /usr/include/c++/4.8.5/bits/stl_vector.h:879
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rax rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       0
+            Local     :      10
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<Real *, std::allocator<Real *>>::vector(std::vector<Real *, std::allocator<Real *>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(249,17):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIPdSaIS0_EEC1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:249
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rax rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Box::numberCells(SAMRAI::hier::IntVector *, const SAMRAI::hier::Box *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (SAMRAI::hier::Box::numberCells(SAMRAI::hier::IntVector *, const SAMRAI::hier::Box *) const) [49] /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h(636,4)
+  -> INLINE: (637,11) SAMRAI::hier::Box::empty(const SAMRAI::hier::Box *) const
+    -> INLINE: (604,32) SAMRAI::hier::Box::getDim(const SAMRAI::hier::Box *) const
+      -> INLINE: (1299,19) SAMRAI::hier::Index::getDim(const SAMRAI::hier::Index *) const
+    -> INLINE: (604,32) SAMRAI::hier::Box::getDim(const SAMRAI::hier::Box *) const
+      -> INLINE: (1299,19) SAMRAI::hier::Index::getDim(const SAMRAI::hier::Index *) const
+    -> INLINE: (604,41) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+    -> INLINE: (604,41) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+    -> INLINE: (605,21) SAMRAI::hier::Index::operator()(const SAMRAI::hier::Index *, unsigned int) const
+    -> INLINE: (605,31) SAMRAI::hier::Index::operator()(const SAMRAI::hier::Index *, unsigned int) const
+  -> INLINE: (638,17) SAMRAI::hier::IntVector::getZero(const SAMRAI::tbox::Dimension &)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h:(1133,28) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+  -> INLINE: (638,36) SAMRAI::hier::Box::getDim(const SAMRAI::hier::Box *) const
+    -> INLINE: (1299,19) SAMRAI::hier::Index::getDim(const SAMRAI::hier::Index *) const
+  -> INLINE: (640,32) SAMRAI::hier::Index::operator-(SAMRAI::hier::Index *, const SAMRAI::hier::Index *, const SAMRAI::hier::Index &) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h:(284,11) SAMRAI::hier::Index::operator-=(SAMRAI::hier::Index *, const SAMRAI::hier::Index &)
+      -> INLINE: (267,42) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+      -> INLINE: (267,42) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+  -> INLINE: (640,39) SAMRAI::hier::Index::operator+(SAMRAI::hier::Index *, const SAMRAI::hier::Index *, int) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h:(253,11) SAMRAI::hier::Index::operator+=(SAMRAI::hier::Index *, int)
+      -> INLINE: (239,42) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+      -> INLINE: (239,42) SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h(604,41) inlined into /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h(638,11)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h(267,42) inlined into /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h(641,32)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+   remark #25478: While Loop Unrolled by 2  
+LOOP END
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h(239,42) inlined into /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h(641,39)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+   remark #25478: While Loop Unrolled by 8  
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h(636,4):remark #34051: REGISTER ALLOCATION : [_ZNK6SAMRAI4hier3Box11numberCellsEv] /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h:636
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    8[ rax rdx rcx rbx rsi rdi r8 r13]
+        
+    Routine temporaries
+        Total         :      79
+            Global    :      17
+            Local     :      62
+        Regenerable   :      13
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :      56 bytes*
+            Reads     :      13 [3.69e+00 ~ 4.7%]
+            Writes    :      12 [2.25e+00 ~ 2.9%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::tbox::Dimension::operator==(const SAMRAI::tbox::Dimension *, const SAMRAI::tbox::Dimension &) const) /home/akula/libraries/SAMRAI/include/SAMRAI/tbox/Dimension.h(73,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::tbox::Dimension::getValue(const SAMRAI::tbox::Dimension *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/tbox/Dimension.h(137,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::IntVector::operator[](const SAMRAI::hier::IntVector *, unsigned int) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(269,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::IntVector::getZero(const SAMRAI::tbox::Dimension &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::IntVector::getZero(const SAMRAI::tbox::Dimension &)) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/IntVector.h(1132,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Index::operator+=(SAMRAI::hier::Index *, int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Index::operator+=(SAMRAI::hier::Index *, int)) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h(238,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Index::operator+(SAMRAI::hier::Index *, const SAMRAI::hier::Index *, int) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Index::operator+(SAMRAI::hier::Index *, const SAMRAI::hier::Index *, int) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h(251,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Index::operator-=(SAMRAI::hier::Index *, const SAMRAI::hier::Index &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Index::operator-=(SAMRAI::hier::Index *, const SAMRAI::hier::Index &)) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h(265,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Index::operator-(SAMRAI::hier::Index *, const SAMRAI::hier::Index *, const SAMRAI::hier::Index &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Index::operator-(SAMRAI::hier::Index *, const SAMRAI::hier::Index *, const SAMRAI::hier::Index &) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h(281,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Index::operator()(const SAMRAI::hier::Index *, unsigned int) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Index::operator()(const SAMRAI::hier::Index *, unsigned int) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h(515,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Index::getDim(const SAMRAI::hier::Index *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Index::getDim(const SAMRAI::hier::Index *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Index.h(724,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Box::empty(const SAMRAI::hier::Box *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Box::empty(const SAMRAI::hier::Box *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h(598,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::Box::getDim(const SAMRAI::hier::Box *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::Box::getDim(const SAMRAI::hier::Box *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/Box.h(1298,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::PatchData::getBox(const SAMRAI::hier::PatchData *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::PatchData::getBox(const SAMRAI::hier::PatchData *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/PatchData.h(84,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::pdat::SideData<Real>::getPointer(SAMRAI::pdat::SideData<Real> *, int, int)) /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/SideData.cpp(157,1)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::pdat::ArrayData<Real>::getPointer(SAMRAI::pdat::ArrayData<Real> *, unsigned int)) /home/akula/libraries/SAMRAI/include/SAMRAI/pdat/ArrayData.cpp(207,1)
+
+===========================================================================
+
+Begin optimization report for: __sti__$E()
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (__sti__$E()) [163] <compiler generated>
+
+
+    Report from: Code generation optimizations [cg]
+
+<compiler generated>:remark #34051: REGISTER ALLOCATION : [__sti__$E] (null):0
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       7
+            Local     :       6
+        Regenerable   :       7
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================

@@ -1,0 +1,1861 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINING OPTION VALUES:
+  -inline-factor: 100
+  -inline-min-size: 30
+  -inline-max-size: 230
+  -inline-max-total-size: 2000
+  -inline-max-per-routine: 10000
+  -inline-max-per-compile: 500000
+
+
+Begin optimization report for: RungeKuttaPatchStrategy::RungeKuttaPatchStrategy(RungeKuttaPatchStrategy *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::RungeKuttaPatchStrategy(RungeKuttaPatchStrategy *)) [2] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(23,1)
+  -> INLINE: (17,26) std::shared_ptr<SAMRAI::hier::VariableContext>::shared_ptr(std::shared_ptr<SAMRAI::hier::VariableContext> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(733,17):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (1, 0)
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(23,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategyC1Ev] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:23
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    4[ rax rdx rdi r12]
+        
+    Routine temporaries
+        Total         :      19
+            Global    :       7
+            Local     :      12
+        Regenerable   :       1
+        Spilled       :       1
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       1 [0.00e+00 ~ 0.0%]
+            Writes    :       1 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::RungeKuttaPatchStrategy(RungeKuttaPatchStrategy *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::RungeKuttaPatchStrategy(RungeKuttaPatchStrategy *const)) [3] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(17,26)
+  -> INLINE: (17,26) RungeKuttaPatchStrategy::RungeKuttaPatchStrategy(RungeKuttaPatchStrategy *)
+    -> INLINE: (17,26) std::shared_ptr<SAMRAI::hier::VariableContext>::shared_ptr(std::shared_ptr<SAMRAI::hier::VariableContext> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr_base.h(733,17):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (1, 0)
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(17,26):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategyC2Ev] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:17
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    4[ rax rdx rdi r12]
+        
+    Routine temporaries
+        Total         :      19
+            Global    :       7
+            Local     :      12
+        Regenerable   :       1
+        Spilled       :       1
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       1 [0.00e+00 ~ 0.0%]
+            Writes    :       1 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: _ZN23RungeKuttaPatchStrategyD0Ev(RungeKuttaPatchStrategy *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (_ZN23RungeKuttaPatchStrategyD0Ev(RungeKuttaPatchStrategy *)) [4] <compiler generated>
+
+
+    Report from: Code generation optimizations [cg]
+
+<compiler generated>:remark #34051: REGISTER ALLOCATION : [_ZThn8_N23RungeKuttaPatchStrategyD0Ev] (null):0
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rdx rcx rsi rdi r8-r9]
+        
+    Routine temporaries
+        Total         :      25
+            Global    :       0
+            Local     :      25
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::~RungeKuttaPatchStrategy(RungeKuttaPatchStrategy *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::~RungeKuttaPatchStrategy(RungeKuttaPatchStrategy *const)) [5] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(27,26)
+  -> INLINE: (27,26) RungeKuttaPatchStrategy::~RungeKuttaPatchStrategy(RungeKuttaPatchStrategy *)
+    -> INLINE: (29,1) std::shared_ptr<SAMRAI::hier::VariableContext>::~shared_ptr(std::shared_ptr<SAMRAI::hier::VariableContext> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(27,26):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategyD0Ev] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:27
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    7[ rax rdx rcx rdi r12-r14]
+        
+    Routine temporaries
+        Total         :      40
+            Global    :      13
+            Local     :      27
+        Regenerable   :       4
+        Spilled       :       3
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       2 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::~RungeKuttaPatchStrategy(RungeKuttaPatchStrategy *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::~RungeKuttaPatchStrategy(RungeKuttaPatchStrategy *const)) [6] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(27,26)
+  -> INLINE: (27,26) RungeKuttaPatchStrategy::~RungeKuttaPatchStrategy(RungeKuttaPatchStrategy *)
+    -> INLINE: (29,1) std::shared_ptr<SAMRAI::hier::VariableContext>::~shared_ptr(std::shared_ptr<SAMRAI::hier::VariableContext> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(27,26):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategyD2Ev] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:27
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    7[ rax rdx rcx rdi r13-r15]
+        
+    Routine temporaries
+        Total         :      39
+            Global    :      13
+            Local     :      26
+        Regenerable   :       4
+        Spilled       :       3
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       2 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: _ZN23RungeKuttaPatchStrategyD1Ev(RungeKuttaPatchStrategy *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (_ZN23RungeKuttaPatchStrategyD1Ev(RungeKuttaPatchStrategy *)) [7] <compiler generated>
+
+
+    Report from: Code generation optimizations [cg]
+
+<compiler generated>:remark #34051: REGISTER ALLOCATION : [_ZThn8_N23RungeKuttaPatchStrategyD1Ev] (null):0
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rdx rcx rsi rdi r8-r9]
+        
+    Routine temporaries
+        Total         :      25
+            Global    :       0
+            Local     :      25
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::~RungeKuttaPatchStrategy(RungeKuttaPatchStrategy *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::~RungeKuttaPatchStrategy(RungeKuttaPatchStrategy *)) [8] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(28,1)
+  -> INLINE: (29,1) std::shared_ptr<SAMRAI::hier::VariableContext>::~shared_ptr(std::shared_ptr<SAMRAI::hier::VariableContext> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(28,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategyD1Ev] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:28
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    7[ rax rdx rcx rdi r13-r15]
+        
+    Routine temporaries
+        Total         :      39
+            Global    :      13
+            Local     :      26
+        Regenerable   :       4
+        Spilled       :       3
+        
+    Routine stack
+        Variables     :       8 bytes*
+            Reads     :       2 [0.00e+00 ~ 0.0%]
+            Writes    :       2 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::setupLoadBalancer(RungeKuttaPatchStrategy *, RungeKuttaLevelIntegrator *, SAMRAI::mesh::GriddingAlgorithm *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::setupLoadBalancer(RungeKuttaPatchStrategy *, RungeKuttaLevelIntegrator *, SAMRAI::mesh::GriddingAlgorithm *)) [9] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(541,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(541,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy17setupLoadBalancerEP25RungeKuttaLevelIntegratorPN6SAMRAI4mesh17GriddingAlgorithmE] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:541
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::setImmersedBoundaryGhostCells(RungeKuttaPatchStrategy *, SAMRAI::hier::Patch &, double, int, const std::shared_ptr<SAMRAI::hier::VariableContext> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::setImmersedBoundaryGhostCells(RungeKuttaPatchStrategy *, SAMRAI::hier::Patch &, double, int, const std::shared_ptr<SAMRAI::hier::VariableContext> &)) [10] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(47,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(47,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy29setImmersedBoundaryGhostCellsERN6SAMRAI4hier5PatchEdiRKSt10shared_ptrINS1_15VariableContextEE] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:47
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    5[ rdx rcx rsi rdi zmm0]
+        
+    Routine temporaries
+        Total         :      11
+            Global    :       0
+            Local     :      11
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::preprocessAdvanceLevelState(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchLevel> &, double, double, bool, bool, bool)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::preprocessAdvanceLevelState(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchLevel> &, double, double, bool, bool, bool)) [11] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(555,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(555,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy27preprocessAdvanceLevelStateERKSt10shared_ptrIN6SAMRAI4hier10PatchLevelEEddbbb] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:555
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    7[ rdx rcx rsi rdi r8 zmm0-zmm1]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       0
+            Local     :      13
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::postprocessAdvanceLevelState(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchLevel> &, double, double, bool, bool, bool)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::postprocessAdvanceLevelState(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchLevel> &, double, double, bool, bool, bool)) [12] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(573,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(573,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy28postprocessAdvanceLevelStateERKSt10shared_ptrIN6SAMRAI4hier10PatchLevelEEddbbb] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:573
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    7[ rdx rcx rsi rdi r8 zmm0-zmm1]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       0
+            Local     :      13
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::tagCellsOnPatchRefineRegions(RungeKuttaPatchStrategy *, SAMRAI::hier::Patch &, double, bool, int, bool, bool, bool, bool, bool, bool)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::tagCellsOnPatchRefineRegions(RungeKuttaPatchStrategy *, SAMRAI::hier::Patch &, double, bool, int, bool, bool, bool, bool, bool, bool)) [13] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(67,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(67,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy28tagCellsOnPatchRefineRegionsERN6SAMRAI4hier5PatchEdbibbbbbb] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:67
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    7[ rdx rcx rsi rdi r8-r9 zmm0]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       0
+            Local     :      13
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::tagCellsOnPatchImmersedBdryDetector(RungeKuttaPatchStrategy *, SAMRAI::hier::Patch &, double, bool, int, bool, bool, bool, bool, bool, bool)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::tagCellsOnPatchImmersedBdryDetector(RungeKuttaPatchStrategy *, SAMRAI::hier::Patch &, double, bool, int, bool, bool, bool, bool, bool, bool)) [14] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(93,1)
+  -> INLINE: (104,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (104,5) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (104,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (104,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (104,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (104,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (104,5) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (104,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (104,5) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (104,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (104,5) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (104,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (104,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (104,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> INLINE: (104,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(93,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy35tagCellsOnPatchImmersedBdryDetectorERN6SAMRAI4hier5PatchEdbibbbbbb] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:93
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   14[ rax rdx rcx rbx rbp rsi rdi r8-r9 r12-r15 zmm0]
+        
+    Routine temporaries
+        Total         :     304
+            Global    :      74
+            Local     :     230
+        Regenerable   :     121
+        Spilled       :       6
+        
+    Routine stack
+        Variables     :     421 bytes*
+            Reads     :      24 [6.84e+00 ~ 5.4%]
+            Writes    :      51 [2.33e+01 ~ 18.4%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::char_traits<char>::length(const std::char_traits<char>::char_type *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(259,7):remark #34051: REGISTER ALLOCATION : [_ZNSt11char_traitsIcE6lengthEPKc] /usr/include/c++/4.8.5/bits/char_traits.h:259
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      12
+            Global    :       7
+            Local     :       5
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::basic_stringbuf<char, std::char_traits<char>, std::allocator<char>>::~basic_stringbuf(std::basic_stringbuf<char, std::char_traits<char>, std::allocator<char>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/iosfwd(93,11):remark #34051: REGISTER ALLOCATION : [_ZNSt15basic_stringbufIcSt11char_traitsIcESaIcEED1Ev] /usr/include/c++/4.8.5/iosfwd:93
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rbp rsi rdi]
+        
+    Routine temporaries
+        Total         :      21
+            Global    :      11
+            Local     :      10
+        Regenerable   :       5
+        Spilled       :       1
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: __gnu_cxx::__exchange_and_add_dispatch(_Atomic_word *, int)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/ext/atomicity.h(79,3):remark #34051: REGISTER ALLOCATION : [_ZN17_INTERNAL924b2f8f9__gnu_cxx27__exchange_and_add_dispatchEPii] /usr/include/c++/4.8.5/ext/atomicity.h:79
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    4[ rax rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      16
+            Global    :       8
+            Local     :       8
+        Regenerable   :       2
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::preprocessTagCellsValueDetector(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, int, double, bool, bool, bool, bool, bool, bool, bool)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::preprocessTagCellsValueDetector(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, int, double, bool, bool, bool, bool, bool, bool, bool)) [25] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(123,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(123,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy31preprocessTagCellsValueDetectorERKSt10shared_ptrIN6SAMRAI4hier14PatchHierarchyEEidbbbbbbb] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:123
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    7[ rdx rcx rsi rdi r8-r9 zmm0]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       0
+            Local     :      13
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::postprocessTagCellsValueDetector(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, int, double, bool, bool, bool, bool, bool, bool, bool)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::postprocessTagCellsValueDetector(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, int, double, bool, bool, bool, bool, bool, bool, bool)) [26] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(149,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(149,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy32postprocessTagCellsValueDetectorERKSt10shared_ptrIN6SAMRAI4hier14PatchHierarchyEEidbbbbbbb] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:149
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    7[ rdx rcx rsi rdi r8-r9 zmm0]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       0
+            Local     :      13
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::tagCellsOnPatchValueDetector(RungeKuttaPatchStrategy *, SAMRAI::hier::Patch &, double, bool, int, bool, bool, bool, bool, bool, bool)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::tagCellsOnPatchValueDetector(RungeKuttaPatchStrategy *, SAMRAI::hier::Patch &, double, bool, int, bool, bool, bool, bool, bool, bool)) [27] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(175,1)
+  -> INLINE: (186,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (186,5) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (186,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (186,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (186,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (186,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (186,5) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (186,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (186,5) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (186,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (186,5) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (186,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (186,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (186,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> INLINE: (186,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(175,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy28tagCellsOnPatchValueDetectorERN6SAMRAI4hier5PatchEdbibbbbbb] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:175
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   14[ rax rdx rcx rbx rbp rsi rdi r8-r9 r12-r15 zmm0]
+        
+    Routine temporaries
+        Total         :     304
+            Global    :      74
+            Local     :     230
+        Regenerable   :     121
+        Spilled       :       6
+        
+    Routine stack
+        Variables     :     421 bytes*
+            Reads     :      24 [6.84e+00 ~ 5.4%]
+            Writes    :      51 [2.33e+01 ~ 18.4%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::preprocessTagCellsGradientDetector(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, int, double, bool, bool, bool, bool, bool, bool, bool)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::preprocessTagCellsGradientDetector(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, int, double, bool, bool, bool, bool, bool, bool, bool)) [28] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(205,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(205,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy34preprocessTagCellsGradientDetectorERKSt10shared_ptrIN6SAMRAI4hier14PatchHierarchyEEidbbbbbbb] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:205
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    7[ rdx rcx rsi rdi r8-r9 zmm0]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       0
+            Local     :      13
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::postprocessTagCellsGradientDetector(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, int, double, bool, bool, bool, bool, bool, bool, bool)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::postprocessTagCellsGradientDetector(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, int, double, bool, bool, bool, bool, bool, bool, bool)) [29] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(231,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(231,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy35postprocessTagCellsGradientDetectorERKSt10shared_ptrIN6SAMRAI4hier14PatchHierarchyEEidbbbbbbb] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:231
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    7[ rdx rcx rsi rdi r8-r9 zmm0]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       0
+            Local     :      13
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::tagCellsOnPatchGradientDetector(RungeKuttaPatchStrategy *, SAMRAI::hier::Patch &, double, bool, int, bool, bool, bool, bool, bool, bool)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::tagCellsOnPatchGradientDetector(RungeKuttaPatchStrategy *, SAMRAI::hier::Patch &, double, bool, int, bool, bool, bool, bool, bool, bool)) [30] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(257,1)
+  -> INLINE: (268,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (268,5) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (268,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (268,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (268,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (268,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (268,5) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (268,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (268,5) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (268,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (268,5) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (268,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (268,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (268,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> INLINE: (268,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(257,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy31tagCellsOnPatchGradientDetectorERN6SAMRAI4hier5PatchEdbibbbbbb] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:257
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   14[ rax rdx rcx rbx rbp rsi rdi r8-r9 r12-r15 zmm0]
+        
+    Routine temporaries
+        Total         :     304
+            Global    :      74
+            Local     :     230
+        Regenerable   :     121
+        Spilled       :       6
+        
+    Routine stack
+        Variables     :     421 bytes*
+            Reads     :      24 [6.84e+00 ~ 5.4%]
+            Writes    :      51 [2.33e+01 ~ 18.4%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::preprocessTagCellsMultiresolutionDetector(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, int, double, bool, bool, bool, bool, bool, bool, bool)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::preprocessTagCellsMultiresolutionDetector(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, int, double, bool, bool, bool, bool, bool, bool, bool)) [31] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(287,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(287,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy41preprocessTagCellsMultiresolutionDetectorERKSt10shared_ptrIN6SAMRAI4hier14PatchHierarchyEEidbbbbbbb] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:287
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    7[ rdx rcx rsi rdi r8-r9 zmm0]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       0
+            Local     :      13
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::postprocessTagCellsMultiresolutionDetector(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, int, double, bool, bool, bool, bool, bool, bool, bool)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::postprocessTagCellsMultiresolutionDetector(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, int, double, bool, bool, bool, bool, bool, bool, bool)) [32] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(313,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(313,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy42postprocessTagCellsMultiresolutionDetectorERKSt10shared_ptrIN6SAMRAI4hier14PatchHierarchyEEidbbbbbbb] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:313
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    7[ rdx rcx rsi rdi r8-r9 zmm0]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       0
+            Local     :      13
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::tagCellsOnPatchMultiresolutionDetector(RungeKuttaPatchStrategy *, SAMRAI::hier::Patch &, double, bool, int, bool, bool, bool, bool, bool, bool)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::tagCellsOnPatchMultiresolutionDetector(RungeKuttaPatchStrategy *, SAMRAI::hier::Patch &, double, bool, int, bool, bool, bool, bool, bool, bool)) [33] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(339,1)
+  -> INLINE: (350,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (350,5) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (350,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (350,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (350,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (350,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (350,5) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (350,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (350,5) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (350,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (350,5) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (350,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (350,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (350,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> INLINE: (350,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(339,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy38tagCellsOnPatchMultiresolutionDetectorERN6SAMRAI4hier5PatchEdbibbbbbb] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:339
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   14[ rax rdx rcx rbx rbp rsi rdi r8-r9 r12-r15 zmm0]
+        
+    Routine temporaries
+        Total         :     304
+            Global    :      74
+            Local     :     230
+        Regenerable   :     121
+        Spilled       :       6
+        
+    Routine stack
+        Variables     :     421 bytes*
+            Reads     :      24 [6.84e+00 ~ 5.4%]
+            Writes    :      51 [2.33e+01 ~ 18.4%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::preprocessTagCellsIntegralDetector(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, int, double, bool, bool, bool, bool, bool, bool, bool)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::preprocessTagCellsIntegralDetector(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, int, double, bool, bool, bool, bool, bool, bool, bool)) [34] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(369,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(369,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy34preprocessTagCellsIntegralDetectorERKSt10shared_ptrIN6SAMRAI4hier14PatchHierarchyEEidbbbbbbb] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:369
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    7[ rdx rcx rsi rdi r8-r9 zmm0]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       0
+            Local     :      13
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::postprocessTagCellsIntegralDetector(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, int, double, bool, bool, bool, bool, bool, bool, bool)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::postprocessTagCellsIntegralDetector(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, int, double, bool, bool, bool, bool, bool, bool, bool)) [35] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(395,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(395,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy35postprocessTagCellsIntegralDetectorERKSt10shared_ptrIN6SAMRAI4hier14PatchHierarchyEEidbbbbbbb] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:395
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    7[ rdx rcx rsi rdi r8-r9 zmm0]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       0
+            Local     :      13
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::tagCellsOnPatchIntegralDetector(RungeKuttaPatchStrategy *, SAMRAI::hier::Patch &, double, bool, int, bool, bool, bool, bool, bool, bool)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::tagCellsOnPatchIntegralDetector(RungeKuttaPatchStrategy *, SAMRAI::hier::Patch &, double, bool, int, bool, bool, bool, bool, bool, bool)) [36] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(421,1)
+  -> INLINE: (432,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (432,5) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (432,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (432,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (432,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (432,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (432,5) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (432,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (432,5) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (432,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (432,5) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (432,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (432,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (432,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> INLINE: (432,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(421,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy31tagCellsOnPatchIntegralDetectorERN6SAMRAI4hier5PatchEdbibbbbbb] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:421
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   14[ rax rdx rcx rbx rbp rsi rdi r8-r9 r12-r15 zmm0]
+        
+    Routine temporaries
+        Total         :     304
+            Global    :      74
+            Local     :     230
+        Regenerable   :     121
+        Spilled       :       6
+        
+    Routine stack
+        Variables     :     421 bytes*
+            Reads     :      24 [6.84e+00 ~ 5.4%]
+            Writes    :      51 [2.33e+01 ~ 18.4%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::computeStatisticsVariables(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::computeStatisticsVariables(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &)) [37] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(484,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(484,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy26computeStatisticsVariablesERKSt10shared_ptrIN6SAMRAI4hier14PatchHierarchyEE] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:484
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rsi rdi]
+        
+    Routine temporaries
+        Total         :       8
+            Global    :       0
+            Local     :       8
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::filterStatisticsVariables(RungeKuttaPatchStrategy *, int, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::filterStatisticsVariables(RungeKuttaPatchStrategy *, int, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &)) [38] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(496,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(496,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy25filterStatisticsVariablesEiRKSt10shared_ptrIN6SAMRAI4hier14PatchHierarchyEE] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:496
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::outputHeaderStatistics(RungeKuttaPatchStrategy *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::outputHeaderStatistics(RungeKuttaPatchStrategy *)) [39] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(507,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(507,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy22outputHeaderStatisticsEv] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:507
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       7
+            Global    :       0
+            Local     :       7
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::computeDataStatistics(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, double)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::computeDataStatistics(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, double)) [40] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(518,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(518,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy21computeDataStatisticsERKSt10shared_ptrIN6SAMRAI4hier14PatchHierarchyEEd] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:518
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rsi rdi zmm0]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::outputDataStatistics(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, double)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::outputDataStatistics(RungeKuttaPatchStrategy *, const std::shared_ptr<SAMRAI::hier::PatchHierarchy> &, double)) [41] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(531,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(531,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy20outputDataStatisticsERKSt10shared_ptrIN6SAMRAI4hier14PatchHierarchyEEd] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:531
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rsi rdi zmm0]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::getDataContext(std::shared_ptr<SAMRAI::hier::VariableContext> *, const RungeKuttaPatchStrategy *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::getDataContext(std::shared_ptr<SAMRAI::hier::VariableContext> *, const RungeKuttaPatchStrategy *) const) [42] /home/akula/HAMeRS_IB/HAMeRS/include/algs/patch_strategy/RungeKuttaPatchStrategy.hpp(729,9)
+  -> INLINE: (730,19) std::shared_ptr<SAMRAI::hier::VariableContext>::shared_ptr(std::shared_ptr<SAMRAI::hier::VariableContext> *, const std::shared_ptr<SAMRAI::hier::VariableContext> &)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/algs/patch_strategy/RungeKuttaPatchStrategy.hpp(729,9):remark #34051: REGISTER ALLOCATION : [_ZNK23RungeKuttaPatchStrategy14getDataContextEv] /home/akula/HAMeRS_IB/HAMeRS/include/algs/patch_strategy/RungeKuttaPatchStrategy.hpp:729
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    4[ rax rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      15
+            Global    :       8
+            Local     :       7
+        Regenerable   :       2
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::BoxContainer::begin(SAMRAI::hier::BoxContainer::const_iterator *, const SAMRAI::hier::BoxContainer *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::BoxContainer::begin(SAMRAI::hier::BoxContainer::const_iterator *, const SAMRAI::hier::BoxContainer *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h(692,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::BoxContainer::end(SAMRAI::hier::BoxContainer::const_iterator *, const SAMRAI::hier::BoxContainer *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::BoxContainer::end(SAMRAI::hier::BoxContainer::const_iterator *, const SAMRAI::hier::BoxContainer *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h(703,4)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::BoxContainer::BoxContainerConstIterator::operator*(const SAMRAI::hier::BoxContainer::BoxContainerConstIterator *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::BoxContainer::BoxContainerConstIterator::operator*(const SAMRAI::hier::BoxContainer::BoxContainerConstIterator *) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h(159,7)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::BoxContainer::BoxContainerConstIterator::operator++(SAMRAI::hier::BoxContainer::BoxContainerConstIterator *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::BoxContainer::BoxContainerConstIterator::operator++(SAMRAI::hier::BoxContainer::BoxContainerConstIterator *)) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h(201,7)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::hier::BoxContainer::BoxContainerConstIterator::operator!=(const SAMRAI::hier::BoxContainer::BoxContainerConstIterator *, const SAMRAI::hier::BoxContainer::BoxContainerConstIterator &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (SAMRAI::hier::BoxContainer::BoxContainerConstIterator::operator!=(const SAMRAI::hier::BoxContainer::BoxContainerConstIterator *, const SAMRAI::hier::BoxContainer::BoxContainerConstIterator &) const) /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h(271,7)
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::xfer::RefinePatchStrategy::preprocessRefineBoxes(SAMRAI::xfer::RefinePatchStrategy *, SAMRAI::hier::Patch &, const SAMRAI::hier::Patch &, const SAMRAI::hier::BoxContainer &, const SAMRAI::hier::IntVector &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (SAMRAI::xfer::RefinePatchStrategy::preprocessRefineBoxes(SAMRAI::xfer::RefinePatchStrategy *, SAMRAI::hier::Patch &, const SAMRAI::hier::Patch &, const SAMRAI::hier::BoxContainer &, const SAMRAI::hier::IntVector &)) [117] /home/akula/libraries/SAMRAI/include/SAMRAI/xfer/RefinePatchStrategy.h(199,4)
+  -> INLINE: (201,62) SAMRAI::hier::BoxContainer::begin(SAMRAI::hier::BoxContainer::const_iterator *, const SAMRAI::hier::BoxContainer *) const
+  -> INLINE: (202,14) SAMRAI::hier::BoxContainer::BoxContainerConstIterator::operator!=(const SAMRAI::hier::BoxContainer::BoxContainerConstIterator *, const SAMRAI::hier::BoxContainer::BoxContainerConstIterator &) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(272,40) std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type>::operator!=(const std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type> *, const std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type>::_Self &) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(273,29) std::_List_const_iterator<SAMRAI::hier::Box>::operator!=(const std::_List_const_iterator<SAMRAI::hier::Box> *, const std::_List_const_iterator<SAMRAI::hier::Box>::_Self &) const
+  -> INLINE: (202,14) SAMRAI::hier::BoxContainer::BoxContainerConstIterator::operator!=(const SAMRAI::hier::BoxContainer::BoxContainerConstIterator *, const SAMRAI::hier::BoxContainer::BoxContainerConstIterator &) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(272,40) std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type>::operator!=(const std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type> *, const std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type>::_Self &) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(273,29) std::_List_const_iterator<SAMRAI::hier::Box>::operator!=(const std::_List_const_iterator<SAMRAI::hier::Box> *, const std::_List_const_iterator<SAMRAI::hier::Box>::_Self &) const
+  -> INLINE: (202,28) SAMRAI::hier::BoxContainer::end(SAMRAI::hier::BoxContainer::const_iterator *, const SAMRAI::hier::BoxContainer *) const
+  -> INLINE: (202,28) SAMRAI::hier::BoxContainer::end(SAMRAI::hier::BoxContainer::const_iterator *, const SAMRAI::hier::BoxContainer *) const
+  -> INLINE: (202,35) SAMRAI::hier::BoxContainer::BoxContainerConstIterator::operator++(SAMRAI::hier::BoxContainer::BoxContainerConstIterator *)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(203,13) std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type>::operator++(std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(205,13) std::_List_const_iterator<SAMRAI::hier::Box>::operator++(std::_List_const_iterator<SAMRAI::hier::Box> *)
+  -> INLINE: (203,41) SAMRAI::hier::BoxContainer::BoxContainerConstIterator::operator*(const SAMRAI::hier::BoxContainer::BoxContainerConstIterator *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(160,30) std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type>::operator*(const std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(160,44) std::_List_const_iterator<SAMRAI::hier::Box>::operator*(const std::_List_const_iterator<SAMRAI::hier::Box> *) const
+  -> INDIRECT- (VIRTUAL): (203,45)  EXPR_CONV.SI64.P64(*((SI64*) (this_56211_V$358.0.84->__vptr_V$fb + EXPR_CONV.SI32.I64(4(SI32)) * 8(I64))))
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/xfer/RefinePatchStrategy.h(202,14)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/libraries/SAMRAI/include/SAMRAI/xfer/RefinePatchStrategy.h(199,4):remark #34051: REGISTER ALLOCATION : [_ZN6SAMRAI4xfer19RefinePatchStrategy21preprocessRefineBoxesERNS_4hier5PatchERKS3_RKNS2_12BoxContainerERKNS2_9IntVectorE] /home/akula/libraries/SAMRAI/include/SAMRAI/xfer/RefinePatchStrategy.h:199
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   12[ rax rdx rcx rbx rbp rsi rdi r8 r12-r15]
+        
+    Routine temporaries
+        Total         :      67
+            Global    :      17
+            Local     :      50
+        Regenerable   :      13
+        Spilled       :       6
+        
+    Routine stack
+        Variables     :      56 bytes*
+            Reads     :      17 [4.14e+01 ~ 18.9%]
+            Writes    :       3 [5.49e+00 ~ 2.5%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::xfer::RefinePatchStrategy::postprocessRefineBoxes(SAMRAI::xfer::RefinePatchStrategy *, SAMRAI::hier::Patch &, const SAMRAI::hier::Patch &, const SAMRAI::hier::BoxContainer &, const SAMRAI::hier::IntVector &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (SAMRAI::xfer::RefinePatchStrategy::postprocessRefineBoxes(SAMRAI::xfer::RefinePatchStrategy *, SAMRAI::hier::Patch &, const SAMRAI::hier::Patch &, const SAMRAI::hier::BoxContainer &, const SAMRAI::hier::IntVector &)) [118] /home/akula/libraries/SAMRAI/include/SAMRAI/xfer/RefinePatchStrategy.h(231,4)
+  -> INLINE: (233,62) SAMRAI::hier::BoxContainer::begin(SAMRAI::hier::BoxContainer::const_iterator *, const SAMRAI::hier::BoxContainer *) const
+  -> INLINE: (234,14) SAMRAI::hier::BoxContainer::BoxContainerConstIterator::operator!=(const SAMRAI::hier::BoxContainer::BoxContainerConstIterator *, const SAMRAI::hier::BoxContainer::BoxContainerConstIterator &) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(272,40) std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type>::operator!=(const std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type> *, const std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type>::_Self &) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(273,29) std::_List_const_iterator<SAMRAI::hier::Box>::operator!=(const std::_List_const_iterator<SAMRAI::hier::Box> *, const std::_List_const_iterator<SAMRAI::hier::Box>::_Self &) const
+  -> INLINE: (234,14) SAMRAI::hier::BoxContainer::BoxContainerConstIterator::operator!=(const SAMRAI::hier::BoxContainer::BoxContainerConstIterator *, const SAMRAI::hier::BoxContainer::BoxContainerConstIterator &) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(272,40) std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type>::operator!=(const std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type> *, const std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type>::_Self &) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(273,29) std::_List_const_iterator<SAMRAI::hier::Box>::operator!=(const std::_List_const_iterator<SAMRAI::hier::Box> *, const std::_List_const_iterator<SAMRAI::hier::Box>::_Self &) const
+  -> INLINE: (234,28) SAMRAI::hier::BoxContainer::end(SAMRAI::hier::BoxContainer::const_iterator *, const SAMRAI::hier::BoxContainer *) const
+  -> INLINE: (234,28) SAMRAI::hier::BoxContainer::end(SAMRAI::hier::BoxContainer::const_iterator *, const SAMRAI::hier::BoxContainer *) const
+  -> INLINE: (234,35) SAMRAI::hier::BoxContainer::BoxContainerConstIterator::operator++(SAMRAI::hier::BoxContainer::BoxContainerConstIterator *)
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(203,13) std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type>::operator++(std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(205,13) std::_List_const_iterator<SAMRAI::hier::Box>::operator++(std::_List_const_iterator<SAMRAI::hier::Box> *)
+  -> INLINE: (235,42) SAMRAI::hier::BoxContainer::BoxContainerConstIterator::operator*(const SAMRAI::hier::BoxContainer::BoxContainerConstIterator *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(160,30) std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type>::operator*(const std::_Rb_tree_const_iterator<std::_Rb_tree<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_type, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type, std::_Identity<std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::value_type>, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::key_compare, std::set<SAMRAI::hier::Box *, SAMRAI::hier::Box::id_less, std::allocator<SAMRAI::hier::Box *>>::_Key_alloc_type>::value_type> *) const
+    -> INLINE: /home/akula/libraries/SAMRAI/include/SAMRAI/hier/BoxContainer.h:(160,44) std::_List_const_iterator<SAMRAI::hier::Box>::operator*(const std::_List_const_iterator<SAMRAI::hier::Box> *) const
+  -> INDIRECT- (VIRTUAL): (235,46)  EXPR_CONV.SI64.P64(*((SI64*) (this_56212_V$360.0.85->__vptr_V$fb + EXPR_CONV.SI32.I64(5(SI32)) * 8(I64))))
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at /home/akula/libraries/SAMRAI/include/SAMRAI/xfer/RefinePatchStrategy.h(234,14)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/libraries/SAMRAI/include/SAMRAI/xfer/RefinePatchStrategy.h(231,4):remark #34051: REGISTER ALLOCATION : [_ZN6SAMRAI4xfer19RefinePatchStrategy22postprocessRefineBoxesERNS_4hier5PatchERKS3_RKNS2_12BoxContainerERKNS2_9IntVectorE] /home/akula/libraries/SAMRAI/include/SAMRAI/xfer/RefinePatchStrategy.h:231
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   12[ rax rdx rcx rbx rbp rsi rdi r8 r12-r15]
+        
+    Routine temporaries
+        Total         :      67
+            Global    :      17
+            Local     :      50
+        Regenerable   :      13
+        Spilled       :       6
+        
+    Routine stack
+        Variables     :      56 bytes*
+            Reads     :      17 [4.14e+01 ~ 18.9%]
+            Writes    :       3 [5.49e+00 ~ 2.5%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::xfer::RefinePatchStrategy::preprocessRefineLevel(SAMRAI::xfer::RefinePatchStrategy *, SAMRAI::hier::PatchLevel &, const SAMRAI::hier::PatchLevel &, const SAMRAI::hier::Connector &, const SAMRAI::hier::Connector &, const std::vector<std::vector<std::shared_ptr<SAMRAI::hier::BoxOverlap>, std::allocator<std::shared_ptr<SAMRAI::hier::BoxOverlap>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::hier::BoxOverlap>, std::allocator<std::shared_ptr<SAMRAI::hier::BoxOverlap>>>>> &, const SAMRAI::xfer::RefineClasses::Data **)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (SAMRAI::xfer::RefinePatchStrategy::preprocessRefineLevel(SAMRAI::xfer::RefinePatchStrategy *, SAMRAI::hier::PatchLevel &, const SAMRAI::hier::PatchLevel &, const SAMRAI::hier::Connector &, const SAMRAI::hier::Connector &, const std::vector<std::vector<std::shared_ptr<SAMRAI::hier::BoxOverlap>, std::allocator<std::shared_ptr<SAMRAI::hier::BoxOverlap>>>, std::allocator<std::vector<std::shared_ptr<SAMRAI::hier::BoxOverlap>, std::allocator<std::shared_ptr<SAMRAI::hier::BoxOverlap>>>>> &, const SAMRAI::xfer::RefineClasses::Data **)) [119] /home/akula/libraries/SAMRAI/include/SAMRAI/xfer/RefinePatchStrategy.h(261,49)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/libraries/SAMRAI/include/SAMRAI/xfer/RefinePatchStrategy.h(261,49):remark #34051: REGISTER ALLOCATION : [_ZN6SAMRAI4xfer19RefinePatchStrategy21preprocessRefineLevelERNS_4hier10PatchLevelERKS3_RKNS2_9ConnectorES9_RKSt6vectorISA_ISt10shared_ptrINS2_10BoxOverlapEESaISD_EESaISF_EEPPKNS0_13RefineClasses4DataE] /home/akula/libraries/SAMRAI/include/SAMRAI/xfer/RefinePatchStrategy.h:261
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rdx rcx rsi rdi r8-r9]
+        
+    Routine temporaries
+        Total         :      12
+            Global    :       0
+            Local     :      12
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: SAMRAI::xfer::RefinePatchStrategy::postprocessRefineLevel(SAMRAI::xfer::RefinePatchStrategy *, SAMRAI::hier::PatchLevel &, const SAMRAI::hier::PatchLevel &, const SAMRAI::hier::Connector &, const SAMRAI::hier::Connector &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (SAMRAI::xfer::RefinePatchStrategy::postprocessRefineLevel(SAMRAI::xfer::RefinePatchStrategy *, SAMRAI::hier::PatchLevel &, const SAMRAI::hier::PatchLevel &, const SAMRAI::hier::Connector &, const SAMRAI::hier::Connector &)) [120] /home/akula/libraries/SAMRAI/include/SAMRAI/xfer/RefinePatchStrategy.h(288,50)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/libraries/SAMRAI/include/SAMRAI/xfer/RefinePatchStrategy.h(288,50):remark #34051: REGISTER ALLOCATION : [_ZN6SAMRAI4xfer19RefinePatchStrategy22postprocessRefineLevelERNS_4hier10PatchLevelERKS3_RKNS2_9ConnectorES9_] /home/akula/libraries/SAMRAI/include/SAMRAI/xfer/RefinePatchStrategy.h:288
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    5[ rdx rcx rsi rdi r8]
+        
+    Routine temporaries
+        Total         :      11
+            Global    :       0
+            Local     :      11
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: __sti__$E()
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (__sti__$E()) [135] <compiler generated>
+
+
+    Report from: Code generation optimizations [cg]
+
+<compiler generated>:remark #34051: REGISTER ALLOCATION : [__sti__$E] (null):0
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       7
+            Local     :       6
+        Regenerable   :       7
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: RungeKuttaPatchStrategy::tagCellsOnPatchRichardsonExtrapolation(RungeKuttaPatchStrategy *, SAMRAI::hier::Patch &, int, const std::shared_ptr<SAMRAI::hier::VariableContext> &, const std::shared_ptr<SAMRAI::hier::VariableContext> &, double, double, int, bool, int, bool, bool, bool, bool, bool, bool)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (RungeKuttaPatchStrategy::tagCellsOnPatchRichardsonExtrapolation(RungeKuttaPatchStrategy *, SAMRAI::hier::Patch &, int, const std::shared_ptr<SAMRAI::hier::VariableContext> &, const std::shared_ptr<SAMRAI::hier::VariableContext> &, double, double, int, bool, int, bool, bool, bool, bool, bool, bool)) [136] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(456,1)
+  -> INLINE: (472,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (472,5) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (472,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (472,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (472,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (472,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (472,5) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (472,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (472,5) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (472,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (472,5) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (472,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (472,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (472,5) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> INLINE: (472,5) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp(456,1):remark #34051: REGISTER ALLOCATION : [_ZN23RungeKuttaPatchStrategy38tagCellsOnPatchRichardsonExtrapolationERN6SAMRAI4hier5PatchEiRKSt10shared_ptrINS1_15VariableContextEES8_ddibibbbbbb] /home/akula/HAMeRS_IB/HAMeRS/src/algs/patch_strategy/RungeKuttaPatchStrategy.cpp:456
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   15[ rax rdx rcx rbx rbp rsi rdi r8-r9 r12-r15 zmm0-zmm1]
+        
+    Routine temporaries
+        Total         :     305
+            Global    :      74
+            Local     :     231
+        Regenerable   :     121
+        Spilled       :       6
+        
+    Routine stack
+        Variables     :     421 bytes*
+            Reads     :      24 [6.84e+00 ~ 5.4%]
+            Writes    :      51 [2.33e+01 ~ 18.2%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================

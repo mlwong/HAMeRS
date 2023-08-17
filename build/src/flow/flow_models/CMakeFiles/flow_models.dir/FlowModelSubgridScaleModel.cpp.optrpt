@@ -1,0 +1,968 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINING OPTION VALUES:
+  -inline-factor: 100
+  -inline-min-size: 30
+  -inline-max-size: 230
+  -inline-max-total-size: 2000
+  -inline-max-per-routine: 10000
+  -inline-max-per-compile: 500000
+
+
+Begin optimization report for: FlowModelSubgridScaleModel::FlowModelSubgridScaleModel(FlowModelSubgridScaleModel *, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const int &, const std::shared_ptr<SAMRAI::tbox::Database> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelSubgridScaleModel::FlowModelSubgridScaleModel(FlowModelSubgridScaleModel *, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const int &, const std::shared_ptr<SAMRAI::tbox::Database> &)) [2] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp(15,1)
+  -> INLINE: (10,23) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (12,25) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+  -> INLINE: (12,25) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (16,17) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (16,17) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (17,31) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (17,43) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (17,43) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (17,43) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INDIRECT- (VIRTUAL): (17,43)  EXPR_CONV.SI64.P64(*((SI64*) (__$U18_V$2d7.0.112->__vptr_V$2de + EXPR_CONV.SI32.I64(5(SI32)) * 8(I64))))
+  -> INLINE: (17,43) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (17,43) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> DELETED: (19,33) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (19,33) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (19,33) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (19,33) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::operator=(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *, std::basic_string<char, std::char_traits<char>, std::allocator<char>> &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (19,57) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (19,69) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (19,69) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (19,69) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INDIRECT- (VIRTUAL): (19,69)  EXPR_CONV.SI64.P64(*((SI64*) (__$U1d_V$2dd.0.112->__vptr_V$2de + EXPR_CONV.SI32.I64(73(SI32)) * 8(I64))))
+  -> INLINE: (19,69) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (21,36) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+  -> DELETED: (21,48) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (21,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (21,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (21,48) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INDIRECT- (VIRTUAL): (21,48)  EXPR_CONV.SI64.P64(*((SI64*) (__$U20_V$2e3.0.112->__vptr_V$2de + EXPR_CONV.SI32.I64(5(SI32)) * 8(I64))))
+  -> INLINE: (21,48) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (23,33) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (23,33) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (23,33) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (23,33) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::operator=(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *, std::basic_string<char, std::char_traits<char>, std::allocator<char>> &&)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (23,57) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (23,69) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (23,69) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (23,69) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INDIRECT- (VIRTUAL): (23,69)  EXPR_CONV.SI64.P64(*((SI64*) (__$U25_V$2e8.0.112->__vptr_V$2de + EXPR_CONV.SI32.I64(73(SI32)) * 8(I64))))
+  -> INLINE: (23,69) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (27,9) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (27,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (27,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (27,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (27,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (27,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (27,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (27,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (27,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (27,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (27,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (27,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (27,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (27,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (27,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (33,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (33,33) std::operator==<char, std::char_traits<char>, std::allocator<char>>(const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &, const char *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (39,9) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (39,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (39,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (39,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (39,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (39,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (39,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (39,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (39,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (39,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (39,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (39,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> (39,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (39,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (39,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (39,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (39,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp(15,1):remark #34051: REGISTER ALLOCATION : [_ZN26FlowModelSubgridScaleModelC1ERKSsRKN6SAMRAI4tbox9DimensionERKSt10shared_ptrINS2_4geom21CartesianGridGeometryEERKiSE_RKS7_INS3_8DatabaseEE] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp:15
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   13[ rax rdx rcx rbx rbp rsi rdi r8-r9 r12-r15]
+        
+    Routine temporaries
+        Total         :     862
+            Global    :     236
+            Local     :     626
+        Regenerable   :     326
+        Spilled       :      12
+        
+    Routine stack
+        Variables     :     901 bytes*
+            Reads     :      57 [1.34e+01 ~ 5.1%]
+            Writes    :     115 [3.46e+01 ~ 13.0%]
+        Spills        :      48 bytes*
+            Reads     :       6 [2.58e-01 ~ 0.1%]
+            Writes    :       6 [2.58e-01 ~ 0.1%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::char_traits<char>::length(const std::char_traits<char>::char_type *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(259,7):remark #34051: REGISTER ALLOCATION : [_ZNSt11char_traitsIcE6lengthEPKc] /usr/include/c++/4.8.5/bits/char_traits.h:259
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rax rdx rdi]
+        
+    Routine temporaries
+        Total         :      12
+            Global    :       7
+            Local     :       5
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: __gnu_cxx::__exchange_and_add_dispatch(_Atomic_word *, int)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/ext/atomicity.h(79,3):remark #34051: REGISTER ALLOCATION : [_ZN17_INTERNAL22cd7e7d9__gnu_cxx27__exchange_and_add_dispatchEPii] /usr/include/c++/4.8.5/ext/atomicity.h:79
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    4[ rax rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      16
+            Global    :       8
+            Local     :       8
+        Regenerable   :       2
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::basic_stringbuf<char, std::char_traits<char>, std::allocator<char>>::~basic_stringbuf(std::basic_stringbuf<char, std::char_traits<char>, std::allocator<char>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/iosfwd(93,11):remark #34051: REGISTER ALLOCATION : [_ZNSt15basic_stringbufIcSt11char_traitsIcESaIcEED1Ev] /usr/include/c++/4.8.5/iosfwd:93
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rbp rsi rdi]
+        
+    Routine temporaries
+        Total         :      21
+            Global    :      11
+            Local     :      10
+        Regenerable   :       5
+        Spilled       :       1
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/shared_ptr.h(93,11):remark #34051: REGISTER ALLOCATION : [_ZNSt10shared_ptrIN6SAMRAI4geom21CartesianGridGeometryEED1Ev] /usr/include/c++/4.8.5/bits/shared_ptr.h:93
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    6[ rax rdx rcx rdi r12-r13]
+        
+    Routine temporaries
+        Total         :      24
+            Global    :      12
+            Local     :      12
+        Regenerable   :       3
+        Spilled       :       2
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelSubgridScaleModel::FlowModelSubgridScaleModel(FlowModelSubgridScaleModel *const, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const int &, const std::shared_ptr<SAMRAI::tbox::Database> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelSubgridScaleModel::FlowModelSubgridScaleModel(FlowModelSubgridScaleModel *const, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const int &, const std::shared_ptr<SAMRAI::tbox::Database> &)) [17] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp(3,29)
+  -> INLINE: (3,29) FlowModelSubgridScaleModel::FlowModelSubgridScaleModel(FlowModelSubgridScaleModel *, const std::string &, const SAMRAI::tbox::Dimension &, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &, const int &, const int &, const std::shared_ptr<SAMRAI::tbox::Database> &)
+    -> INLINE: (10,23) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (12,25) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *, const std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> &)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> (12,25) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+    -> INLINE: (16,17) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (16,17) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (17,31) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+    -> DELETED: (17,43) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (17,43) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INDIRECT- (VIRTUAL): (17,43)  EXPR_CONV.SI64.P64(*((SI64*) (__$U18_V$2d7.0.112.1925->__vptr_V$2de + EXPR_CONV.SI32.I64(5(SI32)) * 8(I64))))
+    -> INLINE: (17,43) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (17,43) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (17,43) std::allocator<char>::allocator(std::allocator<char> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (19,33) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::operator=(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *, std::basic_string<char, std::char_traits<char>, std::allocator<char>> &&)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (19,33) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (19,33) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (19,33) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (19,57) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: (19,69) std::allocator<char>::allocator(std::allocator<char> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INDIRECT- (VIRTUAL): (19,69)  EXPR_CONV.SI64.P64(*((SI64*) (__$U1d_V$2dd.0.112.1925->__vptr_V$2de + EXPR_CONV.SI32.I64(73(SI32)) * 8(I64))))
+    -> DELETED: (19,69) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (19,69) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (19,69) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (21,36) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: (21,48) std::allocator<char>::allocator(std::allocator<char> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INDIRECT- (VIRTUAL): (21,48)  EXPR_CONV.SI64.P64(*((SI64*) (__$U20_V$2e3.0.112.1925->__vptr_V$2de + EXPR_CONV.SI32.I64(5(SI32)) * 8(I64))))
+    -> DELETED: (21,48) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (21,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (21,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (21,48) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (23,33) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::operator=(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *, std::basic_string<char, std::char_traits<char>, std::allocator<char>> &&)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (23,33) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (23,33) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (23,33) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (23,57) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: (23,69) std::allocator<char>::allocator(std::allocator<char> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INDIRECT- (VIRTUAL): (23,69)  EXPR_CONV.SI64.P64(*((SI64*) (__$U25_V$2e8.0.112.1925->__vptr_V$2de + EXPR_CONV.SI32.I64(73(SI32)) * 8(I64))))
+    -> DELETED: (23,69) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (23,69) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (23,69) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (27,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (27,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (27,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> (27,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+    -> (27,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+    -> (27,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+    -> (27,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+    -> INLINE: (27,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (27,9) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (27,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (27,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (27,9) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (27,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (27,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (27,9) std::allocator<char>::allocator(std::allocator<char> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (33,5) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (33,33) std::operator==<char, std::char_traits<char>, std::allocator<char>>(const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &, const char *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (39,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (39,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (39,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> (39,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+    -> (39,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+    -> (39,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+    -> (39,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+    -> (39,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+    -> (39,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+    -> INLINE: (39,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (39,9) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (39,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (39,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (39,9) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (39,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (39,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (39,9) std::allocator<char>::allocator(std::allocator<char> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp(3,29):remark #34051: REGISTER ALLOCATION : [_ZN26FlowModelSubgridScaleModelC2ERKSsRKN6SAMRAI4tbox9DimensionERKSt10shared_ptrINS2_4geom21CartesianGridGeometryEERKiSE_RKS7_INS3_8DatabaseEE] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp:3
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   13[ rax rdx rcx rbx rbp rsi rdi r8-r9 r12-r15]
+        
+    Routine temporaries
+        Total         :     862
+            Global    :     236
+            Local     :     626
+        Regenerable   :     326
+        Spilled       :      12
+        
+    Routine stack
+        Variables     :     901 bytes*
+            Reads     :      57 [1.34e+01 ~ 5.1%]
+            Writes    :     115 [3.46e+01 ~ 13.0%]
+        Spills        :      48 bytes*
+            Reads     :       6 [2.58e-01 ~ 0.1%]
+            Writes    :       6 [2.58e-01 ~ 0.1%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelSubgridScaleModel::~FlowModelSubgridScaleModel(FlowModelSubgridScaleModel *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelSubgridScaleModel::~FlowModelSubgridScaleModel(FlowModelSubgridScaleModel *)) [18] /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModelSubgridScaleModel.hpp(36,47)
+  -> INLINE: (36,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (36,48) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModelSubgridScaleModel.hpp(36,47):remark #34051: REGISTER ALLOCATION : [_ZN26FlowModelSubgridScaleModelD1Ev] /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModelSubgridScaleModel.hpp:36
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    8[ rax rdx rcx rbx rbp rsi rdi r15]
+        
+    Routine temporaries
+        Total         :      33
+            Global    :      17
+            Local     :      16
+        Regenerable   :       8
+        Spilled       :       3
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelSubgridScaleModel::~FlowModelSubgridScaleModel(FlowModelSubgridScaleModel *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelSubgridScaleModel::~FlowModelSubgridScaleModel(FlowModelSubgridScaleModel *const)) [19] /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModelSubgridScaleModel.hpp(36,17)
+  -> INLINE: (36,17) FlowModelSubgridScaleModel::~FlowModelSubgridScaleModel(FlowModelSubgridScaleModel *)
+    -> INLINE: (36,48) std::shared_ptr<SAMRAI::geom::CartesianGridGeometry>::~shared_ptr(std::shared_ptr<SAMRAI::geom::CartesianGridGeometry> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (36,48) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModelSubgridScaleModel.hpp(36,17):remark #34051: REGISTER ALLOCATION : [_ZN26FlowModelSubgridScaleModelD0Ev] /home/akula/HAMeRS_IB/HAMeRS/include/flow/flow_models/FlowModelSubgridScaleModel.hpp:36
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    8[ rax rdx rcx rbx rbp rsi rdi r12]
+        
+    Routine temporaries
+        Total         :      34
+            Global    :      17
+            Local     :      17
+        Regenerable   :       8
+        Spilled       :       3
+        
+    Routine stack
+        Variables     :       1 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelSubgridScaleModel::getDerivedVariablesToRegister(std::vector<std::string, std::allocator<std::string>> *, const FlowModelSubgridScaleModel *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelSubgridScaleModel::getDerivedVariablesToRegister(std::vector<std::string, std::allocator<std::string>> *, const FlowModelSubgridScaleModel *) const) [20] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp(52,1)
+  -> (53,30) std::vector<std::string, std::allocator<std::string>>::vector(std::vector<std::string, std::allocator<std::string>> *)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp(52,1):remark #34051: REGISTER ALLOCATION : [_ZNK26FlowModelSubgridScaleModel29getDerivedVariablesToRegisterEv] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp:52
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rsi rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       0
+            Local     :      10
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<std::string, std::allocator<std::string>>::vector(std::vector<std::string, std::allocator<std::string>> *)
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(249,17):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorISsSaISsEEC1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:249
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rax rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelSubgridScaleModel::getDerivedVariablesForInterpolationToSideData(const FlowModelSubgridScaleModel *, std::vector<std::string, std::allocator<std::string>> &, std::vector<int, std::allocator<int>> &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelSubgridScaleModel::getDerivedVariablesForInterpolationToSideData(const FlowModelSubgridScaleModel *, std::vector<std::string, std::allocator<std::string>> &, std::vector<int, std::allocator<int>> &) const) [23] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp(65,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp(65,1):remark #34051: REGISTER ALLOCATION : [_ZNK26FlowModelSubgridScaleModel45getDerivedVariablesForInterpolationToSideDataERSt6vectorISsSaISsEERS0_IiSaIiEE] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp:65
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelSubgridScaleModel::getCellDataOfVariablesForSideDerivativeForSubgridScaleViscosity(FlowModelSubgridScaleModel *, std::vector<std::string, std::allocator<std::string>> &, std::vector<int, std::allocator<int>> &, const DIRECTION::TYPE &, const DIRECTION::TYPE &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelSubgridScaleModel::getCellDataOfVariablesForSideDerivativeForSubgridScaleViscosity(FlowModelSubgridScaleModel *, std::vector<std::string, std::allocator<std::string>> &, std::vector<int, std::allocator<int>> &, const DIRECTION::TYPE &, const DIRECTION::TYPE &)) [24] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp(80,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp(80,1):remark #34051: REGISTER ALLOCATION : [_ZN26FlowModelSubgridScaleModel63getCellDataOfVariablesForSideDerivativeForSubgridScaleViscosityERSt6vectorISsSaISsEERS0_IiSaIiEERKN9DIRECTION4TYPEESA_] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp:80
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    5[ rdx rcx rsi rdi r8]
+        
+    Routine temporaries
+        Total         :      11
+            Global    :       0
+            Local     :      11
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelSubgridScaleModel::updateSideDataOfDiffusiveFluxDiffusivities(FlowModelSubgridScaleModel *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> &, const std::map<DIRECTION::TYPE, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::less<DIRECTION::TYPE>, std::allocator<std::pair<const DIRECTION::TYPE, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>> &, const DIRECTION::TYPE &, const SAMRAI::hier::Patch &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelSubgridScaleModel::updateSideDataOfDiffusiveFluxDiffusivities(FlowModelSubgridScaleModel *, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>> &, const std::map<DIRECTION::TYPE, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>, std::less<DIRECTION::TYPE>, std::allocator<std::pair<const DIRECTION::TYPE, std::vector<std::shared_ptr<SAMRAI::pdat::SideData<Real>>, std::allocator<std::shared_ptr<SAMRAI::pdat::SideData<Real>>>>>>> &, const DIRECTION::TYPE &, const SAMRAI::hier::Patch &)) [25] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp(97,1)
+
+
+    Report from: Code generation optimizations [cg]
+
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp(97,1):remark #34051: REGISTER ALLOCATION : [_ZN26FlowModelSubgridScaleModel42updateSideDataOfDiffusiveFluxDiffusivitiesERSt6vectorISt10shared_ptrIN6SAMRAI4pdat8SideDataIdEEESaIS6_EERKSt3mapIN9DIRECTION4TYPEES8_St4lessISC_ESaISt4pairIKSC_S8_EEERSG_RKNS2_4hier5PatchE] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp:97
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    5[ rdx rcx rsi rdi r8]
+        
+    Routine temporaries
+        Total         :      11
+            Global    :       0
+            Local     :      11
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelSubgridScaleModel::putToRestart(const FlowModelSubgridScaleModel *, const std::shared_ptr<SAMRAI::tbox::Database> &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelSubgridScaleModel::putToRestart(const FlowModelSubgridScaleModel *, const std::shared_ptr<SAMRAI::tbox::Database> &) const) [26] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp(111,1)
+  -> INLINE: (112,5) FlowModelSubgridScaleModel::putToRestartBase(const FlowModelSubgridScaleModel *, const std::shared_ptr<SAMRAI::tbox::Database> &) const
+    -> INLINE: (125,39) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+    -> INLINE: (125,51) std::allocator<char>::allocator(std::allocator<char> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (125,51) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (125,51) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (125,76) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (125,76) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (125,76) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (125,76) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INDIRECT- (VIRTUAL): (125,76)  EXPR_CONV.SI64.P64(*((SI64*) (__$U30_V$31f.0.119.1675->__vptr_V$2de + EXPR_CONV.SI32.I64(70(SI32)) * 8(I64))))
+    -> INLINE: (125,76) std::allocator<char>::allocator(std::allocator<char> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (125,76) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (125,76) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (129,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> (129,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+    -> INLINE: (129,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (129,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (129,9) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (129,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (129,9) std::allocator<char>::allocator(std::allocator<char> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (129,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> (129,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+    -> (129,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+    -> (129,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+    -> INLINE: (129,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> INLINE: (129,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+    -> DELETED: (129,9) std::allocator<char>::~allocator(std::allocator<char> *)
+    -> INLINE: (129,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+       {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp(111,1):remark #34051: REGISTER ALLOCATION : [_ZNK26FlowModelSubgridScaleModel12putToRestartERKSt10shared_ptrIN6SAMRAI4tbox8DatabaseEE] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp:111
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   12[ rax rdx rcx rbx rbp rsi rdi r8 r12-r15]
+        
+    Routine temporaries
+        Total         :     374
+            Global    :      97
+            Local     :     277
+        Regenerable   :     149
+        Spilled       :       6
+        
+    Routine stack
+        Variables     :     443 bytes*
+            Reads     :      29 [6.69e+00 ~ 5.2%]
+            Writes    :      54 [2.26e+01 ~ 17.4%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: FlowModelSubgridScaleModel::putToRestartBase(const FlowModelSubgridScaleModel *, const std::shared_ptr<SAMRAI::tbox::Database> &) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (FlowModelSubgridScaleModel::putToRestartBase(const FlowModelSubgridScaleModel *, const std::shared_ptr<SAMRAI::tbox::Database> &) const) [27] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp(122,1)
+  -> INLINE: (125,39) std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic>::operator->(const std::__shared_ptr<SAMRAI::tbox::Database, __gnu_cxx::_S_atomic> *) const
+  -> INLINE: (125,51) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (125,51) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (125,51) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (125,76) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (125,76) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (125,76) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INDIRECT- (VIRTUAL): (125,76)  EXPR_CONV.SI64.P64(*((SI64*) (__$U30_V$31f.0.119->__vptr_V$2de + EXPR_CONV.SI32.I64(70(SI32)) * 8(I64))))
+  -> INLINE: (125,76) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (125,76) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (125,76) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (125,76) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (129,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (129,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (129,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (129,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (129,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (129,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (129,9) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (129,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::str(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::__string_type *, const std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *) const
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (129,9) std::allocator<char>::allocator(std::allocator<char> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (129,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> DELETED: (129,9) std::allocator<char>::~allocator(std::allocator<char> *)
+  -> INLINE: (129,9) std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string(std::basic_string<char, std::char_traits<char>, std::allocator<char>> *)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> INLINE: (129,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::~basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+  -> (129,9) std::operator<<<char, std::char_traits<char>, std::allocator<char>>(std::basic_ostream<char, std::char_traits<char>> &, const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &)
+  -> INLINE: (129,9) std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>>::basic_ostringstream(std::basic_ostringstream<char, std::char_traits<char>, std::allocator<char>> *const, std::ios_base::openmode)
+     {{ Inlining of routines from system headers is omitted. Use -qopt-report=3 to view full report. }}
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/char_traits.h(271,40):remark #34026: call to memcpy implemented as a call to optimized library version
+/home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp(122,1):remark #34051: REGISTER ALLOCATION : [_ZNK26FlowModelSubgridScaleModel16putToRestartBaseERKSt10shared_ptrIN6SAMRAI4tbox8DatabaseEE] /home/akula/HAMeRS_IB/HAMeRS/src/flow/flow_models/FlowModelSubgridScaleModel.cpp:122
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :   12[ rax rdx rcx rbx rbp rsi rdi r8 r12-r15]
+        
+    Routine temporaries
+        Total         :     374
+            Global    :      97
+            Local     :     277
+        Regenerable   :     149
+        Spilled       :       6
+        
+    Routine stack
+        Variables     :     443 bytes*
+            Reads     :      29 [6.69e+00 ~ 5.2%]
+            Writes    :      54 [2.26e+01 ~ 17.4%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: __sti__$E()
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (__sti__$E()) [120] <compiler generated>
+
+
+    Report from: Code generation optimizations [cg]
+
+<compiler generated>:remark #34051: REGISTER ALLOCATION : [__sti__$E] (null):0
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      13
+            Global    :       7
+            Local     :       6
+        Regenerable   :       7
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================

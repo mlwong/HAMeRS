@@ -1,0 +1,2 @@
+/usr/bin/ar qc librefine_regions_taggers.a  CMakeFiles/refine_regions_taggers.dir/RefineRegionsTagger.cpp.o
+/usr/bin/ranlib librefine_regions_taggers.a

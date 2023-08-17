@@ -1,0 +1,2 @@
+/usr/bin/ar qc libbasic_boundary_conditions.a  CMakeFiles/basic_boundary_conditions.dir/BoundaryUtilityStrategy.cpp.o CMakeFiles/basic_boundary_conditions.dir/BasicCartesianBoundaryUtilities1.cpp.o CMakeFiles/basic_boundary_conditions.dir/BasicCartesianBoundaryUtilities2.cpp.o CMakeFiles/basic_boundary_conditions.dir/BasicCartesianBoundaryUtilities3.cpp.o
+/usr/bin/ranlib libbasic_boundary_conditions.a

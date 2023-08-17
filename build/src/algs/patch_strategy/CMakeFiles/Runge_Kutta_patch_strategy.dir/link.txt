@@ -1,0 +1,2 @@
+/usr/bin/ar qc libRunge_Kutta_patch_strategy.a  CMakeFiles/Runge_Kutta_patch_strategy.dir/RungeKuttaPatchStrategy.cpp.o
+/usr/bin/ranlib libRunge_Kutta_patch_strategy.a
