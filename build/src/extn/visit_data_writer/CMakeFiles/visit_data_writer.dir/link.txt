@@ -1,2 +1,0 @@
-/usr/bin/ar qc libvisit_data_writer.a  CMakeFiles/visit_data_writer.dir/ExtendedVisItDataWriter.cpp.o CMakeFiles/visit_data_writer.dir/fortran/appu_cpdat2buf2d.f.o CMakeFiles/visit_data_writer.dir/fortran/appu_cpdat2buf3d.f.o
-/usr/bin/ranlib libvisit_data_writer.a

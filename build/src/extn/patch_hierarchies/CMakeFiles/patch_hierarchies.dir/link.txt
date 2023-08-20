@@ -1,2 +1,0 @@
-/usr/bin/ar qc libpatch_hierarchies.a  CMakeFiles/patch_hierarchies.dir/ExtendedUncoveredBoxIterator.cpp.o CMakeFiles/patch_hierarchies.dir/ExtendedFlattenedHierarchy.cpp.o
-/usr/bin/ranlib libpatch_hierarchies.a

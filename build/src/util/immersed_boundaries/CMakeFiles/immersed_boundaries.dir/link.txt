@@ -1,2 +1,0 @@
-/usr/bin/ar qc libimmersed_boundaries.a  CMakeFiles/immersed_boundaries.dir/ImmersedBoundaries.cpp.o
-/usr/bin/ranlib libimmersed_boundaries.a

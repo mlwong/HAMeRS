@@ -9,18 +9,18 @@ path_EulerSpecialBoundaryConditions_cpp = ""
 path_EulerErrorStatistics_cpp           = ""
 
 # Navier-Stokes application.
-path_NavierStokesInitialConditions_cpp         = ""
+path_NavierStokesInitialConditions_cpp         = "/bighome/daslangil/HAMeRS/problems/Navier-Stokes/initial_conditions/UniformFlow2D.cpp"
 path_NavierStokesSpecialBoundaryConditions_cpp = ""
 path_NavierStokesErrorStatistics_cpp           = ""
 
 # Flow models.
-path_FlowModelSpecialSourceTerms_cpp                     = ""
+path_FlowModelSpecialSourceTerms_cpp                     = "/bighome/daslangil/HAMeRS/problems/Navier-Stokes/source_terms/UniformFlow2D.cpp"
 path_FlowModelStatisticsUtilitiesSingleSpecies_cpp       = ""
 path_FlowModelStatisticsUtilitiesFourEqnConservative_cpp = ""
 path_FlowModelStatisticsUtilitiesFiveEqnAllaire_cpp      = ""
 
 # Immersed boundaries.
-path_ImmersedBoundaries_cpp = ""
+path_ImmersedBoundaries_cpp = "/bighome/daslangil/HAMeRS/problems/immersed_boundaries/Cylinder2D.cpp"
 
 
 

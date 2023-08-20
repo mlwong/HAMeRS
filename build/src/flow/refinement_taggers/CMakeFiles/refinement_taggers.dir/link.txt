@@ -1,2 +1,0 @@
-/usr/bin/ar qc librefinement_taggers.a  CMakeFiles/refinement_taggers.dir/ImmersedBoundaryTagger.cpp.o CMakeFiles/refinement_taggers.dir/ValueTagger.cpp.o CMakeFiles/refinement_taggers.dir/GradientTagger.cpp.o CMakeFiles/refinement_taggers.dir/MultiresolutionTagger.cpp.o
-/usr/bin/ranlib librefinement_taggers.a

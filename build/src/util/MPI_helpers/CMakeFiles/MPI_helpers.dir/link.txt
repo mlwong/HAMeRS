@@ -1,2 +1,0 @@
-/usr/bin/ar qc libMPI_helpers.a  CMakeFiles/MPI_helpers.dir/MPIHelper.cpp.o CMakeFiles/MPI_helpers.dir/MPIHelperGrid.cpp.o CMakeFiles/MPI_helpers.dir/MPIHelperMaxMin.cpp.o CMakeFiles/MPI_helpers.dir/MPIHelperAverage.cpp.o CMakeFiles/MPI_helpers.dir/MPIHelperCorrelation.cpp.o CMakeFiles/MPI_helpers.dir/MPIHelperCentroid.cpp.o
-/usr/bin/ranlib libMPI_helpers.a

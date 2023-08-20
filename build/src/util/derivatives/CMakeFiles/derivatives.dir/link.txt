@@ -1,2 +1,0 @@
-/usr/bin/ar qc libderivatives.a  CMakeFiles/derivatives.dir/Derivative.cpp.o CMakeFiles/derivatives.dir/DerivativeFirstOrder.cpp.o CMakeFiles/derivatives.dir/DerivativeSecondOrder.cpp.o
-/usr/bin/ranlib libderivatives.a

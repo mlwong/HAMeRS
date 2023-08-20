@@ -1,2 +1,0 @@
-/usr/bin/ar qc libEuler.a  CMakeFiles/Euler.dir/Euler.cpp.o CMakeFiles/Euler.dir/EulerBoundaryConditions.cpp.o CMakeFiles/Euler.dir/EulerInitialConditions.cpp.o CMakeFiles/Euler.dir/EulerSpecialBoundaryConditions.cpp.o CMakeFiles/Euler.dir/EulerErrorStatistics.cpp.o
-/usr/bin/ranlib libEuler.a

@@ -1,2 +1,0 @@
-/usr/bin/ar qc libNavier_Stokes.a  CMakeFiles/Navier_Stokes.dir/NavierStokes.cpp.o CMakeFiles/Navier_Stokes.dir/NavierStokesBoundaryConditions.cpp.o CMakeFiles/Navier_Stokes.dir/NavierStokesInitialConditions.cpp.o CMakeFiles/Navier_Stokes.dir/NavierStokesSpecialBoundaryConditions.cpp.o CMakeFiles/Navier_Stokes.dir/NavierStokesErrorStatistics.cpp.o
-/usr/bin/ranlib libNavier_Stokes.a
