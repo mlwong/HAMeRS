@@ -232,7 +232,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     S[3][idx_source] -= dt*xi_b*E_p;
                 }
                 // AFK 8/16/23 Bottom Sponge Forcing
-                if (x[1] <= d_special_source_box_lo[0])
+                if (x[1] <= d_special_source_box_lo[1])
                 {
                     const Real u_ref = u_inf;
                     const Real v_ref = v_inf;
@@ -244,7 +244,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     const Real rho_v_ref = rho_ref * v_ref;
                     const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
                     
-                    Real yi_b = std::pow((Real(1) - (x[1] - domain_xlo[1])/(d_special_source_box_bo[0] - domain_xlo[1])), Real(3));
+                    Real yi_b = std::pow((Real(1) - (x[1] - domain_xlo[1])/(d_special_source_box_lo[1] - domain_xlo[1])), Real(3));
                     yi_b     *= sponge_rate; // mask value needs to be improved 
                     
                     const Real rho_p   = rho[idx_cons_var]   - rho_ref;
@@ -258,7 +258,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     S[3][idx_source] -= dt*yi_b*E_p;
                 }
                 // AFK 8/16/23 Top Sponge Forcing
-                if (x[1] >= d_special_source_box_to[0])
+                if (x[1] >= d_special_source_box_hi[1])
                 {                    
                     const Real u_ref = u_inf;
                     const Real v_ref = v_inf;
@@ -270,7 +270,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     const Real rho_v_ref = rho_ref * v_ref;
                     const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
 
-                    Real yi_b      = std::pow((x[1]-d_special_source_box_to[0])/(domain_xhi[1]-d_special_source_box_to[0]), Real(3)); // mask value needs to be improved 
+                    Real yi_b      = std::pow((x[1]-d_special_source_box_hi[1])/(domain_xhi[1]-d_special_source_box_hi[1]), Real(3)); // mask value needs to be improved 
                     yi_b          *= sponge_rate;
 
                     const Real rho_p   = rho[idx_cons_var]   - rho_ref;
