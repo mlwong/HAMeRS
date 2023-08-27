@@ -1156,6 +1156,15 @@ class RungeKuttaLevelIntegrator:
             const HAMERS_SHARED_PTR<hier::VariableContext>& src_context,
             const HAMERS_SHARED_PTR<hier::VariableContext>& dst_context);
         
+        /*
+         * Copy no-fill data from source space to destination space.
+         */
+        virtual void
+        copyNoFillData(
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& src_context,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& dst_context);
+        
         /**
          * Apply the standard AMR Runge-Kutta flux synchronization process preserve conservation
          * properties in the solution between the fine level and the coarse level. The sync_time
@@ -1251,6 +1260,11 @@ class RungeKuttaLevelIntegrator:
         std::vector<std::vector<double> > d_gamma;
         
         /*
+         * Whether to use flux correction for conservative coarse-fine interface.
+         */
+        bool d_use_flux_correction;
+        
+        /*
          * Number of times of filtering before computing statistics.
          */
         int d_num_filtering_stats;
@@ -1302,6 +1316,16 @@ class RungeKuttaLevelIntegrator:
          */
         HAMERS_SHARED_PTR<xfer::RefineAlgorithm> d_bdry_fill_advance_old;
         
+        /*
+         * The "init with ghost cell immersed boundary method" is used for filling scratch data used in
+         * the initialization of the integration data when ghost cell immersed boundary method is used.
+         */
+        HAMERS_SHARED_PTR<xfer::RefineAlgorithm> d_bdry_fill_init_w_gcibm;
+        
+        /*
+         * The "intermediate" is used for filling intermediate data used in the intermediate steps of the
+         * Runge-Kutta time integration.
+         */
         std::vector<HAMERS_SHARED_PTR<xfer::RefineAlgorithm> > d_bdry_fill_intermediate;
         
         /*
@@ -1357,6 +1381,7 @@ class RungeKuttaLevelIntegrator:
         
         std::list<HAMERS_SHARED_PTR<hier::Variable> > d_all_variables;
         std::list<HAMERS_SHARED_PTR<hier::Variable> > d_time_dep_variables;
+        std::list<HAMERS_SHARED_PTR<hier::Variable> > d_no_fill_variables;
         std::list<HAMERS_SHARED_PTR<hier::Variable> > d_flux_variables;
         std::list<HAMERS_SHARED_PTR<hier::Variable> > d_fluxsum_variables;
         std::list<HAMERS_SHARED_PTR<hier::Variable> > d_source_variables;
