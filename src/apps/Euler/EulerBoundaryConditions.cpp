@@ -365,13 +365,27 @@ EulerBoundaryConditions::EulerBoundaryConditions(
         }
     }
     
+    if (boundary_conditions_db->keyExists("Special_boundary_data"))
+    {
+        d_Euler_special_boundary_conditions_db = boundary_conditions_db->getDatabase("Special_boundary_data");
+    }
+    else if (boundary_conditions_db->keyExists("d_Euler_special_boundary_conditions_db"))
+    {
+        d_Euler_special_boundary_conditions_db = boundary_conditions_db->getDatabase("d_Euler_special_boundary_conditions_db");
+    }
+    else
+    {
+        d_Euler_special_boundary_conditions_db = nullptr;
+    }
+    
     d_Euler_special_boundary_conditions.reset(new EulerSpecialBoundaryConditions(
         "d_Euler_special_boundary_conditions",
         d_project_name,
         d_dim,
         d_grid_geometry,
         d_flow_model_type,
-        d_flow_model));
+        d_flow_model,
+        d_Euler_special_boundary_conditions_db));
 }
 
 
@@ -625,6 +639,14 @@ EulerBoundaryConditions::putToRestart(
                 "d_bdry_face_conservative_var[" + tbox::Utilities::intToString(vi) + "]",
                 d_bdry_face_conservative_var[vi]);
         }
+    }
+    
+    if (d_Euler_special_boundary_conditions_db != nullptr)
+    {
+        HAMERS_SHARED_PTR<tbox::Database> restart_Euler_special_boundary_conditions_db =
+            restart_db->putDatabase("d_Euler_special_boundary_conditions_db");
+        
+        restart_Euler_special_boundary_conditions_db->copyDatabase(d_Euler_special_boundary_conditions_db);
     }
 }
 
