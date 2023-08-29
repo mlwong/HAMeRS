@@ -69,8 +69,17 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
     TBOX_ASSERT(patch_geom);
 #endif
     
+    TBOX_ASSERT(d_special_boundary_conditions_db != nullptr);
+    TBOX_ASSERT(d_special_boundary_conditions_db->keyExists("gravity"));
+    TBOX_ASSERT(d_special_boundary_conditions_db->keyExists("species_mass"));
+    
+    std::vector<double> gravity_vector = d_special_boundary_conditions_db->getDoubleVector("gravity");
+    std::vector<double> W_vector = d_special_boundary_conditions_db->getDoubleVector("species_mass"); // molecular mass of mixing fluids
+    
     if( d_project_name == "2D smooth isopycnic Rayleigh-Taylor instability")
     {
+        TBOX_ASSERT(static_cast<int>(W_vector.size()) == 2);
+        
         if (patch_geom->getTouchesRegularBoundary(0, 0) ||
             patch_geom->getTouchesRegularBoundary(0, 1))
         {
@@ -88,13 +97,13 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             double* E       = total_energy->getPointer(0);
             
             const double gamma = double(7)/double(5);
-            const double g     = 10.0; // HARD-CODED for now!
+            const double g = gravity_vector[0]; // gravity
             
             const double p_i = 100000.0; // interface pressure
             const double T_0 = 300.0; 
             
-            const double W_1 = 0.03328; // molecular mass of heavier gas
-            const double W_2 = 0.03072; // molecular mass of lighter gas
+            const double W_1 = W_vector[0]; // molecular mass of heavier gas
+            const double W_2 = W_vector[1]; // molecular mass of lighter gas
             
             const double R_u = 8.31446261815324; // universal gas constant
             const double R_1 = R_u/W_1;          // gas constant of heavier gas
@@ -165,6 +174,8 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
     }
     else if(d_project_name == "2D smooth isopycnic Rayleigh-Taylor instability 3 species")
     {
+        TBOX_ASSERT(static_cast<int>(W_vector.size()) == 3);
+        
         if (patch_geom->getTouchesRegularBoundary(0, 0) ||
             patch_geom->getTouchesRegularBoundary(0, 1))
         {
@@ -183,14 +194,14 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             double* E       = total_energy->getPointer(0);
             
             const double gamma = double(7)/double(5);
-            const double g     = 10.0; // HARD-CODED for now!
+            const double g     = gravity_vector[0]; // gravity
             
             const double p_i = 100000.0; // interface pressure
             const double T_0 = 300.0; 
             
-            const double W_1 = 0.03328; // molecular mass of heavier gas
-            const double W_2 = 0.03072; // molecular mass of lighter gas
-            const double W_3 = 0.03200; // molecular mass of lighter gas
+            const double W_1 = W_vector[0]; // molecular mass of first gas
+            const double W_2 = W_vector[1]; // molecular mass of second gas
+            const double W_3 = W_vector[2]; // molecular mass of third gas
             
             const double R_u = 8.31446261815324; // universal gas constant
             const double R_1 = R_u/W_1;          // gas constant of heavier gas
@@ -220,7 +231,7 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
                         i_lo = interior_dims[0];
                         i_hi = interior_dims[0] + ghost_width_to_fill[0];
                     }
-            
+                    
                     for (int j = -num_ghosts[1]; j < interior_dims[1] + num_ghosts[1]; j++)
                     {
                         for (int i = i_lo; i < i_hi; i++)
@@ -239,20 +250,15 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
                             const double Z_3_H = 0.5*(1.0 + erf(((x[0] - eta - shift)/delta)));
                             const double Z_1_H = 1.0 - Z_2_H - Z_3_H;
                             
-                            const double rho = rho_1*Z_1_H + rho_2*Z_2_H + rho_3*Z_3_H;                    
+                            const double rho = rho_1*Z_1_H + rho_2*Z_2_H + rho_3*Z_3_H;
                             
                             const double ksi_1 = (x[0] + shift)/delta;
                             const double ksi_2 = (x[0] - shift)/delta;
                             
-                            // const double p = p_i + (g*rho_1*x[0]) + ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
-                            //    ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
-                            //    (0.5*g*x[0]*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
-                            
-                            // ML:
                             const double p = p_i + 0.5*g*(rho_1 + rho_3)*x[0] +
-                            0.5*g*delta*(rho_2 - rho_1)*( -(shift/delta)*erf(shift/delta) + ksi_1*erf(ksi_1) + (exp(-ksi_1*ksi_1) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) ) +
-                            0.5*g*delta*(rho_3 - rho_2)*( -(shift/delta)*erf(shift/delta) + ksi_2*erf(ksi_2) + (exp(-ksi_2*ksi_2) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) );
-
+                                0.5*g*delta*(rho_2 - rho_1)*( -(shift/delta)*erf(shift/delta) + ksi_1*erf(ksi_1) + (exp(-ksi_1*ksi_1) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) ) +
+                                0.5*g*delta*(rho_3 - rho_2)*( -(shift/delta)*erf(shift/delta) + ksi_2*erf(ksi_2) + (exp(-ksi_2*ksi_2) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) );
+                            
                             rho_Y_0[idx_cell] = rho_1*Z_1_H;
                             rho_Y_1[idx_cell] = rho_2*Z_2_H;
                             rho_Y_2[idx_cell] = rho_3*Z_3_H;
@@ -271,6 +277,8 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
     }
     else if(d_project_name == "2D smooth multi-mode isopycnic Rayleigh-Taylor instability")
     {
+        TBOX_ASSERT(static_cast<int>(W_vector.size()) == 3);
+        
         if (patch_geom->getTouchesRegularBoundary(0, 0) ||
             patch_geom->getTouchesRegularBoundary(0, 1))
         {
@@ -289,20 +297,20 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             double* E       = total_energy->getPointer(0);
             
             const double gamma = double(7)/double(5);
-            const double g     = 10.0; // HARD-CODED for now!
+            const double g     = gravity_vector[0]; // gravity
             
             const double p_i = 100000.0; // interface pressure
             const double T_0 = 300.0; 
             
-            const double W_1 = 0.03328; // molecular mass of heavier gas
-            const double W_2 = 0.03200;
-            const double W_3 = 0.03078; // molecular mass of lighter gas
+            const double W_1 = W_vector[0]; // molecular mass of first gas
+            const double W_2 = W_vector[1]; // molecular mass of second gas
+            const double W_3 = W_vector[2]; // molecular mass of third gas
             
             const double R_u = 8.31446261815324; // universal gas constant
             const double R_1 = R_u/W_1;          // gas constant of heavier gas
             const double R_2 = R_u/W_2;
             const double R_3 = R_u/W_3;
-
+            
             const double rho_1 = p_i/(R_1*T_0);
             const double rho_2 = p_i/(R_2*T_0);
             const double rho_3 = p_i/(R_3*T_0);
@@ -382,15 +390,10 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
                             const double ksi_1 = (x[0] + shift)/delta;
                             const double ksi_2 = (x[0] - shift)/delta;
                             
-                            // const double p = p_i + (g*rho_1*x[0]) + ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
-                            //    ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
-                            //    (0.5*g*x[0]*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
-                            
-                            // ML:
                             const double p = p_i + 0.5*g*(rho_1 + rho_3)*x[0] +
-                            0.5*g*delta*(rho_2 - rho_1)*( -(shift/delta)*erf(shift/delta) + ksi_1*erf(ksi_1) + (exp(-ksi_1*ksi_1) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) ) +
-                            0.5*g*delta*(rho_3 - rho_2)*( -(shift/delta)*erf(shift/delta) + ksi_2*erf(ksi_2) + (exp(-ksi_2*ksi_2) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) );
-
+                                0.5*g*delta*(rho_2 - rho_1)*( -(shift/delta)*erf(shift/delta) + ksi_1*erf(ksi_1) + (exp(-ksi_1*ksi_1) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) ) +
+                                0.5*g*delta*(rho_3 - rho_2)*( -(shift/delta)*erf(shift/delta) + ksi_2*erf(ksi_2) + (exp(-ksi_2*ksi_2) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) );
+                            
                             rho_Y_0[idx_cell] = rho*Z_1_H;
                             rho_Y_1[idx_cell] = rho*Z_2_H;
                             rho_Y_2[idx_cell] = rho*Z_3_H;

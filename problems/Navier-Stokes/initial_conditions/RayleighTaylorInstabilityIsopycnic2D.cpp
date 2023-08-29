@@ -95,7 +95,6 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         double eta_0  = 0.02*lambda;      // 1% perturbation // DEBUGGING
         // const double eta_0  = 0.0*lambda;      // no perturbation
         
-        
         const double p_i = 100000.0; // interface pressure
         const double T_0 = 300.0;    // background temperature
         
@@ -104,15 +103,14 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         TBOX_ASSERT(d_initial_conditions_db->keyExists("species_mass"));
         
         std::vector<double> gravity_vector = d_initial_conditions_db->getDoubleVector("gravity");
-        const double g = gravity_vector[0]; // gravity
-        std::vector<double> W_vector = d_initial_conditions_db->getDoubleVector("species_mass"); // molecular mass of mixing fluids                
+        std::vector<double> W_vector       = d_initial_conditions_db->getDoubleVector("species_mass"); // molecular mass of mixing fluids
+        const double g   = gravity_vector[0]; // gravity
         const double W_1 = W_vector[0]; // molecular mass of heavier gas
         const double W_2 = W_vector[1]; // molecular mass of lighter gas
         
         const double R_u = 8.31446261815324; // universal gas constant
         const double R_1 = R_u/W_1;          // gas constant of heavier gas
         const double R_2 = R_u/W_2;          // gas constant of lighter gas
-        
         
         // const double rho_i = p_i/(R_u*T_0)*(W_1 + W_2)/2.0;
         
@@ -166,10 +164,10 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             const double delta = 0.01*lambda; // characteristic length of interface.
             const double shift = lambda/4.0;
             double* rho_Y_2 = partial_density->getPointer(2);
-
+            
             const double W_3 = W_vector[2]; // molecular weight of third fluid if any
             const double R_3 = R_u/W_3;          // gas constant of third gas
-        
+            
             const double rho_1 = p_i/(R_1*T_0);
             const double rho_2 = p_i/(R_2*T_0);
             const double rho_3 = p_i/(R_3*T_0);
@@ -192,26 +190,11 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     const double Z_3_H = 0.5*(1.0 + erf(((x[0] - eta - shift)/delta)));
                     const double Z_1_H = 1.0 - Z_2_H - Z_3_H;
                     
-                    const double rho = rho_1*Z_1_H + rho_2*Z_2_H + rho_3*Z_3_H;  
-                    
-                    
-                    //Gideon's Code on 04/19/2023
+                    const double rho = rho_1*Z_1_H + rho_2*Z_2_H + rho_3*Z_3_H;
                     
                     const double ksi_1 = (x[0] + shift)/delta;
                     const double ksi_2 = (x[0] - shift)/delta;
                    
-                    // const double p = p_i + (g*rho_1*x[0]) +
-                    //     ((0.5*g*delta)*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)))) +
-                    //     ((0.5*g*delta)*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI)))) +
-                    //     (0.5*g*x[0]*(rho_3 - rho_1)) + ((0.5*g*delta*(rho_3 - rho_1))*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI)));
-                    
-                    // refactored above
-                    // const double p = p_i + 0.5*g*(rho_1 + rho_3)*x[0] +
-                    //     0.5*g*delta*(rho_2 - rho_1)*((ksi_1*erf(ksi_1)) + ((exp(-pow(ksi_1,2.0)))/sqrt(M_PI))) +
-                    //     0.5*g*delta*(rho_1 - rho_2)*((ksi_2*erf(ksi_2)) + ((exp(-pow(ksi_2,2.0)))/sqrt(M_PI))) +
-                    //     0.5*g*delta*(rho_3 - rho_1)*((exp(-pow(ksi_1,2.0)))/sqrt(M_PI));
-                    
-                    // ML:
                     const double p = p_i + 0.5*g*(rho_1 + rho_3)*x[0] +
                         0.5*g*delta*(rho_2 - rho_1)*( -(shift/delta)*erf(shift/delta) + ksi_1*erf(ksi_1) + (exp(-ksi_1*ksi_1) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) ) +
                         0.5*g*delta*(rho_3 - rho_2)*( -(shift/delta)*erf(shift/delta) + ksi_2*erf(ksi_2) + (exp(-ksi_2*ksi_2) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) );
@@ -241,7 +224,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             double* rho_Y_2 = partial_density->getPointer(2);
             const double W_3 = W_vector[2]; // molecular weight of third fluid if any
             const double R_3 = R_u/W_3;          // gas constant of third gas
-
+            
             // Seed for "random" phase shifts.
             int random_seed = 0;
             if (d_initial_conditions_db->keyExists("random_seed"))
@@ -262,7 +245,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     << std::endl);
             }
             
-            double rmod[9]; // random seed
+            double rmod[9] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // random seed
             switch (random_seed)
             {
                 case 0:
@@ -496,7 +479,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         << std::endl);
                 }
             }
-
+            
             // Seed for "random" phase shifts.
             int random_seed_2 = 1;
             if (d_initial_conditions_db->keyExists("random_seed_2"))
@@ -517,7 +500,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     << std::endl);
             }
 
-            double rmod_2[9]; // random seed
+            double rmod_2[9] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // random seed
             switch (random_seed_2)
             {
                 case 0:
@@ -751,8 +734,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         << std::endl);
                 }
             }
-
-
+            
             for (int j = 0; j < patch_dims[1]; j++)
             {
                 for (int i = 0; i < patch_dims[0]; i++)
@@ -784,20 +766,15 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     const double Z_3_H = 0.5*(1.0 + erf(((x[0] - eta_2 - shift)/delta)));
                     const double Z_1_H = 1.0 - Z_2_H - Z_3_H;
                     
-                    const double rho = rho_1*Z_1_H + rho_2*Z_2_H + rho_3*Z_3_H;  
-                    
-                    
-                    //Gideon's Code on 04/19/2023
+                    const double rho = rho_1*Z_1_H + rho_2*Z_2_H + rho_3*Z_3_H;
                     
                     const double ksi_1 = (x[0] + shift)/delta;
                     const double ksi_2 = (x[0] - shift)/delta;
                     
-                    // ML:
                     const double p = p_i + 0.5*g*(rho_1 + rho_3)*x[0] +
                         0.5*g*delta*(rho_2 - rho_1)*( -(shift/delta)*erf(shift/delta) + ksi_1*erf(ksi_1) + (exp(-ksi_1*ksi_1) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) ) +
                         0.5*g*delta*(rho_3 - rho_2)*( -(shift/delta)*erf(shift/delta) + ksi_2*erf(ksi_2) + (exp(-ksi_2*ksi_2) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) );
-
-
+                    
                     rho_Y_0[idx_cell] = rho*Z_1_H;
                     rho_Y_1[idx_cell] = rho*Z_2_H;
                     rho_Y_2[idx_cell] = rho*Z_3_H;
