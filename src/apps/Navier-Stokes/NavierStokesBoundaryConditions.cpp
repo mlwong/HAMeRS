@@ -5,6 +5,8 @@
 #include "util/basic_boundary_conditions/BasicCartesianBoundaryUtilities2.hpp"
 #include "util/basic_boundary_conditions/BasicCartesianBoundaryUtilities3.hpp"
 
+#include "SAMRAI/tbox/MemoryDatabase.h"
+
 //integer constant for debugging improperly set boundary data
 #define BOGUS_BDRY_DATA (-9999)
 
@@ -376,17 +378,28 @@ NavierStokesBoundaryConditions::NavierStokesBoundaryConditions(
     d_num_ghosts_transverse_derivatives_bc = flow_model_boundary_utilities->
         getBoundaryConditionsTransverseDerivativesNumberOfGhostCells();
     
-    if (boundary_conditions_db->keyExists("Special_boundary_data"))
+    if (boundary_conditions_db != nullptr)
     {
-        d_Navier_Stokes_special_boundary_conditions_db = boundary_conditions_db->getDatabase("Special_boundary_data");
-    }
-    else if (boundary_conditions_db->keyExists("d_Navier_Stokes_special_boundary_conditions_db"))
-    {
-        d_Navier_Stokes_special_boundary_conditions_db = boundary_conditions_db->getDatabase("d_Navier_Stokes_special_boundary_conditions_db");
+        if (boundary_conditions_db->keyExists("Special_boundary_data"))
+        {
+            d_Navier_Stokes_special_boundary_conditions_db = boundary_conditions_db->
+                getDatabase("Special_boundary_data");
+        }
+        else if (boundary_conditions_db->keyExists("d_Navier_Stokes_special_boundary_conditions_db"))
+        {
+            d_Navier_Stokes_special_boundary_conditions_db = boundary_conditions_db->
+                getDatabase("d_Navier_Stokes_special_boundary_conditions_db");
+        }
+        else
+        {
+            d_Navier_Stokes_special_boundary_conditions_db =
+                HAMERS_MAKE_SHARED<tbox::MemoryDatabase>("Special_boundary_data"); // Create empty database.
+        }
     }
     else
     {
-        d_Navier_Stokes_special_boundary_conditions_db = nullptr;
+        d_Navier_Stokes_special_boundary_conditions_db =
+            HAMERS_MAKE_SHARED<tbox::MemoryDatabase>("Special_boundary_data"); // Create empty database.
     }
     
     d_Navier_Stokes_special_boundary_conditions.reset(new NavierStokesSpecialBoundaryConditions(
