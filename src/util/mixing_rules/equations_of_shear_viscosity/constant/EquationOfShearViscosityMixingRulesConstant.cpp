@@ -66,7 +66,7 @@ EquationOfShearViscosityMixingRulesConstant::EquationOfShearViscosityMixingRules
         {
             TBOX_ERROR(d_object_name
                 << ": "
-                << "Key data 'species_mu'/'d_species_mu'"
+                << "Key data 'species_nu'/'d_species_nu'"
                 << "not found in data for equation of shear viscosity mixing rules."
                 << std::endl);
         }
