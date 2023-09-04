@@ -3,7 +3,7 @@
 
 #include "util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRules.hpp"
 
-#include "util/mixing_rules/equations_of_shear_viscosity/constant/EquationOfShearViscosityPowerLaw.hpp"
+#include "util/mixing_rules/equations_of_shear_viscosity/power_law/EquationOfShearViscosityPowerLaw.hpp"
 
 class EquationOfShearViscosityMixingRulesPowerLaw: public EquationOfShearViscosityMixingRules
 {
@@ -116,6 +116,12 @@ class EquationOfShearViscosityMixingRulesPowerLaw: public EquationOfShearViscosi
          * Power for computing dynamic shear viscosities.
          */
         std::vector<Real> d_species_power;
+        
+        /*
+         * HAMERS_SHARED_PTR to EquationOfShearViscosity.
+         */
+        HAMERS_SHARED_PTR<EquationOfShearViscosity> d_equation_of_shear_viscosity;
+        
 };
 
 #endif /* EQUATION_OF_SHEAR_VISCOSITY_MIXING_RULES_POWER_LAW_HPP */

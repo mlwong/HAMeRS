@@ -1,4 +1,4 @@
-#include "util/mixing_rules/equations_of_shear_viscosity/constant/EquationOfShearViscosityMixingRulesPowerLaw.hpp"
+#include "util/mixing_rules/equations_of_shear_viscosity/power_law/EquationOfShearViscosityMixingRulesPowerLaw.hpp"
 
 EquationOfShearViscosityMixingRulesPowerLaw::EquationOfShearViscosityMixingRulesPowerLaw(
     const std::string& object_name,

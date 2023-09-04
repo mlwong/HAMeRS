@@ -375,10 +375,10 @@ EquationOfShearViscosityPowerLaw::computeShearViscosity(
             const int idx_shear_viscosity = i + offset_0_shear_viscosity;
             
             const int idx_molecular_properties = i + offset_0_molecular_properties;
-            const int idx_pressure = i + offset_0_pressure;
             const int idx_temperature = i + offset_0_temperature;
             
-            mu[idx_shear_viscosity] = mu_ref[idx_molecular_properties]*std::pow(T[idx_temperature]/T_ref, power);
+            mu[idx_shear_viscosity] = mu_ref[idx_molecular_properties]*
+                std::pow(T[idx_temperature]/T_ref[idx_molecular_properties], power[idx_molecular_properties]);
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -419,7 +419,8 @@ EquationOfShearViscosityPowerLaw::computeShearViscosity(
                 const int idx_temperature = (i + offset_0_temperature) +
                     (j + offset_1_temperature)*ghostcell_dim_0_temperature;
                 
-                mu[idx_shear_viscosity] = mu_ref[idx_molecular_properties]*std::pow(T[idx_temperature]/T_ref, power);
+                mu[idx_shear_viscosity] = mu_ref[idx_molecular_properties]*
+                    std::pow(T[idx_temperature]/T_ref[idx_molecular_properties], power[idx_molecular_properties]);
             }
         }
     }
@@ -477,7 +478,8 @@ EquationOfShearViscosityPowerLaw::computeShearViscosity(
                         (k + offset_2_temperature)*ghostcell_dim_0_temperature*
                             ghostcell_dim_1_temperature;
                     
-                    mu[idx_shear_viscosity] = mu_ref[idx_molecular_properties]*std::pow(T[idx_temperature]/T_ref, power);
+                    mu[idx_shear_viscosity] = mu_ref[idx_molecular_properties]*
+                        std::pow(T[idx_temperature]/T_ref[idx_molecular_properties], power[idx_molecular_properties]);
                 }
             }
         }
