@@ -172,6 +172,14 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         else if (d_project_name == "2D smooth Rayleigh-Taylor instability")
         {
             const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+
+            TBOX_ASSERT(d_initial_conditions_db->keyExists("x_lo"));
+            TBOX_ASSERT(d_initial_conditions_db->keyExists("x_up"));
+        
+            std::vector<double> x_lo_vector = d_initial_conditions_db->getDoubleVector("x_lo");
+            double x_domain_lo = x_lo_vector[0]; // Lower end of computational domain
+            std::vector<double> x_hi_vector = d_initial_conditions_db->getDoubleVector("x_up");
+            double x_domain_hi = x_hi_vector[0]; // Upper end of computational domain
             
             const double delta = 0.04*lambda; // characteristic length of interface.
             const double shift = 0.0; // location of interface.
@@ -182,8 +190,9 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             
             // Discretize the domain in x-direction for the approximated integral.
             
-            double x_domain_lo = -3.0*lambda; // Hard coded but read from input
-            double x_domain_hi =  1.5*lambda; // Hard coded but read from input
+        
+            //double x_domain_lo = -4.0*lambda; // Hard coded but read from input
+            //double x_domain_hi =  4.0*lambda; // Hard coded but read from input
             
             x_domain_lo -= 0.1*lambda; // enlarge the domain for domain ghost cells
             x_domain_hi += 0.1*lambda; // enlarge the domain for domain ghost cells

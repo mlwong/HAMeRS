@@ -66,7 +66,14 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(patch_geom);
 #endif
+    // Added 9/7/23
+    TBOX_ASSERT(d_special_boundary_conditions_db != nullptr);
+    TBOX_ASSERT(d_special_boundary_conditions_db->keyExists("gravity"));
+    TBOX_ASSERT(d_special_boundary_conditions_db->keyExists("species_mass"));
     
+    std::vector<double> gravity_vector = d_special_boundary_conditions_db->getDoubleVector("gravity");
+    std::vector<double> W_vector = d_special_boundary_conditions_db->getDoubleVector("species_mass"); // molecular mass of mixing fluids
+    //
     if( d_project_name == "2D discontinuous Rayleigh-Taylor instability")
     {
         if (patch_geom->getTouchesRegularBoundary(0, 0) ||
@@ -86,14 +93,17 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             double* E       = total_energy->getPointer(0);
             
             const double gamma = double(7)/double(5);
-            const double g     = 90.0; // HARD-CODED for now!
+            const double g = gravity_vector[0]; // gravity
+            //const double g     = 90.0; // HARD-CODED for now!
             
             const double p_i = 100000.0; // interface pressure
             const double T_0 = 300.0; 
             
-            const double W_1 = 0.0600; //0.033280; //0.0400; // molecular mass of heavier gas
-            const double W_2 = 0.0200; //0.030720; //0.0240; // molecular mass of lighter gas
-            
+            //const double W_1 = 0.0600; //0.033280; //0.0400; // molecular mass of heavier gas
+            //const double W_2 = 0.0200; //0.030720; //0.0240; // molecular mass of lighter gas
+            const double W_1 = W_vector[0]; // molecular mass of heavier gas
+            const double W_2 = W_vector[1]; // molecular mass of lighter gas
+
             const double R_u = 8.31446261815324; // universal gas constant
             const double R_1 = R_u/W_1;          // gas constant of heavier gas
             const double R_2 = R_u/W_2;
@@ -190,13 +200,16 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             double* E       = total_energy->getPointer(0);
             
             const double gamma = double(7)/double(5);
-            const double g     = 90.0; // HARD-CODED for now!
+            const double g     = gravity_vector[0]; // gravity
+            //const double g     = 90.0; // HARD-CODED for now!
             
             const double p_i = 100000.0; // interface pressure
             const double T_0 = 300.0; 
             
-            const double W_1 = 0.060; // molecular mass of heavier gas
-            const double W_2 = 0.020; // molecular mass of lighter gas
+            const double W_1 = W_vector[0]; // molecular mass of heavier gas
+            const double W_2 = W_vector[1]; // molecular mass of lighter gas
+            //const double W_1 = 0.060; // molecular mass of heavier gas
+            //const double W_2 = 0.020; // molecular mass of lighter gas
             
             const double R_u = 8.31446261815324; // universal gas constant
             const double R_1 = R_u/W_1;          // gas constant of heavier gas

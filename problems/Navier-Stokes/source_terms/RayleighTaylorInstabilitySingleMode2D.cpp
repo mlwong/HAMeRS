@@ -183,8 +183,8 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     }
     
     const double g   = gravity_vector[0]; // gravity
-    const double W_1 = species_mass[0]; // gravity
-    const double W_2 = species_mass[1]; // gravity
+    const double W_1 = species_mass[0]; // species mass 1
+    const double W_2 = species_mass[1]; // species mass 2
     
     
     const double R_u = 8.31446261815324; // universal gas constant
