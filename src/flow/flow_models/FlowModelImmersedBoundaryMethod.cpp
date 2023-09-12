@@ -59,7 +59,7 @@ FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod(
         }
         else if (bc_type_velocity_str == "NO_SLIP")
         {
-            d_bc_type_velocity = VELOCITY_IBC::SLIP;
+            d_bc_type_velocity = VELOCITY_IBC::NO_SLIP;
         }
         else
         {
