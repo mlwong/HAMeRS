@@ -964,7 +964,7 @@ RTIThreeLayersStatisticsUtilities::outputMixednessSpeciesOneInXDirection(
     quantity_names.push_back("MASS_FRACTIONS");
     component_indices.push_back(0);
     quantity_names.push_back("MASS_FRACTIONS");
-    component_indices.push_back(1);
+    component_indices.push_back(0);
     
     std::vector<double> Y_product_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
         quantity_names,
@@ -985,7 +985,7 @@ RTIThreeLayersStatisticsUtilities::outputMixednessSpeciesOneInXDirection(
         
         for (int i = 0; i < finest_level_dims[0]; i++)
         {
-            num += Y_product_avg_global[i];
+            num += Y_avg_global[i] - Y_product_avg_global[i];
         }
         
         for (int i = 0; i < finest_level_dims[0]; i++)
@@ -1067,7 +1067,7 @@ RTIThreeLayersStatisticsUtilities::outputMixednessSpeciesTwoInXDirection(
     std::vector<int> component_indices;
     
     quantity_names.push_back("MASS_FRACTIONS");
-    component_indices.push_back(0);
+    component_indices.push_back(1);
     quantity_names.push_back("MASS_FRACTIONS");
     component_indices.push_back(1);
     
@@ -1090,7 +1090,7 @@ RTIThreeLayersStatisticsUtilities::outputMixednessSpeciesTwoInXDirection(
         
         for (int i = 0; i < finest_level_dims[0]; i++)
         {
-            num += Y_product_avg_global[i];
+            num += Y_avg_global[i] - Y_product_avg_global[i];
         }
         
         for (int i = 0; i < finest_level_dims[0]; i++)
@@ -1172,9 +1172,9 @@ RTIThreeLayersStatisticsUtilities::outputMixednessSpeciesThreeInXDirection(
     std::vector<int> component_indices;
     
     quantity_names.push_back("MASS_FRACTIONS");
-    component_indices.push_back(0);
+    component_indices.push_back(2);
     quantity_names.push_back("MASS_FRACTIONS");
-    component_indices.push_back(1);
+    component_indices.push_back(2);
     
     std::vector<double> Y_product_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
         quantity_names,
@@ -1195,7 +1195,7 @@ RTIThreeLayersStatisticsUtilities::outputMixednessSpeciesThreeInXDirection(
         
         for (int i = 0; i < finest_level_dims[0]; i++)
         {
-            num += Y_product_avg_global[i];
+            num += Y_avg_global[i] - Y_product_avg_global[i];
         }
         
         for (int i = 0; i < finest_level_dims[0]; i++)
