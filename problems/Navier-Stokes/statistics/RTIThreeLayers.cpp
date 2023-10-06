@@ -35,107 +35,158 @@ class RTIThreeLayersStatisticsUtilities
                 d_num_ghosts_derivative(3)
         {}
         
+        /*
+         * Functions for stats calculations for 3 layers RTI.
+         */
         
         /*
-            Start new stats calculations for 3 layers RTI
-        */
-        
+         * Output minimum interface location of 1st species in x-direction to a file.
+         */
         void
         outputInterfaceMinSpeciesOneInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
-
+        
+        /*
+         * Output maximum interface location of 1st species in x-direction to a file.
+         */
         void
         outputInterfaceMaxSpeciesOneInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
-
+        
+        /*
+         * Output minimum interface location of 2nd species in x-direction to a file.
+         */
         void
         outputInterfaceMinSpeciesTwoInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
-
+        
+        /*
+         * Output maximum interface location of 2nd species in x-direction to a file.
+         */
         void
         outputInterfaceMaxSpeciesTwoInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
-
+        
+        /*
+         * Output minimum interface location of 3rd species in x-direction to a file.
+         */
         void
         outputInterfaceMinSpeciesThreeInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
-
+        
+        /*
+         * Output maximum interface location of 3rd species in x-direction to a file.
+         */
         void
         outputInterfaceMaxSpeciesThreeInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
-
+        
+        /*
+         * Output mixing width in x-direction for 1st species in the domain to a file.
+         */
         void
         outputMixingWidthSpeciesOneInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
-
+        
+        /*
+         * Output mixing width in x-direction for 2nd species in the domain to a file.
+         */
         void
         outputMixingWidthSpeciesTwoInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
-
+        
+        /*
+         * Output mixing width in x-direction for 3rd species in the domain to a file.
+         */
         void
         outputMixingWidthSpeciesThreeInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
-
+        
+        /*
+         * Output mixedness in x-direction for 1st species to a file.
+         */
         void
         outputMixednessSpeciesOneInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
+        /*
+         * Output mixedness in x-direction for 2nd species to a file.
+         */
         void
         outputMixednessSpeciesTwoInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
+        /*
+         * Output mixedness in x-direction for 3rd species to a file.
+         */
         void
         outputMixednessSpeciesThreeInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
-        
+        /*
+         * Output Reynolds normal stress component in x-direction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+         * to a file.
+         */
         void
         outputReynoldsNormalStressXWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
+        /*
+         * Output Reynolds normal stress component in y-direction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+         * to a file.
+         */
         void
         outputReynoldsNormalStressYWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
+        /*
+         * Output enstrophy integrated to a file.
+         */
         void
         outputEnstrophyIntegrated(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
+        /*
+         * Output TKE integrated with assumed homogeneity in y-direction to a file.
+         */
         void
         outputTKEIntegratedWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
+        /*
+         * Output maximum value of species 2 in the domain to a file.
+         */
         void
         outputMaxMassFractionSpeciesTwo(
             const std::string& stat_dump_filename,
@@ -207,7 +258,7 @@ class RTIThreeLayersStatisticsUtilities
 
 
 /*
- * Output minimum interface location in x-direction to a file.
+ * Output minimum interface location of 1st species in x-direction to a file.
  */
 void
 RTIThreeLayersStatisticsUtilities::outputInterfaceMinSpeciesOneInXDirection(
@@ -250,7 +301,7 @@ RTIThreeLayersStatisticsUtilities::outputInterfaceMinSpeciesOneInXDirection(
                 << std::endl);
         }
     }
-
+    
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     FlowModelMPIHelperMaxMin MPI_helper_max_min = FlowModelMPIHelperMaxMin(
@@ -280,8 +331,9 @@ RTIThreeLayersStatisticsUtilities::outputInterfaceMinSpeciesOneInXDirection(
     }
 }
 
+
 /*
- * Output maximum interface location in x-direction to a file.
+ * Output maximum interface location of 1st species in x-direction to a file.
  */
 void
 RTIThreeLayersStatisticsUtilities::outputInterfaceMaxSpeciesOneInXDirection(
@@ -324,7 +376,7 @@ RTIThreeLayersStatisticsUtilities::outputInterfaceMaxSpeciesOneInXDirection(
                 << std::endl);
         }
     }
-
+    
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     FlowModelMPIHelperMaxMin MPI_helper_max_min = FlowModelMPIHelperMaxMin(
@@ -354,8 +406,10 @@ RTIThreeLayersStatisticsUtilities::outputInterfaceMaxSpeciesOneInXDirection(
     }
 }
 
-//Second Species
 
+/*
+ * Output minimum interface location of 2nd species in x-direction to a file.
+ */
 void
 RTIThreeLayersStatisticsUtilities::outputInterfaceMinSpeciesTwoInXDirection(
     const std::string& stat_dump_filename,
@@ -397,7 +451,7 @@ RTIThreeLayersStatisticsUtilities::outputInterfaceMinSpeciesTwoInXDirection(
                 << std::endl);
         }
     }
-
+    
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     FlowModelMPIHelperMaxMin MPI_helper_max_min = FlowModelMPIHelperMaxMin(
@@ -427,6 +481,10 @@ RTIThreeLayersStatisticsUtilities::outputInterfaceMinSpeciesTwoInXDirection(
     }
 }
 
+
+/*
+ * Output maximum interface location of 2nd species in x-direction to a file.
+ */
 void
 RTIThreeLayersStatisticsUtilities::outputInterfaceMaxSpeciesTwoInXDirection(
     const std::string& stat_dump_filename,
@@ -468,7 +526,7 @@ RTIThreeLayersStatisticsUtilities::outputInterfaceMaxSpeciesTwoInXDirection(
                 << std::endl);
         }
     }
-
+    
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     FlowModelMPIHelperMaxMin MPI_helper_max_min = FlowModelMPIHelperMaxMin(
@@ -498,8 +556,10 @@ RTIThreeLayersStatisticsUtilities::outputInterfaceMaxSpeciesTwoInXDirection(
     }
 }
 
-//
 
+/*
+ * Output minimum interface location of 3rd species in x-direction to a file.
+ */
 void
 RTIThreeLayersStatisticsUtilities::outputInterfaceMinSpeciesThreeInXDirection(
     const std::string& stat_dump_filename,
@@ -541,7 +601,7 @@ RTIThreeLayersStatisticsUtilities::outputInterfaceMinSpeciesThreeInXDirection(
                 << std::endl);
         }
     }
-
+    
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     FlowModelMPIHelperMaxMin MPI_helper_max_min = FlowModelMPIHelperMaxMin(
@@ -571,6 +631,10 @@ RTIThreeLayersStatisticsUtilities::outputInterfaceMinSpeciesThreeInXDirection(
     }
 }
 
+
+/*
+ * Output maximum interface location of 3rd species in x-direction to a file.
+ */
 void
 RTIThreeLayersStatisticsUtilities::outputInterfaceMaxSpeciesThreeInXDirection(
     const std::string& stat_dump_filename,
@@ -612,7 +676,7 @@ RTIThreeLayersStatisticsUtilities::outputInterfaceMaxSpeciesThreeInXDirection(
                 << std::endl);
         }
     }
-
+    
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     FlowModelMPIHelperMaxMin MPI_helper_max_min = FlowModelMPIHelperMaxMin(
@@ -642,8 +706,9 @@ RTIThreeLayersStatisticsUtilities::outputInterfaceMaxSpeciesThreeInXDirection(
     }
 }
 
+
 /*
- * Output mixing width in X direction for species one in the domain to a file.
+ * Output mixing width in x-direction for 1st species in the domain to a file.
  */
 void
 RTIThreeLayersStatisticsUtilities::outputMixingWidthSpeciesOneInXDirection(
@@ -686,7 +751,7 @@ RTIThreeLayersStatisticsUtilities::outputMixingWidthSpeciesOneInXDirection(
                 << std::endl);
         }
     }
-
+    
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
@@ -727,8 +792,9 @@ RTIThreeLayersStatisticsUtilities::outputMixingWidthSpeciesOneInXDirection(
     }
 }
 
+
 /*
- * Output mixing width in X direction for species two in the domain to a file.
+ * Output mixing width in x-direction for 2nd species in the domain to a file.
  */
 void
 RTIThreeLayersStatisticsUtilities::outputMixingWidthSpeciesTwoInXDirection(
@@ -771,7 +837,7 @@ RTIThreeLayersStatisticsUtilities::outputMixingWidthSpeciesTwoInXDirection(
                 << std::endl);
         }
     }
-
+    
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
@@ -812,8 +878,9 @@ RTIThreeLayersStatisticsUtilities::outputMixingWidthSpeciesTwoInXDirection(
     }
 }
 
+
 /*
- * Output mixing width in X direction for species three in the domain to a file.
+ * Output mixing width in x-direction for 3rd species in the domain to a file.
  */
 void
 RTIThreeLayersStatisticsUtilities::outputMixingWidthSpeciesThreeInXDirection(
@@ -856,7 +923,7 @@ RTIThreeLayersStatisticsUtilities::outputMixingWidthSpeciesThreeInXDirection(
                 << std::endl);
         }
     }
-
+    
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
@@ -897,8 +964,9 @@ RTIThreeLayersStatisticsUtilities::outputMixingWidthSpeciesThreeInXDirection(
     }
 }
 
+
 /*
- * Output mixedness in x-direction for species one to a file.
+ * Output mixedness in x-direction for 1st species to a file.
  */
 void
 RTIThreeLayersStatisticsUtilities::outputMixednessSpeciesOneInXDirection(
@@ -1002,8 +1070,9 @@ RTIThreeLayersStatisticsUtilities::outputMixednessSpeciesOneInXDirection(
     }
 }
 
+
 /*
- * Output mixedness in x-direction for species two to a file.
+ * Output mixedness in x-direction for 2nd species to a file.
  */
 void
 RTIThreeLayersStatisticsUtilities::outputMixednessSpeciesTwoInXDirection(
@@ -1107,8 +1176,9 @@ RTIThreeLayersStatisticsUtilities::outputMixednessSpeciesTwoInXDirection(
     }
 }
 
+
 /*
- * Output mixedness in x-direction for species three to a file.
+ * Output mixedness in x-direction for 3rd species to a file.
  */
 void
 RTIThreeLayersStatisticsUtilities::outputMixednessSpeciesThreeInXDirection(
@@ -1211,6 +1281,7 @@ RTIThreeLayersStatisticsUtilities::outputMixednessSpeciesThreeInXDirection(
         f_out.close();
     }
 }
+
 
 /*
  * Output Reynolds normal stress component in x-direction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
@@ -1364,6 +1435,7 @@ RTIThreeLayersStatisticsUtilities::outputReynoldsNormalStressXWithInhomogeneousX
     }
 }
 
+
 /*
  * Output Reynolds normal stress component in y-direction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
  * to a file.
@@ -1515,6 +1587,7 @@ RTIThreeLayersStatisticsUtilities::outputReynoldsNormalStressYWithInhomogeneousX
         f_out.close();
     }
 }
+
 
 /*
  * Output enstrophy integrated to a file.
@@ -1963,6 +2036,7 @@ RTIThreeLayersStatisticsUtilities::outputEnstrophyIntegrated(
     }
 }
 
+
 /*
  * Output TKE integrated with assumed homogeneity in y-direction to a file.
  */
@@ -2148,6 +2222,7 @@ RTIThreeLayersStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirectio
     }
 }
 
+
 /*
  * Output maximum value of species 2 in the domain to a file.
  */
@@ -2192,7 +2267,7 @@ RTIThreeLayersStatisticsUtilities::outputMaxMassFractionSpeciesTwo(
                 << std::endl);
         }
     }
-
+    
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     FlowModelMPIHelperMaxMin MPI_helper_max_min = FlowModelMPIHelperMaxMin(
@@ -2219,6 +2294,7 @@ RTIThreeLayersStatisticsUtilities::outputMaxMassFractionSpeciesTwo(
         f_out.close();
     }
 }
+
 
 /*
  * Output names of statistical quantities to output to a file.
@@ -2332,7 +2408,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
         f_out.close();
     }
 }
-
 
 
 /*
