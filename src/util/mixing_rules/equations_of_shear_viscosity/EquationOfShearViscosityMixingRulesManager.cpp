@@ -22,6 +22,17 @@ EquationOfShearViscosityMixingRulesManager::EquationOfShearViscosityMixingRulesM
                 mixing_closure_model,
                 equation_of_shear_viscosity_mixing_rules_db));
     }
+    else if (equation_of_shear_viscosity_str == "POWER_LAW")
+    {
+        d_equation_of_shear_viscosity_type = EQN_SHEAR_VISCOSITY::POWER_LAW;
+        
+        d_equation_of_shear_viscosity_mixing_rules.reset(new EquationOfShearViscosityMixingRulesPowerLaw(
+                "d_equation_of_shear_viscosity_mixing_rules",
+                dim,
+                num_species,
+                mixing_closure_model,
+                equation_of_shear_viscosity_mixing_rules_db));
+    }
     else if (equation_of_shear_viscosity_str == "CHAPMAN_ENSKOG")
     {
         d_equation_of_shear_viscosity_type = EQN_SHEAR_VISCOSITY::CHAPMAN_ENSKOG;
@@ -40,7 +51,7 @@ EquationOfShearViscosityMixingRulesManager::EquationOfShearViscosityMixingRulesM
             << "Unknown equation_of_shear_viscosity/d_equation_of_shear_viscosity string = '"
             << equation_of_shear_viscosity_str
             << "' found in input/restart file."
-            << std::endl);        
+            << std::endl);
     }
 }
 
