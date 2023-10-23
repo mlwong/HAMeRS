@@ -166,6 +166,11 @@ class EulerBoundaryConditions:
          */
         HAMERS_SHARED_PTR<EulerSpecialBoundaryConditions> d_Euler_special_boundary_conditions;
         
+        /*
+         * Speical boundary conditions database.
+         */
+        HAMERS_SHARED_PTR<tbox::Database> d_Euler_special_boundary_conditions_db;
+        
 };
 
 #endif /* EULER_BOUNDARY_CONDITIONS_HPP */

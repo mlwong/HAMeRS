@@ -4,6 +4,8 @@ set(mixing_rules_source_files
     ./equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.cpp
     ./equations_of_shear_viscosity/constant/EquationOfShearViscosityConstant.cpp
     ./equations_of_shear_viscosity/constant/EquationOfShearViscosityMixingRulesConstant.cpp
+    ./equations_of_shear_viscosity/power_law/EquationOfShearViscosityPowerLaw.cpp
+    ./equations_of_shear_viscosity/power_law/EquationOfShearViscosityMixingRulesPowerLaw.cpp
     ./equations_of_shear_viscosity/Chapman-Enskog/EquationOfShearViscosityChapmanEnskog.cpp
     ./equations_of_shear_viscosity/Chapman-Enskog/EquationOfShearViscosityMixingRulesChapmanEnskog.cpp
     ./equations_of_bulk_viscosity/EquationOfBulkViscosityMixingRulesManager.cpp

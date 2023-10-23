@@ -61,7 +61,9 @@ ValueTagger::ValueTagger(
                   (variable_key == "PRESSURE") ||
                   (variable_key == "DILATATION") ||
                   (variable_key == "ENSTROPHY") ||
-                  (variable_key == "MASS_FRACTION") || (variable_key == "MASS_FRACTIONS")))
+                  (variable_key == "RELATIVE_KINETIC_ENERGY") ||
+                  (variable_key == "MASS_FRACTION") || (variable_key == "MASS_FRACTIONS")
+                  ))
             {
                 TBOX_ERROR(d_object_name
                     << ":"
@@ -69,6 +71,48 @@ ValueTagger::ValueTagger(
                     << variable_key
                     << "\nin input."
                     << std::endl);
+            }
+        }
+        
+        // Loop over variables chosen.
+        for (int vi = 0; vi < static_cast<int>(d_variables.size()); vi++)
+        {
+            std::string variable_key = d_variables[vi];
+            
+            if (variable_key == "RELATIVE_KINETIC_ENERGY")
+            {
+                if (value_tagger_db->keyExists("ref_velocity"))
+                {
+                    d_ref_velocity = value_tagger_db->getRealVector("ref_velocity");
+                }
+                else if (value_tagger_db->keyExists("d_ref_velocity"))
+                {
+                    d_ref_velocity = value_tagger_db->getRealVector("d_ref_velocity");
+                }
+                else
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": "
+                        << "No key 'ref_velocity'/'d_ref_velocity"
+                        << " found in database of value tagger when variable 'RELATIVE_KINETIC_ENERGY' is chosen."
+                        << std::endl);
+                }
+                
+                // Check the dimension of d_ref_velocity is correct.
+                if (static_cast<int>(d_ref_velocity.size()) != d_dim.getValue())
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": "
+                        << "The dimension of 'ref_velocity'/'d_ref_velocity' is not correct."
+                        << std::endl);
+                }
+                
+                // Compute the reference kinetic energy.
+                d_ref_kinetic_energy = double(0);
+                for (int di = 0; di < d_dim.getValue(); di++)
+                {
+                    d_ref_kinetic_energy += d_ref_velocity[di]*d_ref_velocity[di];
+                }
             }
         }
         
@@ -380,6 +424,13 @@ ValueTagger::registerValueTaggerVariables(
                 "Value tagger enstrophy",
                 1);
         }
+        else if (variable_key == "RELATIVE_KINETIC_ENERGY")
+        {
+            d_value_tagger_variable_relative_kinetic_energy = HAMERS_MAKE_SHARED<pdat::CellVariable<Real> >(
+                d_dim,
+                "Value tagger relative kinetic energy",
+                1);
+        }
         else if (variable_key == "MASS_FRACTION" || variable_key == "MASS_FRACTIONS")
         {
             const int num_species = d_flow_model->getNumberOfSpecies();
@@ -467,6 +518,17 @@ ValueTagger::registerValueTaggerVariables(
         {
             integrator->registerVariable(
                 d_value_tagger_variable_enstrophy,
+                hier::IntVector::getZero(d_dim),
+                hier::IntVector::getZero(d_dim),
+                RungeKuttaLevelIntegrator::TEMPORARY,
+                    d_grid_geometry,
+                    "NO_COARSEN",
+                    "NO_REFINE");
+        }
+        else if (variable_key == "RELATIVE_KINETIC_ENERGY")
+        {
+            integrator->registerVariable(
+                d_value_tagger_variable_relative_kinetic_energy,
                 hier::IntVector::getZero(d_dim),
                 hier::IntVector::getZero(d_dim),
                 RungeKuttaLevelIntegrator::TEMPORARY,
@@ -644,6 +706,17 @@ ValueTagger::putToRestart(
     restart_db->putInteger("d_num_ghosts_derivative", d_num_ghosts_derivative);
     
     restart_db->putStringVector("d_variables", d_variables);
+    
+    // Loop over variables chosen.
+    for (int vi = 0; vi < static_cast<int>(d_variables.size()); vi++)
+    {
+        std::string variable_key = d_variables[vi];
+        
+        if (variable_key == "RELATIVE_KINETIC_ENERGY")
+        {
+            restart_db->putRealVector("d_ref_velocity", d_ref_velocity);
+        }
+    }
     
     restart_db->putBoolVector("d_uses_global_tol_up", d_uses_global_tol_up);
     restart_db->putBoolVector("d_uses_global_tol_lo", d_uses_global_tol_lo);
@@ -860,7 +933,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             const hier::IntVector num_ghosts_dilatation = dilatation->getGhostCellWidth();
             const hier::IntVector ghostcell_dims_dilatation =
                 dilatation->getGhostBox().numberCells();
-    
+            
             // Initialize cell data for velocity derivatives.
             HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity_derivatives(
                 new pdat::CellData<Real>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
@@ -1317,6 +1390,188 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             
             d_flow_model->unregisterPatch();
         }
+        else if (variable_key == "RELATIVE_KINETIC_ENERGY")
+        {
+            /*
+             * Register the patch and velocity in the flow model and compute the corresponding cell data.
+             */
+            
+            d_flow_model->registerPatchWithDataContext(patch, data_context);
+            
+            std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+            
+            num_subghosts_of_data.insert(
+                std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+            
+            d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+            
+            d_flow_model->allocateMemoryForDerivedCellData();
+            
+            d_flow_model->computeDerivedCellData();
+            
+            // Get the cell data.
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > relative_kinetic_energy(
+                HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
+                    patch.getPatchData(d_value_tagger_variable_relative_kinetic_energy, data_context)));
+            
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity = d_flow_model->getCellData("VELOCITY");
+            
+            // Get the dimensions of box that covers the interior of patch.
+            const hier::Box interior_box = patch.getBox();
+            const hier::IntVector interior_dims = interior_box.numberCells();
+            
+            // Get the numbers of ghost cells and the dimensions of the ghost cell box.
+            const hier::IntVector num_ghosts_relative_kinetic_energy = relative_kinetic_energy->getGhostCellWidth();
+            const hier::IntVector num_ghosts_velocity = velocity->getGhostCellWidth();
+            
+            const hier::IntVector ghostcell_dims_relative_kinetic_energy =
+                relative_kinetic_energy->getGhostBox().numberCells();
+            
+            const hier::IntVector ghostcell_dims_velocity =
+                velocity->getGhostBox().numberCells();
+            
+            // Get the grid spacing.
+            const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                    patch.getPatchGeometry()));
+            
+            // Get the pointer to the cell data of relative kinetic energy.
+            Real* relative_KE = relative_kinetic_energy->getPointer(0);
+            
+            const Real d_ref_kinetic_energy_inv = Real(1)/d_ref_kinetic_energy;
+            
+            if (d_dim == tbox::Dimension(1))
+            {
+                /*
+                 * Get the number of cells in each dimension and number of ghost cells.
+                 */
+                
+                const int interior_dim_0 = interior_dims[0];
+                
+                const int num_ghosts_0_relative_kinetic_energy = num_ghosts_relative_kinetic_energy[0];
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                
+                // Get the pointer to the cell data of velocity.
+                Real* u = velocity->getPointer(0);
+                
+                const Real u_ref = d_ref_velocity[0];
+                
+                HAMERS_PRAGMA_SIMD
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_velocity = i + num_ghosts_0_velocity;
+                    const int idx_relative_kinetic_energy = i + num_ghosts_0_relative_kinetic_energy;
+                    
+                    relative_KE[idx_relative_kinetic_energy] = d_ref_kinetic_energy_inv*(u[idx_velocity] - u_ref)*(u[idx_velocity] - u_ref);
+                }
+            }
+            else if (d_dim == tbox::Dimension(2))
+            {
+                /*
+                 * Get the numbers of cells in each dimension and numbers of ghost cells.
+                 */
+                
+                const int interior_dim_0 = interior_dims[0];
+                const int interior_dim_1 = interior_dims[1];
+                
+                const int num_ghosts_0_relative_kinetic_energy = num_ghosts_relative_kinetic_energy[0];
+                const int num_ghosts_1_relative_kinetic_energy = num_ghosts_relative_kinetic_energy[1];
+                const int ghostcell_dim_0_relative_kinetic_energy = ghostcell_dims_relative_kinetic_energy[0];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                
+                // Get the pointers to the cell data of velocity.
+                Real* u = velocity->getPointer(0);
+                Real* v = velocity->getPointer(1);
+                
+                const Real u_ref = d_ref_velocity[0];
+                const Real v_ref = d_ref_velocity[1];
+                
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_velocity = (i + num_ghosts_0_velocity) +
+                            (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                        
+                        const int idx_relative_kinetic_energy = (i + num_ghosts_0_relative_kinetic_energy) +
+                            (j + num_ghosts_1_relative_kinetic_energy)*ghostcell_dim_0_relative_kinetic_energy;
+                        
+                        relative_KE[idx_relative_kinetic_energy] = d_ref_kinetic_energy_inv*
+                            ((u[idx_velocity] - u_ref)*(u[idx_velocity] - u_ref) +
+                             (v[idx_velocity] - v_ref)*(v[idx_velocity] - v_ref));
+                    }
+                }
+            }
+            else if (d_dim == tbox::Dimension(3))
+            {
+                /*
+                 * Get the numbers of cells in each dimension and numbers of ghost cells.
+                 */
+                
+                const int interior_dim_0 = interior_dims[0];
+                const int interior_dim_1 = interior_dims[1];
+                const int interior_dim_2 = interior_dims[2];
+                
+                const int num_ghosts_0_relative_kinetic_energy = num_ghosts_relative_kinetic_energy[0];
+                const int num_ghosts_1_relative_kinetic_energy = num_ghosts_relative_kinetic_energy[1];
+                const int num_ghosts_2_relative_kinetic_energy = num_ghosts_relative_kinetic_energy[2];
+                const int ghostcell_dim_0_relative_kinetic_energy = ghostcell_dims_relative_kinetic_energy[0];
+                const int ghostcell_dim_1_relative_kinetic_energy = ghostcell_dims_relative_kinetic_energy[1];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                // Get the pointers to the cell data of velocity.
+                Real* u = velocity->getPointer(0);
+                Real* v = velocity->getPointer(1);
+                Real* w = velocity->getPointer(2);
+                
+                const Real u_ref = d_ref_velocity[0];
+                const Real v_ref = d_ref_velocity[1];
+                const Real w_ref = d_ref_velocity[2];
+                
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_velocity = (i + num_ghosts_0_velocity) +
+                                (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                (k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                    ghostcell_dim_1_velocity;
+                            
+                            const int idx_relative_kinetic_energy = (i + num_ghosts_0_relative_kinetic_energy) +
+                                (j + num_ghosts_1_relative_kinetic_energy)*ghostcell_dim_0_relative_kinetic_energy +
+                                (k + num_ghosts_2_relative_kinetic_energy)*ghostcell_dim_0_relative_kinetic_energy*
+                                    ghostcell_dim_1_relative_kinetic_energy;
+                            
+                            relative_KE[idx_relative_kinetic_energy] = d_ref_kinetic_energy_inv*
+                                ((u[idx_velocity] - u_ref)*(u[idx_velocity] - u_ref) +
+                                 (v[idx_velocity] - v_ref)*(v[idx_velocity] - v_ref) +
+                                 (w[idx_velocity] - w_ref)*(w[idx_velocity] - w_ref));
+                        }
+                    }
+                }
+            }
+            
+            /*
+             * Unregister the patch and data of all registered derived cell variables in the flow model.
+             */
+            
+            d_flow_model->unregisterPatch();
+        }
         else if (variable_key == "MASS_FRACTION" || variable_key == "MASS_FRACTIONS")
         {
             /*
@@ -1466,6 +1721,22 @@ ValueTagger::getValueStatistics(
                 mpi.Allreduce(
                     &Omega_max_local,
                     &d_value_tagger_max_enstrophy,
+                    1,
+                    HAMERS_MPI_REAL,
+                    MPI_MAX);
+            }
+            else if (variable_key == "RELATIVE_KINETIC_ENERGY")
+            {
+                const int ke_id = variable_db->mapVariableAndContextToIndex(
+                    d_value_tagger_variable_relative_kinetic_energy,
+                    data_context);
+                
+                Real ke_max_local = cell_double_operator.max(ke_id);
+                d_value_tagger_max_relative_kinetic_energy = Real(0);
+                
+                mpi.Allreduce(
+                    &ke_max_local,
+                    &d_value_tagger_max_relative_kinetic_energy,
                     1,
                     HAMERS_MPI_REAL,
                     MPI_MAX);
@@ -1624,6 +1895,23 @@ ValueTagger::tagCellsOnPatch(
                 tags,
                 d_value_tagger_variable_enstrophy,
                 d_value_tagger_max_enstrophy,
+                uses_global_tol_up,
+                uses_global_tol_lo,
+                uses_local_tol_up,
+                uses_local_tol_lo,
+                global_tol_up,
+                global_tol_lo,
+                local_tol_up,
+                local_tol_lo);
+        }
+        else if (variable_key == "RELATIVE_KINETIC_ENERGY")
+        {
+            tagCellsOnPatchWithValue(
+                patch,
+                data_context,
+                tags,
+                d_value_tagger_variable_relative_kinetic_energy,
+                d_value_tagger_max_relative_kinetic_energy,
                 uses_global_tol_up,
                 uses_global_tol_lo,
                 uses_local_tol_up,

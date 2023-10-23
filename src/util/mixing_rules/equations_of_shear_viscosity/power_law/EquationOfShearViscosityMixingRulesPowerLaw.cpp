@@ -1,6 +1,6 @@
-#include "util/mixing_rules/equations_of_shear_viscosity/constant/EquationOfShearViscosityMixingRulesConstant.hpp"
+#include "util/mixing_rules/equations_of_shear_viscosity/power_law/EquationOfShearViscosityMixingRulesPowerLaw.hpp"
 
-EquationOfShearViscosityMixingRulesConstant::EquationOfShearViscosityMixingRulesConstant(
+EquationOfShearViscosityMixingRulesPowerLaw::EquationOfShearViscosityMixingRulesPowerLaw(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const int& num_species,
@@ -13,146 +13,41 @@ EquationOfShearViscosityMixingRulesConstant::EquationOfShearViscosityMixingRules
             mixing_closure_model,
             equation_of_shear_viscosity_mixing_rules_db)
 {
-    d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions = equation_of_shear_viscosity_mixing_rules_db->getBoolWithDefault(
-        "use_constant_kinematic_viscosity_and_ideal_gas_assumptions",
-        false);
-    
-    d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions = equation_of_shear_viscosity_mixing_rules_db->getBoolWithDefault(
-        "d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions",
-        d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions);
-    
     /*
-     * Get the viscosity of each species from the database.
+     * Get the reference dynamic viscosity of each species from the database.
      */
     
-    // If the constant kinematic viscosities are used.
-    if (d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions)
+    if (equation_of_shear_viscosity_mixing_rules_db->keyExists("species_mu_ref"))
     {
-        if (equation_of_shear_viscosity_mixing_rules_db->keyExists("species_nu"))
+        size_t species_mu_ref_array_size =
+            equation_of_shear_viscosity_mixing_rules_db->getArraySize("species_mu_ref");
+        if (static_cast<int>(species_mu_ref_array_size) == d_num_species)
         {
-            size_t species_nu_array_size =
-                equation_of_shear_viscosity_mixing_rules_db->getArraySize("species_nu");
-            if (static_cast<int>(species_nu_array_size) == d_num_species)
-            {
-                d_species_nu =
-                    equation_of_shear_viscosity_mixing_rules_db->getRealVector("species_nu");
-            }
-            else
-            {
-                TBOX_ERROR(d_object_name
-                    << ": "
-                    << "number of 'species_nu' entries must be equal to 'num_species'."
-                    << std::endl);
-            }
-        }
-        else if (equation_of_shear_viscosity_mixing_rules_db->keyExists("d_species_nu"))
-        {
-            size_t species_nu_array_size =
-                equation_of_shear_viscosity_mixing_rules_db->getArraySize("d_species_nu");
-            if (static_cast<int>(species_nu_array_size) == d_num_species)
-            {
-                d_species_nu =
-                    equation_of_shear_viscosity_mixing_rules_db->getRealVector("d_species_nu");
-            }
-            else
-            {
-                TBOX_ERROR(d_object_name
-                    << ": "
-                    << "number of 'd_species_nu' entries must be equal to 'd_num_species'."
-                    << std::endl);
-            }
+            d_species_mu_ref =
+                equation_of_shear_viscosity_mixing_rules_db->getRealVector("species_mu_ref");
         }
         else
         {
             TBOX_ERROR(d_object_name
                 << ": "
-                << "Key data 'species_nu'/'d_species_nu'"
-                << "not found in data for equation of shear viscosity mixing rules."
+                << "number of 'species_mu_ref' entries must be equal to 'num_species'."
                 << std::endl);
         }
     }
-    // If the constant dynamic viscosities are used.
-    else
+    else if (equation_of_shear_viscosity_mixing_rules_db->keyExists("d_species_mu_ref"))
     {
-        if (equation_of_shear_viscosity_mixing_rules_db->keyExists("species_mu"))
+        size_t species_mu_ref_array_size =
+            equation_of_shear_viscosity_mixing_rules_db->getArraySize("d_species_mu_ref");
+        if (static_cast<int>(species_mu_ref_array_size) == d_num_species)
         {
-            size_t species_mu_array_size =
-                equation_of_shear_viscosity_mixing_rules_db->getArraySize("species_mu");
-            if (static_cast<int>(species_mu_array_size) == d_num_species)
-            {
-                d_species_mu =
-                    equation_of_shear_viscosity_mixing_rules_db->getRealVector("species_mu");
-            }
-            else
-            {
-                TBOX_ERROR(d_object_name
-                    << ": "
-                    << "number of 'species_mu' entries must be equal to 'num_species'."
-                    << std::endl);
-            }
-        }
-        else if (equation_of_shear_viscosity_mixing_rules_db->keyExists("d_species_mu"))
-        {
-            size_t species_mu_array_size =
-                equation_of_shear_viscosity_mixing_rules_db->getArraySize("d_species_mu");
-            if (static_cast<int>(species_mu_array_size) == d_num_species)
-            {
-                d_species_mu =
-                    equation_of_shear_viscosity_mixing_rules_db->getRealVector("d_species_mu");
-            }
-            else
-            {
-                TBOX_ERROR(d_object_name
-                    << ": "
-                    << "number of 'd_species_mu' entries must be equal to 'd_num_species'."
-                    << std::endl);
-            }
+            d_species_mu_ref =
+                equation_of_shear_viscosity_mixing_rules_db->getRealVector("d_species_mu_ref");
         }
         else
         {
             TBOX_ERROR(d_object_name
                 << ": "
-                << "Key data 'species_mu'/'d_species_mu'"
-                << "not found in data for equation of shear viscosity mixing rules."
-                << std::endl);
-        }
-    }
-    
-    /*
-     * Get the molecular weight of each species from the database.
-     */
-    
-    if (equation_of_shear_viscosity_mixing_rules_db->keyExists("species_M"))
-    {
-        size_t species_M_array_size =
-            equation_of_shear_viscosity_mixing_rules_db->getArraySize("species_M");
-        if (static_cast<int>(species_M_array_size) == d_num_species)
-        {
-            d_species_M =
-                equation_of_shear_viscosity_mixing_rules_db->getRealVector("species_M");
-        }
-        else
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "number of 'species_M' entries must be equal to 'num_species'."
-                << std::endl);
-        }
-    }
-    else if (equation_of_shear_viscosity_mixing_rules_db->keyExists("d_species_M"))
-    {
-        size_t species_M_array_size =
-            equation_of_shear_viscosity_mixing_rules_db->getArraySize("d_species_M");
-        if (static_cast<int>(species_M_array_size) == d_num_species)
-        {
-            d_species_M =
-                equation_of_shear_viscosity_mixing_rules_db->getRealVector("d_species_M");
-        }
-        else
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "number of 'd_species_M' entries must be equal to 'num_species'."
+                << "number of 'd_species_mu_ref' entries must be equal to 'd_num_species'."
                 << std::endl);
         }
     }
@@ -160,24 +55,108 @@ EquationOfShearViscosityMixingRulesConstant::EquationOfShearViscosityMixingRules
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "Key data 'species_M'/'d_species_M'"
+            << "Key data 'species_mu_ref'/'d_species_mu_ref'"
             << "not found in data for equation of shear viscosity mixing rules."
             << std::endl);
     }
     
-    d_R_u = equation_of_shear_viscosity_mixing_rules_db->getRealWithDefault(
-        "R_u",
-        Real(8.314462618153240)); // Universal gas constant in SI units.
+    /*
+     * Get the reference temperature for dynamic shear viscosity of each species from the database.
+     */
     
-    d_R_u = equation_of_shear_viscosity_mixing_rules_db->getRealWithDefault(
-        "d_R_u",
-        d_R_u);
+    if (equation_of_shear_viscosity_mixing_rules_db->keyExists("species_T_ref"))
+    {
+        size_t species_T_ref_array_size =
+            equation_of_shear_viscosity_mixing_rules_db->getArraySize("species_T_ref");
+        if (static_cast<int>(species_T_ref_array_size) == d_num_species)
+        {
+            d_species_T_ref =
+                equation_of_shear_viscosity_mixing_rules_db->getRealVector("species_T_ref");
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "number of 'species_T_ref' entries must be equal to 'num_species'."
+                << std::endl);
+        }
+    }
+    else if (equation_of_shear_viscosity_mixing_rules_db->keyExists("d_species_T_ref"))
+    {
+        size_t species_T_ref_array_size =
+            equation_of_shear_viscosity_mixing_rules_db->getArraySize("d_species_T_ref");
+        if (static_cast<int>(species_T_ref_array_size) == d_num_species)
+        {
+            d_species_T_ref =
+                equation_of_shear_viscosity_mixing_rules_db->getRealVector("d_species_T_ref");
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "number of 'd_species_T_ref' entries must be equal to 'num_species'."
+                << std::endl);
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Key data 'species_T_ref'/'d_species_T_ref'"
+            << "not found in data for equation of shear viscosity mixing rules."
+            << std::endl);
+    }
     
-    d_equation_of_shear_viscosity.reset(new EquationOfShearViscosityConstant(
+    /*
+     * Get the power for computing dynamic shear viscosity of each species from the database.
+     */
+    
+    if (equation_of_shear_viscosity_mixing_rules_db->keyExists("species_power"))
+    {
+        size_t species_power_array_size =
+            equation_of_shear_viscosity_mixing_rules_db->getArraySize("species_power");
+        if (static_cast<int>(species_power_array_size) == d_num_species)
+        {
+            d_species_power =
+                equation_of_shear_viscosity_mixing_rules_db->getRealVector("species_power");
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "number of 'species_power' entries must be equal to 'num_species'."
+                << std::endl);
+        }
+    }
+    else if (equation_of_shear_viscosity_mixing_rules_db->keyExists("d_species_power"))
+    {
+        size_t species_power_array_size =
+            equation_of_shear_viscosity_mixing_rules_db->getArraySize("d_species_power");
+        if (static_cast<int>(species_power_array_size) == d_num_species)
+        {
+            d_species_power =
+                equation_of_shear_viscosity_mixing_rules_db->getRealVector("d_species_power");
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "number of 'd_species_power' entries must be equal to 'num_species'."
+                << std::endl);
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Key data 'species_power'/'d_species_power'"
+            << "not found in data for equation of shear viscosity mixing rules."
+            << std::endl);
+    }
+    
+    d_equation_of_shear_viscosity.reset(new EquationOfShearViscosityPowerLaw(
         "d_equation_of_shear_viscosity",
-        dim,
-        d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions,
-        d_R_u));
+        dim));
 }
 
 
@@ -185,15 +164,15 @@ EquationOfShearViscosityMixingRulesConstant::EquationOfShearViscosityMixingRules
  * Print all characteristics of the equation of shear viscosity class.
  */
 void
-EquationOfShearViscosityMixingRulesConstant::printClassData(
+EquationOfShearViscosityMixingRulesPowerLaw::printClassData(
     std::ostream& os) const
 {
-    os << "\nPrint EquationOfShearViscosityMixingRulesConstant object..."
+    os << "\nPrint EquationOfShearViscosityMixingRulesPowerLaw object..."
        << std::endl;
     
     os << std::endl;
-    os << "EquationOfShearViscosityMixingRulesConstant: this = "
-       << (EquationOfShearViscosityMixingRulesConstant *)this
+    os << "EquationOfShearViscosityMixingRulesPowerLaw: this = "
+       << (EquationOfShearViscosityMixingRulesPowerLaw *)this
        << std::endl;
     
     os << "d_object_name = "
@@ -205,42 +184,39 @@ EquationOfShearViscosityMixingRulesConstant::printClassData(
        << std::endl;
     
     /*
-     * Print the viscosity of each species.
+     * Print the reference dynamic shear viscosity of each species.
      */
     
-    // If the constant kinematic viscosities are used.
-    if (d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions)
-    {
-        os << "d_species_nu = ";
-        for (int si = 0; si < d_num_species - 1; si++)
-        {
-            os << d_species_nu[si] << ", ";
-        }
-        os << d_species_nu[d_num_species - 1];
-        os << std::endl;
-    }
-    // If the constant dynamic viscosities are used.
-    else
-    {
-        os << "d_species_mu = ";
-        for (int si = 0; si < d_num_species - 1; si++)
-        {
-            os << d_species_mu[si] << ", ";
-        }
-        os << d_species_mu[d_num_species - 1];
-        os << std::endl;
-    }
-    
-    /*
-     * Print the molecular weight of each species.
-     */
-    
-    os << "d_species_M = ";
+    os << "d_species_mu_ref = ";
     for (int si = 0; si < d_num_species - 1; si++)
     {
-        os << d_species_M[si] << ", ";
+        os << d_species_mu_ref[si] << ", ";
     }
-    os << d_species_M[d_num_species - 1];
+    os << d_species_mu_ref[d_num_species - 1];
+    os << std::endl;
+    
+    /*
+     * Print the reference temperature for dynamic shear viscosity of each species.
+     */
+    
+    os << "d_species_T_ref = ";
+    for (int si = 0; si < d_num_species - 1; si++)
+    {
+        os << d_species_T_ref[si] << ", ";
+    }
+    os << d_species_T_ref[d_num_species - 1];
+    os << std::endl;
+    
+    /*
+     * Print the power for computing dynamic shear viscosity of each species.
+     */
+    
+    os << "d_species_power = ";
+    for (int si = 0; si < d_num_species - 1; si++)
+    {
+        os << d_species_power[si] << ", ";
+    }
+    os << d_species_power[d_num_species - 1];
     os << std::endl;
 }
 
@@ -250,23 +226,12 @@ EquationOfShearViscosityMixingRulesConstant::printClassData(
  * database.
  */
 void
-EquationOfShearViscosityMixingRulesConstant::putToRestart(
+EquationOfShearViscosityMixingRulesPowerLaw::putToRestart(
     const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
-    restart_db->putBool("d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions",
-        d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions);
-    
-    if (d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions)
-    {
-        restart_db->putRealVector("d_species_nu", d_species_nu);
-    }
-    else
-    {
-        restart_db->putRealVector("d_species_mu", d_species_mu);
-    }
-    
-    restart_db->putRealVector("d_species_M", d_species_M);
-    restart_db->putReal("d_R_u", d_R_u);
+    restart_db->putRealVector("d_species_mu_ref", d_species_mu_ref);
+    restart_db->putRealVector("d_species_T_ref", d_species_T_ref);
+    restart_db->putRealVector("d_species_power", d_species_power);
 }
 
 
@@ -274,7 +239,7 @@ EquationOfShearViscosityMixingRulesConstant::putToRestart(
  * Compute the shear viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 Real
-EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
+EquationOfShearViscosityMixingRulesPowerLaw::getShearViscosity(
     const Real* const pressure,
     const Real* const temperature,
     const std::vector<const Real*>& mass_fractions) const
@@ -389,7 +354,7 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
  * Compute the shear viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
-EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
+EquationOfShearViscosityMixingRulesPowerLaw::computeShearViscosity(
     HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_shear_viscosity,
     const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
     const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_temperature,
@@ -1105,7 +1070,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
  * Compute the shear viscosity of the mixture with isobaric equilibrium assumption.
  */
 Real
-EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
+EquationOfShearViscosityMixingRulesPowerLaw::getShearViscosity(
     const Real* const pressure,
     const std::vector<const Real*>& species_temperatures,
     const std::vector<const Real*>& mass_fractions,
@@ -1209,7 +1174,7 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
  * Compute the shear viscosity of the mixture with isobaric equilibrium assumption.
  */
 void
-EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
+EquationOfShearViscosityMixingRulesPowerLaw::computeShearViscosity(
     HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_shear_viscosity,
     const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_pressure,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& data_species_temperatures,
@@ -1849,24 +1814,17 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
  * Get the molecular properties of a species.
  */
 void
-EquationOfShearViscosityMixingRulesConstant::getSpeciesMolecularProperties(
+EquationOfShearViscosityMixingRulesPowerLaw::getSpeciesMolecularProperties(
     std::vector<Real*>& species_molecular_properties,
     const int species_index) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(species_molecular_properties.size()) >= 2);
+    TBOX_ASSERT(static_cast<int>(species_molecular_properties.size()) >= 3);
     TBOX_ASSERT(species_index >= 0);
     TBOX_ASSERT(species_index < d_num_species);
 #endif
     
-    // If the constant kinematic viscosities are used.
-    if (d_use_constant_kinematic_viscosity_and_ideal_gas_assumptions)
-    {
-        *(species_molecular_properties[0]) = d_species_nu[species_index];
-    }
-    else
-    {
-        *(species_molecular_properties[0]) = d_species_mu[species_index];
-    }
-    *(species_molecular_properties[1]) = d_species_M[species_index];
+    *(species_molecular_properties[0]) = d_species_mu_ref[species_index];
+    *(species_molecular_properties[1]) = d_species_T_ref[species_index];
+    *(species_molecular_properties[2]) = d_species_power[species_index];
 }

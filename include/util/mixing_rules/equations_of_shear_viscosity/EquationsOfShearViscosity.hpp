@@ -2,6 +2,7 @@
 #define EQUATIONS_OF_SHEAR_VISCOSITY_HPP
 
 #include "util/mixing_rules/equations_of_shear_viscosity/constant/EquationOfShearViscosityMixingRulesConstant.hpp"
+#include "util/mixing_rules/equations_of_shear_viscosity/power_law/EquationOfShearViscosityMixingRulesPowerLaw.hpp"
 #include "util/mixing_rules/equations_of_shear_viscosity/Chapman-Enskog/EquationOfShearViscosityMixingRulesChapmanEnskog.hpp"
 
 #include <map>
@@ -10,6 +11,7 @@
 namespace EQN_SHEAR_VISCOSITY
 {
     enum TYPE { CONSTANT,
+                POWER_LAW,
                 CHAPMAN_ENSKOG };
 }
 
@@ -24,6 +26,7 @@ inline std::ostream& operator<<(std::ostream& os, const EQN_SHEAR_VISCOSITY::TYP
     {
 #define INSERT_ELEMENT(p) strings[p] = #p
         INSERT_ELEMENT(EQN_SHEAR_VISCOSITY::CONSTANT);
+        INSERT_ELEMENT(EQN_SHEAR_VISCOSITY::POWER_LAW);
         INSERT_ELEMENT(EQN_SHEAR_VISCOSITY::CHAPMAN_ENSKOG);
 #undef INSERT_ELEMENT
     }
