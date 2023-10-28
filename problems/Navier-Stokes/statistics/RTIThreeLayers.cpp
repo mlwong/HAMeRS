@@ -40,6 +40,66 @@ class RTIThreeLayersStatisticsUtilities
          */
         
         /*
+         * Output minimum interface location of 1st species using the averaged 1D mass fraction profile
+         * in x-direction to a file.
+         */
+        void
+        outputAveragedInterfaceMinSpeciesOneInXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output maximum interface location of 1st species using the averaged 1D mass fraction profile
+         * in x-direction to a file.
+         */
+        void
+        outputAveragedInterfaceMaxSpeciesOneInXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output minimum interface location of 2nd species using the averaged 1D mass fraction profile
+         * in x-direction to a file.
+         */
+        void
+        outputAveragedInterfaceMinSpeciesTwoInXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output maximum interface location of 2nd species using the averaged 1D mass fraction profile
+         * in x-direction to a file.
+         */
+        void
+        outputAveragedInterfaceMaxSpeciesTwoInXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output minimum interface location of 3rd species using the averaged 1D mass fraction profile
+         * in x-direction to a file.
+         */
+        void
+        outputAveragedInterfaceMinSpeciesThreeInXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output maximum interface location of 3rd species using the averaged 1D mass fraction profile
+         * in x-direction to a file.
+         */
+        void
+        outputAveragedInterfaceMaxSpeciesThreeInXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
          * Output minimum interface location of 1st species in x-direction to a file.
          */
         void
@@ -328,6 +388,564 @@ class RTIThreeLayersStatisticsUtilities
         const int d_num_ghosts_derivative;
         
 };
+
+
+/*
+ * Output minimum interface location of 1st species using the averaged 1D mass fraction profile
+ * in x-direction to a file.
+ */
+void
+RTIThreeLayersStatisticsUtilities::outputAveragedInterfaceMinSpeciesOneInXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+    if (d_num_species != 3)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_AVG_MIN_S1' can be computed with three species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const std::vector<double>& dx_finest = MPI_helper_average.getFinestRefinedDomainGridSpacing();
+
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+
+    std::vector<double> Y_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "MASS_FRACTIONS",
+        0,
+        data_context);
+    
+    /*
+     * Compute and output the value (only done by process 0).
+     */
+    
+    const double lower_bound = double(1) - double(0.99);
+    const double upper_bound = double(0.99);
+    
+    if (mpi.getRank() == 0)
+    {
+        const double* x_lo = d_grid_geometry->getXLower();
+        const double* x_hi = d_grid_geometry->getXUpper();
+        double interface_min = x_hi[0];
+        
+        for (int i = finest_level_dims[0] - 1; i >= 0;  i--)
+        {
+            if (Y_avg_global[i] > lower_bound && Y_avg_global[i] < upper_bound)
+            {
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc < interface_min)
+                {
+                   interface_min = x_loc;
+                }
+            }
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_min;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output maximum interface location of 1st species using the averaged 1D mass fraction profile
+ * in x-direction to a file.
+ */
+void
+RTIThreeLayersStatisticsUtilities::outputAveragedInterfaceMaxSpeciesOneInXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+    if (d_num_species != 3)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_AVG_MAX_S1' can be computed with three species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const std::vector<double>& dx_finest = MPI_helper_average.getFinestRefinedDomainGridSpacing();
+
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+
+    std::vector<double> Y_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "MASS_FRACTIONS",
+        0,
+        data_context);
+    
+    /*
+     * Compute and output the value (only done by process 0).
+     */
+    
+    const double lower_bound = double(1) - double(0.99);
+    const double upper_bound = double(0.99);
+    
+    if (mpi.getRank() == 0)
+    {
+        const double* x_lo = d_grid_geometry->getXLower();
+        // const double* x_hi = d_grid_geometry->getXUpper();
+        double interface_max = x_lo[0];
+        
+        for (int i = 0; i < finest_level_dims[0]; i++)
+        {
+            if (Y_avg_global[i] > lower_bound && Y_avg_global[i] < upper_bound)
+            {
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc > interface_max)
+                {
+                   interface_max = x_loc;
+                }
+            }
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_max;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output minimum interface location of 2nd species using the averaged 1D mass fraction profile
+ * in x-direction to a file.
+ */
+void
+RTIThreeLayersStatisticsUtilities::outputAveragedInterfaceMinSpeciesTwoInXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+    if (d_num_species != 3)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_AVG_MIN_S2' can be computed with three species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const std::vector<double>& dx_finest = MPI_helper_average.getFinestRefinedDomainGridSpacing();
+
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+
+    std::vector<double> Y_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "MASS_FRACTIONS",
+        1,
+        data_context);
+    
+    /*
+     * Compute and output the value (only done by process 0).
+     */
+    
+    const double lower_bound = double(1) - double(0.99);
+    const double upper_bound = double(0.99);
+    
+    if (mpi.getRank() == 0)
+    {
+        const double* x_lo = d_grid_geometry->getXLower();
+        const double* x_hi = d_grid_geometry->getXUpper();
+        double interface_min = x_hi[0];
+        
+        for (int i = finest_level_dims[0] - 1; i >= 0;  i--)
+        {
+            if (Y_avg_global[i] > lower_bound && Y_avg_global[i] < upper_bound)
+            {
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc < interface_min)
+                {
+                   interface_min = x_loc;
+                }
+            }
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_min;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output maximum interface location of 2nd species using the averaged 1D mass fraction profile
+ * in x-direction to a file.
+ */
+void
+RTIThreeLayersStatisticsUtilities::outputAveragedInterfaceMaxSpeciesTwoInXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+    if (d_num_species != 3)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_AVG_MAX_S2' can be computed with three species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const std::vector<double>& dx_finest = MPI_helper_average.getFinestRefinedDomainGridSpacing();
+
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+
+    std::vector<double> Y_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "MASS_FRACTIONS",
+        1,
+        data_context);
+    
+    /*
+     * Compute and output the value (only done by process 0).
+     */
+    
+    const double lower_bound = double(1) - double(0.99);
+    const double upper_bound = double(0.99);
+    
+    if (mpi.getRank() == 0)
+    {
+        const double* x_lo = d_grid_geometry->getXLower();
+        // const double* x_hi = d_grid_geometry->getXUpper();
+        double interface_max = x_lo[0];
+        
+        for (int i = 0; i < finest_level_dims[0]; i++)
+        {
+            if (Y_avg_global[i] > lower_bound && Y_avg_global[i] < upper_bound)
+            {
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc > interface_max)
+                {
+                   interface_max = x_loc;
+                }
+            }
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_max;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output minimum interface location of 3rd species using the averaged 1D mass fraction profile
+ * in x-direction to a file.
+ */
+void
+RTIThreeLayersStatisticsUtilities::outputAveragedInterfaceMinSpeciesThreeInXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+    if (d_num_species != 3)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_AVG_MIN_S3' can be computed with three species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const std::vector<double>& dx_finest = MPI_helper_average.getFinestRefinedDomainGridSpacing();
+
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+
+    std::vector<double> Y_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "MASS_FRACTIONS",
+        2,
+        data_context);
+    
+    /*
+     * Compute and output the value (only done by process 0).
+     */
+    
+    const double lower_bound = double(1) - double(0.99);
+    const double upper_bound = double(0.99);
+    
+    if (mpi.getRank() == 0)
+    {
+        const double* x_lo = d_grid_geometry->getXLower();
+        const double* x_hi = d_grid_geometry->getXUpper();
+        double interface_min = x_hi[0];
+        
+        for (int i = finest_level_dims[0] - 1; i >= 0;  i--)
+        {
+            if (Y_avg_global[i] > lower_bound && Y_avg_global[i] < upper_bound)
+            {
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc < interface_min)
+                {
+                   interface_min = x_loc;
+                }
+            }
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_min;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output maximum interface location of 3rd species using the averaged 1D mass fraction profile
+ * in x-direction to a file.
+ */
+void
+RTIThreeLayersStatisticsUtilities::outputAveragedInterfaceMaxSpeciesThreeInXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+    if (d_num_species != 3)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_AVG_MAX_S3' can be computed with three species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const std::vector<double>& dx_finest = MPI_helper_average.getFinestRefinedDomainGridSpacing();
+
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+
+    std::vector<double> Y_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "MASS_FRACTIONS",
+        2,
+        data_context);
+    
+    /*
+     * Compute and output the value (only done by process 0).
+     */
+    
+    const double lower_bound = double(1) - double(0.99);
+    const double upper_bound = double(0.99);
+    
+    if (mpi.getRank() == 0)
+    {
+        const double* x_lo = d_grid_geometry->getXLower();
+        // const double* x_hi = d_grid_geometry->getXUpper();
+        double interface_max = x_lo[0];
+        
+        for (int i = 0; i < finest_level_dims[0]; i++)
+        {
+            if (Y_avg_global[i] > lower_bound && Y_avg_global[i] < upper_bound)
+            {
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc > interface_max)
+                {
+                   interface_max = x_loc;
+                }
+            }
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_max;
+        
+        f_out.close();
+    }
+}
 
 
 /*
@@ -3823,7 +4441,31 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             // Get the key of the current variable.
             std::string statistical_quantity_key = d_statistical_quantities[qi];
             
-            if (statistical_quantity_key == "INTERFACE_MIN_S1")
+            if (statistical_quantity_key == "INTERFACE_AVG_MIN_S1")
+            {
+                f_out << "\t" << "INTERFACE_AVG_MIN_S1 ";
+            }
+            else if (statistical_quantity_key == "INTERFACE_AVG_MAX_S1")
+            {
+                f_out << "\t" << "INTERFACE_AVG_MAX_S1 ";
+            }
+            else if (statistical_quantity_key == "INTERFACE_AVG_MIN_S2")
+            {
+                f_out << "\t" << "INTERFACE_AVG_MIN_S2 ";
+            }
+            else if (statistical_quantity_key == "INTERFACE_AVG_MAX_S2")
+            {
+                f_out << "\t" << "INTERFACE_AVG_MAX_S2 ";
+            }
+            else if (statistical_quantity_key == "INTERFACE_AVG_MIN_S3")
+            {
+                f_out << "\t" << "INTERFACE_AVG_MIN_S3 ";
+            }
+            else if (statistical_quantity_key == "INTERFACE_AVG_MAX_S3")
+            {
+                f_out << "\t" << "INTERFACE_AVG_MAX_S3 ";
+            }
+            else if (statistical_quantity_key == "INTERFACE_MIN_S1")
             {
                 f_out << "\t" << "INTERFACE_MIN_S1     ";
             }
@@ -3980,7 +4622,49 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         // Get the key of the current variable.
         std::string statistical_quantity_key = d_statistical_quantities[qi];
         
-        if (statistical_quantity_key == "INTERFACE_MIN_S1")
+        if (statistical_quantity_key == "INTERFACE_AVG_MIN_S1")
+        {
+            rti_three_layers_statistics_utilities->outputAveragedInterfaceMinSpeciesOneInXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "INTERFACE_AVG_MAX_S1")
+        {
+            rti_three_layers_statistics_utilities->outputAveragedInterfaceMaxSpeciesOneInXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "INTERFACE_AVG_MIN_S2")
+        {
+            rti_three_layers_statistics_utilities->outputAveragedInterfaceMinSpeciesTwoInXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "INTERFACE_AVG_MAX_S2")
+        {
+            rti_three_layers_statistics_utilities->outputAveragedInterfaceMaxSpeciesTwoInXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "INTERFACE_AVG_MIN_S3")
+        {
+            rti_three_layers_statistics_utilities->outputAveragedInterfaceMinSpeciesThreeInXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "INTERFACE_AVG_MAX_S3")
+        {
+            rti_three_layers_statistics_utilities->outputAveragedInterfaceMaxSpeciesThreeInXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "INTERFACE_MIN_S1")
         {
             rti_three_layers_statistics_utilities->outputInterfaceMinSpeciesOneInXDirection(
                 stat_dump_filename,
