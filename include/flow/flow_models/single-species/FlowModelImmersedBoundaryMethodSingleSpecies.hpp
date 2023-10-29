@@ -41,6 +41,7 @@ class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoun
          * Values of primitive variables inside the body.
          */
         Real d_rho_body;
+        Real d_temp_body;
         std::vector<Real> d_vel_body;
         Real d_p_body;
         

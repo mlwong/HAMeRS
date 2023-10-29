@@ -13,6 +13,20 @@
 #include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/pdat/CellVariable.h"
 
+namespace VELOCITY_IBC
+{
+    enum TYPE { NONE,
+                SLIP,
+                NO_SLIP };
+}
+
+namespace TEMPERATURE_IBC
+{
+    enum TYPE { NONE,
+                ADIABATIC,
+                ISOTHERMAL };
+}
+
 class FlowModel;
 
 class FlowModelImmersedBoundaryMethod
@@ -150,6 +164,16 @@ class FlowModelImmersedBoundaryMethod
          * Number of equations.
          */
         const int d_num_eqn;
+        
+        /*
+         * Type of velocity immersed boundary condition.
+         */
+        VELOCITY_IBC::TYPE d_bc_type_velocity;
+         
+        /*
+         * Type of temperature immersed boundary condition.
+         */
+        TEMPERATURE_IBC::TYPE d_bc_type_temperature;
         
         /*
          * Pointer to immersed boundaries.

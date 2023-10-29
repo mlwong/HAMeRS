@@ -63,9 +63,13 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
     
     const double half = double(1)/double(2);
     
-    const double radius_c = double(1)/double(20);
-    const double x_c = half;
-    const double y_c = half;
+    /*
+     * These will be read from the input file.
+     */
+    
+    const double radius_c = half; //double(20); AFK 
+    const double x_c = double(5); //half;  AFK
+    const double y_c = double(5); //half;  AFK
     
     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
     {
@@ -78,15 +82,18 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
             
             // Compute the coordinates.
             double x[2];
-            x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
-            x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
+            x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0]; // x coordinates of the point.
+            x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1]; // y coordinates of the point.
             
+            // Distance from the cylinder center.
             const double radius = sqrt(pow(x[0] - x_c, 2) + pow(x[1] - y_c, 2));
+            // Angle between x axis and a line passing through center and current cell.
             const double theta  = atan2(x[1] - y_c, x[0] - x_c);
-            if (radius < radius_c)
+            
+            if (radius < radius_c) // Condition that should be satisfied to be in cylinder.
             {
-                double x_p = double(0); // x coordiantes on the cylinder where y = x[1].
-                double y_p = double(0); // y coordiantes on the cylinder where x = x[0].
+                double x_p = double(0); // x coordinates on the cylinder where y = x[1].
+                double y_p = double(0); // y coordinates on the cylinder where x = x[0].
                 
                 if (x[0] > x_c)
                 {
@@ -110,7 +117,7 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                     (fabs(y_p - x[1]) < (double(d_num_immersed_boundary_ghosts[1]))*dx[1]))
                 {
                     mask[idx]   = int(IB_MASK::IB_GHOST);
-                    dist[idx]   = radius;
+                    dist[idx]   = radius_c - radius;
                     norm_0[idx] = (x[0] - x_c)/radius;
                     norm_1[idx] = (x[1] - y_c)/radius;
                 }
