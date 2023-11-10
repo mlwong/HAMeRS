@@ -19,6 +19,8 @@ FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod(
         d_num_IBM_ghosts(hier::IntVector::getZero(d_dim)),
         d_num_species(num_species),
         d_num_eqn(num_eqn),
+        d_bc_type_velocity(VELOCITY_IBC::NONE),
+        d_bc_type_temperature(TEMPERATURE_IBC::NONE),
         d_immersed_boundaries(immersed_boundaries),
         d_equation_of_state_mixing_rules(equation_of_state_mixing_rules)
 {
@@ -42,6 +44,70 @@ FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod(
     
     s_variable_surface_normal = HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
         new pdat::CellVariable<Real>(d_dim, "surface_normal", dim.getValue()));
+    
+    /*
+     * Read the immersed boundary conditions.
+     */
+    
+    if (immersed_boundary_method_db->keyExists("bc_type_velocity"))
+    {
+        const std::string bc_type_velocity_str = immersed_boundary_method_db->getString("bc_type_velocity");
+        
+        if (bc_type_velocity_str == "SLIP")
+        {
+            d_bc_type_velocity = VELOCITY_IBC::SLIP;
+        }
+        else if (bc_type_velocity_str == "NO_SLIP")
+        {
+            d_bc_type_velocity = VELOCITY_IBC::NO_SLIP;
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod()\n"
+                << "Unknown 'bc_type_velocity' entry from input database: " << d_bc_type_velocity
+                << std::endl);
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod()\n"
+            << "Required 'bc_type_velocity' entry from input database missing."
+            << std::endl);
+    }
+    
+    if (immersed_boundary_method_db->keyExists("bc_type_temperature"))
+    {
+        const std::string bc_type_temperature_str = immersed_boundary_method_db->getString("bc_type_temperature");
+        
+        if (bc_type_temperature_str == "ADIABATIC")
+        {
+            d_bc_type_temperature = TEMPERATURE_IBC::ADIABATIC;
+        }
+        // ISOTHERMAL BC NOT IMPLEMENTED YET!
+        else if (bc_type_temperature_str == "ISOTHERMAL")
+        {
+            d_bc_type_temperature = TEMPERATURE_IBC::ISOTHERMAL;
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod()\n"
+                << "Unknown 'bc_type_temperature' entry from input database: " << d_bc_type_temperature
+                << std::endl);
+        }
+    }
+    else
+    {
+        // Default is adiabatic wall.
+        // d_bc_type_temperature = TEMPERATURE_IBC::ADIABATIC;
+        
+        TBOX_ERROR(d_object_name
+            << ": FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod()\n"
+            << "Required 'bc_type_temperature' entry from input database missing."
+            << std::endl);
+    }
 }
 
 
@@ -222,7 +288,7 @@ FlowModelImmersedBoundaryMethod::setConservativeVariablesCellDataImmersedBoundar
     const HAMERS_SHARED_PTR<pdat::CellData<Real> > data_surface_normal(
         HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(s_variable_surface_normal, data_context_IB)));
-
+    
     // Get the dimensions of the ghost cell boxes.
     const hier::Box ghost_box_cons_var = conservative_var_data[0]->getGhostBox();
     const hier::IntVector ghostcell_dims_cons_var = ghost_box_cons_var.numberCells();

@@ -10,7 +10,21 @@ NonconservativeDiffusiveFluxDivergenceOperatorManager::NonconservativeDiffusiveF
     const std::string& nonconservative_diffusive_flux_divergence_operator_str):
         d_object_name(object_name)
 {
-    if (nonconservative_diffusive_flux_divergence_operator_str == "SIXTH_ORDER")
+    
+    if (nonconservative_diffusive_flux_divergence_operator_str == "SECOND_ORDER")
+    {
+        d_nonconservative_diffusive_flux_divergence_operator_type =
+            NONCONSERVATIVE_DIFFUSIVE_FLUX_DIVERGENCE_OPERATOR::SECOND_ORDER;
+            
+        d_noncons_diff_flux_div_op.reset(new NonconservativeDiffusiveFluxDivergenceOperatorSecondOrder(
+            "d_nonconservative_diffusive_flux_divergence_operator",
+            dim,
+            grid_geometry,
+            flow_model->getNumberOfEquations(),
+            flow_model,
+            nonconservative_diffusive_flux_divergence_operator_db));
+    }
+    else if (nonconservative_diffusive_flux_divergence_operator_str == "SIXTH_ORDER")
     {
         d_nonconservative_diffusive_flux_divergence_operator_type =
             NONCONSERVATIVE_DIFFUSIVE_FLUX_DIVERGENCE_OPERATOR::SIXTH_ORDER;
