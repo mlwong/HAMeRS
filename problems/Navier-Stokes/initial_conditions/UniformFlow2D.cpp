@@ -87,13 +87,14 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             Real* rho_v = momentum->getPointer(1);
             Real* E     = total_energy->getPointer(0);
             
-            Real gamma = Real(7)/Real(5);
+            //Real gamma = Real(7)/Real(5);
             
             // Initial conditions.
             Real rho_inf = Real(1);
             Real u_inf   = Real(1);
             Real v_inf   = Real(1);
             Real p_inf   = Real(1);
+            Real gamma   = Real(1);
             Real x_c     = Real(1);
             Real y_c     = Real(1); 
             Real D       = Real(1);
@@ -111,7 +112,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             Real spongeL = Real(1);
             Real spongeB = Real(1);
             Real spongeT = Real(1);
-            
+
             Real half = Real(1)/Real(2);
             
             if (d_initial_conditions_db != nullptr)
@@ -125,17 +126,14 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 u_inf   = d_initial_conditions_db->getReal("u_inf");
                 v_inf   = d_initial_conditions_db->getReal("v_inf");
                 p_inf   = d_initial_conditions_db->getReal("p_inf");
+                gamma   = d_initial_conditions_db->getReal("gamma");
                 x_c     = d_initial_conditions_db->getReal("x_c");
                 y_c     = d_initial_conditions_db->getReal("y_c");
                 D       = d_initial_conditions_db->getReal("D");
                 spongeL = d_initial_conditions_db->getReal("spongeL");
                 spongeR = d_initial_conditions_db->getReal("spongeR");
-                spongeB = d_initial_conditions_db->getReal("spongeB");
-                spongeT = d_initial_conditions_db->getReal("spongeT");
-                std::cout << std::setprecision(17) << u_inf << std::endl;
-                std::cout << v_inf << std::endl;
-                std::cout << rho_inf << std::endl;
-                std::cout << p_inf << std::endl;
+                spongeB = d_initial_conditions_db->getReal("spongeB"); 
+                spongeT = d_initial_conditions_db->getReal("spongeT"); 
             }
             
             for (int j = -num_ghosts_cons_var[1]; j < patch_dims[1] + num_ghosts_cons_var[1]; j++)
@@ -154,7 +152,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     
                     r       = std::pow((x[0] - x_c), Real(2)) + std::pow((x[1] - y_c), Real(2));
                     r       = std::pow(r, half);
-                    theta   = std::atan((x[1] - y_c)/(x[0] - x_c));
+                    theta   = std::atan((x[1] - y_c)/(x[0] - x_c)) + 30.0*M_PI/180.0; 
                     V_r     =  u_inf*(Real(1) - D*D/(Real(4)*r*r))*std::cos(theta);
                     V_theta = -u_inf*(Real(1) + D*D/(Real(4)*r*r))*std::sin(theta);
                     if (r < D/Real(4))
@@ -178,8 +176,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         v = half * (v_inf + v_ic) - half * (v_ic - v_inf)*erf((x[0]-spongeR)/(D/Real(5)));
                         p = half * (p_inf + p_ic) - half * (p_ic - p_inf)*erf((x[0]-spongeR)/(D/Real(5)));
                     }
-                    
-                    if(x[1] < y_c)
+
+                    if (x[1] < y_c)
                     {
                         u = half * (u_inf + u_ic) + half * (u_ic - u_inf)*erf((x[1]-spongeB)/(D/Real(5)));
                         v = half * (v_inf + v_ic) + half * (v_ic - v_inf)*erf((x[1]-spongeB)/(D/Real(5)));
@@ -190,6 +188,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         u = half * (u_inf + u_ic) - half * (u_ic - u_inf)*erf((x[1]-spongeT)/(D/Real(5)));
                         v = half * (v_inf + v_ic) - half * (v_ic - v_inf)*erf((x[1]-spongeT)/(D/Real(5)));
                         p = half * (p_inf + p_ic) - half * (p_ic - p_inf)*erf((x[1]-spongeT)/(D/Real(5)));
+
                     }
 
                     rho_u[idx_cell] = rho_inf*u;
