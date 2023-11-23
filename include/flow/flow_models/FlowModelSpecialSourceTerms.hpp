@@ -66,7 +66,7 @@ class FlowModelSpecialSourceTerms
                     << "No key 'special_source_box_hi' or 'd_special_source_box_hi' found in data for source terms."
                     << std::endl);
             }
-
+            
             d_special_source_exterior = source_terms_db->getBoolWithDefault("special_source_exterior", true);
             d_special_source_exterior = source_terms_db->getBoolWithDefault("d_special_source_exterior", d_special_source_exterior);
             
@@ -85,7 +85,6 @@ class FlowModelSpecialSourceTerms
                     << "Size of 'special_source_box_hi' or 'd_special_source_box_hi' is not consistent with problem dimension."
                     << std::endl);
             }
-
         }
         
         /*
@@ -110,7 +109,7 @@ class FlowModelSpecialSourceTerms
         {
             return d_special_source_box_hi;
         }
-
+        
         bool getSpecialSourceExterior() const
         {
             return d_special_source_exterior;
@@ -162,7 +161,7 @@ class FlowModelSpecialSourceTerms
          * Special source box definition.
          */
         std::vector<Real> d_special_source_box_lo; // Lower spatial coordinates.
-        std::vector<Real> d_special_source_box_hi; // Uppe/r spatial coordinates.
+        std::vector<Real> d_special_source_box_hi; // Upper spatial coordinates.
         bool d_special_source_exterior;
         
 };

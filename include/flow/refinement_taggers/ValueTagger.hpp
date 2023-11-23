@@ -176,6 +176,7 @@ class ValueTagger
         HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_value_tagger_variable_pressure;
         HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_value_tagger_variable_dilatation;
         HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_value_tagger_variable_enstrophy;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_value_tagger_variable_relative_kinetic_energy;;
         std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > d_value_tagger_variable_mass_fractions;
         
         /*
@@ -186,7 +187,14 @@ class ValueTagger
         Real d_value_tagger_max_pressure;
         Real d_value_tagger_max_dilatation;
         Real d_value_tagger_max_enstrophy;
+        Real d_value_tagger_max_relative_kinetic_energy;
         std::vector<Real> d_value_tagger_max_mass_fractions;
+        
+        /*
+         * Settings of some specific variables.
+         */
+        std::vector<Real> d_ref_velocity;
+        Real d_ref_kinetic_energy;
         
 };
 

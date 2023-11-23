@@ -24,7 +24,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorManager::NonconservativeDiffusiveF
             flow_model,
             nonconservative_diffusive_flux_divergence_operator_db));
     }
-    
     else if (nonconservative_diffusive_flux_divergence_operator_str == "SIXTH_ORDER")
     {
         d_nonconservative_diffusive_flux_divergence_operator_type =

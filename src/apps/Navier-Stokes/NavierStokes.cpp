@@ -5328,24 +5328,21 @@ NavierStokes::getFromInput(
         }
     }
     
-    if (num_per_dirs < d_dim.getValue())
+    if (input_db->keyExists("Boundary_data"))
     {
-        if (input_db->keyExists("Boundary_data"))
+        d_Navier_Stokes_boundary_conditions_db = input_db->getDatabase(
+            "Boundary_data");
+        
+        d_Navier_Stokes_boundary_conditions_db_is_from_restart = false;
+    }
+    else
+    {
+        if (num_per_dirs < d_dim.getValue() && !is_from_restart)
         {
-            d_Navier_Stokes_boundary_conditions_db = input_db->getDatabase(
-                "Boundary_data");
-            
-            d_Navier_Stokes_boundary_conditions_db_is_from_restart = false;
-        }
-        else
-        {
-            if (!is_from_restart)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": "
-                    << "Key data 'Boundary_data' not found in input database."
-                    << std::endl);
-            }
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Key data 'Boundary_data' not found in input database."
+                << std::endl);
         }
     }
     

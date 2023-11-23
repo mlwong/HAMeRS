@@ -217,7 +217,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
     Real* E   = data_total_energy->getPointer(0);
     
     int* mask = data_mask->getPointer(0);
-    Real* dist = data_wall_distance->getPointer(0);  // AFK 03/15/23 distance variable uncommented 
+    Real* dist = data_wall_distance->getPointer(0);
     
     const Real& rho_body  = d_rho_body;
     const Real& E_body    = d_E_body;

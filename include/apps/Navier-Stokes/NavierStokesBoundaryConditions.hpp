@@ -179,6 +179,11 @@ class NavierStokesBoundaryConditions:
         HAMERS_SHARED_PTR<NavierStokesSpecialBoundaryConditions> d_Navier_Stokes_special_boundary_conditions;
         
         /*
+         * Speical boundary conditions database.
+         */
+        HAMERS_SHARED_PTR<tbox::Database> d_Navier_Stokes_special_boundary_conditions_db;
+        
+        /*
          * Whether transverse derivatives are used in boundary conditions.
          */
         bool d_use_transverse_derivatives_bc;
