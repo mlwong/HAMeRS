@@ -141,6 +141,7 @@ NavierStokes::NavierStokes(
             "d_immersed_boundaries",
             d_project_name,
             d_dim,
+            d_Navier_Stokes_initial_conditions_db,
             d_grid_geometry));
         
         d_flow_model->initializeImmersedBoundaryMethod(

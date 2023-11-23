@@ -142,6 +142,7 @@ Euler::Euler(
             "d_immersed_boundaries",
             d_project_name,
             d_dim,
+            d_Euler_initial_conditions_db,
             d_grid_geometry));
         
         d_flow_model->initializeImmersedBoundaryMethod(
