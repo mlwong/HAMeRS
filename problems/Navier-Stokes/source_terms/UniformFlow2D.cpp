@@ -117,7 +117,8 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
 
     TBOX_ASSERT(d_source_terms_db->keyExists("D"));
     
-    Real D = Real(0);
+    Real D = Real(1);
+    
     if (d_source_terms_db->keyExists("D"))
     {
         D = d_source_terms_db->getReal("D");
@@ -129,8 +130,9 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << "No key 'D' found in data for source terms."
             << std::endl);
     }
-
-    Real gamma = Real(0);
+    
+    Real gamma = Real(7)/Real(5);
+    
     if (d_source_terms_db->keyExists("gamma"))
     {
         gamma = d_source_terms_db->getReal("gamma");
@@ -479,4 +481,35 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
     }
     
     restart_source_terms_db->putReal("p_inf", p_inf);
+    
+    Real D = Real(1);
+    if (d_source_terms_db->keyExists("D"))
+    {
+        D = d_source_terms_db->getReal("D");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "No key 'D' found in data for source terms."
+            << std::endl);
+    }
+    
+    restart_source_terms_db->putReal("D", D);
+
+    Real gamma = Real(7)/Real(5);
+    if (d_source_terms_db->keyExists("gamma"))
+    {
+        gamma = d_source_terms_db->getReal("gamma");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "No key 'gamma' found in data for source terms."
+            << std::endl);
+    }
+    
+    restart_source_terms_db->putReal("gamma", gamma);
+
 }
