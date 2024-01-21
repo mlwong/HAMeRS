@@ -2203,7 +2203,7 @@ RungeKuttaLevelIntegrator::standardLevelSynchronization(
     const double sync_time,
     const double old_time)
 {
-    if (false)
+    if (true)
     {
         TBOX_ASSERT(hierarchy);
         
@@ -2231,7 +2231,7 @@ RungeKuttaLevelIntegrator::standardLevelSynchronization(
     const double sync_time,
     const std::vector<double>& old_times)
 {
-    if (false)
+    if (true)
     {
         TBOX_ASSERT(hierarchy);
         TBOX_ASSERT((coarsest_level >= 0)
