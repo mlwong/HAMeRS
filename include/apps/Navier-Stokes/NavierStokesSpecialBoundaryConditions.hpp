@@ -85,6 +85,7 @@ class NavierStokesSpecialBoundaryConditions
          * Speical boundary conditions database.
          */
         const HAMERS_SHARED_PTR<tbox::Database> d_special_boundary_conditions_db;
+        std::vector<double> d_special_boundary_conditions_vector;
         
 };
 

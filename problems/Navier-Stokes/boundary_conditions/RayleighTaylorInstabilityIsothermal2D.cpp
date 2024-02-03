@@ -137,18 +137,22 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
                 // Discretize the domain in x-direction for the approximated integral.
                 const int integral_N_x = 10000;
                 
-                std::vector<double> integral_vector(integral_N_x + 3);
+                std::vector<double>& integral_vector = d_special_boundary_conditions_vector; // Reference to the class member vector that stores the numerical integral.
                 
-                std::ifstream f_in;
-                std::string integral_filename = "integral.dat";
-                f_in.open(integral_filename, std::ios::in | std::ios::binary);
-                f_in.read((char*)&integral_vector[0], sizeof(double)*integral_vector.size());
-                f_in.close();
+                if (integral_vector.empty())
+                {
+                    integral_vector.resize(integral_N_x + 3);
+                    std::ifstream f_in;
+                    std::string integral_filename = "integral.dat";
+                    f_in.open(integral_filename, std::ios::in | std::ios::binary);
+                    f_in.read((char*)&integral_vector[0], sizeof(double)*integral_vector.size());
+                    f_in.close();
+                }
                 
                 const double x_domain_lo = integral_vector[integral_N_x + 0];
                 const double x_domain_hi = integral_vector[integral_N_x + 1];
                 const double dx_uniform  = integral_vector[integral_N_x + 2];
-            
+                
                 // Loop over the boundary boxes.
                 for (int bi = 0; bi < static_cast<int>(boundary_boxes.size()); bi++)
                 {
@@ -195,15 +199,15 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
                             
                             const int idx_integral_vector_lo = int(std::floor((x[0] - x_domain_lo)/dx_uniform));
                             const int idx_integral_vector_hi = idx_integral_vector_lo + 1;
-                    
+                            
                             const double x_integral_vector_lo = double(idx_integral_vector_lo)*dx_uniform + 0.5*dx_uniform + x_domain_lo;
                             const double x_integral_vector_hi = x_integral_vector_lo + dx_uniform;
-                    
+                            
                             const double weight_lo = ( x_integral_vector_hi - x[0])/dx_uniform;
                             const double weight_hi = (-x_integral_vector_lo + x[0])/dx_uniform;
-                    
+                            
                             integral = weight_lo*integral_vector[idx_integral_vector_lo] + weight_hi*integral_vector[idx_integral_vector_hi];
-                    
+                            
                             
                             // for (int ii = 0; ii < N_int; ii++)
                             //{
@@ -327,20 +331,20 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
         //                     double integral = 0.0;
         //                     double p_H = 0.0;
         //                     double rho_H = 0.0;
-        //             
+        //                     
         //                     // Compute the integral with linear interpolation.
-        //             
+        //                    
         //                     const int idx_integral_vector_lo = int(std::floor((x[0] - x_domain_lo)/dx_uniform));
         //                     const int idx_integral_vector_hi = idx_integral_vector_lo + 1;
-        //             
+        //                     
         //                     const double x_integral_vector_lo = double(idx_integral_vector_lo)*dx_uniform + 0.5*dx_uniform + x_domain_lo;
         //                     const double x_integral_vector_hi = x_integral_vector_lo + dx_uniform;
-        //             
+        //                     
         //                     const double weight_lo = ( x_integral_vector_hi - x[0])/dx_uniform;
         //                     const double weight_hi = (-x_integral_vector_lo + x[0])/dx_uniform;
-        //             
+        //                     
         //                     integral = weight_lo*integral_vector[idx_integral_vector_lo] + weight_hi*integral_vector[idx_integral_vector_hi];
-        //             
+        //                     
         //                     
         //                     // for (int ii = 0; ii < N_int; ii++)
         //                     //{

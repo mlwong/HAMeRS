@@ -163,6 +163,7 @@ class FlowModelSpecialSourceTerms
         std::vector<Real> d_special_source_box_lo; // Lower spatial coordinates.
         std::vector<Real> d_special_source_box_hi; // Upper spatial coordinates.
         bool d_special_source_exterior;
+        std::vector<double> d_special_source_vector; // Data container for special source terms.
         
 };
 

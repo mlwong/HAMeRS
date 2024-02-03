@@ -414,28 +414,41 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
         // Discretize the domain in x-direction for the approximated integral.
         const int integral_N_x = 10000;
         
-        std::vector<double> integral_vector(integral_N_x + 3);
+        std::vector<double>& integral_vector = d_special_source_vector; // Reference to the class member vector that stores the numerical integral.
         
-        std::ifstream f_in;
-        std::string integral_filename = "integral.dat";
-        f_in.open(integral_filename, std::ios::in | std::ios::binary);
-        f_in.read((char*)&integral_vector[0], sizeof(double)*integral_vector.size());
-        f_in.close();
+        if (integral_vector.empty())
+        {
+            integral_vector.resize(integral_N_x + 3);
+            std::ifstream f_in;
+            std::string integral_filename = "integral.dat";
+            f_in.open(integral_filename, std::ios::in | std::ios::binary);
+            f_in.read((char*)&integral_vector[0], sizeof(double)*integral_vector.size());
+            f_in.close();
+        }
         
         const double x_domain_lo = integral_vector[integral_N_x + 0];
         const double x_domain_hi = integral_vector[integral_N_x + 1];
         const double dx_uniform  = integral_vector[integral_N_x + 2];
         
-        for (int j = 0; j < patch_dims[1]; j++)
+        const int patch_dims_0 = patch_dims[0];
+        const int patch_dims_1 = patch_dims[1];
+        const int num_ghosts_source_0 = num_ghosts_source[0];
+        const int num_ghosts_source_1 = num_ghosts_source[1];
+        const int ghostcell_dims_source_0 = ghostcell_dims_source[0];
+        const int num_ghosts_cons_var_0 = num_ghosts_cons_var[0];
+        const int num_ghosts_cons_var_1 = num_ghosts_cons_var[1];
+        const int ghostcell_dims_cons_var_0 = ghostcell_dims_cons_var[0];
+        for (int j = 0; j < patch_dims_1; j++)
         {
-            for (int i = 0; i < patch_dims[0]; i++)
+            HAMERS_PRAGMA_SIMD
+            for (int i = 0; i < patch_dims_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_source = (i + num_ghosts_source[0]) +
-                    (j + num_ghosts_source[1])*ghostcell_dims_source[0];
+                const int idx_source = (i + num_ghosts_source_0) +
+                    (j + num_ghosts_source_1)*ghostcell_dims_source_0;
 
-                const int idx_cons_var = (i + num_ghosts_cons_var[0]) +
-                    (j + num_ghosts_cons_var[1])*ghostcell_dims_cons_var[0];
+                const int idx_cons_var = (i + num_ghosts_cons_var_0) +
+                    (j + num_ghosts_cons_var_1)*ghostcell_dims_cons_var_0;
 
                 // Compute the coordinates.
                 double x[2];
