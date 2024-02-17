@@ -29,7 +29,8 @@ class RefineRegionsTagger
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const HAMERS_SHARED_PTR<tbox::Database>& refine_regions_tagger_db,
-            const bool is_db_from_restart);
+            const bool is_db_from_restart,
+            const bool read_on_restart);
         
         /*
          * Put the characteristics of the refine regions tagger class into the restart database.

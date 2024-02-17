@@ -132,10 +132,10 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 spongeR = d_initial_conditions_db->getReal("spongeR");
                 spongeB = d_initial_conditions_db->getReal("spongeB");
                 spongeT = d_initial_conditions_db->getReal("spongeT");
-                std::cout << std::setprecision(17) << u_inf << std::endl;
-                std::cout << v_inf << std::endl;
-                std::cout << rho_inf << std::endl;
-                std::cout << p_inf << std::endl;
+                // std::cout << std::setprecision(17) << u_inf << std::endl;
+                // std::cout << v_inf << std::endl;
+                // std::cout << rho_inf << std::endl;
+                // std::cout << p_inf << std::endl;
             }
             
             for (int j = -num_ghosts_cons_var[1]; j < patch_dims[1] + num_ghosts_cons_var[1]; j++)
