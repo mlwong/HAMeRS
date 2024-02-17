@@ -110,6 +110,7 @@ NavierStokes::NavierStokes(
         getFromRestart();
     }
     getFromInput(input_db, is_from_restart);
+    const bool read_on_restart = input_db->getBoolWithDefault("read_on_restart", false);
     
     if (d_use_ghost_cell_immersed_boundary_method)
     {
@@ -253,7 +254,8 @@ NavierStokes::NavierStokes(
             d_dim,
             d_grid_geometry,
             d_refine_regions_tagger_db,
-            is_from_restart));
+            is_from_restart,
+            read_on_restart));
     }
     else
     {

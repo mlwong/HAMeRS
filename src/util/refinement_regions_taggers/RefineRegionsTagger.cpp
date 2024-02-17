@@ -15,14 +15,15 @@ RefineRegionsTagger::RefineRegionsTagger(
     const tbox::Dimension& dim,
     const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const HAMERS_SHARED_PTR<tbox::Database>& refine_regions_tagger_db,
-    const bool is_db_from_restart):
+    const bool is_db_from_restart,
+    const bool read_on_restart):
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry)
 {
     if (refine_regions_tagger_db != nullptr)
     {
-        if (!is_db_from_restart)
+        if (!is_db_from_restart || read_on_restart)
         {
             /*
              * Get the refine boxes in the sequence of 'refine_box_0', 'refine_box_1', ...
