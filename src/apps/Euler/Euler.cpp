@@ -1227,6 +1227,7 @@ Euler::setImmersedBoundaryGhostCells(
 void
 Euler::computeFluxesAndSourcesOnPatch(
     hier::Patch& patch,
+    const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
     const double time,
     const double dt,
     const int RK_step_number,
@@ -1264,6 +1265,7 @@ Euler::computeFluxesAndSourcesOnPatch(
         d_convective_flux_reconstructor->
             computeConvectiveFluxAndSourceOnPatch(
                 patch,
+                coarse_fine_bdry,
                 d_variable_convective_flux,
                 d_variable_source,
                 data_context,
@@ -1276,6 +1278,7 @@ Euler::computeFluxesAndSourcesOnPatch(
         d_convective_flux_reconstructor->
             computeConvectiveFluxAndSourceOnPatch(
                 patch,
+                coarse_fine_bdry,
                 d_variable_convective_flux,
                 d_variable_source,
                 getDataContext(),

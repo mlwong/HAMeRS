@@ -1565,6 +1565,7 @@ NavierStokes::setImmersedBoundaryGhostCells(
 void
 NavierStokes::computeFluxesAndSourcesOnPatch(
     hier::Patch& patch,
+    const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
     const double time,
     const double dt,
     const int RK_step_number,
@@ -1601,6 +1602,7 @@ NavierStokes::computeFluxesAndSourcesOnPatch(
     {
         d_convective_flux_reconstructor->computeConvectiveFluxAndSourceOnPatch(
             patch,
+            coarse_fine_bdry,
             d_variable_convective_flux,
             d_variable_source,
             data_context,
@@ -1612,6 +1614,7 @@ NavierStokes::computeFluxesAndSourcesOnPatch(
         {
             d_diffusive_flux_reconstructor->computeDiffusiveFluxOnPatch(
                 patch,
+                coarse_fine_bdry,
                 d_variable_diffusive_flux,
                 data_context,
                 time,
@@ -1623,6 +1626,7 @@ NavierStokes::computeFluxesAndSourcesOnPatch(
             d_nonconservative_diffusive_flux_divergence_operator->
                 computeNonconservativeDiffusiveFluxDivergenceOnPatch(
                     patch,
+                    coarse_fine_bdry,
                     d_variable_diffusive_flux_divergence,
                     data_context,
                     time,
@@ -1634,6 +1638,7 @@ NavierStokes::computeFluxesAndSourcesOnPatch(
     {
         d_convective_flux_reconstructor->computeConvectiveFluxAndSourceOnPatch(
             patch,
+            coarse_fine_bdry,
             d_variable_convective_flux,
             d_variable_source,
             getDataContext(),
@@ -1645,6 +1650,7 @@ NavierStokes::computeFluxesAndSourcesOnPatch(
         {
             d_diffusive_flux_reconstructor->computeDiffusiveFluxOnPatch(
                 patch,
+                coarse_fine_bdry,
                 d_variable_diffusive_flux,
                 getDataContext(),
                 time,
@@ -1656,6 +1662,7 @@ NavierStokes::computeFluxesAndSourcesOnPatch(
             d_nonconservative_diffusive_flux_divergence_operator->
                 computeNonconservativeDiffusiveFluxDivergenceOnPatch(
                     patch,
+                    coarse_fine_bdry,
                     d_variable_diffusive_flux_divergence,
                     getDataContext(),
                     time,

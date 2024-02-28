@@ -25,6 +25,7 @@
 #include "SAMRAI/pdat/SideDataFactory.h"
 #include "SAMRAI/pdat/SideVariable.h"
 #include "SAMRAI/xfer/CoarsenSchedule.h"
+#include "SAMRAI/hier/CoarseFineBoundary.h"
 #include "SAMRAI/hier/PatchData.h"
 #include "SAMRAI/hier/PatchDataFactory.h"
 #include "SAMRAI/hier/PatchDataRestartManager.h"
@@ -1877,6 +1878,16 @@ RungeKuttaLevelIntegrator::advanceLevel(
         }
     }
     
+    /*
+     * Get object that holds information of coarse-fine interfaces.
+     */
+    
+    HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry(
+        new hier::CoarseFineBoundary(
+            *hierarchy,
+            level->getLevelNumber(),
+            hier::IntVector::getZero(hierarchy->getDim())));
+    
     const tbox::SAMRAI_MPI& mpi(hierarchy->getMPI());
     for (int sn = 0; sn < d_number_steps; sn++)
     {
@@ -1982,6 +1993,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
             // Compute flux corresponding to this sub-step.
             d_patch_strategy->computeFluxesAndSourcesOnPatch(
                 *patch,
+                coarse_fine_bdry,
                 current_time,
                 dt,
                 sn,

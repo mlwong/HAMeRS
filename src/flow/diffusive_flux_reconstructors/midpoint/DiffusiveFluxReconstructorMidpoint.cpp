@@ -37,12 +37,14 @@ DiffusiveFluxReconstructorMidpoint::DiffusiveFluxReconstructorMidpoint(
 void
 DiffusiveFluxReconstructorMidpoint::computeDiffusiveFluxOnPatch(
     hier::Patch& patch,
+    const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
     const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_diffusive_flux,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double time,
     const double dt,
     const int RK_step_number)
 {
+    NULL_USE(coarse_fine_bdry);
     NULL_USE(time);
     NULL_USE(RK_step_number);
     

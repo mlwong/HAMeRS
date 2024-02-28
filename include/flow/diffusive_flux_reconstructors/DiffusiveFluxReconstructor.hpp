@@ -9,6 +9,7 @@
 #include "flow/flow_models/FlowModelSubgridScaleModel.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
+#include "SAMRAI/hier/CoarseFineBoundary.h"
 #include "SAMRAI/hier/IntVector.h"
 #include "SAMRAI/hier/Patch.h"
 #include "SAMRAI/pdat/CellVariable.h"
@@ -72,6 +73,7 @@ class DiffusiveFluxReconstructor
         virtual void
         computeDiffusiveFluxOnPatch(
             hier::Patch& patch,
+            const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
             const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_diffusive_flux,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double time,

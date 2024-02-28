@@ -155,6 +155,7 @@ class Euler:
         void
         computeFluxesAndSourcesOnPatch(
             hier::Patch& patch,
+            const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
             const double time,
             const double dt,
             const int RK_step_number,

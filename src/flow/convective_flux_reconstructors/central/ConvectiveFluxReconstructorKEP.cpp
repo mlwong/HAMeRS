@@ -248,6 +248,7 @@ ConvectiveFluxReconstructorKEP::putToRestart(
 void
 ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
     hier::Patch& patch,
+    const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
     const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
     const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -263,6 +264,7 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
             " KEP schemes can only be used for flow models: SINGLE_SPECIES, FOUR_EQN_CONSERVATIVE or FIVE_EQN_ALLAIRE!");
     }
     
+    NULL_USE(coarse_fine_bdry);
     NULL_USE(time);
     NULL_USE(RK_step_number);
     

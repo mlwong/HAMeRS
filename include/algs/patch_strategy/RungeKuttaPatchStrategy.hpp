@@ -20,6 +20,7 @@
 
 #include "util/ensemble_statistics/EnsembleStatistics.hpp"
 
+#include "SAMRAI/hier/CoarseFineBoundary.h"
 #include "SAMRAI/hier/IntVector.h"
 #include "SAMRAI/hier/PatchData.h"
 #include "SAMRAI/hier/PatchLevel.h"
@@ -160,6 +161,7 @@ class RungeKuttaPatchStrategy:
         virtual void
         computeFluxesAndSourcesOnPatch(
             hier::Patch& patch,
+            const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
             const double time,
             const double dt,
             const int RK_step_number,
