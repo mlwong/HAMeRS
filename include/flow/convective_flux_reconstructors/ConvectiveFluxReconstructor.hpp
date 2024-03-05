@@ -119,7 +119,7 @@ class ConvectiveFluxReconstructor
         const HAMERS_SHARED_PTR<FlowModel> d_flow_model;
         
         /*
-         * HAMERS_SHARED_PTR to database of the convective_flux_reconstructor.
+         * HAMERS_SHARED_PTR to database of the convective flux reconstructor.
          */
         const HAMERS_SHARED_PTR<tbox::Database> d_convective_flux_reconstructor_db;
         

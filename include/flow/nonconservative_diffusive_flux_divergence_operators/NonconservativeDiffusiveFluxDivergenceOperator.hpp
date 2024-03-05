@@ -186,7 +186,7 @@ class NonconservativeDiffusiveFluxDivergenceOperator
         const HAMERS_SHARED_PTR<FlowModel> d_flow_model;
         
         /*
-         * HAMERS_SHARED_PTR to database of the non-conservative diffusive flux divergence operatore.
+         * HAMERS_SHARED_PTR to database of the non-conservative diffusive flux divergence operator.
          */
         const HAMERS_SHARED_PTR<tbox::Database> d_nonconservative_diffusive_flux_divergence_operator_db;
         
