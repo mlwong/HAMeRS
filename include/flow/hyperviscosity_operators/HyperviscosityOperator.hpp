@@ -30,16 +30,7 @@ class HyperviscosityOperator
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_eqn,
             const HAMERS_SHARED_PTR<FlowModel>& flow_model,
-            const HAMERS_SHARED_PTR<tbox::Database>& hyperviscosity_operator_db):
-                d_object_name(object_name),
-                d_dim(dim),
-                d_grid_geometry(grid_geometry),
-                d_num_hyperviscosity_op_ghosts(hier::IntVector::getZero(d_dim)),
-                d_num_eqn(num_eqn),
-                d_flow_model(flow_model),
-                d_hyperviscosity_operator_db(
-                    hyperviscosity_operator_db)
-        {}
+            const HAMERS_SHARED_PTR<tbox::Database>& hyperviscosity_operator_db);
         
         virtual ~HyperviscosityOperator() {}
         
@@ -115,6 +106,12 @@ class HyperviscosityOperator
          */
         const HAMERS_SHARED_PTR<tbox::Database> d_hyperviscosity_operator_db;
         
+        /*
+         * Scheme parameters.
+         */
+        int d_lap_order;
+        int d_accuracy_order;
+        bool d_use_conservative_form;
 };
 
 
