@@ -72,6 +72,17 @@ class HyperviscosityOperator
         
     private:
         /*
+         * Perform the hyperviscosity operator on a patch using source form.
+         */
+        void
+        performHyperviscosityOperatorOnPatchSourceForm(
+            hier::Patch& patch,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> > source,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double dt,
+            const hier::Box& domain) const;
+        
+        /*
          * The object name is used for error/warning reporting.
          */
         const std::string d_object_name;
@@ -111,7 +122,12 @@ class HyperviscosityOperator
          */
         int d_lap_order;
         int d_accuracy_order;
-        bool d_use_conservative_form;
+        bool d_use_flux_form;
+        Real d_coeff;
+        
+        std::vector<Real> d_coeffs_node;
+        std::vector<Real> d_coeffs_midpoint;
+        Real d_prefactor;
 };
 
 
