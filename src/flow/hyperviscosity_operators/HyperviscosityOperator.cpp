@@ -490,15 +490,344 @@ HyperviscosityOperator::performHyperviscosityOperatorOnPatchFluxForm(
             
             if (num_ghosts == 1)
             {
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_x = i +
+                                j*(interior_dim_0 + 1) +
+                                k*(interior_dim_0 + 1)*interior_dim_1;
+                            
+                            const int idx_sound_speed_L = (i - 1 + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed + 
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_R = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_cons_var_L = (i - 1 + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var + 
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_R = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const Real c_midpoint = a_I_2nd*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
+                            
+                            F_face_x[idx_face_x] -= Real(dt)*prefactor*c_midpoint*(
+                                a_m*(Q[ei][idx_cons_var_R]  - Q[ei][idx_cons_var_L])
+                                );
+                        }
+                    }
+                }
             }
             else if (num_ghosts == 2)
             {
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_x = i +
+                                j*(interior_dim_0 + 1) +
+                                k*(interior_dim_0 + 1)*interior_dim_1;
+                            
+                            const int idx_sound_speed_LL = (i - 2 + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_L = (i - 1 + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed + 
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_R = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_RR = (i + 1 + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_cons_var_LL = (i - 2 + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_L = (i - 1 + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var + 
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_R = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_RR = (i + 1 + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const Real c_midpoint_4th =
+                                a_I_4th*(c[idx_sound_speed_L]  + c[idx_sound_speed_R]) +
+                                b_I_4th*(c[idx_sound_speed_LL] + c[idx_sound_speed_RR]);
+                            
+                            const Real c_midpoint_2nd =
+                                a_I_2nd*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
+                            
+                            Real c_midpoint = c_midpoint_4th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_2nd;
+                            
+                            F_face_x[idx_face_x] -= Real(dt)*prefactor*c_midpoint*(
+                                a_m*(Q[ei][idx_cons_var_R]  - Q[ei][idx_cons_var_L]) +
+                                b_m*(Q[ei][idx_cons_var_RR] - Q[ei][idx_cons_var_LL])
+                                );
+                        }
+                    }
+                }
             }
             else if (num_ghosts == 3)
             {
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_x = i +
+                                j*(interior_dim_0 + 1) +
+                                k*(interior_dim_0 + 1)*interior_dim_1;
+                            
+                            const int idx_sound_speed_LLL = (i - 3 + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_LL = (i - 2 + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_L = (i - 1 + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed + 
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_R = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_RR = (i + 1 + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_RRR = (i + 2 + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_cons_var_LLL = (i - 3 + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_LL = (i - 2 + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_L = (i - 1 + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var + 
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_R = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_RR = (i + 1 + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_RRR = (i + 2 + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const Real c_midpoint_6th =
+                                a_I_6th*(c[idx_sound_speed_L]   + c[idx_sound_speed_R]) +
+                                b_I_6th*(c[idx_sound_speed_LL]  + c[idx_sound_speed_RR]) +
+                                c_I_6th*(c[idx_sound_speed_LLL] + c[idx_sound_speed_RRR]);
+                            
+                            const Real c_midpoint_4th =
+                                a_I_4th*(c[idx_sound_speed_L]  + c[idx_sound_speed_R]) +
+                                b_I_4th*(c[idx_sound_speed_LL] + c[idx_sound_speed_RR]);
+                            
+                            const Real c_midpoint_2nd =
+                                a_I_2nd*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
+                            
+                            Real c_midpoint = c_midpoint_6th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_4th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_2nd;
+                            
+                            F_face_x[idx_face_x] -= Real(dt)*prefactor*c_midpoint*(
+                                a_m*(Q[ei][idx_cons_var_R]   - Q[ei][idx_cons_var_L]) +
+                                b_m*(Q[ei][idx_cons_var_RR]  - Q[ei][idx_cons_var_LL]) +
+                                c_m*(Q[ei][idx_cons_var_RRR] - Q[ei][idx_cons_var_LLL])
+                                );
+                        }
+                    }
+                }
             }
             else if (num_ghosts == 4)
             {
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_x = i +
+                                j*(interior_dim_0 + 1) +
+                                k*(interior_dim_0 + 1)*interior_dim_1;
+                            
+                            const int idx_sound_speed_LLLL = (i - 4 + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed + 
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_LLL = (i - 3 + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_LL = (i - 2 + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_L = (i - 1 + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed + 
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_R = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_RR = (i + 1 + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_RRR = (i + 2 + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_RRRR = (i + 3 + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_cons_var_LLLL = (i - 4 + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var + 
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_LLL = (i - 3 + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_LL = (i - 2 + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_L = (i - 1 + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var + 
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_R = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_RR = (i + 1 + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_RRR = (i + 2 + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_RRRR = (i + 3 + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const Real c_midpoint_8th = 
+                                a_I_8th*(c[idx_sound_speed_L]    + c[idx_sound_speed_R]) +
+                                b_I_8th*(c[idx_sound_speed_LL]   + c[idx_sound_speed_RR]) +
+                                c_I_8th*(c[idx_sound_speed_LLL]  + c[idx_sound_speed_RRR]) +
+                                d_I_8th*(c[idx_sound_speed_LLLL] + c[idx_sound_speed_RRRR]);
+                            
+                            const Real c_midpoint_6th =
+                                a_I_6th*(c[idx_sound_speed_L]   + c[idx_sound_speed_R]) +
+                                b_I_6th*(c[idx_sound_speed_LL]  + c[idx_sound_speed_RR]) +
+                                c_I_6th*(c[idx_sound_speed_LLL] + c[idx_sound_speed_RRR]);
+                            
+                            const Real c_midpoint_4th =
+                                a_I_4th*(c[idx_sound_speed_L]  + c[idx_sound_speed_R]) +
+                                b_I_4th*(c[idx_sound_speed_LL] + c[idx_sound_speed_RR]);
+                            
+                            const Real c_midpoint_2nd =
+                                a_I_2nd*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
+                            
+                            Real c_midpoint = c_midpoint_8th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_6th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_4th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_2nd;
+                            
+                            F_face_x[idx_face_x] -= Real(dt)*prefactor*c_midpoint*(
+                                a_m*(Q[ei][idx_cons_var_R]    - Q[ei][idx_cons_var_L]) +
+                                b_m*(Q[ei][idx_cons_var_RR]   - Q[ei][idx_cons_var_LL]) +
+                                c_m*(Q[ei][idx_cons_var_RRR]  - Q[ei][idx_cons_var_LLL]) +
+                                d_m*(Q[ei][idx_cons_var_RRRR] - Q[ei][idx_cons_var_LLLL])
+                                );
+                        }
+                    }
+                }
             }
             else if (num_ghosts == 5)
             {
@@ -665,15 +994,344 @@ HyperviscosityOperator::performHyperviscosityOperatorOnPatchFluxForm(
             
             if (num_ghosts == 1)
             {
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_y = i +
+                                j*interior_dim_0 + 
+                                k*interior_dim_0*(interior_dim_1 + 1);
+                            
+                            const int idx_sound_speed_B = (i + num_subghosts_0_sound_speed) +
+                                (j - 1 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed + 
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_T = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_cons_var_B = (i + num_subghosts_0_conservative_var) +
+                                (j - 1 + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var + 
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_T = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const Real c_midpoint = a_I_2nd*(c[idx_sound_speed_B] + c[idx_sound_speed_T]);
+                            
+                            F_face_y[idx_face_y] -= Real(dt)*prefactor*c_midpoint*(
+                                a_m*(Q[ei][idx_cons_var_T] - Q[ei][idx_cons_var_B])
+                                );
+                        }
+                    }
+                }
             }
             else if (num_ghosts == 2)
             {
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_y = i +
+                                j*interior_dim_0 + 
+                                k*interior_dim_0*(interior_dim_1 + 1);
+                            
+                            const int idx_sound_speed_BB = (i + num_subghosts_0_sound_speed) +
+                                (j - 2 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_B = (i + num_subghosts_0_sound_speed) +
+                                (j - 1 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed + 
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_T = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_TT = (i + num_subghosts_0_sound_speed) +
+                                (j + 1 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_cons_var_BB = (i + num_subghosts_0_conservative_var) +
+                                (j - 2 + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_B = (i + num_subghosts_0_conservative_var) +
+                                (j - 1 + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var + 
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_T = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_TT = (i + num_subghosts_0_conservative_var) +
+                                (j + 1 + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const Real c_midpoint_4th =
+                                a_I_4th*(c[idx_sound_speed_B]  + c[idx_sound_speed_T]) +
+                                b_I_4th*(c[idx_sound_speed_BB] + c[idx_sound_speed_TT]);
+                            
+                            const Real c_midpoint_2nd =
+                                a_I_2nd*(c[idx_sound_speed_B] + c[idx_sound_speed_T]);
+                            
+                            Real c_midpoint = c_midpoint_4th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_2nd;
+                            
+                            F_face_y[idx_face_y] -= Real(dt)*prefactor*c_midpoint*(
+                                a_m*(Q[ei][idx_cons_var_T]  - Q[ei][idx_cons_var_B]) +
+                                b_m*(Q[ei][idx_cons_var_TT] - Q[ei][idx_cons_var_BB])
+                                );
+                        }
+                    }
+                }
             }
             else if (num_ghosts == 3)
             {
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_y = i +
+                                j*interior_dim_0 + 
+                                k*interior_dim_0*(interior_dim_1 + 1);
+                            
+                            const int idx_sound_speed_BBB = (i + num_subghosts_0_sound_speed) +
+                                (j - 3 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_BB = (i + num_subghosts_0_sound_speed) +
+                                (j - 2 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_B = (i + num_subghosts_0_sound_speed) +
+                                (j - 1 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed + 
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_T = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_TT = (i + num_subghosts_0_sound_speed) +
+                                (j + 1 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_TTT = (i + num_subghosts_0_sound_speed) +
+                                (j + 2 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_cons_var_BBB = (i + num_subghosts_0_conservative_var) +
+                                (j - 3 + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_BB = (i + num_subghosts_0_conservative_var) +
+                                (j - 2 + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_B = (i + num_subghosts_0_conservative_var) +
+                                (j - 1 + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var + 
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_T = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_TT = (i + num_subghosts_0_conservative_var) +
+                                (j + 1 + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_TTT = (i + num_subghosts_0_conservative_var) +
+                                (j + 2 + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const Real c_midpoint_6th =
+                                a_I_6th*(c[idx_sound_speed_B]   + c[idx_sound_speed_T]) +
+                                b_I_6th*(c[idx_sound_speed_BB]  + c[idx_sound_speed_TT]) +
+                                c_I_6th*(c[idx_sound_speed_BBB] + c[idx_sound_speed_TTT]);
+                            
+                            const Real c_midpoint_4th =
+                                a_I_4th*(c[idx_sound_speed_B]  + c[idx_sound_speed_T]) +
+                                b_I_4th*(c[idx_sound_speed_BB] + c[idx_sound_speed_TT]);
+                            
+                            const Real c_midpoint_2nd =
+                                a_I_2nd*(c[idx_sound_speed_B] + c[idx_sound_speed_T]);
+                            
+                            Real c_midpoint = c_midpoint_6th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_4th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_2nd;
+                            
+                            F_face_y[idx_face_y] -= Real(dt)*prefactor*c_midpoint*(
+                                a_m*(Q[ei][idx_cons_var_T]   - Q[ei][idx_cons_var_B]) +
+                                b_m*(Q[ei][idx_cons_var_TT]  - Q[ei][idx_cons_var_BB]) +
+                                c_m*(Q[ei][idx_cons_var_TTT] - Q[ei][idx_cons_var_BBB])
+                                );
+                        }
+                    }
+                }
             }
             else if (num_ghosts == 4)
             {
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_y = i +
+                                j*interior_dim_0 + 
+                                k*interior_dim_0*(interior_dim_1 + 1);
+                            
+                            const int idx_sound_speed_BBBB = (i + num_subghosts_0_sound_speed) +
+                                (j - 4 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed + 
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_BBB = (i + num_subghosts_0_sound_speed) +
+                                (j - 3 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_BB = (i + num_subghosts_0_sound_speed) +
+                                (j - 2 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_B = (i + num_subghosts_0_sound_speed) +
+                                (j - 1 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed + 
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_T = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_TT = (i + num_subghosts_0_sound_speed) +
+                                (j + 1 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_TTT = (i + num_subghosts_0_sound_speed) +
+                                (j + 2 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_TTTT = (i + num_subghosts_0_sound_speed) +
+                                (j + 3 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_cons_var_BBBB = (i + num_subghosts_0_conservative_var) +
+                                (j - 4 + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var + 
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_BBB = (i + num_subghosts_0_conservative_var) +
+                                (j - 3 + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_BB = (i + num_subghosts_0_conservative_var) +
+                                (j - 2 + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_B = (i + num_subghosts_0_conservative_var) +
+                                (j - 1 + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var + 
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_T = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_TT = (i + num_subghosts_0_conservative_var) +
+                                (j + 1 + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_TTT = (i + num_subghosts_0_conservative_var) +
+                                (j + 2 + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_TTTT = (i + num_subghosts_0_conservative_var) +
+                                (j + 3 + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const Real c_midpoint_8th = 
+                                a_I_8th*(c[idx_sound_speed_B]    + c[idx_sound_speed_T]) +
+                                b_I_8th*(c[idx_sound_speed_BB]   + c[idx_sound_speed_TT]) +
+                                c_I_8th*(c[idx_sound_speed_BBB]  + c[idx_sound_speed_TTT]) +
+                                d_I_8th*(c[idx_sound_speed_BBBB] + c[idx_sound_speed_TTTT]);
+                            
+                            const Real c_midpoint_6th =
+                                a_I_6th*(c[idx_sound_speed_B]   + c[idx_sound_speed_T]) +
+                                b_I_6th*(c[idx_sound_speed_BB]  + c[idx_sound_speed_TT]) +
+                                c_I_6th*(c[idx_sound_speed_BBB] + c[idx_sound_speed_TTT]);
+                            
+                            const Real c_midpoint_4th =
+                                a_I_4th*(c[idx_sound_speed_B]  + c[idx_sound_speed_T]) +
+                                b_I_4th*(c[idx_sound_speed_BB] + c[idx_sound_speed_TT]);
+                            
+                            const Real c_midpoint_2nd =
+                                a_I_2nd*(c[idx_sound_speed_B] + c[idx_sound_speed_T]);
+                            
+                            Real c_midpoint = c_midpoint_8th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_6th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_4th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_2nd;
+                            
+                            F_face_y[idx_face_y] -= Real(dt)*prefactor*c_midpoint*(
+                                a_m*(Q[ei][idx_cons_var_T]    - Q[ei][idx_cons_var_B]) +
+                                b_m*(Q[ei][idx_cons_var_TT]   - Q[ei][idx_cons_var_BB]) +
+                                c_m*(Q[ei][idx_cons_var_TTT]  - Q[ei][idx_cons_var_BBB]) +
+                                d_m*(Q[ei][idx_cons_var_TTTT] - Q[ei][idx_cons_var_BBBB])
+                                );
+                        }
+                    }
+                }
             }
             else if (num_ghosts == 5)
             {
@@ -840,15 +1498,347 @@ HyperviscosityOperator::performHyperviscosityOperatorOnPatchFluxForm(
             
             if (num_ghosts == 1)
             {
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2 + 1; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_z = i +
+                                j*interior_dim_0 + 
+                                k*interior_dim_0*interior_dim_1;
+                            
+                            const int idx_sound_speed_B = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed + 
+                                (k - 1 + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_F = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_cons_var_B = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var + 
+                                (k - 1 + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_F = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const Real c_midpoint_2nd =
+                                a_I_2nd*(c[idx_sound_speed_B] + c[idx_sound_speed_F]);
+                            
+                            const Real c_midpoint = c_midpoint_2nd;
+                            
+                            F_face_z[idx_face_z] -= Real(dt)*prefactor*c_midpoint*(
+                                a_m*(Q[ei][idx_cons_var_F]  - Q[ei][idx_cons_var_B])
+                                );
+                        }
+                    }
+                }
             }
             else if (num_ghosts == 2)
             {
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2 + 1; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_z = i +
+                                j*interior_dim_0 + 
+                                k*interior_dim_0*interior_dim_1;
+                            
+                            const int idx_sound_speed_BB = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k - 2 + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_B = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed + 
+                                (k - 1 + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_F = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_FF = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + 1 + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_cons_var_BB = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k - 2 + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_B = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var + 
+                                (k - 1 + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_F = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_FF = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + 1 + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const Real c_midpoint_4th =
+                                a_I_4th*(c[idx_sound_speed_B]  + c[idx_sound_speed_F]) +
+                                b_I_4th*(c[idx_sound_speed_BB] + c[idx_sound_speed_FF]);
+                            
+                            const Real c_midpoint_2nd =
+                                a_I_2nd*(c[idx_sound_speed_B] + c[idx_sound_speed_F]);
+                            
+                            Real c_midpoint = c_midpoint_4th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_2nd;
+                            
+                            F_face_z[idx_face_z] -= Real(dt)*prefactor*c_midpoint*(
+                                a_m*(Q[ei][idx_cons_var_F]  - Q[ei][idx_cons_var_B]) +
+                                b_m*(Q[ei][idx_cons_var_FF] - Q[ei][idx_cons_var_BB])
+                                );
+                        }
+                    }
+                }
             }
             else if (num_ghosts == 3)
             {
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2 + 1; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_z = i +
+                                j*interior_dim_0 + 
+                                k*interior_dim_0*interior_dim_1;
+                            
+                            const int idx_sound_speed_BBB = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k - 3 + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_BB = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k - 2 + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_B = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed + 
+                                (k - 1 + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_F = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_FF = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + 1 + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_FFF = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + 2 + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_cons_var_BBB = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k - 3 + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_BB = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k - 2 + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_B = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var + 
+                                (k - 1 + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_F = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_FF = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + 1 + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_FFF = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + 2 + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const Real c_midpoint_6th =
+                                a_I_6th*(c[idx_sound_speed_B]   + c[idx_sound_speed_F]) +
+                                b_I_6th*(c[idx_sound_speed_BB]  + c[idx_sound_speed_FF]) +
+                                c_I_6th*(c[idx_sound_speed_BBB] + c[idx_sound_speed_FFF]);
+                            
+                            const Real c_midpoint_4th =
+                                a_I_4th*(c[idx_sound_speed_B]  + c[idx_sound_speed_F]) +
+                                b_I_4th*(c[idx_sound_speed_BB] + c[idx_sound_speed_FF]);
+                            
+                            const Real c_midpoint_2nd =
+                                a_I_2nd*(c[idx_sound_speed_B] + c[idx_sound_speed_F]);
+                            
+                            Real c_midpoint = c_midpoint_6th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_4th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_2nd;
+                            
+                            F_face_z[idx_face_z] -= Real(dt)*prefactor*c_midpoint*(
+                                a_m*(Q[ei][idx_cons_var_F]   - Q[ei][idx_cons_var_B]) +
+                                b_m*(Q[ei][idx_cons_var_FF]  - Q[ei][idx_cons_var_BB]) +
+                                c_m*(Q[ei][idx_cons_var_FFF] - Q[ei][idx_cons_var_BBB])
+                                );
+                        }
+                    }
+                }
             }
             else if (num_ghosts == 4)
             {
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2 + 1; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_z = i +
+                                j*interior_dim_0 + 
+                                k*interior_dim_0*interior_dim_1;
+                            
+                            const int idx_sound_speed_BBBB = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed + 
+                                (k - 4 + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_BBB = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k - 3 + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_BB = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k - 2 + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_B = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed + 
+                                (k - 1 + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_F = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_FF = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + 1 + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_FFF = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + 2 + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_FFFF = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + 3 + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_cons_var_BBBB = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var + 
+                                (k - 4 + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_BBB = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k - 3 + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_BB = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k - 2 + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_B = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var + 
+                                (k - 1 + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_F = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_FF = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + 1 + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_FFF = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + 2 + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const int idx_cons_var_FFFF = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + 3 + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
+                            
+                            const Real c_midpoint_8th = 
+                                a_I_8th*(c[idx_sound_speed_B]    + c[idx_sound_speed_F]) +
+                                b_I_8th*(c[idx_sound_speed_BB]   + c[idx_sound_speed_FF]) +
+                                c_I_8th*(c[idx_sound_speed_BBB]  + c[idx_sound_speed_FFF]) +
+                                d_I_8th*(c[idx_sound_speed_BBBB] + c[idx_sound_speed_FFFF]);
+                            
+                            const Real c_midpoint_6th =
+                                a_I_6th*(c[idx_sound_speed_B]   + c[idx_sound_speed_F]) +
+                                b_I_6th*(c[idx_sound_speed_BB]  + c[idx_sound_speed_FF]) +
+                                c_I_6th*(c[idx_sound_speed_BBB] + c[idx_sound_speed_FFF]);
+                            
+                            const Real c_midpoint_4th =
+                                a_I_4th*(c[idx_sound_speed_B]  + c[idx_sound_speed_F]) +
+                                b_I_4th*(c[idx_sound_speed_BB] + c[idx_sound_speed_FF]);
+                            
+                            const Real c_midpoint_2nd =
+                                a_I_2nd*(c[idx_sound_speed_B] + c[idx_sound_speed_F]);
+                            
+                            Real c_midpoint = c_midpoint_8th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_6th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_4th;
+                            if (c_midpoint < Real(0)) c_midpoint = c_midpoint_2nd;
+                            
+                            F_face_z[idx_face_z] -= Real(dt)*prefactor*c_midpoint*(
+                                a_m*(Q[ei][idx_cons_var_F]    - Q[ei][idx_cons_var_B]) +
+                                b_m*(Q[ei][idx_cons_var_FF]   - Q[ei][idx_cons_var_BB]) +
+                                c_m*(Q[ei][idx_cons_var_FFF]  - Q[ei][idx_cons_var_BBB]) +
+                                d_m*(Q[ei][idx_cons_var_FFFF] - Q[ei][idx_cons_var_BBBB])
+                                );
+                        }
+                    }
+                }
             }
             else if (num_ghosts == 5)
             {
