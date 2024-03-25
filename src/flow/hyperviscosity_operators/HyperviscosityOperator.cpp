@@ -248,10 +248,10 @@ HyperviscosityOperator::putToRestart(
 
 
 /*
- * Perform the hyperviscosity operator on a patch.
+ * Perform the hyperviscosity operation on a patch.
  */
 void
-HyperviscosityOperator::performHyperviscosityOperatorOnPatch(
+HyperviscosityOperator::performHyperviscosityOperationOnPatch(
     hier::Patch& patch,
     const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
     const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
@@ -290,8 +290,14 @@ HyperviscosityOperator::performHyperviscosityOperatorOnPatch(
     TBOX_ASSERT(convective_flux->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
 #endif
         
-        TBOX_ERROR("HyperviscosityOperator::performHyperviscosityOperatorOnPatch:"
-            " Flux form is not implemented yet!");
+        performHyperviscosityOperationOnPatchFluxForm(
+            patch,
+            convective_flux,
+            data_context,
+            domain,
+            d_coeffs_midpoint,
+            d_prefactor,
+            dt);
     }
     else
     {
@@ -305,7 +311,7 @@ HyperviscosityOperator::performHyperviscosityOperatorOnPatch(
         TBOX_ASSERT(source->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
 #endif
         
-        performHyperviscosityOperatorOnPatchSourceForm(
+        performHyperviscosityOperationOnPatchSourceForm(
             patch,
             source,
             data_context,
@@ -318,10 +324,10 @@ HyperviscosityOperator::performHyperviscosityOperatorOnPatch(
 
 
 /*
- * Perform the hyperviscosity operator on a patch using flux form.
+ * Perform the hyperviscosity operation on a patch using flux form.
  */
 void
-HyperviscosityOperator::performHyperviscosityOperatorOnPatchFluxForm(
+HyperviscosityOperator::performHyperviscosityOperationOnPatchFluxForm(
     hier::Patch& patch,
     const HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2008,10 +2014,10 @@ HyperviscosityOperator::performHyperviscosityOperatorOnPatchFluxForm(
 
 
 /*
- * Perform the hyperviscosity operator on a patch using source form.
+ * Perform the hyperviscosity operation on a patch using source form.
  */
 void
-HyperviscosityOperator::performHyperviscosityOperatorOnPatchSourceForm(
+HyperviscosityOperator::performHyperviscosityOperationOnPatchSourceForm(
     hier::Patch& patch,
     const HAMERS_SHARED_PTR<pdat::CellData<Real> > source,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,

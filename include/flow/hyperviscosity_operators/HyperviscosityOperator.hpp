@@ -57,10 +57,10 @@ class HyperviscosityOperator
             const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
         /*
-         * Perform the hyperviscosity operator on a patch.
+         * Perform the hyperviscosity operation on a patch.
          */
         void
-        performHyperviscosityOperatorOnPatch(
+        performHyperviscosityOperationOnPatch(
             hier::Patch& patch,
             const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
             const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
@@ -72,10 +72,10 @@ class HyperviscosityOperator
         
     private:
         /*
-         * Perform the hyperviscosity operator on a patch using flux form.
+         * Perform the hyperviscosity operation on a patch using flux form.
          */
         void
-        performHyperviscosityOperatorOnPatchFluxForm(
+        performHyperviscosityOperationOnPatchFluxForm(
             hier::Patch& patch,
             const HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -85,10 +85,10 @@ class HyperviscosityOperator
             const double dt) const;
         
         /*
-         * Perform the hyperviscosity operator on a patch using source form.
+         * Perform the hyperviscosity operation on a patch using source form.
          */
         void
-        performHyperviscosityOperatorOnPatchSourceForm(
+        performHyperviscosityOperationOnPatchSourceForm(
             hier::Patch& patch,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> > source,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,

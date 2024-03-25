@@ -66,6 +66,7 @@ Euler::Euler(
         d_monitoring_stat_dump_filename("monitoring_stats.txt"),
         d_stat_dump_filename(stat_dump_filename),
         d_use_nonuniform_workload(false),
+        d_use_hyperviscosity_operator(false),
         d_Euler_boundary_conditions_db_is_from_restart(false),
         d_use_immersed_boundaries(false)
 {
@@ -166,6 +167,21 @@ Euler::Euler(
     
     d_convective_flux_reconstructor = d_convective_flux_reconstructor_manager->getConvectiveFluxReconstructor();
     
+    if (d_use_hyperviscosity_operator)
+    {
+        /*
+         * Initialize d_hyperviscosity_operator object.
+         */
+        
+        d_hyperviscosity_operator.reset(new HyperviscosityOperator(
+            "d_hyperviscosity_operator",
+            d_dim,
+            d_grid_geometry,
+            d_flow_model->getNumberOfEquations(),
+            d_flow_model,
+            d_hyperviscosity_operator_db));
+    }
+    
     /*
      * Initialize d_Euler_initial_conditions.
      */
@@ -234,6 +250,13 @@ Euler::Euler(
         num_cells_buffer_required = hier::IntVector::max(
             num_cells_buffer_required,
             d_convective_flux_reconstructor->getConvectiveFluxNumberOfGhostCells());
+        
+        if (d_use_hyperviscosity_operator)
+        {
+            num_cells_buffer_required = hier::IntVector::max(
+                num_cells_buffer_required,
+                d_hyperviscosity_operator->getHyperviscosityOperatorNumberOfGhostCells());
+        }
         
         if (hier::IntVector::getOne(d_dim)*d_immersed_boundary_tagger_num_cells_buffer >= hier::IntVector::getZero(d_dim))
         {
@@ -363,6 +386,13 @@ Euler::registerModelVariables(
     num_ghosts_intermediate = hier::IntVector::max(
         num_ghosts_intermediate,
         d_convective_flux_reconstructor->getConvectiveFluxNumberOfGhostCells());
+    
+    if (d_use_hyperviscosity_operator)
+    {
+        num_ghosts_intermediate = hier::IntVector::max(
+            num_ghosts_intermediate,
+            d_hyperviscosity_operator->getHyperviscosityOperatorNumberOfGhostCells());
+    }
     
     hier::IntVector num_ghosts = num_ghosts_intermediate;
     
@@ -1272,6 +1302,19 @@ Euler::computeFluxesAndSourcesOnPatch(
                 time,
                 dt,
                 RK_step_number);
+        
+        if (d_use_hyperviscosity_operator)
+        {
+            d_hyperviscosity_operator->performHyperviscosityOperationOnPatch(
+                patch,
+                coarse_fine_bdry,
+                d_variable_convective_flux,
+                d_variable_source,
+                data_context,
+                time,
+                dt,
+                RK_step_number);
+        }
     }
     else
     {
@@ -1285,6 +1328,19 @@ Euler::computeFluxesAndSourcesOnPatch(
                 time,
                 dt,
                 RK_step_number);
+        
+        if (d_use_hyperviscosity_operator)
+        {
+            d_hyperviscosity_operator->performHyperviscosityOperationOnPatch(
+                patch,
+                coarse_fine_bdry,
+                d_variable_convective_flux,
+                d_variable_source,
+                getDataContext(),
+                time,
+                dt,
+                RK_step_number);
+        }
     }
     
     /*
@@ -3185,6 +3241,15 @@ Euler::putToRestart(
         restart_db->putDatabase("d_convective_flux_reconstructor_db");
     d_convective_flux_reconstructor->putToRestart(restart_convective_flux_reconstructor_db);
     
+    // Hyperviscosity operator.
+    restart_db->putBool("d_use_hyperviscosity_operator", d_use_hyperviscosity_operator);
+    if (d_use_hyperviscosity_operator)
+    {
+        HAMERS_SHARED_PTR<tbox::Database> restart_hyperviscosity_operator_db =
+            restart_db->putDatabase("d_hyperviscosity_operator_db");
+        d_hyperviscosity_operator->putToRestart(restart_hyperviscosity_operator_db);
+    }
+    
     HAMERS_SHARED_PTR<tbox::Database> restart_Euler_boundary_conditions_db =
         restart_db->putDatabase("d_Euler_boundary_conditions_db");
     
@@ -3345,6 +3410,16 @@ void Euler::printClassData(std::ostream& os) const
     
     d_convective_flux_reconstructor->printClassData(os);
     os << "--------------------------------------------------------------------------------";
+    
+    if (d_use_hyperviscosity_operator)
+    {
+        /*
+         * Print data of d_hyperviscosity_operator.
+         */
+        
+        d_hyperviscosity_operator->printClassData(os);
+        os << "--------------------------------------------------------------------------------";
+    }
     
     /*
      * Print Refinement data
@@ -3826,6 +3901,27 @@ Euler::getFromInput(
                 << std::endl);
         }
         
+        d_use_hyperviscosity_operator = input_db->getBoolWithDefault(
+            "use_hyperviscosity_operator", false);
+        
+        if (d_use_hyperviscosity_operator)
+        {
+            /*
+             * Get the database of the hyperviscosity operator.
+             */
+            if (input_db->keyExists("Hyperviscosity_operator"))
+            {
+                d_hyperviscosity_operator_db = input_db->getDatabase("Hyperviscosity_operator");
+            }
+            else
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Key data 'Hyperviscosity_operator' not found in input database."
+                    << std::endl);
+            }
+        }
+        
         if (input_db->keyExists("Refine_regions_tagger"))
         {
             d_refine_regions_tagger_db =
@@ -3943,6 +4039,13 @@ void Euler::getFromRestart()
     d_convective_flux_reconstructor_str = db->getString("d_convective_flux_reconstructor_str");
     
     d_convective_flux_reconstructor_db = db->getDatabase("d_convective_flux_reconstructor_db");
+    
+    d_use_hyperviscosity_operator = db->getBool("d_use_hyperviscosity_operator");
+    
+    if (d_use_hyperviscosity_operator)
+    {
+        d_hyperviscosity_operator_db = db->getDatabase("d_hyperviscosity_operator_db");
+    }
     
     d_Euler_boundary_conditions_db = db->getDatabase("d_Euler_boundary_conditions_db");
     

@@ -46,7 +46,17 @@
         "thread": "cpp",
         "type_traits": "cpp",
         "tuple": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "cinttypes": "cpp",
+        "cstdarg": "cpp",
+        "algorithm": "cpp",
+        "iterator": "cpp",
+        "memory_resource": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+        "set": "cpp",
+        "cfenv": "cpp",
+        "typeindex": "cpp"
     },
     "cmake.configureOnOpen": false
 }

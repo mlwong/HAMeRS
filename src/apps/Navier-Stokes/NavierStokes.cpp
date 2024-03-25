@@ -64,6 +64,7 @@ NavierStokes::NavierStokes(
         d_monitoring_stat_dump_filename("monitoring_stats.txt"),
         d_stat_dump_filename(stat_dump_filename),
         d_use_nonuniform_workload(false),
+        d_use_hyperviscosity_operator(false),
         d_use_conservative_form_diffusive_flux(true),
         d_Navier_Stokes_boundary_conditions_db_is_from_restart(false),
         d_use_immersed_boundaries(false)
@@ -164,6 +165,21 @@ NavierStokes::NavierStokes(
         d_convective_flux_reconstructor_str));
     
     d_convective_flux_reconstructor = d_convective_flux_reconstructor_manager->getConvectiveFluxReconstructor();
+    
+    if (d_use_hyperviscosity_operator)
+    {
+        /*
+         * Initialize d_hyperviscosity_operator object.
+         */
+        
+        d_hyperviscosity_operator.reset(new HyperviscosityOperator(
+            "d_hyperviscosity_operator",
+            d_dim,
+            d_grid_geometry,
+            d_flow_model->getNumberOfEquations(),
+            d_flow_model,
+            d_hyperviscosity_operator_db));
+    }
     
     if (d_use_conservative_form_diffusive_flux)
     {
@@ -272,6 +288,13 @@ NavierStokes::NavierStokes(
         num_cells_buffer_required = hier::IntVector::max(
             num_cells_buffer_required,
             d_convective_flux_reconstructor->getConvectiveFluxNumberOfGhostCells());
+        
+        if (d_use_hyperviscosity_operator)
+        {
+            num_cells_buffer_required = hier::IntVector::max(
+                num_cells_buffer_required,
+                d_hyperviscosity_operator->getHyperviscosityOperatorNumberOfGhostCells());
+        }
         
         hier::IntVector num_ghosts_diffusive_flux = hier::IntVector::getZero(d_dim);
         
@@ -446,6 +469,13 @@ NavierStokes::registerModelVariables(
     num_ghosts_intermediate = hier::IntVector::max(
         num_ghosts_intermediate,
         d_convective_flux_reconstructor->getConvectiveFluxNumberOfGhostCells());
+    
+    if (d_use_hyperviscosity_operator)
+    {
+        num_ghosts_intermediate = hier::IntVector::max(
+            num_ghosts_intermediate,
+            d_hyperviscosity_operator->getHyperviscosityOperatorNumberOfGhostCells());
+    }
     
     hier::IntVector num_ghosts_diffusive_flux = hier::IntVector::getZero(d_dim);
     
@@ -1610,6 +1640,19 @@ NavierStokes::computeFluxesAndSourcesOnPatch(
             dt,
             RK_step_number);
         
+        if (d_use_hyperviscosity_operator)
+        {
+            d_hyperviscosity_operator->performHyperviscosityOperationOnPatch(
+                patch,
+                coarse_fine_bdry,
+                d_variable_convective_flux,
+                d_variable_source,
+                data_context,
+                time,
+                dt,
+                RK_step_number);
+        }
+        
         if (d_use_conservative_form_diffusive_flux)
         {
             d_diffusive_flux_reconstructor->computeDiffusiveFluxOnPatch(
@@ -1645,6 +1688,19 @@ NavierStokes::computeFluxesAndSourcesOnPatch(
             time,
             dt,
             RK_step_number);
+        
+        if (d_use_hyperviscosity_operator)
+        {
+            d_hyperviscosity_operator->performHyperviscosityOperationOnPatch(
+                patch,
+                coarse_fine_bdry,
+                d_variable_convective_flux,
+                d_variable_source,
+                getDataContext(),
+                time,
+                dt,
+                RK_step_number);
+        }
         
         if (d_use_conservative_form_diffusive_flux)
         {
@@ -4527,6 +4583,15 @@ NavierStokes::putToRestart(
         restart_db->putDatabase("d_convective_flux_reconstructor_db");
     d_convective_flux_reconstructor->putToRestart(restart_convective_flux_reconstructor_db);
     
+    // Hyperviscosity operator.
+    restart_db->putBool("d_use_hyperviscosity_operator", d_use_hyperviscosity_operator);
+    if (d_use_hyperviscosity_operator)
+    {
+        HAMERS_SHARED_PTR<tbox::Database> restart_hyperviscosity_operator_db =
+            restart_db->putDatabase("d_hyperviscosity_operator_db");
+        d_hyperviscosity_operator->putToRestart(restart_hyperviscosity_operator_db);
+    }
+    
     restart_db->putBool("d_use_conservative_form_diffusive_flux", d_use_conservative_form_diffusive_flux);
     
     if (d_use_conservative_form_diffusive_flux)
@@ -4710,6 +4775,17 @@ void NavierStokes::printClassData(std::ostream& os) const
     
     d_convective_flux_reconstructor->printClassData(os);
     os << "--------------------------------------------------------------------------------";
+    
+    if (d_use_hyperviscosity_operator)
+    {
+        /*
+         * Print data of d_hyperviscosity_operator.
+         */
+        
+        d_hyperviscosity_operator->printClassData(os);
+        os << "--------------------------------------------------------------------------------";
+    }
+    
     
     if (d_use_conservative_form_diffusive_flux)
     {
@@ -5208,6 +5284,27 @@ NavierStokes::getFromInput(
                 << std::endl);
         }
         
+        d_use_hyperviscosity_operator = input_db->getBoolWithDefault(
+            "use_hyperviscosity_operator", false);
+        
+        if (d_use_hyperviscosity_operator)
+        {
+            /*
+             * Get the database of the hyperviscosity operator.
+             */
+            if (input_db->keyExists("Hyperviscosity_operator"))
+            {
+                d_hyperviscosity_operator_db = input_db->getDatabase("Hyperviscosity_operator");
+            }
+            else
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Key data 'Hyperviscosity_operator' not found in input database."
+                    << std::endl);
+            }
+        }
+        
         d_use_conservative_form_diffusive_flux = input_db->getBoolWithDefault(
             "use_conservative_form_diffusive_flux", true);
         
@@ -5395,6 +5492,13 @@ void NavierStokes::getFromRestart()
     d_convective_flux_reconstructor_str = db->getString("d_convective_flux_reconstructor_str");
     
     d_convective_flux_reconstructor_db = db->getDatabase("d_convective_flux_reconstructor_db");
+    
+    d_use_hyperviscosity_operator = db->getBool("d_use_hyperviscosity_operator");
+    
+    if (d_use_hyperviscosity_operator)
+    {
+        d_hyperviscosity_operator_db = db->getDatabase("d_hyperviscosity_operator_db");
+    }
     
     d_use_conservative_form_diffusive_flux = db->getBool("d_use_conservative_form_diffusive_flux");
     
