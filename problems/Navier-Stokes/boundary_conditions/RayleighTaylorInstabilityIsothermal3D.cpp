@@ -181,7 +181,7 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
                             {
                                 const int idx_cell = (i + num_ghosts[0]) +
                                     (j + num_ghosts[1])*ghostcell_dims[0] +
-                                    (k + num_ghosts[2]*ghostcell_dims[0]*ghostcell_dims[1]);
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                                 
                                 // Compute the coordinates.
                                 double x[3];
@@ -247,7 +247,7 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             }
         }
     }
-    if (d_project_name == "3D smooth multi-mode Rayleigh-Taylor instability")
+    else if (d_project_name == "3D smooth multi-mode Rayleigh-Taylor instability")
     {
         // New code
         const double* const dx = patch_geom->getDx();
@@ -434,7 +434,7 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
                                 x[1] = patch_xlo[1] + (j + double(1)/double(2))*dx[1];
                                 x[2] = patch_xlo[2] + (k + double(1)/double(2))*dx[2];
                                 
-                                double eta = 0.0;      
+                                double eta = 0.0;
                                 for (int m = waven - 4; m <= waven + 4; m++)
                                 {
                                     // eta += eta_0/3.0*cos(2.0*M_PI*m/width*x[1] + rmod[m-waven+4])*cos(2.0*M_PI*m/width*x[2] + rmod[m-waven+4]);
