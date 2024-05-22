@@ -73,6 +73,7 @@ class NonconservativeDiffusiveFluxDivergenceOperator
         void
         computeNonconservativeDiffusiveFluxDivergenceOnPatch(
             hier::Patch& patch,
+            const int level_number,
             const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
             const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_diffusive_flux_divergence,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,

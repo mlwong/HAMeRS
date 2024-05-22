@@ -39,6 +39,7 @@ ConvectiveFluxReconstructorWCNS56::ConvectiveFluxReconstructorWCNS56(
 void
 ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
     hier::Patch& patch,
+    const int level_number,
     const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
     const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
     const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
@@ -47,6 +48,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
     const double dt,
     const int RK_step_number)
 {
+    NULL_USE(level_number);
     NULL_USE(coarse_fine_bdry);
     NULL_USE(time);
     NULL_USE(RK_step_number);

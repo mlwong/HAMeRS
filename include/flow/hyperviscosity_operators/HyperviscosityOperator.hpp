@@ -62,6 +62,7 @@ class HyperviscosityOperator
         void
         performHyperviscosityOperationOnPatch(
             hier::Patch& patch,
+            const int level_number,
             const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
             const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
             const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
@@ -139,6 +140,7 @@ class HyperviscosityOperator
         int d_accuracy_order;
         bool d_use_flux_form;
         Real d_coeff;
+        int d_max_level_number;
         
         std::vector<Real> d_coeffs_node;
         std::vector<Real> d_coeffs_midpoint;

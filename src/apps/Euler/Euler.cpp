@@ -1257,6 +1257,7 @@ Euler::setImmersedBoundaryGhostCells(
 void
 Euler::computeFluxesAndSourcesOnPatch(
     hier::Patch& patch,
+    const int level_number,
     const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
     const double time,
     const double dt,
@@ -1295,6 +1296,7 @@ Euler::computeFluxesAndSourcesOnPatch(
         d_convective_flux_reconstructor->
             computeConvectiveFluxAndSourceOnPatch(
                 patch,
+                level_number,
                 coarse_fine_bdry,
                 d_variable_convective_flux,
                 d_variable_source,
@@ -1307,6 +1309,7 @@ Euler::computeFluxesAndSourcesOnPatch(
         {
             d_hyperviscosity_operator->performHyperviscosityOperationOnPatch(
                 patch,
+                level_number,
                 coarse_fine_bdry,
                 d_variable_convective_flux,
                 d_variable_source,
@@ -1321,6 +1324,7 @@ Euler::computeFluxesAndSourcesOnPatch(
         d_convective_flux_reconstructor->
             computeConvectiveFluxAndSourceOnPatch(
                 patch,
+                level_number,
                 coarse_fine_bdry,
                 d_variable_convective_flux,
                 d_variable_source,
@@ -1333,6 +1337,7 @@ Euler::computeFluxesAndSourcesOnPatch(
         {
             d_hyperviscosity_operator->performHyperviscosityOperationOnPatch(
                 patch,
+                level_number,
                 coarse_fine_bdry,
                 d_variable_convective_flux,
                 d_variable_source,

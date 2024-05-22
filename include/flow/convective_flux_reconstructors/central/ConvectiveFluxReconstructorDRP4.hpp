@@ -46,6 +46,7 @@ class ConvectiveFluxReconstructorDRP4: public ConvectiveFluxReconstructor
         void
         computeConvectiveFluxAndSourceOnPatch(
             hier::Patch& patch,
+            const int level_number,
             const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
             const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
             const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,

@@ -36,6 +36,11 @@ HyperviscosityOperator::HyperviscosityOperator(
     d_coeff = d_hyperviscosity_operator_db->
         getRealWithDefault("d_coeff", d_coeff);
     
+    d_max_level_number = d_hyperviscosity_operator_db->
+        getIntegerWithDefault("max_level_number", -1);
+    d_max_level_number = d_hyperviscosity_operator_db->
+        getIntegerWithDefault("d_max_level_number", d_max_level_number);
+    
     if (d_accuracy_order != 2 && d_accuracy_order != 4  && d_accuracy_order != 6)
     {
         TBOX_ERROR("HyperviscosityOperator::HyperviscosityOperator:"
@@ -244,6 +249,7 @@ HyperviscosityOperator::putToRestart(
     restart_db->putInteger("d_lap_order", d_lap_order);
     restart_db->putInteger("d_accuracy_order", d_accuracy_order);
     restart_db->putReal("d_coeff", d_coeff);
+    restart_db->putInteger("d_max_level_number", d_max_level_number);
 }
 
 
@@ -253,6 +259,7 @@ HyperviscosityOperator::putToRestart(
 void
 HyperviscosityOperator::performHyperviscosityOperationOnPatch(
     hier::Patch& patch,
+    const int level_number,
     const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
     const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
     const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
@@ -270,6 +277,12 @@ HyperviscosityOperator::performHyperviscosityOperationOnPatch(
     NULL_USE(time);
     NULL_USE(dt);
     NULL_USE(RK_step_number);
+    
+    // Skip this patch if the level number is larger than the maximum level number.
+    if (d_max_level_number >= 0 && level_number > d_max_level_number)
+    {
+        return;
+    }
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();

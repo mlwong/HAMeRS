@@ -40,7 +40,7 @@ ConvectiveFluxReconstructorKEP::ConvectiveFluxReconstructorKEP(
         
         if (d_stencil_width < 9 || d_stencil_width > 13)
         {
-            TBOX_ERROR("ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch:"
+            TBOX_ERROR("ConvectiveFluxReconstructorKEP::ConvectiveFluxReconstructorKEP:"
                 " Only 9-point, 11-point, 13-point stencil KEP schemes are implemented!");
         }
     }
@@ -77,7 +77,7 @@ ConvectiveFluxReconstructorKEP::ConvectiveFluxReconstructorKEP(
         }
         else
         {
-            TBOX_ERROR("ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch:"
+            TBOX_ERROR("ConvectiveFluxReconstructorKEP::ConvectiveFluxReconstructorKEP:"
                 " Only 3-point, 5-point, 7-point, 9-point, 11-point, 13-point stencil central schemes are implemented!");
         }
     }
@@ -248,6 +248,7 @@ ConvectiveFluxReconstructorKEP::putToRestart(
 void
 ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
     hier::Patch& patch,
+    const int level_number,
     const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
     const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
     const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
@@ -264,6 +265,7 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
             " KEP schemes can only be used for flow models: SINGLE_SPECIES, FOUR_EQN_CONSERVATIVE or FIVE_EQN_ALLAIRE!");
     }
     
+    NULL_USE(level_number);
     NULL_USE(coarse_fine_bdry);
     NULL_USE(time);
     NULL_USE(RK_step_number);

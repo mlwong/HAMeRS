@@ -1993,6 +1993,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
             // Compute flux corresponding to this sub-step.
             d_patch_strategy->computeFluxesAndSourcesOnPatch(
                 *patch,
+                level->getLevelNumber(),
                 coarse_fine_bdry,
                 current_time,
                 dt,
