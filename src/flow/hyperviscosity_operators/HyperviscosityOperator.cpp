@@ -32,7 +32,7 @@ HyperviscosityOperator::HyperviscosityOperator(
         getBoolWithDefault("d_use_flux_form", d_use_flux_form);
     
     d_coeff = d_hyperviscosity_operator_db->
-        getRealWithDefault("coeff", Real(1));
+        getRealWithDefault("coeff", Real(0.01));
     d_coeff = d_hyperviscosity_operator_db->
         getRealWithDefault("d_coeff", d_coeff);
     
@@ -388,6 +388,12 @@ HyperviscosityOperator::performHyperviscosityOperationOnPatchFluxForm(
         HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     
+    /*
+     * Register the patch and derived cell variables in the flow model and compute the corresponding cell data.
+     */
+    
+    d_flow_model->registerPatchWithDataContext(patch, data_context);
+    
     std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_variables =
         d_flow_model->getCellDataOfConservativeVariables();
     
@@ -434,12 +440,6 @@ HyperviscosityOperator::performHyperviscosityOperationOnPatchFluxForm(
     
     domain_lo = domain.lower() - interior_box.lower();
     domain_dims = domain.numberCells();
-    
-    /*
-     * Register the patch and derived cell variables in the flow model and compute the corresponding cell data.
-     */
-    
-    d_flow_model->registerPatchWithDataContext(patch, data_context);
     
     std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
     
@@ -2056,6 +2056,12 @@ HyperviscosityOperator::performHyperviscosityOperationOnPatchSourceForm(
     
     const double* const dx = patch_geom->getDx();
     
+    /*
+     * Register the patch and derived cell variables in the flow model and compute the corresponding cell data.
+     */
+    
+    d_flow_model->registerPatchWithDataContext(patch, data_context);
+    
     std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_variables =
         d_flow_model->getCellDataOfConservativeVariables();
     
@@ -2102,12 +2108,6 @@ HyperviscosityOperator::performHyperviscosityOperationOnPatchSourceForm(
     
     domain_lo = domain.lower() - interior_box.lower();
     domain_dims = domain.numberCells();
-    
-    /*
-     * Register the patch and derived cell variables in the flow model and compute the corresponding cell data.
-     */
-    
-    d_flow_model->registerPatchWithDataContext(patch, data_context);
     
     std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
     
