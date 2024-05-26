@@ -383,11 +383,6 @@ HyperviscosityOperator::performHyperviscosityOperationOnPatchFluxForm(
     const Real d_I_10th = -Real(405)/Real(65536);
     const Real e_I_10th =  Real(35)/Real(65536);
     
-    // Get the grid spacing.
-    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-            patch.getPatchGeometry()));
-    
     /*
      * Register the patch and derived cell variables in the flow model and compute the corresponding cell data.
      */
