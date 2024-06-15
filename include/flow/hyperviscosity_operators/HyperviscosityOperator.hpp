@@ -141,6 +141,7 @@ class HyperviscosityOperator
         bool d_use_flux_form;
         Real d_coeff;
         int d_max_level_number;
+        std::vector<Real> d_level_end_times;
         
         std::vector<Real> d_coeffs_node;
         std::vector<Real> d_coeffs_midpoint;

@@ -41,6 +41,17 @@ HyperviscosityOperator::HyperviscosityOperator(
     d_max_level_number = d_hyperviscosity_operator_db->
         getIntegerWithDefault("d_max_level_number", d_max_level_number);
     
+    if (d_hyperviscosity_operator_db->keyExists("level_end_times"))
+    {
+        d_level_end_times = d_hyperviscosity_operator_db->
+            getRealVector("level_end_times");
+    }
+    else if (d_hyperviscosity_operator_db->keyExists("d_level_end_times"))
+    {
+        d_level_end_times = d_hyperviscosity_operator_db->
+            getRealVector("d_level_end_times");
+    }
+    
     if (d_accuracy_order != 2 && d_accuracy_order != 4  && d_accuracy_order != 6)
     {
         TBOX_ERROR("HyperviscosityOperator::HyperviscosityOperator:"
@@ -250,6 +261,10 @@ HyperviscosityOperator::putToRestart(
     restart_db->putInteger("d_accuracy_order", d_accuracy_order);
     restart_db->putReal("d_coeff", d_coeff);
     restart_db->putInteger("d_max_level_number", d_max_level_number);
+    if (static_cast<int>(d_level_end_times.size()) > 0)
+    {
+        restart_db->putRealVector("d_level_end_times", d_level_end_times);
+    }
 }
 
 
@@ -282,6 +297,14 @@ HyperviscosityOperator::performHyperviscosityOperationOnPatch(
     if (d_max_level_number >= 0 && level_number > d_max_level_number)
     {
         return;
+    }
+    
+    if (level_number < static_cast<int>(d_level_end_times.size()))
+    {
+        if (time > d_level_end_times[level_number])
+        {
+            return;
+        }
     }
     
     // Get the dimensions of box that covers the interior of patch.
