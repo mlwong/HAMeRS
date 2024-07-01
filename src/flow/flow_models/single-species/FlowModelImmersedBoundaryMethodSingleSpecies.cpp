@@ -665,15 +665,15 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         Real u_gc = Real(0);  // u velocity of the ghost cell
                         Real v_gc = Real(0);  // v velocity of the ghost cell
                         Real w_gc = Real(0);  // w velocity of the ghost cell
-                        Real vel_ip_n = Real(0);
-                        Real vel_ip_t = Real(0);
+                        Real vel_ip_n  = Real(0);
+                        Real vel_ip_t1 = Real(0);
+                        Real vel_ip_t2 = Real(0);
                         Real vel_gc_n = Real(0);
-                        Real vel_gc_t = Real(0);
 
                         //NEEDS TO BE UPDATED
                         if(d_bc_type_velocity == VELOCITY_IBC::SLIP) // SLIP BC NEEDS TO BE DEFINED
                         {   
-                            Real norm_tmp   = pow(Real(1) - norm_2[idx_IB] * norm_2[idx_IB]); // sin(phi) 
+                            Real norm_tmp   = pow(Real(1) - norm_2[idx_IB] * norm_2[idx_IB], 0.5); // sin(phi) 
                             norm_0[idx_IB] /= norm_tmp;   //cos(theta)
                             norm_1[idx_IB] /= norm_tmp;   //sin(theta)
                             // norm_2                     //cos(phi)
@@ -685,7 +685,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                             // phi normal vector
                             vel_ip_t2  = u_IP * (norm_0[idx_IB] * norm_2[idx_IB]) + v_IP * (norm_1[idx_IB] * norm_2[idx_IB]) + w_IP * (-norm_tmp);
                             
-                            vel_gc_n = vel_ip_n - ((d_ip + dist[idx_IB]) / d_ip) * (vel_ip_n);
+                            vel_ip_n = vel_ip_n - ((d_ip + dist[idx_IB]) / d_ip) * (vel_ip_n);
                             
                             u_gc = (norm_0[idx_IB] * norm_tmp * vel_ip_n) - (norm_1[idx_IB] * vel_ip_t1) + (norm_0[idx_IB]*norm_2[idx_IB] * vel_ip_t2);
                             v_gc = (norm_1[idx_IB] * norm_tmp * vel_ip_n) + (norm_0[idx_IB] * vel_ip_t1) + (norm_1[idx_IB]*norm_2[idx_IB] * vel_ip_t2);
