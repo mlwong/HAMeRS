@@ -180,6 +180,22 @@ void runSimulation(
         restart_interval = main_db->getInteger("restart_interval");
     }
     
+    int restart_interval_skip = 0;
+    int restart_interval_skip_counter = 0;
+    if ((restart_interval == -1) && main_db->keyExists("restart_interval_skip"))
+    {
+        restart_interval_skip = main_db->getInteger("restart_interval_skip");
+        // Check that restart_interval_skip is positive.
+        if (restart_interval_skip < 0)
+        {
+            TBOX_ERROR("The option in input file, restart_interval_skip = "
+                << restart_interval_skip
+                << " is not positive."
+                << std::endl);
+        }
+    }
+    
+    
     restart_write_dirname =
         main_db->getStringWithDefault("restart_write_dirname",
                                       base_name + ".restart");
@@ -732,14 +748,24 @@ void runSimulation(
                     
                     if ((restart_interval == -1) && !(restart_write_dirname.empty()))
                     {
-                        t_write_restart->start();
-                        
-                        restart_manager->writeRestartFile(restart_write_dirname,
-                            iteration_num);
-                        
-                        t_write_restart->stop();
-                        
-                        tbox::pout << "Files for restart are written." << std::endl;
+                        // Check the skip.
+                        if (restart_interval_skip_counter == restart_interval_skip)
+                        {
+                            restart_interval_skip_counter = 0;
+                            
+                            t_write_restart->start();
+                            
+                            restart_manager->writeRestartFile(restart_write_dirname,
+                                iteration_num);
+                            
+                            t_write_restart->stop();
+                            
+                            tbox::pout << "Files for restart are written." << std::endl;
+                        }
+                        else
+                        {
+                            restart_interval_skip_counter++;
+                        }
                     }
                 }
             }
@@ -760,14 +786,24 @@ void runSimulation(
                     
                     if ((restart_interval == -1) && !(restart_write_dirname.empty()))
                     {
-                        t_write_restart->start();
-                        
-                        restart_manager->writeRestartFile(restart_write_dirname,
-                            iteration_num);
-                        
-                        t_write_restart->stop();
-                        
-                        tbox::pout << "Files for restart are written." << std::endl;
+                        // Check the skip.
+                        if (restart_interval_skip_counter == restart_interval_skip)
+                        {
+                            restart_interval_skip_counter = 0;
+                            
+                            t_write_restart->start();
+                            
+                            restart_manager->writeRestartFile(restart_write_dirname,
+                                iteration_num);
+                            
+                            t_write_restart->stop();
+                            
+                            tbox::pout << "Files for restart are written." << std::endl;
+                        }
+                        else
+                        {
+                            restart_interval_skip_counter++;
+                        }
                     }
                 }
             }
