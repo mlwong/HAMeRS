@@ -123,17 +123,19 @@ class FlowModelBasicUtilitiesSingleSpecies: public FlowModelBasicUtilities
          * Compute the side data of the projection variables for transformation between conservative variables and
          * characteristic variables.
          */
-        void
+        virtual void
         computeSideDataOfProjectionVariablesForConservativeVariables(
-            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables);
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
+            const hier::Box& domain);
         
         /*
          * Compute the side data of the projection variables for transformation between primitive variables and
          * characteristic variables.
          */
-        void
+        virtual void
         computeSideDataOfProjectionVariablesForPrimitiveVariables(
-            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables);
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
+            const hier::Box& domain);
         
         /*
          * Compute the side data of characteristic variables from conservative variables.
@@ -143,7 +145,8 @@ class FlowModelBasicUtilitiesSingleSpecies: public FlowModelBasicUtilities
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
             const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
             const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
-            const int& idx_offset);
+            const int& idx_offset,
+            const hier::Box& domain);
         
         /*
          * Compute the side data of characteristic variables from primitive variables.
@@ -153,7 +156,8 @@ class FlowModelBasicUtilitiesSingleSpecies: public FlowModelBasicUtilities
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
             const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& primitive_variables,
             const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
-            const int& idx_offset);
+            const int& idx_offset,
+            const hier::Box& domain);
         
         /*
          * Compute the side data of conservative variables from characteristic variables.
@@ -162,7 +166,8 @@ class FlowModelBasicUtilitiesSingleSpecies: public FlowModelBasicUtilities
         computeSideDataOfConservativeVariablesFromCharacteristicVariables(
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
             const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables);
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
+            const hier::Box& domain);
         
         /*
          * Compute the side data of primitive variables from characteristic variables.
@@ -171,7 +176,8 @@ class FlowModelBasicUtilitiesSingleSpecies: public FlowModelBasicUtilities
         computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
             const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables);
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
+            const hier::Box& domain);
         
     private:
         /*
