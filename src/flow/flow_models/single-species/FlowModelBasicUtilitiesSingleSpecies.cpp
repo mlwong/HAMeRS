@@ -3392,7 +3392,7 @@ FlowModelBasicUtilitiesSingleSpecies::getNumberOfProjectionVariablesForPrimitive
 void
 FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForConservativeVariables(
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
-    const hier::Box& domain)
+    const std::vector<hier::Box>& domains)
 {
     if (d_flow_model.expired())
     {
@@ -3436,40 +3436,47 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForCon
     hier::IntVector domain_y_dims(d_dim);
     hier::IntVector domain_z_dims(d_dim);
     
-    if (domain.empty())
+    if (domains[0].empty())
     {
         domain_x_lo = hier::IntVector::getZero(d_dim);
-        domain_y_lo = hier::IntVector::getZero(d_dim);
-        domain_z_lo = hier::IntVector::getZero(d_dim);
-        
         domain_x_dims = interior_dims;
-        domain_y_dims = interior_dims;
-        domain_z_dims = interior_dims;
-        
         domain_x_lo[0] = -num_ghosts_projection_var[0];
         domain_x_dims[0] = ghostcell_dims_projection_var[0];
-        
-        if (d_dim > tbox::Dimension(1))
-        {
-            domain_y_lo[1] = -num_ghosts_projection_var[1];
-            domain_y_dims[1] = ghostcell_dims_projection_var[1];
-        }
-        if (d_dim > tbox::Dimension(2))
-        {
-            domain_z_lo[2] = -num_ghosts_projection_var[2];
-            domain_z_dims[2] = ghostcell_dims_projection_var[2];
-        }
     }
     else
     {
-        domain_x_lo = domain.lower() - interior_box.lower();
-        domain_x_dims = domain.numberCells();
-        
-        domain_y_lo = domain_x_lo;
-        domain_y_dims = domain_x_dims;
-        
-        domain_z_lo = domain_x_lo;
-        domain_z_dims = domain_x_dims;
+        domain_x_lo = domains[0].lower() - interior_box.lower();
+        domain_x_dims = domains[0].numberCells();
+    }
+    if (d_dim > tbox::Dimension(1))
+    {
+        if (domains[1].empty())
+        {
+            domain_y_lo = hier::IntVector::getZero(d_dim);
+            domain_y_dims = interior_dims;
+            domain_y_lo[1] = -num_ghosts_projection_var[1];
+            domain_y_dims[1] = ghostcell_dims_projection_var[1];
+        }
+        else
+        {
+            domain_y_lo = domains[1].lower() - interior_box.lower();
+            domain_y_dims = domains[1].numberCells();
+        }
+    }
+    if (d_dim > tbox::Dimension(2))
+    {
+        if (domains[2].empty())
+        {
+            domain_z_lo = hier::IntVector::getZero(d_dim);
+            domain_z_dims = interior_dims;
+            domain_z_lo[2] = -num_ghosts_projection_var[2];
+            domain_z_dims[2] = ghostcell_dims_projection_var[2];
+        }
+        else
+        {
+            domain_z_lo = domains[2].lower() - interior_box.lower();
+            domain_z_dims = domains[2].numberCells();
+        }
     }
     
     /*
@@ -4506,7 +4513,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForCon
 void
 FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForPrimitiveVariables(
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
-    const hier::Box& domain)
+    const std::vector<hier::Box>& domains)
 {
     if (d_flow_model.expired())
     {
@@ -4550,40 +4557,47 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForPri
     hier::IntVector domain_y_dims(d_dim);
     hier::IntVector domain_z_dims(d_dim);
     
-    if (domain.empty())
+    if (domains[0].empty())
     {
         domain_x_lo = hier::IntVector::getZero(d_dim);
-        domain_y_lo = hier::IntVector::getZero(d_dim);
-        domain_z_lo = hier::IntVector::getZero(d_dim);
-        
         domain_x_dims = interior_dims;
-        domain_y_dims = interior_dims;
-        domain_z_dims = interior_dims;
-        
         domain_x_lo[0] = -num_ghosts_projection_var[0];
         domain_x_dims[0] = ghostcell_dims_projection_var[0];
-        
-        if (d_dim > tbox::Dimension(1))
-        {
-            domain_y_lo[1] = -num_ghosts_projection_var[1];
-            domain_y_dims[1] = ghostcell_dims_projection_var[1];
-        }
-        if (d_dim > tbox::Dimension(2))
-        {
-            domain_z_lo[2] = -num_ghosts_projection_var[2];
-            domain_z_dims[2] = ghostcell_dims_projection_var[2];
-        }
     }
     else
     {
-        domain_x_lo = domain.lower() - interior_box.lower();
-        domain_x_dims = domain.numberCells();
-        
-        domain_y_lo = domain_x_lo;
-        domain_y_dims = domain_x_dims;
-        
-        domain_z_lo = domain_x_lo;
-        domain_z_dims = domain_x_dims;
+        domain_x_lo = domains[0].lower() - interior_box.lower();
+        domain_x_dims = domains[0].numberCells();
+    }
+    if (d_dim > tbox::Dimension(1))
+    {
+        if (domains[1].empty())
+        {
+            domain_y_lo = hier::IntVector::getZero(d_dim);
+            domain_y_dims = interior_dims;
+            domain_y_lo[1] = -num_ghosts_projection_var[1];
+            domain_y_dims[1] = ghostcell_dims_projection_var[1];
+        }
+        else
+        {
+            domain_y_lo = domains[1].lower() - interior_box.lower();
+            domain_y_dims = domains[1].numberCells();
+        }
+    }
+    if (d_dim > tbox::Dimension(2))
+    {
+        if (domains[2].empty())
+        {
+            domain_z_lo = hier::IntVector::getZero(d_dim);
+            domain_z_dims = interior_dims;
+            domain_z_lo[2] = -num_ghosts_projection_var[2];
+            domain_z_dims[2] = ghostcell_dims_projection_var[2];
+        }
+        else
+        {
+            domain_z_lo = domains[2].lower() - interior_box.lower();
+            domain_z_dims = domains[2].numberCells();
+        }
     }
     
     /*
@@ -5067,7 +5081,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
     const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
     const int& idx_offset,
-    const hier::Box& domain)
+    const std::vector<hier::Box>& domains)
 {
     if (d_flow_model.expired())
     {
@@ -5130,40 +5144,47 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
     hier::IntVector domain_y_dims(d_dim);
     hier::IntVector domain_z_dims(d_dim);
     
-    if (domain.empty())
+    if (domains[0].empty())
     {
         domain_x_lo = hier::IntVector::getZero(d_dim);
-        domain_y_lo = hier::IntVector::getZero(d_dim);
-        domain_z_lo = hier::IntVector::getZero(d_dim);
-        
         domain_x_dims = interior_dims;
-        domain_y_dims = interior_dims;
-        domain_z_dims = interior_dims;
-        
         domain_x_lo[0] = -num_ghosts_characteristic_var[0];
         domain_x_dims[0] = ghostcell_dims_characteristic_var[0];
-        
-        if (d_dim > tbox::Dimension(1))
-        {
-            domain_y_lo[1] = -num_ghosts_characteristic_var[1];
-            domain_y_dims[1] = ghostcell_dims_characteristic_var[1];
-        }
-        if (d_dim > tbox::Dimension(2))
-        {
-            domain_z_lo[2] = -num_ghosts_characteristic_var[2];
-            domain_z_dims[2] = ghostcell_dims_characteristic_var[2];
-        }
     }
     else
     {
-        domain_x_lo = domain.lower() - interior_box.lower();
-        domain_x_dims = domain.numberCells();
-        
-        domain_y_lo = domain_x_lo;
-        domain_y_dims = domain_x_dims;
-        
-        domain_z_lo = domain_x_lo;
-        domain_z_dims = domain_x_dims;
+        domain_x_lo = domains[0].lower() - interior_box.lower();
+        domain_x_dims = domains[0].numberCells();
+    }
+    if (d_dim > tbox::Dimension(1))
+    {
+        if (domains[1].empty())
+        {
+            domain_y_lo = hier::IntVector::getZero(d_dim);
+            domain_y_dims = interior_dims;
+            domain_y_lo[1] = -num_ghosts_characteristic_var[1];
+            domain_y_dims[1] = ghostcell_dims_characteristic_var[1];
+        }
+        else
+        {
+            domain_y_lo = domains[1].lower() - interior_box.lower();
+            domain_y_dims = domains[1].numberCells();
+        }
+    }
+    if (d_dim > tbox::Dimension(2))
+    {
+        if (domains[2].empty())
+        {
+            domain_z_lo = hier::IntVector::getZero(d_dim);
+            domain_z_dims = interior_dims;
+            domain_z_lo[2] = -num_ghosts_characteristic_var[2];
+            domain_z_dims[2] = ghostcell_dims_characteristic_var[2];
+        }
+        else
+        {
+            domain_z_lo = domains[2].lower() - interior_box.lower();
+            domain_z_dims = domains[2].numberCells();
+        }
     }
     
     /*
@@ -5876,7 +5897,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& primitive_variables,
     const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
     const int& idx_offset,
-    const hier::Box& domain)
+    const std::vector<hier::Box>& domains)
 {
     if (d_flow_model.expired())
     {
@@ -5939,40 +5960,47 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
     hier::IntVector domain_y_dims(d_dim);
     hier::IntVector domain_z_dims(d_dim);
     
-    if (domain.empty())
+    if (domains[0].empty())
     {
         domain_x_lo = hier::IntVector::getZero(d_dim);
-        domain_y_lo = hier::IntVector::getZero(d_dim);
-        domain_z_lo = hier::IntVector::getZero(d_dim);
-        
         domain_x_dims = interior_dims;
-        domain_y_dims = interior_dims;
-        domain_z_dims = interior_dims;
-        
         domain_x_lo[0] = -num_ghosts_characteristic_var[0];
         domain_x_dims[0] = ghostcell_dims_characteristic_var[0];
-        
-        if (d_dim > tbox::Dimension(1))
-        {
-            domain_y_lo[1] = -num_ghosts_characteristic_var[1];
-            domain_y_dims[1] = ghostcell_dims_characteristic_var[1];
-        }
-        if (d_dim > tbox::Dimension(2))
-        {
-            domain_z_lo[2] = -num_ghosts_characteristic_var[2];
-            domain_z_dims[2] = ghostcell_dims_characteristic_var[2];
-        }
     }
     else
     {
-        domain_x_lo = domain.lower() - interior_box.lower();
-        domain_x_dims = domain.numberCells();
-        
-        domain_y_lo = domain_x_lo;
-        domain_y_dims = domain_x_dims;
-        
-        domain_z_lo = domain_x_lo;
-        domain_z_dims = domain_x_dims;
+        domain_x_lo = domains[0].lower() - interior_box.lower();
+        domain_x_dims = domains[0].numberCells();
+    }
+    if (d_dim > tbox::Dimension(1))
+    {
+        if (domains[1].empty())
+        {
+            domain_y_lo = hier::IntVector::getZero(d_dim);
+            domain_y_dims = interior_dims;
+            domain_y_lo[1] = -num_ghosts_characteristic_var[1];
+            domain_y_dims[1] = ghostcell_dims_characteristic_var[1];
+        }
+        else
+        {
+            domain_y_lo = domains[1].lower() - interior_box.lower();
+            domain_y_dims = domains[1].numberCells();
+        }
+    }
+    if (d_dim > tbox::Dimension(2))
+    {
+        if (domains[2].empty())
+        {
+            domain_z_lo = hier::IntVector::getZero(d_dim);
+            domain_z_dims = interior_dims;
+            domain_z_lo[2] = -num_ghosts_characteristic_var[2];
+            domain_z_dims[2] = ghostcell_dims_characteristic_var[2];
+        }
+        else
+        {
+            domain_z_lo = domains[2].lower() - interior_box.lower();
+            domain_z_dims = domains[2].numberCells();
+        }
     }
     
     /*
@@ -6507,7 +6535,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
     const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
     const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
-    const hier::Box& domain)
+    const std::vector<hier::Box>& domains)
 {
     if (d_flow_model.expired())
     {
@@ -6557,40 +6585,47 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
     hier::IntVector domain_y_dims(d_dim);
     hier::IntVector domain_z_dims(d_dim);
     
-    if (domain.empty())
+    if (domains[0].empty())
     {
         domain_x_lo = hier::IntVector::getZero(d_dim);
-        domain_y_lo = hier::IntVector::getZero(d_dim);
-        domain_z_lo = hier::IntVector::getZero(d_dim);
-        
         domain_x_dims = interior_dims;
-        domain_y_dims = interior_dims;
-        domain_z_dims = interior_dims;
-        
         domain_x_lo[0] = -num_ghosts_characteristic_var[0];
         domain_x_dims[0] = ghostcell_dims_characteristic_var[0];
-        
-        if (d_dim > tbox::Dimension(1))
-        {
-            domain_y_lo[1] = -num_ghosts_characteristic_var[1];
-            domain_y_dims[1] = ghostcell_dims_characteristic_var[1];
-        }
-        if (d_dim > tbox::Dimension(2))
-        {
-            domain_z_lo[2] = -num_ghosts_characteristic_var[2];
-            domain_z_dims[2] = ghostcell_dims_characteristic_var[2];
-        }
     }
     else
     {
-        domain_x_lo = domain.lower() - interior_box.lower();
-        domain_x_dims = domain.numberCells();
-        
-        domain_y_lo = domain_x_lo;
-        domain_y_dims = domain_x_dims;
-        
-        domain_z_lo = domain_x_lo;
-        domain_z_dims = domain_x_dims;
+        domain_x_lo = domains[0].lower() - interior_box.lower();
+        domain_x_dims = domains[0].numberCells();
+    }
+    if (d_dim > tbox::Dimension(1))
+    {
+        if (domains[1].empty())
+        {
+            domain_y_lo = hier::IntVector::getZero(d_dim);
+            domain_y_dims = interior_dims;
+            domain_y_lo[1] = -num_ghosts_characteristic_var[1];
+            domain_y_dims[1] = ghostcell_dims_characteristic_var[1];
+        }
+        else
+        {
+            domain_y_lo = domains[1].lower() - interior_box.lower();
+            domain_y_dims = domains[1].numberCells();
+        }
+    }
+    if (d_dim > tbox::Dimension(2))
+    {
+        if (domains[2].empty())
+        {
+            domain_z_lo = hier::IntVector::getZero(d_dim);
+            domain_z_dims = interior_dims;
+            domain_z_lo[2] = -num_ghosts_characteristic_var[2];
+            domain_z_dims[2] = ghostcell_dims_characteristic_var[2];
+        }
+        else
+        {
+            domain_z_lo = domains[2].lower() - interior_box.lower();
+            domain_z_dims = domains[2].numberCells();
+        }
     }
     
     /*
@@ -7140,7 +7175,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
     const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
     const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
-    const hier::Box& domain)
+    const std::vector<hier::Box>& domains)
 {
     if (d_flow_model.expired())
     {
@@ -7190,40 +7225,47 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
     hier::IntVector domain_y_dims(d_dim);
     hier::IntVector domain_z_dims(d_dim);
     
-    if (domain.empty())
+    if (domains[0].empty())
     {
         domain_x_lo = hier::IntVector::getZero(d_dim);
-        domain_y_lo = hier::IntVector::getZero(d_dim);
-        domain_z_lo = hier::IntVector::getZero(d_dim);
-        
         domain_x_dims = interior_dims;
-        domain_y_dims = interior_dims;
-        domain_z_dims = interior_dims;
-        
         domain_x_lo[0] = -num_ghosts_characteristic_var[0];
         domain_x_dims[0] = ghostcell_dims_characteristic_var[0];
-        
-        if (d_dim > tbox::Dimension(1))
-        {
-            domain_y_lo[1] = -num_ghosts_characteristic_var[1];
-            domain_y_dims[1] = ghostcell_dims_characteristic_var[1];
-        }
-        if (d_dim > tbox::Dimension(2))
-        {
-            domain_z_lo[2] = -num_ghosts_characteristic_var[2];
-            domain_z_dims[2] = ghostcell_dims_characteristic_var[2];
-        }
     }
     else
     {
-        domain_x_lo = domain.lower() - interior_box.lower();
-        domain_x_dims = domain.numberCells();
-        
-        domain_y_lo = domain_x_lo;
-        domain_y_dims = domain_x_dims;
-        
-        domain_z_lo = domain_x_lo;
-        domain_z_dims = domain_x_dims;
+        domain_x_lo = domains[0].lower() - interior_box.lower();
+        domain_x_dims = domains[0].numberCells();
+    }
+    if (d_dim > tbox::Dimension(1))
+    {
+        if (domains[1].empty())
+        {
+            domain_y_lo = hier::IntVector::getZero(d_dim);
+            domain_y_dims = interior_dims;
+            domain_y_lo[1] = -num_ghosts_characteristic_var[1];
+            domain_y_dims[1] = ghostcell_dims_characteristic_var[1];
+        }
+        else
+        {
+            domain_y_lo = domains[1].lower() - interior_box.lower();
+            domain_y_dims = domains[1].numberCells();
+        }
+    }
+    if (d_dim > tbox::Dimension(2))
+    {
+        if (domains[2].empty())
+        {
+            domain_z_lo = hier::IntVector::getZero(d_dim);
+            domain_z_dims = interior_dims;
+            domain_z_lo[2] = -num_ghosts_characteristic_var[2];
+            domain_z_dims[2] = ghostcell_dims_characteristic_var[2];
+        }
+        else
+        {
+            domain_z_lo = domains[2].lower() - interior_box.lower();
+            domain_z_dims = domains[2].numberCells();
+        }
     }
     
     /*
