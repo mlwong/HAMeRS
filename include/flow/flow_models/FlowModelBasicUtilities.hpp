@@ -66,6 +66,14 @@ class FlowModelBasicUtilities
             const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables) = 0;
         
         /*
+         * Convert conservative variables to primitive variables.
+         */
+        virtual void
+        convertConservativeVariablesToPrimitiveVariables(
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables) = 0;
+        
+        /*
          * Convert primitive variables to conservative variables.
          */
         virtual void

@@ -3685,28 +3685,32 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForCon
                     data_density_averaged,
                     data_internal_energy_averaged,
                     thermo_properties_const_ptr,
-                    0);
+                    0,
+                    domains[0]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computeSoundSpeed(
                     projection_variables[3],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    0);
+                    0,
+                    domains[0]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
                     projection_variables[4],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    0);
+                    0,
+                    domains[0]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computeGruneisenParameter(
                     projection_variables[5],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    0);
+                    0,
+                    domains[0]);
                 
                 // Compute the total specific enthalpy.
                 
@@ -3854,28 +3858,32 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForCon
                     data_density_averaged,
                     data_internal_energy_averaged,
                     thermo_properties_const_ptr,
-                    0);
+                    0,
+                    domains[0]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computeSoundSpeed(
                     projection_variables[4],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    0);
+                    0,
+                    domains[0]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
                     projection_variables[5],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    0);
+                    0,
+                    domains[0]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computeGruneisenParameter(
                     projection_variables[6],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    0);
+                    0,
+                    domains[0]);
                 
                 // Compute the total specific enthalpy.
                 
@@ -3964,28 +3972,32 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForCon
                     data_density_averaged,
                     data_internal_energy_averaged,
                     thermo_properties_const_ptr,
-                    1);
+                    1,
+                    domains[1]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computeSoundSpeed(
                     projection_variables[4],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    1);
+                    1,
+                    domains[1]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
                     projection_variables[5],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    1);
+                    1,
+                    domains[1]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computeGruneisenParameter(
                     projection_variables[6],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    1);
+                    1,
+                    domains[1]);
                 
                 // Compute the total specific enthalpy.
                 
@@ -4173,28 +4185,32 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForCon
                     data_density_averaged,
                     data_internal_energy_averaged,
                     thermo_properties_const_ptr,
-                    0);
+                    0,
+                    domains[0]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computeSoundSpeed(
                     projection_variables[5],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    0);
+                    0,
+                    domains[0]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
                     projection_variables[6],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    0);
+                    0,
+                    domains[0]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computeGruneisenParameter(
                     projection_variables[7],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    0);
+                    0,
+                    domains[0]);
                 
                 // Compute the total specific enthalpy.
                 
@@ -4305,28 +4321,32 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForCon
                     data_density_averaged,
                     data_internal_energy_averaged,
                     thermo_properties_const_ptr,
-                    1);
+                    1,
+                    domains[1]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computeSoundSpeed(
                     projection_variables[5],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    1);
+                    1,
+                    domains[1]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
                     projection_variables[6],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    1);
+                    1,
+                    domains[1]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computeGruneisenParameter(
                     projection_variables[7],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    1);
+                    1,
+                    domains[1]);
                 
                 // Compute the total specific enthalpy.
                 
@@ -4437,28 +4457,32 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForCon
                     data_density_averaged,
                     data_internal_energy_averaged,
                     thermo_properties_const_ptr,
-                    2);
+                    2,
+                    domains[2]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computeSoundSpeed(
                     projection_variables[5],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    2);
+                    2,
+                    domains[2]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
                     projection_variables[6],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    2);
+                    2,
+                    domains[2]);
                 
                 d_equation_of_state_mixing_rules->getEquationOfState()->computeGruneisenParameter(
                     projection_variables[7],
                     data_density_averaged,
                     data_pressure_averaged,
                     thermo_properties_const_ptr,
-                    2);
+                    2,
+                    domains[2]);
                 
                 // Compute the total specific enthalpy.
                 

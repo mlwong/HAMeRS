@@ -54,6 +54,29 @@ class ConvectiveFluxReconstructorCentral: public ConvectiveFluxReconstructor
         
     private:
         /*
+         * Compute the convective flux and source due to splitting using shock-capturing scheme.
+         */
+        void
+        computeConvectiveFluxAndSourceOnPatchShockCapturing(
+            hier::Patch& patch,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> > source,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const hier::Box& domain,
+            const Real coeff_blending,
+            const double dt) const;
+        
+        /*
+         * Perform WENO interpolation.
+         */
+        void
+        performWENOInterpolation(
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& variables_minus,
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& variables_plus,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& variables,
+            const hier::Box& domain) const;
+        
+        /*
          * Options of the scheme.
          */
         int d_order;
