@@ -43,7 +43,8 @@ class FlowModelBasicUtilitiesFiveEqnAllaire: public FlowModelBasicUtilities
         void
         convertConservativeVariablesToPrimitiveVariables(
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables);
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
+            const std::vector<hier::Box>& domains);
         
         /*
          * Convert primitive variables to conservative variables.
@@ -59,7 +60,8 @@ class FlowModelBasicUtilitiesFiveEqnAllaire: public FlowModelBasicUtilities
         void
         convertPrimitiveVariablesToConservativeVariables(
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables);
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
+            const std::vector<hier::Box>& domains);
         
         /*
          * Check whether the given cell conservative variables are within the bounds.
@@ -67,7 +69,8 @@ class FlowModelBasicUtilitiesFiveEqnAllaire: public FlowModelBasicUtilities
         void
         checkCellDataOfConservativeVariablesBounded(
             HAMERS_SHARED_PTR<pdat::CellData<int> >& bounded_flag,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables);
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
+            const hier::Box& domain);
         
         /*
          * Check whether the given side conservative variables are within the bounds.
@@ -75,7 +78,8 @@ class FlowModelBasicUtilitiesFiveEqnAllaire: public FlowModelBasicUtilities
         void
         checkSideDataOfConservativeVariablesBounded(
             HAMERS_SHARED_PTR<pdat::SideData<int> >& bounded_flag,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables);
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
+            const std::vector<hier::Box>& domains);
         
         /*
          * Check whether the given cell primitive variables are within the bounds.
@@ -83,7 +87,17 @@ class FlowModelBasicUtilitiesFiveEqnAllaire: public FlowModelBasicUtilities
         void
         checkCellDataOfPrimitiveVariablesBounded(
             HAMERS_SHARED_PTR<pdat::CellData<int> >& bounded_flag,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& primitive_variables);
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& primitive_variables,
+            const hier::Box& domain);
+        
+        /*
+         * Check whether the given side primitive variables are within the bounds.
+         */
+        void
+        checkSideDataOfPrimitiveVariablesBounded(
+            HAMERS_SHARED_PTR<pdat::SideData<int> >& bounded_flag,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
+            const std::vector<hier::Box>& domains);
         
         /*
          * Register the required derived variables for transformation between conservative
@@ -102,14 +116,6 @@ class FlowModelBasicUtilitiesFiveEqnAllaire: public FlowModelBasicUtilities
         registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             const hier::IntVector& num_subghosts,
             const AVERAGING::TYPE& averaging_type);
-        
-        /*
-         * Check whether the given side primitive variables are within the bounds.
-         */
-        void
-        checkSideDataOfPrimitiveVariablesBounded(
-            HAMERS_SHARED_PTR<pdat::SideData<int> >& bounded_flag,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables);
         
         /*
          * Get the number of projection variables for transformation between conservative

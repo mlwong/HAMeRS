@@ -41,7 +41,8 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
         void
         convertConservativeVariablesToPrimitiveVariables(
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables);
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
+            const std::vector<hier::Box>& domains);
         
         /*
          * Convert primitive variables to conservative variables.
@@ -57,7 +58,8 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
         void
         convertPrimitiveVariablesToConservativeVariables(
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables);
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
+            const std::vector<hier::Box>& domains);
         
         /*
          * Check whether the given cell conservative variables are within the bounds.
@@ -65,7 +67,8 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
         void
         checkCellDataOfConservativeVariablesBounded(
             HAMERS_SHARED_PTR<pdat::CellData<int> >& bounded_flag,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables);
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
+            const hier::Box& domain);
         
         /*
          * Check whether the given side conservative variables are within the bounds.
@@ -73,7 +76,8 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
         void
         checkSideDataOfConservativeVariablesBounded(
             HAMERS_SHARED_PTR<pdat::SideData<int> >& bounded_flag,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables);
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
+            const std::vector<hier::Box>& domains);
         
         /*
          * Check whether the given cell primitive variables are within the bounds.
@@ -81,7 +85,8 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
         void
         checkCellDataOfPrimitiveVariablesBounded(
             HAMERS_SHARED_PTR<pdat::CellData<int> >& bounded_flag,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& primitive_variables);
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& primitive_variables,
+            const hier::Box& domain);
         
         /*
          * Check whether the given side primitive variables are within the bounds.
@@ -89,7 +94,8 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
         void
         checkSideDataOfPrimitiveVariablesBounded(
             HAMERS_SHARED_PTR<pdat::SideData<int> >& bounded_flag,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables);
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
+            const std::vector<hier::Box>& domains);
         
         /*
          * Register the required derived variables for transformation between conservative
