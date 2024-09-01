@@ -20,16 +20,6 @@ ConvectiveFluxReconstructorWCNS56::ConvectiveFluxReconstructorWCNS56(
             convective_flux_reconstructor_db)
 {
     d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*4;
-    d_eqn_form = d_flow_model->getEquationsForm();
-    d_has_advective_eqn_form = false;
-    
-    for (int ei = 0; ei < d_num_eqn; ei++)
-    {
-        if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
-        {
-            d_has_advective_eqn_form = true;
-        }
-    }
 }
 
 

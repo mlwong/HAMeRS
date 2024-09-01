@@ -369,16 +369,6 @@ ConvectiveFluxReconstructorWCNS6_Test::ConvectiveFluxReconstructorWCNS6_Test(
     d_constant_alpha_tau = d_convective_flux_reconstructor_db->
         getRealWithDefault("d_constant_alpha_tau", d_constant_alpha_tau);
     
-    d_eqn_form = d_flow_model->getEquationsForm();
-    d_has_advective_eqn_form = false;
-    for (int ei = 0; ei < d_num_eqn; ei++)
-    {
-        if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
-        {
-            d_has_advective_eqn_form = true;
-        }
-    }
-    
     t_characteristic_decomposition = tbox::TimerManager::getManager()->
         getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_characteristic_decomposition");
     

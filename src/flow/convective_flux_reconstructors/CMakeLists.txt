@@ -2,6 +2,7 @@
 # a list of the source files for the convective_flux_reconstructors library
 set(convective_flux_reconstructors_source_files
     ConvectiveFluxReconstructorManager.cpp
+    ConvectiveFluxReconstructor.cpp
     ./first_order/ConvectiveFluxReconstructorFirstOrderLLF.cpp
     ./first_order/ConvectiveFluxReconstructorFirstOrderHLLC.cpp
     ./WCNS56/ConvectiveFluxReconstructorWCNS56-HLLC-HLL.cpp

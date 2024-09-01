@@ -31,16 +31,7 @@ class ConvectiveFluxReconstructor
             const int& num_eqn,
             const FLOW_MODEL::TYPE& flow_model_type,
             const HAMERS_SHARED_PTR<FlowModel>& flow_model,
-            const HAMERS_SHARED_PTR<tbox::Database>& convective_flux_reconstructor_db):
-                d_object_name(object_name),
-                d_dim(dim),
-                d_grid_geometry(grid_geometry),
-                d_num_conv_ghosts(hier::IntVector::getZero(d_dim)),
-                d_num_eqn(num_eqn),
-                d_flow_model_type(flow_model_type),
-                d_flow_model(flow_model),
-                d_convective_flux_reconstructor_db(convective_flux_reconstructor_db)
-        {}
+            const HAMERS_SHARED_PTR<tbox::Database>& convective_flux_reconstructor_db);
         
         virtual ~ConvectiveFluxReconstructor() {}
         
@@ -85,6 +76,28 @@ class ConvectiveFluxReconstructor
     
     protected:
         /*
+         * Compute the convective flux and source due to splitting using shock-capturing scheme.
+         */
+        virtual void
+        computeConvectiveFluxAndSourceOnPatchShockCapturing(
+            hier::Patch& patch,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> > source_scratch,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const hier::Box& domain,
+            const double dt) const;
+        
+        /*
+         * Perform WENO interpolation.
+         */
+        void
+        performWENOInterpolation(
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& variables_minus,
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& variables_plus,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& variables,
+            const hier::Box& domain) const;
+        
+        /*
          * The object name is used for error/warning reporting.
          */
         const std::string d_object_name;
@@ -124,6 +137,18 @@ class ConvectiveFluxReconstructor
          */
         const HAMERS_SHARED_PTR<tbox::Database> d_convective_flux_reconstructor_db;
         
+        /*
+         * Forms of equations.
+         */
+        std::vector<EQN_FORM::TYPE> d_eqn_form;
+        bool d_has_advective_eqn_form;
+        
+        /*
+         * Constants for shock- and discontinuity-capturing scheme.
+         */
+        
+        Real d_threshold_Ducros;
+        Real d_threshold_density_sensor;
 };
 
 #endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_HPP */

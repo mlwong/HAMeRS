@@ -58,12 +58,6 @@ class ConvectiveFluxReconstructorWCNS56: public ConvectiveFluxReconstructor
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& variables_plus,
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& variables) = 0;
         
-        /*
-         * Forms of equations.
-         */
-        std::vector<EQN_FORM::TYPE> d_eqn_form;
-        bool d_has_advective_eqn_form;
-        
 };
 
 #endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_56_HLLC_HLL_HPP */

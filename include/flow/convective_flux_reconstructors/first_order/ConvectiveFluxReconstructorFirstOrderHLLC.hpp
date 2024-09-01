@@ -46,8 +46,6 @@ class ConvectiveFluxReconstructorFirstOrderHLLC: public ConvectiveFluxReconstruc
             const int RK_step_number);
         
     private:
-        std::vector<EQN_FORM::TYPE> d_eqn_form;
-        bool d_has_advective_eqn_form;
         
 };
 

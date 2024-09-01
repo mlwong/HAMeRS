@@ -174,11 +174,11 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
             const double dt) const;
         
         /*
-         * Add source terms to the advection equations of volume fractions.
+         * Compute source terms for the advection equations of volume fractions.
          * (for five-equation model by Allaire et al.)
          */
         void
-        addSourceTermsToVolumeFractionEquations(
+        computeSourceTermsForVolumeFractionEquations(
             HAMERS_SHARED_PTR<pdat::CellData<Real> > data_source,
             HAMERS_SHARED_PTR<pdat::CellData<Real> > data_velocity,
             HAMERS_SHARED_PTR<pdat::CellData<Real> > data_volume_fractions,
@@ -191,12 +191,7 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
         bool d_use_DRP4;
         int d_stencil_width;
         int d_order;
-        
-        /*
-         * Forms of equations.
-         */
-        std::vector<EQN_FORM::TYPE> d_eqn_form;
-        bool d_has_advective_eqn_form;
+        bool d_use_shock_capturing;
         
         /*
          * Timers interspersed throughout the class.

@@ -337,7 +337,7 @@ HyperviscosityOperator::performHyperviscosityOperationOnPatch(
     }
     else
     {
-    // Get the cell data of source term.
+        // Get the cell data of source term.
         HAMERS_SHARED_PTR<pdat::CellData<Real> > source(
             HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(variable_source, data_context)));

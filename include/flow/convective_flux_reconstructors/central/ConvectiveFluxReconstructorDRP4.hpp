@@ -62,12 +62,6 @@ class ConvectiveFluxReconstructorDRP4: public ConvectiveFluxReconstructor
         int d_stencil_width;
         
         /*
-         * Forms of equations.
-         */
-        std::vector<EQN_FORM::TYPE> d_eqn_form;
-        bool d_has_advective_eqn_form;
-        
-        /*
          * Timers interspersed throughout the class.
          */
         static HAMERS_SHARED_PTR<tbox::Timer> t_reconstruct_flux;

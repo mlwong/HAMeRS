@@ -48,16 +48,6 @@ ConvectiveFluxReconstructorDRP4::ConvectiveFluxReconstructorDRP4(
             " Only 9-point, 11-point, 13-point stencil DRP schemes are implemented!");
     }
     
-    d_eqn_form = d_flow_model->getEquationsForm();
-    d_has_advective_eqn_form = false;
-    for (int ei = 0; ei < d_num_eqn; ei++)
-    {
-        if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
-        {
-            d_has_advective_eqn_form = true;
-        }
-    }
-    
     t_reconstruct_flux = tbox::TimerManager::getManager()->
         getTimer("ConvectiveFluxReconstructorDRP4::t_reconstruct_flux");
     
