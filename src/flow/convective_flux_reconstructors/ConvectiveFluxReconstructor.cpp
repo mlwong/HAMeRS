@@ -374,8 +374,8 @@ ConvectiveFluxReconstructor::putToRestartBase(
 void
 ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing(
     hier::Patch& patch,
-    const HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
-    const HAMERS_SHARED_PTR<pdat::CellData<Real> > source_scratch,
+    const HAMERS_SHARED_PTR<pdat::SideData<Real> >& convective_flux,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& source_scratch,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const hier::Box& domain,
     const double dt,

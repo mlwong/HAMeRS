@@ -66,7 +66,7 @@ class ConvectiveFluxReconstructor
         computeConvectiveFluxAndSourceOnPatch(
             hier::Patch& patch,
             const int level_number,
-            const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
+            const HAMERS_SHARED_PTR<hier::CoarseFineBoundary>& coarse_fine_bdry,
             const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
             const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -88,8 +88,8 @@ class ConvectiveFluxReconstructor
         virtual void
         computeConvectiveFluxAndSourceOnPatchShockCapturing(
             hier::Patch& patch,
-            const HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux,
-            const HAMERS_SHARED_PTR<pdat::CellData<Real> > source_scratch,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& source_scratch,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const hier::Box& domain,
             const double dt,

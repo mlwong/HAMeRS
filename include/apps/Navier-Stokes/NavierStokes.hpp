@@ -160,7 +160,7 @@ class NavierStokes:
         computeFluxesAndSourcesOnPatch(
             hier::Patch& patch,
             const int level_number,
-            const HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry,
+            const HAMERS_SHARED_PTR<hier::CoarseFineBoundary>& coarse_fine_bdry,
             const double time,
             const double dt,
             const int RK_step_number,
