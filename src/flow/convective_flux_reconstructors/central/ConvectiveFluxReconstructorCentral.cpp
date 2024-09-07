@@ -4081,7 +4081,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
             domain,
             dt);
         
-        t_reconstruct_flux->start();
+        t_reconstruct_flux->stop();
     }
     
     t_compute_source->start();
