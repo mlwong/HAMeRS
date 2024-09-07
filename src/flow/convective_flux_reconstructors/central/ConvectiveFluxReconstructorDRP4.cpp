@@ -30,6 +30,12 @@ ConvectiveFluxReconstructorDRP4::ConvectiveFluxReconstructorDRP4(
     d_stencil_width = d_convective_flux_reconstructor_db->
         getIntegerWithDefault("d_stencil_width", d_stencil_width);
     
+    d_use_shock_capturing = d_convective_flux_reconstructor_db->getBoolWithDefault("use_shock_capturing", false);
+    d_use_shock_capturing = d_convective_flux_reconstructor_db->getBoolWithDefault("d_use_shock_capturing", d_use_shock_capturing);
+    
+    d_use_interface_capturing = d_convective_flux_reconstructor_db->getBoolWithDefault("use_interface_capturing", false);
+    d_use_interface_capturing = d_convective_flux_reconstructor_db->getBoolWithDefault("d_use_interface_capturing", d_use_interface_capturing);
+    
     if (d_stencil_width == 9)
     {
         d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*4;
@@ -46,6 +52,12 @@ ConvectiveFluxReconstructorDRP4::ConvectiveFluxReconstructorDRP4(
     {
         TBOX_ERROR("ConvectiveFluxReconstructorDRP4::ConvectiveFluxReconstructorDRP4:"
             " Only 9-point, 11-point, 13-point stencil DRP schemes are implemented!");
+    }
+    
+    if (d_use_shock_capturing || d_use_interface_capturing)
+    {
+        // Make sure at least enough ghost cells are set for shock- and interface-capturing.
+        d_num_conv_ghosts = hier::IntVector::max(d_num_conv_ghosts, hier::IntVector::getOne(d_dim)*d_num_ghosts_shock_interface_capturing);
     }
     
     t_reconstruct_flux = tbox::TimerManager::getManager()->
@@ -84,6 +96,12 @@ ConvectiveFluxReconstructorDRP4::printClassData(
     os << "d_stencil_width = "
        << d_stencil_width
        << std::endl;
+    os << "d_use_shock_capturing = " << std::boolalpha
+       << d_use_shock_capturing
+       << std::endl;
+    os << "d_use_interface_capturing = " << std::boolalpha
+         << d_use_interface_capturing
+         << std::endl;
 }
 
 
@@ -98,6 +116,8 @@ ConvectiveFluxReconstructorDRP4::putToRestart(
     putToRestartBase(restart_db);
     
     restart_db->putInteger("d_stencil_width", d_stencil_width);
+    restart_db->putBool("d_use_shock_capturing", d_use_shock_capturing);
+    restart_db->putBool("d_use_interface_capturing", d_use_interface_capturing);
 }
 
 
@@ -217,6 +237,15 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
     TBOX_ASSERT(source);
     TBOX_ASSERT(source->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
 #endif
+    
+    // Create the scratch cell data of source.
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > source_scratch;
+    
+    if (d_has_advective_eqn_form)
+    {
+        source_scratch.reset(new pdat::CellData<Real>(interior_box, d_num_eqn, hier::IntVector::getZero(d_dim)));
+        source_scratch->fillAll(Real(0));
+    }
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -421,7 +450,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
             {
                 if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
                 {
-                    Real* S = source->getPointer(ei);
+                    Real* S_scratch = source_scratch->getPointer(ei);
                     
                     const int num_subghosts_0_conservative_var = num_subghosts_conservative_var[ei][0];
                     
@@ -444,7 +473,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                             
                             const int idx_cell_nghost = i;
                             
-                            S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                            S_scratch[idx_cell_nghost] = Real(dt)*Q[ei][idx_cell_wghost]*(
                                 (
                                 a_n*(u[idx_cell_wghost_x_R]    - u[idx_cell_wghost_x_L]) +
                                 b_n*(u[idx_cell_wghost_x_RR]   - u[idx_cell_wghost_x_LL]) +
@@ -474,7 +503,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                             
                             const int idx_cell_nghost = i;
                             
-                            S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                            S_scratch[idx_cell_nghost] = Real(dt)*Q[ei][idx_cell_wghost]*(
                                 (
                                 a_n*(u[idx_cell_wghost_x_R]     - u[idx_cell_wghost_x_L]) +
                                 b_n*(u[idx_cell_wghost_x_RR]    - u[idx_cell_wghost_x_LL]) +
@@ -507,7 +536,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                             
                             const int idx_cell_nghost = i;
                             
-                            S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                            S_scratch[idx_cell_nghost] = Real(dt)*Q[ei][idx_cell_wghost]*(
                                 (
                                 a_n*(u[idx_cell_wghost_x_R]      - u[idx_cell_wghost_x_L]) +
                                 b_n*(u[idx_cell_wghost_x_RR]     - u[idx_cell_wghost_x_LL]) +
@@ -1003,7 +1032,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
             {
                 if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
                 {
-                    Real* S = source->getPointer(ei);
+                    Real* S_scratch = source_scratch->getPointer(ei);
                     
                     const int num_subghosts_0_conservative_var = num_subghosts_conservative_var[ei][0];
                     const int num_subghosts_1_conservative_var = num_subghosts_conservative_var[ei][1];
@@ -1070,7 +1099,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                 
                                 const int idx_cell_nghost = i + j*interior_dim_0;
                                 
-                                S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                S_scratch[idx_cell_nghost] = Real(dt)*Q[ei][idx_cell_wghost]*(
                                     (
                                     a_n*(u[idx_cell_wghost_x_R]    - u[idx_cell_wghost_x_L]) +
                                     b_n*(u[idx_cell_wghost_x_RR]   - u[idx_cell_wghost_x_LL]) +
@@ -1160,7 +1189,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                 
                                 const int idx_cell_nghost = i + j*interior_dim_0;
                                 
-                                S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                S_scratch[idx_cell_nghost] = Real(dt)*Q[ei][idx_cell_wghost]*(
                                     (
                                     a_n*(u[idx_cell_wghost_x_R]     - u[idx_cell_wghost_x_L]) +
                                     b_n*(u[idx_cell_wghost_x_RR]    - u[idx_cell_wghost_x_LL]) +
@@ -1264,7 +1293,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                 
                                 const int idx_cell_nghost = i + j*interior_dim_0;
                                 
-                                S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                S_scratch[idx_cell_nghost] = Real(dt)*Q[ei][idx_cell_wghost]*(
                                     (
                                     a_n*(u[idx_cell_wghost_x_R]      - u[idx_cell_wghost_x_L]) +
                                     b_n*(u[idx_cell_wghost_x_RR]     - u[idx_cell_wghost_x_LL]) +
@@ -2181,7 +2210,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
             {
                 if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
                 {
-                    Real* S = source->getPointer(ei);
+                    Real* S_scratch = source_scratch->getPointer(ei);
                     
                     const int num_subghosts_0_conservative_var = num_subghosts_conservative_var[ei][0];
                     const int num_subghosts_1_conservative_var = num_subghosts_conservative_var[ei][1];
@@ -2329,7 +2358,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                         k*interior_dim_0*
                                             interior_dim_1;
                                     
-                                    S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                    S_scratch[idx_cell_nghost] = Real(dt)*Q[ei][idx_cell_wghost]*(
                                         (
                                         a_n*(u[idx_cell_wghost_x_R]    - u[idx_cell_wghost_x_L]) +
                                         b_n*(u[idx_cell_wghost_x_RR]   - u[idx_cell_wghost_x_LL]) +
@@ -2523,7 +2552,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                         k*interior_dim_0*
                                             interior_dim_1;
                                     
-                                    S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                    S_scratch[idx_cell_nghost] = Real(dt)*Q[ei][idx_cell_wghost]*(
                                         (
                                         a_n*(u[idx_cell_wghost_x_R]     - u[idx_cell_wghost_x_L]) +
                                         b_n*(u[idx_cell_wghost_x_RR]    - u[idx_cell_wghost_x_LL]) +
@@ -2750,7 +2779,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                                         k*interior_dim_0*
                                             interior_dim_1;
                                     
-                                    S[idx_cell_nghost] += Real(dt)*Q[ei][idx_cell_wghost]*(
+                                    S_scratch[idx_cell_nghost] = Real(dt)*Q[ei][idx_cell_wghost]*(
                                         (
                                         a_n*(u[idx_cell_wghost_x_R]      - u[idx_cell_wghost_x_L]) +
                                         b_n*(u[idx_cell_wghost_x_RR]     - u[idx_cell_wghost_x_LL]) +
@@ -2793,4 +2822,139 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         d_flow_model->unregisterPatch();
         
     } // if (d_dim == tbox::Dimension(3))
+    
+    if (d_use_shock_capturing || d_use_interface_capturing)
+    {
+        // Set the domain.
+        const hier::Box domain(interior_box);
+        
+        t_reconstruct_flux->start();
+            
+        computeConvectiveFluxAndSourceOnPatchShockCapturing(
+            patch,
+            convective_flux,
+            source,
+            data_context,
+            domain,
+            dt,
+            d_use_shock_capturing,
+            d_use_interface_capturing);
+        
+        t_reconstruct_flux->stop();
+    }
+    
+    t_compute_source->start();
+    
+    if (d_has_advective_eqn_form)
+    {
+        // Copy the source_scratch to source.
+        if (d_dim == tbox::Dimension(1))
+        {
+            /*
+             * Get the dimension.
+             */
+            
+            const int interior_dim_0 = interior_dims[0];
+            
+            /*
+             * Copy from source_scratch to source.
+             */
+            
+            for (int ei = 0; ei < d_num_eqn; ei ++)
+            {
+                if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
+                {
+                    Real* S         = source->getPointer(ei);
+                    Real* S_scratch = source_scratch->getPointer(ei);
+                    
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_cell_nghost = i;
+                        
+                        S[idx_cell_nghost] += S_scratch[idx_cell_nghost];
+                    }
+                }
+            }
+        } // if (d_dim == tbox::Dimension(1))
+        else if (d_dim == tbox::Dimension(2))
+        {
+            /*
+             * Get the dimensions.
+             */
+            
+            const int interior_dim_0 = interior_dims[0];
+            const int interior_dim_1 = interior_dims[1];
+            
+            /*
+             * Copy from source_scratch to source.
+             */
+            
+            for (int ei = 0; ei < d_num_eqn; ei ++)
+            {
+                if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
+                {
+                    Real* S         = source->getPointer(ei);
+                    Real* S_scratch = source_scratch->getPointer(ei);
+                    
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear index.
+                            const int idx_cell_nghost = i + j*interior_dim_0;
+                            
+                            S[idx_cell_nghost] += S_scratch[idx_cell_nghost];
+                        }
+                    }
+                }
+            }
+        } // if (d_dim == tbox::Dimension(2))
+        else if (d_dim == tbox::Dimension(3))
+        {
+            /*
+             * Get the dimensions.
+             */
+            
+            const int interior_dim_0 = interior_dims[0];
+            const int interior_dim_1 = interior_dims[1];
+            const int interior_dim_2 = interior_dims[2];
+            
+            /*
+             * Copy from source_scratch to source.
+             */
+            
+            for (int ei = 0; ei < d_num_eqn; ei ++)
+            {
+                if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
+                {
+                    Real* S         = source->getPointer(ei);
+                    Real* S_scratch = source_scratch->getPointer(ei);
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                            // Compute the linear index.
+                                const int idx_cell_nghost = i +
+                                    j*interior_dim_0 +
+                                    k*interior_dim_0*
+                                        interior_dim_1;
+                                
+                                S[idx_cell_nghost] += S_scratch[idx_cell_nghost];
+                            }
+                        }
+                    }
+                }
+            }
+            
+        } // if (d_dim == tbox::Dimension(3))
+    } // if (d_has_advective_eqn_form)
+    
+    t_compute_source->stop();
 }

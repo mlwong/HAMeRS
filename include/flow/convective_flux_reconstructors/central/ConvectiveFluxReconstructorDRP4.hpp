@@ -60,6 +60,8 @@ class ConvectiveFluxReconstructorDRP4: public ConvectiveFluxReconstructor
          * Options of the scheme.
          */
         int d_stencil_width;
+        bool d_use_shock_capturing;
+        bool d_use_interface_capturing;
         
         /*
          * Timers interspersed throughout the class.
