@@ -52,6 +52,8 @@ void
 ConvectiveFluxReconstructorFirstOrderLLF::putToRestart(
    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
+    putToRestartBase(restart_db);
+    
     restart_db->putString("d_shock_capturing_scheme", "LLF");
 }
 

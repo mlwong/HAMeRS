@@ -312,6 +312,8 @@ void
 ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL::putToRestart(
    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
+    putToRestartBase(restart_db);
+    
     restart_db->putInteger("d_constant_q", d_constant_q);
     restart_db->putReal("d_constant_C", d_constant_C);
     restart_db->putReal("d_constant_Chi", d_constant_Chi);

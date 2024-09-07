@@ -333,10 +333,17 @@ ConvectiveFluxReconstructor::ConvectiveFluxReconstructor(
         d_num_eqn(num_eqn),
         d_flow_model_type(flow_model_type),
         d_flow_model(flow_model),
-        d_convective_flux_reconstructor_db(convective_flux_reconstructor_db)
+        d_convective_flux_reconstructor_db(convective_flux_reconstructor_db),
+        d_num_ghosts_shock_interface_capturing(4)
 {
-    d_threshold_Ducros = Real(3)/Real(10);
-    d_threshold_density_sensor = Real(5)/Real(10000);
+    d_threshold_sensor_shock = Real(3)/Real(10);
+    d_threshold_sensor_interface = Real(5)/Real(10000);
+    
+    d_threshold_sensor_shock = d_convective_flux_reconstructor_db->getRealWithDefault("threshold_sensor_shock", d_threshold_sensor_shock);
+    d_threshold_sensor_shock = d_convective_flux_reconstructor_db->getRealWithDefault("d_threshold_sensor_shock", d_threshold_sensor_shock);
+    
+    d_threshold_sensor_interface = d_convective_flux_reconstructor_db->getRealWithDefault("threshold_sensor_interface", d_threshold_sensor_interface);
+    d_threshold_sensor_interface = d_convective_flux_reconstructor_db->getRealWithDefault("d_threshold_sensor_interface", d_threshold_sensor_interface);
     
     d_eqn_form = d_flow_model->getEquationsForm();
     d_has_advective_eqn_form = false;
@@ -351,6 +358,17 @@ ConvectiveFluxReconstructor::ConvectiveFluxReconstructor(
 
 
 /*
+ * Put the characteristics of the base convective flux reconstruction class into the restart database.
+ */
+void
+ConvectiveFluxReconstructor::putToRestartBase(
+    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
+{
+    restart_db->putReal("d_threshold_sensor_shock", d_threshold_sensor_shock);
+    restart_db->putReal("d_threshold_sensor_interface", d_threshold_sensor_interface);
+}
+
+/*
  * Compute the convective flux and source due to splitting using shock-capturing scheme.
  */
 void
@@ -360,8 +378,15 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
     const HAMERS_SHARED_PTR<pdat::CellData<Real> > source_scratch,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const hier::Box& domain,
-    const double dt) const
+    const double dt,
+    const bool use_shock_capturing,
+    const bool use_interface_capturing) const
 {
+    if (!use_shock_capturing && !use_interface_capturing)
+    {
+        return;
+    }
+    
     d_flow_model->setupRiemannSolver();
     d_flow_model->setupBasicUtilities();
     
@@ -431,10 +456,10 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
     HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux_midpoint_HLLC(
         new pdat::SideData<Real>(interior_box, d_num_eqn, hier::IntVector::getOne(d_dim)));
     
-    HAMERS_SHARED_PTR<pdat::SideData<Real> > shock_sensor_side(
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > discontinuity_sensor_side(
         new pdat::SideData<Real>(interior_box, 1, hier::IntVector::getZero(d_dim)));
     
-    HAMERS_SHARED_PTR<pdat::CellData<Real> > shock_sensor_cell(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > discontinuity_sensor_cell(
         new pdat::CellData<Real>(interior_box, 1, hier::IntVector::getZero(d_dim)));
     
     HAMERS_SHARED_PTR<pdat::CellData<Real> > velocity_derivatives;
@@ -442,7 +467,7 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
     HAMERS_SHARED_PTR<pdat::CellData<Real> > enstrophy;
     std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > density_sensors;
     
-    bool perform_shock_capturing = false;
+    bool perform_WCNS = false;
     
     if (d_dim > tbox::Dimension(1))
     {
@@ -585,23 +610,23 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
      * Pointers to shock sensors.
      */
     
-    Real* s   = shock_sensor_cell->getPointer(0);
-    Real* s_x = shock_sensor_side->getPointer(0);
+    Real* s   = discontinuity_sensor_cell->getPointer(0);
+    Real* s_x = discontinuity_sensor_side->getPointer(0);
     Real* s_y = nullptr;
     Real* s_z = nullptr;
     
     if (d_dim == tbox::Dimension(1))
     {
-        shock_sensor_cell->fillAll(Real(1));
-        shock_sensor_side->fillAll(Real(1));
-        perform_shock_capturing = true;
+        discontinuity_sensor_cell->fillAll(Real(1));
+        discontinuity_sensor_side->fillAll(Real(1));
+        perform_WCNS = true;
     }
     else
     {
         /*
          * Get the numbers of ghost cells of the variables.
          */
-    
+        
         const hier::IntVector num_ghosts_density = density->getGhostCellWidth();
         
         /*
@@ -617,7 +642,7 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
         Real* rho_s_x = density_sensors[0]->getPointer(0);
         Real* rho_s_y = density_sensors[1]->getPointer(0);
         
-        s_y = shock_sensor_side->getPointer(1);
+        s_y = discontinuity_sensor_side->getPointer(1);
         
         const hier::Box empty_box(d_dim);
         
@@ -731,7 +756,7 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                 }
             }
             
-            int num_valid_shock_sensor = 0;
+            int count_valid_sensor = 0;
             
             const Real half = Real(1)/Real(2);
             
@@ -760,20 +785,20 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                     const Real Ducros_value_midpoint = half*(Ducros_value_L + Ducros_value_R);
                     
                     s_x[idx_sensor] = Real(0);
-                    if (Ducros_value_midpoint > d_threshold_Ducros)
+                    if (Ducros_value_midpoint > d_threshold_sensor_shock && use_shock_capturing)
                     {
                         s_x[idx_sensor] = Real(1);
                     }
                     
                     const Real rho_s_x_midpoint = half*(rho_s_x[idx_L] + rho_s_x[idx_R]);
-                    if (rho_s_x_midpoint > d_threshold_density_sensor)
+                    if (rho_s_x_midpoint > d_threshold_sensor_interface && use_interface_capturing)
                     {
                         s_x[idx_sensor] = Real(1);
                     }
                     
                     if (s_x[idx_sensor] > Real(0))
                     {
-                        num_valid_shock_sensor++;
+                        count_valid_sensor++;
                     }
                 }
             }
@@ -803,20 +828,20 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                     const Real Ducros_value_midpoint = half*(Ducros_value_B + Ducros_value_T);
                     
                     s_y[idx_sensor] = Real(0);
-                    if (Ducros_value_midpoint > d_threshold_Ducros)
+                    if (Ducros_value_midpoint > d_threshold_sensor_shock && use_shock_capturing)
                     {
                         s_y[idx_sensor] = Real(1);
                     }
                     
                     const Real rho_s_y_midpoint = half*(rho_s_y[idx_B] + rho_s_y[idx_T]);
-                    if (rho_s_y_midpoint > d_threshold_density_sensor)
+                    if (rho_s_y_midpoint > d_threshold_sensor_interface && use_interface_capturing)
                     {
                         s_y[idx_sensor] = Real(1);
                     }
                     
                     if (s_y[idx_sensor] > Real(0))
                     {
-                        num_valid_shock_sensor++;
+                        count_valid_sensor++;
                     }
                 }
             }
@@ -840,36 +865,39 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                             (theta[idx]*theta[idx] + Omega[idx] + EPSILON);
                         
                         s[idx_sensor] = Real(0);
-                        if (Ducros_value > d_threshold_Ducros)
+                        if (Ducros_value > d_threshold_sensor_shock && use_shock_capturing)
                         {
                             s[idx_sensor] = Real(1);
                         }
-                        if (rho_s_x[idx] > d_threshold_density_sensor)
                         {
                             s[idx_sensor] = Real(1);
                         }
-                        if (rho_s_y[idx] > d_threshold_density_sensor)
+                        if (rho_s_x[idx] > d_threshold_sensor_interface && use_interface_capturing)
+                        {
+                            s[idx_sensor] = Real(1);
+                        }
+                        if (rho_s_y[idx] > d_threshold_sensor_interface && use_interface_capturing)
                         {
                             s[idx_sensor] = Real(1);
                         }
                         
                         if (s[idx_sensor] > Real(0))
                         {
-                            num_valid_shock_sensor++;
+                            count_valid_sensor++;
                         }
                     }
                 }
             }
             
-            if (num_valid_shock_sensor > 0)
+            if (count_valid_sensor > 0)
             {
-                perform_shock_capturing = true;
+                perform_WCNS = true;
             }
         }
         else if (d_dim == tbox::Dimension(3))
         {
             Real* rho_s_z = density_sensors[2]->getPointer(0);
-            Real* s_z = shock_sensor_side->getPointer(2);
+            Real* s_z = discontinuity_sensor_side->getPointer(2);
             
             /*
              * Get the local lower indices and the number of cells in each dimension.
@@ -1026,7 +1054,7 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                 }
             }
             
-            int num_valid_shock_sensor = 0;
+            int count_valid_sensor = 0;
             
             const Real half = Real(1)/Real(2);
             
@@ -1063,20 +1091,20 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                         const Real Ducros_value_midpoint = half*(Ducros_value_L + Ducros_value_R);
                         
                         s_x[idx_sensor] = Real(0);
-                        if (Ducros_value_midpoint > d_threshold_Ducros)
+                        if (Ducros_value_midpoint > d_threshold_sensor_shock && use_shock_capturing)
                         {
                             s_x[idx_sensor] = Real(1);
                         }
                         
                         const Real rho_s_x_midpoint = half*(rho_s_x[idx_L] + rho_s_x[idx_R]);
-                        if (rho_s_x_midpoint > d_threshold_density_sensor)
+                        if (rho_s_x_midpoint > d_threshold_sensor_interface && use_interface_capturing)
                         {
                             s_x[idx_sensor] = Real(1);
                         }
                         
                         if (s_x[idx_sensor] > Real(0))
                         {
-                            num_valid_shock_sensor++;
+                            count_valid_sensor++;
                         }
                     }
                 }
@@ -1115,20 +1143,20 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                         const Real Ducros_value_midpoint = half*(Ducros_value_B + Ducros_value_T);
                         
                         s_y[idx_sensor] = Real(0);
-                        if (Ducros_value_midpoint > d_threshold_Ducros)
+                        if (Ducros_value_midpoint > d_threshold_sensor_shock && use_shock_capturing)
                         {
                             s_y[idx_sensor] = Real(1);
                         }
                         
                         const Real rho_s_y_midpoint = half*(rho_s_y[idx_B] + rho_s_y[idx_T]);
-                        if (rho_s_y_midpoint > d_threshold_density_sensor)
+                        if (rho_s_y_midpoint > d_threshold_sensor_interface && use_interface_capturing)
                         {
                             s_y[idx_sensor] = Real(1);
                         }
                         
                         if (s_y[idx_sensor] > Real(0))
                         {
-                            num_valid_shock_sensor++;
+                            count_valid_sensor++;
                         }
                     }
                 }
@@ -1167,20 +1195,20 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                         const Real Ducros_value_midpoint = half*(Ducros_value_B + Ducros_value_T);
                         
                         s_z[idx_sensor] = Real(0);
-                        if (Ducros_value_midpoint > d_threshold_Ducros)
+                        if (Ducros_value_midpoint > d_threshold_sensor_shock && use_shock_capturing)
                         {
                             s_z[idx_sensor] = Real(1);
                         }
                         
                         const Real rho_s_z_midpoint = half*(rho_s_z[idx_B] + rho_s_z[idx_T]);
-                        if (rho_s_z_midpoint > d_threshold_density_sensor)
+                        if (rho_s_z_midpoint > d_threshold_sensor_interface && use_interface_capturing)
                         {
                             s_z[idx_sensor] = Real(1);
                         }
                         
                         if (s_z[idx_sensor] > Real(0))
                         {
-                            num_valid_shock_sensor++;
+                            count_valid_sensor++;
                         }
                     }
                 }
@@ -1211,41 +1239,41 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                                 (theta[idx]*theta[idx] + Omega[idx] + EPSILON);
                             
                             s[idx_sensor] = Real(0);
-                            if (Ducros_value > d_threshold_Ducros)
+                            if (Ducros_value > d_threshold_sensor_shock && use_shock_capturing)
                             {
                                 s[idx_sensor] = Real(1);
                             }
                             
-                            if (rho_s_x[idx] > d_threshold_density_sensor)
+                            if (rho_s_x[idx] > d_threshold_sensor_interface && use_interface_capturing)
                             {
                                 s[idx_sensor] = Real(1);
                             }
-                            if (rho_s_y[idx] > d_threshold_density_sensor)
+                            if (rho_s_y[idx] > d_threshold_sensor_interface && use_interface_capturing)
                             {
                                 s[idx_sensor] = Real(1);
                             }
-                            if (rho_s_z[idx] > d_threshold_density_sensor)
+                            if (rho_s_z[idx] > d_threshold_sensor_interface && use_interface_capturing)
                             {
                                 s[idx_sensor] = Real(1);
                             }
                             
                             if (s[idx_sensor] > Real(0))
                             {
-                                num_valid_shock_sensor++;
+                                count_valid_sensor++;
                             }
                         }
                     }
                 }
             }
             
-            if (num_valid_shock_sensor > 0)
+            if (count_valid_sensor > 0)
             {
-                perform_shock_capturing = true;
+                perform_WCNS = true;
             }
         } // if (d_dim == tbox::Dimension(3))
     } // if (d_dim == tbox::Dimension(1))
     
-    if (perform_shock_capturing)
+    if (perform_WCNS)
     {
         /*
          * Declare temporary data containers for WENO interpolation.

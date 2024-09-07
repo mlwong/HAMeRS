@@ -33,6 +33,9 @@ ConvectiveFluxReconstructorKEP::ConvectiveFluxReconstructorKEP(
     d_use_shock_capturing = d_convective_flux_reconstructor_db->getBoolWithDefault("use_shock_capturing", false);
     d_use_shock_capturing = d_convective_flux_reconstructor_db->getBoolWithDefault("d_use_shock_capturing", d_use_shock_capturing);
     
+    d_use_interface_capturing = d_convective_flux_reconstructor_db->getBoolWithDefault("use_interface_capturing", false);
+    d_use_interface_capturing = d_convective_flux_reconstructor_db->getBoolWithDefault("d_use_interface_capturing", d_use_interface_capturing);
+    
     if (d_use_DRP4)
     {
         d_stencil_width = d_convective_flux_reconstructor_db->
@@ -182,10 +185,10 @@ ConvectiveFluxReconstructorKEP::ConvectiveFluxReconstructorKEP(
         }
     }
     
-    if (d_use_shock_capturing)
+    if (d_use_shock_capturing || d_use_interface_capturing)
     {
-        // Make sure at least 4 ghost cells are used for shock capturing.
-        d_num_conv_ghosts = hier::IntVector::max(d_num_conv_ghosts, hier::IntVector::getOne(d_dim)*4);
+        // Make sure at least enough ghost cells are set for shock- and interface-capturing.
+        d_num_conv_ghosts = hier::IntVector::max(d_num_conv_ghosts, hier::IntVector::getOne(d_dim)*d_num_ghosts_shock_interface_capturing);
     }
     
     t_reconstruct_flux = tbox::TimerManager::getManager()->
@@ -227,6 +230,9 @@ ConvectiveFluxReconstructorKEP::printClassData(
     os << "d_use_shock_capturing = " << std::boolalpha
        << d_use_shock_capturing
        << std::endl;
+    os << "d_use_interface_capturing = " << std::boolalpha
+         << d_use_interface_capturing
+         << std::endl;
 }
 
 
@@ -238,10 +244,13 @@ void
 ConvectiveFluxReconstructorKEP::putToRestart(
    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
+    putToRestartBase(restart_db);
+    
     restart_db->putBool("d_use_DRP4", d_use_DRP4);
     restart_db->putInteger("d_stencil_width", d_stencil_width);
     restart_db->putInteger("d_order", d_order);
     restart_db->putBool("d_use_shock_capturing", d_use_shock_capturing);
+    restart_db->putBool("d_use_interface_capturing", d_use_interface_capturing);
 }
 
 
@@ -1359,7 +1368,7 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
     
     d_flow_model->unregisterPatch();
     
-    if (d_use_shock_capturing)
+    if (d_use_shock_capturing || d_use_interface_capturing)
     {
         // Set the domain.
         const hier::Box domain(interior_box);
@@ -1372,7 +1381,9 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
             source,
             data_context,
             domain,
-            dt);
+            dt,
+            d_use_shock_capturing,
+            d_use_interface_capturing);
         
         t_reconstruct_flux->stop();
     }

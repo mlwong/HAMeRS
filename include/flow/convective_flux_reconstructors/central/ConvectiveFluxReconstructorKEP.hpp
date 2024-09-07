@@ -192,6 +192,7 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
         int d_stencil_width;
         int d_order;
         bool d_use_shock_capturing;
+        bool d_use_interface_capturing;
         
         /*
          * Timers interspersed throughout the class.

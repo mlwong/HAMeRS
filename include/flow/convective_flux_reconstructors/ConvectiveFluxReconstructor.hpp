@@ -76,6 +76,13 @@ class ConvectiveFluxReconstructor
     
     protected:
         /*
+         * Put the characteristics of the base convective flux reconstruction class into the restart database.
+         */
+        void
+        putToRestartBase(
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
+        
+        /*
          * Compute the convective flux and source due to splitting using shock-capturing scheme.
          */
         virtual void
@@ -85,7 +92,9 @@ class ConvectiveFluxReconstructor
             const HAMERS_SHARED_PTR<pdat::CellData<Real> > source_scratch,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const hier::Box& domain,
-            const double dt) const;
+            const double dt,
+            const bool use_shock_capturing,
+            const bool use_interface_capturing) const;
         
         /*
          * Perform WENO interpolation.
@@ -144,11 +153,14 @@ class ConvectiveFluxReconstructor
         bool d_has_advective_eqn_form;
         
         /*
-         * Constants for shock- and discontinuity-capturing scheme.
+         * Constants for shock- and interface-capturing scheme.
          */
         
-        Real d_threshold_Ducros;
-        Real d_threshold_density_sensor;
+        Real d_threshold_sensor_shock;
+        Real d_threshold_sensor_interface;
+        
+        const int d_num_ghosts_shock_interface_capturing;
+        
 };
 
 #endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_HPP */
