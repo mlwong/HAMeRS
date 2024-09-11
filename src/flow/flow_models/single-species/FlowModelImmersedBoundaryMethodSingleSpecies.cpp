@@ -281,12 +281,6 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
         
         // AFK 090624 normal distance between the boundary and second image point is set to 2*(dx) - epsilon
         const Real d_ip2  = Real(2)*Real(dx[0]) - HAMERS_REAL_EPSILON;   
-
-        // AFK 090624 Hard-coded specific gas constant to be used 2nd-order adibatic pressure boundary condition (needs to be fixed)
-        const Real species_m   = Real(2897) / Real(100000);
-        const Real R_universal = Real(831446261815324) / Real(100000000000000);
-        const Real R_specific  = R_universal / species_m;
-        // AFK 090624
         
         const Real& rho_u_body = d_mom_body[0];
         const Real& rho_v_body = d_mom_body[1];
