@@ -2473,9 +2473,6 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                 }
             }
             
-            ///////////////////////////////
-            // UNFINISHED
-            
             /*
              * Reconstruct the flux in the x-direction.
              */
@@ -2605,7 +2602,7 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
                         HAMERS_PRAGMA_SIMD
-                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
                             const int idx_face_z = i +
@@ -2677,7 +2674,7 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                                 HAMERS_PRAGMA_SIMD
                                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                                 {
-                                    // Compute the linear indices. 
+                                    // Compute the linear indices.
                                     const int idx_cell_nghost = i +
                                         j*interior_dim_0 +
                                         k*interior_dim_0*
