@@ -102,7 +102,8 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
 void
 FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimitiveVariables(
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables)
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
+    const std::vector<hier::Box>& domains)
 {
     if (d_flow_model.expired())
     {
@@ -141,6 +142,60 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
     
     const hier::IntVector ghostcell_dims_conservative_var = conservative_variables[0]->
         getGhostBox().numberCells();
+    
+    /*
+     * Get the domain dimensions.
+     */
+    
+    hier::IntVector domain_x_lo(d_dim);
+    hier::IntVector domain_y_lo(d_dim);
+    hier::IntVector domain_z_lo(d_dim);
+    hier::IntVector domain_x_dims(d_dim);
+    hier::IntVector domain_y_dims(d_dim);
+    hier::IntVector domain_z_dims(d_dim);
+    
+    if (domains[0].empty())
+    {
+        domain_x_lo = hier::IntVector::getZero(d_dim);
+        domain_x_dims = interior_dims;
+        domain_x_lo[0] = -num_ghosts_primitive_var[0];
+        domain_x_dims[0] = ghostcell_dims_primitive_var[0];
+    }
+    else
+    {
+        domain_x_lo = domains[0].lower() - interior_box.lower();
+        domain_x_dims = domains[0].numberCells();
+    }
+    if (d_dim > tbox::Dimension(1))
+    {
+        if (domains[1].empty())
+        {
+            domain_y_lo = hier::IntVector::getZero(d_dim);
+            domain_y_dims = interior_dims;
+            domain_y_lo[1] = -num_ghosts_primitive_var[1];
+            domain_y_dims[1] = ghostcell_dims_primitive_var[1];
+        }
+        else
+        {
+            domain_y_lo = domains[1].lower() - interior_box.lower();
+            domain_y_dims = domains[1].numberCells();
+        }
+    }
+    if (d_dim > tbox::Dimension(2))
+    {
+        if (domains[2].empty())
+        {
+            domain_z_lo = hier::IntVector::getZero(d_dim);
+            domain_z_dims = interior_dims;
+            domain_z_lo[2] = -num_ghosts_primitive_var[2];
+            domain_z_dims[2] = ghostcell_dims_primitive_var[2];
+        }
+        else
+        {
+            domain_z_lo = domains[2].lower() - interior_box.lower();
+            domain_z_dims = domains[2].numberCells();
+        }
+    }
     
     /*
      * Get the size of variables.
@@ -288,7 +343,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
     
     if (d_dim == tbox::Dimension(1))
     {
-        const int interior_dim_0 = interior_dims[0];
+        /*
+         * Get the local lower index, numbers of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_dim_0 = domain_x_dims[0];
         
         const int num_ghosts_0_primitive_var    = num_ghosts_primitive_var[0];
         const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[0];
@@ -334,9 +394,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         for (int si = 0; si < d_num_species; si++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_conservative_var;
-                 i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                 i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear index.
                 const int idx_conservative_var = i + num_ghosts_0_conservative_var;
@@ -347,9 +405,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         
         // Compute the internal energy.
         HAMERS_PRAGMA_SIMD
-        for (int i = -num_ghosts_0_conservative_var;
-                i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                i++)
+        for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
         {
             // Compute the linear index.
             const int idx_conservative_var = i + num_ghosts_0_conservative_var;
@@ -363,9 +419,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         for (int si = 0; si < d_num_species; si++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_conservative_var;
-                    i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                    i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear index.
                 const int idx_conservative_var = i + num_ghosts_0_conservative_var;
@@ -380,15 +434,14 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
             data_density,
             data_internal_energy,
             data_mass_fractions,
-            0);
+            0,
+            domains[0]);
         
         // Set the partial densities.
         for (int si = 0; si < d_num_species; si++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_primitive_var;
-                 i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                 i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
                 const int idx_primitive_var    = i + num_ghosts_0_primitive_var;
@@ -400,9 +453,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         
         // Set the velocity.
         HAMERS_PRAGMA_SIMD
-        for (int i = -num_ghosts_0_primitive_var;
-                i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                i++)
+        for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
         {
             // Compute the linear indices.
             const int idx_primitive_var    = i + num_ghosts_0_primitive_var;
@@ -413,9 +464,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         
         // Set the pressure.
         HAMERS_PRAGMA_SIMD
-        for (int i = -num_ghosts_0_primitive_var;
-                i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                i++)
+        for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
         {
             // Compute the linear indices.
             const int idx_primitive_var    = i + num_ghosts_0_primitive_var;
@@ -426,8 +475,19 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
+        /*
+         * Get the local lower indices and the number of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_lo_1  = domain_x_lo[1];
+        const int domain_x_dim_0 = domain_x_dims[0];
+        const int domain_x_dim_1 = domain_x_dims[1];
+        
+        const int domain_y_lo_0  = domain_y_lo[0];
+        const int domain_y_lo_1  = domain_y_lo[1];
+        const int domain_y_dim_0 = domain_y_dims[0];
+        const int domain_y_dim_1 = domain_y_dims[1];
         
         const int num_ghosts_0_primitive_var = num_ghosts_primitive_var[0];
         const int num_ghosts_1_primitive_var = num_ghosts_primitive_var[1];
@@ -477,12 +537,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         // Compute the mixture density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_conservative_var;
-                     i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                     i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -494,12 +552,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         }
         
         // Compute the internal energy.
-        for (int j = 0; j < interior_dim_1; j++)
+        for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_conservative_var;
-                    i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                    i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear index.
                 const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -515,12 +571,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         // Compute the mass fractions.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_conservative_var;
-                        i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                        i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -537,17 +591,16 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
             data_density,
             data_internal_energy,
             data_mass_fractions,
-            0);
+            0,
+            domains[0]);
         
         // Set the partial densities.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_primitive_var;
-                        i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                        i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -562,12 +615,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         }
         
         // Set the velocity.
-        for (int j = 0; j < interior_dim_1; j++)
+        for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_primitive_var;
-                    i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                    i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
                 const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -582,12 +633,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         }
         
         // Set the pressure.
-        for (int j = 0; j < interior_dim_1; j++)
+        for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_primitive_var;
-                    i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                    i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
                 const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -640,12 +689,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         // Compute the mixture density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = -num_ghosts_1_conservative_var;
-                 j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
-                 j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -657,12 +704,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         }
         
         // Compute the internal energy.
-        for (int j = -num_ghosts_1_conservative_var;
-                j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
-                j++)
+        for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = 0; i < interior_dim_0; i++)
+            for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
             {
                 // Compute the linear index.
                 const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -678,12 +723,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         // Compute the mass fractions.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = -num_ghosts_1_conservative_var;
-                 j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
-                 j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -700,17 +743,16 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
             data_density,
             data_internal_energy,
             data_mass_fractions,
-            1);
+            1,
+            domains[1]);
         
         // Set the partial densities.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = -num_ghosts_1_primitive_var;
-                j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-                j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear indices.
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -725,12 +767,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         }
         
         // Set the velocity.
-        for (int j = -num_ghosts_1_primitive_var;
-            j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-            j++)
+        for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = 0; i < interior_dim_0; i++)
+            for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
             {
                 // Compute the linear indices.
                 const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -745,12 +785,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         }
         
         // Set the pressure.
-        for (int j = -num_ghosts_1_primitive_var;
-            j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-            j++)
+        for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = 0; i < interior_dim_0; i++)
+            for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
             {
                 // Compute the linear indices.
                 const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -765,9 +803,30 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
-        const int interior_dim_2 = interior_dims[2];
+        /*
+         * Get the local lower indices and the number of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_lo_1  = domain_x_lo[1];
+        const int domain_x_lo_2  = domain_x_lo[2];
+        const int domain_x_dim_0 = domain_x_dims[0];
+        const int domain_x_dim_1 = domain_x_dims[1];
+        const int domain_x_dim_2 = domain_x_dims[2];
+        
+        const int domain_y_lo_0  = domain_y_lo[0];
+        const int domain_y_lo_1  = domain_y_lo[1];
+        const int domain_y_lo_2  = domain_y_lo[2];
+        const int domain_y_dim_0 = domain_y_dims[0];
+        const int domain_y_dim_1 = domain_y_dims[1];
+        const int domain_y_dim_2 = domain_y_dims[2];
+        
+        const int domain_z_lo_0  = domain_z_lo[0];
+        const int domain_z_lo_1  = domain_z_lo[1];
+        const int domain_z_lo_2  = domain_z_lo[2];
+        const int domain_z_dim_0 = domain_z_dims[0];
+        const int domain_z_dim_1 = domain_z_dims[1];
+        const int domain_z_dim_2 = domain_z_dims[2];
         
         const int num_ghosts_0_primitive_var = num_ghosts_primitive_var[0];
         const int num_ghosts_1_primitive_var = num_ghosts_primitive_var[1];
@@ -821,14 +880,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         // Compute the mixture density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = -num_ghosts_0_conservative_var;
-                         i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                         i++)
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                     {
                         // Compute the linear index.
                         const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -843,14 +900,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         }
         
         // Compute the internal energy.
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_conservative_var;
-                        i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                        i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -870,14 +925,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         // Compute the mass fractions.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = -num_ghosts_0_conservative_var;
-                            i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                            i++)
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                     {
                         // Compute the linear index.
                         const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -897,19 +950,18 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
             data_density,
             data_internal_energy,
             data_mass_fractions,
-            0);
+            0,
+            domains[0]);
         
         // Set the partial densities.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = -num_ghosts_0_primitive_var;
-                            i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                            i++)
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
                         const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -929,14 +981,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         }
         
         // Set the velocity.
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_primitive_var;
-                        i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                        i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -957,14 +1007,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         }
         
         // Set the pressure.
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_primitive_var;
-                        i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                        i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -1022,14 +1070,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         // Compute the mixture density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
             {
-                for (int j = -num_ghosts_1_conservative_var;
-                     j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
-                     j++)
+                for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                     {
                         // Compute the linear index.
                         const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -1044,14 +1090,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         }
         
         // Compute the internal energy.
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
         {
-            for (int j = -num_ghosts_1_conservative_var;
-                    j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
-                    j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -1071,14 +1115,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         // Compute the mass fractions.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
             {
-                for (int j = -num_ghosts_1_conservative_var;
-                        j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
-                        j++)
+                for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                     {
                         // Compute the linear index.
                         const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -1098,19 +1140,18 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
             data_density,
             data_internal_energy,
             data_mass_fractions,
-            1);
+            1,
+            domains[1]);
         
         // Set the partial densities.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
             {
-                for (int j = -num_ghosts_1_primitive_var;
-                        j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-                        j++)
+                for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                     {
                         // Compute the linear indices.
                         const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -1130,14 +1171,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         }
         
         // Set the velocity.
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
         {
-            for (int j = -num_ghosts_1_primitive_var;
-                    j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-                    j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear indices.
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -1158,14 +1197,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         }
         
         // Set the pressure.
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
         {
-            for (int j = -num_ghosts_1_primitive_var;
-                    j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-                    j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear indices.
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -1223,14 +1260,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         // Compute the mixture density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = -num_ghosts_2_conservative_var;
-                 k < interior_dim_2 + 1 + num_ghosts_2_conservative_var;
-                 k++)
+            for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                     {
                         // Compute the linear index.
                         const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -1245,14 +1280,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         }
         
         // Compute the internal energy.
-        for (int k = -num_ghosts_2_conservative_var;
-                k < interior_dim_2 + 1 + num_ghosts_2_conservative_var;
-                k++)
+        for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -1272,14 +1305,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         // Compute the mass fractions.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = -num_ghosts_2_conservative_var;
-                    k < interior_dim_2 + 1 + num_ghosts_2_conservative_var;
-                    k++)
+            for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                     {
                         // Compute the linear index.
                         const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -1299,19 +1330,18 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
             data_density,
             data_internal_energy,
             data_mass_fractions,
-            2);
+            2,
+            domains[2]);
         
         // Set the partial densities.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = -num_ghosts_2_primitive_var;
-                    k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
-                    k++)
+            for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                     {
                         // Compute the linear indices.
                         const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -1331,14 +1361,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         }
         
         // Set the velocity.
-        for (int k = -num_ghosts_2_primitive_var;
-                k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
-                k++)
+        for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                 {
                     // Compute the linear indices.
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -1359,14 +1387,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         }
         
         // Set the pressure.
-        for (int k = -num_ghosts_2_primitive_var;
-                k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
-                k++)
+        for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                 {
                     // Compute the linear indices.
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -1487,7 +1513,8 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
 void
 FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservativeVariables(
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables)
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
+    const std::vector<hier::Box>& domains)
 {
     if (d_flow_model.expired())
     {
@@ -1526,6 +1553,60 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
     
     const hier::IntVector ghostcell_dims_primitive_var = primitive_variables[0]->
         getGhostBox().numberCells();
+    
+    /*
+     * Get the domain dimensions.
+     */
+    
+    hier::IntVector domain_x_lo(d_dim);
+    hier::IntVector domain_y_lo(d_dim);
+    hier::IntVector domain_z_lo(d_dim);
+    hier::IntVector domain_x_dims(d_dim);
+    hier::IntVector domain_y_dims(d_dim);
+    hier::IntVector domain_z_dims(d_dim);
+    
+    if (domains[0].empty())
+    {
+        domain_x_lo = hier::IntVector::getZero(d_dim);
+        domain_x_dims = interior_dims;
+        domain_x_lo[0] = -num_ghosts_conservative_var[0];
+        domain_x_dims[0] = ghostcell_dims_conservative_var[0];
+    }
+    else
+    {
+        domain_x_lo = domains[0].lower() - interior_box.lower();
+        domain_x_dims = domains[0].numberCells();
+    }
+    if (d_dim > tbox::Dimension(1))
+    {
+        if (domains[1].empty())
+        {
+            domain_y_lo = hier::IntVector::getZero(d_dim);
+            domain_y_dims = interior_dims;
+            domain_y_lo[1] = -num_ghosts_conservative_var[1];
+            domain_y_dims[1] = ghostcell_dims_conservative_var[1];
+        }
+        else
+        {
+            domain_y_lo = domains[1].lower() - interior_box.lower();
+            domain_y_dims = domains[1].numberCells();
+        }
+    }
+    if (d_dim > tbox::Dimension(2))
+    {
+        if (domains[2].empty())
+        {
+            domain_z_lo = hier::IntVector::getZero(d_dim);
+            domain_z_dims = interior_dims;
+            domain_z_lo[2] = -num_ghosts_conservative_var[2];
+            domain_z_dims[2] = ghostcell_dims_conservative_var[2];
+        }
+        else
+        {
+            domain_z_lo = domains[2].lower() - interior_box.lower();
+            domain_z_dims = domains[2].numberCells();
+        }
+    }
     
     /*
      * Get the size of variables.
@@ -1673,7 +1754,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
     
     if (d_dim == tbox::Dimension(1))
     {
-        const int interior_dim_0 = interior_dims[0];
+        /*
+         * Get the local lower index, numbers of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_dim_0 = domain_x_dims[0];
         
         const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[0];
         const int num_ghosts_0_primitive_var    = num_ghosts_primitive_var[0];
@@ -1719,9 +1805,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         for (int si = 0; si < d_num_species; si++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_primitive_var;
-                 i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                 i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear index.
                 const int idx_primitive_var = i + num_ghosts_0_primitive_var;
@@ -1732,9 +1816,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         
         // Get the pressure.
         HAMERS_PRAGMA_SIMD
-        for (int i = -num_ghosts_0_primitive_var;
-                i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                i++)
+        for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
         {
             // Compute the linear index.
             const int idx_primitive_var = i + num_ghosts_0_primitive_var;
@@ -1746,9 +1828,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         for (int si = 0; si < d_num_species; si++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_primitive_var;
-                    i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                    i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear index.
                 const int idx_primitive_var = i + num_ghosts_0_primitive_var;
@@ -1763,15 +1843,14 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
             data_density,
             data_pressure,
             data_mass_fractions,
-            0);
+            0,
+            domains[0]);
         
         // Set the partial densities.
         for (int si = 0; si < d_num_species; si++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_conservative_var;
-                 i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                 i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
                 const int idx_conservative_var = i + num_ghosts_0_conservative_var;
@@ -1783,9 +1862,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         
         // Set the momentum.
         HAMERS_PRAGMA_SIMD
-        for (int i = -num_ghosts_0_conservative_var;
-                i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                i++)
+        for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
         {
             // Compute the linear indices.
             const int idx_conservative_var = i + num_ghosts_0_conservative_var;
@@ -1796,9 +1873,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         
         // Set the total energy.
         HAMERS_PRAGMA_SIMD
-        for (int i = -num_ghosts_0_conservative_var;
-                i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                i++)
+        for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
         {
             // Compute the linear indices.
             const int idx_conservative_var = i + num_ghosts_0_conservative_var;
@@ -1811,8 +1886,19 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
+        /*
+         * Get the local lower indices and the number of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_lo_1  = domain_x_lo[1];
+        const int domain_x_dim_0 = domain_x_dims[0];
+        const int domain_x_dim_1 = domain_x_dims[1];
+        
+        const int domain_y_lo_0  = domain_y_lo[0];
+        const int domain_y_lo_1  = domain_y_lo[1];
+        const int domain_y_dim_0 = domain_y_dims[0];
+        const int domain_y_dim_1 = domain_y_dims[1];
         
         const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[0];
         const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[1];
@@ -1862,12 +1948,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         // Compute the mixture density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_primitive_var;
-                     i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                     i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -1879,12 +1963,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         }
         
         // Get the pressure.
-        for (int j = 0; j < interior_dim_1; j++)
+        for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_primitive_var;
-                    i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                    i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear index.
                 const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -1897,12 +1979,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         // Compute the mass fractions.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_primitive_var;
-                     i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                     i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -1919,17 +1999,16 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
             data_density,
             data_pressure,
             data_mass_fractions,
-            0);
+            0,
+            domains[0]);
         
         // Set the partial densities.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_conservative_var;
-                     i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                     i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -1944,12 +2023,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         }
         
         // Set the momentum.
-        for (int j = 0; j < interior_dim_1; j++)
+        for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_conservative_var;
-                    i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                    i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
                 const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -1964,12 +2041,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         }
         
         // Set the total energy.
-        for (int j = 0; j < interior_dim_1; j++)
+        for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_conservative_var;
-                    i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                    i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
                 const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -2025,12 +2100,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         // Compute the mixture density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = -num_ghosts_1_primitive_var;
-                 j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-                 j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -2042,12 +2115,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         }
         
         // Get the pressure.
-        for (int j = -num_ghosts_1_primitive_var;
-                j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-                j++)
+        for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = 0; i < interior_dim_0; i++)
+            for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
             {
                 // Compute the linear index.
                 const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -2060,12 +2131,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         // Compute the mass fractions.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = -num_ghosts_1_primitive_var;
-                 j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-                 j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -2082,17 +2151,16 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
             data_density,
             data_pressure,
             data_mass_fractions,
-            1);
+            1,
+            domains[1]);
         
         // Set the partial densities.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = -num_ghosts_1_primitive_var;
-                j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-                j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear indices.
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -2107,12 +2175,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         }
         
         // Set the momentum.
-        for (int j = -num_ghosts_1_primitive_var;
-            j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-            j++)
+        for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = 0; i < interior_dim_0; i++)
+            for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
             {
                 // Compute the linear indices.
                 const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -2127,12 +2193,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         }
         
         // Set the total energy.
-        for (int j = -num_ghosts_1_primitive_var;
-            j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-            j++)
+        for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = 0; i < interior_dim_0; i++)
+            for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
             {
                 // Compute the linear indices.
                 const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -2150,9 +2214,30 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
-        const int interior_dim_2 = interior_dims[2];
+        /*
+         * Get the local lower indices and the number of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_lo_1  = domain_x_lo[1];
+        const int domain_x_lo_2  = domain_x_lo[2];
+        const int domain_x_dim_0 = domain_x_dims[0];
+        const int domain_x_dim_1 = domain_x_dims[1];
+        const int domain_x_dim_2 = domain_x_dims[2];
+        
+        const int domain_y_lo_0  = domain_y_lo[0];
+        const int domain_y_lo_1  = domain_y_lo[1];
+        const int domain_y_lo_2  = domain_y_lo[2];
+        const int domain_y_dim_0 = domain_y_dims[0];
+        const int domain_y_dim_1 = domain_y_dims[1];
+        const int domain_y_dim_2 = domain_y_dims[2];
+        
+        const int domain_z_lo_0  = domain_z_lo[0];
+        const int domain_z_lo_1  = domain_z_lo[1];
+        const int domain_z_lo_2  = domain_z_lo[2];
+        const int domain_z_dim_0 = domain_z_dims[0];
+        const int domain_z_dim_1 = domain_z_dims[1];
+        const int domain_z_dim_2 = domain_z_dims[2];
         
         const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[0];
         const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[1];
@@ -2206,14 +2291,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         // Compute the mixture density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = -num_ghosts_0_primitive_var;
-                         i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                         i++)
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                     {
                         // Compute the linear index.
                         const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -2228,14 +2311,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         }
         
         // Get the pressure.
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_primitive_var;
-                        i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                        i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -2251,14 +2332,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         // Compute the mass fractions.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = -num_ghosts_0_primitive_var;
-                         i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                         i++)
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                     {
                         // Compute the linear index.
                         const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -2278,19 +2357,18 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
             data_density,
             data_pressure,
             data_mass_fractions,
-            0);
+            0,
+            domains[0]);
         
         // Set the partial densities.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = -num_ghosts_0_conservative_var;
-                            i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                            i++)
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
                         const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -2310,14 +2388,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         }
         
         // Set the momentum.
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_conservative_var;
-                        i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                        i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -2338,14 +2414,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         }
         
         // Set the total energy.
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_conservative_var;
-                        i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                        i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -2407,14 +2481,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         // Compute the mixture density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
             {
-                for (int j = -num_ghosts_1_primitive_var;
-                     j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-                     j++)
+                for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                     {
                         // Compute the linear index.
                         const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -2429,14 +2501,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         }
         
         // Get the pressure.
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
         {
-            for (int j = -num_ghosts_1_primitive_var;
-                    j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-                    j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -2452,14 +2522,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         // Compute the mass fractions.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
             {
-                for (int j = -num_ghosts_1_primitive_var;
-                     j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-                     j++)
+                for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                     {
                         // Compute the linear index.
                         const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -2479,19 +2547,18 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
             data_density,
             data_pressure,
             data_mass_fractions,
-            1);
+            1,
+            domains[1]);
         
         // Set the partial densities.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
             {
-                for (int j = -num_ghosts_1_conservative_var;
-                        j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
-                        j++)
+                for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                     {
                         // Compute the linear indices.
                         const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -2511,14 +2578,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         }
         
         // Set the momentum.
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
         {
-            for (int j = -num_ghosts_1_conservative_var;
-                    j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
-                    j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear indices.
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -2539,14 +2604,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         }
         
         // Set the total energy.
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
         {
-            for (int j = -num_ghosts_1_conservative_var;
-                    j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
-                    j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear indices.
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -2608,14 +2671,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         // Compute the mixture density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = -num_ghosts_2_primitive_var;
-                 k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
-                 k++)
+            for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                     {
                         // Compute the linear index.
                         const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -2630,14 +2691,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         }
         
         // Get the pressure.
-        for (int k = -num_ghosts_2_primitive_var;
-                k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
-                k++)
+        for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -2653,14 +2712,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         // Compute the mass fractions.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = -num_ghosts_2_primitive_var;
-                 k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
-                 k++)
+            for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                     {
                         // Compute the linear index.
                         const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
@@ -2680,19 +2737,18 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
             data_density,
             data_pressure,
             data_mass_fractions,
-            2);
+            2,
+            domains[2]);
         
         // Set the partial densities.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = -num_ghosts_2_conservative_var;
-                    k < interior_dim_2 + 1 + num_ghosts_2_conservative_var;
-                    k++)
+            for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                     {
                         // Compute the linear indices.
                         const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -2712,14 +2768,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         }
         
         // Set the momentum.
-        for (int k = -num_ghosts_2_conservative_var;
-                k < interior_dim_2 + 1 + num_ghosts_2_conservative_var;
-                k++)
+        for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                 {
                     // Compute the linear indices.
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -2740,14 +2794,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         }
         
         // Set the total energy.
-        for (int k = -num_ghosts_2_conservative_var;
-                k < interior_dim_2 + 1 + num_ghosts_2_conservative_var;
-                k++)
+        for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                 {
                     // Compute the linear indices.
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
@@ -2778,10 +2830,12 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
 void
 FlowModelBasicUtilitiesFourEqnConservative::checkCellDataOfConservativeVariablesBounded(
     HAMERS_SHARED_PTR<pdat::CellData<int> >& bounded_flag,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables)
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
+    const hier::Box& domain)
 {
     NULL_USE(bounded_flag);
     NULL_USE(conservative_variables);
+    NULL_USE(domain);
     
     TBOX_ERROR(d_object_name
         << ": FlowModelBasicUtilitiesFourEqnConservative::"
@@ -2798,7 +2852,8 @@ FlowModelBasicUtilitiesFourEqnConservative::checkCellDataOfConservativeVariables
 void
 FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariablesBounded(
     HAMERS_SHARED_PTR<pdat::SideData<int> >& bounded_flag,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables)
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
+    const std::vector<hier::Box>& domains)
 {
     if (d_flow_model.expired())
     {
@@ -2833,6 +2888,60 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
     
     const hier::IntVector ghostcell_dims_conservative_var = conservative_variables[0]->
         getGhostBox().numberCells();
+    
+    /*
+     * Get the domain dimensions.
+     */
+    
+    hier::IntVector domain_x_lo(d_dim);
+    hier::IntVector domain_y_lo(d_dim);
+    hier::IntVector domain_z_lo(d_dim);
+    hier::IntVector domain_x_dims(d_dim);
+    hier::IntVector domain_y_dims(d_dim);
+    hier::IntVector domain_z_dims(d_dim);
+    
+    if (domains[0].empty())
+    {
+        domain_x_lo = hier::IntVector::getZero(d_dim);
+        domain_x_dims = interior_dims;
+        domain_x_lo[0] = -num_ghosts_conservative_var[0];
+        domain_x_dims[0] = ghostcell_dims_conservative_var[0];
+    }
+    else
+    {
+        domain_x_lo = domains[0].lower() - interior_box.lower();
+        domain_x_dims = domains[0].numberCells();
+    }
+    if (d_dim > tbox::Dimension(1))
+    {
+        if (domains[1].empty())
+        {
+            domain_y_lo = hier::IntVector::getZero(d_dim);
+            domain_y_dims = interior_dims;
+            domain_y_lo[1] = -num_ghosts_conservative_var[1];
+            domain_y_dims[1] = ghostcell_dims_conservative_var[1];
+        }
+        else
+        {
+            domain_y_lo = domains[1].lower() - interior_box.lower();
+            domain_y_dims = domains[1].numberCells();
+        }
+    }
+    if (d_dim > tbox::Dimension(2))
+    {
+        if (domains[2].empty())
+        {
+            domain_z_lo = hier::IntVector::getZero(d_dim);
+            domain_z_dims = interior_dims;
+            domain_z_lo[2] = -num_ghosts_conservative_var[2];
+            domain_z_dims[2] = ghostcell_dims_conservative_var[2];
+        }
+        else
+        {
+            domain_z_lo = domains[2].lower() - interior_box.lower();
+            domain_z_dims = domains[2].numberCells();
+        }
+    }
     
     /*
      * Check the size of variables.
@@ -2917,7 +3026,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
     
     if (d_dim == tbox::Dimension(1))
     {
-        const int interior_dim_0 = interior_dims[0];
+        /*
+         * Get the local lower index, numbers of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_dim_0 = domain_x_dims[0];
         
         const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[0];
         
@@ -2938,9 +3052,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         for (int si = 0; si < d_num_species; si++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_conservative_var;
-                 i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                 i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear index.
                 const int idx_face = i + num_ghosts_0_conservative_var;
@@ -2953,9 +3065,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         for (int si = 0; si < d_num_species; si++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_conservative_var;
-                 i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                 i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear index.
                 const int idx_face = i + num_ghosts_0_conservative_var;
@@ -2975,9 +3085,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         
         // Check if density and total energy are bounded.
         HAMERS_PRAGMA_SIMD
-        for (int i = -num_ghosts_0_conservative_var;
-             i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-             i++)
+        for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
         {
             // Compute the linear index.
             const int idx_face = i + num_ghosts_0_conservative_var;
@@ -3003,8 +3111,19 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
+        /*
+         * Get the local lower indices and the number of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_lo_1  = domain_x_lo[1];
+        const int domain_x_dim_0 = domain_x_dims[0];
+        const int domain_x_dim_1 = domain_x_dims[1];
+        
+        const int domain_y_lo_0  = domain_y_lo[0];
+        const int domain_y_lo_1  = domain_y_lo[1];
+        const int domain_y_dim_0 = domain_y_dims[0];
+        const int domain_y_dim_1 = domain_y_dims[1];
         
         const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[0];
         const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[1];
@@ -3026,12 +3145,10 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         // Compute density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_conservative_var;
-                     i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                     i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_conservative_var) +
@@ -3045,12 +3162,10 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         // Check if mass fractions are bounded.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_conservative_var;
-                     i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                     i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_conservative_var) +
@@ -3071,12 +3186,10 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         }
         
         // Check if density and total energy are bounded.
-        for (int j = 0; j < interior_dim_1; j++)
+        for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_conservative_var;
-                 i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                 i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear index.
                 const int idx_face = (i + num_ghosts_0_conservative_var) +
@@ -3118,12 +3231,10 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         // Compute density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = -num_ghosts_1_conservative_var;
-                 j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
-                 j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_conservative_var) +
@@ -3137,12 +3248,10 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         // Check if mass fractions are bounded.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = -num_ghosts_1_conservative_var;
-                 j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
-                 j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_conservative_var) +
@@ -3163,12 +3272,10 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         }
         
         // Check if density and total energy are bounded.
-        for (int j = -num_ghosts_1_conservative_var;
-             j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
-             j++)
+        for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = 0; i < interior_dim_0; i++)
+            for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
             {
                 // Compute the linear index.
                 const int idx_face = (i + num_ghosts_0_conservative_var) +
@@ -3196,9 +3303,30 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
-        const int interior_dim_2 = interior_dims[2];
+        /*
+         * Get the local lower indices and the number of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_lo_1  = domain_x_lo[1];
+        const int domain_x_lo_2  = domain_x_lo[2];
+        const int domain_x_dim_0 = domain_x_dims[0];
+        const int domain_x_dim_1 = domain_x_dims[1];
+        const int domain_x_dim_2 = domain_x_dims[2];
+        
+        const int domain_y_lo_0  = domain_y_lo[0];
+        const int domain_y_lo_1  = domain_y_lo[1];
+        const int domain_y_lo_2  = domain_y_lo[2];
+        const int domain_y_dim_0 = domain_y_dims[0];
+        const int domain_y_dim_1 = domain_y_dims[1];
+        const int domain_y_dim_2 = domain_y_dims[2];
+        
+        const int domain_z_lo_0  = domain_z_lo[0];
+        const int domain_z_lo_1  = domain_z_lo[1];
+        const int domain_z_lo_2  = domain_z_lo[2];
+        const int domain_z_dim_0 = domain_z_dims[0];
+        const int domain_z_dim_1 = domain_z_dims[1];
+        const int domain_z_dim_2 = domain_z_dims[2];
         
         const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[0];
         const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[1];
@@ -3222,14 +3350,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         // Compute density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = -num_ghosts_0_conservative_var;
-                         i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                         i++)
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
                         const int idx_face = (i + num_ghosts_0_conservative_var) +
@@ -3246,14 +3372,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         // Check if mass fractions are bounded.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = -num_ghosts_0_conservative_var;
-                         i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                         i++)
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
                         const int idx_face = (i + num_ghosts_0_conservative_var) +
@@ -3277,14 +3401,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         }
         
         // Check if density and total energy are bounded.
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_conservative_var;
-                     i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
-                     i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
                     const int idx_face = (i + num_ghosts_0_conservative_var) +
@@ -3329,14 +3451,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         // Compute density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
             {
-                for (int j = -num_ghosts_1_conservative_var;
-                     j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
-                     j++)
+                for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                     {
                         // Compute the linear index.
                         const int idx_face = (i + num_ghosts_0_conservative_var) +
@@ -3353,14 +3473,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         // Check if mass fractions are bounded.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
             {
-                for (int j = -num_ghosts_1_conservative_var;
-                     j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
-                     j++)
+                for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                     {
                         // Compute the linear indices.
                         const int idx_face = (i + num_ghosts_0_conservative_var) +
@@ -3384,14 +3502,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         }
         
         // Check if density and total energy are bounded.
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
         {
-            for (int j = -num_ghosts_1_conservative_var;
-                 j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
-                 j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_conservative_var) +
@@ -3436,14 +3552,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         // Compute density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = -num_ghosts_2_conservative_var;
-                 k < interior_dim_2 + 1 + num_ghosts_2_conservative_var;
-                 k++)
+            for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                     {
                         // Compute the linear index.
                         const int idx_face = (i + num_ghosts_0_conservative_var) +
@@ -3460,14 +3574,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         // Check if mass fractions are bounded.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = -num_ghosts_2_conservative_var;
-                 k < interior_dim_2 + 1 + num_ghosts_2_conservative_var;
-                 k++)
+            for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                     {
                         // Compute the linear indices.
                         const int idx_face = (i + num_ghosts_0_conservative_var) +
@@ -3491,14 +3603,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         }
         
         // Check if density and total energy are bounded.
-        for (int k = -num_ghosts_2_conservative_var;
-             k < interior_dim_2 + 1 + num_ghosts_2_conservative_var;
-             k++)
+        for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_conservative_var) +
@@ -3536,10 +3646,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
 void
 FlowModelBasicUtilitiesFourEqnConservative::checkCellDataOfPrimitiveVariablesBounded(
     HAMERS_SHARED_PTR<pdat::CellData<int> >& bounded_flag,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& primitive_variables)
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& primitive_variables,
+    const hier::Box& domain)
 {
     NULL_USE(bounded_flag);
     NULL_USE(primitive_variables);
+    NULL_USE(domain);
     
     TBOX_ERROR(d_object_name
         << ": FlowModelBasicUtilitiesFourEqnConservative::"
@@ -3556,7 +3668,8 @@ FlowModelBasicUtilitiesFourEqnConservative::checkCellDataOfPrimitiveVariablesBou
 void
 FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBounded(
     HAMERS_SHARED_PTR<pdat::SideData<int> >& bounded_flag,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables)
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
+    const std::vector<hier::Box>& domains)
 {
     if (d_flow_model.expired())
     {
@@ -3591,6 +3704,60 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
     
     const hier::IntVector ghostcell_dims_primitive_var = primitive_variables[0]->
         getGhostBox().numberCells();
+    
+    /*
+     * Get the domain dimensions.
+     */
+    
+    hier::IntVector domain_x_lo(d_dim);
+    hier::IntVector domain_y_lo(d_dim);
+    hier::IntVector domain_z_lo(d_dim);
+    hier::IntVector domain_x_dims(d_dim);
+    hier::IntVector domain_y_dims(d_dim);
+    hier::IntVector domain_z_dims(d_dim);
+    
+    if (domains[0].empty())
+    {
+        domain_x_lo = hier::IntVector::getZero(d_dim);
+        domain_x_dims = interior_dims;
+        domain_x_lo[0] = -num_ghosts_primitive_var[0];
+        domain_x_dims[0] = ghostcell_dims_primitive_var[0];
+    }
+    else
+    {
+        domain_x_lo = domains[0].lower() - interior_box.lower();
+        domain_x_dims = domains[0].numberCells();
+    }
+    if (d_dim > tbox::Dimension(1))
+    {
+        if (domains[1].empty())
+        {
+            domain_y_lo = hier::IntVector::getZero(d_dim);
+            domain_y_dims = interior_dims;
+            domain_y_lo[1] = -num_ghosts_primitive_var[1];
+            domain_y_dims[1] = ghostcell_dims_primitive_var[1];
+        }
+        else
+        {
+            domain_y_lo = domains[1].lower() - interior_box.lower();
+            domain_y_dims = domains[1].numberCells();
+        }
+    }
+    if (d_dim > tbox::Dimension(2))
+    {
+        if (domains[2].empty())
+        {
+            domain_z_lo = hier::IntVector::getZero(d_dim);
+            domain_z_dims = interior_dims;
+            domain_z_lo[2] = -num_ghosts_primitive_var[2];
+            domain_z_dims[2] = ghostcell_dims_primitive_var[2];
+        }
+        else
+        {
+            domain_z_lo = domains[2].lower() - interior_box.lower();
+            domain_z_dims = domains[2].numberCells();
+        }
+    }
     
     /*
      * Check the size of variables.
@@ -3675,7 +3842,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
     
     if (d_dim == tbox::Dimension(1))
     {
-        const int interior_dim_0 = interior_dims[0];
+        /*
+         * Get the local lower index, numbers of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_dim_0 = domain_x_dims[0];
         
         const int num_ghosts_0_primitive_var = num_ghosts_primitive_var[0];
         
@@ -3696,9 +3868,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         for (int si = 0; si < d_num_species; si++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_primitive_var;
-                 i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                 i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear index.
                 const int idx_face = i + num_ghosts_0_primitive_var;
@@ -3711,9 +3881,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         for (int si = 0; si < d_num_species; si++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_primitive_var;
-                 i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                 i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear index.
                 const int idx_face = i + num_ghosts_0_primitive_var;
@@ -3733,9 +3901,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         
         // Check if density and pressure are bounded.
         HAMERS_PRAGMA_SIMD
-        for (int i = -num_ghosts_0_primitive_var;
-             i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-             i++)
+        for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
         {
             // Compute the linear index.
             const int idx_face = i + num_ghosts_0_primitive_var;
@@ -3761,8 +3927,19 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
+        /*
+         * Get the local lower indices and the number of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_lo_1  = domain_x_lo[1];
+        const int domain_x_dim_0 = domain_x_dims[0];
+        const int domain_x_dim_1 = domain_x_dims[1];
+        
+        const int domain_y_lo_0  = domain_y_lo[0];
+        const int domain_y_lo_1  = domain_y_lo[1];
+        const int domain_y_dim_0 = domain_y_dims[0];
+        const int domain_y_dim_1 = domain_y_dims[1];
         
         const int num_ghosts_0_primitive_var = num_ghosts_primitive_var[0];
         const int num_ghosts_1_primitive_var = num_ghosts_primitive_var[1];
@@ -3784,12 +3961,10 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         // Compute density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_primitive_var;
-                     i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                     i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_primitive_var) +
@@ -3803,12 +3978,10 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         // Check if mass fractions are bounded.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_primitive_var;
-                     i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                     i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_primitive_var) +
@@ -3829,12 +4002,10 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         }
         
         // Check if density and pressure are bounded.
-        for (int j = 0; j < interior_dim_1; j++)
+        for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_primitive_var;
-                 i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                 i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear index.
                 const int idx_face = (i + num_ghosts_0_primitive_var) +
@@ -3876,12 +4047,10 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         // Compute density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = -num_ghosts_1_primitive_var;
-                 j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-                 j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_primitive_var) +
@@ -3895,12 +4064,10 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         // Check if mass fractions are bounded.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = -num_ghosts_1_primitive_var;
-                 j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-                 j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_primitive_var) +
@@ -3921,12 +4088,10 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         }
         
         // Check if density and pressure are bounded.
-        for (int j = -num_ghosts_1_primitive_var;
-             j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-             j++)
+        for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = 0; i < interior_dim_0; i++)
+            for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
             {
                 // Compute the linear index.
                 const int idx_face = (i + num_ghosts_0_primitive_var) +
@@ -3954,9 +4119,30 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
-        const int interior_dim_2 = interior_dims[2];
+        /*
+         * Get the local lower indices and the number of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_lo_1  = domain_x_lo[1];
+        const int domain_x_lo_2  = domain_x_lo[2];
+        const int domain_x_dim_0 = domain_x_dims[0];
+        const int domain_x_dim_1 = domain_x_dims[1];
+        const int domain_x_dim_2 = domain_x_dims[2];
+        
+        const int domain_y_lo_0  = domain_y_lo[0];
+        const int domain_y_lo_1  = domain_y_lo[1];
+        const int domain_y_lo_2  = domain_y_lo[2];
+        const int domain_y_dim_0 = domain_y_dims[0];
+        const int domain_y_dim_1 = domain_y_dims[1];
+        const int domain_y_dim_2 = domain_y_dims[2];
+        
+        const int domain_z_lo_0  = domain_z_lo[0];
+        const int domain_z_lo_1  = domain_z_lo[1];
+        const int domain_z_lo_2  = domain_z_lo[2];
+        const int domain_z_dim_0 = domain_z_dims[0];
+        const int domain_z_dim_1 = domain_z_dims[1];
+        const int domain_z_dim_2 = domain_z_dims[2];
         
         const int num_ghosts_0_primitive_var = num_ghosts_primitive_var[0];
         const int num_ghosts_1_primitive_var = num_ghosts_primitive_var[1];
@@ -3980,14 +4166,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         // Compute density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = -num_ghosts_0_primitive_var;
-                         i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                         i++)
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                     {
                         // Compute the linear index.
                         const int idx_face = (i + num_ghosts_0_primitive_var) +
@@ -4004,14 +4188,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         // Check if mass fractions are bounded.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = -num_ghosts_0_primitive_var;
-                         i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                         i++)
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                     {
                         // Compute the linear index.
                         const int idx_face = (i + num_ghosts_0_primitive_var) +
@@ -4035,14 +4217,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         }
         
         // Check if density and pressure are bounded.
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_primitive_var;
-                     i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
-                     i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_primitive_var) +
@@ -4087,14 +4267,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         // Compute density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
             {
-                for (int j = -num_ghosts_1_primitive_var;
-                     j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-                     j++)
+                for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                     {
                         // Compute the linear index.
                         const int idx_face = (i + num_ghosts_0_primitive_var) +
@@ -4111,14 +4289,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         // Check if mass fractions are bounded.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
             {
-                for (int j = -num_ghosts_1_primitive_var;
-                     j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-                     j++)
+                for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                     {
                         // Compute the linear index.
                         const int idx_face = (i + num_ghosts_0_primitive_var) +
@@ -4142,14 +4318,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         }
         
         // Check if density and pressure are bounded.
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
         {
-            for (int j = -num_ghosts_1_primitive_var;
-                 j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
-                 j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_primitive_var) +
@@ -4194,14 +4368,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         // Compute density.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = -num_ghosts_2_primitive_var;
-                 k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
-                 k++)
+            for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                     {
                         // Compute the linear index.
                         const int idx_face = (i + num_ghosts_0_primitive_var) +
@@ -4218,14 +4390,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         // Check if mass fractions are bounded.
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = -num_ghosts_2_primitive_var;
-                 k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
-                 k++)
+            for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                     {
                         // Compute the linear index.
                         const int idx_face = (i + num_ghosts_0_primitive_var) +
@@ -4249,14 +4419,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         }
         
         // Check if density and pressure are bounded.
-        for (int k = -num_ghosts_2_primitive_var;
-             k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
-             k++)
+        for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_primitive_var) +
@@ -4401,9 +4569,11 @@ FlowModelBasicUtilitiesFourEqnConservative::getNumberOfProjectionVariablesForPri
  */
 void
 FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariablesForConservativeVariables(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables)
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
+    const std::vector<hier::Box>& domains)
 {
     NULL_USE(projection_variables);
+    NULL_USE(domains);
     
     TBOX_ERROR(d_object_name
         << ": FlowModelBasicUtilitiesFourEqnConservative::"
@@ -4420,7 +4590,8 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
  */
 void
 FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariablesForPrimitiveVariables(
-    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables)
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
+    const std::vector<hier::Box>& domains)
 {
     if (d_flow_model.expired())
     {
@@ -4452,6 +4623,60 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
     const hier::IntVector num_ghosts_projection_var = projection_variables[0]->getGhostCellWidth();
     const hier::IntVector ghostcell_dims_projection_var =
         projection_variables[0]->getGhostBox().numberCells();
+    
+    /*
+     * Get the domain dimensions.
+     */
+    
+    hier::IntVector domain_x_lo(d_dim);
+    hier::IntVector domain_y_lo(d_dim);
+    hier::IntVector domain_z_lo(d_dim);
+    hier::IntVector domain_x_dims(d_dim);
+    hier::IntVector domain_y_dims(d_dim);
+    hier::IntVector domain_z_dims(d_dim);
+    
+    if (domains[0].empty())
+    {
+        domain_x_lo = hier::IntVector::getZero(d_dim);
+        domain_x_dims = interior_dims;
+        domain_x_lo[0] = -num_ghosts_projection_var[0];
+        domain_x_dims[0] = ghostcell_dims_projection_var[0];
+    }
+    else
+    {
+        domain_x_lo = domains[0].lower() - interior_box.lower();
+        domain_x_dims = domains[0].numberCells();
+    }
+    if (d_dim > tbox::Dimension(1))
+    {
+        if (domains[1].empty())
+        {
+            domain_y_lo = hier::IntVector::getZero(d_dim);
+            domain_y_dims = interior_dims;
+            domain_y_lo[1] = -num_ghosts_projection_var[1];
+            domain_y_dims[1] = ghostcell_dims_projection_var[1];
+        }
+        else
+        {
+            domain_y_lo = domains[1].lower() - interior_box.lower();
+            domain_y_dims = domains[1].numberCells();
+        }
+    }
+    if (d_dim > tbox::Dimension(2))
+    {
+        if (domains[2].empty())
+        {
+            domain_z_lo = hier::IntVector::getZero(d_dim);
+            domain_z_dims = interior_dims;
+            domain_z_lo[2] = -num_ghosts_projection_var[2];
+            domain_z_dims[2] = ghostcell_dims_projection_var[2];
+        }
+        else
+        {
+            domain_z_lo = domains[2].lower() - interior_box.lower();
+            domain_z_dims = domains[2].numberCells();
+        }
+    }
     
     /*
      * Check the size of variables.
@@ -4562,7 +4787,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
     
     if (d_dim == tbox::Dimension(1))
     {
-        const int interior_dim_0 = interior_dims[0];
+        /*
+         * Get the local lower index, numbers of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_dim_0 = domain_x_dims[0];
         
         const int num_ghosts_0 = num_ghosts[0];
         const int num_ghosts_0_projection_var = num_ghosts_projection_var[0];
@@ -4587,9 +4817,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
                 for (int si = 0; si < d_num_species; si++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = -num_ghosts_0_projection_var;
-                         i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
-                         i++)
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
                         const int idx_face_x = i + num_ghosts_0_projection_var;
@@ -4601,9 +4829,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
                 }
                 
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_projection_var;
-                     i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
-                     i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
                     const int idx_face_x = i + num_ghosts_0_projection_var;
@@ -4640,8 +4866,19 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
+        /*
+         * Get the local lower indices and the number of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_lo_1  = domain_x_lo[1];
+        const int domain_x_dim_0 = domain_x_dims[0];
+        const int domain_x_dim_1 = domain_x_dims[1];
+        
+        const int domain_y_lo_0  = domain_y_lo[0];
+        const int domain_y_lo_1  = domain_y_lo[1];
+        const int domain_y_dim_0 = domain_y_dims[0];
+        const int domain_y_dim_1 = domain_y_dims[1];
         
         const int num_ghosts_0 = num_ghosts[0];
         const int num_ghosts_1 = num_ghosts[1];
@@ -4676,12 +4913,10 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
                 
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    for (int j = 0; j < interior_dim_1; j++)
+                    for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
                     {
                         HAMERS_PRAGMA_SIMD
-                        for (int i = -num_ghosts_0_projection_var;
-                             i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
-                             i++)
+                        for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                         {
                             // Compute the linear indices.
                             const int idx_face_x = (i + num_ghosts_0_projection_var) +
@@ -4698,12 +4933,10 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
                     }
                 }
                 
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = -num_ghosts_0_projection_var;
-                         i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
-                         i++)
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
                         const int idx_face_x = (i + num_ghosts_0_projection_var) +
@@ -4739,12 +4972,10 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
                 
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    for (int j = -num_ghosts_1_projection_var;
-                         j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
-                         j++)
+                    for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
                     {
                         HAMERS_PRAGMA_SIMD
-                        for (int i = 0; i < interior_dim_0; i++)
+                        for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                         {
                             // Compute the linear indices.
                             const int idx_face_y = (i + num_ghosts_0_projection_var) +
@@ -4761,12 +4992,10 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
                     }
                 }
                 
-                for (int j = -num_ghosts_1_projection_var;
-                     j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
-                     j++)
+                for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                     {
                         // Compute the linear indices.
                         const int idx_face_y = (i + num_ghosts_0_projection_var) +
@@ -4813,9 +5042,30 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
-        const int interior_dim_2 = interior_dims[2];
+        /*
+         * Get the local lower indices and the number of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_lo_1  = domain_x_lo[1];
+        const int domain_x_lo_2  = domain_x_lo[2];
+        const int domain_x_dim_0 = domain_x_dims[0];
+        const int domain_x_dim_1 = domain_x_dims[1];
+        const int domain_x_dim_2 = domain_x_dims[2];
+        
+        const int domain_y_lo_0  = domain_y_lo[0];
+        const int domain_y_lo_1  = domain_y_lo[1];
+        const int domain_y_lo_2  = domain_y_lo[2];
+        const int domain_y_dim_0 = domain_y_dims[0];
+        const int domain_y_dim_1 = domain_y_dims[1];
+        const int domain_y_dim_2 = domain_y_dims[2];
+        
+        const int domain_z_lo_0  = domain_z_lo[0];
+        const int domain_z_lo_1  = domain_z_lo[1];
+        const int domain_z_lo_2  = domain_z_lo[2];
+        const int domain_z_dim_0 = domain_z_dims[0];
+        const int domain_z_dim_1 = domain_z_dims[1];
+        const int domain_z_dim_2 = domain_z_dims[2];
         
         const int num_ghosts_0 = num_ghosts[0];
         const int num_ghosts_1 = num_ghosts[1];
@@ -4858,14 +5108,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
                 
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    for (int k = 0; k < interior_dim_2; k++)
+                    for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
                     {
-                        for (int j = 0; j < interior_dim_1; j++)
+                        for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
                         {
                             HAMERS_PRAGMA_SIMD
-                            for (int i = -num_ghosts_0_projection_var;
-                                 i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
-                                 i++)
+                            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                             {
                                 // Compute the linear indices.
                                 const int idx_face_x = (i + num_ghosts_0_projection_var) +
@@ -4889,14 +5137,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
                     }
                 }
                 
-                for (int k = 0; k < interior_dim_2; k++)
+                for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
                 {
-                    for (int j = 0; j < interior_dim_1; j++)
+                    for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
                     {
                         HAMERS_PRAGMA_SIMD
-                        for (int i = -num_ghosts_0_projection_var;
-                             i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
-                             i++)
+                        for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                         {
                             // Compute the linear indices.
                             const int idx_face_x = (i + num_ghosts_0_projection_var) +
@@ -4943,14 +5189,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
                 
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    for (int k = 0; k < interior_dim_2; k++)
+                    for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
                     {
-                        for (int j = -num_ghosts_1_projection_var;
-                             j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
-                             j++)
+                        for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
                         {
                             HAMERS_PRAGMA_SIMD
-                            for (int i = 0; i < interior_dim_0; i++)
+                            for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                             {
                                 // Compute the linear indices.
                                 const int idx_face_y = (i + num_ghosts_0_projection_var) +
@@ -4974,14 +5218,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
                     }
                 }
                 
-                for (int k = 0; k < interior_dim_2; k++)
+                for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
                 {
-                    for (int j = -num_ghosts_1_projection_var;
-                         j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
-                         j++)
+                    for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
                     {
                         HAMERS_PRAGMA_SIMD
-                        for (int i = 0; i < interior_dim_0; i++)
+                        for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                         {
                             // Compute the linear indices.
                             const int idx_face_y = (i + num_ghosts_0_projection_var) +
@@ -5028,14 +5270,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
                 
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    for (int k = -num_ghosts_2_projection_var;
-                         k < interior_dim_2 + 1 + num_ghosts_2_projection_var;
-                         k++)
+                    for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
                     {
-                        for (int j = 0; j < interior_dim_1; j++)
+                        for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
                         {
                             HAMERS_PRAGMA_SIMD
-                            for (int i = 0; i < interior_dim_0; i++)
+                            for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                             {
                                 // Compute the linear indices.
                                 const int idx_face_z = (i + num_ghosts_0_projection_var) +
@@ -5059,14 +5299,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
                     }
                 }
                 
-                for (int k = -num_ghosts_2_projection_var;
-                     k < interior_dim_2 + 1 + num_ghosts_2_projection_var;
-                     k++)
+                for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
                 {
-                    for (int j = 0; j < interior_dim_1; j++)
+                    for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
                     {
                         HAMERS_PRAGMA_SIMD
-                        for (int i = 0; i < interior_dim_0; i++)
+                        for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                         {
                             // Compute the linear indices.
                             const int idx_face_z = (i + num_ghosts_0_projection_var) +
@@ -5133,12 +5371,14 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
     const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
-    const int& idx_offset)
+    const int& idx_offset,
+    const std::vector<hier::Box>& domains)
 {
     NULL_USE(characteristic_variables);
     NULL_USE(conservative_variables);
     NULL_USE(projection_variables);
     NULL_USE(idx_offset);
+    NULL_USE(domains);
     
     TBOX_ERROR(d_object_name
         << ": FlowModelBasicUtilitiesFourEqnConservative::"
@@ -5157,7 +5397,8 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& primitive_variables,
     const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
-    const int& idx_offset)
+    const int& idx_offset,
+    const std::vector<hier::Box>& domains)
 {
     if (d_flow_model.expired())
     {
@@ -5174,6 +5415,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
      * Get the dimensions of box that covers the interior of patch.
      */
     
+    const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = patch.getBox().numberCells();
     
     /*
@@ -5206,6 +5448,60 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
     {
         ghostcell_dims_primitive_var.push_back(primitive_variables[vi]->
             getGhostBox().numberCells());
+    }
+    
+    /*
+     * Get the domain dimensions.
+     */
+    
+    hier::IntVector domain_x_lo(d_dim);
+    hier::IntVector domain_y_lo(d_dim);
+    hier::IntVector domain_z_lo(d_dim);
+    hier::IntVector domain_x_dims(d_dim);
+    hier::IntVector domain_y_dims(d_dim);
+    hier::IntVector domain_z_dims(d_dim);
+    
+    if (domains[0].empty())
+    {
+        domain_x_lo = hier::IntVector::getZero(d_dim);
+        domain_x_dims = interior_dims;
+        domain_x_lo[0] = -num_ghosts_characteristic_var[0];
+        domain_x_dims[0] = ghostcell_dims_characteristic_var[0];
+    }
+    else
+    {
+        domain_x_lo = domains[0].lower() - interior_box.lower();
+        domain_x_dims = domains[0].numberCells();
+    }
+    if (d_dim > tbox::Dimension(1))
+    {
+        if (domains[1].empty())
+        {
+            domain_y_lo = hier::IntVector::getZero(d_dim);
+            domain_y_dims = interior_dims;
+            domain_y_lo[1] = -num_ghosts_characteristic_var[1];
+            domain_y_dims[1] = ghostcell_dims_characteristic_var[1];
+        }
+        else
+        {
+            domain_y_lo = domains[1].lower() - interior_box.lower();
+            domain_y_dims = domains[1].numberCells();
+        }
+    }
+    if (d_dim > tbox::Dimension(2))
+    {
+        if (domains[2].empty())
+        {
+            domain_z_lo = hier::IntVector::getZero(d_dim);
+            domain_z_dims = interior_dims;
+            domain_z_lo[2] = -num_ghosts_characteristic_var[2];
+            domain_z_dims[2] = ghostcell_dims_characteristic_var[2];
+        }
+        else
+        {
+            domain_z_lo = domains[2].lower() - interior_box.lower();
+            domain_z_dims = domains[2].numberCells();
+        }
     }
     
     /*
@@ -5368,7 +5664,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
     
     if (d_dim == tbox::Dimension(1))
     {
-        const int interior_dim_0 = interior_dims[0];
+        /*
+         * Get the local lower index, numbers of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_dim_0 = domain_x_dims[0];
         
         const int num_ghosts_0_characteristic_var = num_ghosts_characteristic_var[0];
         const int num_ghosts_0_rho_Y = num_ghosts_primitive_var[0][0];
@@ -5398,9 +5699,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
         for (int si = 0; si < d_num_species; si++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_characteristic_var;
-                 i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
-                 i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
                 const int idx_face = i + num_ghosts_0_characteristic_var;
@@ -5414,9 +5713,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
         }
         
         HAMERS_PRAGMA_SIMD
-        for (int i = -num_ghosts_0_characteristic_var;
-             i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
-             i++)
+        for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
         {
             // Compute the linear indices.
             const int idx_face = i + num_ghosts_0_characteristic_var;
@@ -5432,8 +5729,19 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
+        /*
+         * Get the local lower indices and the number of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_lo_1  = domain_x_lo[1];
+        const int domain_x_dim_0 = domain_x_dims[0];
+        const int domain_x_dim_1 = domain_x_dims[1];
+        
+        const int domain_y_lo_0  = domain_y_lo[0];
+        const int domain_y_lo_1  = domain_y_lo[1];
+        const int domain_y_dim_0 = domain_y_dims[0];
+        const int domain_y_dim_1 = domain_y_dims[1];
         
         const int num_ghosts_0_characteristic_var = num_ghosts_characteristic_var[0];
         const int num_ghosts_1_characteristic_var = num_ghosts_characteristic_var[1];
@@ -5473,12 +5781,10 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
         
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_characteristic_var;
-                     i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
-                     i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
                     const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -5497,12 +5803,10 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
             }
         }
         
-        for (int j = 0; j < interior_dim_1; j++)
+        for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_characteristic_var;
-                 i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
-                 i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
                 const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -5542,12 +5846,10 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
         
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = -num_ghosts_1_characteristic_var;
-                 j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
-                 j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear indices.
                     const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -5566,12 +5868,10 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
             }
         }
         
-        for (int j = -num_ghosts_1_characteristic_var;
-             j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
-             j++)
+        for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = 0; i < interior_dim_0; i++)
+            for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
             {
                 // Compute the linear indices.
                 const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -5595,9 +5895,30 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
-        const int interior_dim_2 = interior_dims[2];
+        /*
+         * Get the local lower indices and the number of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_lo_1  = domain_x_lo[1];
+        const int domain_x_lo_2  = domain_x_lo[2];
+        const int domain_x_dim_0 = domain_x_dims[0];
+        const int domain_x_dim_1 = domain_x_dims[1];
+        const int domain_x_dim_2 = domain_x_dims[2];
+        
+        const int domain_y_lo_0  = domain_y_lo[0];
+        const int domain_y_lo_1  = domain_y_lo[1];
+        const int domain_y_lo_2  = domain_y_lo[2];
+        const int domain_y_dim_0 = domain_y_dims[0];
+        const int domain_y_dim_1 = domain_y_dims[1];
+        const int domain_y_dim_2 = domain_y_dims[2];
+        
+        const int domain_z_lo_0  = domain_z_lo[0];
+        const int domain_z_lo_1  = domain_z_lo[1];
+        const int domain_z_lo_2  = domain_z_lo[2];
+        const int domain_z_dim_0 = domain_z_dims[0];
+        const int domain_z_dim_1 = domain_z_dims[1];
+        const int domain_z_dim_2 = domain_z_dims[2];
         
         const int num_ghosts_0_characteristic_var = num_ghosts_characteristic_var[0];
         const int num_ghosts_1_characteristic_var = num_ghosts_characteristic_var[1];
@@ -5645,14 +5966,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
         
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = -num_ghosts_0_characteristic_var;
-                         i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
-                         i++)
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
                         const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -5678,14 +5997,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
             }
         }
         
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_characteristic_var;
-                     i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
-                     i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
                     const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -5734,14 +6051,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
         
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
             {
-                for (int j = -num_ghosts_1_characteristic_var;
-                     j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
-                     j++)
+                for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                     {
                         // Compute the linear indices.
                         const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -5767,14 +6082,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
             }
         }
         
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
         {
-            for (int j = -num_ghosts_1_characteristic_var;
-                 j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
-                 j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear indices.
                     const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -5823,14 +6136,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
         
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = -num_ghosts_2_characteristic_var;
-                 k < interior_dim_2 + 1 + num_ghosts_2_characteristic_var;
-                 k++)
+            for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                     {
                         // Compute the linear indices.
                         const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -5856,14 +6167,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
             }
         }
         
-        for (int k = -num_ghosts_2_characteristic_var;
-             k < interior_dim_2 + 1 + num_ghosts_2_characteristic_var;
-             k++)
+        for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                 {
                     // Compute the linear indices.
                     const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -5904,11 +6213,13 @@ void
 FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfConservativeVariablesFromCharacteristicVariables(
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
     const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables)
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
+    const std::vector<hier::Box>& domains)
 {
     NULL_USE(conservative_variables);
     NULL_USE(characteristic_variables);
     NULL_USE(projection_variables);
+    NULL_USE(domains);
     
     TBOX_ERROR(d_object_name
         << ": FlowModelBasicUtilitiesFourEqnConservative::"
@@ -5926,7 +6237,8 @@ void
 FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
     std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
     const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
-    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables)
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
+    const std::vector<hier::Box>& domains)
 {
     if (d_flow_model.expired())
     {
@@ -5943,6 +6255,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
      * Get the dimensions of box that covers the interior of patch.
      */
     
+    const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = patch.getBox().numberCells();
     
     /*
@@ -5963,6 +6276,60 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
     
     const hier::IntVector ghostcell_dims_characteristic_var = characteristic_variables[0]->
         getGhostBox().numberCells();
+    
+    /*
+     * Get the domain dimensions.
+     */
+    
+    hier::IntVector domain_x_lo(d_dim);
+    hier::IntVector domain_y_lo(d_dim);
+    hier::IntVector domain_z_lo(d_dim);
+    hier::IntVector domain_x_dims(d_dim);
+    hier::IntVector domain_y_dims(d_dim);
+    hier::IntVector domain_z_dims(d_dim);
+    
+    if (domains[0].empty())
+    {
+        domain_x_lo = hier::IntVector::getZero(d_dim);
+        domain_x_dims = interior_dims;
+        domain_x_lo[0] = -num_ghosts_characteristic_var[0];
+        domain_x_dims[0] = ghostcell_dims_characteristic_var[0];
+    }
+    else
+    {
+        domain_x_lo = domains[0].lower() - interior_box.lower();
+        domain_x_dims = domains[0].numberCells();
+    }
+    if (d_dim > tbox::Dimension(1))
+    {
+        if (domains[1].empty())
+        {
+            domain_y_lo = hier::IntVector::getZero(d_dim);
+            domain_y_dims = interior_dims;
+            domain_y_lo[1] = -num_ghosts_characteristic_var[1];
+            domain_y_dims[1] = ghostcell_dims_characteristic_var[1];
+        }
+        else
+        {
+            domain_y_lo = domains[1].lower() - interior_box.lower();
+            domain_y_dims = domains[1].numberCells();
+        }
+    }
+    if (d_dim > tbox::Dimension(2))
+    {
+        if (domains[2].empty())
+        {
+            domain_z_lo = hier::IntVector::getZero(d_dim);
+            domain_z_dims = interior_dims;
+            domain_z_lo[2] = -num_ghosts_characteristic_var[2];
+            domain_z_dims[2] = ghostcell_dims_characteristic_var[2];
+        }
+        else
+        {
+            domain_z_lo = domains[2].lower() - interior_box.lower();
+            domain_z_dims = domains[2].numberCells();
+        }
+    }
     
     /*
      * Check the size of variables.
@@ -6107,7 +6474,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
     
     if (d_dim == tbox::Dimension(1))
     {
-        const int interior_dim_0 = interior_dims[0];
+        /*
+         * Get the local lower index, numbers of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_dim_0 = domain_x_dims[0];
         
         const int num_ghosts_0_characteristic_var = num_ghosts_characteristic_var[0];
         
@@ -6135,9 +6507,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
         for (int si = 0; si < d_num_species; si++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_characteristic_var;
-                 i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
-                 i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear index.
                 const int idx_face = i + num_ghosts_0_characteristic_var;
@@ -6149,9 +6519,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
         }
         
         HAMERS_PRAGMA_SIMD
-        for (int i = -num_ghosts_0_characteristic_var;
-             i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
-             i++)
+        for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
         {
             // Compute the linear index.
             const int idx_face = i + num_ghosts_0_characteristic_var;
@@ -6166,8 +6534,19 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
+        /*
+         * Get the local lower indices and the number of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_lo_1  = domain_x_lo[1];
+        const int domain_x_dim_0 = domain_x_dims[0];
+        const int domain_x_dim_1 = domain_x_dims[1];
+        
+        const int domain_y_lo_0  = domain_y_lo[0];
+        const int domain_y_lo_1  = domain_y_lo[1];
+        const int domain_y_dim_0 = domain_y_dims[0];
+        const int domain_y_dim_1 = domain_y_dims[1];
         
         const int num_ghosts_0_characteristic_var = num_ghosts_characteristic_var[0];
         const int num_ghosts_1_characteristic_var = num_ghosts_characteristic_var[1];
@@ -6196,12 +6575,10 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
         
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_characteristic_var;
-                     i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
-                     i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -6214,12 +6591,10 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
             }
         }
         
-        for (int j = 0; j < interior_dim_1; j++)
+        for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = -num_ghosts_0_characteristic_var;
-                 i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
-                 i++)
+            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
             {
                 // Compute the linear index.
                 const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -6259,12 +6634,10 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
         
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int j = -num_ghosts_1_characteristic_var;
-                 j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
-                 j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -6277,12 +6650,10 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
             }
         }
         
-        for (int j = -num_ghosts_1_characteristic_var;
-             j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
-             j++)
+        for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
         {
             HAMERS_PRAGMA_SIMD
-            for (int i = 0; i < interior_dim_0; i++)
+            for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
             {
                 // Compute the linear index.
                 const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -6301,9 +6672,30 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
-        const int interior_dim_2 = interior_dims[2];
+        /*
+         * Get the local lower indices and the number of cells in each dimension.
+         */
+        
+        const int domain_x_lo_0  = domain_x_lo[0];
+        const int domain_x_lo_1  = domain_x_lo[1];
+        const int domain_x_lo_2  = domain_x_lo[2];
+        const int domain_x_dim_0 = domain_x_dims[0];
+        const int domain_x_dim_1 = domain_x_dims[1];
+        const int domain_x_dim_2 = domain_x_dims[2];
+        
+        const int domain_y_lo_0  = domain_y_lo[0];
+        const int domain_y_lo_1  = domain_y_lo[1];
+        const int domain_y_lo_2  = domain_y_lo[2];
+        const int domain_y_dim_0 = domain_y_dims[0];
+        const int domain_y_dim_1 = domain_y_dims[1];
+        const int domain_y_dim_2 = domain_y_dims[2];
+        
+        const int domain_z_lo_0  = domain_z_lo[0];
+        const int domain_z_lo_1  = domain_z_lo[1];
+        const int domain_z_lo_2  = domain_z_lo[2];
+        const int domain_z_dim_0 = domain_z_dims[0];
+        const int domain_z_dim_1 = domain_z_dims[1];
+        const int domain_z_dim_2 = domain_z_dims[2];
         
         const int num_ghosts_0_characteristic_var = num_ghosts_characteristic_var[0];
         const int num_ghosts_1_characteristic_var = num_ghosts_characteristic_var[1];
@@ -6334,14 +6726,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
         
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = -num_ghosts_0_characteristic_var;
-                         i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
-                         i++)
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                     {
                         // Compute the linear index.
                         const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -6357,14 +6747,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
             }
         }
         
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = -num_ghosts_0_characteristic_var;
-                     i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
-                     i++)
+                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -6409,14 +6797,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
         
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
             {
-                for (int j = -num_ghosts_1_characteristic_var;
-                     j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
-                     j++)
+                for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                     {
                         // Compute the linear index.
                         const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -6432,14 +6818,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
             }
         }
         
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
         {
-            for (int j = -num_ghosts_1_characteristic_var;
-                 j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
-                 j++)
+            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -6484,14 +6868,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
         
         for (int si = 0; si < d_num_species; si++)
         {
-            for (int k = -num_ghosts_2_characteristic_var;
-                 k < interior_dim_2 + 1 + num_ghosts_2_characteristic_var;
-                 k++)
+            for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
                 {
                     HAMERS_PRAGMA_SIMD
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                     {
                         // Compute the linear index.
                         const int idx_face = (i + num_ghosts_0_characteristic_var) +
@@ -6507,14 +6889,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
             }
         }
         
-        for (int k = -num_ghosts_2_characteristic_var;
-             k < interior_dim_2 + 1 + num_ghosts_2_characteristic_var;
-             k++)
+        for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
             {
                 HAMERS_PRAGMA_SIMD
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
                 {
                     // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_characteristic_var) +

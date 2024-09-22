@@ -52,6 +52,8 @@ void
 ConvectiveFluxReconstructorFirstOrderLLF::putToRestart(
    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
+    putToRestartBase(restart_db);
+    
     restart_db->putString("d_shock_capturing_scheme", "LLF");
 }
 
@@ -62,6 +64,8 @@ ConvectiveFluxReconstructorFirstOrderLLF::putToRestart(
 void
 ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
     hier::Patch& patch,
+    const int level_number,
+    const HAMERS_SHARED_PTR<hier::CoarseFineBoundary>& coarse_fine_bdry,
     const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
     const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -69,6 +73,8 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
     const double dt,
     const int RK_step_number)
 {
+    NULL_USE(level_number);
+    NULL_USE(coarse_fine_bdry);
     NULL_USE(time);
     NULL_USE(RK_step_number);
     

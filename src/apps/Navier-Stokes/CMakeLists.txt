@@ -14,7 +14,8 @@ add_library(Navier_Stokes ${Navier_Stokes_source_files})
 
 TARGET_LINK_LIBRARIES(Navier_Stokes
     convective_flux_reconstructors diffusive_flux_reconstructors
-    nonconservative_diffusive_flux_divergence_operators refinement_taggers
+    nonconservative_diffusive_flux_divergence_operators hyperviscosity_operators
+    refinement_taggers
     flow_models Runge_Kutta_patch_strategy Runge_Kutta_level_integrator
     SAMRAI_appu SAMRAI_geom SAMRAI_solv SAMRAI_algs SAMRAI_mesh
     SAMRAI_math SAMRAI_pdat SAMRAI_xfer SAMRAI_hier SAMRAI_tbox

@@ -20,16 +20,6 @@ ConvectiveFluxReconstructorFirstOrderHLLC::ConvectiveFluxReconstructorFirstOrder
             convective_flux_reconstructor_db)
 {
     d_num_conv_ghosts = hier::IntVector::getOne(d_dim);
-    
-    d_eqn_form = d_flow_model->getEquationsForm();
-    d_has_advective_eqn_form = false;
-    for (int ei = 0; ei < d_num_eqn; ei++)
-    {
-        if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
-        {
-            d_has_advective_eqn_form = true;
-        }
-    }
 }
 
 /*
@@ -61,6 +51,8 @@ void
 ConvectiveFluxReconstructorFirstOrderHLLC::putToRestart(
    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
+    putToRestartBase(restart_db);
+    
     restart_db->putString("d_shock_capturing_scheme", "FIRST_ORDER_HLLC");
 }
 
@@ -71,6 +63,8 @@ ConvectiveFluxReconstructorFirstOrderHLLC::putToRestart(
 void
 ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch(
     hier::Patch& patch,
+    const int level_number,
+    const HAMERS_SHARED_PTR<hier::CoarseFineBoundary>& coarse_fine_bdry,
     const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
     const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -78,6 +72,8 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
     const double dt,
     const int RK_step_number)
 {
+    NULL_USE(level_number);
+    NULL_USE(coarse_fine_bdry);
     NULL_USE(time);
     NULL_USE(RK_step_number);
     

@@ -12,6 +12,7 @@
 #include "apps/Euler/EulerInitialConditions.hpp"
 #include "extn/visit_data_writer/ExtendedVisItDataWriter.hpp"
 #include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorManager.hpp"
+#include "flow/hyperviscosity_operators/HyperviscosityOperator.hpp"
 #include "flow/flow_models/FlowModelManager.hpp"
 #include "flow/refinement_taggers/GradientTagger.hpp"
 #include "flow/refinement_taggers/ImmersedBoundaryTagger.hpp"
@@ -155,6 +156,8 @@ class Euler:
         void
         computeFluxesAndSourcesOnPatch(
             hier::Patch& patch,
+            const int level_number,
+            const HAMERS_SHARED_PTR<hier::CoarseFineBoundary>& coarse_fine_bdry,
             const double time,
             const double dt,
             const int RK_step_number,
@@ -637,6 +640,17 @@ class Euler:
          */
         HAMERS_SHARED_PTR<ConvectiveFluxReconstructor> d_convective_flux_reconstructor;
         HAMERS_SHARED_PTR<tbox::Database> d_convective_flux_reconstructor_db;
+        
+        /*
+         * HAMERS_SHARED_PTR to the HyperviscosityOperator and its database.
+         */
+        HAMERS_SHARED_PTR<HyperviscosityOperator> d_hyperviscosity_operator;
+        HAMERS_SHARED_PTR<tbox::Database> d_hyperviscosity_operator_db;
+        
+        /*
+         * Boolean to determine whether to use hyperviscosity operator.
+         */
+        bool d_use_hyperviscosity_operator;
         
         /*
          * HAMERS_SHARED_PTR to EulerInitialConditions.

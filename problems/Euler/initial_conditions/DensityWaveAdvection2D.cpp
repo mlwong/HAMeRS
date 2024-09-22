@@ -12,11 +12,12 @@ EulerInitialConditions::initializeDataOnPatch(
 {
     NULL_USE(data_time);
     
-    if (d_project_name != "2D advection of density wave")
+    if (d_project_name != "2D advection of density wave" && d_project_name != "2D advection of smooth density wave")
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "Can only initialize data for 'project_name' = '2D advection of density wave'!\n"
+            << "Can only initialize data for 'project_name' = '2D advection of density wave' or "
+            << "'2D advection of smooth density wave'!\n"
             << "'project_name' = '"
             << d_project_name
             << "' is given."
@@ -80,45 +81,74 @@ EulerInitialConditions::initializeDataOnPatch(
         
         double gamma = double(7)/double(5);
         
+        double u_inf = double(1);
+        double v_inf = double(1);
+        double p_inf = double(1);
+        
         // Initial conditions inside the square.
         double rho_i = double(10);
-        double u_i   = double(1);
-        double v_i   = double(1);
-        double p_i   = double(1);
         
         // Initial conditions outside the square.
         double rho_o = double(1);
-        double u_o   = double(1);
-        double v_o   = double(1);
-        double p_o   = double(1);
         
-        for (int j = 0; j < patch_dims[1]; j++)
+        if (d_project_name == "2D advection of density wave")
         {
-            for (int i = 0; i < patch_dims[0]; i++)
+            for (int j = 0; j < patch_dims[1]; j++)
             {
-                // Compute index into linear data array.
-                int idx_cell = i + j*patch_dims[0];
-                
-                // Compute the coordinates.
-                double x[2];
-                x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
-                x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
-                
-                if ((x[0] >= x_a) && (x[0] <= x_b) && (x[1] >= y_a) && (x[1] <= y_b))
+                for (int i = 0; i < patch_dims[0]; i++)
                 {
-                    rho[idx_cell]   = rho_i;
-                    rho_u[idx_cell] = rho_i*u_i;
-                    rho_v[idx_cell] = rho_i*v_i;
-                    E[idx_cell]     = p_i/(gamma - double(1)) + double(1)/double(2)*rho_i*
-                        (u_i*u_i + v_i*v_i);
+                    // Compute index into linear data array.
+                    int idx_cell = i + j*patch_dims[0];
+                    
+                    // Compute the coordinates.
+                    double x[2];
+                    x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
+                    x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
+                    
+                    if ((x[0] >= x_a) && (x[0] <= x_b) && (x[1] >= y_a) && (x[1] <= y_b))
+                    {
+                        rho[idx_cell]   = rho_i;
+                        rho_u[idx_cell] = rho_i*u_inf;
+                        rho_v[idx_cell] = rho_i*v_inf;
+                        E[idx_cell]     = p_inf/(gamma - double(1)) + double(1)/double(2)*rho_i*
+                            (u_inf*u_inf + v_inf*v_inf);
+                    }
+                    else
+                    {
+                        rho[idx_cell]   = rho_o;
+                        rho_u[idx_cell] = rho_o*u_inf;
+                        rho_v[idx_cell] = rho_o*v_inf;
+                        E[idx_cell]     = p_inf/(gamma - double(1)) + double(1)/double(2)*rho_o*
+                            (u_inf*u_inf + v_inf*v_inf);
+                    }
                 }
-                else
+            }
+        }
+        else if (d_project_name == "2D advection of smooth density wave")
+        {
+            const double epsilon_i = 0.01;
+            for (int j = 0; j < patch_dims[1]; j++)
+            {
+                for (int i = 0; i < patch_dims[0]; i++)
                 {
-                    rho[idx_cell]   = rho_o;
-                    rho_u[idx_cell] = rho_o*u_o;
-                    rho_v[idx_cell] = rho_o*v_o;
-                    E[idx_cell]     = p_o/(gamma - double(1)) + double(1)/double(2)*rho_o*
-                        (u_o*u_o + v_o*v_o);
+                    // Compute index into linear data array.
+                    int idx_cell = i + j*patch_dims[0];
+                    
+                    // Compute the coordinates.
+                    double x[2];
+                    x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
+                    x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
+                    
+                    const double f_sm_x = 0.5*(1.0 + tanh((x[0] - x_a)/epsilon_i)) - 0.5*(1.0 + tanh((x[0] - x_b)/epsilon_i));
+                    const double f_sm_y = 0.5*(1.0 + tanh((x[1] - y_a)/epsilon_i)) - 0.5*(1.0 + tanh((x[1] - y_b)/epsilon_i));
+                    
+                    const double f_sm = f_sm_x*f_sm_y;
+                    
+                    rho[idx_cell]   = rho_i*f_sm + rho_o*(1.0 - f_sm);
+                    rho_u[idx_cell] = rho[idx_cell]*u_inf;
+                    rho_v[idx_cell] = rho[idx_cell]*v_inf;
+                    E[idx_cell]     = p_inf/(gamma - double(1)) + double(1)/double(2)*rho[idx_cell]*
+                        (u_inf*u_inf + v_inf*v_inf);
                 }
             }
         }
