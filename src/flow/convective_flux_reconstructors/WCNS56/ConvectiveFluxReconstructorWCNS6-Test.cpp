@@ -369,16 +369,6 @@ ConvectiveFluxReconstructorWCNS6_Test::ConvectiveFluxReconstructorWCNS6_Test(
     d_constant_alpha_tau = d_convective_flux_reconstructor_db->
         getRealWithDefault("d_constant_alpha_tau", d_constant_alpha_tau);
     
-    d_eqn_form = d_flow_model->getEquationsForm();
-    d_has_advective_eqn_form = false;
-    for (int ei = 0; ei < d_num_eqn; ei++)
-    {
-        if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
-        {
-            d_has_advective_eqn_form = true;
-        }
-    }
-    
     t_characteristic_decomposition = tbox::TimerManager::getManager()->
         getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_characteristic_decomposition");
     
@@ -447,6 +437,8 @@ void
 ConvectiveFluxReconstructorWCNS6_Test::putToRestart(
    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
+    putToRestartBase(restart_db);
+    
     restart_db->putReal("d_constant_C", d_constant_C);
     restart_db->putInteger("d_constant_p", d_constant_p);
     restart_db->putInteger("d_constant_q", d_constant_q);
@@ -460,6 +452,8 @@ ConvectiveFluxReconstructorWCNS6_Test::putToRestart(
 void
 ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
     hier::Patch& patch,
+    const int level_number,
+    const HAMERS_SHARED_PTR<hier::CoarseFineBoundary>& coarse_fine_bdry,
     const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
     const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -467,6 +461,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
     const double dt,
     const int RK_step_number)
 {
+    NULL_USE(level_number);
+    NULL_USE(coarse_fine_bdry);
     NULL_USE(time);
     NULL_USE(RK_step_number);
     

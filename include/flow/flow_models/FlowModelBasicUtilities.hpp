@@ -63,7 +63,21 @@ class FlowModelBasicUtilities
         virtual void
         convertConservativeVariablesToPrimitiveVariables(
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables) = 0;
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
+            const std::vector<hier::Box>& domains) = 0;
+        
+        /*
+         * Convert conservative variables to primitive variables.
+         */
+        virtual void
+        convertConservativeVariablesToPrimitiveVariables(
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables)
+        {
+            hier::Box empty_box(d_dim);
+            std::vector<hier::Box> empty_domains(d_dim.getValue(), empty_box);
+            convertConservativeVariablesToPrimitiveVariables(primitive_variables, conservative_variables, empty_domains);
+        }
         
         /*
          * Convert primitive variables to conservative variables.
@@ -79,7 +93,21 @@ class FlowModelBasicUtilities
         virtual void
         convertPrimitiveVariablesToConservativeVariables(
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables) = 0;
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
+            const std::vector<hier::Box>& domains) = 0;
+        
+        /*
+         * Convert primitive variables to conservative variables.
+         */
+        virtual void
+        convertPrimitiveVariablesToConservativeVariables(
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables)
+        {
+            hier::Box empty_box(d_dim);
+            std::vector<hier::Box> empty_domains(d_dim.getValue(), empty_box);
+            convertPrimitiveVariablesToConservativeVariables(conservative_variables, primitive_variables, empty_domains);
+        }
         
         /*
          * Check whether the given cell conservative variables are within the bounds.
@@ -87,7 +115,20 @@ class FlowModelBasicUtilities
         virtual void
         checkCellDataOfConservativeVariablesBounded(
             HAMERS_SHARED_PTR<pdat::CellData<int> >& bounded_flag,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables) = 0;
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
+            const hier::Box& domain) = 0;
+        
+        /*
+         * Check whether the given cell conservative variables are within the bounds.
+         */
+        virtual void
+        checkCellDataOfConservativeVariablesBounded(
+            HAMERS_SHARED_PTR<pdat::CellData<int> >& bounded_flag,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables)
+        {
+            hier::Box empty_box(d_dim);
+            checkCellDataOfConservativeVariablesBounded(bounded_flag, conservative_variables, empty_box);
+        }
         
         /*
          * Check whether the given side conservative variables are within the bounds.
@@ -95,7 +136,21 @@ class FlowModelBasicUtilities
         virtual void
         checkSideDataOfConservativeVariablesBounded(
             HAMERS_SHARED_PTR<pdat::SideData<int> >& bounded_flag,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables) = 0;
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
+            const std::vector<hier::Box>& domains) = 0;
+        
+        /*
+         * Check whether the given side conservative variables are within the bounds.
+         */
+        virtual void
+        checkSideDataOfConservativeVariablesBounded(
+            HAMERS_SHARED_PTR<pdat::SideData<int> >& bounded_flag,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables)
+        {
+            hier::Box empty_box(d_dim);
+            std::vector<hier::Box> empty_domains(d_dim.getValue(), empty_box);
+            checkSideDataOfConservativeVariablesBounded(bounded_flag, conservative_variables, empty_domains);
+        }
         
         /*
          * Check whether the given cell primitive variables are within the bounds.
@@ -103,7 +158,20 @@ class FlowModelBasicUtilities
         virtual void
         checkCellDataOfPrimitiveVariablesBounded(
             HAMERS_SHARED_PTR<pdat::CellData<int> >& bounded_flag,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& primitive_variables) = 0;
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& primitive_variables,
+            const hier::Box& domain) = 0;
+        
+        /*
+         * Check whether the given cell primitive variables are within the bounds.
+         */
+        virtual void
+        checkCellDataOfPrimitiveVariablesBounded(
+            HAMERS_SHARED_PTR<pdat::CellData<int> >& bounded_flag,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& primitive_variables)
+        {
+            hier::Box empty_box(d_dim);
+            checkCellDataOfPrimitiveVariablesBounded(bounded_flag, primitive_variables, empty_box);
+        }
         
         /*
          * Check whether the given side primitive variables are within the bounds.
@@ -111,7 +179,21 @@ class FlowModelBasicUtilities
         virtual void
         checkSideDataOfPrimitiveVariablesBounded(
             HAMERS_SHARED_PTR<pdat::SideData<int> >& bounded_flag,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables) = 0;
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
+            const std::vector<hier::Box>& domains) = 0;
+        
+        /*
+         * Check whether the given side primitive variables are within the bounds.
+         */
+        virtual void
+        checkSideDataOfPrimitiveVariablesBounded(
+            HAMERS_SHARED_PTR<pdat::SideData<int> >& bounded_flag,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables)
+        {
+            hier::Box empty_box(d_dim);
+            std::vector<hier::Box> empty_domains(d_dim.getValue(), empty_box);
+            checkSideDataOfPrimitiveVariablesBounded(bounded_flag, primitive_variables, empty_domains);
+        }
         
         /*
          * Register the required derived variables for transformation between conservative
@@ -151,7 +233,21 @@ class FlowModelBasicUtilities
          */
         virtual void
         computeSideDataOfProjectionVariablesForConservativeVariables(
-            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables) = 0;
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
+            const std::vector<hier::Box>& domains) = 0;
+        
+        /*
+         * Compute the side data of the projection variables for transformation between conservative variables and
+         * characteristic variables.
+         */
+        virtual void
+        computeSideDataOfProjectionVariablesForConservativeVariables(
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables)
+        {
+            hier::Box empty_box(d_dim);
+            std::vector<hier::Box> empty_domains(d_dim.getValue(), empty_box);
+            computeSideDataOfProjectionVariablesForConservativeVariables(projection_variables, empty_domains);
+        }
         
         /*
          * Compute the side data of the projection variables for transformation between primitive variables and
@@ -159,7 +255,21 @@ class FlowModelBasicUtilities
          */
         virtual void
         computeSideDataOfProjectionVariablesForPrimitiveVariables(
-            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables) = 0;
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
+            const std::vector<hier::Box>& domains) = 0;
+        
+        /*
+         * Compute the side data of the projection variables for transformation between primitive variables and
+         * characteristic variables.
+         */
+        virtual void
+        computeSideDataOfProjectionVariablesForPrimitiveVariables(
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables)
+        {
+            hier::Box empty_box(d_dim);
+            std::vector<hier::Box> empty_domains(d_dim.getValue(), empty_box);
+            computeSideDataOfProjectionVariablesForPrimitiveVariables(projection_variables, empty_domains);
+        }
         
         /*
          * Compute the side data of characteristic variables from conservative variables.
@@ -169,7 +279,28 @@ class FlowModelBasicUtilities
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
             const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
             const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
-            const int& idx_offset) = 0;
+            const int& idx_offset,
+            const std::vector<hier::Box>& domains) = 0;
+        
+        /*
+         * Compute the side data of characteristic variables from conservative variables.
+         */
+        virtual void
+        computeSideDataOfCharacteristicVariablesFromConservativeVariables(
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
+            const int& idx_offset)
+        {
+            hier::Box empty_box(d_dim);
+            std::vector<hier::Box> empty_domains(d_dim.getValue(), empty_box);
+            computeSideDataOfCharacteristicVariablesFromConservativeVariables(
+                characteristic_variables,
+                conservative_variables,
+                projection_variables,
+                idx_offset,
+                empty_domains);
+        }
         
         /*
          * Compute the side data of characteristic variables from primitive variables.
@@ -179,7 +310,28 @@ class FlowModelBasicUtilities
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
             const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& primitive_variables,
             const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
-            const int& idx_offset) = 0;
+            const int& idx_offset,
+            const std::vector<hier::Box>& domains) = 0;
+        
+        /*
+         * Compute the side data of characteristic variables from primitive variables.
+         */
+        virtual void
+        computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& primitive_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
+            const int& idx_offset)
+        {
+            hier::Box empty_box(d_dim);
+            std::vector<hier::Box> empty_domains(d_dim.getValue(), empty_box);
+            computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
+                characteristic_variables,
+                primitive_variables,
+                projection_variables,
+                idx_offset,
+                empty_domains);
+        }
         
         /*
          * Compute the side data of conservative variables from characteristic variables.
@@ -188,7 +340,26 @@ class FlowModelBasicUtilities
         computeSideDataOfConservativeVariablesFromCharacteristicVariables(
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
             const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables) = 0;
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
+            const std::vector<hier::Box>& domains) = 0;
+        
+        /*
+         * Compute the side data of conservative variables from characteristic variables.
+         */
+        virtual void
+        computeSideDataOfConservativeVariablesFromCharacteristicVariables(
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& conservative_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables)
+        {
+            hier::Box empty_box(d_dim);
+            std::vector<hier::Box> empty_domains(d_dim.getValue(), empty_box);
+            computeSideDataOfConservativeVariablesFromCharacteristicVariables(
+                conservative_variables,
+                characteristic_variables,
+                projection_variables,
+                empty_domains);
+        }
         
         /*
          * Compute the side data of primitive variables from characteristic variables.
@@ -197,7 +368,26 @@ class FlowModelBasicUtilities
         computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
             const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
-            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables) = 0;
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables,
+            const std::vector<hier::Box>& domains) = 0;
+        
+        /*
+         * Compute the side data of primitive variables from characteristic variables.
+         */
+        virtual void
+        computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& primitive_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& characteristic_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& projection_variables)
+        {
+            hier::Box empty_box(d_dim);
+            std::vector<hier::Box> empty_domains(d_dim.getValue(), empty_box);
+            computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
+                primitive_variables,
+                characteristic_variables,
+                projection_variables,
+                empty_domains);
+        }
         
 protected:
         /*

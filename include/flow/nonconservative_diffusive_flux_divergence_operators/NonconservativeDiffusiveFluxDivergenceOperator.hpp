@@ -8,6 +8,7 @@
 #include "flow/flow_models/FlowModels.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
+#include "SAMRAI/hier/CoarseFineBoundary.h"
 #include "SAMRAI/hier/IntVector.h"
 #include "SAMRAI/hier/Patch.h"
 #include "SAMRAI/pdat/CellVariable.h"
@@ -72,6 +73,8 @@ class NonconservativeDiffusiveFluxDivergenceOperator
         void
         computeNonconservativeDiffusiveFluxDivergenceOnPatch(
             hier::Patch& patch,
+            const int level_number,
+            const HAMERS_SHARED_PTR<hier::CoarseFineBoundary>& coarse_fine_bdry,
             const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_diffusive_flux_divergence,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double time,
@@ -184,7 +187,7 @@ class NonconservativeDiffusiveFluxDivergenceOperator
         const HAMERS_SHARED_PTR<FlowModel> d_flow_model;
         
         /*
-         * HAMERS_SHARED_PTR to database of the non-conservative diffusive flux divergence operatore.
+         * HAMERS_SHARED_PTR to database of the non-conservative diffusive flux divergence operator.
          */
         const HAMERS_SHARED_PTR<tbox::Database> d_nonconservative_diffusive_flux_divergence_operator_db;
         

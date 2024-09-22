@@ -25,6 +25,7 @@
 #include "SAMRAI/pdat/SideDataFactory.h"
 #include "SAMRAI/pdat/SideVariable.h"
 #include "SAMRAI/xfer/CoarsenSchedule.h"
+#include "SAMRAI/hier/CoarseFineBoundary.h"
 #include "SAMRAI/hier/PatchData.h"
 #include "SAMRAI/hier/PatchDataFactory.h"
 #include "SAMRAI/hier/PatchDataRestartManager.h"
@@ -1877,6 +1878,16 @@ RungeKuttaLevelIntegrator::advanceLevel(
         }
     }
     
+    /*
+     * Get object that holds information of coarse-fine interfaces.
+     */
+    
+    HAMERS_SHARED_PTR<hier::CoarseFineBoundary> coarse_fine_bdry(
+        new hier::CoarseFineBoundary(
+            *hierarchy,
+            level->getLevelNumber(),
+            hier::IntVector::getZero(hierarchy->getDim())));
+    
     const tbox::SAMRAI_MPI& mpi(hierarchy->getMPI());
     for (int sn = 0; sn < d_number_steps; sn++)
     {
@@ -1982,6 +1993,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
             // Compute flux corresponding to this sub-step.
             d_patch_strategy->computeFluxesAndSourcesOnPatch(
                 *patch,
+                level->getLevelNumber(),
+                coarse_fine_bdry,
                 current_time,
                 dt,
                 sn,
@@ -2203,23 +2216,20 @@ RungeKuttaLevelIntegrator::standardLevelSynchronization(
     const double sync_time,
     const double old_time)
 {
-    if (true)
+    TBOX_ASSERT(hierarchy);
+    
+    std::vector<double> old_times(finest_level - coarsest_level + 1);
+    for (int i = coarsest_level; i <= finest_level; i++)
     {
-        TBOX_ASSERT(hierarchy);
-        
-        std::vector<double> old_times(finest_level - coarsest_level + 1);
-        for (int i = coarsest_level; i <= finest_level; i++)
-        {
-            old_times[i] = old_time;
-        }
-        
-        standardLevelSynchronization(
-            hierarchy,
-            coarsest_level,
-            finest_level,
-            sync_time,
-            old_times);
+        old_times[i] = old_time;
     }
+    
+    standardLevelSynchronization(
+        hierarchy,
+        coarsest_level,
+        finest_level,
+        sync_time,
+        old_times);
 }
 
 
@@ -2231,62 +2241,59 @@ RungeKuttaLevelIntegrator::standardLevelSynchronization(
     const double sync_time,
     const std::vector<double>& old_times)
 {
-    if (true)
-    {
-        TBOX_ASSERT(hierarchy);
-        TBOX_ASSERT((coarsest_level >= 0)
-                    && (coarsest_level < finest_level)
-                    && (finest_level <= hierarchy->getFinestLevelNumber()));
-        TBOX_ASSERT(static_cast<int>(old_times.size()) >= finest_level);
+    TBOX_ASSERT(hierarchy);
+    TBOX_ASSERT((coarsest_level >= 0)
+                && (coarsest_level < finest_level)
+                && (finest_level <= hierarchy->getFinestLevelNumber()));
+    TBOX_ASSERT(static_cast<int>(old_times.size()) >= finest_level);
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        for (int ln = coarsest_level; ln < finest_level; ln++)
-        {
-            TBOX_ASSERT(hierarchy->getPatchLevel(ln));
-            TBOX_ASSERT(sync_time >= old_times[ln]);
-        }
+    for (int ln = coarsest_level; ln < finest_level; ln++)
+    {
+        TBOX_ASSERT(hierarchy->getPatchLevel(ln));
+        TBOX_ASSERT(sync_time >= old_times[ln]);
+    }
 #endif
-        TBOX_ASSERT(hierarchy->getPatchLevel(finest_level));
+    TBOX_ASSERT(hierarchy->getPatchLevel(finest_level));
+    
+    t_std_level_sync->start();
+    
+    for (int fine_ln = finest_level; fine_ln > coarsest_level; --fine_ln)
+    {
+        const int coarse_ln = fine_ln - 1;
         
-        t_std_level_sync->start();
+        HAMERS_SHARED_PTR<hier::PatchLevel> fine_level(
+           hierarchy->getPatchLevel(fine_ln));
         
-        for (int fine_ln = finest_level; fine_ln > coarsest_level; --fine_ln)
+        HAMERS_SHARED_PTR<hier::PatchLevel> coarse_level(
+           hierarchy->getPatchLevel(coarse_ln));
+        
+        synchronizeLevelWithCoarser(
+            fine_level,
+            coarse_level,
+            sync_time,
+            old_times[coarse_ln]);
+        
+        fine_level->deallocatePatchData(d_fluxsum_data);
+        fine_level->deallocatePatchData(d_flux_var_data);
+        fine_level->deallocatePatchData(d_source_var_data);
+        
+        if (coarse_ln > coarsest_level)
         {
-            const int coarse_ln = fine_ln - 1;
-            
-            HAMERS_SHARED_PTR<hier::PatchLevel> fine_level(
-               hierarchy->getPatchLevel(fine_ln));
-            
-            HAMERS_SHARED_PTR<hier::PatchLevel> coarse_level(
-               hierarchy->getPatchLevel(coarse_ln));
-            
-            synchronizeLevelWithCoarser(
-                fine_level,
-                coarse_level,
-                sync_time,
-                old_times[coarse_ln]);
-            
-            fine_level->deallocatePatchData(d_fluxsum_data);
-            fine_level->deallocatePatchData(d_flux_var_data);
-            fine_level->deallocatePatchData(d_source_var_data);
-            
-            if (coarse_ln > coarsest_level)
+            coarse_level->deallocatePatchData(d_flux_var_data);
+            coarse_level->deallocatePatchData(d_source_var_data);
+        }
+        else
+        {
+            if (coarsest_level == 0)
             {
                 coarse_level->deallocatePatchData(d_flux_var_data);
+                d_have_flux_on_level_zero = false;
                 coarse_level->deallocatePatchData(d_source_var_data);
             }
-            else
-            {
-                if (coarsest_level == 0)
-                {
-                    coarse_level->deallocatePatchData(d_flux_var_data);
-                    d_have_flux_on_level_zero = false;
-                    coarse_level->deallocatePatchData(d_source_var_data);
-                }
-            }
         }
-        
-        t_std_level_sync->stop();
     }
+    
+    t_std_level_sync->stop();
 }
 
 

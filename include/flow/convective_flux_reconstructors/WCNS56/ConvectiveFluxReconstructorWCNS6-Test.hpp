@@ -41,6 +41,8 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
         void
         computeConvectiveFluxAndSourceOnPatch(
             hier::Patch& patch,
+            const int level_number,
+            const HAMERS_SHARED_PTR<hier::CoarseFineBoundary>& coarse_fine_bdry,
             const HAMERS_SHARED_PTR<pdat::SideVariable<Real> >& variable_convective_flux,
             const HAMERS_SHARED_PTR<pdat::CellVariable<Real> >& variable_source,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -65,12 +67,6 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
         int    d_constant_q;
         Real d_constant_C;
         Real d_constant_alpha_tau;
-        
-        /*
-         * Forms of equations.
-         */
-        std::vector<EQN_FORM::TYPE> d_eqn_form;
-        bool d_has_advective_eqn_form;
         
         /*
          * Timers interspersed throughout the class.
