@@ -122,8 +122,45 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                     y_p = y_c - sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));
                 }
                 
+	        double x_d[2];
+                x_d[0] = patch_xlo[0] + (double(i+1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
+                x_d[1] = patch_xlo[1] + (double(j+1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
+
+                // Distance from the cylinder center.
+                double radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+                
+		bool is_ghost = radius_d > radius_c;
+
+                x_d[0] = patch_xlo[0] + (double(i-1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
+                x_d[1] = patch_xlo[1] + (double(j+1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
+
+                // Distance from the cylinder center.
+                radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+
+                is_ghost |= radius_d > radius_c;
+
+		x_d[0] = patch_xlo[0] + (double(i-1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
+                x_d[1] = patch_xlo[1] + (double(j-1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
+
+                // Distance from the cylinder center.
+                radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+
+                is_ghost |= radius_d > radius_c;
+
+		x_d[0] = patch_xlo[0] + (double(i+1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
+                x_d[1] = patch_xlo[1] + (double(j-1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
+
+                // Distance from the cylinder center.
+                radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+
+                is_ghost |= radius_d > radius_c;
+
+		//
+
                 if ((fabs(x_p - x[0]) < (double(d_num_immersed_boundary_ghosts[0]))*dx[0]) ||
-                    (fabs(y_p - x[1]) < (double(d_num_immersed_boundary_ghosts[1]))*dx[1]))
+                    (fabs(y_p - x[1]) < (double(d_num_immersed_boundary_ghosts[1]))*dx[1]) ||
+		    is_ghost
+		    )
                 {
                     mask[idx]   = int(IB_MASK::IB_GHOST);
                     dist[idx]   = radius_c - radius;
