@@ -83,6 +83,20 @@ class ConvectiveFluxReconstructor
             const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
         /*
+         * (Old) Compute the convective flux and source due to splitting using shock-capturing scheme.
+         */
+        virtual void
+        computeConvectiveFluxAndSourceOnPatchShockCapturingOld(
+            hier::Patch& patch,
+            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& source_scratch,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const hier::Box& domain,
+            const double dt,
+            const bool use_shock_capturing,
+            const bool use_interface_capturing) const;
+        
+        /*
          * Compute the convective flux and source due to splitting using shock-capturing scheme.
          */
         virtual void
@@ -104,7 +118,7 @@ class ConvectiveFluxReconstructor
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& variables_minus,
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& variables_plus,
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& variables,
-            const hier::Box& domain) const;
+            const std::vector<hier::Box>& domains) const;
         
         /*
          * The object name is used for error/warning reporting.
