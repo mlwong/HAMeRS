@@ -43,7 +43,7 @@ static inline __attribute__((always_inline)) void computeLocalSigma(
 /*
  * Compute local beta's.
  */
-static inline __attribute__((always_inline)) void computeLocalBeta(
+static inline __attribute__((always_inline)) void computeLocalBetaOld(
     Real& beta_0,
     Real& beta_1,
     Real& beta_2,
@@ -86,7 +86,7 @@ static inline __attribute__((always_inline)) void computeLocalBeta(
 /*
  * Compute local beta_tilde's.
  */
-static inline __attribute__((always_inline)) void computeLocalBetaTilde(
+static inline __attribute__((always_inline)) void computeLocalBetaTildeOld(
     Real& beta_tilde_0,
     Real& beta_tilde_1,
     Real& beta_tilde_2,
@@ -129,7 +129,7 @@ static inline __attribute__((always_inline)) void computeLocalBetaTilde(
 /*
  * Perform local WENO interpolation of U_minus.
  */
-static inline __attribute__((always_inline)) void performLocalWENOInterpolationMinus(
+static inline __attribute__((always_inline)) void performLocalWENOInterpolationMinusOld(
     Real* U_minus,
     Real** U_array,
     const int& idx_side,
@@ -152,7 +152,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
     
     Real beta_0, beta_1, beta_2, beta_3;
     
-    computeLocalBeta(beta_0, beta_1, beta_2, beta_3, U_array, idx_side);
+    computeLocalBetaOld(beta_0, beta_1, beta_2, beta_3, U_array, idx_side);
     
     /*
      * Compute the weights omega_upwind.
@@ -225,7 +225,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
 /*
  * Perform local WENO interpolation of U_plus.
  */
-static inline __attribute__((always_inline)) void performLocalWENOInterpolationPlus(
+static inline __attribute__((always_inline)) void performLocalWENOInterpolationPlusOld(
     Real* U_plus,
     Real** U_array,
     const int& idx_side,
@@ -248,7 +248,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationP
     
     Real beta_tilde_0, beta_tilde_1, beta_tilde_2, beta_tilde_3;
     
-    computeLocalBetaTilde(beta_tilde_0, beta_tilde_1, beta_tilde_2, beta_tilde_3, U_array, idx_side);
+    computeLocalBetaTildeOld(beta_tilde_0, beta_tilde_1, beta_tilde_2, beta_tilde_3, U_array, idx_side);
     
     /*
      * Compute the weights omega_upwind_tilde.
@@ -315,6 +315,156 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationP
             U_array[2][idx_side] +
         (-Real(1)/Real(8)*omega_tilde_2 - Real(10)/Real(8)*omega_tilde_3)*U_array[1][idx_side] +
         Real(3)/Real(8)*omega_tilde_3*U_array[0][idx_side];
+}
+
+
+/*
+ * Compute local beta's.
+ */
+static inline __attribute__((always_inline)) void computeLocalBeta(
+    Real& beta_0,
+    Real& beta_1,
+    Real& beta_2,
+    Real** U_array,
+    const int& idx_side)
+{
+    beta_0 = Real(1)/Real(3)*(U_array[0][idx_side]*(Real(4)*U_array[0][idx_side] -
+         Real(19)*U_array[1][idx_side] + Real(11)*U_array[2][idx_side]) +
+         U_array[1][idx_side]*(Real(25)*U_array[1][idx_side] - Real(31)*U_array[2][idx_side]) +
+         Real(10)*U_array[2][idx_side]*U_array[2][idx_side]);
+    
+    beta_1 = Real(1)/Real(3)*(U_array[1][idx_side]*(Real(4)*U_array[1][idx_side] -
+         Real(13)*U_array[2][idx_side] + Real(5)*U_array[3][idx_side]) +
+         Real(13)*U_array[2][idx_side]*(U_array[2][idx_side] - U_array[3][idx_side]) +
+         Real(4)*U_array[3][idx_side]*U_array[3][idx_side]);
+    
+    beta_2 = Real(1)/Real(3)*(U_array[2][idx_side]*(Real(10)*U_array[2][idx_side] -
+         Real(31)*U_array[3][idx_side] + Real(11)*U_array[4][idx_side]) +
+         U_array[3][idx_side]*(Real(25)*U_array[3][idx_side] - Real(19)*U_array[4][idx_side]) +
+         Real(4)*U_array[4][idx_side]*U_array[4][idx_side]);
+}
+
+
+/*
+ * Compute local beta_tilde's.
+ */
+static inline __attribute__((always_inline)) void computeLocalBetaTilde(
+    Real& beta_tilde_0,
+    Real& beta_tilde_1,
+    Real& beta_tilde_2,
+    Real** U_array,
+    const int& idx_side)
+{
+    beta_tilde_0 = Real(1)/Real(3)*(U_array[5][idx_side]*(Real(4)*U_array[5][idx_side] -
+         Real(19)*U_array[4][idx_side] + Real(11)*U_array[3][idx_side]) +
+         U_array[4][idx_side]*(Real(25)*U_array[4][idx_side] - Real(31)*U_array[3][idx_side]) +
+         Real(10)*U_array[3][idx_side]*U_array[3][idx_side]);
+    
+    beta_tilde_1 = Real(1)/Real(3)*(U_array[4][idx_side]*(Real(4)*U_array[4][idx_side] -
+         Real(13)*U_array[3][idx_side] + Real(5)*U_array[2][idx_side]) +
+         Real(13)*U_array[3][idx_side]*(U_array[3][idx_side] - U_array[2][idx_side]) +
+         Real(4)*U_array[2][idx_side]*U_array[2][idx_side]);
+    
+    beta_tilde_2 = Real(1)/Real(3)*(U_array[3][idx_side]*(Real(10)*U_array[3][idx_side] -
+         Real(31)*U_array[2][idx_side] + Real(11)*U_array[1][idx_side]) +
+         U_array[2][idx_side]*(Real(25)*U_array[2][idx_side] - Real(19)*U_array[1][idx_side]) +
+         Real(4)*U_array[1][idx_side]*U_array[1][idx_side]);
+}
+
+
+/*
+ * Perform local WENO interpolation of U_minus.
+ */
+static inline __attribute__((always_inline)) void performLocalWENOInterpolationMinus(
+    Real* U_minus,
+    Real** U_array,
+    const int& idx_side,
+    const int& p)
+{
+    /*
+     * Compute beta's.
+     */
+    
+    Real beta_0, beta_1, beta_2;
+    
+    computeLocalBeta(beta_0, beta_1, beta_2, U_array, idx_side);
+    
+    /*
+     * Compute the weights omega.
+     */
+    
+    Real omega_0, omega_1, omega_2;
+    
+    Real tau_5 = std::abs(beta_0 - beta_2);
+    
+    omega_0 = Real(1)/Real(16)*(Real(1) + ipow(tau_5/(beta_0 + EPSILON), p));
+    omega_1 = Real(5)/Real(8)*(Real(1) + ipow(tau_5/(beta_1 + EPSILON), p));
+    omega_2 = Real(5)/Real(16)*(Real(1) + ipow(tau_5/(beta_2 + EPSILON), p));
+    
+    Real omega_sum = omega_0 + omega_1 + omega_2;
+    
+    omega_0 = omega_0/omega_sum;
+    omega_1 = omega_1/omega_sum;
+    omega_2 = omega_2/omega_sum;
+    
+    /*
+     * Compute U_minus.
+     */
+    
+    U_minus[idx_side] = Real(3)/Real(8)*omega_0*U_array[0][idx_side] +
+        (-Real(10)/Real(8)*omega_0 - Real(1)/Real(8)*omega_1)*U_array[1][idx_side] +
+        (Real(15)/Real(8)*omega_0 + Real(6)/Real(8)*omega_1 +
+        Real(3)/Real(8)*omega_2)*U_array[2][idx_side] +
+        (Real(3)/Real(8)*omega_1 + Real(6)/Real(8)*omega_2)*U_array[3][idx_side] -
+        Real(1)/Real(8)*omega_2*U_array[4][idx_side];
+}
+
+
+/*
+ * Perform local WENO interpolation of U_plus.
+ */
+static inline __attribute__((always_inline)) void performLocalWENOInterpolationPlus(
+    Real* U_plus,
+    Real** U_array,
+    const int& idx_side,
+    const int& p)
+{
+    /*
+     * Compute beta_tilde's.
+     */
+    
+    Real beta_tilde_0, beta_tilde_1, beta_tilde_2;
+    
+    computeLocalBetaTilde(beta_tilde_0, beta_tilde_1, beta_tilde_2, U_array, idx_side);
+    
+    /*
+     * Compute the weights omega_upwind_tilde.
+     */
+    
+    Real omega_tilde_0, omega_tilde_1, omega_tilde_2;
+    
+    Real tau_5_tilde = std::abs(beta_tilde_0 - beta_tilde_2);
+    
+    omega_tilde_0 = Real(1)/Real(16)*(Real(1) + ipow(tau_5_tilde/(beta_tilde_0 + EPSILON), p));
+    omega_tilde_1 = Real(5)/Real(8)*(Real(1) + ipow(tau_5_tilde/(beta_tilde_1 + EPSILON), p));
+    omega_tilde_2 = Real(5)/Real(16)*(Real(1) + ipow(tau_5_tilde/(beta_tilde_2 + EPSILON), p));
+    
+    Real omega_tilde_sum = omega_tilde_0 + omega_tilde_1 + omega_tilde_2;
+    
+    omega_tilde_0 = omega_tilde_0/omega_tilde_sum;
+    omega_tilde_1 = omega_tilde_1/omega_tilde_sum;
+    omega_tilde_2 = omega_tilde_2/omega_tilde_sum;
+    
+    /*
+     * Compute U_plus.
+     */
+    
+    U_plus[idx_side] = Real(3)/Real(8)*omega_tilde_0*U_array[5][idx_side] +
+        (-Real(10)/Real(8)*omega_tilde_0 - Real(1)/Real(8)*omega_tilde_1)*U_array[4][idx_side] +
+        (Real(15)/Real(8)*omega_tilde_0 + Real(6)/Real(8)*omega_tilde_1 +
+        Real(3)/Real(8)*omega_tilde_2)*U_array[3][idx_side] +
+        (Real(3)/Real(8)*omega_tilde_1 + Real(6)/Real(8)*omega_tilde_2)*U_array[2][idx_side] -
+        Real(1)/Real(8)*omega_tilde_2*U_array[1][idx_side];
 }
 
 
@@ -5433,10 +5583,15 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
                     U_L,
                     U_array.data(),
                     idx_midpoint_x,
-                    constant_p,
-                    constant_q,
-                    constant_C,
-                    constant_alpha_tau);
+                    constant_p);
+                // performLocalWENOInterpolationMinus(
+                //     U_L,
+                //     U_array.data(),
+                //     idx_midpoint_x,
+                //     constant_p,
+                //     constant_q,
+                //     constant_C,
+                //     constant_alpha_tau);
             }
         }
         
@@ -5462,10 +5617,15 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
                     U_R,
                     U_array.data(),
                     idx_midpoint_x,
-                    constant_p,
-                    constant_q,
-                    constant_C,
-                    constant_alpha_tau);
+                    constant_p);
+                // performLocalWENOInterpolationPlus(
+                //     U_R,
+                //     U_array.data(),
+                //     idx_midpoint_x,
+                //     constant_p,
+                //     constant_q,
+                //     constant_C,
+                //     constant_alpha_tau);
             }
         }
         
@@ -5519,10 +5679,15 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
                         U_L,
                         U_array.data(),
                         idx_midpoint_x,
-                        constant_p,
-                        constant_q,
-                        constant_C,
-                        constant_alpha_tau);
+                        constant_p);
+                    // performLocalWENOInterpolationMinus(
+                    //     U_L,
+                    //     U_array.data(),
+                    //     idx_midpoint_x,
+                    //     constant_p,
+                    //     constant_q,
+                    //     constant_C,
+                    //     constant_alpha_tau);
                 }
             }
         }
@@ -5552,10 +5717,15 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
                         U_R,
                         U_array.data(),
                         idx_midpoint_x,
-                        constant_p,
-                        constant_q,
-                        constant_C,
-                        constant_alpha_tau);
+                        constant_p);
+                    // performLocalWENOInterpolationPlus(
+                    //     U_R,
+                    //     U_array.data(),
+                    //     idx_midpoint_x,
+                    //     constant_p,
+                    //     constant_q,
+                    //     constant_C,
+                    //     constant_alpha_tau);
                 }
             }
         }
@@ -5589,10 +5759,15 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
                         U_B,
                         U_array.data(),
                         idx_midpoint_y,
-                        constant_p,
-                        constant_q,
-                        constant_C,
-                        constant_alpha_tau);
+                        constant_p);
+                    // performLocalWENOInterpolationMinus(
+                    //     U_B,
+                    //     U_array.data(),
+                    //     idx_midpoint_y,
+                    //     constant_p,
+                    //     constant_q,
+                    //     constant_C,
+                    //     constant_alpha_tau);
                 }
             }
         }
@@ -5622,10 +5797,15 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
                         U_T,
                         U_array.data(),
                         idx_midpoint_y,
-                        constant_p,
-                        constant_q,
-                        constant_C,
-                        constant_alpha_tau);
+                        constant_p);
+                    // performLocalWENOInterpolationPlus(
+                    //     U_T,
+                    //     U_array.data(),
+                    //     idx_midpoint_y,
+                    //     constant_p,
+                    //     constant_q,
+                    //     constant_C,
+                    //     constant_alpha_tau);
                 }
             }
         }
@@ -5697,10 +5877,15 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
                             U_L,
                             U_array.data(),
                             idx_midpoint_x,
-                            constant_p,
-                            constant_q,
-                            constant_C,
-                            constant_alpha_tau);
+                            constant_p);
+                        // performLocalWENOInterpolationMinus(
+                        //     U_L,
+                        //     U_array.data(),
+                        //     idx_midpoint_x,
+                        //     constant_p,
+                        //     constant_q,
+                        //     constant_C,
+                        //     constant_alpha_tau);
                     }
                 }
             }
@@ -5735,10 +5920,15 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
                             U_R,
                             U_array.data(),
                             idx_midpoint_x,
-                            constant_p,
-                            constant_q,
-                            constant_C,
-                            constant_alpha_tau);
+                            constant_p);
+                        // performLocalWENOInterpolationPlus(
+                        //     U_R,
+                        //     U_array.data(),
+                        //     idx_midpoint_x,
+                        //     constant_p,
+                        //     constant_q,
+                        //     constant_C,
+                        //     constant_alpha_tau);
                     }
                 }
             }
@@ -5777,10 +5967,15 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
                             U_B,
                             U_array.data(),
                             idx_midpoint_y,
-                            constant_p,
-                            constant_q,
-                            constant_C,
-                            constant_alpha_tau);
+                            constant_p);
+                        // performLocalWENOInterpolationMinus(
+                        //     U_B,
+                        //     U_array.data(),
+                        //     idx_midpoint_y,
+                        //     constant_p,
+                        //     constant_q,
+                        //     constant_C,
+                        //     constant_alpha_tau);
                     }
                 }
             }
@@ -5815,10 +6010,15 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
                             U_T,
                             U_array.data(),
                             idx_midpoint_y,
-                            constant_p,
-                            constant_q,
-                            constant_C,
-                            constant_alpha_tau);
+                            constant_p);
+                        // performLocalWENOInterpolationPlus(
+                        //     U_T,
+                        //     U_array.data(),
+                        //     idx_midpoint_y,
+                        //     constant_p,
+                        //     constant_q,
+                        //     constant_C,
+                        //     constant_alpha_tau);
                     }
                 }
             }
@@ -5857,10 +6057,15 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
                             U_B,
                             U_array.data(),
                             idx_midpoint_z,
-                            constant_p,
-                            constant_q,
-                            constant_C,
-                            constant_alpha_tau);
+                            constant_p);
+                        // performLocalWENOInterpolationMinus(
+                        //     U_B,
+                        //     U_array.data(),
+                        //     idx_midpoint_z,
+                        //     constant_p,
+                        //     constant_q,
+                        //     constant_C,
+                        //     constant_alpha_tau);
                     }
                 }
             }
@@ -5895,10 +6100,15 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
                             U_F,
                             U_array.data(),
                             idx_midpoint_z,
-                            constant_p,
-                            constant_q,
-                            constant_C,
-                            constant_alpha_tau);
+                            constant_p);
+                        // performLocalWENOInterpolationPlus(
+                        //     U_F,
+                        //     U_array.data(),
+                        //     idx_midpoint_z,
+                        //     constant_p,
+                        //     constant_q,
+                        //     constant_C,
+                        //     constant_alpha_tau);
                     }
                 }
             }
