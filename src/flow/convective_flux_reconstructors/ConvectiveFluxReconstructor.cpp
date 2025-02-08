@@ -517,7 +517,7 @@ ConvectiveFluxReconstructor::ConvectiveFluxReconstructor(
     }
     
     d_shock_capturing_use_small_stencil_finite_differencing = d_convective_flux_reconstructor_db->getBoolWithDefault(
-        "shock_capturing_use_small_stencil_finite_differencing", false);
+        "shock_capturing_use_small_stencil_finite_differencing", true);
     d_shock_capturing_use_small_stencil_finite_differencing = d_convective_flux_reconstructor_db->getBoolWithDefault(
         "d_shock_capturing_use_small_stencil_finite_differencing", d_shock_capturing_use_small_stencil_finite_differencing);
     
