@@ -183,7 +183,7 @@ class ConvectiveFluxReconstructor
         
         WENO_INTERP::TYPE d_weno_interp;
         
-        bool d_use_MND_finite_differencing;
+        bool d_shock_capturing_use_small_stencil_finite_differencing;
         
 };
 
