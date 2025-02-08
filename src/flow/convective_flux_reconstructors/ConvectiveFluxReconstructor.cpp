@@ -485,7 +485,6 @@ ConvectiveFluxReconstructor::ConvectiveFluxReconstructor(
         d_flow_model(flow_model),
         d_convective_flux_reconstructor_db(convective_flux_reconstructor_db),
         d_num_ghosts_shock_interface_capturing(3)
-        // d_num_ghosts_shock_interface_capturing(4)
 {
     d_threshold_sensor_shock = Real(3)/Real(10);
     d_threshold_sensor_interface = Real(5)/Real(10000);
@@ -517,6 +516,20 @@ ConvectiveFluxReconstructor::ConvectiveFluxReconstructor(
             << std::endl);
     }
     
+    d_use_MND_finite_differencing = d_convective_flux_reconstructor_db->getBoolWithDefault(
+        "use_MND_finite_differencing", false);
+    d_use_MND_finite_differencing = d_convective_flux_reconstructor_db->getBoolWithDefault(
+        "d_use_MND_finite_differencing", d_use_MND_finite_differencing);
+    
+    if (d_use_MND_finite_differencing)
+    {
+        d_num_ghosts_shock_interface_capturing = 4;
+    }
+    else
+    {
+        d_num_ghosts_shock_interface_capturing = 3;
+    }
+    
     d_eqn_form = d_flow_model->getEquationsForm();
     d_has_advective_eqn_form = false;
     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -545,6 +558,8 @@ ConvectiveFluxReconstructor::putToRestartBase(
     else if (d_weno_interp == WENO_INTERP::WENO6LD) {
         restart_db->putString("d_weno_interp", "WENO6LD");
     }
+    
+    restart_db->putBool("d_use_MND_finite_differencing", d_use_MND_finite_differencing);
 }
 
 
@@ -631,9 +646,6 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
     }
     
     HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux_midpoint(
-        new pdat::SideData<Real>(interior_box, d_num_eqn, hier::IntVector::getOne(d_dim)));
-    
-    HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux_midpoint_HLLC(
         new pdat::SideData<Real>(interior_box, d_num_eqn, hier::IntVector::getOne(d_dim)));
     
     HAMERS_SHARED_PTR<pdat::SideData<Real> > discontinuity_sensor_side(
@@ -1599,6 +1611,20 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
         int* flag_plus = nullptr;
         
         /*
+         * Coefficients for finite differencing.
+         */
+        
+        const Real a_midpoint_r = Real(23)/Real(15);
+        const Real b_midpoint_r = Real(1)/Real(30);
+        
+        const Real a_node_r = -Real(3)/Real(10);
+        
+        const Real a_midpoint = Real(3)/Real(2);
+        const Real b_midpoint = Real(1)/Real(30);
+        
+        const Real a_node =  -Real(3)/Real(10);
+        
+        /*
          * Compute the convective flux and source using shock-capturing scheme.
          */
         if (d_dim == tbox::Dimension(1))
@@ -1642,16 +1668,10 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             }
             
             std::vector<Real*> F_midpoint_x;
-            std::vector<Real*> F_midpoint_HLLC_x;
             F_midpoint_x.reserve(d_num_eqn);
-            F_midpoint_HLLC_x.reserve(d_num_eqn);
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
                 F_midpoint_x.push_back(convective_flux_midpoint->getPointer(0, ei));
-            }
-            for (int ei = 0; ei < d_num_eqn; ei++)
-            {
-                F_midpoint_HLLC_x.push_back(convective_flux_midpoint_HLLC->getPointer(0, ei));
             }
             
             /*
@@ -1698,7 +1718,7 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             if (d_has_advective_eqn_form)
             {
                 riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
-                    convective_flux_midpoint_HLLC,
+                    convective_flux_midpoint,
                     velocity_midpoint,
                     primitive_variables_minus,
                     primitive_variables_plus,
@@ -1709,24 +1729,12 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             else
             {
                 riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
-                    convective_flux_midpoint_HLLC,
+                    convective_flux_midpoint,
                     primitive_variables_minus,
                     primitive_variables_plus,
                     DIRECTION::X_DIRECTION,
                     RIEMANN_SOLVER::HLLC,
                     domains[0]);
-            }
-            
-            for (int ei = 0; ei < d_num_eqn; ei++)
-            {
-                HAMERS_PRAGMA_SIMD
-                for (int i = domain_lo_0 - 1; i < domain_lo_0 + domain_dim_0 + 2; i++)
-                {
-                    // Compute the linear index of the side.
-                    const int idx_midpoint_x = i + 1;
-                    
-                    F_midpoint_x[ei][idx_midpoint_x] = F_midpoint_HLLC_x[ei][idx_midpoint_x];
-                }
             }
             
             /*
@@ -1753,11 +1761,10 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                         const int idx_node_R = i     + num_subghosts_0_convective_flux_x;
                         
                         F_face_x[idx_face_x] = Real(dt)*(
-                            Real(1)/Real(30)*(F_midpoint_x[ei][idx_midpoint_x_R] +
-                                F_midpoint_x[ei][idx_midpoint_x_L]) -
-                            Real(3)/Real(10)*(F_node_x[ei][idx_node_R] +
-                                F_node_x[ei][idx_node_L]) +
-                            Real(23)/Real(15)*F_midpoint_x[ei][idx_midpoint_x]);
+                            a_midpoint_r*F_midpoint_x[ei][idx_midpoint_x] +
+                            b_midpoint_r*(F_midpoint_x[ei][idx_midpoint_x_L] + F_midpoint_x[ei][idx_midpoint_x_R]) +
+                            a_node_r*(F_node_x[ei][idx_node_L] + F_node_x[ei][idx_node_R])
+                            );
                     }
                 }
             }
@@ -1796,13 +1803,10 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                                 const int idx_midpoint_x_R  = i + 2;
                                 const int idx_midpoint_x_RR = i + 3;
                                 
-                                S[idx_cell_nghost] = Real(dt)*Q[ei][idx_cell_wghost]*(
-                                    (Real(3)/Real(2)*(u_midpoint_x[idx_midpoint_x_R] -
-                                         u_midpoint_x[idx_midpoint_x_L]) -
-                                     Real(3)/Real(10)*(u[idx_cell_wghost_x_R] -
-                                         u[idx_cell_wghost_x_L]) +
-                                     Real(1)/Real(30)*(u_midpoint_x[idx_midpoint_x_RR] -
-                                         u_midpoint_x[idx_midpoint_x_LL]))/Real(dx[0]));
+                                S[idx_cell_nghost] = Real(dt)*Q[ei][idx_cell_wghost]*((
+                                    a_midpoint*(u_midpoint_x[idx_midpoint_x_R]  - u_midpoint_x[idx_midpoint_x_L]) +
+                                    b_midpoint*(u_midpoint_x[idx_midpoint_x_RR] - u_midpoint_x[idx_midpoint_x_LL]) +
+                                    a_node*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L]))/Real(dx[0]));
                             }
                         }
                     }
@@ -1873,21 +1877,12 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             
             std::vector<Real*> F_midpoint_x;
             std::vector<Real*> F_midpoint_y;
-            std::vector<Real*> F_midpoint_HLLC_x;
-            std::vector<Real*> F_midpoint_HLLC_y;
             F_midpoint_x.reserve(d_num_eqn);
             F_midpoint_y.reserve(d_num_eqn);
-            F_midpoint_HLLC_x.reserve(d_num_eqn);
-            F_midpoint_HLLC_y.reserve(d_num_eqn);
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
                 F_midpoint_x.push_back(convective_flux_midpoint->getPointer(0, ei));
                 F_midpoint_y.push_back(convective_flux_midpoint->getPointer(1, ei));
-            }
-            for (int ei = 0; ei < d_num_eqn; ei++)
-            {
-                F_midpoint_HLLC_x.push_back(convective_flux_midpoint_HLLC->getPointer(0, ei));
-                F_midpoint_HLLC_y.push_back(convective_flux_midpoint_HLLC->getPointer(1, ei));
             }
             
             /*
@@ -1985,7 +1980,7 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             if (d_has_advective_eqn_form)
             {
                 riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
-                    convective_flux_midpoint_HLLC,
+                    convective_flux_midpoint,
                     velocity_midpoint,
                     primitive_variables_minus,
                     primitive_variables_plus,
@@ -1996,28 +1991,12 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             else
             {
                 riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
-                    convective_flux_midpoint_HLLC,
+                    convective_flux_midpoint,
                     primitive_variables_minus,
                     primitive_variables_plus,
                     DIRECTION::X_DIRECTION,
                     RIEMANN_SOLVER::HLLC,
                     domains[0]);
-            }
-            
-            for (int ei = 0; ei < d_num_eqn; ei++)
-            {
-                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-                {
-                    HAMERS_PRAGMA_SIMD
-                    for (int i = domain_lo_0 - 1; i < domain_lo_0 + domain_dim_0 + 2; i++)
-                    {
-                        // Compute the linear index of the side.
-                        const int idx_midpoint_x = (i + 1) +
-                            (j + 1)*(interior_dim_0 + 3);
-                        
-                        F_midpoint_x[ei][idx_midpoint_x] = F_midpoint_HLLC_x[ei][idx_midpoint_x];
-                    }
-                }
             }
             
             /*
@@ -2027,7 +2006,7 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             if (d_has_advective_eqn_form)
             {
                 riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
-                    convective_flux_midpoint_HLLC,
+                    convective_flux_midpoint,
                     velocity_midpoint,
                     primitive_variables_minus,
                     primitive_variables_plus,
@@ -2038,28 +2017,12 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             else
             {
                 riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
-                    convective_flux_midpoint_HLLC,
+                    convective_flux_midpoint,
                     primitive_variables_minus,
                     primitive_variables_plus,
                     DIRECTION::Y_DIRECTION,
                     RIEMANN_SOLVER::HLLC,
                     domains[1]);
-            }
-            
-            for (int ei = 0; ei < d_num_eqn; ei++)
-            {
-                for (int j = domain_lo_1 - 1; j < domain_lo_1 + domain_dim_1 + 2; j++)
-                {
-                    HAMERS_PRAGMA_SIMD
-                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                    {
-                        // Compute the linear index of the side.
-                        const int idx_midpoint_y = (i + 1) +
-                            (j + 1)*(interior_dim_0 + 2);
-                        
-                        F_midpoint_y[ei][idx_midpoint_y] = F_midpoint_HLLC_y[ei][idx_midpoint_y];
-                    }
-                }
             }
             
             /*
@@ -2097,11 +2060,10 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                                 (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
                             
                             F_face_x[idx_face_x] = Real(dt)*(
-                                Real(1)/Real(30)*(F_midpoint_x[ei][idx_midpoint_x_R] +
-                                    F_midpoint_x[ei][idx_midpoint_x_L]) -
-                                Real(3)/Real(10)*(F_node_x[ei][idx_node_R] +
-                                    F_node_x[ei][idx_node_L]) +
-                                Real(23)/Real(15)*F_midpoint_x[ei][idx_midpoint_x]);
+                                a_midpoint_r*F_midpoint_x[ei][idx_midpoint_x] +
+                                b_midpoint_r*(F_midpoint_x[ei][idx_midpoint_x_L] + F_midpoint_x[ei][idx_midpoint_x_R]) +
+                                a_node_r*(F_node_x[ei][idx_node_L] + F_node_x[ei][idx_node_R])
+                                );
                         }
                     }
                 }
@@ -2141,12 +2103,12 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                             const int idx_node_T = (i + num_subghosts_0_convective_flux_y) +
                                 (j + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
                             
+                            
                             F_face_y[idx_face_y] = Real(dt)*(
-                                Real(1)/Real(30)*(F_midpoint_y[ei][idx_midpoint_y_T] +
-                                    F_midpoint_y[ei][idx_midpoint_y_B]) -
-                                Real(3)/Real(10)*(F_node_y[ei][idx_node_T] +
-                                    F_node_y[ei][idx_node_B]) +
-                                Real(23)/Real(15)*F_midpoint_y[ei][idx_midpoint_y]);
+                                a_midpoint_r*F_midpoint_y[ei][idx_midpoint_y] +
+                                b_midpoint_r*(F_midpoint_y[ei][idx_midpoint_y_B] + F_midpoint_y[ei][idx_midpoint_y_T]) +
+                                a_node_r*(F_node_y[ei][idx_node_B] + F_node_x[ei][idx_node_T])
+                                );
                         }
                     }
                 }
@@ -2220,19 +2182,15 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                                     const int idx_midpoint_y_TT = (i + 1) +
                                         (j + 3)*(interior_dim_0 + 2);
                                     
-                                    S[idx_cell_nghost] = Real(dt)*Q[ei][idx_cell_wghost]*(
-                                        (Real(3)/Real(2)*(u_midpoint_x[idx_midpoint_x_R] -
-                                             u_midpoint_x[idx_midpoint_x_L]) -
-                                         Real(3)/Real(10)*(u[idx_cell_wghost_x_R] -
-                                             u[idx_cell_wghost_x_L]) +
-                                         Real(1)/Real(30)*(u_midpoint_x[idx_midpoint_x_RR] -
-                                             u_midpoint_x[idx_midpoint_x_LL]))/Real(dx[0]) +
-                                        (Real(3)/Real(2)*(v_midpoint_y[idx_midpoint_y_T] -
-                                             v_midpoint_y[idx_midpoint_y_B]) -
-                                         Real(3)/Real(10)*(v[idx_cell_wghost_y_T] -
-                                             v[idx_cell_wghost_y_B]) +
-                                         Real(1)/Real(30)*(v_midpoint_y[idx_midpoint_y_TT] -
-                                             v_midpoint_y[idx_midpoint_y_BB]))/Real(dx[1]));
+                                    S[idx_cell_nghost] = Real(dt)*Q[ei][idx_cell_wghost]*((
+                                        a_midpoint*(u_midpoint_x[idx_midpoint_x_R]  - u_midpoint_x[idx_midpoint_x_L]) +
+                                        b_midpoint*(u_midpoint_x[idx_midpoint_x_RR] - u_midpoint_x[idx_midpoint_x_LL]) +
+                                        a_node*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L])
+                                        )/Real(dx[0]) + (
+                                        a_midpoint*(v_midpoint_y[idx_midpoint_y_T]  - v_midpoint_y[idx_midpoint_y_B]) +
+                                        b_midpoint*(v_midpoint_y[idx_midpoint_y_TT] - v_midpoint_y[idx_midpoint_y_BB]) +
+                                        a_node*(v[idx_cell_wghost_y_T] - v[idx_cell_wghost_y_B])
+                                        )/Real(dx[1]));
                                 }
                             }
                         }
@@ -2328,26 +2286,14 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             std::vector<Real*> F_midpoint_x;
             std::vector<Real*> F_midpoint_y;
             std::vector<Real*> F_midpoint_z;
-            std::vector<Real*> F_midpoint_HLLC_x;
-            std::vector<Real*> F_midpoint_HLLC_y;
-            std::vector<Real*> F_midpoint_HLLC_z;
             F_midpoint_x.reserve(d_num_eqn);
             F_midpoint_y.reserve(d_num_eqn);
             F_midpoint_z.reserve(d_num_eqn);
-            F_midpoint_HLLC_x.reserve(d_num_eqn);
-            F_midpoint_HLLC_y.reserve(d_num_eqn);
-            F_midpoint_HLLC_z.reserve(d_num_eqn);
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
                 F_midpoint_x.push_back(convective_flux_midpoint->getPointer(0, ei));
                 F_midpoint_y.push_back(convective_flux_midpoint->getPointer(1, ei));
                 F_midpoint_z.push_back(convective_flux_midpoint->getPointer(2, ei));
-            }
-            for (int ei = 0; ei < d_num_eqn; ei++)
-            {
-                F_midpoint_HLLC_x.push_back(convective_flux_midpoint_HLLC->getPointer(0, ei));
-                F_midpoint_HLLC_y.push_back(convective_flux_midpoint_HLLC->getPointer(1, ei));
-                F_midpoint_HLLC_z.push_back(convective_flux_midpoint_HLLC->getPointer(2, ei));
             }
             
             /*
@@ -2522,7 +2468,7 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             if (d_has_advective_eqn_form)
             {
                 riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
-                    convective_flux_midpoint_HLLC,
+                    convective_flux_midpoint,
                     velocity_midpoint,
                     primitive_variables_minus,
                     primitive_variables_plus,
@@ -2532,32 +2478,11 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             else
             {
                 riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
-                    convective_flux_midpoint_HLLC,
+                    convective_flux_midpoint,
                     primitive_variables_minus,
                     primitive_variables_plus,
                     DIRECTION::X_DIRECTION,
                     RIEMANN_SOLVER::HLLC);
-            }
-            
-            for (int ei = 0; ei < d_num_eqn; ei++)
-            {
-                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
-                {
-                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-                    {
-                        HAMERS_PRAGMA_SIMD
-                        for (int i = domain_lo_0 - 1; i < domain_lo_0 + domain_dim_0 + 2; i++)
-                        {
-                            // Compute the linear index of the side.
-                            const int idx_midpoint_x = (i + 1) +
-                                (j + 1)*(interior_dim_0 + 3) +
-                                (k + 1)*(interior_dim_0 + 3)*
-                                    (interior_dim_1 + 2);
-                            
-                            F_midpoint_x[ei][idx_midpoint_x] = F_midpoint_HLLC_x[ei][idx_midpoint_x];
-                        }
-                    }
-                }
             }
             
             /*
@@ -2567,7 +2492,7 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             if (d_has_advective_eqn_form)
             {
                 riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
-                    convective_flux_midpoint_HLLC,
+                    convective_flux_midpoint,
                     velocity_midpoint,
                     primitive_variables_minus,
                     primitive_variables_plus,
@@ -2577,32 +2502,11 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             else
             {
                 riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
-                    convective_flux_midpoint_HLLC,
+                    convective_flux_midpoint,
                     primitive_variables_minus,
                     primitive_variables_plus,
                     DIRECTION::Y_DIRECTION,
                     RIEMANN_SOLVER::HLLC);
-            }
-            
-            for (int ei = 0; ei < d_num_eqn; ei++)
-            {
-                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
-                {
-                    for (int j = domain_lo_1 - 1; j < domain_lo_1 + domain_dim_1 + 2; j++)
-                    {
-                        HAMERS_PRAGMA_SIMD
-                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                        {
-                            // Compute the linear index of the side.
-                            const int idx_midpoint_y = (i + 1) +
-                                (j + 1)*(interior_dim_0 + 2) +
-                                (k + 1)*(interior_dim_0 + 2)*
-                                    (interior_dim_1 + 3);
-                            
-                            F_midpoint_y[ei][idx_midpoint_y] = F_midpoint_HLLC_y[ei][idx_midpoint_y];
-                        }
-                    }
-                }
             }
             
             /*
@@ -2612,7 +2516,7 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             if (d_has_advective_eqn_form)
             {
                 riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
-                    convective_flux_midpoint_HLLC,
+                    convective_flux_midpoint,
                     velocity_midpoint,
                     primitive_variables_minus,
                     primitive_variables_plus,
@@ -2622,32 +2526,11 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             else
             {
                 riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
-                    convective_flux_midpoint_HLLC,
+                    convective_flux_midpoint,
                     primitive_variables_minus,
                     primitive_variables_plus,
                     DIRECTION::Z_DIRECTION,
                     RIEMANN_SOLVER::HLLC);
-            }
-            
-            for (int ei = 0; ei < d_num_eqn; ei++)
-            {
-                for (int k = domain_lo_2 - 1; k < domain_lo_2 + domain_dim_2 + 2; k++)
-                {
-                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-                    {
-                        HAMERS_PRAGMA_SIMD
-                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                        {
-                            // Compute the linear index of the side.
-                            const int idx_midpoint_z = (i + 1) +
-                                (j + 1)*(interior_dim_0 + 2) +
-                                (k + 1)*(interior_dim_0 + 2)*
-                                    (interior_dim_1 + 2);
-                            
-                            F_midpoint_z[ei][idx_midpoint_z] = F_midpoint_HLLC_z[ei][idx_midpoint_z];
-                        }
-                    }
-                }
             }
             
             /*
@@ -2699,11 +2582,10 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                                         subghostcell_dim_1_convective_flux_x;
                             
                                 F_face_x[idx_face_x] = Real(dt)*(
-                                    Real(1)/Real(30)*(F_midpoint_x[ei][idx_midpoint_x_R] +
-                                        F_midpoint_x[ei][idx_midpoint_x_L]) -
-                                    Real(3)/Real(10)*(F_node_x[ei][idx_node_R] +
-                                        F_node_x[ei][idx_node_L]) +
-                                    Real(23)/Real(15)*F_midpoint_x[ei][idx_midpoint_x]);
+                                    a_midpoint_r*F_midpoint_x[ei][idx_midpoint_x] +
+                                    b_midpoint_r*(F_midpoint_x[ei][idx_midpoint_x_L] + F_midpoint_x[ei][idx_midpoint_x_R]) +
+                                    a_node_r*(F_node_x[ei][idx_node_L] + F_node_x[ei][idx_node_R])
+                                    );
                             }
                         }
                     }
@@ -2755,12 +2637,11 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                                         subghostcell_dim_1_convective_flux_y;
                                 
                                 F_face_y[idx_face_y] = Real(dt)*(
-                                    Real(1)/Real(30)*(F_midpoint_y[ei][idx_midpoint_y_T] +
-                                        F_midpoint_y[ei][idx_midpoint_y_B]) -
-                                    Real(3)/Real(10)*(F_node_y[ei][idx_node_T] +
-                                        F_node_y[ei][idx_node_B]) +
-                                    Real(23)/Real(15)*F_midpoint_y[ei][idx_midpoint_y]);
-                            }
+                                    a_midpoint_r*F_midpoint_y[ei][idx_midpoint_y] +
+                                    b_midpoint_r*(F_midpoint_y[ei][idx_midpoint_y_B] + F_midpoint_y[ei][idx_midpoint_y_T]) +
+                                    a_node_r*(F_node_y[ei][idx_node_B] + F_node_x[ei][idx_node_T])
+                                    );
+                                }
                         }
                     }
                 }
@@ -2811,11 +2692,10 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                                         subghostcell_dim_1_convective_flux_z;
                                 
                                 F_face_z[idx_face_z] = Real(dt)*(
-                                    Real(1)/Real(30)*(F_midpoint_z[ei][idx_midpoint_z_F] +
-                                        F_midpoint_z[ei][idx_midpoint_z_B]) -
-                                    Real(3)/Real(10)*(F_node_z[ei][idx_node_F] +
-                                        F_node_z[ei][idx_node_B]) +
-                                    Real(23)/Real(15)*F_midpoint_z[ei][idx_midpoint_z]);
+                                    a_midpoint_r*F_midpoint_z[ei][idx_midpoint_z] +
+                                    b_midpoint_r*(F_midpoint_z[ei][idx_midpoint_z_B] + F_midpoint_z[ei][idx_midpoint_z_F]) +
+                                    a_node_r*(F_node_z[ei][idx_node_B] + F_node_z[ei][idx_node_F])
+                                    );
                             }
                         }
                     }
@@ -2954,25 +2834,19 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                                             (k + 3)*(interior_dim_0 + 2)*
                                                 (interior_dim_1 + 2);
                                         
-                                        S[idx_cell_nghost] = Real(dt)*Q[ei][idx_cell_wghost]*(
-                                            (Real(3)/Real(2)*(u_midpoint_x[idx_midpoint_x_R] -
-                                                 u_midpoint_x[idx_midpoint_x_L]) -
-                                             Real(3)/Real(10)*(u[idx_cell_wghost_x_R] -
-                                                 u[idx_cell_wghost_x_L]) +
-                                             Real(1)/Real(30)*(u_midpoint_x[idx_midpoint_x_RR] -
-                                                 u_midpoint_x[idx_midpoint_x_LL]))/Real(dx[0]) +
-                                            (Real(3)/Real(2)*(v_midpoint_y[idx_midpoint_y_T] -
-                                                 v_midpoint_y[idx_midpoint_y_B]) -
-                                             Real(3)/Real(10)*(v[idx_cell_wghost_y_T] -
-                                                 v[idx_cell_wghost_y_B]) +
-                                             Real(1)/Real(30)*(v_midpoint_y[idx_midpoint_y_TT] -
-                                                 v_midpoint_y[idx_midpoint_y_BB]))/Real(dx[1]) +
-                                            (Real(3)/Real(2)*(w_midpoint_z[idx_midpoint_z_F] -
-                                                 w_midpoint_z[idx_midpoint_z_B]) -
-                                             Real(3)/Real(10)*(w[idx_cell_wghost_z_F] -
-                                                 w[idx_cell_wghost_z_B]) +
-                                             Real(1)/Real(30)*(w_midpoint_z[idx_midpoint_z_FF] -
-                                                 w_midpoint_z[idx_midpoint_z_BB]))/Real(dx[2]));
+                                        S[idx_cell_nghost] = Real(dt)*Q[ei][idx_cell_wghost]*((
+                                            a_midpoint*(u_midpoint_x[idx_midpoint_x_R]  - u_midpoint_x[idx_midpoint_x_L]) +
+                                            b_midpoint*(u_midpoint_x[idx_midpoint_x_RR] - u_midpoint_x[idx_midpoint_x_LL]) +
+                                            a_node*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L])
+                                            )/Real(dx[0]) + (
+                                            a_midpoint*(v_midpoint_y[idx_midpoint_y_T]  - v_midpoint_y[idx_midpoint_y_B]) +
+                                            b_midpoint*(v_midpoint_y[idx_midpoint_y_TT] - v_midpoint_y[idx_midpoint_y_BB]) +
+                                            a_node*(v[idx_cell_wghost_y_T] - v[idx_cell_wghost_y_B])
+                                            )/Real(dx[1]) + (
+                                            a_midpoint*(w_midpoint_z[idx_midpoint_z_F]  - w_midpoint_z[idx_midpoint_z_B]) +
+                                            b_midpoint*(w_midpoint_z[idx_midpoint_z_FF] - w_midpoint_z[idx_midpoint_z_BB]) +
+                                            a_node*(w[idx_cell_wghost_z_F] - w[idx_cell_wghost_z_B])
+                                            )/Real(dx[2]));
                                     }
                                 }
                             }
@@ -3005,18 +2879,6 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
     const bool use_shock_capturing,
     const bool use_interface_capturing) const
 {
-    // computeConvectiveFluxAndSourceOnPatchShockCapturingOld(
-    //     patch,
-    //     convective_flux,
-    //     source_scratch,
-    //     data_context,
-    //     domain,
-    //     dt,
-    //     use_shock_capturing,
-    //     use_interface_capturing);
-    
-    // return;
-    
     if (!use_shock_capturing && !use_interface_capturing)
     {
         return;
@@ -4157,18 +4019,6 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                     domains[0]);
             }
             
-            // for (int ei = 0; ei < d_num_eqn; ei++)
-            // {
-            //     HAMERS_PRAGMA_SIMD
-            //     for (int i = domain_lo_0 - 1; i < domain_lo_0 + domain_dim_0 + 2; i++)
-            //     {
-            //         // Compute the linear index of the side.
-            //         const int idx_midpoint_x = i + 1;
-                    
-            //         F_midpoint_x[ei][idx_midpoint_x] = F_midpoint_HLLC_x[ei][idx_midpoint_x];
-            //     }
-            // }
-            
             /*
              * Reconstruct the flux in the x-direction.
              */
@@ -4438,22 +4288,6 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                     domains[0]);
             }
             
-            // for (int ei = 0; ei < d_num_eqn; ei++)
-            // {
-            //     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-            //     {
-            //         HAMERS_PRAGMA_SIMD
-            //         for (int i = domain_lo_0 - 1; i < domain_lo_0 + domain_dim_0 + 2; i++)
-            //         {
-            //             // Compute the linear index of the side.
-            //             const int idx_midpoint_x = (i + 1) +
-            //                 (j + 1)*(interior_dim_0 + 3);
-                        
-            //             F_midpoint_x[ei][idx_midpoint_x] = F_midpoint_HLLC_x[ei][idx_midpoint_x];
-            //         }
-            //     }
-            // }
-            
             /*
              * Compute mid-point flux in the y-direction.
              */
@@ -4479,22 +4313,6 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                     RIEMANN_SOLVER::HLLC,
                     domains[1]);
             }
-            
-            // for (int ei = 0; ei < d_num_eqn; ei++)
-            // {
-            //     for (int j = domain_lo_1 - 1; j < domain_lo_1 + domain_dim_1 + 2; j++)
-            //     {
-            //         HAMERS_PRAGMA_SIMD
-            //         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-            //         {
-            //             // Compute the linear index of the side.
-            //             const int idx_midpoint_y = (i + 1) +
-            //                 (j + 1)*(interior_dim_0 + 2);
-                        
-            //             F_midpoint_y[ei][idx_midpoint_y] = F_midpoint_HLLC_y[ei][idx_midpoint_y];
-            //         }
-            //     }
-            // }
             
             /*
              * Reconstruct the flux in the x-direction.
@@ -4983,27 +4801,6 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                     RIEMANN_SOLVER::HLLC);
             }
             
-            // for (int ei = 0; ei < d_num_eqn; ei++)
-            // {
-            //     for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
-            //     {
-            //         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-            //         {
-            //             HAMERS_PRAGMA_SIMD
-            //             for (int i = domain_lo_0 - 1; i < domain_lo_0 + domain_dim_0 + 2; i++)
-            //             {
-            //                 // Compute the linear index of the side.
-            //                 const int idx_midpoint_x = (i + 1) +
-            //                     (j + 1)*(interior_dim_0 + 3) +
-            //                     (k + 1)*(interior_dim_0 + 3)*
-            //                         (interior_dim_1 + 2);
-                            
-            //                 F_midpoint_x[ei][idx_midpoint_x] = F_midpoint_HLLC_x[ei][idx_midpoint_x];
-            //             }
-            //         }
-            //     }
-            // }
-            
             /*
              * Compute mid-point flux in the y-direction.
              */
@@ -5028,27 +4825,6 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                     RIEMANN_SOLVER::HLLC);
             }
             
-            // for (int ei = 0; ei < d_num_eqn; ei++)
-            // {
-            //     for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
-            //     {
-            //         for (int j = domain_lo_1 - 1; j < domain_lo_1 + domain_dim_1 + 2; j++)
-            //         {
-            //             HAMERS_PRAGMA_SIMD
-            //             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-            //             {
-            //                 // Compute the linear index of the side.
-            //                 const int idx_midpoint_y = (i + 1) +
-            //                     (j + 1)*(interior_dim_0 + 2) +
-            //                     (k + 1)*(interior_dim_0 + 2)*
-            //                         (interior_dim_1 + 3);
-                            
-            //                 F_midpoint_y[ei][idx_midpoint_y] = F_midpoint_HLLC_y[ei][idx_midpoint_y];
-            //             }
-            //         }
-            //     }
-            // }
-            
             /*
              * Compute mid-point flux in the z-direction.
              */
@@ -5072,27 +4848,6 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                     DIRECTION::Z_DIRECTION,
                     RIEMANN_SOLVER::HLLC);
             }
-            
-            // for (int ei = 0; ei < d_num_eqn; ei++)
-            // {
-            //     for (int k = domain_lo_2 - 1; k < domain_lo_2 + domain_dim_2 + 2; k++)
-            //     {
-            //         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-            //         {
-            //             HAMERS_PRAGMA_SIMD
-            //             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-            //             {
-            //                 // Compute the linear index of the side.
-            //                 const int idx_midpoint_z = (i + 1) +
-            //                     (j + 1)*(interior_dim_0 + 2) +
-            //                     (k + 1)*(interior_dim_0 + 2)*
-            //                         (interior_dim_1 + 2);
-                            
-            //                 F_midpoint_z[ei][idx_midpoint_z] = F_midpoint_HLLC_z[ei][idx_midpoint_z];
-            //             }
-            //         }
-            //     }
-            // }
             
             /*
              * Reconstruct the flux in the x-direction.

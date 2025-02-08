@@ -179,9 +179,11 @@ class ConvectiveFluxReconstructor
         Real d_threshold_sensor_shock;
         Real d_threshold_sensor_interface;
         
-        const int d_num_ghosts_shock_interface_capturing;
+        int d_num_ghosts_shock_interface_capturing;
         
         WENO_INTERP::TYPE d_weno_interp;
+        
+        bool d_use_MND_finite_differencing;
         
 };
 
