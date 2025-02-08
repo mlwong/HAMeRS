@@ -496,16 +496,16 @@ ConvectiveFluxReconstructor::ConvectiveFluxReconstructor(
     d_threshold_sensor_interface = d_convective_flux_reconstructor_db->getRealWithDefault("d_threshold_sensor_interface", d_threshold_sensor_interface);
     
     
-    std::string weno_interp_str = "WENO5Z";
+    std::string weno_interp_str = "WENO_5Z";
     
     weno_interp_str = d_convective_flux_reconstructor_db->getStringWithDefault("weno_interp", weno_interp_str);
     weno_interp_str = d_convective_flux_reconstructor_db->getStringWithDefault("d_weno_interp", weno_interp_str);
     
-    if (weno_interp_str == "WENO5Z")
+    if (weno_interp_str == "WENO_5Z")
     {
         d_weno_interp = WENO_INTERP::WENO5Z;
     }
-    else if (weno_interp_str == "WENO6LD")
+    else if (weno_interp_str == "WENO6_LD")
     {
         d_weno_interp = WENO_INTERP::WENO6LD;
     }
@@ -521,13 +521,13 @@ ConvectiveFluxReconstructor::ConvectiveFluxReconstructor(
     d_shock_capturing_use_small_stencil_finite_differencing = d_convective_flux_reconstructor_db->getBoolWithDefault(
         "d_shock_capturing_use_small_stencil_finite_differencing", d_shock_capturing_use_small_stencil_finite_differencing);
     
-    if (!d_shock_capturing_use_small_stencil_finite_differencing)
+    if (d_shock_capturing_use_small_stencil_finite_differencing)
     {
-        d_num_ghosts_shock_interface_capturing = 4;
+        d_num_ghosts_shock_interface_capturing = 3;
     }
     else
     {
-        d_num_ghosts_shock_interface_capturing = 3;
+        d_num_ghosts_shock_interface_capturing = 4;
     }
     
     d_eqn_form = d_flow_model->getEquationsForm();
