@@ -43,7 +43,7 @@ static inline __attribute__((always_inline)) void computeLocalSigma(
 /*
  * Compute local beta's.
  */
-static inline __attribute__((always_inline)) void computeLocalBetaOld(
+static inline __attribute__((always_inline)) void computeLocalBeta6(
     Real& beta_0,
     Real& beta_1,
     Real& beta_2,
@@ -86,7 +86,7 @@ static inline __attribute__((always_inline)) void computeLocalBetaOld(
 /*
  * Compute local beta_tilde's.
  */
-static inline __attribute__((always_inline)) void computeLocalBetaTildeOld(
+static inline __attribute__((always_inline)) void computeLocalBetaTilde6(
     Real& beta_tilde_0,
     Real& beta_tilde_1,
     Real& beta_tilde_2,
@@ -129,7 +129,7 @@ static inline __attribute__((always_inline)) void computeLocalBetaTildeOld(
 /*
  * Perform local WENO interpolation of U_minus.
  */
-static inline __attribute__((always_inline)) void performLocalWENOInterpolationMinusOld(
+static inline __attribute__((always_inline)) void performLocalWENOInterpolationMinusLD(
     Real* U_minus,
     Real** U_array,
     const int& idx_side,
@@ -152,7 +152,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
     
     Real beta_0, beta_1, beta_2, beta_3;
     
-    computeLocalBetaOld(beta_0, beta_1, beta_2, beta_3, U_array, idx_side);
+    computeLocalBeta6(beta_0, beta_1, beta_2, beta_3, U_array, idx_side);
     
     /*
      * Compute the weights omega_upwind.
@@ -225,7 +225,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
 /*
  * Perform local WENO interpolation of U_plus.
  */
-static inline __attribute__((always_inline)) void performLocalWENOInterpolationPlusOld(
+static inline __attribute__((always_inline)) void performLocalWENOInterpolationPlusLD(
     Real* U_plus,
     Real** U_array,
     const int& idx_side,
@@ -248,7 +248,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationP
     
     Real beta_tilde_0, beta_tilde_1, beta_tilde_2, beta_tilde_3;
     
-    computeLocalBetaTildeOld(beta_tilde_0, beta_tilde_1, beta_tilde_2, beta_tilde_3, U_array, idx_side);
+    computeLocalBetaTilde6(beta_tilde_0, beta_tilde_1, beta_tilde_2, beta_tilde_3, U_array, idx_side);
     
     /*
      * Compute the weights omega_upwind_tilde.
@@ -321,7 +321,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationP
 /*
  * Compute local beta's.
  */
-static inline __attribute__((always_inline)) void computeLocalBeta(
+static inline __attribute__((always_inline)) void computeLocalBeta5(
     Real& beta_0,
     Real& beta_1,
     Real& beta_2,
@@ -348,7 +348,7 @@ static inline __attribute__((always_inline)) void computeLocalBeta(
 /*
  * Compute local beta_tilde's.
  */
-static inline __attribute__((always_inline)) void computeLocalBetaTilde(
+static inline __attribute__((always_inline)) void computeLocalBetaTilde5(
     Real& beta_tilde_0,
     Real& beta_tilde_1,
     Real& beta_tilde_2,
@@ -375,7 +375,7 @@ static inline __attribute__((always_inline)) void computeLocalBetaTilde(
 /*
  * Perform local WENO interpolation of U_minus.
  */
-static inline __attribute__((always_inline)) void performLocalWENOInterpolationMinus(
+static inline __attribute__((always_inline)) void performLocalWENOInterpolationMinusZ(
     Real* U_minus,
     Real** U_array,
     const int& idx_side,
@@ -387,7 +387,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
     
     Real beta_0, beta_1, beta_2;
     
-    computeLocalBeta(beta_0, beta_1, beta_2, U_array, idx_side);
+    computeLocalBeta5(beta_0, beta_1, beta_2, U_array, idx_side);
     
     /*
      * Compute the weights omega.
@@ -423,7 +423,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
 /*
  * Perform local WENO interpolation of U_plus.
  */
-static inline __attribute__((always_inline)) void performLocalWENOInterpolationPlus(
+static inline __attribute__((always_inline)) void performLocalWENOInterpolationPlusZ(
     Real* U_plus,
     Real** U_array,
     const int& idx_side,
@@ -435,7 +435,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationP
     
     Real beta_tilde_0, beta_tilde_1, beta_tilde_2;
     
-    computeLocalBetaTilde(beta_tilde_0, beta_tilde_1, beta_tilde_2, U_array, idx_side);
+    computeLocalBetaTilde5(beta_tilde_0, beta_tilde_1, beta_tilde_2, U_array, idx_side);
     
     /*
      * Compute the weights omega_upwind_tilde.
@@ -496,6 +496,27 @@ ConvectiveFluxReconstructor::ConvectiveFluxReconstructor(
     d_threshold_sensor_interface = d_convective_flux_reconstructor_db->getRealWithDefault("threshold_sensor_interface", d_threshold_sensor_interface);
     d_threshold_sensor_interface = d_convective_flux_reconstructor_db->getRealWithDefault("d_threshold_sensor_interface", d_threshold_sensor_interface);
     
+    
+    std::string weno_interp_str = "WENO5Z";
+    
+    weno_interp_str = d_convective_flux_reconstructor_db->getStringWithDefault("weno_interp", weno_interp_str);
+    weno_interp_str = d_convective_flux_reconstructor_db->getStringWithDefault("d_weno_interp", weno_interp_str);
+    
+    if (weno_interp_str == "WENO5Z")
+    {
+        d_weno_interp = WENO_INTERP::WENO5Z;
+    }
+    else if (weno_interp_str == "WENO6LD")
+    {
+        d_weno_interp = WENO_INTERP::WENO6LD;
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name << ": "
+            << "Unknown WENO interpolation method specified in input database"
+            << std::endl);
+    }
+    
     d_eqn_form = d_flow_model->getEquationsForm();
     d_has_advective_eqn_form = false;
     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -517,6 +538,13 @@ ConvectiveFluxReconstructor::putToRestartBase(
 {
     restart_db->putReal("d_threshold_sensor_shock", d_threshold_sensor_shock);
     restart_db->putReal("d_threshold_sensor_interface", d_threshold_sensor_interface);
+    
+    if (d_weno_interp == WENO_INTERP::WENO5Z) {
+        restart_db->putString("d_weno_interp", "WENO5Z");
+    }
+    else if (d_weno_interp == WENO_INTERP::WENO6LD) {
+        restart_db->putString("d_weno_interp", "WENO6LD");
+    }
 }
 
 
@@ -5573,25 +5601,43 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
             
             Real* U_L = variables_minus[ei]->getPointer(0);
             
-            HAMERS_PRAGMA_SIMD
-            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+            switch(d_weno_interp)
             {
-                // Compute the linear index of the mid-point.
-                const int idx_midpoint_x = i + num_ghosts_0;
-                
-                performLocalWENOInterpolationMinus(
-                    U_L,
-                    U_array.data(),
-                    idx_midpoint_x,
-                    constant_p);
-                // performLocalWENOInterpolationMinus(
-                //     U_L,
-                //     U_array.data(),
-                //     idx_midpoint_x,
-                //     constant_p,
-                //     constant_q,
-                //     constant_C,
-                //     constant_alpha_tau);
+                case WENO_INTERP::TYPE::WENO5Z:
+                {
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+                    {
+                        // Compute the linear index of the mid-point.
+                        const int idx_midpoint_x = i + num_ghosts_0;
+                        
+                        performLocalWENOInterpolationMinusZ(
+                            U_L,
+                            U_array.data(),
+                            idx_midpoint_x,
+                            constant_p);
+                    }
+                    break;
+                }
+                case WENO_INTERP::TYPE::WENO6LD:
+                {
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+                    {
+                        // Compute the linear index of the mid-point.
+                        const int idx_midpoint_x = i + num_ghosts_0;
+                        
+                        performLocalWENOInterpolationMinusLD(
+                            U_L,
+                            U_array.data(),
+                            idx_midpoint_x,
+                            constant_p,
+                            constant_q,
+                            constant_C,
+                            constant_alpha_tau);
+                    }
+                    break;
+                }
             }
         }
         
@@ -5607,28 +5653,45 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
             
             Real* U_R = variables_plus[ei]->getPointer(0);
             
-            HAMERS_PRAGMA_SIMD
-            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+            switch(d_weno_interp)
             {
-                // Compute the linear index of the mid-point.
-                const int idx_midpoint_x = i + num_ghosts_0;
-                
-                performLocalWENOInterpolationPlus(
-                    U_R,
-                    U_array.data(),
-                    idx_midpoint_x,
-                    constant_p);
-                // performLocalWENOInterpolationPlus(
-                //     U_R,
-                //     U_array.data(),
-                //     idx_midpoint_x,
-                //     constant_p,
-                //     constant_q,
-                //     constant_C,
-                //     constant_alpha_tau);
+                case WENO_INTERP::TYPE::WENO5Z:
+                {
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+                    {
+                        // Compute the linear index of the mid-point.
+                        const int idx_midpoint_x = i + num_ghosts_0;
+                        
+                        performLocalWENOInterpolationPlusZ(
+                            U_R,
+                            U_array.data(),
+                            idx_midpoint_x,
+                            constant_p);
+                    }
+                    break;
+                }
+                case WENO_INTERP::TYPE::WENO6LD:
+                {
+                    HAMERS_PRAGMA_SIMD
+                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+                    {
+                        // Compute the linear index of the mid-point.
+                        const int idx_midpoint_x = i + num_ghosts_0;
+                        
+                        performLocalWENOInterpolationPlusLD(
+                            U_R,
+                            U_array.data(),
+                            idx_midpoint_x,
+                            constant_p,
+                            constant_q,
+                            constant_C,
+                            constant_alpha_tau);
+                    }
+                    break;
+                }
             }
         }
-        
     } // if (d_dim == tbox::Dimension(1))
     else if (d_dim == tbox::Dimension(2))
     {
@@ -5666,28 +5729,50 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
             
             Real* U_L = variables_minus[ei]->getPointer(0);
             
-            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
+            switch(d_weno_interp)
             {
-                HAMERS_PRAGMA_SIMD
-                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+                case WENO_INTERP::TYPE::WENO5Z:
                 {
-                    // Compute the linear index of the mid-point.
-                    const int idx_midpoint_x = (i + num_ghosts_0) +
-                        (j + num_ghosts_1)*(ghostcell_dim_0 + 1);
-                    
-                    performLocalWENOInterpolationMinus(
-                        U_L,
-                        U_array.data(),
-                        idx_midpoint_x,
-                        constant_p);
-                    // performLocalWENOInterpolationMinus(
-                    //     U_L,
-                    //     U_array.data(),
-                    //     idx_midpoint_x,
-                    //     constant_p,
-                    //     constant_q,
-                    //     constant_C,
-                    //     constant_alpha_tau);
+                    for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+                        {
+                            // Compute the linear index of the mid-point.
+                            const int idx_midpoint_x = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*(ghostcell_dim_0 + 1);
+                            
+                            performLocalWENOInterpolationMinusZ(
+                                U_L,
+                                U_array.data(),
+                                idx_midpoint_x,
+                                constant_p);
+                        }
+                    }
+                    break;
+                }
+                case WENO_INTERP::TYPE::WENO6LD:
+                {
+                    for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+                        {
+                            // Compute the linear index of the mid-point.
+                            const int idx_midpoint_x = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*(ghostcell_dim_0 + 1);
+                            
+                            performLocalWENOInterpolationMinusLD(
+                                U_L,
+                                U_array.data(),
+                                idx_midpoint_x,
+                                constant_p,
+                                constant_q,
+                                constant_C,
+                                constant_alpha_tau);
+                        }
+                    }
+                    break;
                 }
             }
         }
@@ -5704,28 +5789,50 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
             
             Real* U_R = variables_plus[ei]->getPointer(0);
             
-            for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
+            switch(d_weno_interp)
             {
-                HAMERS_PRAGMA_SIMD
-                for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+                case WENO_INTERP::TYPE::WENO5Z:
                 {
-                    // Compute the linear index of the mid-point.
-                    const int idx_midpoint_x = (i + num_ghosts_0) +
-                        (j + num_ghosts_1)*(ghostcell_dim_0 + 1);
-                    
-                    performLocalWENOInterpolationPlus(
-                        U_R,
-                        U_array.data(),
-                        idx_midpoint_x,
-                        constant_p);
-                    // performLocalWENOInterpolationPlus(
-                    //     U_R,
-                    //     U_array.data(),
-                    //     idx_midpoint_x,
-                    //     constant_p,
-                    //     constant_q,
-                    //     constant_C,
-                    //     constant_alpha_tau);
+                    for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+                        {
+                            // Compute the linear index of the mid-point.
+                            const int idx_midpoint_x = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*(ghostcell_dim_0 + 1);
+                            
+                            performLocalWENOInterpolationPlusZ(
+                                U_R,
+                                U_array.data(),
+                                idx_midpoint_x,
+                                constant_p);
+                        }
+                    }
+                    break;
+                }
+                case WENO_INTERP::TYPE::WENO6LD:
+                {
+                    for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+                        {
+                            // Compute the linear index of the mid-point.
+                            const int idx_midpoint_x = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*(ghostcell_dim_0 + 1);
+                            
+                            performLocalWENOInterpolationPlusLD(
+                                U_R,
+                                U_array.data(),
+                                idx_midpoint_x,
+                                constant_p,
+                                constant_q,
+                                constant_C,
+                                constant_alpha_tau);
+                        }
+                    }
+                    break;
                 }
             }
         }
@@ -5746,28 +5853,50 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
             
             Real* U_B = variables_minus[ei]->getPointer(1);
             
-            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
+            switch(d_weno_interp)
             {
-                HAMERS_PRAGMA_SIMD
-                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
+                case WENO_INTERP::TYPE::WENO5Z:
                 {
-                    // Compute the linear index of the mid-point.
-                    const int idx_midpoint_y = (i + num_ghosts_0) +
-                        (j + num_ghosts_1)*ghostcell_dim_0;
-                    
-                    performLocalWENOInterpolationMinus(
-                        U_B,
-                        U_array.data(),
-                        idx_midpoint_y,
-                        constant_p);
-                    // performLocalWENOInterpolationMinus(
-                    //     U_B,
-                    //     U_array.data(),
-                    //     idx_midpoint_y,
-                    //     constant_p,
-                    //     constant_q,
-                    //     constant_C,
-                    //     constant_alpha_tau);
+                    for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
+                        {
+                            // Compute the linear index of the mid-point.
+                            const int idx_midpoint_y = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0;
+                            
+                            performLocalWENOInterpolationMinusZ(
+                                U_B,
+                                U_array.data(),
+                                idx_midpoint_y,
+                                constant_p);
+                        }
+                    }
+                    break;
+                }
+                case WENO_INTERP::TYPE::WENO6LD:
+                {
+                    for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
+                        {
+                            // Compute the linear index of the mid-point.
+                            const int idx_midpoint_y = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0;
+                            
+                            performLocalWENOInterpolationMinusLD(
+                                U_B,
+                                U_array.data(),
+                                idx_midpoint_y,
+                                constant_p,
+                                constant_q,
+                                constant_C,
+                                constant_alpha_tau);
+                        }
+                    }
+                    break;
                 }
             }
         }
@@ -5784,32 +5913,53 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
             
             Real* U_T = variables_plus[ei]->getPointer(1);
             
-            for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
+            switch(d_weno_interp)
             {
-                HAMERS_PRAGMA_SIMD
-                for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
+                case WENO_INTERP::TYPE::WENO5Z:
                 {
-                    // Compute the linear index of the mid-point.
-                    const int idx_midpoint_y = (i + num_ghosts_0) +
-                        (j + num_ghosts_1)*ghostcell_dim_0;
-                    
-                    performLocalWENOInterpolationPlus(
-                        U_T,
-                        U_array.data(),
-                        idx_midpoint_y,
-                        constant_p);
-                    // performLocalWENOInterpolationPlus(
-                    //     U_T,
-                    //     U_array.data(),
-                    //     idx_midpoint_y,
-                    //     constant_p,
-                    //     constant_q,
-                    //     constant_C,
-                    //     constant_alpha_tau);
+                    for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
+                        {
+                            // Compute the linear index of the mid-point.
+                            const int idx_midpoint_y = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0;
+                            
+                            performLocalWENOInterpolationPlusZ(
+                                U_T,
+                                U_array.data(),
+                                idx_midpoint_y,
+                                constant_p);
+                        }
+                    }
+                    break;
+                }
+                case WENO_INTERP::TYPE::WENO6LD:
+                {
+                    for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
+                    {
+                        HAMERS_PRAGMA_SIMD
+                        for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
+                        {
+                            // Compute the linear index of the mid-point.
+                            const int idx_midpoint_y = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0;
+                            
+                            performLocalWENOInterpolationPlusLD(
+                                U_T,
+                                U_array.data(),
+                                idx_midpoint_y,
+                                constant_p,
+                                constant_q,
+                                constant_C,
+                                constant_alpha_tau);
+                        }
+                    }
+                    break;
                 }
             }
         }
-        
     } // if (d_dim == tbox::Dimension(2))
     else if (d_dim == tbox::Dimension(3))
     {
@@ -5860,33 +6010,60 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
             
             Real* U_L = variables_minus[ei]->getPointer(0);
             
-            for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
+            switch(d_weno_interp)
             {
-                for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
+                case WENO_INTERP::TYPE::WENO5Z:
                 {
-                    HAMERS_PRAGMA_SIMD
-                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+                    for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
                     {
-                        // Compute the linear index of the mid-point.
-                        const int idx_midpoint_x = (i + num_ghosts_0) +
-                            (j + num_ghosts_1)*(ghostcell_dim_0 + 1) +
-                            (k + num_ghosts_2)*(ghostcell_dim_0 + 1)*
-                                ghostcell_dim_1;
-                        
-                        performLocalWENOInterpolationMinus(
-                            U_L,
-                            U_array.data(),
-                            idx_midpoint_x,
-                            constant_p);
-                        // performLocalWENOInterpolationMinus(
-                        //     U_L,
-                        //     U_array.data(),
-                        //     idx_midpoint_x,
-                        //     constant_p,
-                        //     constant_q,
-                        //     constant_C,
-                        //     constant_alpha_tau);
+                        for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+                            {
+                                // Compute the linear index of the mid-point.
+                                const int idx_midpoint_x = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*(ghostcell_dim_0 + 1) +
+                                    (k + num_ghosts_2)*(ghostcell_dim_0 + 1)*
+                                        ghostcell_dim_1;
+                                
+                                performLocalWENOInterpolationMinusZ(
+                                    U_L,
+                                    U_array.data(),
+                                    idx_midpoint_x,
+                                    constant_p);
+                            }
+                        }
                     }
+                    break;
+                }
+                case WENO_INTERP::TYPE::WENO6LD:
+                {
+                    for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
+                    {
+                        for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+                            {
+                                // Compute the linear index of the mid-point.
+                                const int idx_midpoint_x = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*(ghostcell_dim_0 + 1) +
+                                    (k + num_ghosts_2)*(ghostcell_dim_0 + 1)*
+                                        ghostcell_dim_1;
+                                
+                                performLocalWENOInterpolationMinusLD(
+                                    U_L,
+                                    U_array.data(),
+                                    idx_midpoint_x,
+                                    constant_p,
+                                    constant_q,
+                                    constant_C,
+                                    constant_alpha_tau);
+                            }
+                        }
+                    }
+                    break;
                 }
             }
         }
@@ -5903,33 +6080,60 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
             
             Real* U_R = variables_plus[ei]->getPointer(0);
             
-            for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
+            switch(d_weno_interp)
             {
-                for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
+                case WENO_INTERP::TYPE::WENO5Z:
                 {
-                    HAMERS_PRAGMA_SIMD
-                    for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+                    for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
                     {
-                        // Compute the linear index of the mid-point.
-                        const int idx_midpoint_x = (i + num_ghosts_0) +
-                            (j + num_ghosts_1)*(ghostcell_dim_0 + 1) +
-                            (k + num_ghosts_2)*(ghostcell_dim_0 + 1)*
-                                ghostcell_dim_1;
-                        
-                        performLocalWENOInterpolationPlus(
-                            U_R,
-                            U_array.data(),
-                            idx_midpoint_x,
-                            constant_p);
-                        // performLocalWENOInterpolationPlus(
-                        //     U_R,
-                        //     U_array.data(),
-                        //     idx_midpoint_x,
-                        //     constant_p,
-                        //     constant_q,
-                        //     constant_C,
-                        //     constant_alpha_tau);
+                        for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+                            {
+                                // Compute the linear index of the mid-point.
+                                const int idx_midpoint_x = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*(ghostcell_dim_0 + 1) +
+                                    (k + num_ghosts_2)*(ghostcell_dim_0 + 1)*
+                                        ghostcell_dim_1;
+                                
+                                performLocalWENOInterpolationPlusZ(
+                                    U_R,
+                                    U_array.data(),
+                                    idx_midpoint_x,
+                                    constant_p);
+                            }
+                        }
                     }
+                    break;
+                }
+                case WENO_INTERP::TYPE::WENO6LD:
+                {
+                    for (int k = domain_x_lo_2; k < domain_x_lo_2 + domain_x_dim_2; k++)
+                    {
+                        for (int j = domain_x_lo_1; j < domain_x_lo_1 + domain_x_dim_1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = domain_x_lo_0; i < domain_x_lo_0 + domain_x_dim_0 + 1; i++)
+                            {
+                                // Compute the linear index of the mid-point.
+                                const int idx_midpoint_x = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*(ghostcell_dim_0 + 1) +
+                                    (k + num_ghosts_2)*(ghostcell_dim_0 + 1)*
+                                        ghostcell_dim_1;
+                                
+                                performLocalWENOInterpolationPlusLD(
+                                    U_R,
+                                    U_array.data(),
+                                    idx_midpoint_x,
+                                    constant_p,
+                                    constant_q,
+                                    constant_C,
+                                    constant_alpha_tau);
+                            }
+                        }
+                    }
+                    break;
                 }
             }
         }
@@ -5950,33 +6154,60 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
             
             Real* U_B = variables_minus[ei]->getPointer(1);
             
-            for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
+            switch(d_weno_interp)
             {
-                for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
+                case WENO_INTERP::TYPE::WENO5Z:
                 {
-                    HAMERS_PRAGMA_SIMD
-                    for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
+                    for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
                     {
-                        // Compute the linear index of the mid-point.
-                        const int idx_midpoint_y = (i + num_ghosts_0) +
-                            (j + num_ghosts_1)*ghostcell_dim_0 +
-                            (k + num_ghosts_2)*ghostcell_dim_0*
-                                (ghostcell_dim_1 + 1);
-                        
-                        performLocalWENOInterpolationMinus(
-                            U_B,
-                            U_array.data(),
-                            idx_midpoint_y,
-                            constant_p);
-                        // performLocalWENOInterpolationMinus(
-                        //     U_B,
-                        //     U_array.data(),
-                        //     idx_midpoint_y,
-                        //     constant_p,
-                        //     constant_q,
-                        //     constant_C,
-                        //     constant_alpha_tau);
+                        for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
+                            {
+                                // Compute the linear index of the mid-point.
+                                const int idx_midpoint_y = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*
+                                        (ghostcell_dim_1 + 1);
+                                
+                                performLocalWENOInterpolationMinusZ(
+                                    U_B,
+                                    U_array.data(),
+                                    idx_midpoint_y,
+                                    constant_p);
+                            }
+                        }
                     }
+                    break;
+                }
+                case WENO_INTERP::TYPE::WENO6LD:
+                {
+                    for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
+                    {
+                        for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
+                            {
+                                // Compute the linear index of the mid-point.
+                                const int idx_midpoint_y = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*
+                                        (ghostcell_dim_1 + 1);
+                                
+                                performLocalWENOInterpolationMinusLD(
+                                    U_B,
+                                    U_array.data(),
+                                    idx_midpoint_y,
+                                    constant_p,
+                                    constant_q,
+                                    constant_C,
+                                    constant_alpha_tau);
+                            }
+                        }
+                    }
+                    break;
                 }
             }
         }
@@ -5993,33 +6224,60 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
             
             Real* U_T = variables_plus[ei]->getPointer(1);
             
-            for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
+            switch(d_weno_interp)
             {
-                for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
+                case WENO_INTERP::TYPE::WENO5Z:
                 {
-                    HAMERS_PRAGMA_SIMD
-                    for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
+                    for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
                     {
-                        // Compute the linear index of the mid-point.
-                        const int idx_midpoint_y = (i + num_ghosts_0) +
-                            (j + num_ghosts_1)*ghostcell_dim_0 +
-                            (k + num_ghosts_2)*ghostcell_dim_0*
-                                (ghostcell_dim_1 + 1);
-                        
-                        performLocalWENOInterpolationPlus(
-                            U_T,
-                            U_array.data(),
-                            idx_midpoint_y,
-                            constant_p);
-                        // performLocalWENOInterpolationPlus(
-                        //     U_T,
-                        //     U_array.data(),
-                        //     idx_midpoint_y,
-                        //     constant_p,
-                        //     constant_q,
-                        //     constant_C,
-                        //     constant_alpha_tau);
+                        for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
+                            {
+                                // Compute the linear index of the mid-point.
+                                const int idx_midpoint_y = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*
+                                        (ghostcell_dim_1 + 1);
+                                
+                                performLocalWENOInterpolationPlusZ(
+                                    U_T,
+                                    U_array.data(),
+                                    idx_midpoint_y,
+                                    constant_p);
+                            }
+                        }
                     }
+                    break;
+                }
+                case WENO_INTERP::TYPE::WENO6LD:
+                {
+                    for (int k = domain_y_lo_2; k < domain_y_lo_2 + domain_y_dim_2; k++)
+                    {
+                        for (int j = domain_y_lo_1; j < domain_y_lo_1 + domain_y_dim_1 + 1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = domain_y_lo_0; i < domain_y_lo_0 + domain_y_dim_0; i++)
+                            {
+                                // Compute the linear index of the mid-point.
+                                const int idx_midpoint_y = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*
+                                        (ghostcell_dim_1 + 1);
+                                
+                                performLocalWENOInterpolationPlusLD(
+                                    U_T,
+                                    U_array.data(),
+                                    idx_midpoint_y,
+                                    constant_p,
+                                    constant_q,
+                                    constant_C,
+                                    constant_alpha_tau);
+                            }
+                        }
+                    }
+                    break;
                 }
             }
         }
@@ -6040,33 +6298,60 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
             
             Real* U_B = variables_minus[ei]->getPointer(2);
             
-            for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
+            switch(d_weno_interp)
             {
-                for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
+                case WENO_INTERP::TYPE::WENO5Z:
                 {
-                    HAMERS_PRAGMA_SIMD
-                    for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
+                    for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
                     {
-                        // Compute the linear index of the mid-point.
-                        const int idx_midpoint_z = (i + num_ghosts_0) +
-                            (j + num_ghosts_1)*ghostcell_dim_0 +
-                            (k + num_ghosts_2)*ghostcell_dim_0*
-                                ghostcell_dim_1;
-                        
-                        performLocalWENOInterpolationMinus(
-                            U_B,
-                            U_array.data(),
-                            idx_midpoint_z,
-                            constant_p);
-                        // performLocalWENOInterpolationMinus(
-                        //     U_B,
-                        //     U_array.data(),
-                        //     idx_midpoint_z,
-                        //     constant_p,
-                        //     constant_q,
-                        //     constant_C,
-                        //     constant_alpha_tau);
+                        for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
+                            {
+                                // Compute the linear index of the mid-point.
+                                const int idx_midpoint_z = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*
+                                        ghostcell_dim_1;
+                                
+                                performLocalWENOInterpolationMinusZ(
+                                    U_B,
+                                    U_array.data(),
+                                    idx_midpoint_z,
+                                    constant_p);
+                            }
+                        }
                     }
+                    break;
+                }
+                case WENO_INTERP::TYPE::WENO6LD:
+                {
+                    for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
+                    {
+                        for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
+                            {
+                                // Compute the linear index of the mid-point.
+                                const int idx_midpoint_z = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*
+                                        ghostcell_dim_1;
+                                
+                                performLocalWENOInterpolationMinusLD(
+                                    U_B,
+                                    U_array.data(),
+                                    idx_midpoint_z,
+                                    constant_p,
+                                    constant_q,
+                                    constant_C,
+                                    constant_alpha_tau);
+                            }
+                        }
+                    }
+                    break;
                 }
             }
         }
@@ -6083,33 +6368,60 @@ ConvectiveFluxReconstructor::performWENOInterpolation(
             
             Real* U_F = variables_plus[ei]->getPointer(2);
             
-            for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
+            switch(d_weno_interp)
             {
-                for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
+                case WENO_INTERP::TYPE::WENO5Z:
                 {
-                    HAMERS_PRAGMA_SIMD
-                    for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
+                    for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
                     {
-                        // Compute the linear index of the mid-point.
-                        const int idx_midpoint_z = (i + num_ghosts_0) +
-                            (j + num_ghosts_1)*ghostcell_dim_0 +
-                            (k + num_ghosts_2)*ghostcell_dim_0*
-                                ghostcell_dim_1;
-                        
-                        performLocalWENOInterpolationPlus(
-                            U_F,
-                            U_array.data(),
-                            idx_midpoint_z,
-                            constant_p);
-                        // performLocalWENOInterpolationPlus(
-                        //     U_F,
-                        //     U_array.data(),
-                        //     idx_midpoint_z,
-                        //     constant_p,
-                        //     constant_q,
-                        //     constant_C,
-                        //     constant_alpha_tau);
+                        for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
+                            {
+                                // Compute the linear index of the mid-point.
+                                const int idx_midpoint_z = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*
+                                        ghostcell_dim_1;
+                                
+                                performLocalWENOInterpolationPlusZ(
+                                    U_F,
+                                    U_array.data(),
+                                    idx_midpoint_z,
+                                    constant_p);
+                            }
+                        }
                     }
+                    break;
+                }
+                case WENO_INTERP::TYPE::WENO6LD:
+                {
+                    for (int k = domain_z_lo_2; k < domain_z_lo_2 + domain_z_dim_2 + 1; k++)
+                    {
+                        for (int j = domain_z_lo_1; j < domain_z_lo_1 + domain_z_dim_1; j++)
+                        {
+                            HAMERS_PRAGMA_SIMD
+                            for (int i = domain_z_lo_0; i < domain_z_lo_0 + domain_z_dim_0; i++)
+                            {
+                                // Compute the linear index of the mid-point.
+                                const int idx_midpoint_z = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*
+                                        ghostcell_dim_1;
+                                
+                                performLocalWENOInterpolationPlusLD(
+                                    U_F,
+                                    U_array.data(),
+                                    idx_midpoint_z,
+                                    constant_p,
+                                    constant_q,
+                                    constant_C,
+                                    constant_alpha_tau);
+                            }
+                        }
+                    }
+                    break;
                 }
             }
         }

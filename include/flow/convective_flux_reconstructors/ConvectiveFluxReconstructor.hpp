@@ -21,6 +21,12 @@
 
 using namespace SAMRAI;
 
+namespace WENO_INTERP
+{
+    enum TYPE { WENO5Z,
+                WENO6LD };
+}
+
 class ConvectiveFluxReconstructor
 {
     public:
@@ -174,6 +180,8 @@ class ConvectiveFluxReconstructor
         Real d_threshold_sensor_interface;
         
         const int d_num_ghosts_shock_interface_capturing;
+        
+        WENO_INTERP::TYPE d_weno_interp;
         
 };
 
