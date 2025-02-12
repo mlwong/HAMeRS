@@ -67,19 +67,21 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
      * These will be read from the input file.
      */
     
-    Real radius_c = half; //double(20); AFK 
-    Real x_c = Real(1); //half;  AFK
-    Real y_c = Real(1); //half;  AFK
+    Real radius_c = half;
+    Real x_c = Real(1);
+    Real y_c = Real(1);
 
     if (d_initial_conditions_db != nullptr)
-            {
-                TBOX_ASSERT(d_initial_conditions_db->keyExists("x_c"));
-                TBOX_ASSERT(d_initial_conditions_db->keyExists("y_c"));
-                x_c     = d_initial_conditions_db->getReal("x_c");
-                y_c     = d_initial_conditions_db->getReal("y_c");
-                radius_c = d_initial_conditions_db->getReal("radius");
-            }
-
+    {
+        TBOX_ASSERT(d_initial_conditions_db->keyExists("x_c"));
+        TBOX_ASSERT(d_initial_conditions_db->keyExists("y_c"));
+        
+        x_c = d_initial_conditions_db->getReal("x_c");
+        y_c = d_initial_conditions_db->getReal("y_c");
+        
+        radius_c = d_initial_conditions_db->getReal("radius");
+    }
+    
     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
     {
         HAMERS_PRAGMA_SIMD
@@ -104,6 +106,7 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                 double x_p = double(0); // x coordinates on the cylinder where y = x[1].
                 double y_p = double(0); // y coordinates on the cylinder where x = x[0].
                 
+                // For checking ghost cell for convective flux.
                 if (x[0] > x_c)
                 {
                     x_p = x_c + sqrt(pow(radius_c, 2) - pow(radius*sin(theta), 2));
@@ -122,45 +125,35 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                     y_p = y_c - sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));
                 }
                 
-	        double x_d[2];
+                // For checking ghost cell for viscous flux.
+                // Check first diagonal ghost cell.
+                double x_d[2];
                 x_d[0] = patch_xlo[0] + (double(i+1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
                 x_d[1] = patch_xlo[1] + (double(j+1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-
-                // Distance from the cylinder center.
                 double radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+                bool is_corner_ghost = radius_d > radius_c;
                 
-		bool is_ghost = radius_d > radius_c;
-
+                // Check second diagonal ghost cell.
                 x_d[0] = patch_xlo[0] + (double(i-1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
                 x_d[1] = patch_xlo[1] + (double(j+1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-
-                // Distance from the cylinder center.
                 radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
-
-                is_ghost |= radius_d > radius_c;
-
-		x_d[0] = patch_xlo[0] + (double(i-1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
+                is_corner_ghost |= radius_d > radius_c;
+                
+                // Check third diagonal ghost cell.
+                x_d[0] = patch_xlo[0] + (double(i-1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
                 x_d[1] = patch_xlo[1] + (double(j-1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-
-                // Distance from the cylinder center.
                 radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
-
-                is_ghost |= radius_d > radius_c;
-
-		x_d[0] = patch_xlo[0] + (double(i+1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
+                is_corner_ghost |= radius_d > radius_c;
+                
+                // Check fourth diagonal ghost cell.
+                x_d[0] = patch_xlo[0] + (double(i+1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
                 x_d[1] = patch_xlo[1] + (double(j-1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-
-                // Distance from the cylinder center.
                 radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
-
-                is_ghost |= radius_d > radius_c;
-
-		//
-
+                is_corner_ghost |= radius_d > radius_c;
+                
                 if ((fabs(x_p - x[0]) < (double(d_num_immersed_boundary_ghosts[0]))*dx[0]) ||
                     (fabs(y_p - x[1]) < (double(d_num_immersed_boundary_ghosts[1]))*dx[1]) ||
-		    is_ghost
-		    )
+                    is_corner_ghost)
                 {
                     mask[idx]   = int(IB_MASK::IB_GHOST);
                     dist[idx]   = radius_c - radius;
