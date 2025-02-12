@@ -132,8 +132,6 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 D       = d_initial_conditions_db->getReal("D");
                 spongeL = d_initial_conditions_db->getReal("spongeL");
                 spongeR = d_initial_conditions_db->getReal("spongeR");
-                spongeB = d_initial_conditions_db->getReal("spongeB");
-                spongeT = d_initial_conditions_db->getReal("spongeT");
                 spongeB = d_initial_conditions_db->getReal("spongeB"); 
                 spongeT = d_initial_conditions_db->getReal("spongeT"); 
             }
