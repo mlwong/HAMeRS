@@ -136,6 +136,66 @@ class FlowModelImmersedBoundaryMethod
         
     protected:
         /*
+         * Get the indices for the 2D bilinear interpolation.
+         */
+        static inline __attribute__((always_inline)) void getBilinearInterpolationIndices2D(
+            int& idx_BL,
+            int& idx_BR,
+            int& idx_TL,
+            int& idx_TR,
+            Real& x_ip_BL,
+            Real& y_ip_BL,
+            const Real& x_ip,
+            const Real& y_ip,
+            const Real& patch_xlo_0,
+            const Real& patch_xlo_1,
+            const int& offset_0,
+            const int& offset_1,
+            const int& ghostcell_dim_0,
+            const Real& dx,
+            const Real& dx_inv)
+        {
+            constexpr Real half = Real(1)/Real(2);
+            
+            const int ip_i = int(floor((x_ip - patch_xlo_0 - half * dx)*dx_inv));
+            const int ip_j = int(floor((y_ip - patch_xlo_1 - half * dx)*dx_inv));
+            
+            idx_BL  = (ip_i     + offset_0) + (ip_j     + offset_1) * ghostcell_dim_0;
+            idx_BR  = (ip_i + 1 + offset_0) + (ip_j     + offset_1) * ghostcell_dim_0;
+            idx_TL  = (ip_i     + offset_0) + (ip_j + 1 + offset_1) * ghostcell_dim_0;
+            idx_TR  = (ip_i + 1 + offset_0) + (ip_j + 1 + offset_1) * ghostcell_dim_0;
+            
+            x_ip_BL = patch_xlo_0 + (ip_i + half)*dx;
+            y_ip_BL = patch_xlo_1 + (ip_j + half)*dx;
+        }
+        
+        /*
+         * Get the indices for the 2D bilinear interpolation.
+         */
+        static inline __attribute__((always_inline)) Real bilinearInterpolate2D(
+            const Real& u_BL,
+            const Real& u_BR,
+            const Real& u_TL,
+            const Real& u_TR,
+            const Real& x_ip,
+            const Real& y_ip,
+            const Real& x_ip_BL,
+            const Real& y_ip_BL,
+            const Real& dx_inv)
+        {
+            constexpr Real one = Real(1);
+            
+            const Real ip_ratio_0 = (x_ip - x_ip_BL)*dx_inv;
+            const Real ip_ratio_1 = (y_ip - y_ip_BL)*dx_inv;
+            
+            const Real u_f1 = (one - ip_ratio_0)*u_BL + ip_ratio_0*u_BR;
+            const Real u_f2 = (one - ip_ratio_0)*u_TL + ip_ratio_0*u_TR;
+            Real u_ip = (one - ip_ratio_1)*u_f1 + ip_ratio_1*u_f2;
+            
+            return u_ip;
+        }
+        
+        /*
          * The object name is used for error/warning reporting.
          */
         const std::string d_object_name;
