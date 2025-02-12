@@ -216,6 +216,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
     Real* rho = data_density->getPointer(0);
     Real* E   = data_total_energy->getPointer(0);
     
+
     int* mask = data_mask->getPointer(0);
     Real* dist = data_wall_distance->getPointer(0);
     
@@ -236,10 +237,10 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
     const Real half = Real(1)/Real(2);
     
     // Distance from cylinder boundary to the image point sqrt(2 + epsilon), isotropic grid cells are assuemd.
-    const Real d_ip = sqrt(Real(2))*Real(dx[0]) + HAMERS_REAL_EPSILON;
     
     if (d_dim == tbox::Dimension(1))
     {
+        const Real d_ip = sqrt(Real(1))*Real(dx[0]) + HAMERS_REAL_EPSILON;
         const Real& rho_u_body = d_mom_body[0];
         
         const int domain_lo_0 = domain_lo[0];
@@ -652,21 +653,23 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
         const int offset_2_cons_var = offset_cons_var[2];
         const int ghostcell_dim_0_cons_var = ghostcell_dims_cons_var[0];
         const int ghostcell_dim_1_cons_var = ghostcell_dims_cons_var[1];
+        const int ghostcell_dim_2_cons_var = ghostcell_dims_cons_var[2];
         
         const int offset_0_IB = offset_IB[0];
         const int offset_1_IB = offset_IB[1];
         const int offset_2_IB = offset_IB[2];
         const int ghostcell_dim_0_IB = ghostcell_dims_IB[0];
         const int ghostcell_dim_1_IB = ghostcell_dims_IB[1];
-        
+        const int ghostcell_dim_2_IB = ghostcell_dims_IB[2];
+
         // Get the pointers to the data.
         Real* rho_u = data_momentum->getPointer(0);
         Real* rho_v = data_momentum->getPointer(1);
         Real* rho_w = data_momentum->getPointer(2);
         
-        // Real* norm_0 = data_surface_normal->getPointer(0);
-        // Real* norm_1 = data_surface_normal->getPointer(1);
-        // Real* norm_2 = data_surface_normal->getPointer(2);
+        Real* norm_0 = data_surface_normal->getPointer(0);
+        Real* norm_1 = data_surface_normal->getPointer(1);
+        Real* norm_2 = data_surface_normal->getPointer(2);
         
         for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
         {
@@ -686,7 +689,12 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         (k + offset_2_IB)*ghostcell_dim_0_IB*
                             ghostcell_dim_1_IB;
                     
-                    if (mask[idx_IB] == int(IB_MASK::IB_GHOST))
+                    Real x[3];
+                    x[0] = Real(patch_xlo[0]) + (Real(i) + half)*Real(dx[0]); // local x coordinates
+                    x[1] = Real(patch_xlo[1]) + (Real(j) + half)*Real(dx[1]); // local y coordinates
+                    x[2] = Real(patch_xlo[2]) + (Real(k) + half)*Real(dx[2]); // local z coordinates
+
+                    if (mask[idx_IB] == int(IB_MASK::IB_GHOST))  
                     {
                         // using Ahmet's bilinear interpolation twice + my own linear interpolation
                         // Start first with the coordinates of IP
