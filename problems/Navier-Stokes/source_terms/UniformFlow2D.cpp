@@ -114,6 +114,35 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << "No key 'p_inf' found in data for source terms."
             << std::endl);
     }
+
+    TBOX_ASSERT(d_source_terms_db->keyExists("D"));
+    
+    Real D = Real(0);
+    if (d_source_terms_db->keyExists("D"))
+    {
+        D = d_source_terms_db->getReal("D");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "No key 'D' found in data for source terms."
+            << std::endl);
+    }
+
+    Real gamma = Real(0);
+    if (d_source_terms_db->keyExists("gamma"))
+    {
+        gamma = d_source_terms_db->getReal("gamma");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "No key 'gamma' found in data for source terms."
+            << std::endl);
+    }
+
     const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
         HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
@@ -154,8 +183,6 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     Real* rho_v = momentum->getPointer(1);
     Real* E     = total_energy->getPointer(0);
     
-    const Real gamma = Real(7)/Real(5); // assume both gases have the same ratio of specific heat ratios
-    
     TBOX_ASSERT(d_source_terms_db != nullptr);
     
     const double* const domain_xlo = d_grid_geometry->getXLower();
@@ -180,7 +207,9 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                 x[0] = patch_xlo[0] + (Real(i) + Real(1)/Real(2))*Real(dx[0]);
                 x[1] = patch_xlo[1] + (Real(j) + Real(1)/Real(2))*Real(dx[1]);
                 
-                // Check whether it is outside the special source box.
+                const Real half  = Real(1)/Real(2);
+
+                //Left sponge region
                 if (x[0] <= d_special_source_box_lo[0])
                 {
                     const Real u_ref = u_inf;
@@ -193,19 +222,41 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     const Real rho_v_ref = rho_ref * v_ref;
                     const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
                     
-                    Real xi_b = std::pow((Real(1) - (x[0] - domain_xlo[0])/(d_special_source_box_lo[0] - domain_xlo[0])), Real(3));
-                    xi_b      *= sponge_rate; // mask value needs to be improved 
-                    
                     const Real rho_p   = rho[idx_cons_var]   - rho_ref;
                     const Real rho_u_p = rho_u[idx_cons_var] - rho_u_ref;
                     const Real rho_v_p = rho_v[idx_cons_var] - rho_v_ref;
                     const Real E_p     = E[idx_cons_var]     - E_ref;
-                    
-                    S[0][idx_source] -= dt*xi_b*rho_p;
-                    S[1][idx_source] -= dt*xi_b*rho_u_p;
-                    S[2][idx_source] -= dt*xi_b*rho_v_p;
-                    S[3][idx_source] -= dt*xi_b*E_p;
+
+                    // Left sponge calculations
+                    /*
+                    Real xi_b = std::pow((Real(1) - (x[0] - domain_xlo[0])/(d_special_source_box_lo[0] - domain_xlo[0])), Real(3));
+                    //Real xi_b = (Real(1) - (x[0] - domain_xlo[0])/(d_special_source_box_lo[0] - domain_xlo[0]));
+                    xi_b      *= sponge_rate; // mask value needs to be improved
+                    */
+                    // 0927 AFK Sponge Update
+                    const Real erf_start_lo  = half*(domain_xlo[0] - d_special_source_box_lo[0]) + d_special_source_box_lo[0]; //center of erf is half of the way into sponge
+                    const Real erf_offset_lo = Real(-0.5) * erf((d_special_source_box_lo[0]-erf_start_lo)/(D*Real(0.5))) + Real(0.5); //value of erf at start of sponge 
+                    Real xi_b                = Real(-0.5) * erf((x[0]-erf_start_lo)/(D*Real(0.5))) + Real(0.5) - erf_offset_lo; //subtract value of erf at start of sponge to start xi_b at zero
+                    xi_b                     *= sponge_rate; 
+
+                    // Bottom left or top left sponge region
+                    if (x[1] <= d_special_source_box_lo[1] || x[1] >= d_special_source_box_hi[1]) 
+                    {
+                        S[0][idx_source] -= half*dt*xi_b*rho_p;
+                        S[1][idx_source] -= half*dt*xi_b*rho_u_p;
+                        S[2][idx_source] -= half*dt*xi_b*rho_v_p;
+                        S[3][idx_source] -= half*dt*xi_b*E_p;
+                    }
+                    // Only left sponge region 
+                    else
+                    {
+                        S[0][idx_source] -= dt*xi_b*rho_p;
+                        S[1][idx_source] -= dt*xi_b*rho_u_p;
+                        S[2][idx_source] -= dt*xi_b*rho_v_p;
+                        S[3][idx_source] -= dt*xi_b*E_p;
+                    }
                 }
+                // Right sponge region
                 if (x[0] >= d_special_source_box_hi[0])
                 {                    
                     const Real u_ref = u_inf;
@@ -218,20 +269,40 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     const Real rho_v_ref = rho_ref * v_ref;
                     const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
 
-                    Real xi_b      = std::pow((x[0]-d_special_source_box_hi[0])/(domain_xhi[0]-d_special_source_box_hi[0]), Real(3)); // mask value needs to be improved 
-                    xi_b          *= sponge_rate;
-
                     const Real rho_p   = rho[idx_cons_var]   - rho_ref;
                     const Real rho_u_p = rho_u[idx_cons_var] - rho_u_ref;
                     const Real rho_v_p = rho_v[idx_cons_var] - rho_v_ref;
                     const Real E_p     = E[idx_cons_var]     - E_ref;
+                    /*
+                    // Right sponge calculations
+                    Real xi_b      = std::pow((x[0]-d_special_source_box_hi[0])/(domain_xhi[0]-d_special_source_box_hi[0]), Real(3)); // mask value needs to be improved 
+                    //Real xi_b      = (x[0]-d_special_source_box_hi[0])/(domain_xhi[0]-d_special_source_box_hi[0]);
+                    xi_b          *= sponge_rate;
+                    */
+                    // 0927 AFK Sponge Update
+                    const Real erf_start_hi  = half*(domain_xhi[0]-d_special_source_box_hi[0]) + d_special_source_box_hi[0]; //center of erf is half of the way into sponge
+                    const Real erf_offset_hi = Real(0.5) * erf((d_special_source_box_hi[0]-erf_start_hi)/(D*Real(0.5))) + Real(0.5); //value of erf at start of sponge
+                    Real xi_b                = Real(0.5) * erf((x[0]-erf_start_hi)/(D*Real(0.5))) + Real(0.5) - erf_offset_hi; //subtract value of erf at start of sponge to start xi_b at zero
+                    xi_b                     *= sponge_rate; 
                     
-                    S[0][idx_source] -= dt*xi_b*rho_p;
-                    S[1][idx_source] -= dt*xi_b*rho_u_p;
-                    S[2][idx_source] -= dt*xi_b*rho_v_p;
-                    S[3][idx_source] -= dt*xi_b*E_p;
+                    // Bottom right or top right sponge region
+                    if (x[1] <= d_special_source_box_lo[1] || x[1] >= d_special_source_box_hi[1]) 
+                    {
+                        S[0][idx_source] -= half*dt*xi_b*rho_p;
+                        S[1][idx_source] -= half*dt*xi_b*rho_u_p;
+                        S[2][idx_source] -= half*dt*xi_b*rho_v_p;
+                        S[3][idx_source] -= half*dt*xi_b*E_p;
+                    }
+                    // Only right sponge region
+                    else
+                    {
+                        S[0][idx_source] -= dt*xi_b*rho_p;
+                        S[1][idx_source] -= dt*xi_b*rho_u_p;
+                        S[2][idx_source] -= dt*xi_b*rho_v_p;
+                        S[3][idx_source] -= dt*xi_b*E_p; 
+                    }
                 }
-                // AFK 8/16/23 Bottom Sponge Forcing
+                // Bottom sponge region
                 if (x[1] <= d_special_source_box_lo[1])
                 {
                     const Real u_ref = u_inf;
@@ -244,20 +315,40 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     const Real rho_v_ref = rho_ref * v_ref;
                     const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
                     
-                    Real yi_b = std::pow((Real(1) - (x[1] - domain_xlo[1])/(d_special_source_box_lo[1] - domain_xlo[1])), Real(3));
-                    yi_b     *= sponge_rate; // mask value needs to be improved 
-                    
                     const Real rho_p   = rho[idx_cons_var]   - rho_ref;
                     const Real rho_u_p = rho_u[idx_cons_var] - rho_u_ref;
                     const Real rho_v_p = rho_v[idx_cons_var] - rho_v_ref;
                     const Real E_p     = E[idx_cons_var]     - E_ref;
-                    
-                    S[0][idx_source] -= dt*yi_b*rho_p;
-                    S[1][idx_source] -= dt*yi_b*rho_u_p;
-                    S[2][idx_source] -= dt*yi_b*rho_v_p;
-                    S[3][idx_source] -= dt*yi_b*E_p;
+
+                    /*
+                    // Bottom sponge calculations
+                    Real yi_b = std::pow((Real(1) - (x[1] - domain_xlo[1])/(d_special_source_box_lo[1] - domain_xlo[1])), Real(3));
+                    //Real yi_b = (Real(1) - (x[1] - domain_xlo[1])/(d_special_source_box_lo[1] - domain_xlo[1]));
+                    yi_b     *= sponge_rate; // mask value needs to be improved 
+                    */
+                    // 0927 AFK Sponge Update
+                    const Real erf_start_lo  = half*(domain_xlo[1] - d_special_source_box_lo[1]) + d_special_source_box_lo[1]; //center of erf is 3/4 of the way into sponge
+                    const Real erf_offset_lo = Real(-0.5) * erf((d_special_source_box_lo[1]-erf_start_lo)/(D*Real(0.5))) + Real(0.5); //value of erf at start of sponge 
+                    Real yi_b                = Real(-0.5) * erf((x[1]-erf_start_lo)/(D*Real(0.5))) + Real(0.5) - erf_offset_lo; //subtract value of erf at start of sponge to start xi_b at zero
+                    yi_b                     *= sponge_rate; 
+
+                    // Bottom left or bottom right sponge region
+                    if (x[0] <= d_special_source_box_lo[0] || x[0] >= d_special_source_box_hi[0])
+                    {
+                        S[0][idx_source] -= half*dt*yi_b*rho_p;
+                        S[1][idx_source] -= half*dt*yi_b*rho_u_p;
+                        S[2][idx_source] -= half*dt*yi_b*rho_v_p;
+                        S[3][idx_source] -= half*dt*yi_b*E_p;
+                    }
+                    else
+                    {
+                        S[0][idx_source] -= dt*yi_b*rho_p;
+                        S[1][idx_source] -= dt*yi_b*rho_u_p;
+                        S[2][idx_source] -= dt*yi_b*rho_v_p;
+                        S[3][idx_source] -= dt*yi_b*E_p;
+                    }
                 }
-                // AFK 8/16/23 Top Sponge Forcing
+                // Top sponge region
                 if (x[1] >= d_special_source_box_hi[1])
                 {                    
                     const Real u_ref = u_inf;
@@ -270,20 +361,39 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     const Real rho_v_ref = rho_ref * v_ref;
                     const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
 
-                    Real yi_b      = std::pow((x[1]-d_special_source_box_hi[1])/(domain_xhi[1]-d_special_source_box_hi[1]), Real(3)); // mask value needs to be improved 
-                    yi_b          *= sponge_rate;
-
                     const Real rho_p   = rho[idx_cons_var]   - rho_ref;
                     const Real rho_u_p = rho_u[idx_cons_var] - rho_u_ref;
                     const Real rho_v_p = rho_v[idx_cons_var] - rho_v_ref;
                     const Real E_p     = E[idx_cons_var]     - E_ref;
-                    
-                    S[0][idx_source] -= dt*yi_b*rho_p;
-                    S[1][idx_source] -= dt*yi_b*rho_u_p;
-                    S[2][idx_source] -= dt*yi_b*rho_v_p;
-                    S[3][idx_source] -= dt*yi_b*E_p;
-                }
 
+                    /*
+                    //Top sponge region calculations
+                    Real yi_b      = std::pow((x[1]-d_special_source_box_hi[1])/(domain_xhi[1]-d_special_source_box_hi[1]), Real(3)); // mask value needs to be improved 
+                    //Real yi_b      = (x[1]-d_special_source_box_hi[1])/(domain_xhi[1]-d_special_source_box_hi[1]);
+                    yi_b          *= sponge_rate;
+                    */
+                    // 0927 AFK Sponge Update
+                    const Real erf_start_hi  = half*(domain_xhi[1]-d_special_source_box_hi[1]) + d_special_source_box_hi[1]; //center of erf is half of the way into sponge
+                    const Real erf_offset_hi = Real(0.5) * erf((d_special_source_box_hi[1]-erf_start_hi)/(D*Real(0.5))) + Real(0.5); //value of erf at start of sponge
+                    Real yi_b                = Real(0.5) * erf((x[1]-erf_start_hi)/(D*Real(0.5))) + Real(0.5) - erf_offset_hi; //subtract value of erf at start of sponge to start xi_b at zero
+                    yi_b                     *= sponge_rate; 
+                    
+                    // Top left or top right sponge region
+                    if (x[0] <= d_special_source_box_lo[0] || x[0] >= d_special_source_box_hi[0])
+                    {
+                        S[0][idx_source] -= half*dt*yi_b*rho_p;
+                        S[1][idx_source] -= half*dt*yi_b*rho_u_p;
+                        S[2][idx_source] -= half*dt*yi_b*rho_v_p;
+                        S[3][idx_source] -= half*dt*yi_b*E_p;
+                    }
+                    else
+                    {
+                        S[0][idx_source] -= dt*yi_b*rho_p;
+                        S[1][idx_source] -= dt*yi_b*rho_u_p;
+                        S[2][idx_source] -= dt*yi_b*rho_v_p;
+                        S[3][idx_source] -= dt*yi_b*E_p;
+                    }
+                }
             }
         }
     }

@@ -67,10 +67,19 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
      * These will be read from the input file.
      */
     
-    const double radius_c = half; //double(20); AFK 
-    const double x_c = double(5); //half;  AFK
-    const double y_c = double(5); //half;  AFK
-    
+    Real radius_c = half; //double(20); AFK 
+    Real x_c = Real(1); //half;  AFK
+    Real y_c = Real(1); //half;  AFK
+
+    if (d_initial_conditions_db != nullptr)
+            {
+                TBOX_ASSERT(d_initial_conditions_db->keyExists("x_c"));
+                TBOX_ASSERT(d_initial_conditions_db->keyExists("y_c"));
+                x_c     = d_initial_conditions_db->getReal("x_c");
+                y_c     = d_initial_conditions_db->getReal("y_c");
+                radius_c = d_initial_conditions_db->getReal("radius");
+            }
+
     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
     {
         HAMERS_PRAGMA_SIMD

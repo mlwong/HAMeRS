@@ -30,12 +30,15 @@ class ImmersedBoundaries
             const std::string& object_name,
             const std::string& project_name,
             const tbox::Dimension& dim,
+            const HAMERS_SHARED_PTR<tbox::Database>& initial_conditions_db,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry):
                 d_object_name(object_name),
                 d_project_name(project_name),
                 d_dim(dim),
+                d_initial_conditions_db(initial_conditions_db),
                 d_grid_geometry(grid_geometry),
                 d_num_immersed_boundary_ghosts(-hier::IntVector::getOne(dim))
+                
         {}
         
         virtual ~ImmersedBoundaries() {}
@@ -165,6 +168,11 @@ class ImmersedBoundaries
          */
         const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
+        /*
+         * Initial conditions database.
+         */
+        const HAMERS_SHARED_PTR<tbox::Database> d_initial_conditions_db;
+
         /*
          * Number of immersed boundary ghost cells (IB_MASK::IBGHOST).
          */
