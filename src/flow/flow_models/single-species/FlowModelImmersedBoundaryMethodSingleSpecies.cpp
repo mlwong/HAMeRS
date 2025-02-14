@@ -275,7 +275,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        if (dx[0] != dx[1])
+        if (fabs(dx[0] - dx[1]) > 10.0*std::numeric_limits<double>::epsilon())
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellDataImmersedBoundaryGhosts()\n"
@@ -283,7 +283,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                 << std::endl);
         }
         
-        const Real dx_inv = Real(1)/dx[0];
+        const Real dx_inv = Real(1)/Real(dx[0]);
         
         // First image point distance is set to sqrt(2)*dx + epsilon.
         const Real d_ip   = sqrt(Real(2))*Real(dx[0]) + HAMERS_REAL_EPSILON;
@@ -616,7 +616,14 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        if (dx[0] != dx[1])
+        if (fabs(dx[0] - dx[1]) > 10.0*std::numeric_limits<double>::epsilon())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellDataImmersedBoundaryGhosts()\n"
+                << "The grid is assumed to be isotropic but the grid spacings are different."
+                << std::endl);
+        }
+        if (fabs(dx[0] - dx[2]) > 10.0*std::numeric_limits<double>::epsilon())
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellDataImmersedBoundaryGhosts()\n"
@@ -624,15 +631,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                 << std::endl);
         }
         
-        if (dx[0] != dx[2])
-        {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellDataImmersedBoundaryGhosts()\n"
-                << "The grid is assumed to be isotropic but the grid spacings are different."
-                << std::endl);
-        }
-        
-        const Real dx_inv = Real(1)/dx[0];
+        const Real dx_inv = Real(1)/Real(dx[0]);
         
         // First image point distance is set to sqrt(3)*dx + epsilon.
         const Real d_ip = sqrt(Real(3))*Real(dx[0]) + HAMERS_REAL_EPSILON;
