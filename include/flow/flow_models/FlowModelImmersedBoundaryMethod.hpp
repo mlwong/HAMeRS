@@ -136,6 +136,52 @@ class FlowModelImmersedBoundaryMethod
         
     protected:
         /*
+         * Dirichlet boundary condition with second order of accuracy.
+         */
+        static inline __attribute__((always_inline)) Real getGhostValueDirichletBC(
+            const Real& u_body,
+            const Real& u_ip,
+            const Real& d_ip,
+            const Real& d_gc)
+        {
+            const Real u_gc = u_ip - ((d_ip + d_gc)/d_ip)*(u_ip - u_body);
+            return u_gc;
+        }
+        
+        /*
+         * Neumann boundary condition with second order of accuracy (zero gradient).
+         */
+        static inline __attribute__((always_inline)) Real getGhostValueNeumannBC(
+            const Real& u_ip1,
+            const Real& u_ip2,
+            const Real& d_ip1,
+            const Real& d_ip2,
+            const Real& d_gc)
+        {
+            const Real u_gc = (u_ip1*(d_ip2*d_ip2 - d_gc*d_gc) - u_ip2*(d_ip1*d_ip1 - d_gc*d_gc))/
+                (d_ip2*d_ip2 - d_ip1*d_ip1);
+            return u_gc;
+        }
+        
+        /*
+         * Neumann boundary condition with second order of accuracy (zero gradient).
+         */
+        static inline __attribute__((always_inline)) Real getGhostValueNeumannBC(
+            const Real& dudn_body,
+            const Real& u_ip1,
+            const Real& u_ip2,
+            const Real& d_ip1,
+            const Real& d_ip2,
+            const Real& d_gc,
+            const Real& dx)
+        {
+            const Real u_gc = (u_ip1*(d_ip2*d_ip2 - d_gc*d_gc) - u_ip2*(d_ip1*d_ip1 - d_gc*d_gc))/
+                (d_ip2*d_ip2 - d_ip1*d_ip1) -
+                (d_ip1*d_ip2 + d_gc*d_gc + d_gc*d_ip1 + d_gc*d_ip2)/(d_ip1 + d_ip2)*dx*dudn_body;
+            return u_gc;
+        }
+        
+        /*
          * Get the indices for the 2D bilinear interpolation.
          */
         static inline __attribute__((always_inline)) void getBilinearInterpolationIndices2D(

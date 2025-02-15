@@ -447,8 +447,17 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                     }
                     else if (d_bc_type_velocity == VELOCITY_IBC::NO_SLIP)
                     {
-                        u_gc = u_ip - ((d_ip + dist[idx_IB])/d_ip)*(u_ip);
-                        v_gc = v_ip - ((d_ip + dist[idx_IB])/d_ip)*(v_ip);
+                        u_gc = getGhostValueDirichletBC(
+                            Real(0),
+                            u_ip,
+                            d_ip,
+                            dist[idx_IB]);
+                        
+                        v_gc = getGhostValueDirichletBC(
+                            Real(0),
+                            v_ip,
+                            d_ip,
+                            dist[idx_IB]);
                     }
                     
                     // Bilinear interpolation to find specific internal energy for image point 1.
@@ -535,8 +544,6 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         y_ip2_BL,
                         dx_inv);
                     
-                    Real T_gc = Real(0);
-                    Real p_gc = Real(0);
                     
                     const Real epsilon_ip = d_equation_of_state_mixing_rules->getEquationOfState()->
                         getInternalEnergyFromTemperature(
@@ -562,25 +569,34 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                             &epsilon_ip2,
                             thermo_properties_ptr);
                     
+                    
+                    // dP/dn = 0
+                    const Real p_gc = getGhostValueNeumannBC(
+                            p_ip,
+                            p_ip2,
+                            d_ip,
+                            d_ip2,
+                            dist[idx_IB]);
+                    
+                    Real T_gc = Real(0);
                     if (d_bc_type_temperature == TEMPERATURE_IBC::ADIABATIC)
                     {   
-                        // dP/dn = 0
-                        p_gc = ((d_ip*d_ip - dist[idx_IB]*dist[idx_IB]) * ((d_ip2*d_ip2*p_ip - d_ip*d_ip*p_ip2)
-                                  / (d_ip2*d_ip2 - d_ip*d_ip)) + dist[idx_IB]*dist[idx_IB]*p_ip) / (d_ip*d_ip);
-                        
                         // dT/dn = 0
-                        T_gc  =  ((d_ip*d_ip - dist[idx_IB]*dist[idx_IB]) * ((d_ip2*d_ip2*T_ip - d_ip*d_ip*T_ip2)
-                                  / (d_ip2*d_ip2 - d_ip*d_ip)) + dist[idx_IB]*dist[idx_IB]*T_ip) / (d_ip*d_ip);
+                        T_gc = getGhostValueNeumannBC(
+                            T_ip,
+                            T_ip2,
+                            d_ip,
+                            d_ip2,
+                            dist[idx_IB]);
                     }
                     else if (d_bc_type_temperature == TEMPERATURE_IBC::ISOTHERMAL)
                     {
-                        // Second-order temperature boundary condition.
-                        T_gc = T_ip - ((d_ip + dist[idx_IB])/d_ip) * (T_ip - T_body);
-                        
-                        // Second-order adiabatic pressure boundary condition
-                        // dP/dn = 0
-                        p_gc = ((d_ip*d_ip - dist[idx_IB]*dist[idx_IB]) * ((d_ip2*d_ip2*p_ip - d_ip*d_ip*p_ip2) / (d_ip2*d_ip2 - d_ip*d_ip)) + dist[idx_IB]*dist[idx_IB]*p_ip) / (d_ip*d_ip);
-                        
+                        // Iso-thermal boundary condition.
+                        T_gc = getGhostValueDirichletBC(
+                            T_body,
+                            T_ip,
+                            d_ip,
+                            dist[idx_IB]);
                     }
                     
                     // Compute density using calculated p and T.
@@ -841,9 +857,23 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         }
                         else if (d_bc_type_velocity == VELOCITY_IBC::NO_SLIP) 
                         {
-                            u_gc = u_ip - ((d_ip + dist[idx_IB])/d_ip)*(u_ip);
-                            v_gc = v_ip - ((d_ip + dist[idx_IB])/d_ip)*(v_ip);
-                            w_gc = w_ip - ((d_ip + dist[idx_IB])/d_ip)*(w_ip);
+                            u_gc = getGhostValueDirichletBC(
+                                Real(0),
+                                u_ip,
+                                d_ip,
+                                dist[idx_IB]);
+                            
+                            v_gc = getGhostValueDirichletBC(
+                                Real(0),
+                                v_ip,
+                                d_ip,
+                                dist[idx_IB]);
+                            
+                            w_gc = getGhostValueDirichletBC(
+                                Real(0),
+                                w_ip,
+                                d_ip,
+                                dist[idx_IB]);
                         }
                         
                         // Bilinear interpolation to find specific internal energy for image point 1.
@@ -917,13 +947,19 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         
                         if (d_bc_type_temperature == TEMPERATURE_IBC::ADIABATIC) // Need to update to second order dp/dn = 0 and dT/dn=0!!!
                         {
-                            rho_gc = rho_ip;
                             T_gc   = T_ip; 
+                            rho_gc = rho_ip;
                         }
                         else if (d_bc_type_temperature == TEMPERATURE_IBC::ISOTHERMAL) // Need to update to second order dp/dn = 0!!!
                         {
-                            T_gc   = T_ip - ((d_ip + dist[idx_IB])/d_ip) * (T_ip - T_body);
-                            rho_gc = (rho_ip * T_ip) / T_gc;
+                            // Iso-thermal boundary condition.
+                            T_gc = getGhostValueDirichletBC(
+                                T_body,
+                                T_ip,
+                                d_ip,
+                                dist[idx_IB]);
+                            
+                            rho_gc = (rho_ip*T_ip) / T_gc;
                         }
                         
                         // Compute the total energy at the ghost cell.
