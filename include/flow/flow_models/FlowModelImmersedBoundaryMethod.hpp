@@ -172,12 +172,11 @@ class FlowModelImmersedBoundaryMethod
             const Real& u_ip2,
             const Real& d_ip1,
             const Real& d_ip2,
-            const Real& d_gc,
-            const Real& dx)
+            const Real& d_gc)
         {
             const Real u_gc = (u_ip1*(d_ip2*d_ip2 - d_gc*d_gc) - u_ip2*(d_ip1*d_ip1 - d_gc*d_gc))/
                 (d_ip2*d_ip2 - d_ip1*d_ip1) -
-                (d_ip1*d_ip2 + d_gc*d_gc + d_gc*d_ip1 + d_gc*d_ip2)/(d_ip1 + d_ip2)*dx*dudn_body;
+                (d_ip1*d_ip2 + d_gc*d_gc + d_gc*d_ip1 + d_gc*d_ip2)/(d_ip1 + d_ip2)*dudn_body;
             return u_gc;
         }
         
