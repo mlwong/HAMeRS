@@ -869,9 +869,9 @@ void runSimulation(
                     iteration_num);
                 
                 t_write_restart->stop();
+                
+                tbox::pout << "Files for restart are written." << std::endl;
             }
-            
-            tbox::pout << "Files for restart are written." << std::endl;
         }
         
         tbox::pout << "--------------------------------------------------------------------------------";
