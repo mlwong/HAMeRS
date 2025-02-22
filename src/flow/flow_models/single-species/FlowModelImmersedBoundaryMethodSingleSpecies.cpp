@@ -436,14 +436,54 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                     
                     if (d_bc_type_velocity == VELOCITY_IBC::SLIP)
                     {
-                        vel_ip_n =  u_ip*norm_0[idx_IB] + v_ip*norm_1[idx_IB];
-                        vel_ip_t = -u_ip*norm_1[idx_IB] + v_ip*norm_0[idx_IB];
+                        const Real u_ip2 = bilinearInterpolate2D(
+                            u2_BL,
+                            u2_BR,
+                            u2_TL,
+                            u2_TR,
+                            x_ip2,
+                            y_ip2,
+                            x_ip2_BL,
+                            y_ip2_BL,
+                            dx_inv);
                         
-                        vel_gc_n = vel_ip_n - ((d_ip + dist[idx_IB])/d_ip)*(vel_ip_n);
-                        vel_gc_t = vel_ip_t;
+                        const Real v_ip2 = bilinearInterpolate2D(
+                            v2_BL,
+                            v2_BR,
+                            v2_TL,
+                            v2_TR,
+                            x_ip2,
+                            y_ip2,
+                            x_ip2_BL,
+                            y_ip2_BL,
+                            dx_inv);
                         
-                        u_gc = vel_gc_n*norm_0[idx_IB] - vel_gc_t*norm_1[idx_IB];
-                        v_gc = vel_gc_n*norm_1[idx_IB] + vel_gc_t*norm_0[idx_IB]; 
+                        // Given d_ip and d_ip2, interpolate to the velocity components (u_mirror and v_mirror)
+                        // at the mirror image point at dist[idx_IB].
+                        const Real diff_ip2_ip = d_ip2 - d_ip;
+                        const Real diff_mirror_ip  = dist[idx_IB] - d_ip;
+                        const Real diff_ip2_mirror = d_ip2 - dist[idx_IB];
+                        
+                        // x-component of velocity at the mirror image point.
+                        const Real u_mirror = (diff_ip2_mirror*u_ip + diff_mirror_ip*u_ip2)/diff_ip2_ip;
+                        // y-component of velocity at the mirror image point.
+                        const Real v_mirror = (diff_ip2_mirror*v_ip + diff_mirror_ip*v_ip2)/diff_ip2_ip;
+                        
+                        // Velocity component normal to the boundary at the mirror image point.
+                        const Real vel_mirror_n = dotProduct2D(u_mirror, v_mirror, norm_0[idx_IB], norm_1[idx_IB]); 
+                        
+                        // No-penetration boundary condition.
+                        u_gc = u_mirror - Real(2)*vel_mirror_n*norm_0[idx_IB];
+                        v_gc = v_mirror - Real(2)*vel_mirror_n*norm_1[idx_IB];
+                        
+                        // vel_ip_n =  u_ip*norm_0[idx_IB] + v_ip*norm_1[idx_IB];
+                        // vel_ip_t = -u_ip*norm_1[idx_IB] + v_ip*norm_0[idx_IB];
+                        
+                        // vel_gc_n = vel_ip_n - ((d_ip + dist[idx_IB])/d_ip)*(vel_ip_n);
+                        // vel_gc_t = vel_ip_t;
+                        
+                        // u_gc = vel_gc_n*norm_0[idx_IB] - vel_gc_t*norm_1[idx_IB];
+                        // v_gc = vel_gc_n*norm_1[idx_IB] + vel_gc_t*norm_0[idx_IB]; 
                     }
                     else if (d_bc_type_velocity == VELOCITY_IBC::NO_SLIP)
                     {
