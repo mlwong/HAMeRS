@@ -112,7 +112,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             Real spongeL = Real(1);
             Real spongeB = Real(1);
             Real spongeT = Real(1);
-
+            
             Real half = Real(1)/Real(2);
             
             if (d_initial_conditions_db != nullptr)
@@ -180,7 +180,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         v = half * (v_inf + v_ic) - half * (v_ic - v_inf)*erf((x[0]-spongeR)/(D/Real(5)));
                         p = half * (p_inf + p_ic) - half * (p_ic - p_inf)*erf((x[0]-spongeR)/(D/Real(5)));
                     }
-
+                    
                     if (x[1] < y_c)
                     {
                         u = half * (u_inf + u_ic) + half * (u_ic - u_inf)*erf((x[1]-spongeB)/(D/Real(5)));
@@ -192,12 +192,15 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         u = half * (u_inf + u_ic) - half * (u_ic - u_inf)*erf((x[1]-spongeT)/(D/Real(5)));
                         v = half * (v_inf + v_ic) - half * (v_ic - v_inf)*erf((x[1]-spongeT)/(D/Real(5)));
                         p = half * (p_inf + p_ic) - half * (p_ic - p_inf)*erf((x[1]-spongeT)/(D/Real(5)));
-
                     }
-
+                    
                     rho_u[idx_cell] = rho_inf*u;
                     rho_v[idx_cell] = rho_inf*v;
                     E[idx_cell]     = p/(gamma - Real(1)) + half*rho_inf*(u*u + v*v);
+                    
+                    // rho_u[idx_cell] = rho_inf*u_inf;
+                    // rho_v[idx_cell] = rho_inf*v_inf;
+                    // E[idx_cell]     = p_inf/(gamma - Real(1)) + half*rho_inf*(u_inf*u_inf + v_inf*v_inf);
                 }
             }
         }
