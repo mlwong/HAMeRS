@@ -136,6 +136,32 @@ class FlowModelImmersedBoundaryMethod
         
     protected:
         /*
+         * Dot product of two 2D vectors.
+         */
+        static inline __attribute__((always_inline)) Real dotProduct2D(
+            const Real& a0,
+            const Real& a1,
+            const Real& b0,
+            const Real& b1)
+        {
+            return a0*b0 + a1*b1;
+        }
+        
+        /*
+         * Dot product of two 3D vectors.
+         */
+        static inline __attribute__((always_inline)) Real dotProduct3D(
+            const Real& a0,
+            const Real& a1,
+            const Real& a2,
+            const Real& b0,
+            const Real& b1,
+            const Real& b2)
+        {
+            return a0*b0 + a1*b1 + a2*b2;
+        }
+        
+        /*
          * Dirichlet boundary condition with second order of accuracy.
          */
         static inline __attribute__((always_inline)) Real getGhostValueDirichletBC(
