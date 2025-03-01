@@ -900,14 +900,14 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         const Real w_ip_LTF = rho_w[idx_ip_cons_var_LTF]/rho[idx_ip_cons_var_LTF];
                         const Real w_ip_RTF = rho_w[idx_ip_cons_var_RTF]/rho[idx_ip_cons_var_RTF];
                         
-                        const Real w_ip2_LBK = rho_w[idx_ip_cons_var_LBK]/rho[idx_ip_cons_var_LBK];
-                        const Real w_ip2_RBK = rho_w[idx_ip_cons_var_RBK]/rho[idx_ip_cons_var_RBK];
-                        const Real w_ip2_LTK = rho_w[idx_ip_cons_var_LTK]/rho[idx_ip_cons_var_LTK];
-                        const Real w_ip2_RTK = rho_w[idx_ip_cons_var_RTK]/rho[idx_ip_cons_var_RTK];
-                        const Real w_ip2_LBF = rho_w[idx_ip_cons_var_LBF]/rho[idx_ip_cons_var_LBF];
-                        const Real w_ip2_RBF = rho_w[idx_ip_cons_var_RBF]/rho[idx_ip_cons_var_RBF];
-                        const Real w_ip2_LTF = rho_w[idx_ip_cons_var_LTF]/rho[idx_ip_cons_var_LTF];
-                        const Real w_ip2_RTF = rho_w[idx_ip_cons_var_RTF]/rho[idx_ip_cons_var_RTF];
+                        const Real w_ip2_LBK = rho_w[idx_ip2_cons_var_LBK]/rho[idx_ip2_cons_var_LBK];
+                        const Real w_ip2_RBK = rho_w[idx_ip2_cons_var_RBK]/rho[idx_ip2_cons_var_RBK];
+                        const Real w_ip2_LTK = rho_w[idx_ip2_cons_var_LTK]/rho[idx_ip2_cons_var_LTK];
+                        const Real w_ip2_RTK = rho_w[idx_ip2_cons_var_RTK]/rho[idx_ip2_cons_var_RTK];
+                        const Real w_ip2_LBF = rho_w[idx_ip2_cons_var_LBF]/rho[idx_ip2_cons_var_LBF];
+                        const Real w_ip2_RBF = rho_w[idx_ip2_cons_var_RBF]/rho[idx_ip2_cons_var_RBF];
+                        const Real w_ip2_LTF = rho_w[idx_ip2_cons_var_LTF]/rho[idx_ip2_cons_var_LTF];
+                        const Real w_ip2_RTF = rho_w[idx_ip2_cons_var_RTF]/rho[idx_ip2_cons_var_RTF];
                         
                         const Real w_ip = trilinearInterpolate3D(
                             w_ip_LBK,
@@ -1224,7 +1224,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                                 &T_gc,
                                 thermo_properties_ptr);
                         
-                        const Real E_gc = rho_gc*(epsilon_gc + half*(u_gc*u_gc + v_gc*v_gc));
+                        const Real E_gc = rho_gc*(epsilon_gc + half*(u_gc*u_gc + v_gc*v_gc + w_gc*w_gc));
                         
                         rho[idx_cons_var]   = rho_gc;
                         rho_u[idx_cons_var] = rho_gc*u_gc;
