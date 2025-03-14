@@ -110,13 +110,15 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
             const double R_2 = R_u/W_2;
             
             double lambda = 701.53278340668; // wavelength of single-mode perturbation
-            double eta_0  = 0.02*lambda;      // 1% perturbation // DEBUGGING
+            double eta_0  = 0.04*lambda;      // 1% perturbation // DEBUGGING
             
             const double delta = 0.04*lambda; // characteristic length of interface.
             const double shift = 0.0;
             const double rho_1 = p_i/(R_1*T_0);
             const double rho_2 = p_i/(R_2*T_0); 
             
+            const double u = 0.0;
+            const double v = 0.0;
             // Assume it is left boundary first.
             int i_lo = -ghost_width_to_fill[0];
             int i_hi = 0;
@@ -143,26 +145,24 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
                             x[0] = patch_xlo[0] + (i + double(1)/double(2))*dx[0];
                             x[1] = patch_xlo[1] + (j + double(1)/double(2))*dx[1];
                             
-                            const double x_shifted = x[0] - shift;
+                            double x_shifted = x[0] - shift;
                             
-                            const double eta = eta_0*cos(2.0*M_PI/lambda*x[1]);
+                            double eta = eta_0*cos(2.0*M_PI/lambda*x[1]);
                             
-                            const double Z_2_H = 0.5*(1.0 + erf((x_shifted - eta)/delta)); // volume fraction of second species (Z_2)
+                            double Z_2_H = 0.5*(1.0 + erf((x_shifted - eta)/delta)); // volume fraction of second species (Z_2)
                             
                             
-                            const double rho = rho_1*(1 - Z_2_H) + rho_2*Z_2_H;
+                            double rho = rho_1*(1 - Z_2_H) + rho_2*Z_2_H;
                             
-                            const double p_H = p_i + 0.5*(rho_1+rho_2)*g*(x_shifted) +
-                                0.5*(rho_1-rho_2)*g*(delta*(exp(-pow(x_shifted/delta,2.0))-1.0)/sqrt(M_PI) + x_shifted*erf(x_shifted/delta));
+                            double p_H = p_i + 0.5*(rho_1+rho_2)*g*(x_shifted) +
+                                0.5*(rho_2-rho_1)*g*(delta*(exp(-pow(x_shifted/delta,2.0))-1.0)/sqrt(M_PI) + x_shifted*erf(x_shifted/delta));
                             
-                            const double p = p_H;
+                            double p = p_H;
                             
                             rho_Y_0[idx_cell] = rho_1*(1.0 - Z_2_H);
                             rho_Y_1[idx_cell] = rho_2*Z_2_H;
                             
-                            const double u = 0.0;
-                            const double v = 0.0;
-                            
+                                                       
                             rho_u[idx_cell] = rho*u;
                             rho_v[idx_cell] = rho*v;
                             E[idx_cell]     = p/(gamma - double(1)) + double(1)/double(2)*rho*(u*u + v*v);

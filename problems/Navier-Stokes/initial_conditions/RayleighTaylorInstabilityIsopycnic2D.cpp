@@ -92,7 +92,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         // const double gamma_1 = double(7)/double(5);
         
         double lambda = 701.53278340668; // wavelength of single-mode perturbation
-        double eta_0  = 0.02*lambda;      // 1% perturbation // DEBUGGING
+        double eta_0  = 0.04*lambda;      // 1% perturbation // DEBUGGING
         // const double eta_0  = 0.0*lambda;      // no perturbation
         
         const double p_i = 100000.0; // interface pressure
@@ -119,7 +119,10 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             const double delta = 0.04*lambda; // characteristic length of interface.
             const double shift = 0.0;
             const double rho_1 = p_i/(R_1*T_0);
-            const double rho_2 = p_i/(R_2*T_0); 
+            const double rho_2 = p_i/(R_2*T_0);
+
+            const double u = 0.0;
+            const double v = 0.0;
             
             for (int j = 0; j < patch_dims[1]; j++)
             {
@@ -133,25 +136,22 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
                     x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
                     
-                    const double x_shifted = x[0] - shift;
+                    double x_shifted = x[0] - shift;
                     
-                    const double eta = eta_0*cos(2.0*M_PI/lambda*x[1]);
+                    double eta = eta_0*cos(2.0*M_PI/lambda*x[1]);
                     
-                    const double Z_2_H = 0.5*(1.0 + erf((x_shifted - eta)/delta)); // mass fraction of second species (Y_2)
+                    double Z_2_H = 0.5*(1.0 + erf((x_shifted - eta)/delta)); // mass fraction of second species (Y_2)
                     // const double R_H   = R_1*(1.0 - Y_2_H) + Y_2_H*R_2;
                     
-                    const double rho = rho_1*(1.0 - Z_2_H) + rho_2*Z_2_H;
+                    double rho = rho_1*(1.0 - Z_2_H) + rho_2*Z_2_H;
                     
                     // presssure is p_i at x = x_i;
-                    const double p_H = p_i + 0.5*(rho_1+rho_2)*g*(x_shifted) + 
-                        0.5*(rho_1-rho_2)*g*(delta*(exp(-pow(x_shifted/delta,2.0))-1.0)/sqrt(M_PI) + x_shifted*erf(x_shifted/delta));
-                    const double p   = p_H;
+                    double p_H = p_i + 0.5*(rho_1+rho_2)*g*(x_shifted) + 
+                        0.5*(rho_2-rho_1)*g*(delta*(exp(-pow(x_shifted/delta,2.0))-1.0)/sqrt(M_PI) + x_shifted*erf(x_shifted/delta));
+                    double p   = p_H;
                     
                     rho_Y_0[idx_cell] = rho_1*(1.0 - Z_2_H);
                     rho_Y_1[idx_cell] = rho_2*Z_2_H;
-                    
-                    const double u = 0.0;
-                    const double v = 0.0;
                     
                     rho_u[idx_cell] = rho*u;
                     rho_v[idx_cell] = rho*v;
@@ -734,7 +734,11 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         << std::endl);
                 }
             }
-            
+
+            const double rho_1 = p_i/(R_1*T_0);
+            const double rho_2 = p_i/(R_2*T_0);
+            const double rho_3 = p_i/(R_3*T_0);
+
             for (int j = 0; j < patch_dims[1]; j++)
             {
                 for (int i = 0; i < patch_dims[0]; i++)
@@ -758,20 +762,16 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         eta_2 += eta_0/3.0*cos(2.0*M_PI*m/width*x[1] + rmod_2[m-waven+4]);
                     }
                     
-                    const double rho_1 = p_i/(R_1*T_0);
-                    const double rho_2 = p_i/(R_2*T_0);
-                    const double rho_3 = p_i/(R_3*T_0);
+                    double Z_2_H = 0.5*(1.0 + erf(((x[0] - eta + shift)/delta))) - 0.5*(1.0 + erf(((x[0] - eta_2 - shift)/delta)));
+                    double Z_3_H = 0.5*(1.0 + erf(((x[0] - eta_2 - shift)/delta)));
+                    double Z_1_H = 1.0 - Z_2_H - Z_3_H;
                     
-                    const double Z_2_H = 0.5*(1.0 + erf(((x[0] - eta + shift)/delta))) - 0.5*(1.0 + erf(((x[0] - eta_2 - shift)/delta)));
-                    const double Z_3_H = 0.5*(1.0 + erf(((x[0] - eta_2 - shift)/delta)));
-                    const double Z_1_H = 1.0 - Z_2_H - Z_3_H;
+                    double rho = rho_1*Z_1_H + rho_2*Z_2_H + rho_3*Z_3_H;
                     
-                    const double rho = rho_1*Z_1_H + rho_2*Z_2_H + rho_3*Z_3_H;
+                    double ksi_1 = (x[0] + shift)/delta;
+                    double ksi_2 = (x[0] - shift)/delta;
                     
-                    const double ksi_1 = (x[0] + shift)/delta;
-                    const double ksi_2 = (x[0] - shift)/delta;
-                    
-                    const double p = p_i + 0.5*g*(rho_1 + rho_3)*x[0] +
+                    double p = p_i + 0.5*g*(rho_1 + rho_3)*x[0] +
                         0.5*g*delta*(rho_2 - rho_1)*( -(shift/delta)*erf(shift/delta) + ksi_1*erf(ksi_1) + (exp(-ksi_1*ksi_1) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) ) +
                         0.5*g*delta*(rho_3 - rho_2)*( -(shift/delta)*erf(shift/delta) + ksi_2*erf(ksi_2) + (exp(-ksi_2*ksi_2) - exp(-shift*shift/(delta*delta)))/sqrt(M_PI) );
                     
