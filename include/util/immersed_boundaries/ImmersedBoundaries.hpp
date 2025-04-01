@@ -12,6 +12,8 @@
 
 #include <string>
 
+#include "TECIO.h"
+
 #define IB_EPSILON HAMERS_EPSILON
 
 using namespace SAMRAI;
@@ -22,6 +24,17 @@ namespace IB_MASK
                 IB_GHOST,
                 BODY };
 }
+
+// Create a struct to hold the surface triangulation data.
+struct SurfaceTriangulation
+{
+    std::vector<std::array<Real, 3> > nodes;
+    std::vector<std::array<int, 3> > connectivities;
+    std::vector<int> component_ids;
+    std::vector<std::array<Real, 3> > normals;
+    std::vector<std::array<Real, 3> > centroids;
+    std::vector<Real> areas;
+};
 
 class ImmersedBoundaries
 {
@@ -39,7 +52,72 @@ class ImmersedBoundaries
                 d_grid_geometry(grid_geometry),
                 d_num_immersed_boundary_ghosts(-hier::IntVector::getOne(dim))
                 
-        {}
+        {
+            generateSurfaceTriangulation(d_surface_triangulation.nodes,
+                                         d_surface_triangulation.connectivities,
+                                         d_surface_triangulation.component_ids);
+            
+            const int num_nodes = static_cast<int>(d_surface_triangulation.nodes.size());
+            const int num_centroid = static_cast<int>(d_surface_triangulation.connectivities.size());
+            
+            // Check to make sure that the number of centroids and number of component ids are the same.
+            if (num_centroid != static_cast<int>(d_surface_triangulation.component_ids.size()))
+            {
+                TBOX_ERROR(d_object_name
+                    << ": ImmersedBoundaries::"
+                    << "generateSurfaceTriangulation()\n"
+                    << "Number of centroids and number of component ids are not the same."
+                    << std::endl);
+            }
+            
+            // Compute the surface normals, centroids and areas.
+            d_surface_triangulation.normals.resize(num_centroid);
+            d_surface_triangulation.centroids.resize(num_centroid);
+            d_surface_triangulation.areas.resize(num_centroid);
+            
+            for (int i = 0; i < num_centroid; ++i)
+            {
+                const int node_0 = d_surface_triangulation.connectivities[i][0];
+                const int node_1 = d_surface_triangulation.connectivities[i][1];
+                const int node_2 = d_surface_triangulation.connectivities[i][2];
+                
+                // Compute the centroids.
+                d_surface_triangulation.centroids[i][0] =
+                    (d_surface_triangulation.nodes[node_0][0] +
+                     d_surface_triangulation.nodes[node_1][0] +
+                     d_surface_triangulation.nodes[node_2][0]) / Real(3);
+                
+                d_surface_triangulation.centroids[i][1] =
+                    (d_surface_triangulation.nodes[node_0][1] +
+                     d_surface_triangulation.nodes[node_1][1] +
+                     d_surface_triangulation.nodes[node_2][1]) / Real(3);
+                
+                d_surface_triangulation.centroids[i][2] =
+                    (d_surface_triangulation.nodes[node_0][2] +
+                     d_surface_triangulation.nodes[node_1][2] +
+                     d_surface_triangulation.nodes[node_2][2]) / Real(3);
+                
+                // Compute the areas.
+                const Real x01[3] = {d_surface_triangulation.nodes[node_1][0] - d_surface_triangulation.nodes[node_0][0],
+                                      d_surface_triangulation.nodes[node_1][1] - d_surface_triangulation.nodes[node_0][1],
+                                      d_surface_triangulation.nodes[node_1][2] - d_surface_triangulation.nodes[node_0][2]};
+                
+                const Real x02[3] = {d_surface_triangulation.nodes[node_2][0] - d_surface_triangulation.nodes[node_0][0],
+                                      d_surface_triangulation.nodes[node_2][1] - d_surface_triangulation.nodes[node_0][1],
+                                      d_surface_triangulation.nodes[node_2][2] - d_surface_triangulation.nodes[node_0][2]};
+                
+                // Compute the normals vector.
+                const Real cross_product[3] =
+                    {x01[1]*x02[2]-x01[2]*x02[1], x01[2]*x02[0]-x01[0]*x02[2], x01[0]*x02[1]-x01[1]*x02[0]};
+                const Real norm = std::sqrt(cross_product[0]*cross_product[0] +
+                                            cross_product[1]*cross_product[1] +
+                                            cross_product[2]*cross_product[2]);
+                d_surface_triangulation.normals[i][0] = cross_product[0] / norm;
+                d_surface_triangulation.normals[i][1] = cross_product[1] / norm;
+                d_surface_triangulation.normals[i][2] = cross_product[2] / norm;
+                d_surface_triangulation.areas[i] = Real(0.5) * norm;
+            }
+        }
         
         virtual ~ImmersedBoundaries() {}
         
@@ -137,6 +215,14 @@ class ImmersedBoundaries
                 data_surface_normal);
         }
         
+        
+        // Get surface triangulation.
+        const SurfaceTriangulation& getSurfaceTriangulation() const
+        {
+            return d_surface_triangulation;
+        }
+    
+    private:
         void setImmersedBoundaryVariablesOnPatch(
             const hier::Patch& patch,
             const double data_time,
@@ -147,7 +233,11 @@ class ImmersedBoundaries
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal);
         
-    private:
+        void generateSurfaceTriangulation(
+            std::vector<std::array<Real, 3> >& nodes,
+            std::vector<std::array<int, 3> >& connectivities,
+            std::vector<int> component_ids);
+        
         /*
          * The object name is used for error/warning reporting.
          */
@@ -178,6 +268,10 @@ class ImmersedBoundaries
          */
         hier::IntVector d_num_immersed_boundary_ghosts;
         
+        /*
+         * Surface triangulation.
+         */
+        SurfaceTriangulation d_surface_triangulation;
 };
 
 #endif /* IMMERSED_BOUNDARIES_HPP */
