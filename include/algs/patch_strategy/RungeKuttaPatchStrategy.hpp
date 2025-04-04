@@ -759,6 +759,14 @@ class RungeKuttaPatchStrategy:
             return d_use_ghost_cell_immersed_boundary_method;
         }
         
+        /**
+         * Output the surface data.
+         */
+        virtual void writePlotSurfaceData(
+            const std::string& dump_directory_name,
+            const int step_num,
+            const double time) = 0;
+        
     protected:
         bool d_use_ghost_cell_immersed_boundary_method;
         bool d_use_static_immersed_boundaries;

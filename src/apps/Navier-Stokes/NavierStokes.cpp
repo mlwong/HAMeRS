@@ -5557,3 +5557,41 @@ void NavierStokes::getFromRestart()
         d_multiresolution_tagger_db = db->getDatabase("d_multiresolution_tagger_db");
     }
 }
+
+
+/**
+ * Output the surface data.
+ */
+ void NavierStokes::writePlotSurfaceData(
+    const std::string& dump_directory_name,
+    const int step_num,
+    const double time)
+{
+    NULL_USE(time);
+    
+    if (d_use_immersed_boundaries)
+    {
+        constexpr int zero_padding_length = 5;
+        char temp_buf[128];
+        sprintf(temp_buf, "%0*d", zero_padding_length, step_num);
+        std::string name_prefix = "tecio_dump.";
+        name_prefix += temp_buf;
+        
+        std::string dump_dirname;
+        if (!dump_directory_name.empty() &&
+        dump_directory_name[dump_directory_name.length() - 1] == '/')
+        {
+            dump_dirname = dump_directory_name;
+        }
+        else
+        {
+            dump_dirname = dump_directory_name + "/";
+        }
+        SAMRAI::tbox::Utilities::recursiveMkdir(dump_dirname);
+        
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        flow_model_immersed_boundary_method->writeSurfaceTriangulationWithData(dump_dirname + name_prefix);
+    }
+}

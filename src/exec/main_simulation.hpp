@@ -740,6 +740,21 @@ void runSimulation(
                         iteration_num,
                         loop_time);
                     
+                    const std::string dump_directory_name = base_name + ".surface_data";
+                    switch (app_label)
+                    {
+                        case EULER:
+                        {
+                            Euler_app->writePlotSurfaceData(dump_directory_name, iteration_num, loop_time);
+                            break;
+                        }
+                        case NAVIER_STOKES:
+                        {
+                            Navier_Stokes_app->writePlotSurfaceData(dump_directory_name, iteration_num, loop_time);
+                            break;
+                        }
+                    }
+                    
                     t_write_viz->stop();
                     
                     last_viz_dump_time = loop_time;
