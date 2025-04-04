@@ -1,5 +1,7 @@
 #include "flow/flow_models/FlowModelImmersedBoundaryMethod.hpp"
 
+#include "TECIO.h"
+
 HAMERS_SHARED_PTR<pdat::CellVariable<int> > FlowModelImmersedBoundaryMethod::s_variable_mask;
 HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelImmersedBoundaryMethod::s_variable_wall_distance;
 HAMERS_SHARED_PTR<pdat::CellVariable<Real> > FlowModelImmersedBoundaryMethod::s_variable_surface_normal;
@@ -377,4 +379,135 @@ FlowModelImmersedBoundaryMethod::setConservativeVariablesCellDataImmersedBoundar
         ghostcell_dims_IB,
         domain_lo,
         domain_dims);
+}
+
+
+/*
+ * Output the surface triangulation.
+ */
+void
+FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::string& file_name) const
+{
+    const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
+    
+    if (surface_triangulation.nodes.size() == 0)
+    {
+        TBOX_WARNING(d_object_name
+            << ": FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData()\n"
+            << "The surface triangulation is empty."
+            << " No surface file will be written."
+            << std::endl);
+        return;
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    if (mpi.getRank() == 0)
+    {
+        const std::vector<std::array<Real, 3> >& nodes = surface_triangulation.nodes;
+        const std::vector<std::array<int, 3> >& connectivities = surface_triangulation.connectivities;
+        
+        INTEGER4 num_nodes = static_cast<INTEGER4>(nodes.size());
+        INTEGER4 num_centroids = static_cast<INTEGER4>(connectivities.size());
+        
+        const std::string file_name_full = file_name + ".plt";
+        
+        INTEGER4 file_format = 0; // 0 == PLT, 1 == SZPLT
+        INTEGER4 file_type = 0; // FULL = 0, GRID = 1, SOLUTION = 2
+        INTEGER4 debug = 1;
+        INTEGER4 v_is_double = 1; // float = 0, double = 1
+        INTEGER4 d_is_double = 1; // float = 0, double = 1
+        
+        /*
+         * Open the file and write the tecplot datafile  header information
+         */
+        INTEGER4 i = TECINI142((char*)"DATASET",
+            (char*)"x y z field",  // NOTE: Make sure and change valueLocation above if this changes.
+            (char*)file_name_full.c_str(),
+            (char*)".",
+            &file_format,
+            &file_type,
+            &debug,
+            &v_is_double);
+        
+        INTEGER4 zone_type = 2; // FETRIANGLE
+        INTEGER4 num_faces = 1; // Not used.
+        INTEGER4 i_cell_max = 0; // Not used.
+        INTEGER4 j_cell_max = 0; // Not used.
+        INTEGER4 k_cell_max = 0; // Not used.
+        double sol_time = 0.0;
+        INTEGER4 strand_id = 0; // Static zone.
+        INTEGER4 parent_zn = 0; // No parent.
+        INTEGER4 is_block  = 1; // Block format.
+        INTEGER4 n_fconns  = 0; // Not used.
+        INTEGER4 f_nmode   = 0; // Not used.
+        INTEGER4 shr_conn  = 0; // Not used.
+        
+          // cell-centered: 0, nodal: 1
+        int valueLocation[] = {
+            1, // x
+            1, // y
+            1, // z
+            1 // field
+        };
+        
+        /*
+         * Write the zone header information.
+         */
+        i = TECZNE142((char*)"Zone",
+            &zone_type,
+            &num_nodes,
+            &num_centroids,
+            &num_faces,
+            &i_cell_max,
+            &j_cell_max,
+            &k_cell_max,
+            &sol_time,
+            &strand_id,
+            &parent_zn,
+            &is_block,
+            &n_fconns,
+            &f_nmode,
+            0,              /* TotalNumFaceNodes */
+            0,              /* NumConnectedBoundaryFaces */
+            0,              /* TotalNumBoundaryConnections */
+            NULL,           /* PassiveVarList */
+            valueLocation,  /* ValueLocation = Nodal */
+            NULL,           /* SharVarFromZone */
+            &shr_conn);
+        
+        /*
+         * Write out the field data.
+         */
+        
+        std::vector<int> connectivity_array;
+        std::vector<double> x, y, z, field;
+        
+        for (const auto& node : nodes)
+        {
+            x.push_back(double(node[0]));
+            y.push_back(double(node[1]));
+            z.push_back(double(node[2]));
+            field.push_back(0.0);
+        }
+        
+        for (const auto& conn : connectivities)
+        {
+            for (int i = 0; i < 3; ++i)
+            {
+                connectivity_array.push_back(conn[i]);
+            }
+        }
+        INTEGER4 connectivity_count = static_cast<INTEGER4>(connectivities.size())*3;
+        
+        
+        i = TECDAT142(&num_nodes, x.data(),     &d_is_double);
+        i = TECDAT142(&num_nodes, y.data(),     &d_is_double);
+        i = TECDAT142(&num_nodes, z.data(),     &d_is_double);
+        i = TECDAT142(&num_nodes, field.data(), &d_is_double);
+        
+        i = TECNODE142(&connectivity_count, connectivity_array.data());
+         
+        i = TECEND142();
+    }
 }

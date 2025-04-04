@@ -558,6 +558,14 @@ class NavierStokes:
             d_plot_context = plot_context;
         }
         
+        /**
+         * Output the surface data.
+         */
+        void writePlotSurfaceData(
+            const std::string& dump_directory_name,
+            const int step_num,
+            const double time);
+        
     private:
         /*
          * These private member functions read data from input and restart. When beginning a run

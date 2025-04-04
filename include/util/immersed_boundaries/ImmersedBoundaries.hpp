@@ -12,8 +12,6 @@
 
 #include <string>
 
-#include "TECIO.h"
-
 #define IB_EPSILON HAMERS_EPSILON
 
 using namespace SAMRAI;
@@ -215,8 +213,9 @@ class ImmersedBoundaries
                 data_surface_normal);
         }
         
-        
-        // Get surface triangulation.
+        /*
+         * Get surface triangulation.
+         */
         const SurfaceTriangulation& getSurfaceTriangulation() const
         {
             return d_surface_triangulation;
@@ -236,7 +235,7 @@ class ImmersedBoundaries
         void generateSurfaceTriangulation(
             std::vector<std::array<Real, 3> >& nodes,
             std::vector<std::array<int, 3> >& connectivities,
-            std::vector<int> component_ids);
+            std::vector<int>& component_ids);
         
         /*
          * The object name is used for error/warning reporting.

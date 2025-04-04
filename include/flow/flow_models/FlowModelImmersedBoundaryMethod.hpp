@@ -134,6 +134,11 @@ class FlowModelImmersedBoundaryMethod
         getCellDataOfImmersedBoundaryMask(
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
+        /*
+         * Output the surface triangulation with surface data.
+         */
+        void writeSurfaceTriangulationWithData(const std::string& file_name) const;
+        
     protected:
         /*
          * Dot product of two 2D vectors.
