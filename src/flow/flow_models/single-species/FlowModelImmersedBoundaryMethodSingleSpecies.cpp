@@ -338,7 +338,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                 {
 
                     // First image point distance.
-                    const Real d_ip = std::sqrt(norm_0[idx_IB]*norm_0[idx_IB] + norm_1[idx_IB]*norm_1[idx_IB]) + HAMERS_REAL_EPSILON;
+                    const Real d_ip = std::sqrt(norm_0[idx_IB]*norm_0[idx_IB] + norm_1[idx_IB]*norm_1[idx_IB])*Real(dx[0]) + HAMERS_REAL_EPSILON;
 
                     // Second image point distance.
                     const Real d_ip2 = d_ip + Real(0.25)*Real(dx[0]);   // Real(2)*Real(dx[0]) - HAMERS_REAL_EPSILON ;
