@@ -388,6 +388,7 @@ FlowModelImmersedBoundaryMethod::setConservativeVariablesCellDataImmersedBoundar
 void
 FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::string& file_name) const
 {
+#ifdef HAMERS_USE_TECIO
     const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
     
     if (surface_triangulation.nodes.size() == 0)
@@ -510,4 +511,5 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
          
         i = TECEND142();
     }
+#endif
 }

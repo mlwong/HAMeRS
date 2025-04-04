@@ -220,7 +220,7 @@ class ImmersedBoundaries
         {
             return d_surface_triangulation;
         }
-    
+        
     private:
         void setImmersedBoundaryVariablesOnPatch(
             const hier::Patch& patch,

@@ -36,6 +36,9 @@ typedef double Real;
 #define HAMERS_MPI_REAL MPI_DOUBLE
 #define HAMERS_REAL_EPSILON DBL_EPSILON
 
+/* Enable compilation with tecio library */
+#cmakedefine HAMERS_USE_TECIO
+
 /* Enable compilation with Boost library */
 #cmakedefine HAMERS_USE_BOOST
 

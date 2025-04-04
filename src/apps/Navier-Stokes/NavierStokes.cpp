@@ -5569,6 +5569,7 @@ void NavierStokes::getFromRestart()
 {
     NULL_USE(time);
     
+#ifdef HAMERS_USE_TECIO
     if (d_use_immersed_boundaries)
     {
         constexpr int zero_padding_length = 5;
@@ -5594,4 +5595,8 @@ void NavierStokes::getFromRestart()
         
         flow_model_immersed_boundary_method->writeSurfaceTriangulationWithData(dump_dirname + name_prefix);
     }
+#else
+    NULL_USE(dump_directory_name);
+    NULL_USE(step_num);
+#endif
 }
