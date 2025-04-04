@@ -11,24 +11,28 @@ if (MPI_FOUND)
   include_directories(${MPI_INCLUDE_PATH})
 endif()
 
-# tecio needs Boost
-FIND_PACKAGE(Boost)
-IF (Boost_FOUND)
-    INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
-ELSE()
-    Set (Boost_INCLUDE_DIR /3rdpartylibs/boost/1.59.0/build/linux64-centos6.5/include)
-    message ("Warning:  Cannot find boost include directories.  Hardcoding to ${Boost_INCLUDE_DIR}")
-    INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR})
-ENDIF()
+option(HAMERS_USE_TECIO "HAMERS_USE_TECIO" OFF)
 
-# option(HAMERS_USE_BOOST "HAMERS_USE_BOOST" ON)
-# 
-# if("${HAMERS_USE_BOOST}")
-#     # Find the boost package
-#     find_package(Boost 1.45 REQUIRED)
-#     include_directories(${Boost_INCLUDE_DIR})
-#     link_directories(${Boost_LIBRARY_DIRS})
-# endif()
+if("${HAMERS_USE_TECIO}")
+    # tecio needs Boost
+    find_package(Boost 1,59 REQUIRED)
+    if (Boost_FOUND)
+        include_directories(${Boost_INCLUDE_DIR})
+    else()
+        Set (Boost_INCLUDE_DIR /3rdpartylibs/boost/1.59.0/build/linux64-centos6.5/include)
+        message ("Warning:  Cannot find boost include directories.  Hardcoding to ${Boost_INCLUDE_DIR}")
+        include_directories(SYSTEM ${Boost_INCLUDE_DIR})
+    endif()
+endif()
+
+option(HAMERS_USE_BOOST "HAMERS_USE_BOOST" ON)
+
+if("${HAMERS_USE_BOOST}")
+    # Find the boost package
+    find_package(Boost 1.45 REQUIRED)
+    include_directories(${Boost_INCLUDE_DIR})
+    link_directories(${Boost_LIBRARY_DIRS})
+endif()
 
 # Find the hdf5 package
 find_package(HDF5 1.14 REQUIRED)

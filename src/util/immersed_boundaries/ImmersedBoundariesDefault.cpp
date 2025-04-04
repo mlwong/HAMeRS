@@ -25,7 +25,7 @@ void
 ImmersedBoundaries::generateSurfaceTriangulation(
     std::vector<std::array<Real, 3> >& nodes,
     std::vector<std::array<int, 3> >& connectivities,
-    std::vector<int> component_id)
+    std::vector<int>& component_id)
 {
     NULL_USE(nodes);
     NULL_USE(connectivities);
