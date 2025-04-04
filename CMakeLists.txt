@@ -15,7 +15,7 @@ option(HAMERS_USE_TECIO "HAMERS_USE_TECIO" OFF)
 
 if("${HAMERS_USE_TECIO}")
     # tecio needs Boost
-    find_package(Boost 1,59 REQUIRED)
+    find_package(Boost 1.59 REQUIRED)
     if (Boost_FOUND)
         include_directories(${Boost_INCLUDE_DIR})
     else()
