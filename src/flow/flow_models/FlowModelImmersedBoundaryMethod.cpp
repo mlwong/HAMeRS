@@ -110,6 +110,14 @@ FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod(
             << "Required 'bc_type_temperature' entry from input database missing."
             << std::endl);
     }
+    
+    const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
+    const int num_nodes = static_cast<int>(surface_triangulation.nodes.size());
+    
+    if (num_nodes > 0)
+    {
+        dx_grid.assign(num_nodes, std::numeric_limits<double>::max());
+    }
 }
 
 
@@ -383,6 +391,130 @@ FlowModelImmersedBoundaryMethod::setConservativeVariablesCellDataImmersedBoundar
 
 
 /*
+ * Compute the data on the surface triangulation.
+ */
+void
+FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationData(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    // if (d_flow_model.expired())
+    // {
+    //     TBOX_ERROR(d_object_name
+    //         << ": "
+    //         << "The object is not setup yet!"
+    //         << std::endl);
+    // }
+    
+    // HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
+    const std::vector<std::array<Real, 3> >& nodes = surface_triangulation.nodes;
+    
+    if (nodes.empty())
+    {
+        return;
+    }
+    
+    const int num_nodes = static_cast<int>(nodes.size());
+    dx_grid.assign(num_nodes, std::numeric_limits<Real>::max());
+    std::vector<double> dx_grid_local(num_nodes, std::numeric_limits<Real>::max());
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        // Do nothing for now.
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        // Do nothing for now.
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                // Make sure dx is isotropic.
+                const double dx_min = std::min(dx[0], std::min(dx[1], dx[2]));
+                const double dx_max = std::max(dx[0], std::max(dx[1], dx[2]));
+                const double dx_ratio = dx_max/dx_min;
+                if (std::abs(dx_max - dx_min) > 10.0*std::numeric_limits<double>::epsilon())
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationData()\n"
+                        << "The grid spacing is not isotropic."
+                        << std::endl);
+                }
+                
+                const double* const patch_xlo = patch_geom->getXLower();
+                const double* const patch_xhi = patch_geom->getXUpper();
+                
+                for (int ni = 0; ni < num_nodes; ++ni)
+                {
+                    const std::array<Real, 3>& node = nodes[ni];
+                    
+                    for (int di = 0; di < d_dim.getValue(); ++di)
+                    {
+                        if (node[di] >= patch_xlo[di] && node[di] <= patch_xhi[di])
+                        {
+                            dx_grid_local[ni] = std::min(dx_grid_local[ni], dx[0]);
+                        }
+                    }
+                }
+            }
+        }
+        
+        const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        
+        mpi.Allreduce(
+            &dx_grid_local[0],
+            &dx_grid[0],
+            num_nodes,
+            MPI_DOUBLE,
+            MPI_MIN);
+        
+        if (mpi.getRank() == 0)
+        {
+            // Make sure dx_grid is uniform.
+            double dx_grid_min = std::numeric_limits<double>::max();
+            double dx_grid_max = std::numeric_limits<double>::min();
+            for (int ni = 0; ni < num_nodes; ++ni)
+            {
+                dx_grid_min = std::min(dx_grid_min, dx_grid[ni]);
+                dx_grid_max = std::max(dx_grid_max, dx_grid[ni]);
+            }
+            if (std::abs(dx_grid_max - dx_grid_min) > 10.0*std::numeric_limits<double>::epsilon())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationData()\n"
+                    << "The surfce triangulation is not in the same grid level."
+                    << std::endl);
+            }
+        }
+    }
+}
+
+
+/*
  * Output the surface triangulation.
  */
 void
@@ -405,8 +537,18 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
     
     if (mpi.getRank() == 0)
     {
-        const std::vector<std::array<Real, 3> >& nodes = surface_triangulation.nodes;
+        const std::vector<std::array<double, 3> >& nodes = surface_triangulation.nodes;
         const std::vector<std::array<int, 3> >& connectivities = surface_triangulation.connectivities;
+        const std::vector<std::array<double, 3> >& normal_nodes = surface_triangulation.normal_nodes;
+        
+        // Check that size of nodes and normal_nodes are the same.
+        if (nodes.size() != normal_nodes.size())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData()\n"
+                << "The size of nodes and normal_nodes are not the same."
+                << std::endl);
+        }
         
         INTEGER4 num_nodes = static_cast<INTEGER4>(nodes.size());
         INTEGER4 num_centroids = static_cast<INTEGER4>(connectivities.size());
@@ -419,13 +561,33 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
         INTEGER4 v_is_double = 1; // float = 0, double = 1
         INTEGER4 d_is_double = 1; // float = 0, double = 1
         
+        std::vector<std::string> variable_names = {
+            "x",
+            "y",
+            "z",
+            "node_normal_x",
+            "node_normal_y",
+            "node_normal_z",
+            "dx_grid"
+        };
+        
+        std::string variable_name_string = "";
+        for (int i = 0; i < static_cast<int>(variable_names.size()); ++i)
+        {
+            variable_name_string += variable_names[i];
+            if (i < static_cast<int>(variable_names.size()) - 1)
+            {
+                variable_name_string += " ";
+            }
+        }
+        
         /*
          * Open the file and write the tecplot datafile  header information
          */
         INTEGER4 i = TECINI142((char*)"DATASET",
-            (char*)"x y z field",  // NOTE: Make sure and change valueLocation above if this changes.
-            (char*)file_name_full.c_str(),
-            (char*)".",
+            (char*) variable_name_string.c_str(), // NOTE: Make sure and change valueLocation above if this changes.
+            (char*) file_name_full.c_str(),
+            (char*) ".",
             &file_format,
             &file_type,
             &debug,
@@ -444,13 +606,8 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
         INTEGER4 f_nmode   = 0; // Not used.
         INTEGER4 shr_conn  = 0; // Not used.
         
-          // cell-centered: 0, nodal: 1
-        int valueLocation[] = {
-            1, // x
-            1, // y
-            1, // z
-            1 // field
-        };
+        // cell-centered: 0, nodal: 1
+        const std::vector<int> valueLocation(static_cast<int>(variable_names.size()), 1);
         
         /*
          * Write the zone header information.
@@ -469,12 +626,12 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
             &is_block,
             &n_fconns,
             &f_nmode,
-            0,              /* TotalNumFaceNodes */
-            0,              /* NumConnectedBoundaryFaces */
-            0,              /* TotalNumBoundaryConnections */
-            NULL,           /* PassiveVarList */
-            valueLocation,  /* ValueLocation = Nodal */
-            NULL,           /* SharVarFromZone */
+            0,                     /* TotalNumFaceNodes */
+            0,                     /* NumConnectedBoundaryFaces */
+            0,                     /* TotalNumBoundaryConnections */
+            NULL,                  /* PassiveVarList */
+            valueLocation.data(),  /* ValueLocation = Nodal */
+            NULL,                  /* SharVarFromZone */
             &shr_conn);
         
         /*
@@ -482,14 +639,20 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
          */
         
         std::vector<int> connectivity_array;
-        std::vector<double> x, y, z, field;
+        std::vector<double> x, y, z;
+        std::vector<double> node_normal_x, node_normal_y, node_normal_z;
         
-        for (const auto& node : nodes)
+        for (int ni = 0; ni < num_nodes; ni++)
         {
+            const auto& node = nodes[ni];
+            const auto& normal_node = normal_nodes[ni];
+            
             x.push_back(double(node[0]));
             y.push_back(double(node[1]));
             z.push_back(double(node[2]));
-            field.push_back(0.0);
+            node_normal_x.push_back(double(normal_node[0]));
+            node_normal_y.push_back(double(normal_node[1]));
+            node_normal_z.push_back(double(normal_node[2]));
         }
         
         for (const auto& conn : connectivities)
@@ -501,11 +664,13 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
         }
         INTEGER4 connectivity_count = static_cast<INTEGER4>(connectivities.size())*3;
         
-        
-        i = TECDAT142(&num_nodes, x.data(),     &d_is_double);
-        i = TECDAT142(&num_nodes, y.data(),     &d_is_double);
-        i = TECDAT142(&num_nodes, z.data(),     &d_is_double);
-        i = TECDAT142(&num_nodes, field.data(), &d_is_double);
+        i = TECDAT142(&num_nodes, x.data(),             &d_is_double);
+        i = TECDAT142(&num_nodes, y.data(),             &d_is_double);
+        i = TECDAT142(&num_nodes, z.data(),             &d_is_double);
+        i = TECDAT142(&num_nodes, node_normal_x.data(), &d_is_double);
+        i = TECDAT142(&num_nodes, node_normal_y.data(), &d_is_double);
+        i = TECDAT142(&num_nodes, node_normal_z.data(), &d_is_double);
+        i = TECDAT142(&num_nodes, dx_grid.data(),       &d_is_double);
         
         i = TECNODE142(&connectivity_count, connectivity_array.data());
          

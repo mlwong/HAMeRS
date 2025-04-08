@@ -558,7 +558,8 @@ class Euler:
         /**
          * Output the surface data.
          */
-         void writePlotSurfaceData(
+        void writePlotSurfaceData(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const std::string& dump_directory_name,
             const int step_num,
             const double time);

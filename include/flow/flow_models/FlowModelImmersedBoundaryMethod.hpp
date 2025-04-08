@@ -135,6 +135,13 @@ class FlowModelImmersedBoundaryMethod
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
+         * Compute the data on the surface triangulation.
+         */
+        void computeSurfaceTriangulationData(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
          * Output the surface triangulation with surface data.
          */
         void writeSurfaceTriangulationWithData(const std::string& file_name) const;
@@ -420,6 +427,12 @@ class FlowModelImmersedBoundaryMethod
         static HAMERS_SHARED_PTR<pdat::CellVariable<int> > s_variable_mask;
         static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_wall_distance;
         static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_surface_normal;
+        
+        /*
+         * Data for the surface triangulation if needed.
+         */
+        
+        std::vector<double> dx_grid;
         
 };
 

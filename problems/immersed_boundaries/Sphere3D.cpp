@@ -8,8 +8,8 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
     const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_wall_distance,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_surface_normal)
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal)
 {
     NULL_USE(data_time);
     
@@ -35,11 +35,11 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
     /*
     * Get the pointers to the data.
     */
-    int* mask      = data_mask->getPointer(0);
-    double* dist   = data_wall_distance->getPointer(0);
-    double* norm_0 = data_surface_normal->getPointer(0);
-    double* norm_1 = data_surface_normal->getPointer(1);
-    double* norm_2 = data_surface_normal->getPointer(2);
+    int* mask    = data_mask->getPointer(0);
+    Real* dist   = data_wall_distance->getPointer(0);
+    Real* norm_0 = data_surface_normal->getPointer(0);
+    Real* norm_1 = data_surface_normal->getPointer(1);
+    Real* norm_2 = data_surface_normal->getPointer(2);
     
     /*
     * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
@@ -63,19 +63,14 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
      ************************************************/
     
     /*
-    * Set the parameters of the sphere here.
-    */
+     * Set the parameters of the sphere here.
+     */
     
-    const double half = double(1)/double(2);
-    
-    /*
-    * These will be read from the input file.
-    */
-    
-    Real radius_c = half;  
-    Real x_c = Real(1); 
-    Real y_c = Real(1); 
-    Real z_c = Real(1); 
+    // These will be read from the input file.
+    double x_c      = 1.0; 
+    double y_c      = 1.0; 
+    double z_c      = 1.0; 
+    double radius_c = 0.5;
     
     if (d_initial_conditions_db != nullptr)
     {
@@ -83,10 +78,10 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
         TBOX_ASSERT(d_initial_conditions_db->keyExists("y_c"));
         TBOX_ASSERT(d_initial_conditions_db->keyExists("z_c"));
         
-        x_c     = d_initial_conditions_db->getReal("x_c");
-        y_c     = d_initial_conditions_db->getReal("y_c");
-        z_c     = d_initial_conditions_db->getReal("z_c");
-        radius_c = d_initial_conditions_db->getReal("radius");
+        x_c      = d_initial_conditions_db->getDouble("x_c");
+        y_c      = d_initial_conditions_db->getDouble("y_c");
+        z_c      = d_initial_conditions_db->getDouble("z_c");
+        radius_c = d_initial_conditions_db->getDouble("radius");
     }
     
     for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++) 
@@ -117,9 +112,9 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                 
                 if (radius < radius_c)  // Condition that should be satisfied to be in sphere
                 {   
-                    double x_p = double(0); // x coordinates on the cylinder where y = x[1] and z = x[2].
-                    double y_p = double(0); // y coordinates on the cylinder where x = x[0] and z = x[2].
-                    double z_p = double(0); // z coordinates on the cylinder where x = x[0] and y = x[1].
+                    double x_p; // x coordinates on the cylinder where y = x[1] and z = x[2].
+                    double y_p; // y coordinates on the cylinder where x = x[0] and z = x[2].
+                    double z_p; // z coordinates on the cylinder where x = x[0] and y = x[1].
                     
                     // For checking ghost cell for convective flux.
                     if (x[0] > x_c)
@@ -151,58 +146,58 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                     // For checking ghost cell for viscous flux.
                     // Check first diagonal ghost cell.
                     double x_d[3];
-                    x_d[0] = patch_xlo[0] + (double(i+1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j+1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k+1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
+                    x_d[0] = patch_xlo[0] + (double(i + 1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
+                    x_d[1] = patch_xlo[1] + (double(j + 1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
+                    x_d[2] = patch_xlo[2] + (double(k + 1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
                     double radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
                     bool is_corner_ghost = radius_d > radius_c;
                     
                     // Check second diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i+1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j+1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k-1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
+                    x_d[0] = patch_xlo[0] + (double(i + 1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
+                    x_d[1] = patch_xlo[1] + (double(j + 1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
+                    x_d[2] = patch_xlo[2] + (double(k - 1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
                     radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
                     is_corner_ghost |= radius_d > radius_c;
                     
                     // Check third diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i+1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j-1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k+1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
+                    x_d[0] = patch_xlo[0] + (double(i + 1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
+                    x_d[1] = patch_xlo[1] + (double(j - 1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
+                    x_d[2] = patch_xlo[2] + (double(k + 1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
                     radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
                     is_corner_ghost |= radius_d > radius_c;
                     
                     // Check fourth diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i+1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j-1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k-1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
+                    x_d[0] = patch_xlo[0] + (double(i + 1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
+                    x_d[1] = patch_xlo[1] + (double(j - 1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
+                    x_d[2] = patch_xlo[2] + (double(k - 1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
                     radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
                     is_corner_ghost |= radius_d > radius_c;
                     
                     // Check fifth diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i-1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j+1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k+1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
+                    x_d[0] = patch_xlo[0] + (double(i - 1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
+                    x_d[1] = patch_xlo[1] + (double(j + 1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
+                    x_d[2] = patch_xlo[2] + (double(k + 1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
                     radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
                     is_corner_ghost |= radius_d > radius_c;
                     
                     // Check sixth diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i-1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j+1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k-1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
+                    x_d[0] = patch_xlo[0] + (double(i - 1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
+                    x_d[1] = patch_xlo[1] + (double(j + 1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
+                    x_d[2] = patch_xlo[2] + (double(k - 1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
                     radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
                     is_corner_ghost |= radius_d > radius_c;
                     
                     // Check seventh diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i-1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j-1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k+1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
+                    x_d[0] = patch_xlo[0] + (double(i - 1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
+                    x_d[1] = patch_xlo[1] + (double(j - 1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
+                    x_d[2] = patch_xlo[2] + (double(k + 1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
                     radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
                     is_corner_ghost |= radius_d > radius_c;
                     
                     // Check eighth diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i-1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j-1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k-1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
+                    x_d[0] = patch_xlo[0] + (double(i - 1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
+                    x_d[1] = patch_xlo[1] + (double(j - 1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
+                    x_d[2] = patch_xlo[2] + (double(k - 1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
                     radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
                     is_corner_ghost |= radius_d > radius_c;
                     
@@ -211,28 +206,28 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                         (fabs(z_p - x[2]) < (double(d_num_immersed_boundary_ghosts[2]))*dx[2]) ||
                         is_corner_ghost)
                     {
-                        mask[idx]   = int(IB_MASK::IB_GHOST); 
-                        dist[idx]   = radius_c - radius; 
-                        norm_0[idx] =  (x[0] - x_c)/radius; // cos(theta) * sin(phi); 
-                        norm_1[idx] =  (x[1] - y_c)/radius; // sin(theta) * sin(phi);
-                        norm_2[idx] =  (x[2] - z_c)/radius; // cos(phi);
+                        mask[idx]   = int(IB_MASK::IB_GHOST);
+                        dist[idx]   = Real(radius_c - radius);
+                        norm_0[idx] = Real((x[0] - x_c)/radius); // cos(theta) * sin(phi); 
+                        norm_1[idx] = Real((x[1] - y_c)/radius); // sin(theta) * sin(phi);
+                        norm_2[idx] = Real((x[2] - z_c)/radius); // cos(phi);
                     }
                     else
                     {
                         mask[idx]   = int(IB_MASK::BODY); 
-                        dist[idx]   = double(0);
-                        norm_0[idx] = double(0);
-                        norm_1[idx] = double(0);
-                        norm_2[idx] = double(0);
+                        dist[idx]   = Real(0);
+                        norm_0[idx] = Real(0);
+                        norm_1[idx] = Real(0);
+                        norm_2[idx] = Real(0);
                     }
                 }
                 else 
                 {
                     mask[idx]   = int(IB_MASK::FLUID);
-                    dist[idx]   = double(0);
-                    norm_0[idx] = double(0);
-                    norm_1[idx] = double(0);
-                    norm_2[idx] = double(0);
+                    dist[idx]   = Real(0);
+                    norm_0[idx] = Real(0);
+                    norm_1[idx] = Real(0);
+                    norm_2[idx] = Real(0);
                 }
             }
         }   
@@ -242,17 +237,27 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
 
 void
 ImmersedBoundaries::generateSurfaceTriangulation(
-    std::vector<std::array<Real, 3> >& nodes,
+    std::vector<std::array<double, 3> >& nodes,
     std::vector<std::array<int, 3> >& connectivities,
+    std::vector<std::array<double, 3> >& normal_nodes,
     std::vector<int>& component_ids)
 {
-    const double x_cen = 0.0;
-    const double y_cen = 0.0;
-    const double z_cen = 0.0;
+    double x_cen         = 1.0;
+    double y_cen         = 1.0;
+    double z_cen         = 1.0;
+    double radius_sphere = 0.5;
+    double edge_length   = 0.008;
+    
+    if (d_initial_conditions_db != nullptr)
+    {
+        x_cen         = d_initial_conditions_db->getDouble("x_c");
+        y_cen         = d_initial_conditions_db->getDouble("y_c");
+        z_cen         = d_initial_conditions_db->getDouble("z_c");
+        radius_sphere = d_initial_conditions_db->getDouble("radius");
+        edge_length   = d_initial_conditions_db->getDoubleWithDefault("edge_length", edge_length);
+    }
     
     // Start creating the surface mesh.
-    const double radius_sphere = 0.5;
-    const double edge_length = 0.008;
     
     const int n_theta_init = 7;
     const double edge_length_tol = 1.5;
@@ -408,6 +413,13 @@ ImmersedBoundaries::generateSurfaceTriangulation(
         nodes[i][0] += x_cen;
         nodes[i][1] += y_cen;
         nodes[i][2] += z_cen;
+        const double radius_node =
+            std::sqrt(pow(nodes[i][0] - x_cen, 2) + pow(nodes[i][1] - y_cen, 2) + pow(nodes[i][2] - z_cen, 2));
+        const std::array<double, 3> normal_node = {
+            (nodes[i][0] - x_cen)/radius_node,
+            (nodes[i][1] - y_cen)/radius_node,
+            (nodes[i][2] - z_cen)/radius_node};
+        normal_nodes.push_back(normal_node);
     }
     
     for (int i = 0; i < connectivity_L.size(); ++i)
