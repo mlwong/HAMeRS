@@ -28,7 +28,6 @@ class FlowModelImmersedBoundaryMethodFourEqnConservative: public FlowModelImmers
             const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
             const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
-            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_d_ip,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal,
             const hier::IntVector& offset_cons_var,
             const hier::IntVector& offset_IB,

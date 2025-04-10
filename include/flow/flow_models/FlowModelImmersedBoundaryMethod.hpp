@@ -119,7 +119,6 @@ class FlowModelImmersedBoundaryMethod
             const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_var_data,
             const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
-            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_d_ip,
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal,
             const hier::IntVector& offset_cons_var,
             const hier::IntVector& offset_IB,
@@ -134,6 +133,11 @@ class FlowModelImmersedBoundaryMethod
         HAMERS_SHARED_PTR<pdat::CellData<int> >
         getCellDataOfImmersedBoundaryMask(
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Output the surface triangulation with surface data.
+         */
+        void writeSurfaceTriangulationWithData(const std::string& file_name) const;
         
     protected:
         /*
@@ -215,10 +219,6 @@ class FlowModelImmersedBoundaryMethod
             int& idx_BR,
             int& idx_TL,
             int& idx_TR,
-            int& idx_IB_BL,
-            int& idx_IB_BR,
-            int& idx_IB_TL,
-            int& idx_IB_TR,
             Real& x_ip_BL,
             Real& y_ip_BL,
             const Real& x_ip,
@@ -228,9 +228,6 @@ class FlowModelImmersedBoundaryMethod
             const int& offset_0,
             const int& offset_1,
             const int& ghostcell_dim_0,
-            const int& offset_0_IB,
-            const int& offset_1_IB,
-            const int& ghostcell_dim_0_IB,
             const Real& dx,
             const Real& dx_inv)
         {
@@ -238,11 +235,6 @@ class FlowModelImmersedBoundaryMethod
             
             const int ip_i = int(floor((x_ip - patch_xlo_0 - half * dx)*dx_inv));
             const int ip_j = int(floor((y_ip - patch_xlo_1 - half * dx)*dx_inv));
-
-            idx_IB_BL  = (ip_i     + offset_0_IB) + (ip_j     + offset_1_IB) * ghostcell_dim_0_IB;
-            idx_IB_BR  = (ip_i + 1 + offset_0_IB) + (ip_j     + offset_1_IB) * ghostcell_dim_0_IB;
-            idx_IB_TL  = (ip_i     + offset_0_IB) + (ip_j + 1 + offset_1_IB) * ghostcell_dim_0_IB;
-            idx_IB_TR  = (ip_i + 1 + offset_0_IB) + (ip_j + 1 + offset_1_IB) * ghostcell_dim_0_IB;
             
             idx_BL  = (ip_i     + offset_0) + (ip_j     + offset_1) * ghostcell_dim_0;
             idx_BR  = (ip_i + 1 + offset_0) + (ip_j     + offset_1) * ghostcell_dim_0;
@@ -291,14 +283,6 @@ class FlowModelImmersedBoundaryMethod
             int& idx_cons_var_RBF,
             int& idx_cons_var_LTF,
             int& idx_cons_var_RTF,
-            int& idx_IB_LBK,
-            int& idx_IB_RBK,
-            int& idx_IB_LTK,
-            int& idx_IB_RTK,
-            int& idx_IB_LBF,
-            int& idx_IB_RBF,
-            int& idx_IB_LTF,
-            int& idx_IB_RTF,
             Real& x_ip_LBK,
             Real& y_ip_LBK,
             Real& z_ip_LBK,
@@ -313,11 +297,6 @@ class FlowModelImmersedBoundaryMethod
             const int& offset_2,
             const int& ghostcell_dim_0,
             const int& ghostcell_dim_1,
-            const int& offset_0_IB,
-            const int& offset_1_IB,
-            const int& offset_2_IB,
-            const int& ghostcell_dim_0_IB,
-            const int& ghostcell_dim_1_IB,
             const Real& dx,
             const Real& dx_inv)
         {
@@ -326,15 +305,6 @@ class FlowModelImmersedBoundaryMethod
             const int ip_i = int(floor((x_ip - patch_xlo_0 - half * dx)*dx_inv));
             const int ip_j = int(floor((y_ip - patch_xlo_1 - half * dx)*dx_inv));
             const int ip_k = int(floor((z_ip - patch_xlo_2 - half * dx)*dx_inv));
-
-            idx_IB_LBK = (ip_i     + offset_0_IB) + (ip_j     + offset_1_IB) * ghostcell_dim_0_IB + (ip_k     + offset_2_IB) * ghostcell_dim_0_IB * ghostcell_dim_1_IB;
-            idx_IB_RBK = (ip_i + 1 + offset_0_IB) + (ip_j     + offset_1_IB) * ghostcell_dim_0_IB + (ip_k     + offset_2_IB) * ghostcell_dim_0_IB * ghostcell_dim_1_IB;
-            idx_IB_LTK = (ip_i     + offset_0_IB) + (ip_j + 1 + offset_1_IB) * ghostcell_dim_0_IB + (ip_k     + offset_2_IB) * ghostcell_dim_0_IB * ghostcell_dim_1_IB;
-            idx_IB_RTK = (ip_i + 1 + offset_0_IB) + (ip_j + 1 + offset_1_IB) * ghostcell_dim_0_IB + (ip_k     + offset_2_IB) * ghostcell_dim_0_IB * ghostcell_dim_1_IB;
-            idx_IB_LBF = (ip_i     + offset_0_IB) + (ip_j     + offset_1_IB) * ghostcell_dim_0_IB + (ip_k + 1 + offset_2_IB) * ghostcell_dim_0_IB * ghostcell_dim_1_IB;
-            idx_IB_RBF = (ip_i + 1 + offset_0_IB) + (ip_j     + offset_1_IB) * ghostcell_dim_0_IB + (ip_k + 1 + offset_2_IB) * ghostcell_dim_0_IB * ghostcell_dim_1_IB;
-            idx_IB_LTF = (ip_i     + offset_0_IB) + (ip_j + 1 + offset_1_IB) * ghostcell_dim_0_IB + (ip_k + 1 + offset_2_IB) * ghostcell_dim_0_IB * ghostcell_dim_1_IB;
-            idx_IB_RTF = (ip_i + 1 + offset_0_IB) + (ip_j + 1 + offset_1_IB) * ghostcell_dim_0_IB + (ip_k + 1 + offset_2_IB) * ghostcell_dim_0_IB * ghostcell_dim_1_IB;
             
             idx_cons_var_LBK = (ip_i     + offset_0) + (ip_j     + offset_1) * ghostcell_dim_0 + (ip_k     + offset_2) * ghostcell_dim_0 * ghostcell_dim_1;
             idx_cons_var_RBK = (ip_i + 1 + offset_0) + (ip_j     + offset_1) * ghostcell_dim_0 + (ip_k     + offset_2) * ghostcell_dim_0 * ghostcell_dim_1;
@@ -449,7 +419,6 @@ class FlowModelImmersedBoundaryMethod
          */
         static HAMERS_SHARED_PTR<pdat::CellVariable<int> > s_variable_mask;
         static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_wall_distance;
-        static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_d_ip;
         static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_surface_normal;
         
 };
