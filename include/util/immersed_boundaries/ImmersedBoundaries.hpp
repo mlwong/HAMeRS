@@ -20,6 +20,7 @@ namespace IB_MASK
 {
     enum TYPE { FLUID = 0,
                 IB_GHOST,
+                IB_GHOST_CORNER,
                 BODY };
 }
 
