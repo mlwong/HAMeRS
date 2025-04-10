@@ -81,7 +81,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         double* rho_Y_1 = partial_density->getPointer(1);
         double* rho_u   = momentum->getPointer(0);
         double* rho_v   = momentum->getPointer(1);
-	double* rho_w   = momentum->getPointer(2);
+        double* rho_w   = momentum->getPointer(2);
         double* E       = total_energy->getPointer(0);
         
         const double gamma = double(7)/double(5); // assume both gases have the same ratio of specific heat ratios
@@ -118,8 +118,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             {
                 for (int j = 0; j < patch_dims[1]; j++)
                 {
-		    for (int i = 0; i < patch_dims[0]; i++)
-		    {
+                    for (int i = 0; i < patch_dims[0]; i++)
+                    {
                         // Compute index into linear data array.
                         int idx_cell = i + j*patch_dims[0] +  k*patch_dims[0]*patch_dims[1];
                         
@@ -127,7 +127,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         double x[3];
                         x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
                         x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
-		        x[2] = patch_xlo[2] + (double(k) + double(1)/double(2))*dx[2];
+                        x[2] = patch_xlo[2] + (double(k) + double(1)/double(2))*dx[2];
                         
                         const double eta = eta_0*cos(2.0*M_PI/lambda*x[1])*cos(2.0*M_PI/lambda*x[2]);
                         
@@ -190,15 +190,14 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         
                         const double u = 0.0;
                         const double v = 0.0;
-		        const double w = 0.0;
+                        const double w = 0.0;
                         
                         rho_u[idx_cell] = rho*u;
                         rho_v[idx_cell] = rho*v;
-		        rho_w[idx_cell] = rho*w;
+                        rho_w[idx_cell] = rho*w;
                         E[idx_cell]     = p/(gamma - double(1)) + double(1)/double(2)*rho*(u*u + v*v + w*w);
- 
-     		    }
-		}
+                    }
+                }
             }
         }
     }

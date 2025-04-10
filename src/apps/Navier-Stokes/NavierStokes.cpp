@@ -5562,16 +5562,26 @@ void NavierStokes::getFromRestart()
 /**
  * Output the surface data.
  */
- void NavierStokes::writePlotSurfaceData(
+void NavierStokes::writePlotSurfaceData(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const std::string& dump_directory_name,
     const int step_num,
     const double time)
 {
     NULL_USE(time);
     
-#ifdef HAMERS_USE_TECIO
     if (d_use_immersed_boundaries)
     {
+        d_flow_model->setupImmersedBoundaryMethod();
+        
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        flow_model_immersed_boundary_method->computeSurfaceTriangulationData(
+            patch_hierarchy,
+            d_plot_context);
+        
+#ifdef HAMERS_USE_TECIO
         constexpr int zero_padding_length = 5;
         char temp_buf[128];
         sprintf(temp_buf, "%0*d", zero_padding_length, step_num);
@@ -5590,13 +5600,7 @@ void NavierStokes::getFromRestart()
         }
         SAMRAI::tbox::Utilities::recursiveMkdir(dump_dirname);
         
-        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
-            d_flow_model->getFlowModelImmersedBoundaryMethod();
-        
         flow_model_immersed_boundary_method->writeSurfaceTriangulationWithData(dump_dirname + name_prefix);
-    }
-#else
-    NULL_USE(dump_directory_name);
-    NULL_USE(step_num);
 #endif
+    }
 }

@@ -4090,7 +4090,8 @@ void Euler::getFromRestart()
 /**
  * Output the surface data.
  */
- void Euler::writePlotSurfaceData(
+void Euler::writePlotSurfaceData(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const std::string& dump_directory_name,
     const int step_num,
     const double time)

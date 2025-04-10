@@ -231,7 +231,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     x[2] = patch_xlo[2] + (Real(k) + Real(1)/Real(2))*Real(dx[2]);
                     
                     const Real half  = Real(1)/Real(2);
-		    const Real two_third = Real(2)/Real(3);
+                    const Real two_third = Real(2)/Real(3);
 
                     //Left sponge region
                     if (x[0] <= d_special_source_box_lo[0])

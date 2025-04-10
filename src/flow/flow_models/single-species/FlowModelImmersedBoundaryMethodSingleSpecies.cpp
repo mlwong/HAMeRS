@@ -692,13 +692,11 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
         
         const Real dx_inv = Real(1)/Real(dx[0]);
         
-	    /*
-        // First image point distance is set to sqrt(3)*dx + epsilon.
-        const Real d_ip = sqrt(Real(3))*Real(dx[0]) + HAMERS_REAL_EPSILON;
+        // // First image point distance is set to sqrt(3)*dx + epsilon.
+        // const Real d_ip = sqrt(Real(3))*Real(dx[0]) + HAMERS_REAL_EPSILON;
         
-        // Second image point distance is set to 2*(dx) - epsilon.
-        const Real d_ip2 = Real(2)*Real(dx[0]) - HAMERS_REAL_EPSILON;
-	    */
+        // // Second image point distance is set to 2*(dx) - epsilon.
+        // const Real d_ip2 = Real(2)*Real(dx[0]) - HAMERS_REAL_EPSILON;
         
         const Real& rho_u_body = d_mom_body[0];
         const Real& rho_v_body = d_mom_body[1];
@@ -759,16 +757,16 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                     
                     if (mask[idx_IB] == int(IB_MASK::IB_GHOST))  
                     {
-
+                        // First image point distance is set to sqrt(3)*dx + epsilon.
                         // const Real d_ip = sqrt(Real(3))*Real(dx[0]) + HAMERS_REAL_EPSILON - dist[idx_IB];
-                        // First image point distance.
-                        const Real d_ip = std::sqrt(norm_0[idx_IB]*norm_0[idx_IB] + norm_1[idx_IB]*norm_1[idx_IB] + norm_2[idx_IB]*norm_2[idx_IB])*Real(dx[0]) + HAMERS_REAL_EPSILON;
-
                         
+                        const Real d_ip = std::sqrt(norm_0[idx_IB]*norm_0[idx_IB] + norm_1[idx_IB]*norm_1[idx_IB] + norm_2[idx_IB]*norm_2[idx_IB])*Real(dx[0]) + HAMERS_REAL_EPSILON;
+                        
+                        // Second image point distance is set to 2*(dx) - epsilon.
                         //const Real d_ip2 = Real(2)*Real(dx[0]) - HAMERS_REAL_EPSILON - dist[idx_IB];
-                        // Second image point distance.
-			            const Real d_ip2 = d_ip + Real(0.25)*Real(dx[0]);   // Real(2)*Real(dx[0]) - HAMERS_REAL_EPSILON ;
-
+                        
+                        const Real d_ip2 = d_ip + Real(0.25)*Real(dx[0]);   // Real(2)*Real(dx[0]) - HAMERS_REAL_EPSILON ;
+                        
                         // Coordinates of the image point 1.
                         const Real x_ip = x[0] + (dist[idx_IB] + d_ip)*norm_0[idx_IB];
                         const Real y_ip = x[1] + (dist[idx_IB] + d_ip)*norm_1[idx_IB];
@@ -1045,15 +1043,16 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                                 w_ip,
                                 d_ip,
                                 dist[idx_IB]);
-			    if (fabs(u_gc) <= HAMERS_REAL_EPSILON)
-			    {
-				u_gc = Real(0);
-			    }
-			    if (fabs(v_gc) <= HAMERS_REAL_EPSILON)
+                            
+                            if (fabs(u_gc) <= HAMERS_REAL_EPSILON)
+                            {
+                                u_gc = Real(0);
+                            }
+                            if (fabs(v_gc) <= HAMERS_REAL_EPSILON)
                             {
                                 v_gc = Real(0);
                             }
-			    if (fabs(w_gc) <= HAMERS_REAL_EPSILON)
+                            if (fabs(w_gc) <= HAMERS_REAL_EPSILON)
                             {
                                 w_gc = Real(0);
                             }

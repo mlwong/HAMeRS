@@ -745,12 +745,21 @@ void runSimulation(
                     {
                         case EULER:
                         {
-                            Euler_app->writePlotSurfaceData(dump_directory_name, iteration_num, loop_time);
+                            Euler_app->writePlotSurfaceData(
+                                patch_hierarchy,
+                                dump_directory_name,
+                                iteration_num,
+                                loop_time);
+                            
                             break;
                         }
                         case NAVIER_STOKES:
                         {
-                            Navier_Stokes_app->writePlotSurfaceData(dump_directory_name, iteration_num, loop_time);
+                            Navier_Stokes_app->writePlotSurfaceData(
+                                patch_hierarchy,
+                                dump_directory_name,
+                                iteration_num,loop_time);
+                            
                             break;
                         }
                     }
@@ -800,12 +809,22 @@ void runSimulation(
                     {
                         case EULER:
                         {
-                            Euler_app->writePlotSurfaceData(dump_directory_name, iteration_num, loop_time);
+                            Euler_app->writePlotSurfaceData(
+                                patch_hierarchy,
+                                dump_directory_name,
+                                iteration_num,
+                                loop_time);
+                            
                             break;
                         }
                         case NAVIER_STOKES:
                         {
-                            Navier_Stokes_app->writePlotSurfaceData(dump_directory_name, iteration_num, loop_time);
+                            Navier_Stokes_app->writePlotSurfaceData(
+                                patch_hierarchy,
+                                dump_directory_name,
+                                iteration_num,
+                                loop_time);
+                            
                             break;
                         }
                     }

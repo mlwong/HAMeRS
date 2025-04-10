@@ -26,12 +26,13 @@ namespace IB_MASK
 // Create a struct to hold the surface triangulation data.
 struct SurfaceTriangulation
 {
-    std::vector<std::array<Real, 3> > nodes;
+    std::vector<std::array<double, 3> > nodes;
     std::vector<std::array<int, 3> > connectivities;
+    std::vector<std::array<double, 3> > normal_nodes;
     std::vector<int> component_ids;
-    std::vector<std::array<Real, 3> > normals;
-    std::vector<std::array<Real, 3> > centroids;
-    std::vector<Real> areas;
+    std::vector<std::array<double, 3> > normal_centroids;
+    std::vector<std::array<double, 3> > centroids;
+    std::vector<double> areas;
 };
 
 class ImmersedBoundaries
@@ -49,10 +50,10 @@ class ImmersedBoundaries
                 d_initial_conditions_db(initial_conditions_db),
                 d_grid_geometry(grid_geometry),
                 d_num_immersed_boundary_ghosts(-hier::IntVector::getOne(dim))
-                
         {
             generateSurfaceTriangulation(d_surface_triangulation.nodes,
                                          d_surface_triangulation.connectivities,
+                                         d_surface_triangulation.normal_nodes,
                                          d_surface_triangulation.component_ids);
             
             const int num_nodes = static_cast<int>(d_surface_triangulation.nodes.size());
@@ -63,13 +64,13 @@ class ImmersedBoundaries
             {
                 TBOX_ERROR(d_object_name
                     << ": ImmersedBoundaries::"
-                    << "generateSurfaceTriangulation()\n"
+                    << "ImmersedBoundaries()\n"
                     << "Number of centroids and number of component ids are not the same."
                     << std::endl);
             }
             
-            // Compute the surface normals, centroids and areas.
-            d_surface_triangulation.normals.resize(num_centroid);
+            // Compute the surface normal_centroids, centroids and areas.
+            d_surface_triangulation.normal_centroids.resize(num_centroid);
             d_surface_triangulation.centroids.resize(num_centroid);
             d_surface_triangulation.areas.resize(num_centroid);
             
@@ -83,37 +84,37 @@ class ImmersedBoundaries
                 d_surface_triangulation.centroids[i][0] =
                     (d_surface_triangulation.nodes[node_0][0] +
                      d_surface_triangulation.nodes[node_1][0] +
-                     d_surface_triangulation.nodes[node_2][0]) / Real(3);
+                     d_surface_triangulation.nodes[node_2][0])/3.0;
                 
                 d_surface_triangulation.centroids[i][1] =
                     (d_surface_triangulation.nodes[node_0][1] +
                      d_surface_triangulation.nodes[node_1][1] +
-                     d_surface_triangulation.nodes[node_2][1]) / Real(3);
+                     d_surface_triangulation.nodes[node_2][1])/3.0;
                 
                 d_surface_triangulation.centroids[i][2] =
                     (d_surface_triangulation.nodes[node_0][2] +
                      d_surface_triangulation.nodes[node_1][2] +
-                     d_surface_triangulation.nodes[node_2][2]) / Real(3);
+                     d_surface_triangulation.nodes[node_2][2])/3.0;
                 
                 // Compute the areas.
-                const Real x01[3] = {d_surface_triangulation.nodes[node_1][0] - d_surface_triangulation.nodes[node_0][0],
+                const double x01[3] = {d_surface_triangulation.nodes[node_1][0] - d_surface_triangulation.nodes[node_0][0],
                                       d_surface_triangulation.nodes[node_1][1] - d_surface_triangulation.nodes[node_0][1],
                                       d_surface_triangulation.nodes[node_1][2] - d_surface_triangulation.nodes[node_0][2]};
                 
-                const Real x02[3] = {d_surface_triangulation.nodes[node_2][0] - d_surface_triangulation.nodes[node_0][0],
+                const double x02[3] = {d_surface_triangulation.nodes[node_2][0] - d_surface_triangulation.nodes[node_0][0],
                                       d_surface_triangulation.nodes[node_2][1] - d_surface_triangulation.nodes[node_0][1],
                                       d_surface_triangulation.nodes[node_2][2] - d_surface_triangulation.nodes[node_0][2]};
                 
-                // Compute the normals vector.
-                const Real cross_product[3] =
+                // Compute the normal_centroids vector.
+                const double cross_product[3] =
                     {x01[1]*x02[2]-x01[2]*x02[1], x01[2]*x02[0]-x01[0]*x02[2], x01[0]*x02[1]-x01[1]*x02[0]};
-                const Real norm = std::sqrt(cross_product[0]*cross_product[0] +
-                                            cross_product[1]*cross_product[1] +
-                                            cross_product[2]*cross_product[2]);
-                d_surface_triangulation.normals[i][0] = cross_product[0] / norm;
-                d_surface_triangulation.normals[i][1] = cross_product[1] / norm;
-                d_surface_triangulation.normals[i][2] = cross_product[2] / norm;
-                d_surface_triangulation.areas[i] = Real(0.5) * norm;
+                const double norm = std::sqrt(cross_product[0]*cross_product[0] +
+                                              cross_product[1]*cross_product[1] +
+                                              cross_product[2]*cross_product[2]);
+                d_surface_triangulation.normal_centroids[i][0] = cross_product[0]/norm;
+                d_surface_triangulation.normal_centroids[i][1] = cross_product[1]/norm;
+                d_surface_triangulation.normal_centroids[i][2] = cross_product[2]/norm;
+                d_surface_triangulation.areas[i] = 0.5 * norm;
             }
         }
         
@@ -233,8 +234,9 @@ class ImmersedBoundaries
             const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal);
         
         void generateSurfaceTriangulation(
-            std::vector<std::array<Real, 3> >& nodes,
+            std::vector<std::array<double, 3> >& nodes,
             std::vector<std::array<int, 3> >& connectivities,
+            std::vector<std::array<double, 3> >& normal_nodes,
             std::vector<int>& component_ids);
         
         /*
