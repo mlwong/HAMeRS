@@ -116,7 +116,9 @@ FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod(
     
     if (num_nodes > 0)
     {
-        dx_grid.assign(num_nodes, std::numeric_limits<double>::max());
+        d_surface_triangulation_dx_grid.assign(num_nodes, std::numeric_limits<double>::max());
+        d_surface_triangulation_coor_ip_1.assign(num_nodes, {0.0, 0.0, 0.0});
+        d_surface_triangulation_coor_ip_2.assign(num_nodes, {0.0, 0.0, 0.0});
     }
 }
 
@@ -409,7 +411,7 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationData(
     // HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
-    const std::vector<std::array<Real, 3> >& nodes = surface_triangulation.nodes;
+    const std::vector<std::array<double, 3> >& nodes = surface_triangulation.nodes;
     
     if (nodes.empty())
     {
@@ -417,8 +419,8 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationData(
     }
     
     const int num_nodes = static_cast<int>(nodes.size());
-    dx_grid.assign(num_nodes, std::numeric_limits<Real>::max());
-    std::vector<double> dx_grid_local(num_nodes, std::numeric_limits<Real>::max());
+    d_surface_triangulation_dx_grid.assign(num_nodes, std::numeric_limits<double>::max());
+    std::vector<double> dx_grid_local(num_nodes, std::numeric_limits<double>::max());
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
@@ -470,14 +472,13 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationData(
                 
                 for (int ni = 0; ni < num_nodes; ++ni)
                 {
-                    const std::array<Real, 3>& node = nodes[ni];
+                    const std::array<double, 3>& node = nodes[ni];
                     
-                    for (int di = 0; di < d_dim.getValue(); ++di)
+                    if ((node[0] >= patch_xlo[0] && node[0] <= patch_xhi[0]) &&
+                        (node[1] >= patch_xlo[1] && node[1] <= patch_xhi[1]) &&
+                        (node[2] >= patch_xlo[2] && node[2] <= patch_xhi[2]))
                     {
-                        if (node[di] >= patch_xlo[di] && node[di] <= patch_xhi[di])
-                        {
-                            dx_grid_local[ni] = std::min(dx_grid_local[ni], dx[0]);
-                        }
+                        dx_grid_local[ni] = std::min(dx_grid_local[ni], dx[0]);
                     }
                 }
             }
@@ -487,26 +488,141 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationData(
         
         mpi.Allreduce(
             &dx_grid_local[0],
-            &dx_grid[0],
+            &d_surface_triangulation_dx_grid[0],
             num_nodes,
             MPI_DOUBLE,
             MPI_MIN);
         
         if (mpi.getRank() == 0)
         {
-            // Make sure dx_grid is uniform.
+            // Make sure d_surface_triangulation_dx_grid is uniform.
             double dx_grid_min = std::numeric_limits<double>::max();
             double dx_grid_max = std::numeric_limits<double>::min();
             for (int ni = 0; ni < num_nodes; ++ni)
             {
-                dx_grid_min = std::min(dx_grid_min, dx_grid[ni]);
-                dx_grid_max = std::max(dx_grid_max, dx_grid[ni]);
+                dx_grid_min = std::min(dx_grid_min, d_surface_triangulation_dx_grid[ni]);
+                dx_grid_max = std::max(dx_grid_max, d_surface_triangulation_dx_grid[ni]);
             }
             if (std::abs(dx_grid_max - dx_grid_min) > 10.0*std::numeric_limits<double>::epsilon())
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationData()\n"
                     << "The surfce triangulation is not in the same grid level."
+                    << std::endl);
+            }
+        }
+        
+        const std::vector<std::array<double, 3> >& normal_nodes = surface_triangulation.normal_nodes;
+        
+        const double c_ip_1 = sqrt(3.0);
+        const double c_ip_2 = 2.0;
+        
+        for (int ni = 0; ni < num_nodes; ++ni)
+        {
+            const std::array<double, 3>& node = nodes[ni];
+            const std::array<double, 3>& normal_node = normal_nodes[ni];
+            const double dx_grid = d_surface_triangulation_dx_grid[ni];
+            
+            d_surface_triangulation_coor_ip_1[ni][0] = node[0] + normal_node[0]*c_ip_1*dx_grid;
+            d_surface_triangulation_coor_ip_1[ni][1] = node[1] + normal_node[1]*c_ip_1*dx_grid;
+            d_surface_triangulation_coor_ip_1[ni][2] = node[2] + normal_node[2]*c_ip_1*dx_grid;
+            
+            d_surface_triangulation_coor_ip_2[ni][0] = node[0] + normal_node[0]*c_ip_2*dx_grid;
+            d_surface_triangulation_coor_ip_2[ni][1] = node[1] + normal_node[1]*c_ip_2*dx_grid;
+            d_surface_triangulation_coor_ip_2[ni][2] = node[2] + normal_node[2]*c_ip_2*dx_grid;
+        }
+        
+        std::vector<double> ip_1_dx_grid(num_nodes, std::numeric_limits<Real>::max());
+        std::vector<double> ip_2_dx_grid(num_nodes, std::numeric_limits<Real>::max());
+        std::vector<double> ip_1_dx_grid_local(num_nodes, std::numeric_limits<Real>::max());
+        std::vector<double> ip_2_dx_grid_local(num_nodes, std::numeric_limits<Real>::max());
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                const double* const patch_xlo = patch_geom->getXLower();
+                const double* const patch_xhi = patch_geom->getXUpper();
+                
+                for (int ni = 0; ni < num_nodes; ++ni)
+                {
+                    const std::array<Real, 3>& coor_ip_1 = d_surface_triangulation_coor_ip_1[ni];
+                    const std::array<Real, 3>& coor_ip_2 = d_surface_triangulation_coor_ip_2[ni];
+                    
+                    if ((coor_ip_1[0] >= patch_xlo[0] && coor_ip_1[0] <= patch_xhi[0]) &&
+                        (coor_ip_1[1] >= patch_xlo[1] && coor_ip_1[1] <= patch_xhi[1]) &&
+                        (coor_ip_1[2] >= patch_xlo[2] && coor_ip_1[2] <= patch_xhi[2]))
+                    {
+                        ip_1_dx_grid_local[ni] = std::min(ip_1_dx_grid_local[ni], dx[0]);
+                    }
+                    if ((coor_ip_2[0] >= patch_xlo[0] && coor_ip_2[0] <= patch_xhi[0]) &&
+                        (coor_ip_2[1] >= patch_xlo[1] && coor_ip_2[1] <= patch_xhi[1]) &&
+                        (coor_ip_2[2] >= patch_xlo[2] && coor_ip_2[2] <= patch_xhi[2]))
+                    {
+                        ip_2_dx_grid_local[ni] = std::min(ip_2_dx_grid_local[ni], dx[0]);
+                    }
+                }
+            }
+        }
+        
+        mpi.Allreduce(
+            &ip_1_dx_grid_local[0],
+            &ip_1_dx_grid[0],
+            num_nodes,
+            MPI_DOUBLE,
+            MPI_MIN);
+        
+        mpi.Allreduce(
+            &ip_2_dx_grid_local[0],
+            &ip_2_dx_grid[0],
+            num_nodes,
+            MPI_DOUBLE,
+            MPI_MIN);
+        
+        if (mpi.getRank() == 0)
+        {
+            // Make sure d_surface_triangulation_dx_grid is uniform.
+            double ip_1_dx_grid_min = std::numeric_limits<double>::max();
+            double ip_1_dx_grid_max = std::numeric_limits<double>::min();
+            double ip_2_dx_grid_min = std::numeric_limits<double>::max();
+            double ip_2_dx_grid_max = std::numeric_limits<double>::min();
+            for (int ni = 0; ni < num_nodes; ++ni)
+            {
+                ip_1_dx_grid_min = std::min(ip_1_dx_grid_min, ip_1_dx_grid[ni]);
+                ip_1_dx_grid_max = std::max(ip_1_dx_grid_max, ip_1_dx_grid[ni]);
+                
+                ip_2_dx_grid_min = std::min(ip_2_dx_grid_min, ip_2_dx_grid[ni]);
+                ip_2_dx_grid_max = std::max(ip_2_dx_grid_max, ip_2_dx_grid[ni]);
+            }
+            if (std::abs(ip_1_dx_grid_max - ip_1_dx_grid_min) > 10.0*std::numeric_limits<double>::epsilon())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationData()\n"
+                    << "The first image points are not in the same grid level."
+                    << std::endl);
+            }
+            if (std::abs(ip_2_dx_grid_max - ip_2_dx_grid_min) > 10.0*std::numeric_limits<double>::epsilon())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationData()\n"
+                    << "The second image points are not in the same grid level."
                     << std::endl);
             }
         }
@@ -568,7 +684,7 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
             "node_normal_x",
             "node_normal_y",
             "node_normal_z",
-            "dx_grid"
+            "d_surface_triangulation_dx_grid"
         };
         
         std::string variable_name_string = "";
@@ -644,8 +760,8 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
         
         for (int ni = 0; ni < num_nodes; ni++)
         {
-            const auto& node = nodes[ni];
-            const auto& normal_node = normal_nodes[ni];
+            const std::array<double, 3>& node = nodes[ni];
+            const std::array<double, 3>& normal_node = normal_nodes[ni];
             
             x.push_back(double(node[0]));
             y.push_back(double(node[1]));
@@ -664,13 +780,13 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
         }
         INTEGER4 connectivity_count = static_cast<INTEGER4>(connectivities.size())*3;
         
-        i = TECDAT142(&num_nodes, x.data(),             &d_is_double);
-        i = TECDAT142(&num_nodes, y.data(),             &d_is_double);
-        i = TECDAT142(&num_nodes, z.data(),             &d_is_double);
-        i = TECDAT142(&num_nodes, node_normal_x.data(), &d_is_double);
-        i = TECDAT142(&num_nodes, node_normal_y.data(), &d_is_double);
-        i = TECDAT142(&num_nodes, node_normal_z.data(), &d_is_double);
-        i = TECDAT142(&num_nodes, dx_grid.data(),       &d_is_double);
+        i = TECDAT142(&num_nodes, x.data(),                               &d_is_double);
+        i = TECDAT142(&num_nodes, y.data(),                               &d_is_double);
+        i = TECDAT142(&num_nodes, z.data(),                               &d_is_double);
+        i = TECDAT142(&num_nodes, node_normal_x.data(),                   &d_is_double);
+        i = TECDAT142(&num_nodes, node_normal_y.data(),                   &d_is_double);
+        i = TECDAT142(&num_nodes, node_normal_z.data(),                   &d_is_double);
+        i = TECDAT142(&num_nodes, d_surface_triangulation_dx_grid.data(), &d_is_double);
         
         i = TECNODE142(&connectivity_count, connectivity_array.data());
          

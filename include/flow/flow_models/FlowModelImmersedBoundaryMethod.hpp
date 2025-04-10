@@ -432,7 +432,10 @@ class FlowModelImmersedBoundaryMethod
          * Data for the surface triangulation if needed.
          */
         
-        std::vector<double> dx_grid;
+        std::vector<double> d_surface_triangulation_dx_grid;
+        
+        std::vector<std::array<double, 3> > d_surface_triangulation_coor_ip_1;
+        std::vector<std::array<double, 3> > d_surface_triangulation_coor_ip_2;
         
 };
 

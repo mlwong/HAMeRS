@@ -413,6 +413,18 @@ ImmersedBoundaries::generateSurfaceTriangulation(
         nodes[i][0] += x_cen;
         nodes[i][1] += y_cen;
         nodes[i][2] += z_cen;
+        if (std::abs(nodes[i][0]) < HAMERS_EPSILON)
+        {
+            nodes[i][0] = HAMERS_EPSILON;
+        }
+        if (std::abs(nodes[i][1]) < HAMERS_EPSILON)
+        {
+            nodes[i][1] = HAMERS_EPSILON;
+        }
+        if (std::abs(nodes[i][2]) < HAMERS_EPSILON)
+        {
+            nodes[i][2] = HAMERS_EPSILON;
+        }
         const double radius_node =
             std::sqrt(pow(nodes[i][0] - x_cen, 2) + pow(nodes[i][1] - y_cen, 2) + pow(nodes[i][2] - z_cen, 2));
         const std::array<double, 3> normal_node = {
