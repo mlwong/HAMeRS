@@ -144,12 +144,9 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 spongeR = d_initial_conditions_db->getReal("spongeR");
                 spongeB = d_initial_conditions_db->getReal("spongeB");
                 spongeT = d_initial_conditions_db->getReal("spongeT");
-                spongeF = d_initial_conditions_db->getReal("spongeF");
-                spongeK = d_initial_conditions_db->getReal("spongeK");
-                // std::cout << std::setprecision(17) << u_inf << std::endl;
-                // std::cout << v_inf << std::endl;
-                // std::cout << rho_inf << std::endl;
-                // std::cout << p_inf << std::endl;
+                //spongeF = d_initial_conditions_db->getReal("spongeF");
+                //spongeK = d_initial_conditions_db->getReal("spongeK");
+                
             }
             for (int k = -num_ghosts_cons_var[2]; k < patch_dims[2] + num_ghosts_cons_var[2]; k++)
             {
@@ -216,15 +213,10 @@ NavierStokesInitialConditions::initializeDataOnPatch(
 
                         }
                         
-                        //rho_u[idx_cell] = rho_inf*u;
-                        //rho_v[idx_cell] = rho_inf*v;
-                        //rho_w[idx_cell] = rho_inf*w;
-                        //E[idx_cell]     = p/(gamma - Real(1)) + half*rho_inf*(u*u + v*v + w*w);
-                        
-                        rho_u[idx_cell] = rho_inf*u_inf;
-                        rho_v[idx_cell] = rho_inf*v_inf;
-                        rho_w[idx_cell] = rho_inf*w_inf;
-                        E[idx_cell]     = p_inf/(gamma - Real(1)) + half*rho_inf*(u_inf*u_inf + v_inf*v_inf + w_inf*w_inf);
+                        rho_u[idx_cell] = rho_inf*u;
+                        rho_v[idx_cell] = rho_inf*v;
+                        rho_w[idx_cell] = rho_inf*w;
+                        E[idx_cell]     = p_inf/(gamma - Real(1)) + half*rho_inf*(u * u + v * v + w * w);
                     }
                 }
             }    
