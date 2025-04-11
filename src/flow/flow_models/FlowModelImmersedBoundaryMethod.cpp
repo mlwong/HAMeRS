@@ -393,10 +393,177 @@ FlowModelImmersedBoundaryMethod::setConservativeVariablesCellDataImmersedBoundar
 
 
 /*
+ * Output the surface triangulation.
+ */
+void
+FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::string& file_name) const
+{
+#ifdef HAMERS_USE_TECIO
+    const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
+    
+    if (surface_triangulation.nodes.size() == 0)
+    {
+        TBOX_WARNING(d_object_name
+            << ": FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData()\n"
+            << "The surface triangulation is empty."
+            << " No surface file will be written."
+            << std::endl);
+        return;
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    if (mpi.getRank() == 0)
+    {
+        const std::vector<std::array<double, 3> >& nodes = surface_triangulation.nodes;
+        const std::vector<std::array<int, 3> >& connectivities = surface_triangulation.connectivities;
+        const std::vector<std::array<double, 3> >& normal_nodes = surface_triangulation.normal_nodes;
+        
+        // Check that size of nodes and normal_nodes are the same.
+        if (nodes.size() != normal_nodes.size())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData()\n"
+                << "The size of nodes and normal_nodes are not the same."
+                << std::endl);
+        }
+        
+        INTEGER4 num_nodes = static_cast<INTEGER4>(nodes.size());
+        INTEGER4 num_centroids = static_cast<INTEGER4>(connectivities.size());
+        
+        const std::string file_name_full = file_name + ".plt";
+        
+        INTEGER4 file_format = 0; // 0 == PLT, 1 == SZPLT
+        INTEGER4 file_type = 0; // FULL = 0, GRID = 1, SOLUTION = 2
+        INTEGER4 debug = 1;
+        INTEGER4 v_is_double = 1; // float = 0, double = 1
+        INTEGER4 d_is_double = 1; // float = 0, double = 1
+        
+        std::vector<std::string> variable_names = {
+            "x",
+            "y",
+            "z",
+            "node_normal_x",
+            "node_normal_y",
+            "node_normal_z",
+            "d_surface_triangulation_dx_grid"
+        };
+        
+        std::string variable_name_string = "";
+        for (int i = 0; i < static_cast<int>(variable_names.size()); ++i)
+        {
+            variable_name_string += variable_names[i];
+            if (i < static_cast<int>(variable_names.size()) - 1)
+            {
+                variable_name_string += " ";
+            }
+        }
+        
+        /*
+         * Open the file and write the tecplot datafile  header information
+         */
+        INTEGER4 i = TECINI142((char*)"DATASET",
+            (char*) variable_name_string.c_str(), // NOTE: Make sure and change valueLocation above if this changes.
+            (char*) file_name_full.c_str(),
+            (char*) ".",
+            &file_format,
+            &file_type,
+            &debug,
+            &v_is_double);
+        
+        INTEGER4 zone_type = 2; // FETRIANGLE
+        INTEGER4 num_faces = 1; // Not used.
+        INTEGER4 i_cell_max = 0; // Not used.
+        INTEGER4 j_cell_max = 0; // Not used.
+        INTEGER4 k_cell_max = 0; // Not used.
+        double sol_time = 0.0;
+        INTEGER4 strand_id = 0; // Static zone.
+        INTEGER4 parent_zn = 0; // No parent.
+        INTEGER4 is_block  = 1; // Block format.
+        INTEGER4 n_fconns  = 0; // Not used.
+        INTEGER4 f_nmode   = 0; // Not used.
+        INTEGER4 shr_conn  = 0; // Not used.
+        
+        // cell-centered: 0, nodal: 1
+        const std::vector<int> valueLocation(static_cast<int>(variable_names.size()), 1);
+        
+        /*
+         * Write the zone header information.
+         */
+        i = TECZNE142((char*)"Zone",
+            &zone_type,
+            &num_nodes,
+            &num_centroids,
+            &num_faces,
+            &i_cell_max,
+            &j_cell_max,
+            &k_cell_max,
+            &sol_time,
+            &strand_id,
+            &parent_zn,
+            &is_block,
+            &n_fconns,
+            &f_nmode,
+            0,                     /* TotalNumFaceNodes */
+            0,                     /* NumConnectedBoundaryFaces */
+            0,                     /* TotalNumBoundaryConnections */
+            NULL,                  /* PassiveVarList */
+            valueLocation.data(),  /* ValueLocation = Nodal */
+            NULL,                  /* SharVarFromZone */
+            &shr_conn);
+        
+        /*
+         * Write out the field data.
+         */
+        
+        std::vector<int> connectivity_array;
+        std::vector<double> x, y, z;
+        std::vector<double> node_normal_x, node_normal_y, node_normal_z;
+        
+        for (int ni = 0; ni < num_nodes; ni++)
+        {
+            const std::array<double, 3>& node = nodes[ni];
+            const std::array<double, 3>& normal_node = normal_nodes[ni];
+            
+            x.push_back(double(node[0]));
+            y.push_back(double(node[1]));
+            z.push_back(double(node[2]));
+            node_normal_x.push_back(double(normal_node[0]));
+            node_normal_y.push_back(double(normal_node[1]));
+            node_normal_z.push_back(double(normal_node[2]));
+        }
+        
+        for (const auto& conn : connectivities)
+        {
+            for (int i = 0; i < 3; ++i)
+            {
+                connectivity_array.push_back(conn[i]);
+            }
+        }
+        INTEGER4 connectivity_count = static_cast<INTEGER4>(connectivities.size())*3;
+        
+        i = TECDAT142(&num_nodes, x.data(),                               &d_is_double);
+        i = TECDAT142(&num_nodes, y.data(),                               &d_is_double);
+        i = TECDAT142(&num_nodes, z.data(),                               &d_is_double);
+        i = TECDAT142(&num_nodes, node_normal_x.data(),                   &d_is_double);
+        i = TECDAT142(&num_nodes, node_normal_y.data(),                   &d_is_double);
+        i = TECDAT142(&num_nodes, node_normal_z.data(),                   &d_is_double);
+        i = TECDAT142(&num_nodes, d_surface_triangulation_dx_grid.data(), &d_is_double);
+        
+        i = TECNODE142(&connectivity_count, connectivity_array.data());
+         
+        i = TECEND142();
+    }
+#endif
+}
+
+
+
+/*
  * Compute the data on the surface triangulation.
  */
 void
-FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationData(
+FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
@@ -627,170 +794,4 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationData(
             }
         }
     }
-}
-
-
-/*
- * Output the surface triangulation.
- */
-void
-FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::string& file_name) const
-{
-#ifdef HAMERS_USE_TECIO
-    const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
-    
-    if (surface_triangulation.nodes.size() == 0)
-    {
-        TBOX_WARNING(d_object_name
-            << ": FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData()\n"
-            << "The surface triangulation is empty."
-            << " No surface file will be written."
-            << std::endl);
-        return;
-    }
-    
-    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
-    
-    if (mpi.getRank() == 0)
-    {
-        const std::vector<std::array<double, 3> >& nodes = surface_triangulation.nodes;
-        const std::vector<std::array<int, 3> >& connectivities = surface_triangulation.connectivities;
-        const std::vector<std::array<double, 3> >& normal_nodes = surface_triangulation.normal_nodes;
-        
-        // Check that size of nodes and normal_nodes are the same.
-        if (nodes.size() != normal_nodes.size())
-        {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData()\n"
-                << "The size of nodes and normal_nodes are not the same."
-                << std::endl);
-        }
-        
-        INTEGER4 num_nodes = static_cast<INTEGER4>(nodes.size());
-        INTEGER4 num_centroids = static_cast<INTEGER4>(connectivities.size());
-        
-        const std::string file_name_full = file_name + ".plt";
-        
-        INTEGER4 file_format = 0; // 0 == PLT, 1 == SZPLT
-        INTEGER4 file_type = 0; // FULL = 0, GRID = 1, SOLUTION = 2
-        INTEGER4 debug = 1;
-        INTEGER4 v_is_double = 1; // float = 0, double = 1
-        INTEGER4 d_is_double = 1; // float = 0, double = 1
-        
-        std::vector<std::string> variable_names = {
-            "x",
-            "y",
-            "z",
-            "node_normal_x",
-            "node_normal_y",
-            "node_normal_z",
-            "d_surface_triangulation_dx_grid"
-        };
-        
-        std::string variable_name_string = "";
-        for (int i = 0; i < static_cast<int>(variable_names.size()); ++i)
-        {
-            variable_name_string += variable_names[i];
-            if (i < static_cast<int>(variable_names.size()) - 1)
-            {
-                variable_name_string += " ";
-            }
-        }
-        
-        /*
-         * Open the file and write the tecplot datafile  header information
-         */
-        INTEGER4 i = TECINI142((char*)"DATASET",
-            (char*) variable_name_string.c_str(), // NOTE: Make sure and change valueLocation above if this changes.
-            (char*) file_name_full.c_str(),
-            (char*) ".",
-            &file_format,
-            &file_type,
-            &debug,
-            &v_is_double);
-        
-        INTEGER4 zone_type = 2; // FETRIANGLE
-        INTEGER4 num_faces = 1; // Not used.
-        INTEGER4 i_cell_max = 0; // Not used.
-        INTEGER4 j_cell_max = 0; // Not used.
-        INTEGER4 k_cell_max = 0; // Not used.
-        double sol_time = 0.0;
-        INTEGER4 strand_id = 0; // Static zone.
-        INTEGER4 parent_zn = 0; // No parent.
-        INTEGER4 is_block  = 1; // Block format.
-        INTEGER4 n_fconns  = 0; // Not used.
-        INTEGER4 f_nmode   = 0; // Not used.
-        INTEGER4 shr_conn  = 0; // Not used.
-        
-        // cell-centered: 0, nodal: 1
-        const std::vector<int> valueLocation(static_cast<int>(variable_names.size()), 1);
-        
-        /*
-         * Write the zone header information.
-         */
-        i = TECZNE142((char*)"Zone",
-            &zone_type,
-            &num_nodes,
-            &num_centroids,
-            &num_faces,
-            &i_cell_max,
-            &j_cell_max,
-            &k_cell_max,
-            &sol_time,
-            &strand_id,
-            &parent_zn,
-            &is_block,
-            &n_fconns,
-            &f_nmode,
-            0,                     /* TotalNumFaceNodes */
-            0,                     /* NumConnectedBoundaryFaces */
-            0,                     /* TotalNumBoundaryConnections */
-            NULL,                  /* PassiveVarList */
-            valueLocation.data(),  /* ValueLocation = Nodal */
-            NULL,                  /* SharVarFromZone */
-            &shr_conn);
-        
-        /*
-         * Write out the field data.
-         */
-        
-        std::vector<int> connectivity_array;
-        std::vector<double> x, y, z;
-        std::vector<double> node_normal_x, node_normal_y, node_normal_z;
-        
-        for (int ni = 0; ni < num_nodes; ni++)
-        {
-            const std::array<double, 3>& node = nodes[ni];
-            const std::array<double, 3>& normal_node = normal_nodes[ni];
-            
-            x.push_back(double(node[0]));
-            y.push_back(double(node[1]));
-            z.push_back(double(node[2]));
-            node_normal_x.push_back(double(normal_node[0]));
-            node_normal_y.push_back(double(normal_node[1]));
-            node_normal_z.push_back(double(normal_node[2]));
-        }
-        
-        for (const auto& conn : connectivities)
-        {
-            for (int i = 0; i < 3; ++i)
-            {
-                connectivity_array.push_back(conn[i]);
-            }
-        }
-        INTEGER4 connectivity_count = static_cast<INTEGER4>(connectivities.size())*3;
-        
-        i = TECDAT142(&num_nodes, x.data(),                               &d_is_double);
-        i = TECDAT142(&num_nodes, y.data(),                               &d_is_double);
-        i = TECDAT142(&num_nodes, z.data(),                               &d_is_double);
-        i = TECDAT142(&num_nodes, node_normal_x.data(),                   &d_is_double);
-        i = TECDAT142(&num_nodes, node_normal_y.data(),                   &d_is_double);
-        i = TECDAT142(&num_nodes, node_normal_z.data(),                   &d_is_double);
-        i = TECDAT142(&num_nodes, d_surface_triangulation_dx_grid.data(), &d_is_double);
-        
-        i = TECNODE142(&connectivity_count, connectivity_array.data());
-         
-        i = TECEND142();
-    }
-#endif
 }

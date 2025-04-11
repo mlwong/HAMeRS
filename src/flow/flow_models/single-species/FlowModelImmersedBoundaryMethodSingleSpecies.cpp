@@ -336,13 +336,12 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                 
                 if (mask[idx_IB] == int(IB_MASK::IB_GHOST))
                 {
-
                     // First image point distance.
                     const Real d_ip = std::sqrt(norm_0[idx_IB]*norm_0[idx_IB] + norm_1[idx_IB]*norm_1[idx_IB])*Real(dx[0]) + HAMERS_REAL_EPSILON;
-
+                    
                     // Second image point distance.
                     const Real d_ip2 = d_ip + Real(0.25)*Real(dx[0]);   // Real(2)*Real(dx[0]) - HAMERS_REAL_EPSILON ;
-
+                    
                     // Coordinates of the image point 1.
                     const Real x_ip  = x[0] + (dist[idx_IB] + d_ip)*norm_0[idx_IB];
                     const Real y_ip  = x[1] + (dist[idx_IB] + d_ip)*norm_1[idx_IB];
@@ -1276,4 +1275,27 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
             }
         }
     }
+}
+
+
+/*
+ * Compute the data on the surface triangulation.
+ */
+void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationData(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    computeSurfaceTriangulationDataBase(
+        patch_hierarchy,
+        data_context);
+    
+    const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
+    const std::vector<std::array<double, 3> >& nodes = surface_triangulation.nodes;
+    
+    if (nodes.empty())
+    {
+        return;
+    }
+    
+    // NOT YET IMPLEMENTED!!!
 }

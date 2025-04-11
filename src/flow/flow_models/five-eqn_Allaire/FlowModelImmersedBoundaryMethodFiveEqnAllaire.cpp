@@ -551,3 +551,26 @@ void FlowModelImmersedBoundaryMethodFiveEqnAllaire::setConservativeVariablesCell
         }
     }
 }
+
+
+/*
+ * Compute the data on the surface triangulation.
+ */
+void FlowModelImmersedBoundaryMethodFiveEqnAllaire::computeSurfaceTriangulationData(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    computeSurfaceTriangulationDataBase(
+        patch_hierarchy,
+        data_context);
+    
+    const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
+    const std::vector<std::array<double, 3> >& nodes = surface_triangulation.nodes;
+    
+    if (nodes.empty())
+    {
+        return;
+    }
+    
+    // NOT YET IMPLEMENTED!!!
+}

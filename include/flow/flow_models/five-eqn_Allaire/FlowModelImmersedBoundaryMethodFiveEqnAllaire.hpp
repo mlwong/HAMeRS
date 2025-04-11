@@ -36,6 +36,13 @@ class FlowModelImmersedBoundaryMethodFiveEqnAllaire: public FlowModelImmersedBou
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims);
         
+        /*
+         * Compute the data on the surface triangulation.
+         */
+        void computeSurfaceTriangulationData(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
     private:
         /* 
          * Values of primitive variables inside the body.
