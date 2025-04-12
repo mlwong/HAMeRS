@@ -476,10 +476,12 @@ void FlowModelImmersedBoundaryMethodFourEqnConservative::setConservativeVariable
  * Compute the data on the surface triangulation.
  */
 void FlowModelImmersedBoundaryMethodFourEqnConservative::computeSurfaceTriangulationData(
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     computeSurfaceTriangulationDataBase(
+        grid_geometry,
         patch_hierarchy,
         data_context);
     

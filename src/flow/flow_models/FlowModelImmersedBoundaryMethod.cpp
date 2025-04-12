@@ -1,5 +1,7 @@
 #include "flow/flow_models/FlowModelImmersedBoundaryMethod.hpp"
 
+#include "util/MPI_helpers/MPIHelper.hpp"
+
 #include "TECIO.h"
 
 HAMERS_SHARED_PTR<pdat::CellVariable<int> > FlowModelImmersedBoundaryMethod::s_variable_mask;
@@ -119,6 +121,9 @@ FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod(
         d_surface_triangulation_dx_grid.assign(num_nodes, std::numeric_limits<double>::max());
         d_surface_triangulation_coor_ip_1.assign(num_nodes, {0.0, 0.0, 0.0});
         d_surface_triangulation_coor_ip_2.assign(num_nodes, {0.0, 0.0, 0.0});
+        
+        d_surface_triangulation_weight_ip_1.assign(num_nodes, 0.0);
+        d_surface_triangulation_weight_ip_2.assign(num_nodes, 0.0);
     }
 }
 
@@ -446,7 +451,8 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
             "node_normal_x",
             "node_normal_y",
             "node_normal_z",
-            "d_surface_triangulation_dx_grid"
+            "d_surface_triangulation_dx_grid",
+            "d_surface_triangulation_weight_ip_1"
         };
         
         std::string variable_name_string = "";
@@ -549,6 +555,7 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
         i = TECDAT142(&num_nodes, node_normal_y.data(),                   &d_is_double);
         i = TECDAT142(&num_nodes, node_normal_z.data(),                   &d_is_double);
         i = TECDAT142(&num_nodes, d_surface_triangulation_dx_grid.data(), &d_is_double);
+        i = TECDAT142(&num_nodes, d_surface_triangulation_weight_ip_1.data(), &d_is_double);
         
         i = TECNODE142(&connectivity_count, connectivity_array.data());
          
@@ -564,19 +571,10 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
  */
 void
 FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    // if (d_flow_model.expired())
-    // {
-    //     TBOX_ERROR(d_object_name
-    //         << ": "
-    //         << "The object is not setup yet!"
-    //         << std::endl);
-    // }
-    
-    // HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
-    
     const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
     const std::vector<std::array<double, 3> >& nodes = surface_triangulation.nodes;
     
@@ -652,6 +650,9 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
         }
         
         const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        MPIHelper mpi_helper("MPI helper", d_dim, grid_geometry, patch_hierarchy);
+        const std::vector<Real>& dx_finest_level_dims = mpi_helper.getFinestRefinedDomainGridSpacing();
+        const double dx_finest = dx_finest_level_dims[0];
         
         mpi.Allreduce(
             &dx_grid_local[0],
@@ -677,6 +678,13 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                     << "The surfce triangulation is not in the same grid level."
                     << std::endl);
             }
+            if (std::abs(dx_grid_max - dx_finest) > 10.0*std::numeric_limits<double>::epsilon())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationData()\n"
+                    << "The surface triangulation is not in the finest grid level."
+                    << std::endl);
+            }
         }
         
         const std::vector<std::array<double, 3> >& normal_nodes = surface_triangulation.normal_nodes;
@@ -699,10 +707,10 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
             d_surface_triangulation_coor_ip_2[ni][2] = node[2] + normal_node[2]*c_ip_2*dx_grid;
         }
         
-        std::vector<double> ip_1_dx_grid(num_nodes, std::numeric_limits<Real>::max());
-        std::vector<double> ip_2_dx_grid(num_nodes, std::numeric_limits<Real>::max());
-        std::vector<double> ip_1_dx_grid_local(num_nodes, std::numeric_limits<Real>::max());
-        std::vector<double> ip_2_dx_grid_local(num_nodes, std::numeric_limits<Real>::max());
+        std::vector<double> dx_gird_ip_1(num_nodes, std::numeric_limits<Real>::max());
+        std::vector<double> dx_grid_ip_2(num_nodes, std::numeric_limits<Real>::max());
+        std::vector<double> dx_grid_local_ip_1(num_nodes, std::numeric_limits<Real>::max());
+        std::vector<double> dx_grid_local_ip_2(num_nodes, std::numeric_limits<Real>::max());
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -737,28 +745,28 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                         (coor_ip_1[1] >= patch_xlo[1] && coor_ip_1[1] <= patch_xhi[1]) &&
                         (coor_ip_1[2] >= patch_xlo[2] && coor_ip_1[2] <= patch_xhi[2]))
                     {
-                        ip_1_dx_grid_local[ni] = std::min(ip_1_dx_grid_local[ni], dx[0]);
+                        dx_grid_local_ip_1[ni] = std::min(dx_grid_local_ip_1[ni], dx[0]);
                     }
                     if ((coor_ip_2[0] >= patch_xlo[0] && coor_ip_2[0] <= patch_xhi[0]) &&
                         (coor_ip_2[1] >= patch_xlo[1] && coor_ip_2[1] <= patch_xhi[1]) &&
                         (coor_ip_2[2] >= patch_xlo[2] && coor_ip_2[2] <= patch_xhi[2]))
                     {
-                        ip_2_dx_grid_local[ni] = std::min(ip_2_dx_grid_local[ni], dx[0]);
+                        dx_grid_local_ip_2[ni] = std::min(dx_grid_local_ip_2[ni], dx[0]);
                     }
                 }
             }
         }
         
         mpi.Allreduce(
-            &ip_1_dx_grid_local[0],
-            &ip_1_dx_grid[0],
+            &dx_grid_local_ip_1[0],
+            &dx_gird_ip_1[0],
             num_nodes,
             MPI_DOUBLE,
             MPI_MIN);
         
         mpi.Allreduce(
-            &ip_2_dx_grid_local[0],
-            &ip_2_dx_grid[0],
+            &dx_grid_local_ip_2[0],
+            &dx_grid_ip_2[0],
             num_nodes,
             MPI_DOUBLE,
             MPI_MIN);
@@ -766,32 +774,238 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
         if (mpi.getRank() == 0)
         {
             // Make sure d_surface_triangulation_dx_grid is uniform.
-            double ip_1_dx_grid_min = std::numeric_limits<double>::max();
-            double ip_1_dx_grid_max = std::numeric_limits<double>::min();
-            double ip_2_dx_grid_min = std::numeric_limits<double>::max();
-            double ip_2_dx_grid_max = std::numeric_limits<double>::min();
+            double dx_grid_ip_1_min = std::numeric_limits<double>::max();
+            double dx_grid_ip_1_max = std::numeric_limits<double>::min();
+            double dx_grid_ip_2_min = std::numeric_limits<double>::max();
+            double dx_grid_ip_2_max = std::numeric_limits<double>::min();
             for (int ni = 0; ni < num_nodes; ++ni)
             {
-                ip_1_dx_grid_min = std::min(ip_1_dx_grid_min, ip_1_dx_grid[ni]);
-                ip_1_dx_grid_max = std::max(ip_1_dx_grid_max, ip_1_dx_grid[ni]);
+                dx_grid_ip_1_min = std::min(dx_grid_ip_1_min, dx_gird_ip_1[ni]);
+                dx_grid_ip_1_max = std::max(dx_grid_ip_1_max, dx_gird_ip_1[ni]);
                 
-                ip_2_dx_grid_min = std::min(ip_2_dx_grid_min, ip_2_dx_grid[ni]);
-                ip_2_dx_grid_max = std::max(ip_2_dx_grid_max, ip_2_dx_grid[ni]);
+                dx_grid_ip_2_min = std::min(dx_grid_ip_2_min, dx_grid_ip_2[ni]);
+                dx_grid_ip_2_max = std::max(dx_grid_ip_2_max, dx_grid_ip_2[ni]);
             }
-            if (std::abs(ip_1_dx_grid_max - ip_1_dx_grid_min) > 10.0*std::numeric_limits<double>::epsilon())
+            if (std::abs(dx_grid_ip_1_max - dx_grid_ip_1_min) > 10.0*std::numeric_limits<double>::epsilon())
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationData()\n"
                     << "The first image points are not in the same grid level."
                     << std::endl);
             }
-            if (std::abs(ip_2_dx_grid_max - ip_2_dx_grid_min) > 10.0*std::numeric_limits<double>::epsilon())
+            if (std::abs(dx_grid_ip_1_max - dx_finest) > 10.0*std::numeric_limits<double>::epsilon())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationData()\n"
+                    << "The first image points are not in the finest grid level."
+                    << std::endl);
+            }
+            if (std::abs(dx_grid_ip_2_max - dx_grid_ip_2_min) > 10.0*std::numeric_limits<double>::epsilon())
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationData()\n"
                     << "The second image points are not in the same grid level."
                     << std::endl);
             }
+            if (std::abs(dx_grid_ip_2_max - dx_finest) > 10.0*std::numeric_limits<double>::epsilon())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationData()\n"
+                    << "The second image points are not in the finest grid level."
+                    << std::endl);
+            }
         }
-    }
+        
+        /*
+         * d_surface_triangulation_weight_ip_1 and d_surface_triangulation_weight_ip_2.
+         */
+        
+        const int num_nodes = static_cast<int>(nodes.size());
+        d_surface_triangulation_weight_ip_1.assign(num_nodes, 0.0);
+        d_surface_triangulation_weight_ip_2.assign(num_nodes, 0.0);
+        std::vector<double> weight_local_ip_1(num_nodes, 0.0);
+        std::vector<double> weight_local_ip_2(num_nodes, 0.0);
+        
+        // for (int li = 0; li < num_levels; li++)
+        {
+            // Only consider the finest level.
+            const int li = num_levels - 1;
+            
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower indices and grid spacings.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                // const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const patch_xlo = patch_geom->getXLower();
+                const double* const patch_xhi = patch_geom->getXUpper();
+                const double* const dx = patch_geom->getDx();
+                const double dx_inv = 1.0/dx[0];
+                
+                for (int ni = 0; ni < num_nodes; ++ni)
+                {
+                    const std::array<double, 3>& coor_ip_1 = d_surface_triangulation_coor_ip_1[ni];
+                    
+                    // if ((coor_ip_1[0] > patch_xlo[0] + 0.5*dx[0] && coor_ip_1[0] <= patch_xhi[0] - 0.5*dx[0]) &&
+                    //     (coor_ip_1[1] > patch_xlo[1] + 0.5*dx[1] && coor_ip_1[1] <= patch_xhi[1] - 0.5*dx[1]) &&
+                    //     (coor_ip_1[2] > patch_xlo[2] + 0.5*dx[2] && coor_ip_1[2] <= patch_xhi[2] - 0.5*dx[2]))
+                    {
+                        int idx_cons_var_LBK, idx_cons_var_RBK, idx_cons_var_LTK, idx_cons_var_RTK,
+                            idx_cons_var_LBF, idx_cons_var_RBF, idx_cons_var_LTF, idx_cons_var_RTF;
+                        
+                        const int ip_i = int(floor((coor_ip_1[0] - patch_xlo[0] - 0.5 * dx[0])*dx_inv));
+                        const int ip_j = int(floor((coor_ip_1[1] - patch_xlo[1] - 0.5 * dx[1])*dx_inv));
+                        const int ip_k = int(floor((coor_ip_1[2] - patch_xlo[2] - 0.5 * dx[2])*dx_inv));
+                        
+                        const double x_ip_LBK = patch_xlo[0] + (double(ip_i) + 0.5)*dx[0];
+                        const double y_ip_LBK = patch_xlo[1] + (double(ip_j) + 0.5)*dx[1];
+                        const double z_ip_LBK = patch_xlo[2] + (double(ip_k) + 0.5)*dx[2];
+                        
+                        const double coor_ip_1_LBK[3] = {x_ip_LBK        , y_ip_LBK        , z_ip_LBK        };
+                        const double coor_ip_1_RBK[3] = {x_ip_LBK + dx[0], y_ip_LBK        , z_ip_LBK        };
+                        const double coor_ip_1_LTK[3] = {x_ip_LBK        , y_ip_LBK + dx[1], z_ip_LBK        };
+                        const double coor_ip_1_RTK[3] = {x_ip_LBK + dx[0], y_ip_LBK + dx[1], z_ip_LBK        };
+                        const double coor_ip_1_LBF[3] = {x_ip_LBK        , y_ip_LBK        , z_ip_LBK + dx[2]};
+                        const double coor_ip_1_RBF[3] = {x_ip_LBK + dx[0], y_ip_LBK        , z_ip_LBK + dx[2]};
+                        const double coor_ip_1_LTF[3] = {x_ip_LBK        , y_ip_LBK + dx[1], z_ip_LBK + dx[2]};
+                        const double coor_ip_1_RTF[3] = {x_ip_LBK + dx[0], y_ip_LBK + dx[1], z_ip_LBK + dx[2]};
+                        
+                        double weight_ip_1_LBK, weight_ip_1_RBK, weight_ip_1_LTK, weight_ip_1_RTK,
+                            weight_ip_1_LBF, weight_ip_1_RBF, weight_ip_1_LTF, weight_ip_1_RTF;
+                        
+                        if (coor_ip_1_LBK[0] > patch_xlo[0] && coor_ip_1_LBK[0] <= patch_xhi[0] &&
+                            coor_ip_1_LBK[1] > patch_xlo[1] && coor_ip_1_LBK[1] <= patch_xhi[1] &&
+                            coor_ip_1_LBK[2] > patch_xlo[2] && coor_ip_1_LBK[2] <= patch_xhi[2])
+                        {
+                            weight_ip_1_LBK = 1.0;
+                        }
+                        else
+                        {
+                            weight_ip_1_LBK = 0.0;
+                        }
+                        
+                        if (coor_ip_1_RBK[0] > patch_xlo[0] && coor_ip_1_RBK[0] <= patch_xhi[0] &&
+                            coor_ip_1_RBK[1] > patch_xlo[1] && coor_ip_1_RBK[1] <= patch_xhi[1] &&
+                            coor_ip_1_RBK[2] > patch_xlo[2] && coor_ip_1_RBK[2] <= patch_xhi[2])
+                        {
+                            weight_ip_1_RBK = 1.0;
+                        }
+                        else
+                        {
+                            weight_ip_1_RBK = 0.0;
+                        }
+                        
+                        if (coor_ip_1_LTK[0] > patch_xlo[0] && coor_ip_1_LTK[0] <= patch_xhi[0] &&
+                            coor_ip_1_LTK[1] > patch_xlo[1] && coor_ip_1_LTK[1] <= patch_xhi[1] &&
+                            coor_ip_1_LTK[2] > patch_xlo[2] && coor_ip_1_LTK[2] <= patch_xhi[2])
+                        {
+                            weight_ip_1_LTK = 1.0;
+                        }
+                        else
+                        {
+                            weight_ip_1_LTK = 0.0;
+                        }
+                        
+                        if (coor_ip_1_RTK[0] > patch_xlo[0] && coor_ip_1_RTK[0] <= patch_xhi[0] &&
+                            coor_ip_1_RTK[1] > patch_xlo[1] && coor_ip_1_RTK[1] <= patch_xhi[1] &&
+                            coor_ip_1_RTK[2] > patch_xlo[2] && coor_ip_1_RTK[2] <= patch_xhi[2])
+                        {
+                            weight_ip_1_RTK = 1.0;
+                        }
+                        else
+                        {
+                            weight_ip_1_RTK = 0.0;
+                        }
+                        
+                        if (coor_ip_1_LBF[0] > patch_xlo[0] && coor_ip_1_LBF[0] <= patch_xhi[0] &&
+                            coor_ip_1_LBF[1] > patch_xlo[1] && coor_ip_1_LBF[1] <= patch_xhi[1] &&
+                            coor_ip_1_LBF[2] > patch_xlo[2] && coor_ip_1_LBF[2] <= patch_xhi[2])
+                        {
+                            weight_ip_1_LBF = 1.0;
+                        }
+                        else
+                        {
+                            weight_ip_1_LBF = 0.0;
+                        }
+                        
+                        if (coor_ip_1_RBF[0] > patch_xlo[0] && coor_ip_1_RBF[0] <= patch_xhi[0] &&
+                            coor_ip_1_RBF[1] > patch_xlo[1] && coor_ip_1_RBF[1] <= patch_xhi[1] &&
+                            coor_ip_1_RBF[2] > patch_xlo[2] && coor_ip_1_RBF[2] <= patch_xhi[2])
+                        {
+                            weight_ip_1_RBF = 1.0;
+                        }
+                        else
+                        {
+                            weight_ip_1_RBF = 0.0;
+                        }
+                        
+                        if (coor_ip_1_LTF[0] > patch_xlo[0] && coor_ip_1_LTF[0] <= patch_xhi[0] &&
+                            coor_ip_1_LTF[1] > patch_xlo[1] && coor_ip_1_LTF[1] <= patch_xhi[1] &&
+                            coor_ip_1_LTF[2] > patch_xlo[2] && coor_ip_1_LTF[2] <= patch_xhi[2])
+                        {
+                            weight_ip_1_LTF = 1.0;
+                        }
+                        else
+                        {
+                            weight_ip_1_LTF = 0.0;
+                        }
+                        
+                        if (coor_ip_1_RTF[0] > patch_xlo[0] && coor_ip_1_RTF[0] <= patch_xhi[0] &&
+                            coor_ip_1_RTF[1] > patch_xlo[1] && coor_ip_1_RTF[1] <= patch_xhi[1] &&
+                            coor_ip_1_RTF[2] > patch_xlo[2] && coor_ip_1_RTF[2] <= patch_xhi[2])
+                        {
+                            weight_ip_1_RTF = 1.0;
+                        }
+                        else
+                        {
+                            weight_ip_1_RTF = 0.0;
+                        }
+                        
+                        const double ip_ratio_0 = (coor_ip_1[0] - x_ip_LBK)*dx_inv;
+                        const double ip_ratio_1 = (coor_ip_1[1] - y_ip_LBK)*dx_inv;
+                        const double ip_ratio_2 = (coor_ip_1[2] - z_ip_LBK)*dx_inv;
+                        
+                        const double weight_ip_BK = (1.0 - ip_ratio_0)*weight_ip_1_LBK + ip_ratio_0*weight_ip_1_RBK;
+                        const double weight_ip_TK = (1.0 - ip_ratio_0)*weight_ip_1_LTK + ip_ratio_0*weight_ip_1_RTK;
+                        const double weight_ip_BF = (1.0 - ip_ratio_0)*weight_ip_1_LBF + ip_ratio_0*weight_ip_1_RBF;
+                        const double weight_ip_TF = (1.0 - ip_ratio_0)*weight_ip_1_LTF + ip_ratio_0*weight_ip_1_RTF;
+                        
+                        const double weight_ip_F = (1.0 - ip_ratio_1)*weight_ip_BF + ip_ratio_1*weight_ip_TF;
+                        const double weight_ip_K = (1.0 - ip_ratio_1)*weight_ip_BK + ip_ratio_1*weight_ip_TK;
+                        
+                        const double weight_ip = (1.0 - ip_ratio_2)*weight_ip_K + ip_ratio_2*weight_ip_F;
+                        
+                        weight_local_ip_1[ni] += weight_ip;
+                    }
+                }
+            }
+        }
+        
+        mpi.Allreduce(
+            &weight_local_ip_1[0],
+            &d_surface_triangulation_weight_ip_1[0],
+            num_nodes,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+    } // end of if (d_dim == tbox::Dimension(3))
 }

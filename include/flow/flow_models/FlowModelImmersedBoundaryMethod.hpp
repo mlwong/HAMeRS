@@ -143,6 +143,7 @@ class FlowModelImmersedBoundaryMethod
          * Compute the data on the surface triangulation.
          */
         virtual void computeSurfaceTriangulationData(
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) = 0;
         
@@ -151,6 +152,7 @@ class FlowModelImmersedBoundaryMethod
          * Compute the data on the surface triangulation.
          */
          void computeSurfaceTriangulationDataBase(
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
@@ -368,7 +370,7 @@ class FlowModelImmersedBoundaryMethod
             const Real u_ip_F = (one - ip_ratio_1)*u_ip_BF + ip_ratio_1*u_ip_TF;
             const Real u_ip_K = (one - ip_ratio_1)*u_ip_BK + ip_ratio_1*u_ip_TK;
             
-            const Real u_ip = (one - ip_ratio_2) * u_ip_K  + ip_ratio_2 * u_ip_F;
+            const Real u_ip = (one - ip_ratio_2)*u_ip_K + ip_ratio_2*u_ip_F;
             
             return u_ip;
         }
@@ -444,6 +446,8 @@ class FlowModelImmersedBoundaryMethod
         std::vector<std::array<double, 3> > d_surface_triangulation_coor_ip_1;
         std::vector<std::array<double, 3> > d_surface_triangulation_coor_ip_2;
         
+        std::vector<double> d_surface_triangulation_weight_ip_1;
+        std::vector<double> d_surface_triangulation_weight_ip_2;
 };
 
 #endif /* FLOW_MODEL_BASIC_UTILITIES_HPP */

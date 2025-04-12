@@ -1,5 +1,7 @@
 #include "flow/flow_models/single-species/FlowModelImmersedBoundaryMethodSingleSpecies.hpp"
 
+#include "extn/patch_hierarchies/ExtendedFlattenedHierarchy.hpp"
+
 FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSingleSpecies(
     const std::string& object_name,
     const tbox::Dimension& dim,
@@ -162,6 +164,13 @@ FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSin
         d_E_body = d_rho_body*(epsilon_body + Real(1)/Real(2)*
             (u_body*u_body + v_body*v_body + w_body*w_body));
     }
+    
+    // const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
+    // const int num_nodes = static_cast<int>(surface_triangulation.nodes.size());
+    
+    // if (num_nodes > 0)
+    // {
+    // }
 }
 
 
@@ -754,7 +763,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         Real(patch_xlo[2]) + (Real(k) + half)*Real(dx[2])
                         };
                     
-                    if (mask[idx_IB] == int(IB_MASK::IB_GHOST))  
+                    if (mask[idx_IB] == int(IB_MASK::IB_GHOST))
                     {
                         // First image point distance is set to sqrt(3)*dx + epsilon.
                         // const Real d_ip = sqrt(Real(3))*Real(dx[0]) + HAMERS_REAL_EPSILON - dist[idx_IB];
@@ -1282,10 +1291,12 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
  * Compute the data on the surface triangulation.
  */
 void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationData(
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     computeSurfaceTriangulationDataBase(
+        grid_geometry,
         patch_hierarchy,
         data_context);
     
@@ -1297,5 +1308,32 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
         return;
     }
     
-    // NOT YET IMPLEMENTED!!!
+    // HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    // const int num_nodes = static_cast<int>(nodes.size());
+    
+    // const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    // /*
+    //  * Get the flattened hierarchy where only the finest existing grid is visible at any given
+    //  * location in the problem space.
+    //  */
+    
+    // HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    //    new ExtendedFlattenedHierarchy(
+    //        *patch_hierarchy,
+    //        0,
+    //        num_levels - 1));
+    
+    // if (d_dim == tbox::Dimension(1))
+    // {
+    //     // Do nothing for now.
+    // }
+    // else if (d_dim == tbox::Dimension(2))
+    // {
+    //     // Do nothing for now.
+    // }
+    // else if (d_dim == tbox::Dimension(3))
+    // {
+    // }
 }

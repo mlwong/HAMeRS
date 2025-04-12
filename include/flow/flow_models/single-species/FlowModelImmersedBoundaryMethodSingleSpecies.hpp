@@ -40,6 +40,7 @@ class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoun
          * Compute the data on the surface triangulation.
          */
         void computeSurfaceTriangulationData(
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
