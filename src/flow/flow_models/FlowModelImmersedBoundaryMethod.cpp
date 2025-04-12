@@ -826,177 +826,164 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
         std::vector<double> weight_local_ip_1(num_nodes, 0.0);
         std::vector<double> weight_local_ip_2(num_nodes, 0.0);
         
-        // for (int li = 0; li < num_levels; li++)
+        /*
+         * Only consider the finest level. Get the patch level.
+         */
+        
+        HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+            patch_hierarchy->getPatchLevel(num_levels - 1));
+        
+        for (hier::PatchLevel::iterator ip(patch_level->begin());
+             ip != patch_level->end();
+             ip++)
         {
-            // Only consider the finest level.
-            const int li = num_levels - 1;
+            const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
             
             /*
-             * Get the current patch level.
+             * Get the patch lower indices and grid spacings.
              */
             
-            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
+            const hier::Box& patch_box = patch->getBox();
             
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
+            const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                    patch->getPatchGeometry()));
+            
+            const double* const patch_xlo = patch_geom->getXLower();
+            const double* const patch_xhi = patch_geom->getXUpper();
+            const double* const dx = patch_geom->getDx();
+            const double dx_inv = 1.0/dx[0];
+            
+            for (int ni = 0; ni < num_nodes; ++ni)
             {
-                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                const std::array<double, 3>& coor_ip_1 = d_surface_triangulation_coor_ip_1[ni];
                 
-                /*
-                 * Get the patch lower indices and grid spacings.
-                 */
+                // int idx_cons_var_LBK, idx_cons_var_RBK, idx_cons_var_LTK, idx_cons_var_RTK,
+                //     idx_cons_var_LBF, idx_cons_var_RBF, idx_cons_var_LTF, idx_cons_var_RTF;
                 
-                const hier::Box& patch_box = patch->getBox();
+                const int ip_i = int(floor((coor_ip_1[0] - patch_xlo[0] - 0.5 * dx[0])*dx_inv));
+                const int ip_j = int(floor((coor_ip_1[1] - patch_xlo[1] - 0.5 * dx[1])*dx_inv));
+                const int ip_k = int(floor((coor_ip_1[2] - patch_xlo[2] - 0.5 * dx[2])*dx_inv));
                 
-                // const hier::Index& patch_index_lo = patch_box.lower();
+                const double x_ip_LBK = patch_xlo[0] + (double(ip_i) + 0.5)*dx[0];
+                const double y_ip_LBK = patch_xlo[1] + (double(ip_j) + 0.5)*dx[1];
+                const double z_ip_LBK = patch_xlo[2] + (double(ip_k) + 0.5)*dx[2];
                 
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
+                const double coor_ip_1_LBK[3] = {x_ip_LBK        , y_ip_LBK        , z_ip_LBK        };
+                const double coor_ip_1_RBK[3] = {x_ip_LBK + dx[0], y_ip_LBK        , z_ip_LBK        };
+                const double coor_ip_1_LTK[3] = {x_ip_LBK        , y_ip_LBK + dx[1], z_ip_LBK        };
+                const double coor_ip_1_RTK[3] = {x_ip_LBK + dx[0], y_ip_LBK + dx[1], z_ip_LBK        };
+                const double coor_ip_1_LBF[3] = {x_ip_LBK        , y_ip_LBK        , z_ip_LBK + dx[2]};
+                const double coor_ip_1_RBF[3] = {x_ip_LBK + dx[0], y_ip_LBK        , z_ip_LBK + dx[2]};
+                const double coor_ip_1_LTF[3] = {x_ip_LBK        , y_ip_LBK + dx[1], z_ip_LBK + dx[2]};
+                const double coor_ip_1_RTF[3] = {x_ip_LBK + dx[0], y_ip_LBK + dx[1], z_ip_LBK + dx[2]};
                 
-                const double* const patch_xlo = patch_geom->getXLower();
-                const double* const patch_xhi = patch_geom->getXUpper();
-                const double* const dx = patch_geom->getDx();
-                const double dx_inv = 1.0/dx[0];
+                double weight_ip_1_LBK, weight_ip_1_RBK, weight_ip_1_LTK, weight_ip_1_RTK,
+                    weight_ip_1_LBF, weight_ip_1_RBF, weight_ip_1_LTF, weight_ip_1_RTF;
                 
-                for (int ni = 0; ni < num_nodes; ++ni)
+                if (coor_ip_1_LBK[0] > patch_xlo[0] && coor_ip_1_LBK[0] <= patch_xhi[0] &&
+                    coor_ip_1_LBK[1] > patch_xlo[1] && coor_ip_1_LBK[1] <= patch_xhi[1] &&
+                    coor_ip_1_LBK[2] > patch_xlo[2] && coor_ip_1_LBK[2] <= patch_xhi[2])
                 {
-                    const std::array<double, 3>& coor_ip_1 = d_surface_triangulation_coor_ip_1[ni];
-                    
-                    // if ((coor_ip_1[0] > patch_xlo[0] + 0.5*dx[0] && coor_ip_1[0] <= patch_xhi[0] - 0.5*dx[0]) &&
-                    //     (coor_ip_1[1] > patch_xlo[1] + 0.5*dx[1] && coor_ip_1[1] <= patch_xhi[1] - 0.5*dx[1]) &&
-                    //     (coor_ip_1[2] > patch_xlo[2] + 0.5*dx[2] && coor_ip_1[2] <= patch_xhi[2] - 0.5*dx[2]))
-                    {
-                        int idx_cons_var_LBK, idx_cons_var_RBK, idx_cons_var_LTK, idx_cons_var_RTK,
-                            idx_cons_var_LBF, idx_cons_var_RBF, idx_cons_var_LTF, idx_cons_var_RTF;
-                        
-                        const int ip_i = int(floor((coor_ip_1[0] - patch_xlo[0] - 0.5 * dx[0])*dx_inv));
-                        const int ip_j = int(floor((coor_ip_1[1] - patch_xlo[1] - 0.5 * dx[1])*dx_inv));
-                        const int ip_k = int(floor((coor_ip_1[2] - patch_xlo[2] - 0.5 * dx[2])*dx_inv));
-                        
-                        const double x_ip_LBK = patch_xlo[0] + (double(ip_i) + 0.5)*dx[0];
-                        const double y_ip_LBK = patch_xlo[1] + (double(ip_j) + 0.5)*dx[1];
-                        const double z_ip_LBK = patch_xlo[2] + (double(ip_k) + 0.5)*dx[2];
-                        
-                        const double coor_ip_1_LBK[3] = {x_ip_LBK        , y_ip_LBK        , z_ip_LBK        };
-                        const double coor_ip_1_RBK[3] = {x_ip_LBK + dx[0], y_ip_LBK        , z_ip_LBK        };
-                        const double coor_ip_1_LTK[3] = {x_ip_LBK        , y_ip_LBK + dx[1], z_ip_LBK        };
-                        const double coor_ip_1_RTK[3] = {x_ip_LBK + dx[0], y_ip_LBK + dx[1], z_ip_LBK        };
-                        const double coor_ip_1_LBF[3] = {x_ip_LBK        , y_ip_LBK        , z_ip_LBK + dx[2]};
-                        const double coor_ip_1_RBF[3] = {x_ip_LBK + dx[0], y_ip_LBK        , z_ip_LBK + dx[2]};
-                        const double coor_ip_1_LTF[3] = {x_ip_LBK        , y_ip_LBK + dx[1], z_ip_LBK + dx[2]};
-                        const double coor_ip_1_RTF[3] = {x_ip_LBK + dx[0], y_ip_LBK + dx[1], z_ip_LBK + dx[2]};
-                        
-                        double weight_ip_1_LBK, weight_ip_1_RBK, weight_ip_1_LTK, weight_ip_1_RTK,
-                            weight_ip_1_LBF, weight_ip_1_RBF, weight_ip_1_LTF, weight_ip_1_RTF;
-                        
-                        if (coor_ip_1_LBK[0] > patch_xlo[0] && coor_ip_1_LBK[0] <= patch_xhi[0] &&
-                            coor_ip_1_LBK[1] > patch_xlo[1] && coor_ip_1_LBK[1] <= patch_xhi[1] &&
-                            coor_ip_1_LBK[2] > patch_xlo[2] && coor_ip_1_LBK[2] <= patch_xhi[2])
-                        {
-                            weight_ip_1_LBK = 1.0;
-                        }
-                        else
-                        {
-                            weight_ip_1_LBK = 0.0;
-                        }
-                        
-                        if (coor_ip_1_RBK[0] > patch_xlo[0] && coor_ip_1_RBK[0] <= patch_xhi[0] &&
-                            coor_ip_1_RBK[1] > patch_xlo[1] && coor_ip_1_RBK[1] <= patch_xhi[1] &&
-                            coor_ip_1_RBK[2] > patch_xlo[2] && coor_ip_1_RBK[2] <= patch_xhi[2])
-                        {
-                            weight_ip_1_RBK = 1.0;
-                        }
-                        else
-                        {
-                            weight_ip_1_RBK = 0.0;
-                        }
-                        
-                        if (coor_ip_1_LTK[0] > patch_xlo[0] && coor_ip_1_LTK[0] <= patch_xhi[0] &&
-                            coor_ip_1_LTK[1] > patch_xlo[1] && coor_ip_1_LTK[1] <= patch_xhi[1] &&
-                            coor_ip_1_LTK[2] > patch_xlo[2] && coor_ip_1_LTK[2] <= patch_xhi[2])
-                        {
-                            weight_ip_1_LTK = 1.0;
-                        }
-                        else
-                        {
-                            weight_ip_1_LTK = 0.0;
-                        }
-                        
-                        if (coor_ip_1_RTK[0] > patch_xlo[0] && coor_ip_1_RTK[0] <= patch_xhi[0] &&
-                            coor_ip_1_RTK[1] > patch_xlo[1] && coor_ip_1_RTK[1] <= patch_xhi[1] &&
-                            coor_ip_1_RTK[2] > patch_xlo[2] && coor_ip_1_RTK[2] <= patch_xhi[2])
-                        {
-                            weight_ip_1_RTK = 1.0;
-                        }
-                        else
-                        {
-                            weight_ip_1_RTK = 0.0;
-                        }
-                        
-                        if (coor_ip_1_LBF[0] > patch_xlo[0] && coor_ip_1_LBF[0] <= patch_xhi[0] &&
-                            coor_ip_1_LBF[1] > patch_xlo[1] && coor_ip_1_LBF[1] <= patch_xhi[1] &&
-                            coor_ip_1_LBF[2] > patch_xlo[2] && coor_ip_1_LBF[2] <= patch_xhi[2])
-                        {
-                            weight_ip_1_LBF = 1.0;
-                        }
-                        else
-                        {
-                            weight_ip_1_LBF = 0.0;
-                        }
-                        
-                        if (coor_ip_1_RBF[0] > patch_xlo[0] && coor_ip_1_RBF[0] <= patch_xhi[0] &&
-                            coor_ip_1_RBF[1] > patch_xlo[1] && coor_ip_1_RBF[1] <= patch_xhi[1] &&
-                            coor_ip_1_RBF[2] > patch_xlo[2] && coor_ip_1_RBF[2] <= patch_xhi[2])
-                        {
-                            weight_ip_1_RBF = 1.0;
-                        }
-                        else
-                        {
-                            weight_ip_1_RBF = 0.0;
-                        }
-                        
-                        if (coor_ip_1_LTF[0] > patch_xlo[0] && coor_ip_1_LTF[0] <= patch_xhi[0] &&
-                            coor_ip_1_LTF[1] > patch_xlo[1] && coor_ip_1_LTF[1] <= patch_xhi[1] &&
-                            coor_ip_1_LTF[2] > patch_xlo[2] && coor_ip_1_LTF[2] <= patch_xhi[2])
-                        {
-                            weight_ip_1_LTF = 1.0;
-                        }
-                        else
-                        {
-                            weight_ip_1_LTF = 0.0;
-                        }
-                        
-                        if (coor_ip_1_RTF[0] > patch_xlo[0] && coor_ip_1_RTF[0] <= patch_xhi[0] &&
-                            coor_ip_1_RTF[1] > patch_xlo[1] && coor_ip_1_RTF[1] <= patch_xhi[1] &&
-                            coor_ip_1_RTF[2] > patch_xlo[2] && coor_ip_1_RTF[2] <= patch_xhi[2])
-                        {
-                            weight_ip_1_RTF = 1.0;
-                        }
-                        else
-                        {
-                            weight_ip_1_RTF = 0.0;
-                        }
-                        
-                        const double ip_ratio_0 = (coor_ip_1[0] - x_ip_LBK)*dx_inv;
-                        const double ip_ratio_1 = (coor_ip_1[1] - y_ip_LBK)*dx_inv;
-                        const double ip_ratio_2 = (coor_ip_1[2] - z_ip_LBK)*dx_inv;
-                        
-                        const double weight_ip_BK = (1.0 - ip_ratio_0)*weight_ip_1_LBK + ip_ratio_0*weight_ip_1_RBK;
-                        const double weight_ip_TK = (1.0 - ip_ratio_0)*weight_ip_1_LTK + ip_ratio_0*weight_ip_1_RTK;
-                        const double weight_ip_BF = (1.0 - ip_ratio_0)*weight_ip_1_LBF + ip_ratio_0*weight_ip_1_RBF;
-                        const double weight_ip_TF = (1.0 - ip_ratio_0)*weight_ip_1_LTF + ip_ratio_0*weight_ip_1_RTF;
-                        
-                        const double weight_ip_F = (1.0 - ip_ratio_1)*weight_ip_BF + ip_ratio_1*weight_ip_TF;
-                        const double weight_ip_K = (1.0 - ip_ratio_1)*weight_ip_BK + ip_ratio_1*weight_ip_TK;
-                        
-                        const double weight_ip = (1.0 - ip_ratio_2)*weight_ip_K + ip_ratio_2*weight_ip_F;
-                        
-                        weight_local_ip_1[ni] += weight_ip;
-                    }
+                    weight_ip_1_LBK = 1.0;
                 }
+                else
+                {
+                    weight_ip_1_LBK = 0.0;
+                }
+                
+                if (coor_ip_1_RBK[0] > patch_xlo[0] && coor_ip_1_RBK[0] <= patch_xhi[0] &&
+                    coor_ip_1_RBK[1] > patch_xlo[1] && coor_ip_1_RBK[1] <= patch_xhi[1] &&
+                    coor_ip_1_RBK[2] > patch_xlo[2] && coor_ip_1_RBK[2] <= patch_xhi[2])
+                {
+                    weight_ip_1_RBK = 1.0;
+                }
+                else
+                {
+                    weight_ip_1_RBK = 0.0;
+                }
+                
+                if (coor_ip_1_LTK[0] > patch_xlo[0] && coor_ip_1_LTK[0] <= patch_xhi[0] &&
+                    coor_ip_1_LTK[1] > patch_xlo[1] && coor_ip_1_LTK[1] <= patch_xhi[1] &&
+                    coor_ip_1_LTK[2] > patch_xlo[2] && coor_ip_1_LTK[2] <= patch_xhi[2])
+                {
+                    weight_ip_1_LTK = 1.0;
+                }
+                else
+                {
+                    weight_ip_1_LTK = 0.0;
+                }
+                
+                if (coor_ip_1_RTK[0] > patch_xlo[0] && coor_ip_1_RTK[0] <= patch_xhi[0] &&
+                    coor_ip_1_RTK[1] > patch_xlo[1] && coor_ip_1_RTK[1] <= patch_xhi[1] &&
+                    coor_ip_1_RTK[2] > patch_xlo[2] && coor_ip_1_RTK[2] <= patch_xhi[2])
+                {
+                    weight_ip_1_RTK = 1.0;
+                }
+                else
+                {
+                    weight_ip_1_RTK = 0.0;
+                }
+                
+                if (coor_ip_1_LBF[0] > patch_xlo[0] && coor_ip_1_LBF[0] <= patch_xhi[0] &&
+                    coor_ip_1_LBF[1] > patch_xlo[1] && coor_ip_1_LBF[1] <= patch_xhi[1] &&
+                    coor_ip_1_LBF[2] > patch_xlo[2] && coor_ip_1_LBF[2] <= patch_xhi[2])
+                {
+                    weight_ip_1_LBF = 1.0;
+                }
+                else
+                {
+                    weight_ip_1_LBF = 0.0;
+                }
+                
+                if (coor_ip_1_RBF[0] > patch_xlo[0] && coor_ip_1_RBF[0] <= patch_xhi[0] &&
+                    coor_ip_1_RBF[1] > patch_xlo[1] && coor_ip_1_RBF[1] <= patch_xhi[1] &&
+                    coor_ip_1_RBF[2] > patch_xlo[2] && coor_ip_1_RBF[2] <= patch_xhi[2])
+                {
+                    weight_ip_1_RBF = 1.0;
+                }
+                else
+                {
+                    weight_ip_1_RBF = 0.0;
+                }
+                
+                if (coor_ip_1_LTF[0] > patch_xlo[0] && coor_ip_1_LTF[0] <= patch_xhi[0] &&
+                    coor_ip_1_LTF[1] > patch_xlo[1] && coor_ip_1_LTF[1] <= patch_xhi[1] &&
+                    coor_ip_1_LTF[2] > patch_xlo[2] && coor_ip_1_LTF[2] <= patch_xhi[2])
+                {
+                    weight_ip_1_LTF = 1.0;
+                }
+                else
+                {
+                    weight_ip_1_LTF = 0.0;
+                }
+                
+                if (coor_ip_1_RTF[0] > patch_xlo[0] && coor_ip_1_RTF[0] <= patch_xhi[0] &&
+                    coor_ip_1_RTF[1] > patch_xlo[1] && coor_ip_1_RTF[1] <= patch_xhi[1] &&
+                    coor_ip_1_RTF[2] > patch_xlo[2] && coor_ip_1_RTF[2] <= patch_xhi[2])
+                {
+                    weight_ip_1_RTF = 1.0;
+                }
+                else
+                {
+                    weight_ip_1_RTF = 0.0;
+                }
+                
+                const double ip_ratio_0 = (coor_ip_1[0] - x_ip_LBK)*dx_inv;
+                const double ip_ratio_1 = (coor_ip_1[1] - y_ip_LBK)*dx_inv;
+                const double ip_ratio_2 = (coor_ip_1[2] - z_ip_LBK)*dx_inv;
+                
+                const double weight_ip_BK = (1.0 - ip_ratio_0)*weight_ip_1_LBK + ip_ratio_0*weight_ip_1_RBK;
+                const double weight_ip_TK = (1.0 - ip_ratio_0)*weight_ip_1_LTK + ip_ratio_0*weight_ip_1_RTK;
+                const double weight_ip_BF = (1.0 - ip_ratio_0)*weight_ip_1_LBF + ip_ratio_0*weight_ip_1_RBF;
+                const double weight_ip_TF = (1.0 - ip_ratio_0)*weight_ip_1_LTF + ip_ratio_0*weight_ip_1_RTF;
+                
+                const double weight_ip_F = (1.0 - ip_ratio_1)*weight_ip_BF + ip_ratio_1*weight_ip_TF;
+                const double weight_ip_K = (1.0 - ip_ratio_1)*weight_ip_BK + ip_ratio_1*weight_ip_TK;
+                
+                const double weight_ip = (1.0 - ip_ratio_2)*weight_ip_K + ip_ratio_2*weight_ip_F;
+                
+                weight_local_ip_1[ni] += weight_ip;
             }
         }
         
