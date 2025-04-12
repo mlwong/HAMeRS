@@ -1,7 +1,5 @@
 #include "flow/flow_models/single-species/FlowModelImmersedBoundaryMethodSingleSpecies.hpp"
 
-#include "extn/patch_hierarchies/ExtendedFlattenedHierarchy.hpp"
-
 FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSingleSpecies(
     const std::string& object_name,
     const tbox::Dimension& dim,

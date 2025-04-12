@@ -27,6 +27,15 @@ namespace TEMPERATURE_IBC
                 ISOTHERMAL };
 }
 
+#define INDEX_LBK 0
+#define INDEX_RBK 1
+#define INDEX_LTK 2
+#define INDEX_RTK 3
+#define INDEX_LBF 4
+#define INDEX_RBF 5
+#define INDEX_LTF 6
+#define INDEX_RTF 7
+
 class FlowModel;
 
 class FlowModelImmersedBoundaryMethod
