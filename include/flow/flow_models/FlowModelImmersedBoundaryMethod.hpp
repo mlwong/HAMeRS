@@ -13,6 +13,8 @@
 #include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/pdat/CellVariable.h"
 
+// #define HAMERS_DEBUG_IMMERSED_BOUNDARY_METHOD
+
 namespace VELOCITY_IBC
 {
     enum TYPE { NONE,
