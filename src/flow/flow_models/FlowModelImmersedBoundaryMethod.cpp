@@ -27,7 +27,9 @@ FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod(
         d_bc_type_velocity(VELOCITY_IBC::NONE),
         d_bc_type_temperature(TEMPERATURE_IBC::NONE),
         d_immersed_boundaries(immersed_boundaries),
-        d_equation_of_state_mixing_rules(equation_of_state_mixing_rules)
+        d_equation_of_state_mixing_rules(equation_of_state_mixing_rules),
+        d_surface_triangulation_coeff_ip_1(std::sqrt(3.0)),
+        d_surface_triangulation_coeff_ip_2(2.0)
 {
     /*
      * Hard-code the additional number of cells required by the immersed boundary method to be 3.
@@ -112,19 +114,6 @@ FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod(
             << ": FlowModelImmersedBoundaryMethod::FlowModelImmersedBoundaryMethod()\n"
             << "Required 'bc_type_temperature' entry from input database missing."
             << std::endl);
-    }
-    
-    const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
-    const int num_nodes = static_cast<int>(surface_triangulation.nodes.size());
-    
-    if (num_nodes > 0)
-    {
-        d_surface_triangulation_dx_grid.assign(num_nodes, std::numeric_limits<double>::max());
-        d_surface_triangulation_coor_ip_1.assign(num_nodes, {0.0, 0.0, 0.0});
-        d_surface_triangulation_coor_ip_2.assign(num_nodes, {0.0, 0.0, 0.0});
-        
-        d_surface_triangulation_weight_ip_1.assign(num_nodes, 0.0);
-        d_surface_triangulation_weight_ip_2.assign(num_nodes, 0.0);
     }
 }
 
@@ -405,6 +394,46 @@ void
 FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::string& file_name) const
 {
 #ifdef HAMERS_USE_TECIO
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > cons_var = flow_model_tmp->getConservativeVariables();
+    
+    const std::vector<std::string> names_cons_var_tmp = flow_model_tmp->getNamesOfConservativeVariables(true);
+    std::vector<std::string> names_cons_var;
+    names_cons_var.reserve(d_num_eqn);
+    int count_eqn = 0;
+    for (int vi = 0; vi < static_cast<int>(cons_var.size()); vi++)
+    {
+        const int depth = cons_var[vi]->getDepth();
+        
+        if (depth == 0)
+        {
+            names_cons_var.push_back(names_cons_var_tmp[vi]);
+        }
+        else
+        {
+            for (int di = 0; di < depth; di++)
+            {
+                // If the last element of the conservative variable vector is not in the system of equations,
+                // ignore it.
+                if (count_eqn >= d_num_eqn)
+                    break;
+                
+                    names_cons_var.push_back(names_cons_var_tmp[vi] + "_" + std::to_string(di));
+                
+                count_eqn++;
+            }
+        }
+    }
+    
     const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
     
     if (surface_triangulation.nodes.size() == 0)
@@ -462,8 +491,14 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
             "weight_ip_2"
         };
         
+        for (int di = 0; di < d_num_eqn; di++)
+        {
+            variable_names.push_back(names_cons_var[di] + "_ip_1");
+            variable_names.push_back(names_cons_var[di] + "_ip_2");
+        }
+        
         std::string variable_name_string = "";
-        for (int i = 0; i < static_cast<int>(variable_names.size()); ++i)
+        for (int i = 0; i < static_cast<int>(variable_names.size()); i++)
         {
             variable_name_string += variable_names[i];
             if (i < static_cast<int>(variable_names.size()) - 1)
@@ -548,7 +583,7 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
         
         for (const auto& conn : connectivities)
         {
-            for (int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; i++)
             {
                 connectivity_array.push_back(conn[i]);
             }
@@ -564,6 +599,12 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
         i = TECDAT142(&num_nodes, d_surface_triangulation_dx_grid.data(),     &d_is_double);
         i = TECDAT142(&num_nodes, d_surface_triangulation_weight_ip_1.data(), &d_is_double);
         i = TECDAT142(&num_nodes, d_surface_triangulation_weight_ip_2.data(), &d_is_double);
+        for (int di = 0; di < d_num_eqn; di++)
+        {
+            i = TECDAT142(&num_nodes, d_surface_triangulation_cons_var_ip_1[di].data(), &d_is_double);
+            i = TECDAT142(&num_nodes, d_surface_triangulation_cons_var_ip_2[di].data(), &d_is_double);
+        }
+
         
         i = TECNODE142(&connectivity_count, connectivity_array.data());
          
@@ -583,6 +624,16 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
     const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
     const std::vector<std::array<double, 3> >& nodes = surface_triangulation.nodes;
     
@@ -653,7 +704,7 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                 const double* const patch_xlo = patch_geom->getXLower();
                 const double* const patch_xhi = patch_geom->getXUpper();
                 
-                for (int ni = 0; ni < num_nodes; ++ni)
+                for (int ni = 0; ni < num_nodes; ni++)
                 {
                     const std::array<double, 3>& node = nodes[ni];
                     
@@ -684,7 +735,7 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
             // Make sure d_surface_triangulation_dx_grid is uniform.
             double dx_grid_min = std::numeric_limits<double>::max();
             double dx_grid_max = std::numeric_limits<double>::min();
-            for (int ni = 0; ni < num_nodes; ++ni)
+            for (int ni = 0; ni < num_nodes; ni++)
             {
                 dx_grid_min = std::min(dx_grid_min, d_surface_triangulation_dx_grid[ni]);
                 dx_grid_max = std::max(dx_grid_max, d_surface_triangulation_dx_grid[ni]);
@@ -707,10 +758,13 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
         
         const std::vector<std::array<double, 3> >& normal_nodes = surface_triangulation.normal_nodes;
         
-        const double c_ip_1 = sqrt(3.0);
-        const double c_ip_2 = 2.0;
+        const double c_ip_1 = d_surface_triangulation_coeff_ip_1;
+        const double c_ip_2 = d_surface_triangulation_coeff_ip_2;
         
-        for (int ni = 0; ni < num_nodes; ++ni)
+        d_surface_triangulation_coor_ip_1.assign(num_nodes, {0.0, 0.0, 0.0});
+        d_surface_triangulation_coor_ip_2.assign(num_nodes, {0.0, 0.0, 0.0});
+        
+        for (int ni = 0; ni < num_nodes; ni++)
         {
             const std::array<double, 3>& node = nodes[ni];
             const std::array<double, 3>& normal_node = normal_nodes[ni];
@@ -754,7 +808,7 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                 const double* const patch_xlo = patch_geom->getXLower();
                 const double* const patch_xhi = patch_geom->getXUpper();
                 
-                for (int ni = 0; ni < num_nodes; ++ni)
+                for (int ni = 0; ni < num_nodes; ni++)
                 {
                     const std::array<Real, 3>& coor_ip_1 = d_surface_triangulation_coor_ip_1[ni];
                     const std::array<Real, 3>& coor_ip_2 = d_surface_triangulation_coor_ip_2[ni];
@@ -796,7 +850,7 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
             double dx_grid_ip_1_max = std::numeric_limits<double>::min();
             double dx_grid_ip_2_min = std::numeric_limits<double>::max();
             double dx_grid_ip_2_max = std::numeric_limits<double>::min();
-            for (int ni = 0; ni < num_nodes; ++ni)
+            for (int ni = 0; ni < num_nodes; ni++)
             {
                 dx_grid_ip_1_min = std::min(dx_grid_ip_1_min, dx_gird_ip_1[ni]);
                 dx_grid_ip_1_max = std::max(dx_grid_ip_1_max, dx_gird_ip_1[ni]);
@@ -844,6 +898,19 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
         std::vector<double> weight_local_ip_1(num_nodes, 0.0);
         std::vector<double> weight_local_ip_2(num_nodes, 0.0);
         
+        std::vector<std::vector<double> > surface_triangulation_cons_var_local_ip_1;
+        std::vector<std::vector<double> > surface_triangulation_cons_var_local_ip_2;
+        d_surface_triangulation_cons_var_ip_1.clear();
+        d_surface_triangulation_cons_var_ip_2.clear();
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            d_surface_triangulation_cons_var_ip_1.push_back(std::vector<double>(num_nodes, 0.0));
+            d_surface_triangulation_cons_var_ip_2.push_back(std::vector<double>(num_nodes, 0.0));
+            
+            surface_triangulation_cons_var_local_ip_1.push_back(std::vector<double>(num_nodes, 0.0));
+            surface_triangulation_cons_var_local_ip_2.push_back(std::vector<double>(num_nodes, 0.0));
+        }
+        
         /*
          * Only consider the finest level. Get the patch level.
          */
@@ -885,6 +952,41 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                     patch_box,
                     num_levels - 1);
             
+            flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+            
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_variables =
+                flow_model_tmp->getCellDataOfConservativeVariables();
+            
+            std::vector<hier::IntVector> num_ghosts_conservative_var;
+            num_ghosts_conservative_var.reserve(d_num_eqn);
+            
+            std::vector<hier::IntVector> ghostcell_dims_conservative_var;
+            ghostcell_dims_conservative_var.reserve(d_num_eqn);
+            
+            std::vector<Real*> Q;
+            Q.reserve(d_num_eqn);
+            
+            int count_eqn = 0;
+            for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+            {
+                const int depth = conservative_variables[vi]->getDepth();
+                
+                for (int di = 0; di < depth; di++)
+                {
+                    // If the last element of the conservative variable vector is not in the system of equations,
+                    // ignore it.
+                    if (count_eqn >= d_num_eqn)
+                        break;
+                    
+                    Q.push_back(conservative_variables[vi]->getPointer(di));
+                    num_ghosts_conservative_var.push_back(conservative_variables[vi]->getGhostCellWidth());
+                    ghostcell_dims_conservative_var.push_back(
+                        conservative_variables[vi]->getGhostBox().numberCells());
+                    
+                    count_eqn++;
+                }
+            }
+            
             for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                  ib != patch_visible_boxes.end();
                  ib++)
@@ -902,7 +1004,7 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                     patch_vis_xhi[di] = patch_xhi[di] + dx[di]*relative_index_hi[di];
                 }
                 
-                for (int ni = 0; ni < num_nodes; ++ni)
+                for (int ni = 0; ni < num_nodes; ni++)
                 {
                     const std::array<double, 3>& coor_ip_1 = d_surface_triangulation_coor_ip_1[ni];
                     const std::array<double, 3>& coor_ip_2 = d_surface_triangulation_coor_ip_2[ni];
@@ -1028,7 +1130,7 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                         }
                     }
                     
-                    // Interplation for the first image point.
+                    // Interpolation for the first image point.
                     const double ratios_ip_1[3] = {coor_ip_1[0] - coor_neigh_ip_1[INDEX_LBK][0],
                                                    coor_ip_1[1] - coor_neigh_ip_1[INDEX_LBK][1],
                                                    coor_ip_1[2] - coor_neigh_ip_1[INDEX_LBK][2]};
@@ -1045,7 +1147,74 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                     
                     weight_local_ip_1[ni] += weight_ip_1;
                     
-                    // Interplation for the second image point.
+                    for (int ei = 0; ei < d_num_eqn; ei++)
+                    {
+                        const int idx_cons_var_LBK = weight_neigh_ip_1[INDEX_LBK] == 0 ? 0 :
+                            (indices_neigh_ip_1[INDEX_LBK][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_ip_1[INDEX_LBK][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_ip_1[INDEX_LBK][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_RBK = weight_neigh_ip_1[INDEX_RBK] == 0 ? 0 :
+                            (indices_neigh_ip_1[INDEX_RBK][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_ip_1[INDEX_RBK][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_ip_1[INDEX_RBK][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_LTK = weight_neigh_ip_1[INDEX_LTK] == 0 ? 0 :
+                            (indices_neigh_ip_1[INDEX_LTK][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_ip_1[INDEX_LTK][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_ip_1[INDEX_LTK][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_RTK = weight_neigh_ip_1[INDEX_RTK] == 0 ? 0 :
+                            (indices_neigh_ip_1[INDEX_RTK][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_ip_1[INDEX_RTK][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_ip_1[INDEX_RTK][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_LBF = (weight_neigh_ip_1[INDEX_LBF] == 0) ? 0 :
+                            (indices_neigh_ip_1[INDEX_LBF][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_ip_1[INDEX_LBF][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_ip_1[INDEX_LBF][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_RBF = (weight_neigh_ip_1[INDEX_RBF] == 0) ? 0 :
+                            (indices_neigh_ip_1[INDEX_RBF][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_ip_1[INDEX_RBF][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_ip_1[INDEX_RBF][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_LTF = weight_neigh_ip_1[INDEX_LTF] == 0 ? 0 :
+                            (indices_neigh_ip_1[INDEX_LTF][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_ip_1[INDEX_LTF][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_ip_1[INDEX_LTF][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_RTF = weight_neigh_ip_1[INDEX_RTF] == 0 ? 0 :
+                            (indices_neigh_ip_1[INDEX_RTF][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_ip_1[INDEX_RTF][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_ip_1[INDEX_RTF][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const double value_ip_1_BK = (1.0 - ratios_ip_1[0])*weight_neigh_ip_1[INDEX_LBK]*double(Q[ei][idx_cons_var_LBK]) +
+                                                             ratios_ip_1[0]*weight_neigh_ip_1[INDEX_RBK]*double(Q[ei][idx_cons_var_RBK]);
+                        const double value_ip_1_TK = (1.0 - ratios_ip_1[0])*weight_neigh_ip_1[INDEX_LTK]*double(Q[ei][idx_cons_var_LTK]) +
+                                                             ratios_ip_1[0]*weight_neigh_ip_1[INDEX_RTK]*double(Q[ei][idx_cons_var_RTK]);
+                        const double value_ip_1_BF = (1.0 - ratios_ip_1[0])*weight_neigh_ip_1[INDEX_LBF]*double(Q[ei][idx_cons_var_LBF]) +
+                                                             ratios_ip_1[0]*weight_neigh_ip_1[INDEX_RBF]*double(Q[ei][idx_cons_var_RBF]);
+                        const double value_ip_1_TF = (1.0 - ratios_ip_1[0])*weight_neigh_ip_1[INDEX_LTF]*double(Q[ei][idx_cons_var_LTF]) +
+                                                             ratios_ip_1[0]*weight_neigh_ip_1[INDEX_RTF]*double(Q[ei][idx_cons_var_RTF]);
+                        
+                        const double value_ip_1_F = (1.0 - ratios_ip_1[1])*value_ip_1_BF + ratios_ip_1[1]*value_ip_1_TF;
+                        const double value_ip_1_K = (1.0 - ratios_ip_1[1])*value_ip_1_BK + ratios_ip_1[1]*value_ip_1_TK;
+                        
+                        const double value_ip_1 = (1.0 - ratios_ip_1[2])*value_ip_1_K + ratios_ip_1[2]*value_ip_1_F;
+                        
+                        surface_triangulation_cons_var_local_ip_1[ei][ni] += value_ip_1;
+                    }
+                    
+                    // Interpolation for the second image point.
                     const double ratios_ip_2[3] = {coor_ip_2[0] - coor_neigh_ip_2[INDEX_LBK][0],
                                                    coor_ip_2[1] - coor_neigh_ip_2[INDEX_LBK][1],
                                                    coor_ip_2[2] - coor_neigh_ip_2[INDEX_LBK][2]};
@@ -1061,8 +1230,81 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                     const double weight_ip_2 = (1.0 - ratios_ip_2[2])*weight_ip_2_K + ratios_ip_2[2]*weight_ip_2_F;
                     
                     weight_local_ip_2[ni] += weight_ip_2;
+                    
+                    for (int ei = 0; ei < d_num_eqn; ei++)
+                    {
+                        const int idx_cons_var_LBK = weight_neigh_ip_2[INDEX_LBK] == 0 ? 0 :
+                            (indices_neigh_ip_2[INDEX_LBK][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_ip_2[INDEX_LBK][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_ip_2[INDEX_LBK][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_RBK = (weight_neigh_ip_2[INDEX_RBK] == 0) ? 0 :
+                            (indices_neigh_ip_2[INDEX_RBK][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_ip_2[INDEX_RBK][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_ip_2[INDEX_RBK][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_LTK = (weight_neigh_ip_2[INDEX_LTK] == 0) ? 0 :
+                            (indices_neigh_ip_2[INDEX_LTK][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_ip_2[INDEX_LTK][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_ip_2[INDEX_LTK][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_RTK = (weight_neigh_ip_2[INDEX_RTK] == 0) ? 0 :
+                            (indices_neigh_ip_2[INDEX_RTK][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_ip_2[INDEX_RTK][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_ip_2[INDEX_RTK][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_LBF = (weight_neigh_ip_2[INDEX_LBF] == 0) ? 0 :
+                            (indices_neigh_ip_2[INDEX_LBF][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_ip_2[INDEX_LBF][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_ip_2[INDEX_LBF][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_RBF = (weight_neigh_ip_2[INDEX_RBF] == 0) ? 0 :
+                            (indices_neigh_ip_2[INDEX_RBF][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_ip_2[INDEX_RBF][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_ip_2[INDEX_RBF][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_LTF = (weight_neigh_ip_2[INDEX_LTF] == 0) ? 0 :
+                            (indices_neigh_ip_2[INDEX_LTF][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_ip_2[INDEX_LTF][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_ip_2[INDEX_LTF][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_RTF = (weight_neigh_ip_2[INDEX_RTF] == 0) ? 0 :
+                            (indices_neigh_ip_2[INDEX_RTF][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_ip_2[INDEX_RTF][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_ip_2[INDEX_RTF][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const double value_ip_2_BK = (1.0 - ratios_ip_2[0])*weight_neigh_ip_2[INDEX_LBK]*double(Q[ei][idx_cons_var_LBK]) +
+                                                             ratios_ip_2[0]*weight_neigh_ip_2[INDEX_RBK]*double(Q[ei][idx_cons_var_RBK]);
+                        const double value_ip_2_TK = (1.0 - ratios_ip_2[0])*weight_neigh_ip_2[INDEX_LTK]*double(Q[ei][idx_cons_var_LTK]) +
+                                                             ratios_ip_2[0]*weight_neigh_ip_2[INDEX_RTK]*double(Q[ei][idx_cons_var_RTK]);
+                        const double value_ip_2_BF = (1.0 - ratios_ip_2[0])*weight_neigh_ip_2[INDEX_LBF]*double(Q[ei][idx_cons_var_LBF]) +
+                                                             ratios_ip_2[0]*weight_neigh_ip_2[INDEX_RBF]*double(Q[ei][idx_cons_var_RBF]);
+                        const double value_ip_2_TF = (1.0 - ratios_ip_2[0])*weight_neigh_ip_2[INDEX_LTF]*double(Q[ei][idx_cons_var_LTF]) +
+                                                             ratios_ip_2[0]*weight_neigh_ip_2[INDEX_RTF]*double(Q[ei][idx_cons_var_RTF]);
+                                                              
+                        const double value_ip_2_F = (1.0 - ratios_ip_2[1])*value_ip_2_BF + ratios_ip_2[1]*value_ip_2_TF;
+                        const double value_ip_2_K = (1.0 - ratios_ip_2[1])*value_ip_2_BK + ratios_ip_2[1]*value_ip_2_TK;
+                        
+                        const double value_ip_2 = (1.0 - ratios_ip_2[2])*value_ip_2_K + ratios_ip_2[2]*value_ip_2_F;
+                        
+                        surface_triangulation_cons_var_local_ip_2[ei][ni] += value_ip_2;
+                    }
                 }
             }
+            
+            /*
+             * Unregister the patch and data of all registered derived cell variables in the flow model.
+             */
+            
+            flow_model_tmp->unregisterPatch();
         }
         
         mpi.Allreduce(
@@ -1079,9 +1321,26 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
             MPI_DOUBLE,
             MPI_SUM);
         
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            mpi.Allreduce(
+                &surface_triangulation_cons_var_local_ip_1[ei][0],
+                &d_surface_triangulation_cons_var_ip_1[ei][0],
+                num_nodes,
+                MPI_DOUBLE,
+                MPI_SUM);
+            
+            mpi.Allreduce(
+                &surface_triangulation_cons_var_local_ip_2[ei][0],
+                &d_surface_triangulation_cons_var_ip_2[ei][0],
+                num_nodes,
+                MPI_DOUBLE,
+                MPI_SUM);
+        }
+        
         if (mpi.getRank() == 0)
         {
-            for (int ni = 0; ni < num_nodes; ++ni)
+            for (int ni = 0; ni < num_nodes; ni++)
             {
                 if (std::abs(d_surface_triangulation_weight_ip_1[ni] - 1.0) > 10.0*std::numeric_limits<double>::epsilon())
                 {

@@ -29,6 +29,7 @@ namespace TEMPERATURE_IBC
                 ISOTHERMAL };
 }
 
+// 3D neighbor indices for the surface triangulation.
 #define INDEX_LBK 0
 #define INDEX_RBK 1
 #define INDEX_LTK 2
@@ -448,6 +449,9 @@ class FlowModelImmersedBoundaryMethod
         static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_wall_distance;
         static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_surface_normal;
         
+        const double d_surface_triangulation_coeff_ip_1;
+        const double d_surface_triangulation_coeff_ip_2;
+        
         /*
          * Data for the surface triangulation if needed.
          */
@@ -459,6 +463,9 @@ class FlowModelImmersedBoundaryMethod
         
         std::vector<double> d_surface_triangulation_weight_ip_1;
         std::vector<double> d_surface_triangulation_weight_ip_2;
+        
+        std::vector<std::vector<double> > d_surface_triangulation_cons_var_ip_1;
+        std::vector<std::vector<double> > d_surface_triangulation_cons_var_ip_2;
 };
 
 #endif /* FLOW_MODEL_BASIC_UTILITIES_HPP */
