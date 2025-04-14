@@ -37,6 +37,11 @@ class FlowModelImmersedBoundaryMethodFourEqnConservative: public FlowModelImmers
             const hier::IntVector& domain_dims);
         
         /*
+         * Output the surface triangulation with surface data.
+         */
+        void writeSurfaceTriangulationWithData(const std::string& file_name) const;
+        
+        /*
          * Compute the data on the surface triangulation.
          */
         void computeSurfaceTriangulationData(

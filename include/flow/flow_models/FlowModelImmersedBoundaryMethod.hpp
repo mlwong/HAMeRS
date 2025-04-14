@@ -149,7 +149,7 @@ class FlowModelImmersedBoundaryMethod
         /*
          * Output the surface triangulation with surface data.
          */
-        void writeSurfaceTriangulationWithData(const std::string& file_name) const;
+        virtual void writeSurfaceTriangulationWithData(const std::string& file_name) const = 0;
         
         /*
          * Compute the data on the surface triangulation.
@@ -160,6 +160,14 @@ class FlowModelImmersedBoundaryMethod
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) = 0;
         
     protected:
+        /*
+         * Output the surface triangulation with surface data.
+         */
+        void writeSurfaceTriangulationWithDataBase(
+            const std::string& file_name,
+            const std::vector<std::string>& variable_names,
+            const std::vector<HAMERS_SHARED_PTR<std::vector<double> > >& variable_data) const;
+        
         /*
          * Compute the data on the surface triangulation.
          */

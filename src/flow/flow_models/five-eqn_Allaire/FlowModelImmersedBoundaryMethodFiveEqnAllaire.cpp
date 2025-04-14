@@ -554,6 +554,31 @@ void FlowModelImmersedBoundaryMethodFiveEqnAllaire::setConservativeVariablesCell
 
 
 /*
+ * Output the surface triangulation with surface data.
+ */
+ void FlowModelImmersedBoundaryMethodFiveEqnAllaire::writeSurfaceTriangulationWithData(
+    const std::string& file_name) const
+{
+#ifdef HAMERS_USE_TECIO
+    const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
+    if (surface_triangulation.nodes.size() == 0)
+    {
+        TBOX_WARNING(d_object_name
+            << ": FlowModelImmersedBoundaryMethodFiveEqnAllaire::writeSurfaceTriangulationWithData()\n"
+            << "The surface triangulation is empty."
+            << " No surface file will be written."
+            << std::endl);
+        return;
+    }
+    
+    std::vector<std::string> variable_names; // empty for now
+    std::vector<HAMERS_SHARED_PTR<std::vector<double> > > variable_data; // empty for now
+    writeSurfaceTriangulationWithDataBase(file_name, variable_names, variable_data);
+#endif
+}
+
+
+/*
  * Compute the data on the surface triangulation.
  */
 void FlowModelImmersedBoundaryMethodFiveEqnAllaire::computeSurfaceTriangulationData(

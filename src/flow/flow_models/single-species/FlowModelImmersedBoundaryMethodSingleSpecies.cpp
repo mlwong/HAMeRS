@@ -1286,6 +1286,35 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
 
 
 /*
+ * Output the surface triangulation with surface data.
+ */
+void FlowModelImmersedBoundaryMethodSingleSpecies::writeSurfaceTriangulationWithData(
+    const std::string& file_name) const
+{
+#ifdef HAMERS_USE_TECIO
+    const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
+    if (surface_triangulation.nodes.size() == 0)
+    {
+        TBOX_WARNING(d_object_name
+            << ": FlowModelImmersedBoundaryMethodSingleSpecies::writeSurfaceTriangulationWithData()\n"
+            << "The surface triangulation is empty."
+            << " No surface file will be written."
+            << std::endl);
+        return;
+    }
+    
+    std::vector<std::string> variable_names;
+    std::vector<HAMERS_SHARED_PTR<std::vector<double> > > variable_data;
+    
+    // Add surface pressure.
+    variable_names.push_back("surf_data_p");
+    variable_data.push_back(d_surface_triangulation_p);
+    
+    writeSurfaceTriangulationWithDataBase(file_name, variable_names, variable_data);
+#endif
+}
+
+/*
  * Compute the data on the surface triangulation.
  */
 void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationData(
@@ -1305,6 +1334,8 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
     {
         return;
     }
+    
+    d_surface_triangulation_p = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size()));
     
     // HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     

@@ -391,7 +391,10 @@ FlowModelImmersedBoundaryMethod::setConservativeVariablesCellDataImmersedBoundar
  * Output the surface triangulation.
  */
 void
-FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::string& file_name) const
+FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithDataBase(
+    const std::string& file_name,
+    const std::vector<std::string>& variable_names,
+    const std::vector<HAMERS_SHARED_PTR<std::vector<double> > >& variable_data) const
 {
 #ifdef HAMERS_USE_TECIO
     if (d_flow_model.expired())
@@ -479,29 +482,29 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
         INTEGER4 debug = 0;
 #endif
         
-        std::vector<std::string> variable_names = {
-            "x",
-            "y",
-            "z",
-            "node_normal_x",
-            "node_normal_y",
-            "node_normal_z",
-            "dx_grid",
-            "weight_ip_1",
-            "weight_ip_2"
+        std::vector<std::string> variable_names_all = {
+            "surf_mesh_x",
+            "surf_mesh_y",
+            "surf_mesh_z",
+            "surf_mesh_node_normal_x",
+            "surf_mesh_node_normal_y",
+            "surf_mesh_node_normal_z",
+            "surf_mesh_dx_grid",
+            "surf_mesh_weight_ip_1",
+            "surf_mesh_weight_ip_2"
         };
         
         for (int di = 0; di < d_num_eqn; di++)
         {
-            variable_names.push_back(names_cons_var[di] + "_ip_1");
-            variable_names.push_back(names_cons_var[di] + "_ip_2");
+            variable_names_all.push_back("cons_var" + names_cons_var[di] + "_ip_1");
+            variable_names_all.push_back("cons_var" + names_cons_var[di] + "_ip_2");
         }
         
         std::string variable_name_string = "";
-        for (int i = 0; i < static_cast<int>(variable_names.size()); i++)
+        for (int i = 0; i < static_cast<int>(variable_names_all.size()); i++)
         {
-            variable_name_string += variable_names[i];
-            if (i < static_cast<int>(variable_names.size()) - 1)
+            variable_name_string += variable_names_all[i];
+            if (i < static_cast<int>(variable_names_all.size()) - 1)
             {
                 variable_name_string += " ";
             }
@@ -533,7 +536,7 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData(const std::st
         INTEGER4 shr_conn  = 0; // Not used.
         
         // cell-centered: 0, nodal: 1
-        const std::vector<int> valueLocation(static_cast<int>(variable_names.size()), 1);
+        const std::vector<int> valueLocation(static_cast<int>(variable_names_all.size()), 1);
         
         /*
          * Write the zone header information.
