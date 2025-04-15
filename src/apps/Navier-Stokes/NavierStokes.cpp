@@ -5578,6 +5578,7 @@ void NavierStokes::writePlotSurfaceData(
             d_flow_model->getFlowModelImmersedBoundaryMethod();
         
         flow_model_immersed_boundary_method->computeSurfaceTriangulationData(
+            d_grid_geometry,
             patch_hierarchy,
             d_plot_context);
         

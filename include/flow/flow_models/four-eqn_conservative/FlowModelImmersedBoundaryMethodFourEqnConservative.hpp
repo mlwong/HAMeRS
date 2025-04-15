@@ -36,6 +36,19 @@ class FlowModelImmersedBoundaryMethodFourEqnConservative: public FlowModelImmers
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims);
         
+        /*
+         * Output the surface triangulation with surface data.
+         */
+        void writeSurfaceTriangulationWithData(const std::string& file_name) const;
+        
+        /*
+         * Compute the data on the surface triangulation.
+         */
+        void computeSurfaceTriangulationData(
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
     private:
         /* 
          * Values of primitive variables inside the body.

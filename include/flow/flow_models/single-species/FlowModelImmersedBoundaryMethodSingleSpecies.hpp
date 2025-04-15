@@ -36,6 +36,19 @@ class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoun
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims);
         
+        /*
+         * Output the surface triangulation with surface data.
+         */
+        void writeSurfaceTriangulationWithData(const std::string& file_name) const;
+        
+        /*
+         * Compute the data on the surface triangulation.
+         */
+        void computeSurfaceTriangulationData(
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
     private:
         /* 
          * Values of primitive variables inside the body.
@@ -55,6 +68,11 @@ class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoun
          * Thermodynamic properties of the species.
          */
         std::vector<Real> d_thermo_properties;
+        
+        /*
+         * Data for the surface triangulation if needed.
+         */
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_p;
         
 };
 

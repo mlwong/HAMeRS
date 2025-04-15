@@ -13,6 +13,8 @@
 #include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/pdat/CellVariable.h"
 
+// #define HAMERS_DEBUG_IMMERSED_BOUNDARY_METHOD
+
 namespace VELOCITY_IBC
 {
     enum TYPE { NONE,
@@ -26,6 +28,16 @@ namespace TEMPERATURE_IBC
                 ADIABATIC,
                 ISOTHERMAL };
 }
+
+// 3D neighbor indices for the surface triangulation.
+#define INDEX_LBK 0
+#define INDEX_RBK 1
+#define INDEX_LTK 2
+#define INDEX_RTK 3
+#define INDEX_LBF 4
+#define INDEX_RBF 5
+#define INDEX_LTF 6
+#define INDEX_RTF 7
 
 class FlowModel;
 
@@ -135,18 +147,35 @@ class FlowModelImmersedBoundaryMethod
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
+         * Output the surface triangulation with surface data.
+         */
+        virtual void writeSurfaceTriangulationWithData(const std::string& file_name) const = 0;
+        
+        /*
          * Compute the data on the surface triangulation.
          */
-        void computeSurfaceTriangulationData(
+        virtual void computeSurfaceTriangulationData(
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) = 0;
         
+    protected:
         /*
          * Output the surface triangulation with surface data.
          */
-        void writeSurfaceTriangulationWithData(const std::string& file_name) const;
+        void writeSurfaceTriangulationWithDataBase(
+            const std::string& file_name,
+            const std::vector<std::string>& variable_names,
+            const std::vector<HAMERS_SHARED_PTR<std::vector<double> > >& variable_data) const;
         
-    protected:
+        /*
+         * Compute the data on the surface triangulation.
+         */
+         void computeSurfaceTriangulationDataBase(
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
         /*
          * Dot product of two 2D vectors.
          */
@@ -202,7 +231,7 @@ class FlowModelImmersedBoundaryMethod
         }
         
         /*
-         * Neumann boundary condition with second order of accuracy (zero gradient).
+         * Neumann boundary condition with second order of accuracy (non-zero gradient).
          */
         static inline __attribute__((always_inline)) Real getGhostValueNeumannBC(
             const Real& dudn_body,
@@ -221,7 +250,7 @@ class FlowModelImmersedBoundaryMethod
         /*
          * Get the indices for the 2D bilinear interpolation.
          */
-         static inline __attribute__((always_inline)) void getBilinearInterpolationIndices2D(
+        static inline __attribute__((always_inline)) void getBilinearInterpolationIndices2D(
             int& idx_BL,
             int& idx_BR,
             int& idx_TL,
@@ -249,16 +278,16 @@ class FlowModelImmersedBoundaryMethod
             
             const int ip_i = int(floor((x_ip - patch_xlo_0 - half * dx)*dx_inv));
             const int ip_j = int(floor((y_ip - patch_xlo_1 - half * dx)*dx_inv));
-
-            idx_IB_BL  = (ip_i     + offset_0_IB) + (ip_j     + offset_1_IB) * ghostcell_dim_0_IB;
-            idx_IB_BR  = (ip_i + 1 + offset_0_IB) + (ip_j     + offset_1_IB) * ghostcell_dim_0_IB;
-            idx_IB_TL  = (ip_i     + offset_0_IB) + (ip_j + 1 + offset_1_IB) * ghostcell_dim_0_IB;
-            idx_IB_TR  = (ip_i + 1 + offset_0_IB) + (ip_j + 1 + offset_1_IB) * ghostcell_dim_0_IB;
             
-            idx_BL  = (ip_i     + offset_0) + (ip_j     + offset_1) * ghostcell_dim_0;
-            idx_BR  = (ip_i + 1 + offset_0) + (ip_j     + offset_1) * ghostcell_dim_0;
-            idx_TL  = (ip_i     + offset_0) + (ip_j + 1 + offset_1) * ghostcell_dim_0;
-            idx_TR  = (ip_i + 1 + offset_0) + (ip_j + 1 + offset_1) * ghostcell_dim_0;
+            idx_IB_BL  = (ip_i     + offset_0_IB) + (ip_j     + offset_1_IB)*ghostcell_dim_0_IB;
+            idx_IB_BR  = (ip_i + 1 + offset_0_IB) + (ip_j     + offset_1_IB)*ghostcell_dim_0_IB;
+            idx_IB_TL  = (ip_i     + offset_0_IB) + (ip_j + 1 + offset_1_IB)*ghostcell_dim_0_IB;
+            idx_IB_TR  = (ip_i + 1 + offset_0_IB) + (ip_j + 1 + offset_1_IB)*ghostcell_dim_0_IB;
+            
+            idx_BL  = (ip_i     + offset_0) + (ip_j     + offset_1)*ghostcell_dim_0;
+            idx_BR  = (ip_i + 1 + offset_0) + (ip_j     + offset_1)*ghostcell_dim_0;
+            idx_TL  = (ip_i     + offset_0) + (ip_j + 1 + offset_1)*ghostcell_dim_0;
+            idx_TR  = (ip_i + 1 + offset_0) + (ip_j + 1 + offset_1)*ghostcell_dim_0;
             
             x_ip_BL = patch_xlo_0 + (Real(ip_i) + half)*dx;
             y_ip_BL = patch_xlo_1 + (Real(ip_j) + half)*dx;
@@ -293,7 +322,7 @@ class FlowModelImmersedBoundaryMethod
         /*
          * Get the indices for the 3D trilinear interpolation.
          */
-         static inline __attribute__((always_inline)) void getTrilinearInterpolationIndices3D(
+        static inline __attribute__((always_inline)) void getTrilinearInterpolationIndices3D(
             int& idx_cons_var_LBK,
             int& idx_cons_var_RBK,
             int& idx_cons_var_LTK,
@@ -337,24 +366,24 @@ class FlowModelImmersedBoundaryMethod
             const int ip_i = int(floor((x_ip - patch_xlo_0 - half * dx)*dx_inv));
             const int ip_j = int(floor((y_ip - patch_xlo_1 - half * dx)*dx_inv));
             const int ip_k = int(floor((z_ip - patch_xlo_2 - half * dx)*dx_inv));
-
-            idx_IB_LBK = (ip_i     + offset_0_IB) + (ip_j     + offset_1_IB) * ghostcell_dim_0_IB + (ip_k     + offset_2_IB) * ghostcell_dim_0_IB * ghostcell_dim_1_IB;
-            idx_IB_RBK = (ip_i + 1 + offset_0_IB) + (ip_j     + offset_1_IB) * ghostcell_dim_0_IB + (ip_k     + offset_2_IB) * ghostcell_dim_0_IB * ghostcell_dim_1_IB;
-            idx_IB_LTK = (ip_i     + offset_0_IB) + (ip_j + 1 + offset_1_IB) * ghostcell_dim_0_IB + (ip_k     + offset_2_IB) * ghostcell_dim_0_IB * ghostcell_dim_1_IB;
-            idx_IB_RTK = (ip_i + 1 + offset_0_IB) + (ip_j + 1 + offset_1_IB) * ghostcell_dim_0_IB + (ip_k     + offset_2_IB) * ghostcell_dim_0_IB * ghostcell_dim_1_IB;
-            idx_IB_LBF = (ip_i     + offset_0_IB) + (ip_j     + offset_1_IB) * ghostcell_dim_0_IB + (ip_k + 1 + offset_2_IB) * ghostcell_dim_0_IB * ghostcell_dim_1_IB;
-            idx_IB_RBF = (ip_i + 1 + offset_0_IB) + (ip_j     + offset_1_IB) * ghostcell_dim_0_IB + (ip_k + 1 + offset_2_IB) * ghostcell_dim_0_IB * ghostcell_dim_1_IB;
-            idx_IB_LTF = (ip_i     + offset_0_IB) + (ip_j + 1 + offset_1_IB) * ghostcell_dim_0_IB + (ip_k + 1 + offset_2_IB) * ghostcell_dim_0_IB * ghostcell_dim_1_IB;
-            idx_IB_RTF = (ip_i + 1 + offset_0_IB) + (ip_j + 1 + offset_1_IB) * ghostcell_dim_0_IB + (ip_k + 1 + offset_2_IB) * ghostcell_dim_0_IB * ghostcell_dim_1_IB;
             
-            idx_cons_var_LBK = (ip_i     + offset_0) + (ip_j     + offset_1) * ghostcell_dim_0 + (ip_k     + offset_2) * ghostcell_dim_0 * ghostcell_dim_1;
-            idx_cons_var_RBK = (ip_i + 1 + offset_0) + (ip_j     + offset_1) * ghostcell_dim_0 + (ip_k     + offset_2) * ghostcell_dim_0 * ghostcell_dim_1;
-            idx_cons_var_LTK = (ip_i     + offset_0) + (ip_j + 1 + offset_1) * ghostcell_dim_0 + (ip_k     + offset_2) * ghostcell_dim_0 * ghostcell_dim_1;
-            idx_cons_var_RTK = (ip_i + 1 + offset_0) + (ip_j + 1 + offset_1) * ghostcell_dim_0 + (ip_k     + offset_2) * ghostcell_dim_0 * ghostcell_dim_1;
-            idx_cons_var_LBF = (ip_i     + offset_0) + (ip_j     + offset_1) * ghostcell_dim_0 + (ip_k + 1 + offset_2) * ghostcell_dim_0 * ghostcell_dim_1;
-            idx_cons_var_RBF = (ip_i + 1 + offset_0) + (ip_j     + offset_1) * ghostcell_dim_0 + (ip_k + 1 + offset_2) * ghostcell_dim_0 * ghostcell_dim_1;
-            idx_cons_var_LTF = (ip_i     + offset_0) + (ip_j + 1 + offset_1) * ghostcell_dim_0 + (ip_k + 1 + offset_2) * ghostcell_dim_0 * ghostcell_dim_1;
-            idx_cons_var_RTF = (ip_i + 1 + offset_0) + (ip_j + 1 + offset_1) * ghostcell_dim_0 + (ip_k + 1 + offset_2) * ghostcell_dim_0 * ghostcell_dim_1;
+            idx_IB_LBK = (ip_i     + offset_0_IB) + (ip_j     + offset_1_IB)*ghostcell_dim_0_IB + (ip_k     + offset_2_IB)*ghostcell_dim_0_IB*ghostcell_dim_1_IB;
+            idx_IB_RBK = (ip_i + 1 + offset_0_IB) + (ip_j     + offset_1_IB)*ghostcell_dim_0_IB + (ip_k     + offset_2_IB)*ghostcell_dim_0_IB*ghostcell_dim_1_IB;
+            idx_IB_LTK = (ip_i     + offset_0_IB) + (ip_j + 1 + offset_1_IB)*ghostcell_dim_0_IB + (ip_k     + offset_2_IB)*ghostcell_dim_0_IB*ghostcell_dim_1_IB;
+            idx_IB_RTK = (ip_i + 1 + offset_0_IB) + (ip_j + 1 + offset_1_IB)*ghostcell_dim_0_IB + (ip_k     + offset_2_IB)*ghostcell_dim_0_IB*ghostcell_dim_1_IB;
+            idx_IB_LBF = (ip_i     + offset_0_IB) + (ip_j     + offset_1_IB)*ghostcell_dim_0_IB + (ip_k + 1 + offset_2_IB)*ghostcell_dim_0_IB*ghostcell_dim_1_IB;
+            idx_IB_RBF = (ip_i + 1 + offset_0_IB) + (ip_j     + offset_1_IB)*ghostcell_dim_0_IB + (ip_k + 1 + offset_2_IB)*ghostcell_dim_0_IB*ghostcell_dim_1_IB;
+            idx_IB_LTF = (ip_i     + offset_0_IB) + (ip_j + 1 + offset_1_IB)*ghostcell_dim_0_IB + (ip_k + 1 + offset_2_IB)*ghostcell_dim_0_IB*ghostcell_dim_1_IB;
+            idx_IB_RTF = (ip_i + 1 + offset_0_IB) + (ip_j + 1 + offset_1_IB)*ghostcell_dim_0_IB + (ip_k + 1 + offset_2_IB)*ghostcell_dim_0_IB*ghostcell_dim_1_IB;
+            
+            idx_cons_var_LBK = (ip_i     + offset_0) + (ip_j     + offset_1)*ghostcell_dim_0 + (ip_k     + offset_2)*ghostcell_dim_0*ghostcell_dim_1;
+            idx_cons_var_RBK = (ip_i + 1 + offset_0) + (ip_j     + offset_1)*ghostcell_dim_0 + (ip_k     + offset_2)*ghostcell_dim_0*ghostcell_dim_1;
+            idx_cons_var_LTK = (ip_i     + offset_0) + (ip_j + 1 + offset_1)*ghostcell_dim_0 + (ip_k     + offset_2)*ghostcell_dim_0*ghostcell_dim_1;
+            idx_cons_var_RTK = (ip_i + 1 + offset_0) + (ip_j + 1 + offset_1)*ghostcell_dim_0 + (ip_k     + offset_2)*ghostcell_dim_0*ghostcell_dim_1;
+            idx_cons_var_LBF = (ip_i     + offset_0) + (ip_j     + offset_1)*ghostcell_dim_0 + (ip_k + 1 + offset_2)*ghostcell_dim_0*ghostcell_dim_1;
+            idx_cons_var_RBF = (ip_i + 1 + offset_0) + (ip_j     + offset_1)*ghostcell_dim_0 + (ip_k + 1 + offset_2)*ghostcell_dim_0*ghostcell_dim_1;
+            idx_cons_var_LTF = (ip_i     + offset_0) + (ip_j + 1 + offset_1)*ghostcell_dim_0 + (ip_k + 1 + offset_2)*ghostcell_dim_0*ghostcell_dim_1;
+            idx_cons_var_RTF = (ip_i + 1 + offset_0) + (ip_j + 1 + offset_1)*ghostcell_dim_0 + (ip_k + 1 + offset_2)*ghostcell_dim_0*ghostcell_dim_1;
             
             x_ip_LBK = patch_xlo_0 + (Real(ip_i) + half)*dx;
             y_ip_LBK = patch_xlo_1 + (Real(ip_j) + half)*dx;
@@ -395,7 +424,7 @@ class FlowModelImmersedBoundaryMethod
             const Real u_ip_F = (one - ip_ratio_1)*u_ip_BF + ip_ratio_1*u_ip_TF;
             const Real u_ip_K = (one - ip_ratio_1)*u_ip_BK + ip_ratio_1*u_ip_TK;
             
-            const Real u_ip = (one - ip_ratio_2) * u_ip_K  + ip_ratio_2 * u_ip_F;
+            const Real u_ip = (one - ip_ratio_2)*u_ip_K + ip_ratio_2*u_ip_F;
             
             return u_ip;
         }
@@ -462,6 +491,9 @@ class FlowModelImmersedBoundaryMethod
         static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_wall_distance;
         static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_surface_normal;
         
+        const double d_surface_triangulation_coeff_ip_1;
+        const double d_surface_triangulation_coeff_ip_2;
+        
         /*
          * Data for the surface triangulation if needed.
          */
@@ -471,6 +503,11 @@ class FlowModelImmersedBoundaryMethod
         std::vector<std::array<double, 3> > d_surface_triangulation_coor_ip_1;
         std::vector<std::array<double, 3> > d_surface_triangulation_coor_ip_2;
         
+        std::vector<double> d_surface_triangulation_weight_ip_1;
+        std::vector<double> d_surface_triangulation_weight_ip_2;
+        
+        std::vector<std::vector<double> > d_surface_triangulation_cons_var_ip_1;
+        std::vector<std::vector<double> > d_surface_triangulation_cons_var_ip_2;
 };
 
 #endif /* FLOW_MODEL_BASIC_UTILITIES_HPP */

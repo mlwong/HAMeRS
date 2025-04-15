@@ -338,13 +338,13 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                     // First image point distance is set to dx/maximum(norm) for ghost cells for convective fluxes.
                     else
                     {
-                        Real norm_max = std::max(std::abs(norm_0[idx_IB]), std::abs(norm_1[idx_IB]));  
-                        d_ip  = Real(dx[0]) / norm_max + HAMERS_REAL_EPSILON;    
+                        Real norm_max = std::max(std::abs(norm_0[idx_IB]), std::abs(norm_1[idx_IB]));
+                        d_ip  = Real(dx[0]) / norm_max + HAMERS_REAL_EPSILON;
                     }
-
+                    
                     // Second image point distance.
                     Real d_ip2 = d_ip + Real(0.25)*Real(dx[0]); 
-
+                    
                     // Coordinates of the image point 1.
                     const Real x_ip  = x[0] + (dist[idx_IB] + d_ip)*norm_0[idx_IB];
                     const Real y_ip  = x[1] + (dist[idx_IB] + d_ip)*norm_1[idx_IB];
@@ -1541,6 +1541,127 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                     }
                 }
             }
+        }
+    }
+}
+
+
+/*
+ * Output the surface triangulation with surface data.
+ */
+void FlowModelImmersedBoundaryMethodSingleSpecies::writeSurfaceTriangulationWithData(
+    const std::string& file_name) const
+{
+#ifdef HAMERS_USE_TECIO
+    const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
+    if (surface_triangulation.nodes.size() == 0)
+    {
+        TBOX_WARNING(d_object_name
+            << ": FlowModelImmersedBoundaryMethodSingleSpecies::writeSurfaceTriangulationWithData()\n"
+            << "The surface triangulation is empty."
+            << " No surface file will be written."
+            << std::endl);
+        return;
+    }
+    
+    std::vector<std::string> variable_names;
+    std::vector<HAMERS_SHARED_PTR<std::vector<double> > > variable_data;
+    
+    // Add surface pressure.
+    variable_names.push_back("surf_data_p");
+    variable_data.push_back(d_surface_triangulation_p);
+    
+    writeSurfaceTriangulationWithDataBase(file_name, variable_names, variable_data);
+#endif
+}
+
+/*
+ * Compute the data on the surface triangulation.
+ */
+void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationData(
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    computeSurfaceTriangulationDataBase(
+        grid_geometry,
+        patch_hierarchy,
+        data_context);
+    
+    const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
+    const std::vector<std::array<double, 3> >& nodes = surface_triangulation.nodes;
+    
+    if (nodes.empty())
+    {
+        return;
+    }
+    
+    const int num_nodes = static_cast<int>(nodes.size());
+    
+    d_surface_triangulation_p = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
+    
+    double* p_data = d_surface_triangulation_p->data();
+    
+    // Get the thermodynamic properties of the species.
+    std::vector<const Real*> thermo_properties_ptr;
+    thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
+    for (int ti = 0; ti < static_cast<int> (d_thermo_properties.size()); ti++)
+    {
+        thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+    }
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        // Do nothing for now.
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        // Do nothing for now.
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        for (int ni = 0; ni < num_nodes; ni++)
+        {
+            const double dx_grid = d_surface_triangulation_dx_grid[ni];
+            const Real d_ip_1    = Real(d_surface_triangulation_coeff_ip_1*dx_grid);
+            const Real d_ip_2    = Real(d_surface_triangulation_coeff_ip_2*dx_grid);
+            
+            const Real rho_ip_1   = Real(d_surface_triangulation_cons_var_ip_1[0][ni]);
+            const Real rho_u_ip_1 = Real(d_surface_triangulation_cons_var_ip_1[1][ni]);
+            const Real rho_v_ip_1 = Real(d_surface_triangulation_cons_var_ip_1[2][ni]);
+            const Real rho_w_ip_1 = Real(d_surface_triangulation_cons_var_ip_1[3][ni]);
+            const Real E_ip_1     = Real(d_surface_triangulation_cons_var_ip_1[4][ni]);
+            
+            const Real rho_ip_2   = Real(d_surface_triangulation_cons_var_ip_2[0][ni]);
+            const Real rho_u_ip_2 = Real(d_surface_triangulation_cons_var_ip_2[1][ni]);
+            const Real rho_v_ip_2 = Real(d_surface_triangulation_cons_var_ip_2[2][ni]);
+            const Real rho_w_ip_2 = Real(d_surface_triangulation_cons_var_ip_2[3][ni]);
+            const Real E_ip_2     = Real(d_surface_triangulation_cons_var_ip_2[4][ni]);
+            
+            const Real epsilon_ip_1 = (E_ip_1 -
+                0.5*(rho_u_ip_1*rho_u_ip_1 + rho_v_ip_1*rho_v_ip_1 + rho_w_ip_1*rho_w_ip_1)/rho_ip_1)/rho_ip_1;
+            
+            const Real epsilon_ip_2 = (E_ip_2 -
+                0.5*(rho_u_ip_2*rho_u_ip_2 + rho_v_ip_2*rho_v_ip_2 + rho_w_ip_2*rho_w_ip_2)/rho_ip_2)/rho_ip_2;
+            
+            const Real p_ip_1 = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(
+                &rho_ip_1,
+                &epsilon_ip_1,
+                thermo_properties_ptr);
+            
+            const Real p_ip_2 = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(
+                &rho_ip_2,
+                &epsilon_ip_2,
+                thermo_properties_ptr);
+            
+            const Real p_surf = getGhostValueNeumannBC(
+                p_ip_1,
+                p_ip_2,
+                d_ip_1,
+                d_ip_2,
+                Real(0));
+            
+            p_data[ni] = double(p_surf);
         }
     }
 }
