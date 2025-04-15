@@ -328,7 +328,6 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                 
                 if ((mask[idx_IB] == int(IB_MASK::IB_GHOST)) || (mask[idx_IB] == int(IB_MASK::IB_GHOST_CORNER)))
                 {
-                    
                     Real d_ip;
                     // First image point distance is set to sqrt(2)*dx + epsilon for corner ghost cells.
                     if (mask[idx_IB] == int(IB_MASK::IB_GHOST_CORNER))
@@ -343,7 +342,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                     }
                     
                     // Second image point distance.
-                    Real d_ip2 = d_ip + Real(0.25)*Real(dx[0]); 
+                    Real d_ip2 = d_ip + Real(0.25)*Real(dx[0]);
                     
                     // Coordinates of the image point 1.
                     const Real x_ip  = x[0] + (dist[idx_IB] + d_ip)*norm_0[idx_IB];
@@ -840,7 +839,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         Real(patch_xlo[2]) + (Real(k) + half)*Real(dx[2])
                         };
                     
-                    if (mask[idx_IB] == int(IB_MASK::IB_GHOST) || mask[idx_IB] == int(IB_MASK::IB_GHOST_CORNER))  
+                    if (mask[idx_IB] == int(IB_MASK::IB_GHOST) || mask[idx_IB] == int(IB_MASK::IB_GHOST_CORNER))
                     {
                         
                         Real d_ip;
