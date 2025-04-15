@@ -1335,34 +1335,72 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
         return;
     }
     
-    d_surface_triangulation_p = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size()));
+    const int num_nodes = static_cast<int>(nodes.size());
     
-    // HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    d_surface_triangulation_p = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
     
-    // const int num_nodes = static_cast<int>(nodes.size());
+    double* p_data = d_surface_triangulation_p->data();
     
-    // const int num_levels = patch_hierarchy->getNumberOfLevels();
+    // Get the thermodynamic properties of the species.
+    std::vector<const Real*> thermo_properties_ptr;
+    thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
+    for (int ti = 0; ti < static_cast<int> (d_thermo_properties.size()); ti++)
+    {
+        thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+    }
     
-    // /*
-    //  * Get the flattened hierarchy where only the finest existing grid is visible at any given
-    //  * location in the problem space.
-    //  */
-    
-    // HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
-    //    new ExtendedFlattenedHierarchy(
-    //        *patch_hierarchy,
-    //        0,
-    //        num_levels - 1));
-    
-    // if (d_dim == tbox::Dimension(1))
-    // {
-    //     // Do nothing for now.
-    // }
-    // else if (d_dim == tbox::Dimension(2))
-    // {
-    //     // Do nothing for now.
-    // }
-    // else if (d_dim == tbox::Dimension(3))
-    // {
-    // }
+    if (d_dim == tbox::Dimension(1))
+    {
+        // Do nothing for now.
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        // Do nothing for now.
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        for (int ni = 0; ni < num_nodes; ni++)
+        {
+            const double dx_grid = d_surface_triangulation_dx_grid[ni];
+            const Real d_ip_1    = Real(d_surface_triangulation_coeff_ip_1*dx_grid);
+            const Real d_ip_2    = Real(d_surface_triangulation_coeff_ip_2*dx_grid);
+            
+            const Real rho_ip_1   = Real(d_surface_triangulation_cons_var_ip_1[0][ni]);
+            const Real rho_u_ip_1 = Real(d_surface_triangulation_cons_var_ip_1[1][ni]);
+            const Real rho_v_ip_1 = Real(d_surface_triangulation_cons_var_ip_1[2][ni]);
+            const Real rho_w_ip_1 = Real(d_surface_triangulation_cons_var_ip_1[3][ni]);
+            const Real E_ip_1     = Real(d_surface_triangulation_cons_var_ip_1[4][ni]);
+            
+            const Real rho_ip_2   = Real(d_surface_triangulation_cons_var_ip_2[0][ni]);
+            const Real rho_u_ip_2 = Real(d_surface_triangulation_cons_var_ip_2[1][ni]);
+            const Real rho_v_ip_2 = Real(d_surface_triangulation_cons_var_ip_2[2][ni]);
+            const Real rho_w_ip_2 = Real(d_surface_triangulation_cons_var_ip_2[3][ni]);
+            const Real E_ip_2     = Real(d_surface_triangulation_cons_var_ip_2[4][ni]);
+            
+            const Real epsilon_ip_1 = (E_ip_1 -
+                0.5*(rho_u_ip_1*rho_u_ip_1 + rho_v_ip_1*rho_v_ip_1 + rho_w_ip_1*rho_w_ip_1)/rho_ip_1)/rho_ip_1;
+            
+            const Real epsilon_ip_2 = (E_ip_2 -
+                0.5*(rho_u_ip_2*rho_u_ip_2 + rho_v_ip_2*rho_v_ip_2 + rho_w_ip_2*rho_w_ip_2)/rho_ip_2)/rho_ip_2;
+            
+            const Real p_ip_1 = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(
+                &rho_ip_1,
+                &epsilon_ip_1,
+                thermo_properties_ptr);
+            
+            const Real p_ip_2 = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(
+                &rho_ip_2,
+                &epsilon_ip_2,
+                thermo_properties_ptr);
+            
+            const Real p_surf = getGhostValueNeumannBC(
+                p_ip_1,
+                p_ip_2,
+                d_ip_1,
+                d_ip_2,
+                Real(0));
+            
+            p_data[ni] = double(p_surf);
+        }
+    }
 }

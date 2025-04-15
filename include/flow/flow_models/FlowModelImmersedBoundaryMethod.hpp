@@ -231,7 +231,7 @@ class FlowModelImmersedBoundaryMethod
         }
         
         /*
-         * Neumann boundary condition with second order of accuracy (zero gradient).
+         * Neumann boundary condition with second order of accuracy (non-zero gradient).
          */
         static inline __attribute__((always_inline)) Real getGhostValueNeumannBC(
             const Real& dudn_body,

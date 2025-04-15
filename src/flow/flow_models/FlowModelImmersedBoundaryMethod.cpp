@@ -405,6 +405,14 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithDataBase(
             << std::endl);
     }
     
+    if (variable_names.size() != variable_data.size())
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithDataBase()\n"
+            << "The number of variable names and data are not the same."
+            << std::endl);
+    }
+    
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > cons_var = flow_model_tmp->getConservativeVariables();
@@ -442,7 +450,7 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithDataBase(
     if (surface_triangulation.nodes.size() == 0)
     {
         TBOX_WARNING(d_object_name
-            << ": FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData()\n"
+            << ": FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithDataBase()\n"
             << "The surface triangulation is empty."
             << " No surface file will be written."
             << std::endl);
@@ -461,7 +469,7 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithDataBase(
         if (nodes.size() != normal_nodes.size())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithData()\n"
+                << ": FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithDataBase()\n"
                 << "The size of nodes and normal_nodes are not the same."
                 << std::endl);
         }
@@ -496,9 +504,14 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithDataBase(
         
         for (int di = 0; di < d_num_eqn; di++)
         {
-            variable_names_all.push_back("cons_var" + names_cons_var[di] + "_ip_1");
-            variable_names_all.push_back("cons_var" + names_cons_var[di] + "_ip_2");
+            variable_names_all.push_back("cons_var_" + names_cons_var[di] + "_ip_1");
+            variable_names_all.push_back("cons_var_" + names_cons_var[di] + "_ip_2");
         }
+        
+        // for (int vi = 0; vi < static_cast<int>(variable_names.size()); vi++)
+        // {
+        //     variable_names_all.push_back(variable_names[vi]);
+        // }
         
         std::string variable_name_string = "";
         for (int i = 0; i < static_cast<int>(variable_names_all.size()); i++)
@@ -607,7 +620,10 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithDataBase(
             i = TECDAT142(&num_nodes, d_surface_triangulation_cons_var_ip_1[di].data(), &d_is_double);
             i = TECDAT142(&num_nodes, d_surface_triangulation_cons_var_ip_2[di].data(), &d_is_double);
         }
-
+        // for (int vi = 0; vi < static_cast<int>(variable_data.size()); vi++)
+        // {
+        //     i = TECDAT142(&num_nodes, variable_data[vi]->data(), &d_is_double);
+        // }
         
         i = TECNODE142(&connectivity_count, connectivity_array.data());
          
