@@ -565,7 +565,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         const Real v_mirror = (diff_ip2_mirror*v_ip + diff_mirror_ip*v_ip2)/diff_ip2_ip;
                         
                         // Velocity component normal to the boundary at the mirror image point.
-                        const Real vel_mirror_n = dotProduct2D(u_mirror, v_mirror, norm_0[idx_IB], norm_1[idx_IB]); 
+                        const Real vel_mirror_n = dotProduct2D(u_mirror, v_mirror, norm_0[idx_IB], norm_1[idx_IB]);
                         
                         // No-penetration boundary condition.
                         u_gc = u_mirror - Real(2)*vel_mirror_n*norm_0[idx_IB];
@@ -578,7 +578,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         // Real vel_gc_t = vel_ip_t;
                         
                         // u_gc = vel_gc_n*norm_0[idx_IB] - vel_gc_t*norm_1[idx_IB];
-                        // v_gc = vel_gc_n*norm_1[idx_IB] + vel_gc_t*norm_0[idx_IB]; 
+                        // v_gc = vel_gc_n*norm_1[idx_IB] + vel_gc_t*norm_0[idx_IB];
                     }
                     else if (d_bc_type_velocity == VELOCITY_IBC::NO_SLIP)
                     {
@@ -851,12 +851,12 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         // First image point distance is set to dx/maximum(norm) for ghost cells for convective fluxes.
                         else
                         {
-                            Real norm_max = std::max(std::max(std::abs(norm_0[idx_IB]), std::abs(norm_1[idx_IB])), std::abs(norm_2[idx_IB]));  
-                            d_ip  = Real(dx[0]) / norm_max + HAMERS_REAL_EPSILON;    
+                            Real norm_max = std::max(std::max(std::abs(norm_0[idx_IB]), std::abs(norm_1[idx_IB])), std::abs(norm_2[idx_IB]));
+                            d_ip  = Real(dx[0]) / norm_max + HAMERS_REAL_EPSILON;
                         }
-
+                        
                         // Second image point distance is set to d_ip + 0.25*dx.
-                        Real d_ip2 = d_ip + Real(0.25)*Real(dx[0]);  
+                        Real d_ip2 = d_ip + Real(0.25)*Real(dx[0]);
                         // Coordinates of the image point 1.
                         const Real x_ip = x[0] + (dist[idx_IB] + d_ip)*norm_0[idx_IB];
                         const Real y_ip = x[1] + (dist[idx_IB] + d_ip)*norm_1[idx_IB];
@@ -930,7 +930,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                                 << "\n x_ip_LBK: " << x_ip_LBK
                                 << "\n y_ip_LBK: " << y_ip_LBK);
                         }
-
+                        
                         if (mask[idx_ip_IB_RBK] != int(IB_MASK::FLUID))
                         {
                             TBOX_ERROR("Error: Right-bottom-back cell is not FLUID at index: " << idx_ip_IB_RBK 
@@ -948,7 +948,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                                 << "\n x_ip_LBK: " << x_ip_LBK
                                 << "\n y_ip_LBK: " << y_ip_LBK);
                         }
-
+                        
                         if (mask[idx_ip_IB_LTK] != int(IB_MASK::FLUID))
                         {
                             TBOX_ERROR("Error: Left-top-back cell is not FLUID at index: " << idx_ip_IB_LTK 
@@ -966,7 +966,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                                 << "\n x_ip_LBK: " << x_ip_LBK
                                 << "\n y_ip_LBK: " << y_ip_LBK);
                         }
-
+                        
                         if (mask[idx_ip_IB_RTK] != int(IB_MASK::FLUID))
                         {
                             TBOX_ERROR("Error: Right-top-back cell is not FLUID at index: " << idx_ip_IB_RTK 
@@ -984,7 +984,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                                 << "\n x_ip_LBK: " << x_ip_LBK
                                 << "\n y_ip_LBK: " << y_ip_LBK);
                         }
-
+                        
                         // Checking first image point interpolation stencil to ensure only fluid cell values are used
                         if (mask[idx_ip_IB_LBF] != int(IB_MASK::FLUID))
                         {
@@ -1003,7 +1003,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                                 << "\n x_ip_LBK: " << x_ip_LBK
                                 << "\n y_ip_LBK: " << y_ip_LBK);
                         }
-
+                        
                         if (mask[idx_ip_IB_RBF] != int(IB_MASK::FLUID))
                         {
                             TBOX_ERROR("Error: Right-bottom-front cell is not FLUID at index: " << idx_ip_IB_RBF 
@@ -1021,7 +1021,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                                 << "\n x_ip_LBK: " << x_ip_LBK
                                 << "\n y_ip_LBK: " << y_ip_LBK);
                         }
-
+                        
                         if (mask[idx_ip_IB_LTF] != int(IB_MASK::FLUID))
                         {
                             TBOX_ERROR("Error: Left-top-front cell is not FLUID at index: " << idx_ip_IB_LTF 
@@ -1039,7 +1039,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                                 << "\n x_ip_LBK: " << x_ip_LBK
                                 << "\n y_ip_LBK: " << y_ip_LBK);
                         }
-
+                        
                         if (mask[idx_ip_IB_RTF] != int(IB_MASK::FLUID))
                         {
                             TBOX_ERROR("Error: Right-top-front cell is not FLUID at index: " << idx_ip_IB_RTF 
@@ -1290,7 +1290,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                             v_gc = v_mirror - Real(2)*vel_mirror_n*norm_1[idx_IB];
                             w_gc = w_mirror - Real(2)*vel_mirror_n*norm_2[idx_IB];
                         }
-                        else if (d_bc_type_velocity == VELOCITY_IBC::NO_SLIP) 
+                        else if (d_bc_type_velocity == VELOCITY_IBC::NO_SLIP)
                         {
                             u_gc = getGhostValueDirichletBC(
                                 Real(0),
