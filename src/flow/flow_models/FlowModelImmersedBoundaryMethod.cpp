@@ -491,9 +491,9 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithDataBase(
 #endif
         
         std::vector<std::string> variable_names_all = {
-            "surf_mesh_x",
-            "surf_mesh_y",
-            "surf_mesh_z",
+            "x",
+            "y",
+            "z",
             "surf_mesh_node_normal_x",
             "surf_mesh_node_normal_y",
             "surf_mesh_node_normal_z",
@@ -508,10 +508,10 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithDataBase(
             variable_names_all.push_back("cons_var_" + names_cons_var[di] + "_ip_2");
         }
         
-        // for (int vi = 0; vi < static_cast<int>(variable_names.size()); vi++)
-        // {
-        //     variable_names_all.push_back(variable_names[vi]);
-        // }
+        for (int vi = 0; vi < static_cast<int>(variable_names.size()); vi++)
+        {
+            variable_names_all.push_back(variable_names[vi]);
+        }
         
         std::string variable_name_string = "";
         for (int i = 0; i < static_cast<int>(variable_names_all.size()); i++)
@@ -620,10 +620,10 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithDataBase(
             i = TECDAT142(&num_nodes, d_surface_triangulation_cons_var_ip_1[di].data(), &d_is_double);
             i = TECDAT142(&num_nodes, d_surface_triangulation_cons_var_ip_2[di].data(), &d_is_double);
         }
-        // for (int vi = 0; vi < static_cast<int>(variable_data.size()); vi++)
-        // {
-        //     i = TECDAT142(&num_nodes, variable_data[vi]->data(), &d_is_double);
-        // }
+        for (int vi = 0; vi < static_cast<int>(variable_data.size()); vi++)
+        {
+            i = TECDAT142(&num_nodes, variable_data[vi]->data(), &d_is_double);
+        }
         
         i = TECNODE142(&connectivity_count, connectivity_array.data());
          
