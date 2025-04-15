@@ -162,13 +162,6 @@ FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSin
         d_E_body = d_rho_body*(epsilon_body + Real(1)/Real(2)*
             (u_body*u_body + v_body*v_body + w_body*w_body));
     }
-    
-    // const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
-    // const int num_nodes = static_cast<int>(surface_triangulation.nodes.size());
-    
-    // if (num_nodes > 0)
-    // {
-    // }
 }
 
 
