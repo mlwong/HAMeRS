@@ -125,53 +125,67 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                     y_p = y_c - sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));
                 }
                 
-                // Ghost cell check boolean variable
-                bool is_ghost_cell = false;
-                
-                // Check cell for convective flux (direct neighbors)
-                if ((fabs(x_p - x[0]) < (double(d_num_immersed_boundary_ghosts[0]))*dx[0]) || (fabs(y_p - x[1]) < (double(d_num_immersed_boundary_ghosts[1]))*dx[1]))
-                 
-                {
-                    is_ghost_cell = true;
-                }
-                
                 // Determine maximum ghost layers in x and y directions
                 const int max_ghost_x = d_num_immersed_boundary_ghosts[0];
                 const int max_ghost_y = d_num_immersed_boundary_ghosts[1];
+
+                if ((max_ghost_x != max_ghost_y ))
+                {
+                    TBOX_ERROR("num_immersed_boundary_ghosts should have the same value in x and y directions\n");
+                }
+                
+                bool is_ghost_cell   = false;
+                bool is_corner_ghost = false;
+
                 double x_d[2];
 
-                // Check diagonal ghost cells for all possible layers
-                if (!is_ghost_cell) 
+                for (int gx = 1; gx <= max_ghost_x; gx++) 
                 {
-                    for (int gx = -max_ghost_x; gx <= max_ghost_x; gx++) 
+                    if ((fabs(x_p - x[0]) < (double(gx))*dx[0]) || (fabs(y_p - x[1]) < (double(gx))*dx[1])) // Ghost cells excluding corner ghost cells
                     {
-                        for (int gy = -max_ghost_y; gy <= max_ghost_y; gy++) 
-                        {
-                            // Skip the center cell and Cartesian-aligned cases
-                            if (gx == 0 && gy == 0) continue;
-                            if (gx == 0 || gy == 0) continue;
-                            
-                            x_d[0] = patch_xlo[0] + (double(i + gx) + 0.5) * dx[0];
-                            x_d[1] = patch_xlo[1] + (double(j + gy) + 0.5) * dx[1];
-                            double radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
-                            
-                            if (radius_d > radius_c) 
-                            {
-                                is_ghost_cell = true;
-                                break;
-                            }
-                        }
-                        if (is_ghost_cell) break;
+                        is_ghost_cell = true;
+                        break; 
                     }
 
-                }
+                    x_d[0] = patch_xlo[0] + (double(i + gx) + double(1)/double(2)) * dx[0];
+                    x_d[1] = patch_xlo[1] + (double(j + gx) + double(1)/double(2)) * dx[1];
+                    double radius_d_TR = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
 
-                // Apply ghost cell marking if any condition is met
-                if (is_ghost_cell) {
-                    mask[idx]   = int(IB_MASK::IB_GHOST);
-                    dist[idx]   = radius_c - radius;
+                    x_d[0] = patch_xlo[0] + (double(i + gx) + double(1)/double(2)) * dx[0];
+                    x_d[1] = patch_xlo[1] + (double(j - gx) + double(1)/double(2)) * dx[1];
+                    double radius_d_BR = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+
+                    x_d[0] = patch_xlo[0] + (double(i - gx) + double(1)/double(2)) * dx[0];
+                    x_d[1] = patch_xlo[1] + (double(j - gx) + double(1)/double(2)) * dx[1];
+                    double radius_d_BL = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+
+                    x_d[0] = patch_xlo[0] + (double(i - gx) + double(1)/double(2)) * dx[0];
+                    x_d[1] = patch_xlo[1] + (double(j + gx) + double(1)/double(2)) * dx[1];
+                    double radius_d_TL = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+                    
+                    if ((radius_d_TR > radius_c) || (radius_d_BR > radius_c) || (radius_d_BL > radius_c) || (radius_d_TL > radius_c))
+                    {
+                        is_corner_ghost = true;
+                        break;
+                    }
+                }
+                
+                if (is_ghost_cell || is_corner_ghost)
+                {
+                    dist[idx]   = radius_c - radius;   
                     norm_0[idx] = (x[0] - x_c)/radius;
                     norm_1[idx] = (x[1] - y_c)/radius;
+
+                    // Corner ghost cells required for viscous fluxes
+                    if (is_corner_ghost)  
+                    {
+                        mask[idx]   = int(IB_MASK::IB_GHOST_CORNER);
+                    }
+                    else // Ghost cells required for convective fluxes
+                    {
+                        mask[idx]   = int(IB_MASK::IB_GHOST);
+                    }
+
                 }
                 else
                 {

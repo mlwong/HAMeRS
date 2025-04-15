@@ -97,7 +97,7 @@ ImmersedBoundaryTagger::tagCellsOnPatch(
             const int idx = i + num_ghosts_0_IB_mask;
             const int idx_nghost = i;
             
-            if (IB_mask_ptr[idx] == int(IB_MASK::IB_GHOST))
+            if ((IB_mask_ptr[idx] == int(IB_MASK::IB_GHOST)) || (IB_mask_ptr[idx] == int(IB_MASK::IB_GHOST_CORNER)))
             {
                 tag_ptr[idx_nghost] |= 1;
             }
@@ -123,7 +123,7 @@ ImmersedBoundaryTagger::tagCellsOnPatch(
                 
                 const int idx_nghost = i + j*interior_dim_0;
                 
-                if (IB_mask_ptr[idx] == int(IB_MASK::IB_GHOST))
+                if ((IB_mask_ptr[idx] == int(IB_MASK::IB_GHOST)) || (IB_mask_ptr[idx] == int(IB_MASK::IB_GHOST_CORNER)))
                 {
                     tag_ptr[idx_nghost] |= 1;
                 }
@@ -157,7 +157,7 @@ ImmersedBoundaryTagger::tagCellsOnPatch(
                     
                     const int idx_nghost = i + j*interior_dim_0 + k*interior_dim_0*interior_dim_1;
                     
-                    if (IB_mask_ptr[idx] == int(IB_MASK::IB_GHOST))
+                    if ((IB_mask_ptr[idx] == int(IB_MASK::IB_GHOST)) || (IB_mask_ptr[idx] == int(IB_MASK::IB_GHOST_CORNER)))
                     {
                         tag_ptr[idx_nghost] |= 1;
                     }

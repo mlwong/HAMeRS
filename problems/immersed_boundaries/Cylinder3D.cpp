@@ -109,12 +109,9 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                 x[2] = patch_xlo[2] + (double(k) + double(1)/double(2))*dx[2]; // z coordinates of the point.
                 
                 // Distance from the cylinder center.
-                   const double radius = sqrt(pow(x[0] - x_c, 2) + pow(x[1] - y_c, 2));
+                const double radius = sqrt(pow(x[0] - x_c, 2) + pow(x[1] - y_c, 2));
                 // Angle between x axis and a line passing through center and current cell.
                 const double theta  = atan2(x[1] - y_c, x[0] - x_c);
-                
-                // Double check this eqn for cylindrical coord
-                const double phi = atan((x[1] - y_c) / x[0] - x_c);
                 
                 if (radius < radius_c) // Condition that should be satisfied to be in cylinder.
                 {
@@ -141,85 +138,70 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                     {
                         y_p = y_c - sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));
                     }
-                    //double check this, z_p does not depend on phi in cylindrical coords, x2 + y2 = r2
-                    if (x[2] > z_c)
-                    {    
-                        z_p = x[2];
-                    }
-                    else
+                    
+                    // Determine maximum ghost layers in x, y, and z directions
+                    const int max_ghost_x = d_num_immersed_boundary_ghosts[0];
+                    const int max_ghost_y = d_num_immersed_boundary_ghosts[1];
+                    const int max_ghost_z = d_num_immersed_boundary_ghosts[2];
+
+                    if ((max_ghost_x != max_ghost_y) || (max_ghost_x != max_ghost_z) || (max_ghost_y != max_ghost_z))
                     {
-                        z_p = x[2];
+                    TBOX_ERROR("num_immersed_boundary_ghosts should have the same value in x, y, and z directions\n");
                     }
-                    // For checking ghost cell for viscous flux.
-                    // 8 diagonal ghost cells for 3D
-                    // Check first diagonal ghost cell.
-                    // radius_d does not depend on z, only x and y
-                    double x_d[3];
-                    x_d[0] = patch_xlo[0] + (double(i+1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j+1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k+1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
-                    double radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
-                    bool is_corner_ghost = radius_d > radius_c;    
-                    
-                    // Check second diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i+1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j+1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k-1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
-                    radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
-                    is_corner_ghost |= radius_d > radius_c;
-                    
-                    // Check third diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i+1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j-1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k+1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
-                    radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
-                    is_corner_ghost |= radius_d > radius_c;
-                    
-                    // Check fourth diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i+1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j-1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k-1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
-                    radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
-                    is_corner_ghost |= radius_d > radius_c;
-                    
-                    // Check fifth diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i-1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j+1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k+1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
-                    radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
-                    is_corner_ghost |= radius_d > radius_c;
-                    // Check sixth diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i-1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j+1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k-1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
-                    radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
-                    is_corner_ghost |= radius_d > radius_c;
-                    
-                    // Check seventh diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i-1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j-1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k+1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
-                    radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
-                    is_corner_ghost |= radius_d > radius_c;
-                    
-                    // Check eighth diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i-1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j-1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k-1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
-                    radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
-                    is_corner_ghost |= radius_d > radius_c;
-                    
-                    if ((fabs(x_p - x[0]) < (double(d_num_immersed_boundary_ghosts[0]))*dx[0]) ||
-                        (fabs(y_p - x[1]) < (double(d_num_immersed_boundary_ghosts[1]))*dx[1]) ||
-                    //    (fabs(z_p - x[2]) < (double(d_num_immersed_boundary_ghosts[2]))*dx[2]) ||
-                        is_corner_ghost)
+
+                    bool is_ghost_cell   = false;
+                    bool is_corner_ghost = false;
+
+                    double x_d[2];
+
+                    for (int gx = 1; gx <= max_ghost_x; gx++) 
                     {
-                        mask[idx]   = int(IB_MASK::IB_GHOST);
-                        dist[idx]   = radius_c - radius;
+                        if ((fabs(x_p - x[0]) < (double(gx))*dx[0]) || (fabs(y_p - x[1]) < (double(gx))*dx[1])) // Ghost cells excluding corner ghost cells
+                        {
+                            is_ghost_cell = true;
+                            break; 
+                        }
+
+                        x_d[0] = patch_xlo[0] + (double(i + gx) + double(1)/double(2)) * dx[0];
+                        x_d[1] = patch_xlo[1] + (double(j + gx) + double(1)/double(2)) * dx[1];
+                        double radius_d_TR = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+
+                        x_d[0] = patch_xlo[0] + (double(i + gx) + double(1)/double(2)) * dx[0];
+                        x_d[1] = patch_xlo[1] + (double(j - gx) + double(1)/double(2)) * dx[1];
+                        double radius_d_BR = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+
+                        x_d[0] = patch_xlo[0] + (double(i - gx) + double(1)/double(2)) * dx[0];
+                        x_d[1] = patch_xlo[1] + (double(j - gx) + double(1)/double(2)) * dx[1];
+                        double radius_d_BL = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+
+                        x_d[0] = patch_xlo[0] + (double(i - gx) + double(1)/double(2)) * dx[0];
+                        x_d[1] = patch_xlo[1] + (double(j + gx) + double(1)/double(2)) * dx[1];
+                        double radius_d_TL = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+                        
+                        if ((radius_d_TR > radius_c) || (radius_d_BR > radius_c) || (radius_d_BL > radius_c) || (radius_d_TL > radius_c))
+                        {
+                            is_corner_ghost = true;
+                            break;
+                        }
+                    }
+
+                    if (is_ghost_cell || is_corner_ghost)
+                    {
+                        dist[idx]   = radius_c - radius;   
                         norm_0[idx] = (x[0] - x_c)/radius;
                         norm_1[idx] = (x[1] - y_c)/radius;
-                        //check this, normal does not depend on z 
                         norm_2[idx] = double(0);
+
+                        // Corner ghost cells required for viscous fluxes
+                        if (is_corner_ghost)  
+                        {
+                            mask[idx]   = int(IB_MASK::IB_GHOST_CORNER);
+                        }
+                        else // Ghost cells required for convective fluxes
+                        {
+                            mask[idx]   = int(IB_MASK::IB_GHOST);
+                        }
+
                     }
                     else
                     {

@@ -104,12 +104,6 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                 // Distance from the sphere center.
                 const double radius = sqrt(pow(x[0] - x_c, 2) + pow(x[1] - y_c, 2) + pow(x[2] - z_c, 2));
                 
-                // Angle between x-axis and a line passing through center and current cell.
-                // const double theta = atan2(x[1] - y_c, x[0] - x_c);
-                
-                // Angle between z-axis and a line passing through center and current cell.
-                // const double phi = acos((x[2] - z_c) / radius);
-                
                 if (radius < radius_c)  // Condition that should be satisfied to be in sphere
                 {   
                     double x_p; // x coordinates on the cylinder where y = x[1] and z = x[2].
@@ -142,75 +136,99 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                     {
                         z_p = z_c - sqrt(pow((radius_c), 2) - pow(radius, 2) + pow((x[2] - z_c),2)); 
                     }
-                    
-                    // For checking ghost cell for viscous flux.
-                    // Check first diagonal ghost cell.
-                    double x_d[3];
-                    x_d[0] = patch_xlo[0] + (double(i + 1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j + 1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k + 1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
-                    double radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
-                    bool is_corner_ghost = radius_d > radius_c;
-                    
-                    // Check second diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i + 1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j + 1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k - 1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
-                    radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
-                    is_corner_ghost |= radius_d > radius_c;
-                    
-                    // Check third diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i + 1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j - 1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k + 1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
-                    radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
-                    is_corner_ghost |= radius_d > radius_c;
-                    
-                    // Check fourth diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i + 1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j - 1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k - 1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
-                    radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
-                    is_corner_ghost |= radius_d > radius_c;
-                    
-                    // Check fifth diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i - 1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j + 1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k + 1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
-                    radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
-                    is_corner_ghost |= radius_d > radius_c;
-                    
-                    // Check sixth diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i - 1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j + 1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k - 1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
-                    radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
-                    is_corner_ghost |= radius_d > radius_c;
-                    
-                    // Check seventh diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i - 1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j - 1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k + 1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
-                    radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
-                    is_corner_ghost |= radius_d > radius_c;
-                    
-                    // Check eighth diagonal ghost cell.
-                    x_d[0] = patch_xlo[0] + (double(i - 1) + double(1)/double(2))*dx[0]; // x coordinates of the point.
-                    x_d[1] = patch_xlo[1] + (double(j - 1) + double(1)/double(2))*dx[1]; // y coordinates of the point.
-                    x_d[2] = patch_xlo[2] + (double(k - 1) + double(1)/double(2))*dx[2]; // z coordinates of the point.
-                    radius_d = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
-                    is_corner_ghost |= radius_d > radius_c;
-                    
-                    if ((fabs(x_p - x[0]) < (double(d_num_immersed_boundary_ghosts[0]))*dx[0]) || 
-                        (fabs(y_p - x[1]) < (double(d_num_immersed_boundary_ghosts[1]))*dx[1]) ||
-                        (fabs(z_p - x[2]) < (double(d_num_immersed_boundary_ghosts[2]))*dx[2]) ||
-                        is_corner_ghost)
+
+                    // Determine maximum ghost layers in x and y directions
+                    const int max_ghost_x = d_num_immersed_boundary_ghosts[0];
+                    const int max_ghost_y = d_num_immersed_boundary_ghosts[1];
+                    const int max_ghost_z = d_num_immersed_boundary_ghosts[2];
+
+                    if ((max_ghost_x != max_ghost_y) || (max_ghost_x != max_ghost_z) || (max_ghost_y != max_ghost_z))
                     {
-                        mask[idx]   = int(IB_MASK::IB_GHOST);
+                    TBOX_ERROR("num_immersed_boundary_ghosts should have the same value in x, y, and z directions\n");
+                    }
+
+                    bool is_ghost_cell   = false;
+                    bool is_corner_ghost = false;
+
+                    double x_d[3];
+
+                    for (int gx = 1; gx <= max_ghost_x; gx++) 
+                    {
+                        if ((fabs(x_p - x[0]) < (double(gx))*dx[0]) || (fabs(y_p - x[1]) < (double(gx))*dx[1]) 
+                                                                    || (fabs(z_p - x[2]) < (double(gx))*dx[2])) // Ghost cells excluding corner ghost cells
+                        {
+                            is_ghost_cell = true;
+                            break; 
+                        }
+
+                        x_d[0] = patch_xlo[0] + (double(i + gx) + double(1)/double(2)) * dx[0];
+                        x_d[1] = patch_xlo[1] + (double(j + gx) + double(1)/double(2)) * dx[1];
+                        x_d[2] = patch_xlo[2] + (double(k + gx) + double(1)/double(2)) * dx[2];
+                        double radius_d_RTF = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
+
+                        x_d[0] = patch_xlo[0] + (double(i - gx) + double(1)/double(2)) * dx[0];
+                        x_d[1] = patch_xlo[1] + (double(j + gx) + double(1)/double(2)) * dx[1];
+                        x_d[2] = patch_xlo[2] + (double(k + gx) + double(1)/double(2)) * dx[2];
+                        double radius_d_LTF = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
+
+                        x_d[0] = patch_xlo[0] + (double(i + gx) + double(1)/double(2)) * dx[0];
+                        x_d[1] = patch_xlo[1] + (double(j - gx) + double(1)/double(2)) * dx[1];
+                        x_d[2] = patch_xlo[2] + (double(k + gx) + double(1)/double(2)) * dx[2];
+                        double radius_d_RBF = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
+
+                        x_d[0] = patch_xlo[0] + (double(i - gx) + double(1)/double(2)) * dx[0];
+                        x_d[1] = patch_xlo[1] + (double(j - gx) + double(1)/double(2)) * dx[1];
+                        x_d[2] = patch_xlo[2] + (double(k + gx) + double(1)/double(2)) * dx[2];
+                        double radius_d_LBF = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
+
+                        x_d[0] = patch_xlo[0] + (double(i + gx) + double(1)/double(2)) * dx[0];
+                        x_d[1] = patch_xlo[1] + (double(j + gx) + double(1)/double(2)) * dx[1];
+                        x_d[2] = patch_xlo[2] + (double(k - gx) + double(1)/double(2)) * dx[2];
+                        double radius_d_RTK = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
+
+                        x_d[0] = patch_xlo[0] + (double(i - gx) + double(1)/double(2)) * dx[0];
+                        x_d[1] = patch_xlo[1] + (double(j + gx) + double(1)/double(2)) * dx[1];
+                        x_d[2] = patch_xlo[2] + (double(k - gx) + double(1)/double(2)) * dx[2];
+                        double radius_d_LTK = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
+
+                        x_d[0] = patch_xlo[0] + (double(i + gx) + double(1)/double(2)) * dx[0];
+                        x_d[1] = patch_xlo[1] + (double(j - gx) + double(1)/double(2)) * dx[1];
+                        x_d[2] = patch_xlo[2] + (double(k - gx) + double(1)/double(2)) * dx[2];
+                        double radius_d_RBK = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
+
+                        x_d[0] = patch_xlo[0] + (double(i - gx) + double(1)/double(2)) * dx[0];
+                        x_d[1] = patch_xlo[1] + (double(j - gx) + double(1)/double(2)) * dx[1];
+                        x_d[2] = patch_xlo[2] + (double(k - gx) + double(1)/double(2)) * dx[2];
+                        double radius_d_LBK = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
+
+                        
+                        if ((radius_d_RTF > radius_c) || (radius_d_LTF > radius_c) ||
+                            (radius_d_RBF > radius_c) || (radius_d_LBF > radius_c) ||
+                            (radius_d_RTK > radius_c) || (radius_d_LTK > radius_c) ||
+                            (radius_d_RBK > radius_c) || (radius_d_LBK > radius_c))
+                        {
+                            is_corner_ghost = true;
+                            break;
+                        }
+                    }
+                    
+                    if (is_ghost_cell || is_corner_ghost)
+                    {
                         dist[idx]   = Real(radius_c - radius);
                         norm_0[idx] = Real((x[0] - x_c)/radius); // cos(theta) * sin(phi); 
                         norm_1[idx] = Real((x[1] - y_c)/radius); // sin(theta) * sin(phi);
                         norm_2[idx] = Real((x[2] - z_c)/radius); // cos(phi);
+
+                        // Corner ghost cells required for viscous fluxes
+                        if (is_corner_ghost)  
+                        {
+                            mask[idx]   = int(IB_MASK::IB_GHOST_CORNER);
+                        }
+                        else // Ghost cells required for convective fluxes
+                        {
+                            mask[idx]   = int(IB_MASK::IB_GHOST);
+                        }
+
                     }
                     else
                     {
