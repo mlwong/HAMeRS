@@ -846,7 +846,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         // First image point distance is set to sqrt(3)*dx + epsilon for corner ghost cells.
                         if (mask[idx_IB] == int(IB_MASK::IB_GHOST_CORNER))
                         {
-                            d_ip   = std::sqrt(Real(2))*Real(dx[0]) + HAMERS_REAL_EPSILON;
+                            d_ip   = std::sqrt(Real(3))*Real(dx[0]) + HAMERS_REAL_EPSILON;
                         }
                         // First image point distance is set to dx/maximum(norm) for ghost cells for convective fluxes.
                         else
