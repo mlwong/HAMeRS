@@ -115,7 +115,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             Real spongeT = Real(1);
             Real spongeF = Real(1); 
             Real spongeK = Real(1); 
-
+            
             Real half = Real(1)/Real(2);
             
             if (d_initial_conditions_db != nullptr) 
@@ -144,7 +144,6 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 spongeK = d_initial_conditions_db->getReal("spongeK");
             }
             
-
             for (int k = -num_ghosts_cons_var[2]; k < patch_dims[2] + num_ghosts_cons_var[2]; k++)
             {
                 for (int j = -num_ghosts_cons_var[1]; j < patch_dims[1] + num_ghosts_cons_var[1]; j++)
@@ -165,27 +164,22 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         rho[idx_cell] = rho_inf;  
                         
                         // radial distance from the center
-                        r       = std::pow((x[0] - x_c), 2) + std::pow((x[1] - y_c), 2) + std::pow(x[2] - z_c, 2);
-                        r       = std::pow(r, half); 
+                        r = std::pow((x[0] - x_c), 2) + std::pow((x[1] - y_c), 2) + std::pow(x[2] - z_c, 2);
+                        r = std::pow(r, half); 
                         
                         if (r < D/Real(4)) 
                         {
-                
                             u_ic = 0;
                             v_ic = 0;
                             w_ic = 0;
-                
                         }
-
                         else 
                         {
-                
-                            u_ic =  u_inf * (Real(1) - (Real(3) * std::pow(D, 3) * std::pow(x[0],2)) / (Real(16) * std::pow(r, 5)) + (std::pow(D, 3) / (Real(16)*std::pow(r, 3))));
+                            u_ic = u_inf; // u_inf * (Real(1) - (Real(3) * std::pow(D, 3) * std::pow(x[0],2)) / (Real(16) * std::pow(r, 5)) + (std::pow(D, 3) / (Real(16)*std::pow(r, 3))));
                             v_ic = Real(0); //-u_inf*((Real(3) * std::pow(D,3) * x[0] * x[1])/(Real(16) * std::pow(r,5)));
                             w_ic = Real(0); //-u_inf*((Real(3) * std::pow(D,3) * x[0] * x[2])/(Real(16) * std::pow(r,5)));
-                
                         }
-
+                        
                         p_ic = p_inf + half*rho_inf*(u_inf*u_inf - (u_ic*u_ic + v_ic*v_ic + w_ic*w_ic)); 
                         
                         if(x[0] < x_c)
@@ -202,7 +196,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                             w = half * (w_inf + w_ic) - half * (w_ic - w_inf)*erf((x[0]-spongeR)/(D/Real(5)));
                             p = half * (p_inf + p_ic) - half * (p_ic - p_inf)*erf((x[0]-spongeR)/(D/Real(5)));
                         }
-
+                        
                         if (x[1] < y_c) 
                         {
                             u = half * (u_inf + u_ic) + half * (u_ic - u_inf)*erf((x[1]-spongeB)/(D/Real(5)));
@@ -216,7 +210,6 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                             v = half * (v_inf + v_ic) - half * (v_ic - v_inf)*erf((x[1]-spongeT)/(D/Real(5)));
                             w = half * (w_inf + w_ic) - half * (w_ic - w_inf)*erf((x[1]-spongeT)/(D/Real(5)));
                             p = half * (p_inf + p_ic) - half * (p_ic - p_inf)*erf((x[1]-spongeT)/(D/Real(5)));
-
                         }
                         
                         if (x[2] < z_c) 
@@ -227,28 +220,25 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                             p = half * (p_inf + p_ic) + half * (p_ic - p_inf)*erf((x[2]-spongeK)/(D/Real(5)));
                         }
                         else
-
                         {
                             u = half * (u_inf + u_ic) - half * (u_ic - u_inf)*erf((x[2]-spongeF)/(D/Real(5)));
                             v = half * (v_inf + v_ic) - half * (v_ic - v_inf)*erf((x[2]-spongeF)/(D/Real(5)));
                             w = half * (w_inf + w_ic) - half * (w_ic - w_inf)*erf((x[2]-spongeF)/(D/Real(5)));
                             p = half * (p_inf + p_ic) - half * (p_ic - p_inf)*erf((x[2]-spongeF)/(D/Real(5)));
                         }
-
+                        
                         rho_u[idx_cell] = rho_inf*u;
                         rho_v[idx_cell] = rho_inf*v;
                         rho_w[idx_cell] = rho_inf*w;
-
+                        
                         E[idx_cell]     = (p / (gamma - Real(1)) + half * rho_inf * (u * u + v * v + w * w));
                     }
                 } 
             }
         }
-        else if (d_flow_model_type == FLOW_MODEL::FIVE_EQN_ALLAIRE) // 5 -eqn allaire.
+        else
         {
-        /* It finds the total density/heat ratio, then loops over every cell to set condiitions and uses the 1-d array / linear index to access the values */
-        
-            HAMERS_SHARED_PTR<pdat::CellData<Real> > partial_density = conservative_variables[0]; // just data pointers 
+            HAMERS_SHARED_PTR<pdat::CellData<Real> > partial_density = conservative_variables[0];
             HAMERS_SHARED_PTR<pdat::CellData<Real> > momentum        = conservative_variables[1];
             HAMERS_SHARED_PTR<pdat::CellData<Real> > total_energy    = conservative_variables[2];
             HAMERS_SHARED_PTR<pdat::CellData<Real> > volume_fraction = conservative_variables[3];
@@ -262,10 +252,10 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             Real* Z_2     = volume_fraction->getPointer(1);
             
             // Species 1.
-            Real gamma_1 = Real(8)/Real(5); // 1.6
+            Real gamma_1 = Real(8)/Real(5); // 1.6 hard-coded
             
             // Species 2.
-            Real gamma_2 = Real(7)/Real(5); // 1.4
+            Real gamma_2 = Real(7)/Real(5); // 1.4 hard-coded
             
             // Initial conditions.
             Real Z_rho_1_inf = Real(1);
@@ -295,8 +285,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 Z_2_inf     = d_initial_conditions_db->getReal("Z_2_inf");
             }
             
-            const Real rho_inf = Z_rho_1_inf + Z_rho_2_inf; // inital density total 
-            const Real gamma_m = Real(1)/(Z_1_inf/(gamma_1 - Real(1)) + Z_2_inf/(gamma_2 - Real(1))) + Real(1); // looks like heat ratio 
+            const Real rho_inf = Z_rho_1_inf + Z_rho_2_inf; // mixture density
+            const Real gamma_m = Real(1)/(Z_1_inf/(gamma_1 - Real(1)) + Z_2_inf/(gamma_2 - Real(1))) + Real(1); // mixture gamma
             
             for (int j = 0; j < patch_dims[1]; j++) // for every single cell 
             {
