@@ -666,6 +666,7 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
     std::vector<double> dx_grid_local(num_nodes, std::numeric_limits<double>::max());
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
     /*
      * Get the flattened hierarchy where only the finest existing grid is visible at any given
      * location in the problem space.
@@ -1048,8 +1049,8 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                     std::array<std::array<double, 3>, 8> coor_neigh_ip_2;
                     std::array<double, 8> weight_neigh_ip_1;
                     std::array<double, 8> weight_neigh_ip_2;
-                    bool all_neigh_valid_ip_1 = true;
-                    bool all_neigh_valid_ip_2 = true;
+                    bool some_neigh_valid_ip_1 = false;
+                    bool some_neigh_valid_ip_2 = false;
                     
                     indices_neigh_ip_1[INDEX_LBK] = hier::Index(indices_LBK_ip_1[0]    , indices_LBK_ip_1[1]    , indices_LBK_ip_1[2]    );
                     indices_neigh_ip_1[INDEX_RBK] = hier::Index(indices_LBK_ip_1[0] + 1, indices_LBK_ip_1[1]    , indices_LBK_ip_1[2]    );
@@ -1094,11 +1095,11 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                             coor_neigh_ip_1[ii][2] > patch_vis_xlo[2] && coor_neigh_ip_1[ii][2] <= patch_vis_xhi[2])
                         {
                             weight_neigh_ip_1[ii] = 1.0;
+                            some_neigh_valid_ip_1 = true;
                         }
                         else
                         {
                             weight_neigh_ip_1[ii] = 0.0;
-                            all_neigh_valid_ip_1 = false;
                         }
                         
                         if (coor_neigh_ip_2[ii][0] > patch_vis_xlo[0] && coor_neigh_ip_2[ii][0] <= patch_vis_xhi[0] &&
@@ -1106,15 +1107,15 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                             coor_neigh_ip_2[ii][2] > patch_vis_xlo[2] && coor_neigh_ip_2[ii][2] <= patch_vis_xhi[2])
                         {
                             weight_neigh_ip_2[ii] = 1.0;
+                            some_neigh_valid_ip_2 = true;
                         }
                         else
                         {
                             weight_neigh_ip_2[ii] = 0.0;
-                            all_neigh_valid_ip_2 = false;
                         }
                     }
                     
-                    if (all_neigh_valid_ip_1 || all_neigh_valid_ip_2)
+                    if (some_neigh_valid_ip_1 || some_neigh_valid_ip_2)
                     {
                         std::array<int, 8> overlapped_neigh_ip_1;
                         std::array<int, 8> overlapped_neigh_ip_2;
@@ -1132,11 +1133,13 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                             
                             for (int ii = 0; ii < 8; ii++)
                             {
-                                if (patch_overlapped_visible_box.contains(indices_neigh_ip_1[ii]))
+                                const hier::Index indices_neigh_ip_1_ii = indices_neigh_ip_1[ii] + index_lo;
+                                if (patch_overlapped_visible_box.contains(indices_neigh_ip_1_ii))
                                 {
                                     overlapped_neigh_ip_1[ii]++;
                                 }
-                                if (patch_overlapped_visible_box.contains(indices_neigh_ip_2[ii]))
+                                const hier::Index indices_neigh_ip_2_ii = indices_neigh_ip_2[ii] + index_lo;
+                                if (patch_overlapped_visible_box.contains(indices_neigh_ip_2_ii))
                                 {
                                     overlapped_neigh_ip_2[ii]++;
                                 }
