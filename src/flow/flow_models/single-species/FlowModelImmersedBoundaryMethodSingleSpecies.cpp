@@ -81,7 +81,7 @@ FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSin
     
     if (immersed_boundary_method_db->keyExists("body_temperature"))
     {
-        d_temp_body = immersed_boundary_method_db->getReal("body_temperature");
+        d_T_body = immersed_boundary_method_db->getReal("body_temperature");
     }
     else
     {
@@ -221,7 +221,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
     
     const Real& rho_body  = d_rho_body;
     const Real& E_body    = d_E_body;
-    const Real& T_body    = d_temp_body;
+    const Real& T_body    = d_T_body;
     
     // Get the thermodynamic properties of the species.
     std::vector<const Real*> thermo_properties_ptr;
@@ -713,7 +713,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                     
                     Real T_gc = Real(0);
                     if (d_bc_type_temperature == TEMPERATURE_IBC::ADIABATIC)
-                    {   
+                    {
                         // dT/dn = 0
                         T_gc = getGhostValueNeumannBC(
                             T_ip,
@@ -1567,8 +1567,14 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::writeSurfaceTriangulationWith
     std::vector<HAMERS_SHARED_PTR<std::vector<double> > > variable_data;
     
     // Add surface pressure.
-    variable_names.push_back("surf_data_p");
+    variable_names.push_back("surf_data_pressure");
     variable_data.push_back(d_surface_triangulation_p);
+    // Add surface temperature.
+    variable_names.push_back("surf_data_temperature");
+    variable_data.push_back(d_surface_triangulation_T);
+    // Add surface density.
+    variable_names.push_back("surf_data_density");
+    variable_data.push_back(d_surface_triangulation_rho);
     
     writeSurfaceTriangulationWithDataBase(file_name, variable_names, variable_data);
 #endif
@@ -1597,9 +1603,13 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
     
     const int num_nodes = static_cast<int>(nodes.size());
     
-    d_surface_triangulation_p = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
+    d_surface_triangulation_p   = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
+    d_surface_triangulation_T   = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
+    d_surface_triangulation_rho = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
     
     double* p_data = d_surface_triangulation_p->data();
+    double* T_data = d_surface_triangulation_T->data();
+    double* rho_data = d_surface_triangulation_rho->data();
     
     // Get the thermodynamic properties of the species.
     std::vector<const Real*> thermo_properties_ptr;
@@ -1653,6 +1663,16 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
                 &epsilon_ip_2,
                 thermo_properties_ptr);
             
+            const Real T_ip_1 = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(
+                &rho_ip_1,
+                &p_ip_1,
+                thermo_properties_ptr);
+            
+            const Real T_ip_2 = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(
+                &rho_ip_2,
+                &p_ip_2,
+                thermo_properties_ptr);
+            
             const Real p_surf = getGhostValueNeumannBC(
                 p_ip_1,
                 p_ip_2,
@@ -1660,7 +1680,35 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
                 d_ip_2,
                 Real(0));
             
-            p_data[ni] = double(p_surf);
+            Real T_surf = Real(0);
+            if (d_bc_type_temperature == TEMPERATURE_IBC::ADIABATIC)
+            {
+                // dT/dn = 0
+                T_surf = getGhostValueNeumannBC(
+                    T_ip_1,
+                    T_ip_2,
+                    d_ip_1,
+                    d_ip_2,
+                    Real(0));
+            }
+            else if (d_bc_type_temperature == TEMPERATURE_IBC::ISOTHERMAL)
+            {
+                // Dirichlet BC.
+                T_surf = getGhostValueDirichletBC(
+                    d_T_body,
+                    T_ip_1,
+                    d_ip_1,
+                    Real(0));
+            }
+            
+            const Real rho_surf = d_equation_of_state_mixing_rules->getEquationOfState()->getDensity(
+                &p_surf,
+                &T_surf,
+                thermo_properties_ptr);
+            
+            p_data[ni]   = double(p_surf);
+            T_data[ni]   = double(T_surf);
+            rho_data[ni] = double(rho_surf);
         }
     }
 }

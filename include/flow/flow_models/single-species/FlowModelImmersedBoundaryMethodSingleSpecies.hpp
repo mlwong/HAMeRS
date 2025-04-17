@@ -54,7 +54,7 @@ class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoun
          * Values of primitive variables inside the body.
          */
         Real d_rho_body;
-        Real d_temp_body;
+        Real d_T_body;
         std::vector<Real> d_vel_body;
         Real d_p_body;
         
@@ -73,6 +73,8 @@ class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoun
          * Data for the surface triangulation if needed.
          */
         HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_p;
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_T;
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_rho;
         
 };
 
