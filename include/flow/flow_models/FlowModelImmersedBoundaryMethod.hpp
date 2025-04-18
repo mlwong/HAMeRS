@@ -248,6 +248,23 @@ class FlowModelImmersedBoundaryMethod
         }
         
         /*
+         * Compute gradient with second order of accuracy.
+         */
+         static inline __attribute__((always_inline)) Real getGradientBC(
+            const Real& u_body,
+            const Real& u_ip1,
+            const Real& u_ip2,
+            const Real& d_ip1,
+            const Real& d_ip2)
+        {
+            const Real dudn_body = ((u_ip1*d_ip2*d_ip2 - u_ip2*d_ip1*d_ip1)/
+                (d_ip2*d_ip2 - d_ip1*d_ip1) - u_body)*
+                (d_ip1 + d_ip2)/(d_ip1*d_ip2);
+            
+            return dudn_body;
+        }
+        
+        /*
          * Get the indices for the 2D bilinear interpolation.
          */
         static inline __attribute__((always_inline)) void getBilinearInterpolationIndices2D(

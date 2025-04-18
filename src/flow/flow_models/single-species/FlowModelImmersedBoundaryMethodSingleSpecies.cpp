@@ -8,7 +8,10 @@ FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSin
     const int& num_eqn,
     const HAMERS_SHARED_PTR<ImmersedBoundaries>& immersed_boundaries,
     const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db,
-    const HAMERS_SHARED_PTR<EquationOfStateMixingRules>& equation_of_state_mixing_rules):
+    const HAMERS_SHARED_PTR<EquationOfStateMixingRules>& equation_of_state_mixing_rules,
+    const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
+    const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
+    const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules):
         FlowModelImmersedBoundaryMethod(
             object_name,
             dim,
@@ -17,7 +20,10 @@ FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSin
             num_eqn,
             immersed_boundaries,
             immersed_boundary_method_db,
-            equation_of_state_mixing_rules)
+            equation_of_state_mixing_rules),
+        d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
+        d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
+        d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules)
 {
     /*
      * Read the body density.
@@ -1216,7 +1222,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         Real v_gc = Real(0); // y-component of velocity of the ghost cell
                         Real w_gc = Real(0); // z-component of velocity of the ghost cell
                         
-                        if (d_bc_type_velocity == VELOCITY_IBC::SLIP) // SLIP BC NEEDS TO BE DEFINED!!!
+                        if (d_bc_type_velocity == VELOCITY_IBC::SLIP)
                         {
                             const Real u_ip2 = trilinearInterpolate3D(
                                 u_ip2_LBK,
@@ -1575,6 +1581,15 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::writeSurfaceTriangulationWith
     // Add surface density.
     variable_names.push_back("surf_data_density");
     variable_data.push_back(d_surface_triangulation_rho);
+    // Add surface traction x-component.
+    variable_names.push_back("surf_data_traction_v_x");
+    variable_data.push_back(d_surface_triangulation_tx_v);
+    // Add surface traction y-component.
+    variable_names.push_back("surf_data_traction_v_y");
+    variable_data.push_back(d_surface_triangulation_ty_v);
+    // Add surface traction z-component.
+    variable_names.push_back("surf_data_traction_v_z");
+    variable_data.push_back(d_surface_triangulation_tz_v);
     
     writeSurfaceTriangulationWithDataBase(file_name, variable_names, variable_data);
 #endif
@@ -1595,6 +1610,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
     
     const SurfaceTriangulation& surface_triangulation = d_immersed_boundaries->getSurfaceTriangulation();
     const std::vector<std::array<double, 3> >& nodes = surface_triangulation.nodes;
+    const std::vector<std::array<double, 3> >& normal_nodes = surface_triangulation.normal_nodes;
     
     if (nodes.empty())
     {
@@ -1603,13 +1619,19 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
     
     const int num_nodes = static_cast<int>(nodes.size());
     
-    d_surface_triangulation_p   = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
-    d_surface_triangulation_T   = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
-    d_surface_triangulation_rho = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
+    d_surface_triangulation_p    = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
+    d_surface_triangulation_T    = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
+    d_surface_triangulation_rho  = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
+    d_surface_triangulation_tx_v = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
+    d_surface_triangulation_ty_v = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
+    d_surface_triangulation_tz_v = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
     
-    double* p_data = d_surface_triangulation_p->data();
-    double* T_data = d_surface_triangulation_T->data();
-    double* rho_data = d_surface_triangulation_rho->data();
+    double* p_data    = d_surface_triangulation_p->data();
+    double* T_data    = d_surface_triangulation_T->data();
+    double* rho_data  = d_surface_triangulation_rho->data();
+    double* tx_v_data = d_surface_triangulation_tx_v->data();
+    double* ty_v_data = d_surface_triangulation_ty_v->data();
+    double* tz_v_data = d_surface_triangulation_tz_v->data();
     
     // Get the thermodynamic properties of the species.
     std::vector<const Real*> thermo_properties_ptr;
@@ -1618,6 +1640,57 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
     {
         thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
     }
+    
+    /*
+     * Get the molecular properties of the species for shear viscosity.
+     */
+    
+    std::vector<Real> molecular_properties_shear_viscosity;
+    std::vector<Real*> molecular_properties_shear_viscosity_ptr;
+    std::vector<const Real*> molecular_properties_shear_viscosity_const_ptr;
+    
+    const int num_molecular_properties_shear_viscosity = d_equation_of_shear_viscosity_mixing_rules->
+        getNumberOfSpeciesMolecularProperties();
+    
+    molecular_properties_shear_viscosity.resize(num_molecular_properties_shear_viscosity);
+    molecular_properties_shear_viscosity_ptr.reserve(num_molecular_properties_shear_viscosity);
+    molecular_properties_shear_viscosity_const_ptr.reserve(num_molecular_properties_shear_viscosity);
+    
+    for (int ti = 0; ti < num_molecular_properties_shear_viscosity; ti++)
+    {
+        molecular_properties_shear_viscosity_ptr.push_back(&molecular_properties_shear_viscosity[ti]);
+        molecular_properties_shear_viscosity_const_ptr.push_back(&molecular_properties_shear_viscosity[ti]);
+    }
+    
+    d_equation_of_shear_viscosity_mixing_rules->getSpeciesMolecularProperties(
+        molecular_properties_shear_viscosity_ptr,
+        0);
+    
+    /*
+     * Get the molecular properties of the species for bulk viscosity.
+     */
+    
+    std::vector<Real> molecular_properties_bulk_viscosity;
+    std::vector<Real*> molecular_properties_bulk_viscosity_ptr;
+    std::vector<const Real*> molecular_properties_bulk_viscosity_const_ptr;
+    
+    const int num_molecular_properties_bulk_viscosity = d_equation_of_bulk_viscosity_mixing_rules->
+        getNumberOfSpeciesMolecularProperties();
+        
+    molecular_properties_bulk_viscosity.resize(num_molecular_properties_bulk_viscosity);
+    molecular_properties_bulk_viscosity_ptr.reserve(num_molecular_properties_bulk_viscosity);
+    molecular_properties_bulk_viscosity_const_ptr.reserve(num_molecular_properties_bulk_viscosity);
+    
+    for (int ti = 0; ti < num_molecular_properties_bulk_viscosity; ti++)
+    {
+        molecular_properties_bulk_viscosity_ptr.push_back(&molecular_properties_bulk_viscosity[ti]);
+        molecular_properties_bulk_viscosity_const_ptr.push_back(&molecular_properties_bulk_viscosity[ti]);
+    }
+    
+    d_equation_of_bulk_viscosity_mixing_rules->getSpeciesMolecularProperties(
+        molecular_properties_bulk_viscosity_ptr,
+        0);
+    
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -1631,9 +1704,11 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
     {
         for (int ni = 0; ni < num_nodes; ni++)
         {
-            const double dx_grid = d_surface_triangulation_dx_grid[ni];
-            const Real d_ip_1    = Real(d_surface_triangulation_coeff_ip_1*dx_grid);
-            const Real d_ip_2    = Real(d_surface_triangulation_coeff_ip_2*dx_grid);
+            const double dx_grid   = d_surface_triangulation_dx_grid[ni];
+            const Real vec_norm[3] = {Real(normal_nodes[ni][0]), Real(normal_nodes[ni][1]), Real(normal_nodes[ni][2])};
+            
+            const Real d_ip_1 = Real(d_surface_triangulation_coeff_ip_1*dx_grid);
+            const Real d_ip_2 = Real(d_surface_triangulation_coeff_ip_2*dx_grid);
             
             const Real rho_ip_1   = Real(d_surface_triangulation_cons_var_ip_1[0][ni]);
             const Real rho_u_ip_1 = Real(d_surface_triangulation_cons_var_ip_1[1][ni]);
@@ -1706,9 +1781,137 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
                 &T_surf,
                 thermo_properties_ptr);
             
-            p_data[ni]   = double(p_surf);
-            T_data[ni]   = double(T_surf);
-            rho_data[ni] = double(rho_surf);
+            const Real mu_surf = d_equation_of_shear_viscosity_mixing_rules->getEquationOfShearViscosity()->
+                getShearViscosity(
+                    &p_surf,
+                    &T_surf,
+                    molecular_properties_shear_viscosity_const_ptr);
+            
+            const Real mu_v_surf = d_equation_of_bulk_viscosity_mixing_rules->getEquationOfBulkViscosity()->
+                getBulkViscosity(
+                    &p_surf,
+                    &T_surf,
+                    molecular_properties_bulk_viscosity_const_ptr);
+            
+            const Real u_ip_1 = rho_u_ip_1/rho_ip_1;
+            const Real v_ip_1 = rho_v_ip_1/rho_ip_1;
+            const Real w_ip_1 = rho_w_ip_1/rho_ip_1;
+            const Real u_ip_2 = rho_u_ip_2/rho_ip_2;
+            const Real v_ip_2 = rho_v_ip_2/rho_ip_2;
+            const Real w_ip_2 = rho_w_ip_2/rho_ip_2;
+            
+            // Get the vectors in the two tangent directions.
+            // A vector orthogonal to (a, b, c) is (-b, a, 0), or (-c, 0, a) or (0, -c, b).
+            Real vec_tan_1[3] = {-vec_norm[1], vec_norm[0], Real(0)};
+            Real vec_tan_2[3] = {-vec_norm[2], Real(0), vec_norm[0]};
+            // Consider special cases when the normal vector is (1, 0, 0) or (0, 1, 0) or (0, 0, 1).
+            if (std::abs(vec_norm[0] - Real(1)) < std::numeric_limits<Real>::epsilon())
+            {
+                vec_tan_1[0] = Real(0);
+                vec_tan_1[1] = Real(1);
+                vec_tan_1[2] = Real(0);
+                
+                vec_tan_2[0] = Real(0);
+                vec_tan_2[1] = Real(0);
+                vec_tan_2[2] = Real(1);
+            }
+            else if (std::abs(vec_norm[1] - Real(1)) < std::numeric_limits<Real>::epsilon())
+            {
+                vec_tan_1[0] = Real(1);
+                vec_tan_1[1] = Real(0);
+                vec_tan_1[2] = Real(0);
+                
+                vec_tan_2[0] = Real(0);
+                vec_tan_2[1] = Real(0);
+                vec_tan_2[2] = Real(1);
+            }
+            else if (std::abs(vec_norm[2] - Real(1)) < std::numeric_limits<Real>::epsilon())
+            {
+                vec_tan_1[0] = Real(1);
+                vec_tan_1[1] = Real(0);
+                vec_tan_1[2] = Real(0);
+                
+                vec_tan_2[0] = Real(0);
+                vec_tan_2[1] = Real(1);
+                vec_tan_2[2] = Real(0);
+            }
+            
+            // Normalize the tangent vectors.
+            const Real norm_tan_1 = sqrt(vec_tan_1[0]*vec_tan_1[0] + vec_tan_1[1]*vec_tan_1[1] + vec_tan_1[2]*vec_tan_1[2]);
+            const Real norm_tan_2 = sqrt(vec_tan_2[0]*vec_tan_2[0] + vec_tan_2[1]*vec_tan_2[1] + vec_tan_2[2]*vec_tan_2[2]);
+            
+            vec_tan_1[0] /= norm_tan_1;
+            vec_tan_1[1] /= norm_tan_1;
+            vec_tan_1[2] /= norm_tan_1;
+            
+            vec_tan_2[0] /= norm_tan_2;
+            vec_tan_2[1] /= norm_tan_2;
+            vec_tan_2[2] /= norm_tan_2;
+            
+            // Rotate u_ip_1, v_ip_1, w_ip_1 to the normal direction.
+            const Real vel_norm_ip_1  = u_ip_1*vec_norm[0]  + v_ip_1*vec_norm[1]  + w_ip_1*vec_norm[2];
+            const Real vel_tan_1_ip_1 = u_ip_1*vec_tan_1[0] + v_ip_1*vec_tan_1[1] + w_ip_1*vec_tan_1[2];
+            const Real vel_tan_2_ip_1 = u_ip_1*vec_tan_2[0] + v_ip_1*vec_tan_2[1] + w_ip_1*vec_tan_2[2];
+            
+            // Rotate u_ip_2, v_ip_2, w_ip_2 to the normal direction.
+            const Real vel_norm_ip_2  = u_ip_2*vec_norm[0]  + v_ip_2*vec_norm[1]  + w_ip_2*vec_norm[2];
+            const Real vel_tan_1_ip_2 = u_ip_2*vec_tan_1[0] + v_ip_2*vec_tan_1[1] + w_ip_2*vec_tan_1[2];
+            const Real vel_tan_2_ip_2 = u_ip_2*vec_tan_2[0] + v_ip_2*vec_tan_2[1] + w_ip_2*vec_tan_2[2];
+            
+            Real ddn_vel_norm_surf  = Real(0);
+            Real ddn_vel_tan_1_surf = Real(0);
+            Real ddn_vel_tan_2_surf = Real(0);
+            
+            if (d_bc_type_velocity == VELOCITY_IBC::SLIP)
+            {
+                const Real ddn_vel_norm_surf = getGradientBC(
+                    Real(0),
+                    vel_norm_ip_1,
+                    vel_norm_ip_2,
+                    d_ip_1,
+                    d_ip_2);
+                
+                // const Real ddn_vel_tan_1_surf = Real(0);
+                // const Real ddn_vel_tan_2_surf = Real(0);
+            }
+            else if (d_bc_type_velocity == VELOCITY_IBC::NO_SLIP)
+            {
+                const Real ddn_vel_norm_surf = getGradientBC(
+                    Real(0),
+                    vel_norm_ip_1,
+                    vel_norm_ip_2,
+                    d_ip_1,
+                    d_ip_2);
+                
+                const Real ddn_vel_tan_1_surf = getGradientBC(
+                    Real(0),
+                    vel_tan_1_ip_1,
+                    vel_tan_1_ip_2,
+                    d_ip_1,
+                    d_ip_2);
+                    
+                const Real ddn_vel_tan_2_surf = getGradientBC(
+                    Real(0),
+                    vel_tan_2_ip_1,
+                    vel_tan_2_ip_2,
+                    d_ip_1,
+                    d_ip_2);
+            }
+            
+            const Real t_norm_surf  = Real(2)*mu_surf*ddn_vel_norm_surf - (Real(2)/Real(3)*mu_surf - mu_v_surf)*ddn_vel_norm_surf;
+            const Real t_tan_1_surf = mu_surf*ddn_vel_tan_1_surf;
+            const Real t_tan_2_surf = mu_surf*ddn_vel_tan_2_surf;
+            
+            const Real tx_v_surf = t_norm_surf*vec_norm[0] + t_tan_1_surf*vec_tan_1[0] + t_tan_2_surf*vec_tan_2[0];
+            const Real ty_v_surf = t_norm_surf*vec_norm[1] + t_tan_1_surf*vec_tan_1[1] + t_tan_2_surf*vec_tan_2[1];
+            const Real tz_v_surf = t_norm_surf*vec_norm[2] + t_tan_1_surf*vec_tan_1[2] + t_tan_2_surf*vec_tan_2[2];
+            
+            p_data[ni]    = double(p_surf);
+            T_data[ni]    = double(T_surf);
+            rho_data[ni]  = double(rho_surf);
+            tx_v_data[ni] = double(tx_v_surf);
+            ty_v_data[ni] = double(ty_v_surf);
+            tz_v_data[ni] = double(tz_v_surf);
         }
     }
 }

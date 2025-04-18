@@ -2,6 +2,9 @@
 #define FLOW_MODEL_IMMERSED_BOUNDARY_METHOD_SINGLE_SPECIES_HPP
 
 #include "flow/flow_models/FlowModelImmersedBoundaryMethod.hpp"
+#include "util/mixing_rules/equations_of_bulk_viscosity/EquationOfBulkViscosityMixingRulesManager.hpp"
+#include "util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.hpp"
+#include "util/mixing_rules/equations_of_thermal_conductivity/EquationOfThermalConductivityMixingRulesManager.hpp"
 
 class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoundaryMethod
 {
@@ -14,7 +17,10 @@ class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoun
             const int& num_eqn,
             const HAMERS_SHARED_PTR<ImmersedBoundaries>& immersed_boundaries,
             const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db,
-            const HAMERS_SHARED_PTR<EquationOfStateMixingRules>& equation_of_state_mixing_rules);
+            const HAMERS_SHARED_PTR<EquationOfStateMixingRules>& equation_of_state_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules);
         
         ~FlowModelImmersedBoundaryMethodSingleSpecies() {}
         
@@ -50,6 +56,24 @@ class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoun
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
     private:
+        /*
+         * HAMERS_SHARED_PTR to EquationOfShearViscosityMixingRules.
+         */
+        const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules>
+            d_equation_of_shear_viscosity_mixing_rules;
+        
+        /*
+         * HAMERS_SHARED_PTR to EquationOfBulkViscosityMixingRules.
+         */
+        const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules>
+            d_equation_of_bulk_viscosity_mixing_rules;
+        
+        /*
+         * HAMERS_SHARED_PTR to EquationOfThermalConductivityMixingRules.
+         */
+        const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules>
+            d_equation_of_thermal_conductivity_mixing_rules;
+        
         /* 
          * Values of primitive variables inside the body.
          */
@@ -75,6 +99,9 @@ class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoun
         HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_p;
         HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_T;
         HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_rho;
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_tx_v;
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_ty_v;
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_tz_v;
         
 };
 
