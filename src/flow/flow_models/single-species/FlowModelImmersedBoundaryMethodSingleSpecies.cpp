@@ -1691,7 +1691,6 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
         molecular_properties_bulk_viscosity_ptr,
         0);
     
-    
     if (d_dim == tbox::Dimension(1))
     {
         // Do nothing for now.
@@ -1864,33 +1863,33 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
             
             if (d_bc_type_velocity == VELOCITY_IBC::SLIP)
             {
-                const Real ddn_vel_norm_surf = getGradientBC(
+                ddn_vel_norm_surf = getGradientBC(
                     Real(0),
                     vel_norm_ip_1,
                     vel_norm_ip_2,
                     d_ip_1,
                     d_ip_2);
                 
-                // const Real ddn_vel_tan_1_surf = Real(0);
-                // const Real ddn_vel_tan_2_surf = Real(0);
+                // ddn_vel_tan_1_surf = Real(0);
+                // ddn_vel_tan_2_surf = Real(0);
             }
             else if (d_bc_type_velocity == VELOCITY_IBC::NO_SLIP)
             {
-                const Real ddn_vel_norm_surf = getGradientBC(
+                ddn_vel_norm_surf = getGradientBC(
                     Real(0),
                     vel_norm_ip_1,
                     vel_norm_ip_2,
                     d_ip_1,
                     d_ip_2);
                 
-                const Real ddn_vel_tan_1_surf = getGradientBC(
+                ddn_vel_tan_1_surf = getGradientBC(
                     Real(0),
                     vel_tan_1_ip_1,
                     vel_tan_1_ip_2,
                     d_ip_1,
                     d_ip_2);
-                    
-                const Real ddn_vel_tan_2_surf = getGradientBC(
+                
+                ddn_vel_tan_2_surf = getGradientBC(
                     Real(0),
                     vel_tan_2_ip_1,
                     vel_tan_2_ip_2,
