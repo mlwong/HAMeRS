@@ -799,7 +799,7 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
             d_surface_triangulation_coor_ip_2[ni][2] = node[2] + normal_node[2]*c_ip_2*dx_grid;
         }
         
-        std::vector<double> dx_gird_ip_1(num_nodes, std::numeric_limits<Real>::max());
+        std::vector<double> dx_grid_ip_1(num_nodes, std::numeric_limits<Real>::max());
         std::vector<double> dx_grid_ip_2(num_nodes, std::numeric_limits<Real>::max());
         std::vector<double> dx_grid_local_ip_1(num_nodes, std::numeric_limits<Real>::max());
         std::vector<double> dx_grid_local_ip_2(num_nodes, std::numeric_limits<Real>::max());
@@ -851,7 +851,7 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
         
         mpi.Allreduce(
             &dx_grid_local_ip_1[0],
-            &dx_gird_ip_1[0],
+            &dx_grid_ip_1[0],
             num_nodes,
             MPI_DOUBLE,
             MPI_MIN);
@@ -872,8 +872,8 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
             double dx_grid_ip_2_max = std::numeric_limits<double>::min();
             for (int ni = 0; ni < num_nodes; ni++)
             {
-                dx_grid_ip_1_min = std::min(dx_grid_ip_1_min, dx_gird_ip_1[ni]);
-                dx_grid_ip_1_max = std::max(dx_grid_ip_1_max, dx_gird_ip_1[ni]);
+                dx_grid_ip_1_min = std::min(dx_grid_ip_1_min, dx_grid_ip_1[ni]);
+                dx_grid_ip_1_max = std::max(dx_grid_ip_1_max, dx_grid_ip_1[ni]);
                 
                 dx_grid_ip_2_min = std::min(dx_grid_ip_2_min, dx_grid_ip_2[ni]);
                 dx_grid_ip_2_max = std::max(dx_grid_ip_2_max, dx_grid_ip_2[ni]);
@@ -1153,9 +1153,9 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                     }
                     
                     // Interpolation for the first image point.
-                    const double ratios_ip_1[3] = {coor_ip_1[0] - coor_neigh_ip_1[INDEX_LBK][0],
-                                                   coor_ip_1[1] - coor_neigh_ip_1[INDEX_LBK][1],
-                                                   coor_ip_1[2] - coor_neigh_ip_1[INDEX_LBK][2]};
+                    const double ratios_ip_1[3] = {(coor_ip_1[0] - coor_neigh_ip_1[INDEX_LBK][0]) * dx_inv,
+                                                   (coor_ip_1[1] - coor_neigh_ip_1[INDEX_LBK][1]) * dx_inv,
+                                                   (coor_ip_1[2] - coor_neigh_ip_1[INDEX_LBK][2]) * dx_inv};
                     
                     const double weight_ip_1_BK = (1.0 - ratios_ip_1[0])*weight_neigh_ip_1[INDEX_LBK] + ratios_ip_1[0]*weight_neigh_ip_1[INDEX_RBK];
                     const double weight_ip_1_TK = (1.0 - ratios_ip_1[0])*weight_neigh_ip_1[INDEX_LTK] + ratios_ip_1[0]*weight_neigh_ip_1[INDEX_RTK];
@@ -1237,9 +1237,9 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                     }
                     
                     // Interpolation for the second image point.
-                    const double ratios_ip_2[3] = {coor_ip_2[0] - coor_neigh_ip_2[INDEX_LBK][0],
-                                                   coor_ip_2[1] - coor_neigh_ip_2[INDEX_LBK][1],
-                                                   coor_ip_2[2] - coor_neigh_ip_2[INDEX_LBK][2]};
+                    const double ratios_ip_2[3] = {(coor_ip_2[0] - coor_neigh_ip_2[INDEX_LBK][0]) * dx_inv,
+                                                   (coor_ip_2[1] - coor_neigh_ip_2[INDEX_LBK][1]) * dx_inv,
+                                                   (coor_ip_2[2] - coor_neigh_ip_2[INDEX_LBK][2]) * dx_inv};
                     
                     const double weight_ip_2_BK = (1.0 - ratios_ip_2[0])*weight_neigh_ip_2[INDEX_LBK] + ratios_ip_2[0]*weight_neigh_ip_2[INDEX_RBK];
                     const double weight_ip_2_TK = (1.0 - ratios_ip_2[0])*weight_neigh_ip_2[INDEX_LTK] + ratios_ip_2[0]*weight_neigh_ip_2[INDEX_RTK];
@@ -1364,7 +1364,7 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
         {
             for (int ni = 0; ni < num_nodes; ni++)
             {
-                if (std::abs(d_surface_triangulation_weight_ip_1[ni] - 1.0) > 10.0*std::numeric_limits<double>::epsilon())
+                if (std::abs(d_surface_triangulation_weight_ip_1[ni] - 1.0) > 10000.0*std::numeric_limits<double>::epsilon())
                 {
                     TBOX_ERROR(d_object_name
                         << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase()\n"
@@ -1372,7 +1372,7 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                         << std::endl);
                 }
                 
-                if (std::abs(d_surface_triangulation_weight_ip_2[ni] - 1.0) > 10.0*std::numeric_limits<double>::epsilon())
+                if (std::abs(d_surface_triangulation_weight_ip_2[ni] - 1.0) > 10000.0*std::numeric_limits<double>::epsilon())
                 {
                     TBOX_ERROR(d_object_name
                         << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase()\n"
