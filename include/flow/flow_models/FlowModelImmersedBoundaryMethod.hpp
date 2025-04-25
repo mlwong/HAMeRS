@@ -519,12 +519,15 @@ class FlowModelImmersedBoundaryMethod
         
         std::vector<std::array<double, 3> > d_surface_triangulation_coor_ip_1;
         std::vector<std::array<double, 3> > d_surface_triangulation_coor_ip_2;
+        std::vector<std::array<double, 3> > d_surface_triangulation_coor_bi;
         
         std::vector<double> d_surface_triangulation_weight_ip_1;
         std::vector<double> d_surface_triangulation_weight_ip_2;
+        std::vector<double> d_surface_triangulation_weight_bi;
         
         std::vector<std::vector<double> > d_surface_triangulation_cons_var_ip_1;
         std::vector<std::vector<double> > d_surface_triangulation_cons_var_ip_2;
+        std::vector<std::vector<double> > d_surface_triangulation_cons_var_bi;
 };
 
 #endif /* FLOW_MODEL_BASIC_UTILITIES_HPP */

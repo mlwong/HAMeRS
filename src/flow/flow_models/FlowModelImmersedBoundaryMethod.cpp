@@ -499,13 +499,15 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithDataBase(
             "surf_mesh_node_normal_z",
             "surf_mesh_dx_grid",
             "surf_mesh_weight_ip_1",
-            "surf_mesh_weight_ip_2"
+            "surf_mesh_weight_ip_2",
+            "surf_mesh_weight_bi"
         };
         
         for (int di = 0; di < d_num_eqn; di++)
         {
             variable_names_all.push_back("cons_var_" + names_cons_var[di] + "_ip_1");
             variable_names_all.push_back("cons_var_" + names_cons_var[di] + "_ip_2");
+            variable_names_all.push_back("cons_var_" + names_cons_var[di] + "_bi");
         }
         
         for (int vi = 0; vi < static_cast<int>(variable_names.size()); vi++)
@@ -615,10 +617,12 @@ FlowModelImmersedBoundaryMethod::writeSurfaceTriangulationWithDataBase(
         i = TECDAT142(&num_nodes, d_surface_triangulation_dx_grid.data(),     &d_is_double);
         i = TECDAT142(&num_nodes, d_surface_triangulation_weight_ip_1.data(), &d_is_double);
         i = TECDAT142(&num_nodes, d_surface_triangulation_weight_ip_2.data(), &d_is_double);
+        i = TECDAT142(&num_nodes, d_surface_triangulation_weight_bi.data(), &d_is_double);
         for (int di = 0; di < d_num_eqn; di++)
         {
             i = TECDAT142(&num_nodes, d_surface_triangulation_cons_var_ip_1[di].data(), &d_is_double);
             i = TECDAT142(&num_nodes, d_surface_triangulation_cons_var_ip_2[di].data(), &d_is_double);
+            i = TECDAT142(&num_nodes, d_surface_triangulation_cons_var_bi[di].data(), &d_is_double);
         }
         for (int vi = 0; vi < static_cast<int>(variable_data.size()); vi++)
         {
@@ -765,6 +769,7 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                 TBOX_ERROR(d_object_name
                     << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase()\n"
                     << "The surfce triangulation is not in the same grid level."
+                    << std::abs(dx_grid_max - dx_grid_min)
                     << std::endl);
             }
             if (std::abs(dx_grid_max - dx_finest) > 10.0*std::numeric_limits<double>::epsilon())
@@ -783,6 +788,7 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
         
         d_surface_triangulation_coor_ip_1.assign(num_nodes, {0.0, 0.0, 0.0});
         d_surface_triangulation_coor_ip_2.assign(num_nodes, {0.0, 0.0, 0.0});
+        d_surface_triangulation_coor_bi.assign(num_nodes, {0.0, 0.0, 0.0});
         
         for (int ni = 0; ni < num_nodes; ni++)
         {
@@ -797,12 +803,18 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
             d_surface_triangulation_coor_ip_2[ni][0] = node[0] + normal_node[0]*c_ip_2*dx_grid;
             d_surface_triangulation_coor_ip_2[ni][1] = node[1] + normal_node[1]*c_ip_2*dx_grid;
             d_surface_triangulation_coor_ip_2[ni][2] = node[2] + normal_node[2]*c_ip_2*dx_grid;
+
+            d_surface_triangulation_coor_bi[ni][0] = node[0];
+            d_surface_triangulation_coor_bi[ni][1] = node[1];
+            d_surface_triangulation_coor_bi[ni][2] = node[2];
         }
         
         std::vector<double> dx_grid_ip_1(num_nodes, std::numeric_limits<Real>::max());
         std::vector<double> dx_grid_ip_2(num_nodes, std::numeric_limits<Real>::max());
+        std::vector<double> dx_grid_bi(num_nodes, std::numeric_limits<Real>::max());
         std::vector<double> dx_grid_local_ip_1(num_nodes, std::numeric_limits<Real>::max());
         std::vector<double> dx_grid_local_ip_2(num_nodes, std::numeric_limits<Real>::max());
+        std::vector<double> dx_grid_local_bi(num_nodes, std::numeric_limits<Real>::max());
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -832,6 +844,7 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                 {
                     const std::array<Real, 3>& coor_ip_1 = d_surface_triangulation_coor_ip_1[ni];
                     const std::array<Real, 3>& coor_ip_2 = d_surface_triangulation_coor_ip_2[ni];
+                    const std::array<Real, 3>& coor_bi = d_surface_triangulation_coor_bi[ni];
                     
                     if ((coor_ip_1[0] >= patch_xlo[0] && coor_ip_1[0] <= patch_xhi[0]) &&
                         (coor_ip_1[1] >= patch_xlo[1] && coor_ip_1[1] <= patch_xhi[1]) &&
@@ -844,6 +857,12 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                         (coor_ip_2[2] >= patch_xlo[2] && coor_ip_2[2] <= patch_xhi[2]))
                     {
                         dx_grid_local_ip_2[ni] = std::min(dx_grid_local_ip_2[ni], dx[0]);
+                    }
+                    if ((coor_bi[0] >= patch_xlo[0] && coor_bi[0] <= patch_xhi[0]) &&
+                        (coor_bi[1] >= patch_xlo[1] && coor_bi[1] <= patch_xhi[1]) &&
+                        (coor_bi[2] >= patch_xlo[2] && coor_bi[2] <= patch_xhi[2]))
+                    {
+                        dx_grid_local_bi[ni] = std::min(dx_grid_local_bi[ni], dx[0]);
                     }
                 }
             }
@@ -863,6 +882,13 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
             MPI_DOUBLE,
             MPI_MIN);
         
+        mpi.Allreduce(
+            &dx_grid_local_bi[0],
+            &dx_grid_bi[0],
+            num_nodes,
+            MPI_DOUBLE,
+            MPI_MIN);
+        
         if (mpi.getRank() == 0)
         {
             // Make sure d_surface_triangulation_dx_grid is uniform.
@@ -870,6 +896,8 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
             double dx_grid_ip_1_max = std::numeric_limits<double>::min();
             double dx_grid_ip_2_min = std::numeric_limits<double>::max();
             double dx_grid_ip_2_max = std::numeric_limits<double>::min();
+            double dx_grid_bi_min   = std::numeric_limits<double>::max();
+            double dx_grid_bi_max   = std::numeric_limits<double>::min();
             for (int ni = 0; ni < num_nodes; ni++)
             {
                 dx_grid_ip_1_min = std::min(dx_grid_ip_1_min, dx_grid_ip_1[ni]);
@@ -877,6 +905,9 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                 
                 dx_grid_ip_2_min = std::min(dx_grid_ip_2_min, dx_grid_ip_2[ni]);
                 dx_grid_ip_2_max = std::max(dx_grid_ip_2_max, dx_grid_ip_2[ni]);
+
+                dx_grid_bi_min = std::min(dx_grid_bi_min, dx_grid_bi[ni]);
+                dx_grid_bi_max = std::max(dx_grid_bi_max, dx_grid_bi[ni]);
             }
             if (std::abs(dx_grid_ip_1_max - dx_grid_ip_1_min) > 10.0*std::numeric_limits<double>::epsilon())
             {
@@ -906,29 +937,49 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                     << "The second image points are not in the finest grid level."
                     << std::endl);
             }
+            if (std::abs(dx_grid_bi_max - dx_grid_bi_min) > 10.0*std::numeric_limits<double>::epsilon())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase()\n"
+                    << "The boundary points are not in the same grid level."
+                    << std::endl);
+            }
+            if (std::abs(dx_grid_bi_max - dx_finest) > 10.0*std::numeric_limits<double>::epsilon())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase()\n"
+                    << "The boundary points are not in the finest grid level."
+                    << std::endl);
+            }
         }
         
         /*
-         * d_surface_triangulation_weight_ip_1 and d_surface_triangulation_weight_ip_2.
+         * d_surface_triangulation_weight_ip_1, d_surface_triangulation_weight_ip_2 and d_surface_triangulation_weight_bi.
          */
         
         const int num_nodes = static_cast<int>(nodes.size());
         d_surface_triangulation_weight_ip_1.assign(num_nodes, 0.0);
         d_surface_triangulation_weight_ip_2.assign(num_nodes, 0.0);
+        d_surface_triangulation_weight_bi.assign(num_nodes, 0.0);
         std::vector<double> weight_local_ip_1(num_nodes, 0.0);
         std::vector<double> weight_local_ip_2(num_nodes, 0.0);
+        std::vector<double> weight_local_bi(num_nodes, 0.0);
         
         std::vector<std::vector<double> > surface_triangulation_cons_var_local_ip_1;
         std::vector<std::vector<double> > surface_triangulation_cons_var_local_ip_2;
+        std::vector<std::vector<double> > surface_triangulation_cons_var_local_bi;
         d_surface_triangulation_cons_var_ip_1.clear();
         d_surface_triangulation_cons_var_ip_2.clear();
+        d_surface_triangulation_cons_var_bi.clear();
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
             d_surface_triangulation_cons_var_ip_1.push_back(std::vector<double>(num_nodes, 0.0));
             d_surface_triangulation_cons_var_ip_2.push_back(std::vector<double>(num_nodes, 0.0));
+            d_surface_triangulation_cons_var_bi.push_back(std::vector<double>(num_nodes, 0.0));
             
             surface_triangulation_cons_var_local_ip_1.push_back(std::vector<double>(num_nodes, 0.0));
             surface_triangulation_cons_var_local_ip_2.push_back(std::vector<double>(num_nodes, 0.0));
+            surface_triangulation_cons_var_local_bi.push_back(std::vector<double>(num_nodes, 0.0));
         }
         
         /*
@@ -1028,6 +1079,7 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                 {
                     const std::array<double, 3>& coor_ip_1 = d_surface_triangulation_coor_ip_1[ni];
                     const std::array<double, 3>& coor_ip_2 = d_surface_triangulation_coor_ip_2[ni];
+                    const std::array<double, 3>& coor_bi   = d_surface_triangulation_coor_bi[ni];
                     
                     const hier::Index indices_LBK_ip_1 = hier::Index(int(floor((coor_ip_1[0] - patch_vis_xlo[0] - 0.5 * dx[0])*dx_inv)),
                                                                      int(floor((coor_ip_1[1] - patch_vis_xlo[1] - 0.5 * dx[1])*dx_inv)),
@@ -1035,6 +1087,9 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                     const hier::Index indices_LBK_ip_2 = hier::Index(int(floor((coor_ip_2[0] - patch_vis_xlo[0] - 0.5 * dx[0])*dx_inv)),
                                                                      int(floor((coor_ip_2[1] - patch_vis_xlo[1] - 0.5 * dx[1])*dx_inv)),
                                                                      int(floor((coor_ip_2[2] - patch_vis_xlo[2] - 0.5 * dx[2])*dx_inv)));
+                    const hier::Index indices_LBK_bi   = hier::Index(int(floor((coor_bi[0] - patch_vis_xlo[0] - 0.5 * dx[0])*dx_inv)),
+                                                                     int(floor((coor_bi[1] - patch_vis_xlo[1] - 0.5 * dx[1])*dx_inv)),
+                                                                     int(floor((coor_bi[2] - patch_vis_xlo[2] - 0.5 * dx[2])*dx_inv)));
                     
                     const double coor_LBK_ip_1[3] = {patch_vis_xlo[0] + (double(indices_LBK_ip_1[0]) + 0.5)*dx[0],
                                                      patch_vis_xlo[1] + (double(indices_LBK_ip_1[1]) + 0.5)*dx[1],
@@ -1042,15 +1097,22 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                     const double coor_LBK_ip_2[3] = {patch_vis_xlo[0] + (double(indices_LBK_ip_2[0]) + 0.5)*dx[0],
                                                      patch_vis_xlo[1] + (double(indices_LBK_ip_2[1]) + 0.5)*dx[1],
                                                      patch_vis_xlo[2] + (double(indices_LBK_ip_2[2]) + 0.5)*dx[2]};
+                    const double coor_LBK_bi[3] =   {patch_vis_xlo[0] + (double(indices_LBK_bi[0]) + 0.5)*dx[0],
+                                                     patch_vis_xlo[1] + (double(indices_LBK_bi[1]) + 0.5)*dx[1],
+                                                     patch_vis_xlo[2] + (double(indices_LBK_bi[2]) + 0.5)*dx[2]};
                     
                     std::vector<hier::Index> indices_neigh_ip_1(8, hier::Index::getZeroIndex(d_dim));
                     std::vector<hier::Index> indices_neigh_ip_2(8, hier::Index::getZeroIndex(d_dim));
+                    std::vector<hier::Index> indices_neigh_bi(8, hier::Index::getZeroIndex(d_dim));
                     std::array<std::array<double, 3>, 8> coor_neigh_ip_1;
                     std::array<std::array<double, 3>, 8> coor_neigh_ip_2;
+                    std::array<std::array<double, 3>, 8> coor_neigh_bi;
                     std::array<double, 8> weight_neigh_ip_1;
                     std::array<double, 8> weight_neigh_ip_2;
+                    std::array<double, 8> weight_neigh_bi;
                     bool some_neigh_valid_ip_1 = false;
                     bool some_neigh_valid_ip_2 = false;
+                    bool some_neigh_valid_bi   = false;
                     
                     indices_neigh_ip_1[INDEX_LBK] = hier::Index(indices_LBK_ip_1[0]    , indices_LBK_ip_1[1]    , indices_LBK_ip_1[2]    );
                     indices_neigh_ip_1[INDEX_RBK] = hier::Index(indices_LBK_ip_1[0] + 1, indices_LBK_ip_1[1]    , indices_LBK_ip_1[2]    );
@@ -1087,6 +1149,24 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                     coor_neigh_ip_2[INDEX_RBF] = {coor_LBK_ip_2[0] + dx[0], coor_LBK_ip_2[1]        , coor_LBK_ip_2[2] + dx[2]};
                     coor_neigh_ip_2[INDEX_LTF] = {coor_LBK_ip_2[0]        , coor_LBK_ip_2[1] + dx[1], coor_LBK_ip_2[2] + dx[2]};
                     coor_neigh_ip_2[INDEX_RTF] = {coor_LBK_ip_2[0] + dx[0], coor_LBK_ip_2[1] + dx[1], coor_LBK_ip_2[2] + dx[2]};
+
+                    indices_neigh_bi[INDEX_LBK] = hier::Index(indices_LBK_bi[0]    , indices_LBK_bi[1]    , indices_LBK_bi[2]    );
+                    indices_neigh_bi[INDEX_RBK] = hier::Index(indices_LBK_bi[0] + 1, indices_LBK_bi[1]    , indices_LBK_bi[2]    );
+                    indices_neigh_bi[INDEX_LTK] = hier::Index(indices_LBK_bi[0]    , indices_LBK_bi[1] + 1, indices_LBK_bi[2]    );
+                    indices_neigh_bi[INDEX_RTK] = hier::Index(indices_LBK_bi[0] + 1, indices_LBK_bi[1] + 1, indices_LBK_bi[2]    );
+                    indices_neigh_bi[INDEX_LBF] = hier::Index(indices_LBK_bi[0]    , indices_LBK_bi[1]    , indices_LBK_bi[2] + 1);
+                    indices_neigh_bi[INDEX_RBF] = hier::Index(indices_LBK_bi[0] + 1, indices_LBK_bi[1]    , indices_LBK_bi[2] + 1);
+                    indices_neigh_bi[INDEX_LTF] = hier::Index(indices_LBK_bi[0]    , indices_LBK_bi[1] + 1, indices_LBK_bi[2] + 1);
+                    indices_neigh_bi[INDEX_RTF] = hier::Index(indices_LBK_bi[0] + 1, indices_LBK_bi[1] + 1, indices_LBK_bi[2] + 1);
+                    
+                    coor_neigh_bi[INDEX_LBK] = {coor_LBK_bi[0]        , coor_LBK_bi[1]        , coor_LBK_bi[2]        };
+                    coor_neigh_bi[INDEX_RBK] = {coor_LBK_bi[0] + dx[0], coor_LBK_bi[1]        , coor_LBK_bi[2]        };
+                    coor_neigh_bi[INDEX_LTK] = {coor_LBK_bi[0]        , coor_LBK_bi[1] + dx[1], coor_LBK_bi[2]        };
+                    coor_neigh_bi[INDEX_RTK] = {coor_LBK_bi[0] + dx[0], coor_LBK_bi[1] + dx[1], coor_LBK_bi[2]        };
+                    coor_neigh_bi[INDEX_LBF] = {coor_LBK_bi[0]        , coor_LBK_bi[1]        , coor_LBK_bi[2] + dx[2]};
+                    coor_neigh_bi[INDEX_RBF] = {coor_LBK_bi[0] + dx[0], coor_LBK_bi[1]        , coor_LBK_bi[2] + dx[2]};
+                    coor_neigh_bi[INDEX_LTF] = {coor_LBK_bi[0]        , coor_LBK_bi[1] + dx[1], coor_LBK_bi[2] + dx[2]};
+                    coor_neigh_bi[INDEX_RTF] = {coor_LBK_bi[0] + dx[0], coor_LBK_bi[1] + dx[1], coor_LBK_bi[2] + dx[2]};
                     
                     for (int ii = 0; ii < 8; ii++)
                     {
@@ -1113,16 +1193,30 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                         {
                             weight_neigh_ip_2[ii] = 0.0;
                         }
+
+                        if (coor_neigh_bi[ii][0] > patch_vis_xlo[0] && coor_neigh_bi[ii][0] <= patch_vis_xhi[0] &&
+                            coor_neigh_bi[ii][1] > patch_vis_xlo[1] && coor_neigh_bi[ii][1] <= patch_vis_xhi[1] &&
+                            coor_neigh_bi[ii][2] > patch_vis_xlo[2] && coor_neigh_bi[ii][2] <= patch_vis_xhi[2])
+                        {
+                            weight_neigh_bi[ii] = 1.0;
+                            some_neigh_valid_bi = true;
+                        }
+                        else
+                        {
+                            weight_neigh_bi[ii] = 0.0;
+                        }
                     }
                     
-                    if (some_neigh_valid_ip_1 || some_neigh_valid_ip_2)
+                    if (some_neigh_valid_ip_1 || some_neigh_valid_ip_2 || some_neigh_valid_bi)
                     {
                         std::array<int, 8> overlapped_neigh_ip_1;
                         std::array<int, 8> overlapped_neigh_ip_2;
+                        std::array<int, 8> overlapped_neigh_bi;
                         for (int ii = 0; ii < 8; ii++)
                         {
                             overlapped_neigh_ip_1[ii] = 1;
                             overlapped_neigh_ip_2[ii] = 1;
+                            overlapped_neigh_bi[ii]   = 1;
                         }
                         for (hier::BoxContainer::BoxContainerConstIterator iob(
                                 patch_overlapped_visible_boxes.begin());
@@ -1143,12 +1237,18 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                                 {
                                     overlapped_neigh_ip_2[ii]++;
                                 }
+                                const hier::Index indices_neigh_bi_ii = indices_neigh_bi[ii] + index_lo;
+                                if (patch_overlapped_visible_box.contains(indices_neigh_bi_ii))
+                                {
+                                    overlapped_neigh_bi[ii]++;
+                                }
                             }
                         }
                         for (int ii = 0; ii < 8; ii++)
                         {
                             weight_neigh_ip_1[ii] /= double(overlapped_neigh_ip_1[ii]);
                             weight_neigh_ip_2[ii] /= double(overlapped_neigh_ip_2[ii]);
+                            weight_neigh_bi[ii]   /= double(overlapped_neigh_bi[ii]);
                         }
                     }
                     
@@ -1319,6 +1419,90 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                         
                         surface_triangulation_cons_var_local_ip_2[ei][ni] += value_ip_2;
                     }
+
+                    // Interpolation for the boundary intercept.
+                    const double ratios_bi[3] =   {(coor_bi[0] - coor_neigh_bi[INDEX_LBK][0]) * dx_inv,
+                                                   (coor_bi[1] - coor_neigh_bi[INDEX_LBK][1]) * dx_inv,
+                                                   (coor_bi[2] - coor_neigh_bi[INDEX_LBK][2]) * dx_inv};
+
+                    const double weight_bi_BK = (1.0 - ratios_bi[0])*weight_neigh_bi[INDEX_LBK] + ratios_bi[0]*weight_neigh_bi[INDEX_RBK];
+                    const double weight_bi_TK = (1.0 - ratios_bi[0])*weight_neigh_bi[INDEX_LTK] + ratios_bi[0]*weight_neigh_bi[INDEX_RTK];
+                    const double weight_bi_BF = (1.0 - ratios_bi[0])*weight_neigh_bi[INDEX_LBF] + ratios_bi[0]*weight_neigh_bi[INDEX_RBF];
+                    const double weight_bi_TF = (1.0 - ratios_bi[0])*weight_neigh_bi[INDEX_LTF] + ratios_bi[0]*weight_neigh_bi[INDEX_RTF];
+
+                    const double weight_bi_F = (1.0 - ratios_bi[1])*weight_bi_BF + ratios_bi[1]*weight_bi_TF;
+                    const double weight_bi_K = (1.0 - ratios_bi[1])*weight_bi_BK + ratios_bi[1]*weight_bi_TK;
+
+                    const double weight_bi = (1.0 - ratios_bi[2])*weight_bi_K + ratios_bi[2]*weight_bi_F;
+
+                    weight_local_bi[ni] += weight_bi;
+
+                    for (int ei = 0; ei < d_num_eqn; ei++)
+                    {
+                        const int idx_cons_var_LBK = weight_neigh_bi[INDEX_LBK] == 0 ? 0 :
+                            (indices_neigh_bi[INDEX_LBK][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_bi[INDEX_LBK][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_bi[INDEX_LBK][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_RBK = weight_neigh_bi[INDEX_RBK] == 0 ? 0 :
+                            (indices_neigh_bi[INDEX_RBK][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_bi[INDEX_RBK][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_bi[INDEX_RBK][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_LTK = weight_neigh_bi[INDEX_LTK] == 0 ? 0 :
+                            (indices_neigh_bi[INDEX_LTK][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_bi[INDEX_LTK][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_bi[INDEX_LTK][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_RTK = weight_neigh_bi[INDEX_RTK] == 0 ? 0 :
+                            (indices_neigh_bi[INDEX_RTK][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_bi[INDEX_RTK][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_bi[INDEX_RTK][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_LBF = (weight_neigh_bi[INDEX_LBF] == 0) ? 0 :
+                            (indices_neigh_bi[INDEX_LBF][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_bi[INDEX_LBF][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_bi[INDEX_LBF][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_RBF = (weight_neigh_bi[INDEX_RBF] == 0) ? 0 :
+                            (indices_neigh_bi[INDEX_RBF][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_bi[INDEX_RBF][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_bi[INDEX_RBF][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_LTF = weight_neigh_bi[INDEX_LTF] == 0 ? 0 :
+                            (indices_neigh_bi[INDEX_LTF][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_bi[INDEX_LTF][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_bi[INDEX_LTF][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const int idx_cons_var_RTF = weight_neigh_bi[INDEX_RTF] == 0 ? 0 :
+                            (indices_neigh_bi[INDEX_RTF][0] + relative_index_lo[0] + num_ghosts_conservative_var[ei][0]) +
+                            (indices_neigh_bi[INDEX_RTF][1] + relative_index_lo[1] + num_ghosts_conservative_var[ei][1])*ghostcell_dims_conservative_var[ei][0] +
+                            (indices_neigh_bi[INDEX_RTF][2] + relative_index_lo[2] + num_ghosts_conservative_var[ei][2])*ghostcell_dims_conservative_var[ei][0]*
+                                ghostcell_dims_conservative_var[ei][1];
+                        
+                        const double value_bi_BK = (1.0 - ratios_bi[0])*weight_neigh_bi[INDEX_LBK]*double(Q[ei][idx_cons_var_LBK]) +
+                                                          ratios_bi[0]*weight_neigh_bi[INDEX_RBK]*double(Q[ei][idx_cons_var_RBK]);
+                        const double value_bi_TK = (1.0 - ratios_bi[0])*weight_neigh_bi[INDEX_LTK]*double(Q[ei][idx_cons_var_LTK]) +
+                                                          ratios_bi[0]*weight_neigh_bi[INDEX_RTK]*double(Q[ei][idx_cons_var_RTK]);
+                        const double value_bi_BF = (1.0 - ratios_bi[0])*weight_neigh_bi[INDEX_LBF]*double(Q[ei][idx_cons_var_LBF]) +
+                                                          ratios_bi[0]*weight_neigh_bi[INDEX_RBF]*double(Q[ei][idx_cons_var_RBF]);
+                        const double value_bi_TF = (1.0 - ratios_bi[0])*weight_neigh_bi[INDEX_LTF]*double(Q[ei][idx_cons_var_LTF]) +
+                                                          ratios_bi[0]*weight_neigh_bi[INDEX_RTF]*double(Q[ei][idx_cons_var_RTF]);
+                        
+                        const double value_bi_F = (1.0 - ratios_bi[1])*value_bi_BF + ratios_bi[1]*value_bi_TF;
+                        const double value_bi_K = (1.0 - ratios_bi[1])*value_bi_BK + ratios_bi[1]*value_bi_TK;
+                        
+                        const double value_bi = (1.0 - ratios_bi[2])*value_bi_K + ratios_bi[2]*value_bi_F;
+                        
+                        surface_triangulation_cons_var_local_bi[ei][ni] += value_bi;
+                    }
                 }
             }
             
@@ -1343,6 +1527,13 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
             MPI_DOUBLE,
             MPI_SUM);
         
+        mpi.Allreduce(
+            &weight_local_bi[0],
+            &d_surface_triangulation_weight_bi[0],
+            num_nodes,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
             mpi.Allreduce(
@@ -1358,6 +1549,13 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                 num_nodes,
                 MPI_DOUBLE,
                 MPI_SUM);
+
+            mpi.Allreduce(
+                &surface_triangulation_cons_var_local_bi[ei][0],
+                &d_surface_triangulation_cons_var_bi[ei][0],
+                num_nodes,
+                MPI_DOUBLE,
+                MPI_SUM);
         }
         
         if (mpi.getRank() == 0)
@@ -1369,6 +1567,8 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                     TBOX_ERROR(d_object_name
                         << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase()\n"
                         << "The weights of neighbors for the first image points are not correct."
+                        << d_surface_triangulation_weight_ip_1[ni]
+                        << std::abs(d_surface_triangulation_weight_ip_1[ni] - 1.0)
                         << std::endl);
                 }
                 
@@ -1377,6 +1577,18 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                     TBOX_ERROR(d_object_name
                         << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase()\n"
                         << "The weights of neighbors for the second image points are not correct."
+                        << d_surface_triangulation_weight_ip_2[ni]
+                        << std::abs(d_surface_triangulation_weight_ip_2[ni] - 1.0)
+                        << std::endl);
+                }
+
+                if (std::abs(d_surface_triangulation_weight_bi[ni] - 1.0) > 10000.0*std::numeric_limits<double>::epsilon())
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase()\n"
+                        << "The weights of neighbors for the boundary intercepts are not correct."
+                        << d_surface_triangulation_weight_bi[ni]
+                        << std::abs(d_surface_triangulation_weight_bi[ni] - 1.0)
                         << std::endl);
                 }
             }
