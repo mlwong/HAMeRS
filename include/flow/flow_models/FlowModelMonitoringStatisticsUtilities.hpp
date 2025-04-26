@@ -147,6 +147,11 @@ class FlowModelMonitoringStatisticsUtilities
          * The monitoring time step interval.
          */
         int d_monitoring_time_step_interval;
+        
+        /*
+         * Whether to monitor the immersed boundary.
+         */
+        bool d_monitor_immersed_boundary;
 };
 
 #endif /* FLOW_MODEL_MONITORING_STATISTICS_UTILITIES_HPP */

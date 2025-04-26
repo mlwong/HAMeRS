@@ -10,7 +10,8 @@ FlowModelMonitoringStatisticsUtilities::FlowModelMonitoringStatisticsUtilities(
         d_dim(dim),
         d_grid_geometry(grid_geometry),
         d_num_species(num_species),
-        d_monitoring_time_step_interval(-1)
+        d_monitoring_time_step_interval(-1),
+        d_monitor_immersed_boundary(false)
 {
     /*
      * Get the monitoring statistics database.
@@ -37,6 +38,18 @@ FlowModelMonitoringStatisticsUtilities::FlowModelMonitoringStatisticsUtilities(
     {
         d_monitoring_time_step_interval = flow_model_db->getInteger("d_monitoring_time_step_interval");
     }
+    
+    /*
+     * Get the monitor immersed boundary flag.
+     */
+    if (flow_model_db->keyExists("monitor_immersed_boundary"))
+    {
+        d_monitor_immersed_boundary = flow_model_db->getBool("monitor_immersed_boundary");
+    }
+    else if (flow_model_db->keyExists("d_monitor_immersed_boundary"))
+    {
+        d_monitor_immersed_boundary = flow_model_db->getBool("d_monitor_immersed_boundary");
+    }
 }
 
 
@@ -53,4 +66,5 @@ FlowModelMonitoringStatisticsUtilities::putToRestart(
     }
     
     restart_db->putInteger("d_monitoring_time_step_interval", d_monitoring_time_step_interval);
+    restart_db->putBool("d_monitor_immersed_boundary", d_monitor_immersed_boundary);
 }

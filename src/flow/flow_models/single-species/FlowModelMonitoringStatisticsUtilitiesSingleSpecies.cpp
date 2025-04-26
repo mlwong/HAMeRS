@@ -279,7 +279,7 @@ FlowModelMonitoringStatisticsUtilitiesSingleSpecies::outputMonitoringStatistical
             }
         }
         
-        if (flow_model_tmp->useImmersedBoundary())
+        if (flow_model_tmp->useImmersedBoundary() && d_monitor_immersed_boundary)
         {
             HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
                 flow_model_tmp->getFlowModelImmersedBoundaryMethod();
@@ -360,7 +360,7 @@ FlowModelMonitoringStatisticsUtilitiesSingleSpecies::outputMonitoringStatistics(
     
     if (mpi.getRank() == 0)
     {
-        if (flow_model_tmp->useImmersedBoundary())
+        if (flow_model_tmp->useImmersedBoundary() && d_monitor_immersed_boundary)
         {
             HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
                 flow_model_tmp->getFlowModelImmersedBoundaryMethod();
