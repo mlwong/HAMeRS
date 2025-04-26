@@ -1581,6 +1581,15 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::writeSurfaceTriangulationWith
     // Add surface pressure.
     variable_names.push_back("surf_data_pressure");
     variable_data.push_back(d_surface_triangulation_p);
+    // Add surface x-component of velocity.
+    variable_names.push_back("surf_data_u");
+    variable_data.push_back(d_surface_triangulation_u);
+    // Add surface y-component of velocity.
+    variable_names.push_back("surf_data_v");
+    variable_data.push_back(d_surface_triangulation_v);
+    // Add surface z-component of velocity.
+    variable_names.push_back("surf_data_w");
+    variable_data.push_back(d_surface_triangulation_w);
     // Add surface temperature.
     variable_names.push_back("surf_data_temperature");
     variable_data.push_back(d_surface_triangulation_T);
@@ -1676,6 +1685,9 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
     const int num_centroids = static_cast<int>(connectivities.size());
     
     d_surface_triangulation_p    = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
+    d_surface_triangulation_u    = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
+    d_surface_triangulation_v    = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
+    d_surface_triangulation_w    = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
     d_surface_triangulation_T    = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
     d_surface_triangulation_rho  = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
     d_surface_triangulation_tx_v = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
@@ -1683,6 +1695,9 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
     d_surface_triangulation_tz_v = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
     
     double* p_data    = d_surface_triangulation_p->data();
+    double* u_data    = d_surface_triangulation_u->data();
+    double* v_data    = d_surface_triangulation_v->data();
+    double* w_data    = d_surface_triangulation_w->data();
     double* T_data    = d_surface_triangulation_T->data();
     double* rho_data  = d_surface_triangulation_rho->data();
     double* tx_v_data = d_surface_triangulation_tx_v->data();
@@ -1854,6 +1869,55 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
             const Real u_ip_2 = rho_u_ip_2/rho_ip_2;
             const Real v_ip_2 = rho_v_ip_2/rho_ip_2;
             const Real w_ip_2 = rho_w_ip_2/rho_ip_2;
+
+            Real u_surf = Real(0); // x-component of velocity at the surface
+            Real v_surf = Real(0); // y-component of velocity at the surface
+            Real w_surf = Real(0); // z-component of velocity at the surface 
+
+            if (d_bc_type_velocity == VELOCITY_IBC::SLIP)
+            {
+                // Given d_ip and d_ip2, interpolate to the velocity components (u_mirror and v_mirror)
+                // at the mirror image point at the surface.
+                const Real diff_ip_2_ip_1 = d_ip_2 - d_ip_1;
+                const Real diff_mirror_ip_1  = - d_ip_1;
+                const Real diff_ip_2_mirror = d_ip_2;
+
+                // x-component of velocity at the mirror image point.
+                const Real u_mirror = (diff_ip_2_mirror*u_ip_1 + diff_mirror_ip_1*u_ip_2)/diff_ip_2_ip_1;
+                // y-component of velocity at the mirror image point.
+                const Real v_mirror = (diff_ip_2_mirror*v_ip_1 + diff_mirror_ip_1*v_ip_2)/diff_ip_2_ip_1;
+                // z-component of velocity at the mirror image point.
+                const Real w_mirror = (diff_ip_2_mirror*w_ip_1 + diff_mirror_ip_1*w_ip_2)/diff_ip_2_ip_1;
+                
+                // Velocity component normal to the boundary at the mirror image point.
+                const Real vel_mirror_n = dotProduct3D(u_mirror, v_mirror, w_mirror, normal_nodes[ni][0], normal_nodes[ni][1], normal_nodes[ni][2]);
+                
+                // No-penetration boundary condition.
+                u_surf = u_mirror - Real(2)*vel_mirror_n*normal_nodes[ni][0];
+                v_surf = v_mirror - Real(2)*vel_mirror_n*normal_nodes[ni][1];
+                w_surf = w_mirror - Real(2)*vel_mirror_n*normal_nodes[ni][2];
+
+            }
+            else if (d_bc_type_velocity == VELOCITY_IBC::NO_SLIP)
+            {
+                u_surf = getGhostValueDirichletBC(
+                    Real(0),
+                    u_ip_1,
+                    d_ip_1,
+                    Real(0));
+                
+                v_surf = getGhostValueDirichletBC(
+                    Real(0),
+                    v_ip_1,
+                    d_ip_1,
+                    Real(0));
+                
+                w_surf = getGhostValueDirichletBC(
+                    Real(0),
+                    w_ip_1,
+                    d_ip_1,
+                    Real(0));
+            }
             
             // Get the vectors in the two tangent directions.
             // A vector orthogonal to (a, b, c) is (-b, a, 0), or (-c, 0, a) or (0, -c, b).
@@ -1962,6 +2026,9 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
             const Real tz_v_surf = t_norm_surf*vec_norm[2] + t_tan_1_surf*vec_tan_1[2] + t_tan_2_surf*vec_tan_2[2];
             
             p_data[ni]    = double(p_surf);
+            u_data[ni]    = double(u_surf);
+            v_data[ni]    = double(v_surf);
+            w_data[ni]    = double(w_surf);
             T_data[ni]    = double(T_surf);
             rho_data[ni]  = double(rho_surf);
             tx_v_data[ni] = double(tx_v_surf);

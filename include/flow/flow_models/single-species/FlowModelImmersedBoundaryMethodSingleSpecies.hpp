@@ -107,6 +107,9 @@ class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoun
          * Data for the surface triangulation if needed.
          */
         HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_p;
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_u;
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_v;
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_w;
         HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_T;
         HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_rho;
         HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_tx_v;
