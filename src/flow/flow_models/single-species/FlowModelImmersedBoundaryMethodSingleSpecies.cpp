@@ -23,7 +23,13 @@ FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSin
             equation_of_state_mixing_rules),
         d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
         d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
-        d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules)
+        d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules),
+        d_surface_triangulation_integrated_F_p_x(0),
+        d_surface_triangulation_integrated_F_p_y(0),
+        d_surface_triangulation_integrated_F_p_z(0),
+        d_surface_triangulation_integrated_F_v_x(0),
+        d_surface_triangulation_integrated_F_v_y(0),
+        d_surface_triangulation_integrated_F_v_z(0)
 {
     /*
      * Read the body density.
@@ -1595,6 +1601,51 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::writeSurfaceTriangulationWith
 #endif
 }
 
+
+/*
+ * Output names of monitoring statistical quantities to output to a file.
+ */
+ void FlowModelImmersedBoundaryMethodSingleSpecies::outputMonitoringStatisticalQuantitiesNames(
+    std::ofstream& f_out) const
+{
+#ifdef HAMERS_USE_TECIO
+    f_out << "\t" << "F_p_x                ";
+    f_out << "\t" << "F_p_y                ";
+    f_out << "\t" << "F_p_z                ";
+    f_out << "\t" << "F_v_x                ";
+    f_out << "\t" << "F_v_y                ";
+    f_out << "\t" << "F_v_z                ";
+#else
+    NULL_USE(f_out);
+#endif
+}
+
+
+/*
+ * Output monitoring statistics to screen.
+ */
+void FlowModelImmersedBoundaryMethodSingleSpecies::outputMonitoringStatistics(
+    std::ofstream& f_out) const
+{
+#ifdef HAMERS_USE_TECIO
+    f_out << std::scientific << std::setprecision(std::numeric_limits<Real>::digits10)
+        << "\t" << d_surface_triangulation_integrated_F_p_x;
+    f_out << std::scientific << std::setprecision(std::numeric_limits<Real>::digits10)
+        << "\t" << d_surface_triangulation_integrated_F_p_y;
+    f_out << std::scientific << std::setprecision(std::numeric_limits<Real>::digits10)
+        << "\t" << d_surface_triangulation_integrated_F_p_z;
+    f_out << std::scientific << std::setprecision(std::numeric_limits<Real>::digits10)
+        << "\t" << d_surface_triangulation_integrated_F_v_x;
+    f_out << std::scientific << std::setprecision(std::numeric_limits<Real>::digits10)
+        << "\t" << d_surface_triangulation_integrated_F_v_y;
+    f_out << std::scientific << std::setprecision(std::numeric_limits<Real>::digits10)
+        << "\t" << d_surface_triangulation_integrated_F_v_z;
+#else
+    NULL_USE(f_out);
+#endif
+}
+
+
 /*
  * Compute the data on the surface triangulation.
  */
@@ -1617,7 +1668,12 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
         return;
     }
     
+    const std::vector<std::array<int, 3> >& connectivities = surface_triangulation.connectivities;
+    const std::vector<std::array<double, 3> >& normal_centroids = surface_triangulation.normal_centroids;
+    const std::vector<double>& areas = surface_triangulation.areas;
+    
     const int num_nodes = static_cast<int>(nodes.size());
+    const int num_centroids = static_cast<int>(connectivities.size());
     
     d_surface_triangulation_p    = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
     d_surface_triangulation_T    = HAMERS_SHARED_PTR<std::vector<double> >(new std::vector<double>(nodes.size(), 0.0));
@@ -1912,5 +1968,47 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
             ty_v_data[ni] = double(ty_v_surf);
             tz_v_data[ni] = double(tz_v_surf);
         }
-    }
+        
+        d_surface_triangulation_integrated_F_p_x = 0.0;
+        d_surface_triangulation_integrated_F_p_y = 0.0;
+        d_surface_triangulation_integrated_F_p_z = 0.0;
+        d_surface_triangulation_integrated_F_v_x = 0.0;
+        d_surface_triangulation_integrated_F_v_y = 0.0;
+        d_surface_triangulation_integrated_F_v_z = 0.0;
+        
+        for (int ci = 0; ci < num_centroids; ci++)
+        {
+            const int& node_0 = connectivities[ci][0];
+            const int& node_1 = connectivities[ci][1];
+            const int& node_2 = connectivities[ci][2];
+            
+            const double& p_0 = p_data[node_0];
+            const double& p_1 = p_data[node_1];
+            const double& p_2 = p_data[node_2];
+            
+            const double& tx_v_0 = tx_v_data[node_0];
+            const double& tx_v_1 = tx_v_data[node_1];
+            const double& tx_v_2 = tx_v_data[node_2];
+            const double& ty_v_0 = ty_v_data[node_0];
+            const double& ty_v_1 = ty_v_data[node_1];
+            const double& ty_v_2 = ty_v_data[node_2];
+            const double& tz_v_0 = tz_v_data[node_0];
+            const double& tz_v_1 = tz_v_data[node_1];
+            const double& tz_v_2 = tz_v_data[node_2];
+            
+            const double p_centroid = (p_0 + p_1 + p_2)/3.0;
+            const double tx_v_centroid = (tx_v_0 + tx_v_1 + tx_v_2)/3.0;
+            const double ty_v_centroid = (ty_v_0 + ty_v_1 + ty_v_2)/3.0;
+            const double tz_v_centroid = (tz_v_0 + tz_v_1 + tz_v_2)/3.0;
+            
+            d_surface_triangulation_integrated_F_p_x -= normal_centroids[ci][0]*p_centroid*areas[ci];
+            d_surface_triangulation_integrated_F_p_y -= normal_centroids[ci][1]*p_centroid*areas[ci];
+            d_surface_triangulation_integrated_F_p_z -= normal_centroids[ci][2]*p_centroid*areas[ci];
+            
+            d_surface_triangulation_integrated_F_v_x += tx_v_centroid*areas[ci];
+            d_surface_triangulation_integrated_F_v_y += ty_v_centroid*areas[ci];
+            d_surface_triangulation_integrated_F_v_z += tz_v_centroid*areas[ci];
+        }
+        
+    } // if (d_dim == tbox::Dimension(3))
 }

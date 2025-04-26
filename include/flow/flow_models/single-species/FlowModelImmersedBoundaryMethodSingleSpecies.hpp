@@ -48,6 +48,16 @@ class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoun
         void writeSurfaceTriangulationWithData(const std::string& file_name) const;
         
         /*
+         * Output names of monitoring statistical quantities to output to a file.
+         */
+        void outputMonitoringStatisticalQuantitiesNames(std::ofstream& f_out) const;
+        
+        /*
+         * Output monitoring statistics to screen.
+         */
+        void outputMonitoringStatistics(std::ofstream& f_out) const;
+        
+        /*
          * Compute the data on the surface triangulation.
          */
         void computeSurfaceTriangulationData(
@@ -103,6 +113,15 @@ class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoun
         HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_ty_v;
         HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_tz_v;
         
+        /*
+         * Data integrated on the surface triangulation if needed.
+         */
+        double d_surface_triangulation_integrated_F_p_x;
+        double d_surface_triangulation_integrated_F_p_y;
+        double d_surface_triangulation_integrated_F_p_z;
+        double d_surface_triangulation_integrated_F_v_x;
+        double d_surface_triangulation_integrated_F_v_y;
+        double d_surface_triangulation_integrated_F_v_z;
 };
 
 #endif /* FLOW_MODEL_IMMERSED_BOUNDARY_METHOD_SINGLE_SPECIES_HPP */

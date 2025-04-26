@@ -579,6 +579,32 @@ void FlowModelImmersedBoundaryMethodFiveEqnAllaire::setConservativeVariablesCell
 
 
 /*
+ * Output names of monitoring statistical quantities to output to a file.
+ */
+ void FlowModelImmersedBoundaryMethodFiveEqnAllaire::outputMonitoringStatisticalQuantitiesNames(
+    std::ofstream& f_out) const
+{
+    NULL_USE(f_out);
+#ifdef HAMERS_USE_TECIO
+    // Do nothing for now.
+#endif
+}
+
+
+/*
+ * Output monitoring statistics to screen.
+ */
+void FlowModelImmersedBoundaryMethodFiveEqnAllaire::outputMonitoringStatistics(
+    std::ofstream& f_out) const
+{
+    NULL_USE(f_out);
+#ifdef HAMERS_USE_TECIO
+    // Do nothing for now.
+#endif
+}
+
+
+/*
  * Compute the data on the surface triangulation.
  */
 void FlowModelImmersedBoundaryMethodFiveEqnAllaire::computeSurfaceTriangulationData(

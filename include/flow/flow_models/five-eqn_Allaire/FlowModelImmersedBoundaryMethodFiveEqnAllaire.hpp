@@ -42,6 +42,16 @@ class FlowModelImmersedBoundaryMethodFiveEqnAllaire: public FlowModelImmersedBou
         void writeSurfaceTriangulationWithData(const std::string& file_name) const;
         
         /*
+         * Output names of monitoring statistical quantities to output to a file.
+         */
+        void outputMonitoringStatisticalQuantitiesNames(std::ofstream& f_out) const;
+        
+        /*
+         * Output monitoring statistics to screen.
+         */
+        void outputMonitoringStatistics(std::ofstream& f_out) const;
+        
+        /*
          * Compute the data on the surface triangulation.
          */
         void computeSurfaceTriangulationData(

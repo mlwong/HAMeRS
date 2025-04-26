@@ -239,6 +239,16 @@ void
 FlowModelMonitoringStatisticsUtilitiesSingleSpecies::outputMonitoringStatisticalQuantitiesNames(
     const std::string& monitoring_stat_dump_filename) const
 {
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     if (mpi.getRank() == 0)
@@ -269,6 +279,15 @@ FlowModelMonitoringStatisticsUtilitiesSingleSpecies::outputMonitoringStatistical
             }
         }
         
+        if (flow_model_tmp->useImmersedBoundary())
+        {
+            HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+                flow_model_tmp->getFlowModelImmersedBoundaryMethod();
+            
+            flow_model_immersed_boundary_method->outputMonitoringStatisticalQuantitiesNames(
+                f_out);
+        }
+        
         f_out.close();
     }
 }
@@ -285,6 +304,16 @@ FlowModelMonitoringStatisticsUtilitiesSingleSpecies::outputMonitoringStatistics(
     const double time)
 {
     NULL_USE(step_num);
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -331,6 +360,15 @@ FlowModelMonitoringStatisticsUtilitiesSingleSpecies::outputMonitoringStatistics(
     
     if (mpi.getRank() == 0)
     {
+        if (flow_model_tmp->useImmersedBoundary())
+        {
+            HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+                flow_model_tmp->getFlowModelImmersedBoundaryMethod();
+            
+            flow_model_immersed_boundary_method->outputMonitoringStatistics(
+                f_out);
+        }
+        
         f_out << std::endl;
         f_out.close();
     }

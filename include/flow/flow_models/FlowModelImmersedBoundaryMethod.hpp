@@ -152,6 +152,16 @@ class FlowModelImmersedBoundaryMethod
         virtual void writeSurfaceTriangulationWithData(const std::string& file_name) const = 0;
         
         /*
+         * Output names of monitoring statistical quantities to output to a file.
+         */
+        virtual void outputMonitoringStatisticalQuantitiesNames(std::ofstream& f_out) const = 0;
+        
+        /*
+         * Output monitoring statistics to screen.
+         */
+        virtual void outputMonitoringStatistics(std::ofstream& f_out) const = 0;
+        
+        /*
          * Compute the data on the surface triangulation.
          */
         virtual void computeSurfaceTriangulationData(
