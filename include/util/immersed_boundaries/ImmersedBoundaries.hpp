@@ -77,9 +77,10 @@ class ImmersedBoundaries
             
             for (int i = 0; i < num_centroid; ++i)
             {
-                const int node_0 = d_surface_triangulation.connectivities[i][0];
-                const int node_1 = d_surface_triangulation.connectivities[i][1];
-                const int node_2 = d_surface_triangulation.connectivities[i][2];
+                // Connectivity indices are 1-based and need to be converted to 0-based.
+                const int node_0 = d_surface_triangulation.connectivities[i][0] - 1;
+                const int node_1 = d_surface_triangulation.connectivities[i][1] - 1;
+                const int node_2 = d_surface_triangulation.connectivities[i][2] - 1;
                 
                 // Compute the centroids.
                 d_surface_triangulation.centroids[i][0] =
@@ -99,12 +100,12 @@ class ImmersedBoundaries
                 
                 // Compute the areas.
                 const double x01[3] = {d_surface_triangulation.nodes[node_1][0] - d_surface_triangulation.nodes[node_0][0],
-                                      d_surface_triangulation.nodes[node_1][1] - d_surface_triangulation.nodes[node_0][1],
-                                      d_surface_triangulation.nodes[node_1][2] - d_surface_triangulation.nodes[node_0][2]};
+                                       d_surface_triangulation.nodes[node_1][1] - d_surface_triangulation.nodes[node_0][1],
+                                       d_surface_triangulation.nodes[node_1][2] - d_surface_triangulation.nodes[node_0][2]};
                 
                 const double x02[3] = {d_surface_triangulation.nodes[node_2][0] - d_surface_triangulation.nodes[node_0][0],
-                                      d_surface_triangulation.nodes[node_2][1] - d_surface_triangulation.nodes[node_0][1],
-                                      d_surface_triangulation.nodes[node_2][2] - d_surface_triangulation.nodes[node_0][2]};
+                                       d_surface_triangulation.nodes[node_2][1] - d_surface_triangulation.nodes[node_0][1],
+                                       d_surface_triangulation.nodes[node_2][2] - d_surface_triangulation.nodes[node_0][2]};
                 
                 // Compute the normal_centroids vector.
                 const double cross_product[3] =

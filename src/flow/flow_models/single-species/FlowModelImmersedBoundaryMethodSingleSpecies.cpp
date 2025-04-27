@@ -24,12 +24,12 @@ FlowModelImmersedBoundaryMethodSingleSpecies::FlowModelImmersedBoundaryMethodSin
         d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
         d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
         d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules),
-        d_surface_triangulation_integrated_F_p_x(0),
-        d_surface_triangulation_integrated_F_p_y(0),
-        d_surface_triangulation_integrated_F_p_z(0),
-        d_surface_triangulation_integrated_F_v_x(0),
-        d_surface_triangulation_integrated_F_v_y(0),
-        d_surface_triangulation_integrated_F_v_z(0)
+        d_surface_triangulation_integrated_F_p_x(0.0),
+        d_surface_triangulation_integrated_F_p_y(0.0),
+        d_surface_triangulation_integrated_F_p_z(0.0),
+        d_surface_triangulation_integrated_F_v_x(0.0),
+        d_surface_triangulation_integrated_F_v_y(0.0),
+        d_surface_triangulation_integrated_F_v_z(0.0)
 {
     /*
      * Read the body density.
@@ -2045,9 +2045,10 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
         
         for (int ci = 0; ci < num_centroids; ci++)
         {
-            const int& node_0 = connectivities[ci][0];
-            const int& node_1 = connectivities[ci][1];
-            const int& node_2 = connectivities[ci][2];
+            // Connectivity indices are 1-based and need to be converted to 0-based.
+            const int& node_0 = connectivities[ci][0] - 1;
+            const int& node_1 = connectivities[ci][1] - 1;
+            const int& node_2 = connectivities[ci][2] - 1;
             
             const double& p_0 = p_data[node_0];
             const double& p_1 = p_data[node_1];
