@@ -1617,16 +1617,12 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::writeSurfaceTriangulationWith
  void FlowModelImmersedBoundaryMethodSingleSpecies::outputMonitoringStatisticalQuantitiesNames(
     std::ofstream& f_out) const
 {
-#ifdef HAMERS_USE_TECIO
     f_out << "\t" << "F_p_x                ";
     f_out << "\t" << "F_p_y                ";
     f_out << "\t" << "F_p_z                ";
     f_out << "\t" << "F_v_x                ";
     f_out << "\t" << "F_v_y                ";
     f_out << "\t" << "F_v_z                ";
-#else
-    NULL_USE(f_out);
-#endif
 }
 
 
@@ -1636,7 +1632,6 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::writeSurfaceTriangulationWith
 void FlowModelImmersedBoundaryMethodSingleSpecies::outputMonitoringStatistics(
     std::ofstream& f_out) const
 {
-#ifdef HAMERS_USE_TECIO
     f_out << std::scientific << std::setprecision(std::numeric_limits<Real>::digits10)
         << "\t" << d_surface_triangulation_integrated_F_p_x;
     f_out << std::scientific << std::setprecision(std::numeric_limits<Real>::digits10)
@@ -1649,9 +1644,6 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::outputMonitoringStatistics(
         << "\t" << d_surface_triangulation_integrated_F_v_y;
     f_out << std::scientific << std::setprecision(std::numeric_limits<Real>::digits10)
         << "\t" << d_surface_triangulation_integrated_F_v_z;
-#else
-    NULL_USE(f_out);
-#endif
 }
 
 

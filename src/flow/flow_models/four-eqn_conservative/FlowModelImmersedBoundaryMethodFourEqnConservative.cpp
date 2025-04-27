@@ -504,9 +504,7 @@ void FlowModelImmersedBoundaryMethodFourEqnConservative::outputMonitoringStatist
     std::ofstream& f_out) const
 {
     NULL_USE(f_out);
-#ifdef HAMERS_USE_TECIO
     // Do nothing for now.
-#endif
 }
 
 
@@ -517,9 +515,7 @@ void FlowModelImmersedBoundaryMethodFourEqnConservative::outputMonitoringStatist
     std::ofstream& f_out) const
 {
     NULL_USE(f_out);
-#ifdef HAMERS_USE_TECIO
     // Do nothing for now.
-#endif
 }
 
 

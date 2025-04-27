@@ -585,9 +585,7 @@ void FlowModelImmersedBoundaryMethodFiveEqnAllaire::setConservativeVariablesCell
     std::ofstream& f_out) const
 {
     NULL_USE(f_out);
-#ifdef HAMERS_USE_TECIO
     // Do nothing for now.
-#endif
 }
 
 
@@ -598,9 +596,7 @@ void FlowModelImmersedBoundaryMethodFiveEqnAllaire::outputMonitoringStatistics(
     std::ofstream& f_out) const
 {
     NULL_USE(f_out);
-#ifdef HAMERS_USE_TECIO
     // Do nothing for now.
-#endif
 }
 
 

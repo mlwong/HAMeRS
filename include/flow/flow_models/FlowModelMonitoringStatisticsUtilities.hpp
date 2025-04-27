@@ -80,10 +80,10 @@ class FlowModelMonitoringStatisticsUtilities
             const int step_num,
             const double time) = 0;
         
-        bool hasMonitoringStatistics() const
-        {
-            return (!d_monitoring_statistics_names.empty());
-        }
+        /*
+         * Whether the object has monitoring statistics.
+         */
+        bool hasMonitoringStatistics() const;
         
         /*
          * Get names of monitoring statistical quantities to output.

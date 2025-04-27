@@ -68,3 +68,35 @@ FlowModelMonitoringStatisticsUtilities::putToRestart(
     restart_db->putInteger("d_monitoring_time_step_interval", d_monitoring_time_step_interval);
     restart_db->putBool("d_monitor_immersed_boundary", d_monitor_immersed_boundary);
 }
+
+
+/*
+ * Whether the object has monitoring statistics.
+ */
+bool
+FlowModelMonitoringStatisticsUtilities::hasMonitoringStatistics() const
+{
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    bool hasMonitoringStatistics = false;
+    
+    if (d_monitoring_statistics_names.size() > 0)
+    {
+        hasMonitoringStatistics = true;
+    }
+    
+    if (flow_model_tmp->useImmersedBoundary() && d_monitor_immersed_boundary)
+    {
+        hasMonitoringStatistics = true;
+    }
+    
+    return hasMonitoringStatistics;
+}
