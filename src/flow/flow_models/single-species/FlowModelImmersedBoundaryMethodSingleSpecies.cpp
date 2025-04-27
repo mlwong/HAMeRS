@@ -1911,32 +1911,22 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
                     Real(0));
             }
             
-            // Get the vectors in the two tangent directions.
-            // A vector orthogonal to (a, b, c) is (-b, a, 0), or (-c, 0, a) or (0, -c, b).
-            Real vec_tan_1[3] = {-vec_norm[1], vec_norm[0], Real(0)};
-            Real vec_tan_2[3] = {-vec_norm[2], Real(0), vec_norm[0]};
-            // Consider special cases when the normal vector is (1, 0, 0) or (0, 1, 0) or (0, 0, 1).
-            if (std::abs(vec_norm[0] - Real(1)) < std::numeric_limits<Real>::epsilon())
+            // Get the vectors in the two tangential directions.
+            // A vector orthogonal to (a, b, c) is (-b, a, 0), (-c, 0, a) or (0, -c, b).
+            // (-b, a, 0) is chosen here.
+            // Another tangential vector is (-ac, -bc, a^2 + b^2).
+            Real vec_tan_1[3] = {-vec_norm[1],             vec_norm[0],              Real(0)};
+            Real vec_tan_2[3] = {-vec_norm[0]*vec_norm[2], -vec_norm[1]*vec_norm[2], vec_norm[0]*vec_norm[0] + vec_norm[1]*vec_norm[1]};
+            const Real vec_tan_1_mag = sqrt(vec_tan_1[0]*vec_tan_1[0] + vec_tan_1[1]*vec_tan_1[1] + vec_tan_1[2]*vec_tan_1[2]);
+            const Real vec_tan_2_mag = sqrt(vec_tan_2[0]*vec_tan_2[0] + vec_tan_2[1]*vec_tan_2[1] + vec_tan_2[2]*vec_tan_2[2]);
+            for (int di = 0; di < 3; di++)
             {
-                vec_tan_1[0] = Real(0);
-                vec_tan_1[1] = Real(1);
-                vec_tan_1[2] = Real(0);
-                
-                vec_tan_2[0] = Real(0);
-                vec_tan_2[1] = Real(0);
-                vec_tan_2[2] = Real(1);
+                vec_tan_1[di] /= vec_tan_1_mag;
+                vec_tan_2[di] /= vec_tan_2_mag;
             }
-            else if (std::abs(vec_norm[1] - Real(1)) < std::numeric_limits<Real>::epsilon())
-            {
-                vec_tan_1[0] = Real(1);
-                vec_tan_1[1] = Real(0);
-                vec_tan_1[2] = Real(0);
-                
-                vec_tan_2[0] = Real(0);
-                vec_tan_2[1] = Real(0);
-                vec_tan_2[2] = Real(1);
-            }
-            else if (std::abs(vec_norm[2] - Real(1)) < std::numeric_limits<Real>::epsilon())
+            
+            // Consider special case when the normal vector is (0, 0, 1).
+            if (std::abs(vec_norm[2] - Real(1)) < std::numeric_limits<Real>::epsilon())
             {
                 vec_tan_1[0] = Real(1);
                 vec_tan_1[1] = Real(0);
