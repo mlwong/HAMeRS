@@ -1617,12 +1617,12 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::writeSurfaceTriangulationWith
  void FlowModelImmersedBoundaryMethodSingleSpecies::outputMonitoringStatisticalQuantitiesNames(
     std::ofstream& f_out) const
 {
-    f_out << "\t" << "F_p_x                ";
-    f_out << "\t" << "F_p_y                ";
-    f_out << "\t" << "F_p_z                ";
-    f_out << "\t" << "F_v_x                ";
-    f_out << "\t" << "F_v_y                ";
-    f_out << "\t" << "F_v_z                ";
+    f_out << std::setw(25) << "F_p_x";
+    f_out << std::setw(25) << "F_p_y";
+    f_out << std::setw(25) << "F_p_z";
+    f_out << std::setw(25) << "F_v_x";
+    f_out << std::setw(25) << "F_v_y";
+    f_out << std::setw(25) << "F_v_z";
 }
 
 
@@ -1632,18 +1632,12 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::writeSurfaceTriangulationWith
 void FlowModelImmersedBoundaryMethodSingleSpecies::outputMonitoringStatistics(
     std::ofstream& f_out) const
 {
-    f_out << std::scientific << std::setprecision(std::numeric_limits<Real>::digits10)
-        << "\t" << d_surface_triangulation_integrated_F_p_x;
-    f_out << std::scientific << std::setprecision(std::numeric_limits<Real>::digits10)
-        << "\t" << d_surface_triangulation_integrated_F_p_y;
-    f_out << std::scientific << std::setprecision(std::numeric_limits<Real>::digits10)
-        << "\t" << d_surface_triangulation_integrated_F_p_z;
-    f_out << std::scientific << std::setprecision(std::numeric_limits<Real>::digits10)
-        << "\t" << d_surface_triangulation_integrated_F_v_x;
-    f_out << std::scientific << std::setprecision(std::numeric_limits<Real>::digits10)
-        << "\t" << d_surface_triangulation_integrated_F_v_y;
-    f_out << std::scientific << std::setprecision(std::numeric_limits<Real>::digits10)
-        << "\t" << d_surface_triangulation_integrated_F_v_z;
+    f_out << std::scientific << std::setprecision(16) << std::setw(25) << d_surface_triangulation_integrated_F_p_x;
+    f_out << std::scientific << std::setprecision(16) << std::setw(25) << d_surface_triangulation_integrated_F_p_y;
+    f_out << std::scientific << std::setprecision(16) << std::setw(25) << d_surface_triangulation_integrated_F_p_z;
+    f_out << std::scientific << std::setprecision(16) << std::setw(25) << d_surface_triangulation_integrated_F_v_x;
+    f_out << std::scientific << std::setprecision(16) << std::setw(25) << d_surface_triangulation_integrated_F_v_y;
+    f_out << std::scientific << std::setprecision(16) << std::setw(25) << d_surface_triangulation_integrated_F_v_z;
 }
 
 

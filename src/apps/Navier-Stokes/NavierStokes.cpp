@@ -4983,7 +4983,7 @@ NavierStokes::outputHeaderMonitoringStatistics()
                     << std::endl);
             }
             
-            f_out << "# TIME               ";
+            f_out << "#" << std::setw(24) << "TIME";
             f_out.close();
         }
         
@@ -5034,7 +5034,7 @@ NavierStokes::outputHeaderStatistics()
                     << std::endl);
             }
             
-            f_out << "# TIME               ";
+            f_out << "#" << std::setw(24) << "TIME";
             f_out.close();
         }
         
@@ -5109,7 +5109,7 @@ NavierStokes::outputDataStatistics(
                     << std::endl);
             }
             
-            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10) << output_time;
+            f_out << std::scientific << std::setprecision(16) << std::setw(25) << output_time;
             f_out.close();
         }
         
