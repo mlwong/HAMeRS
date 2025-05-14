@@ -276,21 +276,24 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
         const double R_1 = R_u/W_1;          // gas constant of heavier gas
         const double R_2 = R_u/W_2;
         
-        const double lambda = 701.53278340668 / 4.0; // characteristic wave-length
-        // const double eta_0  = 0.08*lambda;
+        const double lambda = 701.53278340668; // characteristic wave-length
+        const double width   = 4.0*lambda;  // domain size in y direction
+        const int k_max = 24;
+        const int k_min = 8;
+        const int k_base = 16;
+        // const int dominant_waven    = (k_max + k_min) / 2.0 ;
+        const double lambda_0       = width / (k_base);
+        const double delta   = lambda_0 * 0.08; // Characteristic length of interface
+        const double eta_0   = lambda_0 * 0.04;
         const double shift  = 0.0; // location of interface.
-        const double width   = 12.0*lambda;  // domain size in y direction
 
         // const double std_desired = (width/12)*0.04;
-        const double delta = (width/12.0)*0.04; // characteristic length of interface.
 
-        const int k_max = 16;
-        const int k_min = 8;
 
         const int delta_ky = 1;
         const int delta_kz = 1;
         const double k_0 = 2.0*M_PI/width;
-        const double epsilon = 1.0e-12;
+        const double epsilon = 1.0e-15;
 
         std::vector<double> a_mn((k_max+1) * (k_max+1)); // Create vector for random number a
         // Read random number list a
@@ -411,7 +414,7 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
 
                                         ratio = sqrt(1.0 / 4.0 * (a_mn[idx_random]*a_mn[idx_random] + b_mn[idx_random]*b_mn[idx_random] + \
                                         c_mn[idx_random]*c_mn[idx_random] + d_mn[idx_random] * d_mn[idx_random]) * \
-                                        2.0 * M_PI * sqrt(m * m + n * n) / (lambda * 0.08 * delta_ky * delta_kz));
+                                        2.0 * M_PI * sqrt(m * m + n * n) / (eta_0 * delta_ky * delta_kz));
                                         
                                         if (ratio <= epsilon) {
                                             ratio = 1.0;
@@ -455,7 +458,7 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
                                 
                                 
                                 // for (int ii = 0; ii < N_int; ii++)
-                                //{
+                                //
                                 //    const double x_p = shift + ii*dx_p;  //Bug fixed 3.22.2023
                                 //    integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - shift)/(delta)) + 0.5*(R_1 + R_2))*dx_p;
                                 //}

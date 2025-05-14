@@ -90,11 +90,6 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         
         // const double gamma = double(7)/double(5); // assume both gases have the same ratio of specific heat ratios, hard coded 
 
-        double lambda = 701.53278340668; // wavelength of single-mode perturbation
-        double eta_0  = 0.02*lambda;      // no perturbation
-        
-        const double p_i = 100000.0; // interface pressure
-        const double T_0 = 300.0;    // background temperature
         
         TBOX_ASSERT(d_initial_conditions_db != nullptr);
         TBOX_ASSERT(d_initial_conditions_db->keyExists("gravity"));
@@ -113,6 +108,26 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         std::vector<double> gamma_vector = d_initial_conditions_db->getDoubleVector("species_gamma"); // specific heat ratio 
         const double gamma = gamma_vector[0]; // specific heat ratio for heavier gas (assume both gases have same specific heat ratios)
 
+        // Read domain size in y direction from input
+        const double width = d_initial_conditions_db->getDouble("width"); // width in y direction (assumes Ly = Lz)
+            
+        // Read characteristic length of interface from input
+        const double delta = d_initial_conditions_db->getDouble("delta");
+            
+        // Read minimum wave number from input
+        const int k_min = d_initial_conditions_db->getInteger("k_min");
+            
+        // Read maximum wave number from input
+        const int k_max = d_initial_conditions_db->getInteger("k_max");
+
+        const double domain_width = width;  // wavelength of single-mode perturbation
+        const double dominant_k   = (k_min + k_max)/2.0;            // Perturbed between wave numbers (k) 4 to 12
+        const double lambda_0     = domain_width/dominant_k;
+        double eta_0              = 0.04*lambda_0;
+        
+        const double p_i = 100000.0; // interface pressure
+        const double T_0 = 300.0;    // background temperature
+        
         
         const double R_u = 8.31446261815324; // universal gas constant
         const double R_1 = R_u/W_1;          // gas constant of heavier gas
@@ -132,12 +147,12 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         int idx_cell = i + j*patch_dims[0] + k*patch_dims[0]*patch_dims[1];
                         
                         // Compute the coordinates.
-                        double x[2];
+                        double x[3];
                         x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
                         x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
                         x[2] = patch_xlo[2] + (double(k) + double(1)/double(2))*dx[2];
 
-                        const double eta = eta_0*cos(2.0*M_PI/lambda*x[1])*cos(2.0*M_PI/lambda*x[2]);
+                        const double eta = eta_0*cos(2.0*M_PI/domain_width*x[1])*cos(2.0*M_PI/domain_width*x[2]);
                         
                         if (x[0] < eta) // heavier fluid
                         {
@@ -207,12 +222,12 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             const int integral_N_int = 1000000; // number of numerical quadrature points
             
             // Discretize the domain in x-direction for the approximated integral.
-        
+
             //double x_domain_lo = -4.0*lambda; // Hard coded but read from input
             //double x_domain_hi =  4.0*lambda; // Hard coded but read from input
             
-            x_domain_lo -= 0.1*lambda; // enlarge the domain for domain ghost cells
-            x_domain_hi += 0.1*lambda; // enlarge the domain for domain ghost cells
+            x_domain_lo -= 0.1*domain_width; // enlarge the domain for domain ghost cells
+            x_domain_hi += 0.1*domain_width; // enlarge the domain for domain ghost cells
             const double dx_uniform  = (x_domain_hi - x_domain_lo)/double(integral_N_x);
             
             std::vector<double> integral_vector(integral_N_x + 3);
@@ -276,7 +291,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
                         x[2] = patch_xlo[2] + (double(k) + double(1)/double(2))*dx[2];
 
-                        const double eta = eta_0*cos(2.0*M_PI/lambda*x[1])*cos(2.0*M_PI/lambda*x[2]);
+                        const double eta = eta_0*cos(2.0*M_PI/domain_width*x[1])*cos(2.0*M_PI/domain_width*x[2]);
                         
                         
                         double X_2_H = 0.5*(1.0 + erf((x[0] - eta - shift)/delta)); // mass fraction of second species (Y_2)
@@ -356,26 +371,12 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             double x_domain_hi = x_hi_vector[0]; // Upper end of computational domain
             
 
-            lambda               = lambda/4.0;
             const double shift   = 0.0; // location of interface.
             // const double delta = (width/12)*0.04; // characteristic length of interface HARD CODED
 
-            // Read domain size in y direction from input
-            const double width = d_initial_conditions_db->getDouble("width"); // width in y direction (assumes Ly = Lz)
-            
-            // Read characteristic length of interface from input
-            const double delta = d_initial_conditions_db->getDouble("delta");
-            
-            // Read minimum wave number from input
-            const int k_min = d_initial_conditions_db->getInteger("k_min");
-            
-            // Read maximum wave number from input
-            const int k_max = d_initial_conditions_db->getInteger("k_max");
-            
- 
-            const int delta_ky = 1;
-            const int delta_kz = 1;
-            const double k_0 = 2.0*M_PI/width;
+            const int delta_ky   = 1;
+            const int delta_kz   = 1;
+            const double k_0     = 2.0*M_PI/width;
             const double epsilon = 1.0e-15;
          
 
@@ -413,7 +414,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         
            
             std::string integral_filename = "integral.dat";
-            const int integral_N_x = 10000;
+            const int integral_N_x   = 10000;
             const int integral_N_int = 1000000; // number of numerical quadrature points
             
             // Discretize the domain in x-direction for the approximated integral.
@@ -436,7 +437,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 {
                     integral_vector[i] = 0.0;
                     const double x_pos = i*dx_uniform + 0.5*dx_uniform + x_domain_lo;
-                    const double dx_p = (x_pos - shift)/(double(integral_N_int) - 1.0);
+                    const double dx_p  = (x_pos - shift)/(double(integral_N_int) - 1.0);
                     for (int ii = 0; ii < integral_N_int; ii++)
                     {
                         const double x_p = shift + ii*dx_p;  //Bug fixed 3.22.2023
@@ -468,6 +469,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 f_in.close();
             }
          
+            // Initial perturbation follows:  B. THORNBER1‡, D. DRIKAKIS1, D. L. YOUNGS2 AND R. J. R. WILLIAMS 2010
+            // Appendix A
 
             for (int k = 0; k < patch_dims[2]; k++)
             {
@@ -484,10 +487,12 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
                         x[2] = patch_xlo[2] + (double(k) + double(1)/double(2))*dx[2];
 
-                        double eta = 0.0; 
+                        // Initialize the parameters
+
+                        double eta     = 0.0; 
                         int idx_random = 0;  // index into random numbers   
-                        double k_amp = 0.0;  
-                        double ratio = 0.0;
+                        double k_amp   = 0.0;  
+                        double ratio   = 0.0;
  
 
                         for (int m = 0; m <= k_max; m++)
@@ -508,9 +513,9 @@ NavierStokesInitialConditions::initializeDataOnPatch(
 
                                 ratio = sqrt(1.0 / 4.0 * ( a_mn[idx_random]*a_mn[idx_random] + \
                                                            b_mn[idx_random]*b_mn[idx_random] + \
-                                                           c_mn[idx_random]*c_mn[idx_random] + \ 
+                                                           c_mn[idx_random]*c_mn[idx_random] + \
                                                            d_mn[idx_random]*d_mn[idx_random] ) * \
-                                            2.0 * M_PI * sqrt(m * m + n * n) / (lambda * 0.08 * delta_ky * delta_kz));
+                                            2.0 * M_PI * sqrt(m * m + n * n) / (eta_0 * delta_ky * delta_kz)) ;
                                 
                                 if (ratio <= epsilon) {
                                     ratio = 1.0;
