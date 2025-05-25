@@ -176,13 +176,14 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                     norm_0[idx] = (Real(x[0]) - x_c)/radius;
                     norm_1[idx] = (Real(x[1]) - y_c)/radius;
                     
-                    // Corner ghost cells required for viscous fluxes
                     if (is_corner_ghost)  
                     {
+                        // Corner ghost cells required for viscous fluxes.
                         mask[idx] = int(IB_MASK::IB_GHOST_CORNER);
                     }
-                    else // Ghost cells required for convective fluxes
+                    else
                     {
+                        // Ghost cells required for convective fluxes.
                         mask[idx] = int(IB_MASK::IB_GHOST);
                     }
                 }
