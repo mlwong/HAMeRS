@@ -78,7 +78,6 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
     TBOX_ASSERT(d_special_boundary_conditions_db->keyExists("x_br"));
     TBOX_ASSERT(d_special_boundary_conditions_db->keyExists("x_j_c"));
     TBOX_ASSERT(d_special_boundary_conditions_db->keyExists("V_jet"));
-
     
     const double p_inf = d_special_boundary_conditions_db->getDouble("p_inf");
     const double u_inf = d_special_boundary_conditions_db->getDouble("u_inf"); 
@@ -90,9 +89,7 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
     const double x_al  = d_special_boundary_conditions_db->getDouble("x_al");
     const double x_br  = d_special_boundary_conditions_db->getDouble("x_br");
     const double x_j_c = d_special_boundary_conditions_db->getDouble("x_j_c");
-
-
-
+    
     /*
      * Determine the ghost cell width to fill.
      */
@@ -119,13 +116,12 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
         HAMERS_SHARED_PTR<pdat::CellData<Real> > density      = conservative_variables[0];
         HAMERS_SHARED_PTR<pdat::CellData<Real> > momentum     = conservative_variables[1];
         HAMERS_SHARED_PTR<pdat::CellData<Real> > total_energy = conservative_variables[2];
-    
+        
         Real* rho         = density->getPointer(0);
         Real* rho_u       = momentum->getPointer(0);
         Real* rho_v       = momentum->getPointer(1);
         Real* E           = total_energy->getPointer(0);
-
-
+        
         for (int codim = 1; codim <= d_dim.getValue(); codim++)
         {
             const std::vector<hier::BoundaryBox>& boundary_boxes = patch_geom->getCodimensionBoundaries(codim);
@@ -158,7 +154,6 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
                             
                             const int idx_mirror_cell = (i + num_ghosts[0]) +
                             (-j + num_ghosts[1] - 1)*ghostcell_dims[0];
-
                             
                             // Compute the coordinates.
                             double x[2];
@@ -188,22 +183,20 @@ NavierStokesSpecialBoundaryConditions::setSpecialBoundaryConditions(
                                     const double r     = fabs(x[0]-x_j_c);
                                     const double r_0   = 0.5;
                                     const double u_ref = 0.0;
-
-                                    const double theta_0 = 0.1;
                                     
+                                    const double theta_0 = 0.1;
                                     const double v_ref = V_jet*0.5*(1.0-tanh(r_0/(4.0*theta_0)*(r/r_0-r_0/r)));
-                                    // const double Z_ref = 0.5*(1.0-tanh(r_0/(4.0*theta_0)*(r/r_0-r_0/r)));
-                    
+                                    
                                     rho[idx_cell]   = rho[idx_mirror_cell];
-
+                                    
                                     const double rho_ref   = rho[idx_cell];
                                     const double rho_u_ref = rho_ref * u_ref;
                                     const double rho_v_ref = rho_ref * v_ref;
                                     const double E_ref     = p_inf/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
                                     
-                                    rho_u[idx_cell]        = rho_u_ref;
-                                    rho_v[idx_cell]        = rho_v_ref;
-                                    E[idx_cell]            = E_ref;
+                                    rho_u[idx_cell] = rho_u_ref;
+                                    rho_v[idx_cell] = rho_v_ref;
+                                    E[idx_cell]     = E_ref;
                                 }
                             }
                         }

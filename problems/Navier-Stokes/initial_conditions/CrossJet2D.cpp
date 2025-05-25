@@ -87,8 +87,6 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             Real* rho_v = momentum->getPointer(1);
             Real* E     = total_energy->getPointer(0);
             
-            //Real gamma = Real(7)/Real(5);
-            
             // Initial conditions.
             Real rho_inf = Real(1);
             Real u_inf   = Real(1);
@@ -110,10 +108,6 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 v_inf   = d_initial_conditions_db->getReal("v_inf");
                 p_inf   = d_initial_conditions_db->getReal("p_inf");
                 gamma   = d_initial_conditions_db->getReal("gamma");
-                // std::cout << std::setprecision(17) << u_inf << std::endl;
-                // std::cout << v_inf << std::endl;
-                // std::cout << rho_inf << std::endl;
-                // std::cout << p_inf << std::endl;
             }
             
             for (int j = -num_ghosts_cons_var[1]; j < patch_dims[1] + num_ghosts_cons_var[1]; j++)
@@ -123,8 +117,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     // Compute index into linear data array.
                     int idx_cell = (i + num_ghosts_cons_var[0]) +
                         (j + num_ghosts_cons_var[1])*ghostcell_dims_cons_var[0];
-
-                    rho[idx_cell]   = rho_inf;          
+                    
+                    rho[idx_cell]   = rho_inf;
                     rho_u[idx_cell] = rho_inf*u_inf;
                     rho_v[idx_cell] = rho_inf*v_inf;
                     E[idx_cell]     = p_inf/(gamma - Real(1)) + half*rho_inf*(u_inf*u_inf + v_inf*v_inf);

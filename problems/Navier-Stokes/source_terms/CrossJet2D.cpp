@@ -114,7 +114,6 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << "No key 'p_inf' found in data for source terms."
             << std::endl);
     }
-
     
     Real gamma = Real(7)/Real(5);
     
@@ -129,7 +128,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << "No key 'gamma' found in data for source terms."
             << std::endl);
     }
-
+    
     Real D = Real(1);
     
     if (d_source_terms_db->keyExists("D"))
@@ -143,7 +142,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << "No key 'D' found in data for source terms."
             << std::endl);
     }
-
+    
     const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
         HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
@@ -209,7 +208,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                 x[1] = patch_xlo[1] + (Real(j) + Real(1)/Real(2))*Real(dx[1]);
                 
                 const Real half  = Real(1)/Real(2);
-
+                
                 //Left sponge region
                 if (x[0] <= d_special_source_box_lo[0])
                 {
@@ -227,7 +226,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     const Real rho_u_p = rho_u[idx_cons_var] - rho_u_ref;
                     const Real rho_v_p = rho_v[idx_cons_var] - rho_v_ref;
                     const Real E_p     = E[idx_cons_var]     - E_ref;
-
+                    
                     // Left sponge calculations
                     /*
                     Real xi_b = std::pow((Real(1) - (x[0] - domain_xlo[0])/(d_special_source_box_lo[0] - domain_xlo[0])), Real(3));
@@ -235,13 +234,12 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     xi_b      *= sponge_rate; // mask value needs to be improved
                     */
                     // 0927 AFK Sponge Update
-
-                
+                    
                     const Real erf_start_lo  = half*(domain_xlo[0] - d_special_source_box_lo[0]) + d_special_source_box_lo[0]; //center of erf is half of the way into sponge
                     const Real erf_offset_lo = Real(-0.5) * erf((d_special_source_box_lo[0]-erf_start_lo)/(D*Real(0.5))) + Real(0.5); //value of erf at start of sponge 
                     Real xi_b                = Real(-0.5) * erf((x[0]-erf_start_lo)/(D*Real(0.5))) + Real(0.5) - erf_offset_lo; //subtract value of erf at start of sponge to start xi_b at zero
                     xi_b                     *= sponge_rate; 
-
+                    
                     // Bottom left or top left sponge region
                     if (x[1] <= d_special_source_box_lo[1] || x[1] >= d_special_source_box_hi[1]) 
                     {
@@ -267,11 +265,11 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     
                     const Real rho_ref = rho_inf;
                     const Real p_ref   = p_inf;
-
+                    
                     const Real rho_u_ref = rho_ref * u_ref;
                     const Real rho_v_ref = rho_ref * v_ref;
                     const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
-
+                    
                     const Real rho_p   = rho[idx_cons_var]   - rho_ref;
                     const Real rho_u_p = rho_u[idx_cons_var] - rho_u_ref;
                     const Real rho_v_p = rho_v[idx_cons_var] - rho_v_ref;
@@ -284,7 +282,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     */
                     // 0927 AFK Sponge Update
                     const Real erf_start_hi  = half*(domain_xhi[0]-d_special_source_box_hi[0]) + d_special_source_box_hi[0]; //center of erf is half of the way into sponge
-                    const Real erf_offset_hi = Real(0.5) * erf((d_special_source_box_hi[0]-erf_start_hi)/(D*Real(0.5))) + Real(0.5); //value of erf at start of sponge
+                    const Real erf_offset_hi = Real(0.5) * erf((d_special_source_box_hi[0] - erf_start_hi)/(D*Real(0.5))) + Real(0.5); //value of erf at start of sponge
                     Real xi_b                = Real(0.5) * erf((x[0]-erf_start_hi)/(D*Real(0.5))) + Real(0.5) - erf_offset_hi; //subtract value of erf at start of sponge to start xi_b at zero
                     xi_b                     *= sponge_rate; 
                     
@@ -313,16 +311,16 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     
                     const Real rho_ref = rho_inf;
                     const Real p_ref   = p_inf;
-
+                    
                     const Real rho_u_ref = rho_ref * u_ref;
                     const Real rho_v_ref = rho_ref * v_ref;
                     const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
-
+                    
                     const Real rho_p   = rho[idx_cons_var]   - rho_ref;
                     const Real rho_u_p = rho_u[idx_cons_var] - rho_u_ref;
                     const Real rho_v_p = rho_v[idx_cons_var] - rho_v_ref;
                     const Real E_p     = E[idx_cons_var]     - E_ref;
-
+                    
                     /*
                     //Top sponge region calculations
                     Real yi_b      = std::pow((x[1]-d_special_source_box_hi[1])/(domain_xhi[1]-d_special_source_box_hi[1]), Real(3)); // mask value needs to be improved 
@@ -331,8 +329,8 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     */
                     // 0927 AFK Sponge Update
                     const Real erf_start_hi  = half*(domain_xhi[1]-d_special_source_box_hi[1]) + d_special_source_box_hi[1]; //center of erf is half of the way into sponge
-                    const Real erf_offset_hi = Real(0.5) * erf((d_special_source_box_hi[1]-erf_start_hi)/(D*Real(0.5))) + Real(0.5); //value of erf at start of sponge
-                    Real yi_b                = Real(0.5) * erf((x[1]-erf_start_hi)/(D*Real(0.5))) + Real(0.5) - erf_offset_hi; //subtract value of erf at start of sponge to start xi_b at zero
+                    const Real erf_offset_hi = Real(0.5) * erf((d_special_source_box_hi[1] - erf_start_hi)/(D*Real(0.5))) + Real(0.5); //value of erf at start of sponge
+                    Real yi_b                = Real(0.5) * erf((x[1] - erf_start_hi)/(D*Real(0.5))) + Real(0.5) - erf_offset_hi; //subtract value of erf at start of sponge to start xi_b at zero
                     yi_b                     *= sponge_rate; 
                     
                     // Top left or top right sponge region
@@ -376,7 +374,7 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
     }
     
     restart_source_terms_db->putReal("sponge_rate", sponge_rate);
-
+    
     Real rho_inf = Real(0);
     if (d_source_terms_db->keyExists("rho_inf"))
     {
@@ -406,7 +404,7 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
     }
     
     restart_source_terms_db->putReal("u_inf", u_inf);
-
+    
     Real v_inf = Real(0);
     if (d_source_terms_db->keyExists("v_inf"))
     {
@@ -421,7 +419,7 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
     }
     
     restart_source_terms_db->putReal("v_inf", v_inf);
-
+    
     Real p_inf = Real(0);
     if (d_source_terms_db->keyExists("p_inf"))
     {
@@ -451,7 +449,7 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
     }
     
     restart_source_terms_db->putReal("D", D);
-
+    
     Real gamma = Real(7)/Real(5);
     if (d_source_terms_db->keyExists("gamma"))
     {
@@ -466,5 +464,4 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
     }
     
     restart_source_terms_db->putReal("gamma", gamma);
-
 }
