@@ -131,7 +131,7 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                 
                 if ((max_ghost_x != max_ghost_y ))
                 {
-                    TBOX_ERROR("num_immersed_boundary_ghosts should have the same value in x and y directions\n");
+                    TBOX_ERROR("d_num_immersed_boundary_ghosts should have the same value in x and y directions\n");
                 }
                 
                 bool is_ghost_cell   = false;
