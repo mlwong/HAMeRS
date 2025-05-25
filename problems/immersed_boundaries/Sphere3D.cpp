@@ -66,11 +66,13 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
      * Set the parameters of the sphere here.
      */
     
+    const Real half = Real(1)/Real(2);
+    
     // These will be read from the input file.
-    double x_c      = 1.0;
-    double y_c      = 1.0;
-    double z_c      = 1.0;
-    double radius_c = 0.5;
+    Real x_c      = 1.0;
+    Real y_c      = 1.0;
+    Real z_c      = 1.0;
+    Real radius_c = 0.5;
     
     if (d_initial_conditions_db != nullptr)
     {
@@ -78,10 +80,10 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
         TBOX_ASSERT(d_initial_conditions_db->keyExists("y_c"));
         TBOX_ASSERT(d_initial_conditions_db->keyExists("z_c"));
         
-        x_c      = d_initial_conditions_db->getDouble("x_c");
-        y_c      = d_initial_conditions_db->getDouble("y_c");
-        z_c      = d_initial_conditions_db->getDouble("z_c");
-        radius_c = d_initial_conditions_db->getDouble("radius");
+        x_c      = d_initial_conditions_db->getReal("x_c");
+        y_c      = d_initial_conditions_db->getReal("y_c");
+        z_c      = d_initial_conditions_db->getReal("z_c");
+        radius_c = d_initial_conditions_db->getReal("radius");
     }
     
     for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++) 
@@ -89,7 +91,7 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++) 
         {
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++) 
-            {   
+            {
                 // Compute the linear index. 
                 const int idx = (i + num_ghosts_0) + 
                     (j + num_ghosts_1)*ghostcell_dim_0 +
@@ -102,16 +104,16 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                 x[2] = patch_xlo[2] + (double(k) + double(1)/double(2))*dx[2]; // z coordinates of the point.
                 
                 // Distance from the sphere center.
-                const double radius = sqrt(pow(x[0] - x_c, 2) + pow(x[1] - y_c, 2) + pow(x[2] - z_c, 2));
+                const Real radius = sqrt(pow(Real(x[0]) - x_c, 2) + pow(Real(x[1]) - y_c, 2) + pow(Real(x[2]) - z_c, 2));
                 
-                if (radius < radius_c)  // Condition that should be satisfied to be in sphere
-                {   
-                    double x_p; // x coordinates on the cylinder where y = x[1] and z = x[2].
-                    double y_p; // y coordinates on the cylinder where x = x[0] and z = x[2].
-                    double z_p; // z coordinates on the cylinder where x = x[0] and y = x[1].
+                if (radius < radius_c) // Condition that should be satisfied to be in sphere
+                {
+                    Real x_p; // x coordinates on the cylinder where y = x[1] and z = x[2].
+                    Real y_p; // y coordinates on the cylinder where x = x[0] and z = x[2].
+                    Real z_p; // z coordinates on the cylinder where x = x[0] and y = x[1].
                     
                     // For checking ghost cell for convective flux.
-                    if (x[0] > x_c)
+                    if (Real(x[0]) > x_c)
                     {
                         x_p = x_c + sqrt(pow((radius_c), 2) - pow(radius, 2) + pow((x[0] - x_c),2));
                     }
@@ -120,7 +122,7 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                         x_p = x_c - sqrt(pow((radius_c), 2) - pow(radius, 2) + pow((x[0] - x_c),2));
                     }
                     
-                    if (x[1] > y_c)
+                    if (Real(x[1]) > y_c)
                     {
                         y_p = y_c + sqrt(pow((radius_c), 2) - pow(radius, 2) + pow((x[1] - y_c),2));
                     }
@@ -128,7 +130,7 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                     {
                         y_p = y_c - sqrt(pow((radius_c), 2) - pow(radius, 2) + pow((x[1] - y_c),2));
                     }
-                    if (x[2] > z_c)
+                    if (Real(x[2]) > z_c)
                     {
                         z_p = z_c + sqrt(pow((radius_c), 2) - pow(radius, 2) + pow((x[2] - z_c),2));
                     }
@@ -144,62 +146,63 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                     
                     if ((max_ghost_x != max_ghost_y) || (max_ghost_x != max_ghost_z) || (max_ghost_y != max_ghost_z))
                     {
-                    TBOX_ERROR("num_immersed_boundary_ghosts should have the same value in x, y, and z directions\n");
+                        TBOX_ERROR("d_num_immersed_boundary_ghosts should have the same value in x, y, and z directions\n");
                     }
                     
                     bool is_ghost_cell   = false;
                     bool is_corner_ghost = false;
                     
-                    double x_d[3];
+                    Real x_d[3];
                     
                     for (int gx = 1; gx <= max_ghost_x; gx++) 
                     {
-                        if ((fabs(x_p - x[0]) < (double(gx))*dx[0]) || (fabs(y_p - x[1]) < (double(gx))*dx[1]) 
-                                                                    || (fabs(z_p - x[2]) < (double(gx))*dx[2])) // Ghost cells excluding corner ghost cells
+                        if ((fabs(x_p - Real(x[0])) < (Real(gx))*Real(dx[0])) ||
+                            (fabs(y_p - Real(x[1])) < (Real(gx))*Real(dx[1])) ||
+                            (fabs(z_p - Real(x[2])) < (Real(gx))*Real(dx[2]))) // Ghost cells excluding corner ghost cells.
                         {
                             is_ghost_cell = true;
                             break;
                         }
                         
-                        x_d[0] = patch_xlo[0] + (double(i + gx) + double(1)/double(2)) * dx[0];
-                        x_d[1] = patch_xlo[1] + (double(j + gx) + double(1)/double(2)) * dx[1];
-                        x_d[2] = patch_xlo[2] + (double(k + gx) + double(1)/double(2)) * dx[2];
-                        double radius_d_RTF = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
+                        x_d[0] = patch_xlo[0] + (Real(i + gx) + half) * Real(dx[0]);
+                        x_d[1] = patch_xlo[1] + (Real(j + gx) + half) * Real(dx[1]);
+                        x_d[2] = patch_xlo[2] + (Real(k + gx) + half) * Real(dx[2]);
+                        Real radius_d_RTF = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
                         
-                        x_d[0] = patch_xlo[0] + (double(i - gx) + double(1)/double(2)) * dx[0];
-                        x_d[1] = patch_xlo[1] + (double(j + gx) + double(1)/double(2)) * dx[1];
-                        x_d[2] = patch_xlo[2] + (double(k + gx) + double(1)/double(2)) * dx[2];
-                        double radius_d_LTF = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
+                        x_d[0] = patch_xlo[0] + (Real(i - gx) + half) * Real(dx[0]);
+                        x_d[1] = patch_xlo[1] + (Real(j + gx) + half) * Real(dx[1]);
+                        x_d[2] = patch_xlo[2] + (Real(k + gx) + half) * Real(dx[2]);
+                        Real radius_d_LTF = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
                         
-                        x_d[0] = patch_xlo[0] + (double(i + gx) + double(1)/double(2)) * dx[0];
-                        x_d[1] = patch_xlo[1] + (double(j - gx) + double(1)/double(2)) * dx[1];
-                        x_d[2] = patch_xlo[2] + (double(k + gx) + double(1)/double(2)) * dx[2];
-                        double radius_d_RBF = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
+                        x_d[0] = patch_xlo[0] + (Real(i + gx) + half) * Real(dx[0]);
+                        x_d[1] = patch_xlo[1] + (Real(j - gx) + half) * Real(dx[1]);
+                        x_d[2] = patch_xlo[2] + (Real(k + gx) + half) * Real(dx[2]);
+                        Real radius_d_RBF = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
                         
-                        x_d[0] = patch_xlo[0] + (double(i - gx) + double(1)/double(2)) * dx[0];
-                        x_d[1] = patch_xlo[1] + (double(j - gx) + double(1)/double(2)) * dx[1];
-                        x_d[2] = patch_xlo[2] + (double(k + gx) + double(1)/double(2)) * dx[2];
-                        double radius_d_LBF = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
+                        x_d[0] = patch_xlo[0] + (Real(i - gx) + half) * Real(dx[0]);
+                        x_d[1] = patch_xlo[1] + (Real(j - gx) + half) * Real(dx[1]);
+                        x_d[2] = patch_xlo[2] + (Real(k + gx) + half) * Real(dx[2]);
+                        Real radius_d_LBF = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
                         
-                        x_d[0] = patch_xlo[0] + (double(i + gx) + double(1)/double(2)) * dx[0];
-                        x_d[1] = patch_xlo[1] + (double(j + gx) + double(1)/double(2)) * dx[1];
-                        x_d[2] = patch_xlo[2] + (double(k - gx) + double(1)/double(2)) * dx[2];
-                        double radius_d_RTK = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
+                        x_d[0] = patch_xlo[0] + (Real(i + gx) + half) * Real(dx[0]);
+                        x_d[1] = patch_xlo[1] + (Real(j + gx) + half) * Real(dx[1]);
+                        x_d[2] = patch_xlo[2] + (Real(k - gx) + half) * Real(dx[2]);
+                        Real radius_d_RTK = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
                         
-                        x_d[0] = patch_xlo[0] + (double(i - gx) + double(1)/double(2)) * dx[0];
-                        x_d[1] = patch_xlo[1] + (double(j + gx) + double(1)/double(2)) * dx[1];
-                        x_d[2] = patch_xlo[2] + (double(k - gx) + double(1)/double(2)) * dx[2];
-                        double radius_d_LTK = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
+                        x_d[0] = patch_xlo[0] + (Real(i - gx) + half) * Real(dx[0]);
+                        x_d[1] = patch_xlo[1] + (Real(j + gx) + half) * Real(dx[1]);
+                        x_d[2] = patch_xlo[2] + (Real(k - gx) + half) * Real(dx[2]);
+                        Real radius_d_LTK = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
                         
-                        x_d[0] = patch_xlo[0] + (double(i + gx) + double(1)/double(2)) * dx[0];
-                        x_d[1] = patch_xlo[1] + (double(j - gx) + double(1)/double(2)) * dx[1];
-                        x_d[2] = patch_xlo[2] + (double(k - gx) + double(1)/double(2)) * dx[2];
-                        double radius_d_RBK = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
+                        x_d[0] = patch_xlo[0] + (Real(i + gx) + half) * Real(dx[0]);
+                        x_d[1] = patch_xlo[1] + (Real(j - gx) + half) * Real(dx[1]);
+                        x_d[2] = patch_xlo[2] + (Real(k - gx) + half) * Real(dx[2]);
+                        Real radius_d_RBK = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
                         
-                        x_d[0] = patch_xlo[0] + (double(i - gx) + double(1)/double(2)) * dx[0];
-                        x_d[1] = patch_xlo[1] + (double(j - gx) + double(1)/double(2)) * dx[1];
-                        x_d[2] = patch_xlo[2] + (double(k - gx) + double(1)/double(2)) * dx[2];
-                        double radius_d_LBK = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
+                        x_d[0] = patch_xlo[0] + (Real(i - gx) + half) * Real(dx[0]);
+                        x_d[1] = patch_xlo[1] + (Real(j - gx) + half) * Real(dx[1]);
+                        x_d[2] = patch_xlo[2] + (Real(k - gx) + half) * Real(dx[2]);
+                        Real radius_d_LBK = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
                         
                         if ((radius_d_RTF > radius_c) || (radius_d_LTF > radius_c) ||
                             (radius_d_RBF > radius_c) || (radius_d_LBF > radius_c) ||
@@ -213,19 +216,20 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                     
                     if (is_ghost_cell || is_corner_ghost)
                     {
-                        dist[idx]   = Real(radius_c - radius);
-                        norm_0[idx] = Real((x[0] - x_c)/radius); // cos(theta) * sin(phi);
-                        norm_1[idx] = Real((x[1] - y_c)/radius); // sin(theta) * sin(phi);
-                        norm_2[idx] = Real((x[2] - z_c)/radius); // cos(phi);
+                        dist[idx]   = radius_c - radius;
+                        norm_0[idx] = (Real(x[0]) - x_c)/radius; // cos(theta) * sin(phi);
+                        norm_1[idx] = (Real(x[1]) - y_c)/radius; // sin(theta) * sin(phi);
+                        norm_2[idx] = (Real(x[2]) - z_c)/radius; // cos(phi);
                         
-                        // Corner ghost cells required for viscous fluxes
-                        if (is_corner_ghost)  
+                        if (is_corner_ghost)
                         {
-                            mask[idx]   = int(IB_MASK::IB_GHOST_CORNER);
+                            // Corner ghost cells required for viscous fluxes.
+                            mask[idx] = int(IB_MASK::IB_GHOST_CORNER);
                         }
-                        else // Ghost cells required for convective fluxes
+                        else 
                         {
-                            mask[idx]   = int(IB_MASK::IB_GHOST);
+                            // Ghost cells required for convective fluxes.
+                            mask[idx] = int(IB_MASK::IB_GHOST);
                         }
                     }
                     else
