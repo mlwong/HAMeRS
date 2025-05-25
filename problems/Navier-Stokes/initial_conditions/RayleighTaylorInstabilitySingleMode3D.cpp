@@ -85,12 +85,9 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         double* E       = total_energy->getPointer(0);
         
         const double gamma = double(7)/double(5); // assume both gases have the same ratio of specific heat ratios
-        // const double gamma_0 = double(7)/double(5);
-        // const double gamma_1 = double(7)/double(5);
         
-              double lambda = 701.53278340668; // wavelength of single-mode perturbation
-              double eta_0  = 0.01*lambda;      // 1% perturbation
-        // const double eta_0  = 0.0*lambda;      // no perturbation
+        double lambda = 701.53278340668; // wavelength of single-mode perturbation
+        double eta_0  = 0.01*lambda;      // 1% perturbation
         
         const double W_1 = 0.04000; // molecular weight of heavier gas
         const double W_2 = 0.02400; // molecular weight of lighter gas
@@ -107,8 +104,6 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         const double R_u = 8.31446261815324; // universal gas constant
         const double R_1 = R_u/W_1;          // gas constant of heavier gas
         const double R_2 = R_u/W_2;          // gas constant of lighter gas
-        
-        // const double rho_i = p_i/(R_u*T_0)*(W_1 + W_2)/2.0;
         
         if (d_project_name == "3D smooth Rayleigh-Taylor instability")
         {
@@ -147,18 +142,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         const double p_H = p_i*exp(g/T_0*integral);
                         const double rho_H = p_H/(R_H*T_0);
                         
-                        // Scott's implementation
-                        // const double dX_2_H_dx = 1.0/(delta*sqrt(M_PI))*exp(-(x[0]/delta)*(x[0]/delta));
-                        // const double dlnR_H_dx = (R_2 - R_1)*dX_2_H_dx;
-                        // const double p_H = p_i*exp(g/(R_H*T_0)*(x[0] - 0.5*delta*delta*dlnR_H_dx));
-                        // const double rho_H = p_H/(R_H*T_0);
-                        
-                        // const double X_2 = 0.5*(1.0 + erf((x[0] - eta)/delta)); // mass fraction of second species (Y_2)
-                        
-                        double rho, p;
-                        
-                        rho = rho_H;
-                        p   = p_H;
+                        const double rho = rho_H;
+                        const double p   = p_H;
                         
                         // if (x[0] < eta)
                         // {
