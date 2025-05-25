@@ -89,20 +89,6 @@ class ConvectiveFluxReconstructor
             const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
         /*
-         * (Old) Compute the convective flux and source due to splitting using shock-capturing scheme.
-         */
-        virtual void
-        computeConvectiveFluxAndSourceOnPatchShockCapturingOld(
-            hier::Patch& patch,
-            const HAMERS_SHARED_PTR<pdat::SideData<Real> >& convective_flux,
-            const HAMERS_SHARED_PTR<pdat::CellData<Real> >& source_scratch,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const hier::Box& domain,
-            const double dt,
-            const bool use_shock_capturing,
-            const bool use_interface_capturing) const;
-        
-        /*
          * Compute the convective flux and source due to splitting using shock-capturing scheme.
          */
         virtual void
@@ -182,8 +168,6 @@ class ConvectiveFluxReconstructor
         int d_num_ghosts_shock_interface_capturing;
         
         WENO_INTERP::TYPE d_weno_interp;
-        
-        bool d_shock_capturing_use_small_stencil_finite_differencing;
         
 };
 
