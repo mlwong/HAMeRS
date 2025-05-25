@@ -109,7 +109,7 @@ class ImmersedBoundaries
                 
                 // Compute the normal_centroids vector.
                 const double cross_product[3] =
-                    {x01[1]*x02[2]-x01[2]*x02[1], x01[2]*x02[0]-x01[0]*x02[2], x01[0]*x02[1]-x01[1]*x02[0]};
+                    {x01[1]*x02[2] - x01[2]*x02[1], x01[2]*x02[0] - x01[0]*x02[2], x01[0]*x02[1] - x01[1]*x02[0]};
                 const double norm = std::sqrt(cross_product[0]*cross_product[0] +
                                               cross_product[1]*cross_product[1] +
                                               cross_product[2]*cross_product[2]);
@@ -265,7 +265,7 @@ class ImmersedBoundaries
          * Initial conditions database.
          */
         const HAMERS_SHARED_PTR<tbox::Database> d_initial_conditions_db;
-
+        
         /*
          * Number of immersed boundary ghost cells (IB_MASK::IBGHOST).
          */

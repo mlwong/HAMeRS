@@ -231,9 +231,9 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
     int* mask = data_mask->getPointer(0);
     Real* dist = data_wall_distance->getPointer(0);
     
-    const Real& rho_body  = d_rho_body;
-    const Real& E_body    = d_E_body;
-    const Real& T_body    = d_T_body;
+    const Real& rho_body = d_rho_body;
+    const Real& E_body   = d_E_body;
+    const Real& T_body   = d_T_body;
     
     // Get the thermodynamic properties of the species.
     std::vector<const Real*> thermo_properties_ptr;
@@ -245,11 +245,13 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
     
     constexpr Real half = Real(1)/Real(2);
     
-    // Distance from cylinder boundary to the image point sqrt(2 + epsilon), isotropic grid cells are assuemd.
-    
     if (d_dim == tbox::Dimension(1))
     {
-        const Real d_ip = sqrt(Real(1))*Real(dx[0]) + HAMERS_REAL_EPSILON;
+        TBOX_ERROR(d_object_name
+            << ": FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellDataImmersedBoundaryGhosts()\n"
+            << "Immersed boundary method is not implemented for 1D problems."
+            << std::endl);
+        
         const Real& rho_u_body = d_mom_body[0];
         
         const int domain_lo_0 = domain_lo[0];
@@ -340,47 +342,47 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                 
                 if ((mask[idx_IB] == int(IB_MASK::IB_GHOST)) || (mask[idx_IB] == int(IB_MASK::IB_GHOST_CORNER)))
                 {
-                    Real d_ip;
+                    Real d_ip_1;
                     // First image point distance is set to sqrt(2)*dx + epsilon for corner ghost cells.
                     if (mask[idx_IB] == int(IB_MASK::IB_GHOST_CORNER))
                     {
-                        d_ip   = std::sqrt(Real(2))*Real(dx[0]) + HAMERS_REAL_EPSILON;
+                        d_ip_1 = std::sqrt(Real(2))*Real(dx[0]) + HAMERS_REAL_EPSILON;
                     }
                     // First image point distance is set to dx/maximum(norm) for ghost cells for convective fluxes.
                     else
                     {
                         Real norm_max = std::max(std::abs(norm_0[idx_IB]), std::abs(norm_1[idx_IB]));
-                        d_ip  = Real(dx[0]) / norm_max + HAMERS_REAL_EPSILON;
+                        d_ip_1 = Real(dx[0]) / norm_max + HAMERS_REAL_EPSILON;
                     }
                     
                     // Second image point distance.
-                    Real d_ip2 = d_ip + Real(0.25)*Real(dx[0]);
+                    Real d_ip_2 = d_ip_1 + Real(0.25)*Real(dx[0]);
                     
                     // Coordinates of the image point 1.
-                    const Real x_ip  = x[0] + (dist[idx_IB] + d_ip)*norm_0[idx_IB];
-                    const Real y_ip  = x[1] + (dist[idx_IB] + d_ip)*norm_1[idx_IB];
+                    const Real x_ip_1 = x[0] + (dist[idx_IB] + d_ip_1)*norm_0[idx_IB];
+                    const Real y_ip_1 = x[1] + (dist[idx_IB] + d_ip_1)*norm_1[idx_IB];
                     
                     // Coordinates of the image point 2.
-                    const Real x_ip2 = x[0] + (dist[idx_IB] + d_ip2)*norm_0[idx_IB];
-                    const Real y_ip2 = x[1] + (dist[idx_IB] + d_ip2)*norm_1[idx_IB];
+                    const Real x_ip_2 = x[0] + (dist[idx_IB] + d_ip_2)*norm_0[idx_IB];
+                    const Real y_ip_2 = x[1] + (dist[idx_IB] + d_ip_2)*norm_1[idx_IB];
                     
                     // Get indices of the cells in interpolation for image point 1.
-                    int idx_ip_cons_var_BL, idx_ip_cons_var_BR, idx_ip_cons_var_TL, idx_ip_cons_var_TR;
-                    int idx_ip_IB_BL, idx_ip_IB_BR, idx_ip_IB_TL, idx_ip_IB_TR;
-                    Real x_ip_BL, y_ip_BL;
+                    int idx_ip_1_cons_var_BL, idx_ip_1_cons_var_BR, idx_ip_1_cons_var_TL, idx_ip_1_cons_var_TR;
+                    int idx_ip_1_IB_BL, idx_ip_1_IB_BR, idx_ip_1_IB_TL, idx_ip_1_IB_TR;
+                    Real x_ip_1_BL, y_ip_1_BL;
                     getBilinearInterpolationIndices2D(
-                        idx_ip_cons_var_BL,
-                        idx_ip_cons_var_BR,
-                        idx_ip_cons_var_TL,
-                        idx_ip_cons_var_TR,
-                        idx_ip_IB_BL,
-                        idx_ip_IB_BR, 
-                        idx_ip_IB_TL, 
-                        idx_ip_IB_TR,
-                        x_ip_BL,
-                        y_ip_BL,
-                        x_ip,
-                        y_ip,
+                        idx_ip_1_cons_var_BL,
+                        idx_ip_1_cons_var_BR,
+                        idx_ip_1_cons_var_TL,
+                        idx_ip_1_cons_var_TR,
+                        idx_ip_1_IB_BL,
+                        idx_ip_1_IB_BR, 
+                        idx_ip_1_IB_TL, 
+                        idx_ip_1_IB_TR,
+                        x_ip_1_BL,
+                        y_ip_1_BL,
+                        x_ip_1,
+                        y_ip_1,
                         Real(patch_xlo[0]),
                         Real(patch_xlo[1]),
                         offset_0_cons_var,
@@ -393,95 +395,95 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         dx_inv);
                     
                     // Checking first image point interpolation stencil to ensure only fluid cell values are used
-                    if (mask[idx_ip_IB_BL] != int(IB_MASK::FLUID))
+                    if (mask[idx_ip_1_IB_BL] != int(IB_MASK::FLUID))
                     {
-                        TBOX_ERROR("Error: Bottom-left cell is not FLUID at index:" << idx_ip_IB_BL 
-                                    << "\n with mask value: " << mask[idx_ip_IB_BL]
-                                    << "\n x_ip: " << x_ip
-                                    << "\n y_ip: " << y_ip
+                        TBOX_ERROR("Error: Bottom-left cell is not FLUID at index:" << idx_ip_1_IB_BL 
+                                    << "\n with mask value: " << mask[idx_ip_1_IB_BL]
+                                    << "\n x_ip_1: " << x_ip_1
+                                    << "\n y_ip_1: " << y_ip_1
                                     << "\n x: " << x[0]
                                     << "\n y: " << x[1]
-                                    << "\n d_ip: " << d_ip/Real(dx[0])
+                                    << "\n d_ip_1: " << d_ip_1/Real(dx[0])
                                     << "\n d_gc: " << dist[idx_IB]
                                     << "\n norm_0:" << norm_0[idx_IB]
                                     << "\n norm_1:" << norm_1[idx_IB]
                                     << "\n dx:" << Real(dx[0])
                                     << "\n dx_inv: " << dx_inv
-                                    << "\n x_ip_BL:" << x_ip_BL
-                                    << "\n y_ip_BL:" << y_ip_BL);
+                                    << "\n x_ip_1_BL:" << x_ip_1_BL
+                                    << "\n y_ip_1_BL:" << y_ip_1_BL);
                     }
-
-                    if (mask[idx_ip_IB_TL] != int(IB_MASK::FLUID))
+                    
+                    if (mask[idx_ip_1_IB_TL] != int(IB_MASK::FLUID))
                     {
-                        TBOX_ERROR("Error: Top-left cell is not FLUID at index: " << idx_ip_IB_TL 
-                                    << "\n with mask value: " << mask[idx_ip_IB_TL]
-                                    << "\n x_ip: " << x_ip
-                                    << "\n y_ip: " << y_ip
+                        TBOX_ERROR("Error: Top-left cell is not FLUID at index: " << idx_ip_1_IB_TL 
+                                    << "\n with mask value: " << mask[idx_ip_1_IB_TL]
+                                    << "\n x_ip_1: " << x_ip_1
+                                    << "\n y_ip_1: " << y_ip_1
                                     << "\n x: " << x[0]
                                     << "\n y: " << x[1]
-                                    << "\n d_ip: " << d_ip/Real(dx[0])
+                                    << "\n d_ip_1: " << d_ip_1/Real(dx[0])
                                     << "\n d_gc: " << dist[idx_IB]
                                     << "\n norm_0: " << norm_0[idx_IB]
                                     << "\n norm_1: " << norm_1[idx_IB]
                                     << "\n dx: " << Real(dx[0])
                                     << "\n dx_inv: " << dx_inv
-                                    << "\n x_ip_BL: " << x_ip_BL
-                                    << "\n y_ip_BL: " << y_ip_BL);
+                                    << "\n x_ip_1_BL: " << x_ip_1_BL
+                                    << "\n y_ip_1_BL: " << y_ip_1_BL);
                     }
-
-                    if (mask[idx_ip_IB_BR] != int(IB_MASK::FLUID))
+                    
+                    if (mask[idx_ip_1_IB_BR] != int(IB_MASK::FLUID))
                     {
-                        TBOX_ERROR("Error: Bottom-right cell is not FLUID at index: " << idx_ip_IB_BR 
-                                    << "\n with mask value: " << mask[idx_ip_IB_BR]
-                                    << "\n x_ip: " << x_ip
-                                    << "\n y_ip: " << y_ip
+                        TBOX_ERROR("Error: Bottom-right cell is not FLUID at index: " << idx_ip_1_IB_BR 
+                                    << "\n with mask value: " << mask[idx_ip_1_IB_BR]
+                                    << "\n x_ip_1: " << x_ip_1
+                                    << "\n y_ip_1: " << y_ip_1
                                     << "\n x: " << x[0]
                                     << "\n y: " << x[1]
-                                    << "\n d_ip: " << d_ip/Real(dx[0])
+                                    << "\n d_ip_1: " << d_ip_1/Real(dx[0])
                                     << "\n d_gc: " << dist[idx_IB]
                                     << "\n norm_0: " << norm_0[idx_IB]
                                     << "\n norm_1: " << norm_1[idx_IB]
                                     << "\n dx: " << Real(dx[0])
                                     << "\n dx_inv: " << dx_inv
-                                    << "\n x_ip_BL: " << x_ip_BL
-                                    << "\n y_ip_BL: " << y_ip_BL);
+                                    << "\n x_ip_1_BL: " << x_ip_1_BL
+                                    << "\n y_ip_1_BL: " << y_ip_1_BL);
                     }
-
-                    if (mask[idx_ip_IB_TR] != int(IB_MASK::FLUID))
+                    
+                    if (mask[idx_ip_1_IB_TR] != int(IB_MASK::FLUID))
                     {
-                        TBOX_ERROR("Error: Top-right cell is not FLUID at index " << idx_ip_IB_TR 
-                                    << "\n with mask value: " << mask[idx_ip_IB_TR]
-                                    << "\n x_ip: " << x_ip
-                                    << "\n y_ip: " << y_ip
+                        TBOX_ERROR("Error: Top-right cell is not FLUID at index " << idx_ip_1_IB_TR 
+                                    << "\n with mask value: " << mask[idx_ip_1_IB_TR]
+                                    << "\n x_ip_1: " << x_ip_1
+                                    << "\n y_ip_1: " << y_ip_1
                                     << "\n x: " << x[0]
                                     << "\n y: " << x[1]
-                                    << "\n d_ip: " << d_ip/Real(dx[0])
+                                    << "\n d_ip_1: " << d_ip_1/Real(dx[0])
                                     << "\n d_gc: " << dist[idx_IB]
                                     << "\n norm_0:" << norm_0[idx_IB]
                                     << "\n norm_1:" << norm_1[idx_IB]
                                     << "\n dx: " << Real(dx[0])
                                     << "\n dx_inv" << dx_inv
-                                    << "\n x_ip_BL: " << x_ip_BL
-                                    << "\n y_ip_BL: " << y_ip_BL);
+                                    << "\n x_ip_1_BL: " << x_ip_1_BL
+                                    << "\n y_ip_1_BL: " << y_ip_1_BL);
                     }
                     
                     // Get indices of the cells in interpolation for image point 2.
-                    int idx_ip2_cons_var_BL, idx_ip2_cons_var_BR, idx_ip2_cons_var_TL, idx_ip2_cons_var_TR;
-                    int idx_ip2_IB_BL, idx_ip2_IB_BR, idx_ip2_IB_TL, idx_ip2_IB_TR;
-                    Real x_ip2_BL, y_ip2_BL;
+                    int idx_ip_2_cons_var_BL, idx_ip_2_cons_var_BR, idx_ip_2_cons_var_TL, idx_ip_2_cons_var_TR;
+                    int idx_ip_2_IB_BL, idx_ip_2_IB_BR, idx_ip_2_IB_TL, idx_ip_2_IB_TR;
+                    Real x_ip_2_BL, y_ip_2_BL;
                     getBilinearInterpolationIndices2D(
-                        idx_ip2_cons_var_BL,
-                        idx_ip2_cons_var_BR,
-                        idx_ip2_cons_var_TL,
-                        idx_ip2_cons_var_TR,
-                        idx_ip2_IB_BL,
-                        idx_ip2_IB_BR, 
-                        idx_ip2_IB_TL, 
-                        idx_ip2_IB_TR,
-                        x_ip2_BL,
-                        y_ip2_BL,
-                        x_ip2,
-                        y_ip2,
+                        idx_ip_2_cons_var_BL,
+                        idx_ip_2_cons_var_BR,
+                        idx_ip_2_cons_var_TL,
+                        idx_ip_2_cons_var_TR,
+                        idx_ip_2_IB_BL,
+                        idx_ip_2_IB_BR, 
+                        idx_ip_2_IB_TL, 
+                        idx_ip_2_IB_TR,
+                        x_ip_2_BL,
+                        y_ip_2_BL,
+                        x_ip_2,
+                        y_ip_2,
                         Real(patch_xlo[0]),
                         Real(patch_xlo[1]),
                         offset_0_cons_var,
@@ -494,47 +496,47 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         dx_inv);
                     
                     // Bilinear interpolation to find image point x-component of velocity values.
-                    const Real u_ip_BL = rho_u[idx_ip_cons_var_BL]/rho[idx_ip_cons_var_BL];
-                    const Real u_ip_BR = rho_u[idx_ip_cons_var_BR]/rho[idx_ip_cons_var_BR];
-                    const Real u_ip_TL = rho_u[idx_ip_cons_var_TL]/rho[idx_ip_cons_var_TL];
-                    const Real u_ip_TR = rho_u[idx_ip_cons_var_TR]/rho[idx_ip_cons_var_TR];
+                    const Real u_ip_1_BL = rho_u[idx_ip_1_cons_var_BL]/rho[idx_ip_1_cons_var_BL];
+                    const Real u_ip_1_BR = rho_u[idx_ip_1_cons_var_BR]/rho[idx_ip_1_cons_var_BR];
+                    const Real u_ip_1_TL = rho_u[idx_ip_1_cons_var_TL]/rho[idx_ip_1_cons_var_TL];
+                    const Real u_ip_1_TR = rho_u[idx_ip_1_cons_var_TR]/rho[idx_ip_1_cons_var_TR];
                     
-                    const Real u_ip2_BL = rho_u[idx_ip2_cons_var_BL]/rho[idx_ip2_cons_var_BL];
-                    const Real u_ip2_BR = rho_u[idx_ip2_cons_var_BR]/rho[idx_ip2_cons_var_BR];
-                    const Real u_ip2_TL = rho_u[idx_ip2_cons_var_TL]/rho[idx_ip2_cons_var_TL];
-                    const Real u_ip2_TR = rho_u[idx_ip2_cons_var_TR]/rho[idx_ip2_cons_var_TR];
+                    const Real u_ip_2_BL = rho_u[idx_ip_2_cons_var_BL]/rho[idx_ip_2_cons_var_BL];
+                    const Real u_ip_2_BR = rho_u[idx_ip_2_cons_var_BR]/rho[idx_ip_2_cons_var_BR];
+                    const Real u_ip_2_TL = rho_u[idx_ip_2_cons_var_TL]/rho[idx_ip_2_cons_var_TL];
+                    const Real u_ip_2_TR = rho_u[idx_ip_2_cons_var_TR]/rho[idx_ip_2_cons_var_TR];
                     
-                    const Real u_ip = bilinearInterpolate2D(
-                        u_ip_BL,
-                        u_ip_BR,
-                        u_ip_TL,
-                        u_ip_TR,
-                        x_ip,
-                        y_ip,
-                        x_ip_BL,
-                        y_ip_BL,
+                    const Real u_ip_1 = bilinearInterpolate2D(
+                        u_ip_1_BL,
+                        u_ip_1_BR,
+                        u_ip_1_TL,
+                        u_ip_1_TR,
+                        x_ip_1,
+                        y_ip_1,
+                        x_ip_1_BL,
+                        y_ip_1_BL,
                         dx_inv);
                     
                     // Bilinear interpolation to find image point y-component of velocity values.
-                    const Real v_ip_BL = rho_v[idx_ip_cons_var_BL]/rho[idx_ip_cons_var_BL];
-                    const Real v_ip_BR = rho_v[idx_ip_cons_var_BR]/rho[idx_ip_cons_var_BR];
-                    const Real v_ip_TL = rho_v[idx_ip_cons_var_TL]/rho[idx_ip_cons_var_TL];
-                    const Real v_ip_TR = rho_v[idx_ip_cons_var_TR]/rho[idx_ip_cons_var_TR];
+                    const Real v_ip_1_BL = rho_v[idx_ip_1_cons_var_BL]/rho[idx_ip_1_cons_var_BL];
+                    const Real v_ip_1_BR = rho_v[idx_ip_1_cons_var_BR]/rho[idx_ip_1_cons_var_BR];
+                    const Real v_ip_1_TL = rho_v[idx_ip_1_cons_var_TL]/rho[idx_ip_1_cons_var_TL];
+                    const Real v_ip_1_TR = rho_v[idx_ip_1_cons_var_TR]/rho[idx_ip_1_cons_var_TR];
                     
-                    const Real v_ip2_BL = rho_v[idx_ip2_cons_var_BL]/rho[idx_ip2_cons_var_BL];
-                    const Real v_ip2_BR = rho_v[idx_ip2_cons_var_BR]/rho[idx_ip2_cons_var_BR];
-                    const Real v_ip2_TL = rho_v[idx_ip2_cons_var_TL]/rho[idx_ip2_cons_var_TL];
-                    const Real v_ip2_TR = rho_v[idx_ip2_cons_var_TR]/rho[idx_ip2_cons_var_TR];
+                    const Real v_ip_2_BL = rho_v[idx_ip_2_cons_var_BL]/rho[idx_ip_2_cons_var_BL];
+                    const Real v_ip_2_BR = rho_v[idx_ip_2_cons_var_BR]/rho[idx_ip_2_cons_var_BR];
+                    const Real v_ip_2_TL = rho_v[idx_ip_2_cons_var_TL]/rho[idx_ip_2_cons_var_TL];
+                    const Real v_ip_2_TR = rho_v[idx_ip_2_cons_var_TR]/rho[idx_ip_2_cons_var_TR];
                     
-                    const Real v_ip = bilinearInterpolate2D(
-                        v_ip_BL,
-                        v_ip_BR,
-                        v_ip_TL,
-                        v_ip_TR,
-                        x_ip,
-                        y_ip,
-                        x_ip_BL,
-                        y_ip_BL,
+                    const Real v_ip_1 = bilinearInterpolate2D(
+                        v_ip_1_BL,
+                        v_ip_1_BR,
+                        v_ip_1_TL,
+                        v_ip_1_TR,
+                        x_ip_1,
+                        y_ip_1,
+                        x_ip_1_BL,
+                        y_ip_1_BL,
                         dx_inv);
                     
                     // Compute velocity components at the ghost cell depending on the type of immersed boundary condition.
@@ -543,38 +545,38 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                     
                     if (d_bc_type_velocity == VELOCITY_IBC::SLIP)
                     {
-                        const Real u_ip2 = bilinearInterpolate2D(
-                            u_ip2_BL,
-                            u_ip2_BR,
-                            u_ip2_TL,
-                            u_ip2_TR,
-                            x_ip2,
-                            y_ip2,
-                            x_ip2_BL,
-                            y_ip2_BL,
+                        const Real u_ip_2 = bilinearInterpolate2D(
+                            u_ip_2_BL,
+                            u_ip_2_BR,
+                            u_ip_2_TL,
+                            u_ip_2_TR,
+                            x_ip_2,
+                            y_ip_2,
+                            x_ip_2_BL,
+                            y_ip_2_BL,
                             dx_inv);
                         
-                        const Real v_ip2 = bilinearInterpolate2D(
-                            v_ip2_BL,
-                            v_ip2_BR,
-                            v_ip2_TL,
-                            v_ip2_TR,
-                            x_ip2,
-                            y_ip2,
-                            x_ip2_BL,
-                            y_ip2_BL,
+                        const Real v_ip_2 = bilinearInterpolate2D(
+                            v_ip_2_BL,
+                            v_ip_2_BR,
+                            v_ip_2_TL,
+                            v_ip_2_TR,
+                            x_ip_2,
+                            y_ip_2,
+                            x_ip_2_BL,
+                            y_ip_2_BL,
                             dx_inv);
                         
-                        // Given d_ip and d_ip2, interpolate to the velocity components (u_mirror and v_mirror)
+                        // Given d_ip_1 and d_ip_2, interpolate to the velocity components (u_mirror and v_mirror)
                         // at the mirror image point at dist[idx_IB].
-                        const Real diff_ip2_ip = d_ip2 - d_ip;
-                        const Real diff_mirror_ip  = dist[idx_IB] - d_ip;
-                        const Real diff_ip2_mirror = d_ip2 - dist[idx_IB];
+                        const Real diff_ip_2_ip_1 = d_ip_2 - d_ip_1;
+                        const Real diff_mirror_ip_1  = dist[idx_IB] - d_ip_1;
+                        const Real diff_ip_2_mirror = d_ip_2 - dist[idx_IB];
                         
                         // x-component of velocity at the mirror image point.
-                        const Real u_mirror = (diff_ip2_mirror*u_ip + diff_mirror_ip*u_ip2)/diff_ip2_ip;
+                        const Real u_mirror = (diff_ip_2_mirror*u_ip_1 + diff_mirror_ip_1*u_ip_2)/diff_ip_2_ip_1;
                         // y-component of velocity at the mirror image point.
-                        const Real v_mirror = (diff_ip2_mirror*v_ip + diff_mirror_ip*v_ip2)/diff_ip2_ip;
+                        const Real v_mirror = (diff_ip_2_mirror*v_ip_1 + diff_mirror_ip_1*v_ip_2)/diff_ip_2_ip_1;
                         
                         // Velocity component normal to the boundary at the mirror image point.
                         const Real vel_mirror_n = dotProduct2D(u_mirror, v_mirror, norm_0[idx_IB], norm_1[idx_IB]);
@@ -582,145 +584,136 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         // No-penetration boundary condition.
                         u_gc = u_mirror - Real(2)*vel_mirror_n*norm_0[idx_IB];
                         v_gc = v_mirror - Real(2)*vel_mirror_n*norm_1[idx_IB];
-                        
-                        // Real vel_ip_n =  u_ip*norm_0[idx_IB] + v_ip*norm_1[idx_IB];
-                        // Real vel_ip_t = -u_ip*norm_1[idx_IB] + v_ip*norm_0[idx_IB];
-                        
-                        // Real vel_gc_n = vel_ip_n - ((d_ip + dist[idx_IB])/d_ip)*(vel_ip_n);
-                        // Real vel_gc_t = vel_ip_t;
-                        
-                        // u_gc = vel_gc_n*norm_0[idx_IB] - vel_gc_t*norm_1[idx_IB];
-                        // v_gc = vel_gc_n*norm_1[idx_IB] + vel_gc_t*norm_0[idx_IB];
                     }
                     else if (d_bc_type_velocity == VELOCITY_IBC::NO_SLIP)
                     {
                         u_gc = getGhostValueDirichletBC(
                             Real(0),
-                            u_ip,
-                            d_ip,
+                            u_ip_1,
+                            d_ip_1,
                             dist[idx_IB]);
                         
                         v_gc = getGhostValueDirichletBC(
                             Real(0),
-                            v_ip,
-                            d_ip,
+                            v_ip_1,
+                            d_ip_1,
                             dist[idx_IB]);
                     }
                     
                     // Bilinear interpolation to find specific internal energy for image point 1.
-                    const Real epsilon_ip_BL = E[idx_ip_cons_var_BL]/rho[idx_ip_cons_var_BL] - half*(u_ip_BL*u_ip_BL + v_ip_BL*v_ip_BL);
-                    const Real epsilon_ip_TL = E[idx_ip_cons_var_TL]/rho[idx_ip_cons_var_TL] - half*(u_ip_TL*u_ip_TL + v_ip_TL*v_ip_TL);
-                    const Real epsilon_ip_BR = E[idx_ip_cons_var_BR]/rho[idx_ip_cons_var_BR] - half*(u_ip_BR*u_ip_BR + v_ip_BR*v_ip_BR);
-                    const Real epsilon_ip_TR = E[idx_ip_cons_var_TR]/rho[idx_ip_cons_var_TR] - half*(u_ip_TR*u_ip_TR + v_ip_TR*v_ip_TR);
+                    const Real epsilon_ip_1_BL = E[idx_ip_1_cons_var_BL]/rho[idx_ip_1_cons_var_BL] - half*(u_ip_1_BL*u_ip_1_BL + v_ip_1_BL*v_ip_1_BL);
+                    const Real epsilon_ip_1_TL = E[idx_ip_1_cons_var_TL]/rho[idx_ip_1_cons_var_TL] - half*(u_ip_1_TL*u_ip_1_TL + v_ip_1_TL*v_ip_1_TL);
+                    const Real epsilon_ip_1_BR = E[idx_ip_1_cons_var_BR]/rho[idx_ip_1_cons_var_BR] - half*(u_ip_1_BR*u_ip_1_BR + v_ip_1_BR*v_ip_1_BR);
+                    const Real epsilon_ip_1_TR = E[idx_ip_1_cons_var_TR]/rho[idx_ip_1_cons_var_TR] - half*(u_ip_1_TR*u_ip_1_TR + v_ip_1_TR*v_ip_1_TR);
                     
                     // Bilinear interpolation to find pecific internal energy for image point 2.
-                    const Real epsilon_ip2_BL = E[idx_ip2_cons_var_BL]/rho[idx_ip2_cons_var_BL] - half*(u_ip2_BL*u_ip2_BL + v_ip2_BL*v_ip2_BL);
-                    const Real epsilon_ip2_TL = E[idx_ip2_cons_var_TL]/rho[idx_ip2_cons_var_TL] - half*(u_ip2_TL*u_ip2_TL + v_ip2_TL*v_ip2_TL);
-                    const Real epsilon_ip2_BR = E[idx_ip2_cons_var_BR]/rho[idx_ip2_cons_var_BR] - half*(u_ip2_BR*u_ip2_BR + v_ip2_BR*v_ip2_BR);
-                    const Real epsilon_ip2_TR = E[idx_ip2_cons_var_TR]/rho[idx_ip2_cons_var_TR] - half*(u_ip2_TR*u_ip2_TR + v_ip2_TR*v_ip2_TR);
+                    const Real epsilon_ip_2_BL = E[idx_ip_2_cons_var_BL]/rho[idx_ip_2_cons_var_BL] - half*(u_ip_2_BL*u_ip_2_BL + v_ip_2_BL*v_ip_2_BL);
+                    const Real epsilon_ip_2_TL = E[idx_ip_2_cons_var_TL]/rho[idx_ip_2_cons_var_TL] - half*(u_ip_2_TL*u_ip_2_TL + v_ip_2_TL*v_ip_2_TL);
+                    const Real epsilon_ip_2_BR = E[idx_ip_2_cons_var_BR]/rho[idx_ip_2_cons_var_BR] - half*(u_ip_2_BR*u_ip_2_BR + v_ip_2_BR*v_ip_2_BR);
+                    const Real epsilon_ip_2_TR = E[idx_ip_2_cons_var_TR]/rho[idx_ip_2_cons_var_TR] - half*(u_ip_2_TR*u_ip_2_TR + v_ip_2_TR*v_ip_2_TR);
                     
                     // Compute the pressure values in the stencils for image point 1.
-                    const Real p_ip_BL = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_cons_var_BL], &epsilon_ip_BL, thermo_properties_ptr);
-                    const Real p_ip_TL = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_cons_var_TL], &epsilon_ip_TL, thermo_properties_ptr);
-                    const Real p_ip_BR = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_cons_var_BR], &epsilon_ip_BR, thermo_properties_ptr);
-                    const Real p_ip_TR = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_cons_var_TR], &epsilon_ip_TR, thermo_properties_ptr);
+                    const Real p_ip_1_BL = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_1_cons_var_BL], &epsilon_ip_1_BL, thermo_properties_ptr);
+                    const Real p_ip_1_TL = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_1_cons_var_TL], &epsilon_ip_1_TL, thermo_properties_ptr);
+                    const Real p_ip_1_BR = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_1_cons_var_BR], &epsilon_ip_1_BR, thermo_properties_ptr);
+                    const Real p_ip_1_TR = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_1_cons_var_TR], &epsilon_ip_1_TR, thermo_properties_ptr);
                     
                     // Compute the pressure values in the stencils for image point 2.
-                    const Real p_ip2_BL = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip2_cons_var_BL], &epsilon_ip2_BL, thermo_properties_ptr);
-                    const Real p_ip2_TL = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip2_cons_var_TL], &epsilon_ip2_TL, thermo_properties_ptr);
-                    const Real p_ip2_BR = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip2_cons_var_BR], &epsilon_ip2_BR, thermo_properties_ptr);
-                    const Real p_ip2_TR = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip2_cons_var_TR], &epsilon_ip2_TR, thermo_properties_ptr);
+                    const Real p_ip_2_BL = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_2_cons_var_BL], &epsilon_ip_2_BL, thermo_properties_ptr);
+                    const Real p_ip_2_TL = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_2_cons_var_TL], &epsilon_ip_2_TL, thermo_properties_ptr);
+                    const Real p_ip_2_BR = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_2_cons_var_BR], &epsilon_ip_2_BR, thermo_properties_ptr);
+                    const Real p_ip_2_TR = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_2_cons_var_TR], &epsilon_ip_2_TR, thermo_properties_ptr);
                     
                     // Compute the temperature values in the stencils for image point 1.
-                    const Real T_ip_BL = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_cons_var_BL], &p_ip_BL, thermo_properties_ptr);
-                    const Real T_ip_TL = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_cons_var_TL], &p_ip_TL, thermo_properties_ptr);
-                    const Real T_ip_BR = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_cons_var_BR], &p_ip_BR, thermo_properties_ptr);
-                    const Real T_ip_TR = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_cons_var_TR], &p_ip_TR, thermo_properties_ptr);
+                    const Real T_ip_1_BL = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_1_cons_var_BL], &p_ip_1_BL, thermo_properties_ptr);
+                    const Real T_ip_1_TL = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_1_cons_var_TL], &p_ip_1_TL, thermo_properties_ptr);
+                    const Real T_ip_1_BR = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_1_cons_var_BR], &p_ip_1_BR, thermo_properties_ptr);
+                    const Real T_ip_1_TR = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_1_cons_var_TR], &p_ip_1_TR, thermo_properties_ptr);
                     
                     // Compute the temperature values in the stencils for image point 2.
-                    const Real T_ip2_BL = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip2_cons_var_BL], &p_ip2_BL, thermo_properties_ptr);
-                    const Real T_ip2_TL = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip2_cons_var_TL], &p_ip2_TL, thermo_properties_ptr);
-                    const Real T_ip2_BR = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip2_cons_var_BR], &p_ip2_BR, thermo_properties_ptr);
-                    const Real T_ip2_TR = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip2_cons_var_TR], &p_ip2_TR, thermo_properties_ptr);
+                    const Real T_ip_2_BL = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_2_cons_var_BL], &p_ip_2_BL, thermo_properties_ptr);
+                    const Real T_ip_2_TL = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_2_cons_var_TL], &p_ip_2_TL, thermo_properties_ptr);
+                    const Real T_ip_2_BR = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_2_cons_var_BR], &p_ip_2_BR, thermo_properties_ptr);
+                    const Real T_ip_2_TR = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_2_cons_var_TR], &p_ip_2_TR, thermo_properties_ptr);
                     
                     // Bilinear interpolation to find temperature of image point 1.
-                    const Real T_ip = bilinearInterpolate2D(
-                        T_ip_BL,
-                        T_ip_BR,
-                        T_ip_TL,
-                        T_ip_TR,
-                        x_ip,
-                        y_ip,
-                        x_ip_BL,
-                        y_ip_BL,
+                    const Real T_ip_1 = bilinearInterpolate2D(
+                        T_ip_1_BL,
+                        T_ip_1_BR,
+                        T_ip_1_TL,
+                        T_ip_1_TR,
+                        x_ip_1,
+                        y_ip_1,
+                        x_ip_1_BL,
+                        y_ip_1_BL,
                         dx_inv);
                     
                     // Bilinear interpolation to find temperature of image point 2.
-                    const Real T_ip2 = bilinearInterpolate2D(
-                        T_ip2_BL,
-                        T_ip2_BR,
-                        T_ip2_TL,
-                        T_ip2_TR,
-                        x_ip2,
-                        y_ip2,
-                        x_ip2_BL,
-                        y_ip2_BL,
+                    const Real T_ip_2 = bilinearInterpolate2D(
+                        T_ip_2_BL,
+                        T_ip_2_BR,
+                        T_ip_2_TL,
+                        T_ip_2_TR,
+                        x_ip_2,
+                        y_ip_2,
+                        x_ip_2_BL,
+                        y_ip_2_BL,
                         dx_inv);
                     
                     // Bilinear interpolation to find density of image point 1.
-                    const Real rho_ip = bilinearInterpolate2D(
-                        rho[idx_ip_cons_var_BL],
-                        rho[idx_ip_cons_var_BR],
-                        rho[idx_ip_cons_var_TL],
-                        rho[idx_ip_cons_var_TR],
-                        x_ip,
-                        y_ip,
-                        x_ip_BL,
-                        y_ip_BL,
+                    const Real rho_ip_1 = bilinearInterpolate2D(
+                        rho[idx_ip_1_cons_var_BL],
+                        rho[idx_ip_1_cons_var_BR],
+                        rho[idx_ip_1_cons_var_TL],
+                        rho[idx_ip_1_cons_var_TR],
+                        x_ip_1,
+                        y_ip_1,
+                        x_ip_1_BL,
+                        y_ip_1_BL,
                         dx_inv);
                     
                     // Bilinear interpolation to find density of image point 2.
-                    const Real rho_ip2 = bilinearInterpolate2D(
-                        rho[idx_ip2_cons_var_BL],
-                        rho[idx_ip2_cons_var_BR],
-                        rho[idx_ip2_cons_var_TL],
-                        rho[idx_ip2_cons_var_TR],
-                        x_ip2,
-                        y_ip2,
-                        x_ip2_BL,
-                        y_ip2_BL,
+                    const Real rho_ip_2 = bilinearInterpolate2D(
+                        rho[idx_ip_2_cons_var_BL],
+                        rho[idx_ip_2_cons_var_BR],
+                        rho[idx_ip_2_cons_var_TL],
+                        rho[idx_ip_2_cons_var_TR],
+                        x_ip_2,
+                        y_ip_2,
+                        x_ip_2_BL,
+                        y_ip_2_BL,
                         dx_inv);
                     
-                    const Real epsilon_ip = d_equation_of_state_mixing_rules->getEquationOfState()->
+                    const Real epsilon_ip_1 = d_equation_of_state_mixing_rules->getEquationOfState()->
                         getInternalEnergyFromTemperature(
-                            &rho_ip,
-                            &T_ip,
+                            &rho_ip_1,
+                            &T_ip_1,
                             thermo_properties_ptr);
                         
-                    const Real epsilon_ip2 = d_equation_of_state_mixing_rules->getEquationOfState()->
+                    const Real epsilon_ip_2 = d_equation_of_state_mixing_rules->getEquationOfState()->
                         getInternalEnergyFromTemperature(
-                            &rho_ip2,
-                            &T_ip2,
+                            &rho_ip_2,
+                            &T_ip_2,
                             thermo_properties_ptr);
                     
-                    const Real p_ip = d_equation_of_state_mixing_rules->getEquationOfState()->
+                    const Real p_ip_1 = d_equation_of_state_mixing_rules->getEquationOfState()->
                         getPressure(
-                            &rho_ip,
-                            &epsilon_ip,
+                            &rho_ip_1,
+                            &epsilon_ip_1,
                             thermo_properties_ptr);
                     
-                    const Real p_ip2 = d_equation_of_state_mixing_rules->getEquationOfState()->
+                    const Real p_ip_2 = d_equation_of_state_mixing_rules->getEquationOfState()->
                         getPressure(
-                            &rho_ip2,
-                            &epsilon_ip2,
+                            &rho_ip_2,
+                            &epsilon_ip_2,
                             thermo_properties_ptr);
                     
                     // dP/dn = 0
                     const Real p_gc = getGhostValueNeumannBC(
-                            p_ip,
-                            p_ip2,
-                            d_ip,
-                            d_ip2,
+                            p_ip_1,
+                            p_ip_2,
+                            d_ip_1,
+                            d_ip_2,
                             dist[idx_IB]);
                     
                     Real T_gc = Real(0);
@@ -728,10 +721,10 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                     {
                         // dT/dn = 0
                         T_gc = getGhostValueNeumannBC(
-                            T_ip,
-                            T_ip2,
-                            d_ip,
-                            d_ip2,
+                            T_ip_1,
+                            T_ip_2,
+                            d_ip_1,
+                            d_ip_2,
                             dist[idx_IB]);
                     }
                     else if (d_bc_type_temperature == TEMPERATURE_IBC::ISOTHERMAL)
@@ -739,8 +732,8 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         // Iso-thermal boundary condition.
                         T_gc = getGhostValueDirichletBC(
                             T_body,
-                            T_ip,
-                            d_ip,
+                            T_ip_1,
+                            d_ip_1,
                             dist[idx_IB]);
                     }
                     
@@ -854,60 +847,60 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                     if (mask[idx_IB] == int(IB_MASK::IB_GHOST) || mask[idx_IB] == int(IB_MASK::IB_GHOST_CORNER))
                     {
                         
-                        Real d_ip;
+                        Real d_ip_1;
                         // First image point distance is set to sqrt(3)*dx + epsilon for corner ghost cells.
                         if (mask[idx_IB] == int(IB_MASK::IB_GHOST_CORNER))
                         {
-                            d_ip   = std::sqrt(Real(3))*Real(dx[0]) + HAMERS_REAL_EPSILON;
+                            d_ip_1 = std::sqrt(Real(3))*Real(dx[0]) + HAMERS_REAL_EPSILON;
                         }
                         // First image point distance is set to dx/maximum(norm) for ghost cells for convective fluxes.
                         else
                         {
                             Real norm_max = std::max(std::max(std::abs(norm_0[idx_IB]), std::abs(norm_1[idx_IB])), std::abs(norm_2[idx_IB]));
-                            d_ip  = Real(dx[0]) / norm_max + HAMERS_REAL_EPSILON;
+                            d_ip_1 = Real(dx[0]) / norm_max + HAMERS_REAL_EPSILON;
                         }
                         
-                        // Second image point distance is set to d_ip + 0.25*dx.
-                        Real d_ip2 = d_ip + Real(0.25)*Real(dx[0]);
+                        // Second image point distance is set to d_ip_1 + 0.25*dx.
+                        Real d_ip_2 = d_ip_1 + Real(0.25)*Real(dx[0]);
                         // Coordinates of the image point 1.
-                        const Real x_ip = x[0] + (dist[idx_IB] + d_ip)*norm_0[idx_IB];
-                        const Real y_ip = x[1] + (dist[idx_IB] + d_ip)*norm_1[idx_IB];
-                        const Real z_ip = x[2] + (dist[idx_IB] + d_ip)*norm_2[idx_IB];
+                        const Real x_ip_1 = x[0] + (dist[idx_IB] + d_ip_1)*norm_0[idx_IB];
+                        const Real y_ip_1 = x[1] + (dist[idx_IB] + d_ip_1)*norm_1[idx_IB];
+                        const Real z_ip_1 = x[2] + (dist[idx_IB] + d_ip_1)*norm_2[idx_IB];
                         
                         // Coordinates of the image point 2.
-                        const Real x_ip2 = x[0] + (dist[idx_IB] + d_ip2)*norm_0[idx_IB];
-                        const Real y_ip2 = x[1] + (dist[idx_IB] + d_ip2)*norm_1[idx_IB];
-                        const Real z_ip2 = x[2] + (dist[idx_IB] + d_ip2)*norm_2[idx_IB];
+                        const Real x_ip_2 = x[0] + (dist[idx_IB] + d_ip_2)*norm_0[idx_IB];
+                        const Real y_ip_2 = x[1] + (dist[idx_IB] + d_ip_2)*norm_1[idx_IB];
+                        const Real z_ip_2 = x[2] + (dist[idx_IB] + d_ip_2)*norm_2[idx_IB];
                         
                         // Get indices of the cells in interpolation for image point 1.
-                        int idx_ip_cons_var_LBK, idx_ip_cons_var_RBK, idx_ip_cons_var_LTK, idx_ip_cons_var_RTK,
-                            idx_ip_cons_var_LBF, idx_ip_cons_var_RBF, idx_ip_cons_var_LTF, idx_ip_cons_var_RTF;
-                        int idx_ip_IB_LBK, idx_ip_IB_RBK, idx_ip_IB_LTK, idx_ip_IB_RTK,
-                            idx_ip_IB_LBF, idx_ip_IB_RBF, idx_ip_IB_LTF, idx_ip_IB_RTF;
-                        Real x_ip_LBK, y_ip_LBK, z_ip_LBK;
+                        int idx_ip_1_cons_var_LBK, idx_ip_1_cons_var_RBK, idx_ip_1_cons_var_LTK, idx_ip_1_cons_var_RTK,
+                            idx_ip_1_cons_var_LBF, idx_ip_1_cons_var_RBF, idx_ip_1_cons_var_LTF, idx_ip_1_cons_var_RTF;
+                        int idx_ip_1_IB_LBK, idx_ip_1_IB_RBK, idx_ip_1_IB_LTK, idx_ip_1_IB_RTK,
+                            idx_ip_1_IB_LBF, idx_ip_1_IB_RBF, idx_ip_1_IB_LTF, idx_ip_1_IB_RTF;
+                        Real x_ip_1_LBK, y_ip_1_LBK, z_ip_1_LBK;
                         getTrilinearInterpolationIndices3D(
-                            idx_ip_cons_var_LBK,
-                            idx_ip_cons_var_RBK,
-                            idx_ip_cons_var_LTK,
-                            idx_ip_cons_var_RTK,
-                            idx_ip_cons_var_LBF,
-                            idx_ip_cons_var_RBF,
-                            idx_ip_cons_var_LTF,
-                            idx_ip_cons_var_RTF,
-                            idx_ip_IB_LBK,
-                            idx_ip_IB_RBK,
-                            idx_ip_IB_LTK,
-                            idx_ip_IB_RTK,
-                            idx_ip_IB_LBF,
-                            idx_ip_IB_RBF,
-                            idx_ip_IB_LTF,
-                            idx_ip_IB_RTF,
-                            x_ip_LBK,
-                            y_ip_LBK,
-                            z_ip_LBK,
-                            x_ip,
-                            y_ip,
-                            z_ip,
+                            idx_ip_1_cons_var_LBK,
+                            idx_ip_1_cons_var_RBK,
+                            idx_ip_1_cons_var_LTK,
+                            idx_ip_1_cons_var_RTK,
+                            idx_ip_1_cons_var_LBF,
+                            idx_ip_1_cons_var_RBF,
+                            idx_ip_1_cons_var_LTF,
+                            idx_ip_1_cons_var_RTF,
+                            idx_ip_1_IB_LBK,
+                            idx_ip_1_IB_RBK,
+                            idx_ip_1_IB_LTK,
+                            idx_ip_1_IB_RTK,
+                            idx_ip_1_IB_LBF,
+                            idx_ip_1_IB_RBF,
+                            idx_ip_1_IB_LTF,
+                            idx_ip_1_IB_RTF,
+                            x_ip_1_LBK,
+                            y_ip_1_LBK,
+                            z_ip_1_LBK,
+                            x_ip_1,
+                            y_ip_1,
+                            z_ip_1,
                             Real(patch_xlo[0]),
                             Real(patch_xlo[1]),
                             Real(patch_xlo[2]),
@@ -925,180 +918,180 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                             dx_inv);
                         
                         // Checking first image point interpolation stencil to ensure only fluid cell values are used
-                        if (mask[idx_ip_IB_LBK] != int(IB_MASK::FLUID))
+                        if (mask[idx_ip_1_IB_LBK] != int(IB_MASK::FLUID))
                         {
-                            TBOX_ERROR("Error: Left-bottom-back cell is not FLUID at index: " << idx_ip_IB_LBK 
-                                << "\n with mask value: " << mask[idx_ip_IB_LBK]
-                                << "\n x_ip: " << x_ip
-                                << "\n y_ip: " << y_ip
+                            TBOX_ERROR("Error: Left-bottom-back cell is not FLUID at index: " << idx_ip_1_IB_LBK 
+                                << "\n with mask value: " << mask[idx_ip_1_IB_LBK]
+                                << "\n x_ip_1: " << x_ip_1
+                                << "\n y_ip_1: " << y_ip_1
                                 << "\n x: " << x[0]
                                 << "\n y: " << x[1]
-                                << "\n d_ip: " << d_ip/Real(dx[0])
+                                << "\n d_ip_1: " << d_ip_1/Real(dx[0])
                                 << "\n d_gc: " << dist[idx_IB]
                                 << "\n norm_0: " << norm_0[idx_IB]
                                 << "\n norm_1: " << norm_1[idx_IB]
                                 << "\n dx: " << Real(dx[0])
                                 << "\n dx_inv: " << dx_inv
-                                << "\n x_ip_LBK: " << x_ip_LBK
-                                << "\n y_ip_LBK: " << y_ip_LBK);
+                                << "\n x_ip_1_LBK: " << x_ip_1_LBK
+                                << "\n y_ip_1_LBK: " << y_ip_1_LBK);
                         }
                         
-                        if (mask[idx_ip_IB_RBK] != int(IB_MASK::FLUID))
+                        if (mask[idx_ip_1_IB_RBK] != int(IB_MASK::FLUID))
                         {
-                            TBOX_ERROR("Error: Right-bottom-back cell is not FLUID at index: " << idx_ip_IB_RBK 
-                                << "\n with mask value: " << mask[idx_ip_IB_RBK]
-                                << "\n x_ip: " << x_ip
-                                << "\n y_ip: " << y_ip
+                            TBOX_ERROR("Error: Right-bottom-back cell is not FLUID at index: " << idx_ip_1_IB_RBK 
+                                << "\n with mask value: " << mask[idx_ip_1_IB_RBK]
+                                << "\n x_ip_1: " << x_ip_1
+                                << "\n y_ip_1: " << y_ip_1
                                 << "\n x: " << x[0]
                                 << "\n y: " << x[1]
-                                << "\n d_ip: " << d_ip/Real(dx[0])
+                                << "\n d_ip_1: " << d_ip_1/Real(dx[0])
                                 << "\n d_gc: " << dist[idx_IB]
                                 << "\n norm_0: " << norm_0[idx_IB]
                                 << "\n norm_1: " << norm_1[idx_IB]
                                 << "\n dx: " << Real(dx[0])
                                 << "\n dx_inv: " << dx_inv
-                                << "\n x_ip_LBK: " << x_ip_LBK
-                                << "\n y_ip_LBK: " << y_ip_LBK);
+                                << "\n x_ip_1_LBK: " << x_ip_1_LBK
+                                << "\n y_ip_1_LBK: " << y_ip_1_LBK);
                         }
                         
-                        if (mask[idx_ip_IB_LTK] != int(IB_MASK::FLUID))
+                        if (mask[idx_ip_1_IB_LTK] != int(IB_MASK::FLUID))
                         {
-                            TBOX_ERROR("Error: Left-top-back cell is not FLUID at index: " << idx_ip_IB_LTK 
-                                << "\n with mask value: " << mask[idx_ip_IB_LTK]
-                                << "\n x_ip: " << x_ip
-                                << "\n y_ip: " << y_ip
+                            TBOX_ERROR("Error: Left-top-back cell is not FLUID at index: " << idx_ip_1_IB_LTK 
+                                << "\n with mask value: " << mask[idx_ip_1_IB_LTK]
+                                << "\n x_ip_1: " << x_ip_1
+                                << "\n y_ip_1: " << y_ip_1
                                 << "\n x: " << x[0]
                                 << "\n y: " << x[1]
-                                << "\n d_ip: " << d_ip/Real(dx[0])
+                                << "\n d_ip_1: " << d_ip_1/Real(dx[0])
                                 << "\n d_gc: " << dist[idx_IB]
                                 << "\n norm_0: " << norm_0[idx_IB]
                                 << "\n norm_1: " << norm_1[idx_IB]
                                 << "\n dx: " << Real(dx[0])
                                 << "\n dx_inv: " << dx_inv
-                                << "\n x_ip_LBK: " << x_ip_LBK
-                                << "\n y_ip_LBK: " << y_ip_LBK);
+                                << "\n x_ip_1_LBK: " << x_ip_1_LBK
+                                << "\n y_ip_1_LBK: " << y_ip_1_LBK);
                         }
                         
-                        if (mask[idx_ip_IB_RTK] != int(IB_MASK::FLUID))
+                        if (mask[idx_ip_1_IB_RTK] != int(IB_MASK::FLUID))
                         {
-                            TBOX_ERROR("Error: Right-top-back cell is not FLUID at index: " << idx_ip_IB_RTK 
-                                << "\n with mask value: " << mask[idx_ip_IB_RTK]
-                                << "\n x_ip: " << x_ip
-                                << "\n y_ip: " << y_ip
+                            TBOX_ERROR("Error: Right-top-back cell is not FLUID at index: " << idx_ip_1_IB_RTK 
+                                << "\n with mask value: " << mask[idx_ip_1_IB_RTK]
+                                << "\n x_ip_1: " << x_ip_1
+                                << "\n y_ip_1: " << y_ip_1
                                 << "\n x: " << x[0]
                                 << "\n y: " << x[1]
-                                << "\n d_ip: " << d_ip/Real(dx[0])
+                                << "\n d_ip_1: " << d_ip_1/Real(dx[0])
                                 << "\n d_gc: " << dist[idx_IB]
                                 << "\n norm_0: " << norm_0[idx_IB]
                                 << "\n norm_1: " << norm_1[idx_IB]
                                 << "\n dx: " << Real(dx[0])
                                 << "\n dx_inv: " << dx_inv
-                                << "\n x_ip_LBK: " << x_ip_LBK
-                                << "\n y_ip_LBK: " << y_ip_LBK);
+                                << "\n x_ip_1_LBK: " << x_ip_1_LBK
+                                << "\n y_ip_1_LBK: " << y_ip_1_LBK);
                         }
                         
                         // Checking first image point interpolation stencil to ensure only fluid cell values are used
-                        if (mask[idx_ip_IB_LBF] != int(IB_MASK::FLUID))
+                        if (mask[idx_ip_1_IB_LBF] != int(IB_MASK::FLUID))
                         {
-                            TBOX_ERROR("Error: Left-bottom-front cell is not FLUID at index: " << idx_ip_IB_LBF 
-                                << "\n with mask value: " << mask[idx_ip_IB_LBF]
-                                << "\n x_ip: " << x_ip
-                                << "\n y_ip: " << y_ip
+                            TBOX_ERROR("Error: Left-bottom-front cell is not FLUID at index: " << idx_ip_1_IB_LBF 
+                                << "\n with mask value: " << mask[idx_ip_1_IB_LBF]
+                                << "\n x_ip_1: " << x_ip_1
+                                << "\n y_ip_1: " << y_ip_1
                                 << "\n x: " << x[0]
                                 << "\n y: " << x[1]
-                                << "\n d_ip: " << d_ip/Real(dx[0])
+                                << "\n d_ip_1: " << d_ip_1/Real(dx[0])
                                 << "\n d_gc: " << dist[idx_IB]
                                 << "\n norm_0: " << norm_0[idx_IB]
                                 << "\n norm_1: " << norm_1[idx_IB]
                                 << "\n dx: " << Real(dx[0])
                                 << "\n dx_inv: " << dx_inv
-                                << "\n x_ip_LBK: " << x_ip_LBK
-                                << "\n y_ip_LBK: " << y_ip_LBK);
+                                << "\n x_ip_1_LBK: " << x_ip_1_LBK
+                                << "\n y_ip_1_LBK: " << y_ip_1_LBK);
                         }
                         
-                        if (mask[idx_ip_IB_RBF] != int(IB_MASK::FLUID))
+                        if (mask[idx_ip_1_IB_RBF] != int(IB_MASK::FLUID))
                         {
-                            TBOX_ERROR("Error: Right-bottom-front cell is not FLUID at index: " << idx_ip_IB_RBF 
-                                << "\n with mask value: " << mask[idx_ip_IB_RBF]
-                                << "\n x_ip: " << x_ip
-                                << "\n y_ip: " << y_ip
+                            TBOX_ERROR("Error: Right-bottom-front cell is not FLUID at index: " << idx_ip_1_IB_RBF 
+                                << "\n with mask value: " << mask[idx_ip_1_IB_RBF]
+                                << "\n x_ip_1: " << x_ip_1
+                                << "\n y_ip_1: " << y_ip_1
                                 << "\n x: " << x[0]
                                 << "\n y: " << x[1]
-                                << "\n d_ip: " << d_ip/Real(dx[0])
+                                << "\n d_ip_1: " << d_ip_1/Real(dx[0])
                                 << "\n d_gc: " << dist[idx_IB]
                                 << "\n norm_0: " << norm_0[idx_IB]
                                 << "\n norm_1: " << norm_1[idx_IB]
                                 << "\n dx: " << Real(dx[0])
                                 << "\n dx_inv: " << dx_inv
-                                << "\n x_ip_LBK: " << x_ip_LBK
-                                << "\n y_ip_LBK: " << y_ip_LBK);
+                                << "\n x_ip_1_LBK: " << x_ip_1_LBK
+                                << "\n y_ip_1_LBK: " << y_ip_1_LBK);
                         }
                         
-                        if (mask[idx_ip_IB_LTF] != int(IB_MASK::FLUID))
+                        if (mask[idx_ip_1_IB_LTF] != int(IB_MASK::FLUID))
                         {
-                            TBOX_ERROR("Error: Left-top-front cell is not FLUID at index: " << idx_ip_IB_LTF 
-                                << "\n with mask value: " << mask[idx_ip_IB_LTF]
-                                << "\n x_ip: " << x_ip
-                                << "\n y_ip: " << y_ip
+                            TBOX_ERROR("Error: Left-top-front cell is not FLUID at index: " << idx_ip_1_IB_LTF 
+                                << "\n with mask value: " << mask[idx_ip_1_IB_LTF]
+                                << "\n x_ip_1: " << x_ip_1
+                                << "\n y_ip_1: " << y_ip_1
                                 << "\n x: " << x[0]
                                 << "\n y: " << x[1]
-                                << "\n d_ip: " << d_ip/Real(dx[0])
+                                << "\n d_ip_1: " << d_ip_1/Real(dx[0])
                                 << "\n d_gc: " << dist[idx_IB]
                                 << "\n norm_0: " << norm_0[idx_IB]
                                 << "\n norm_1: " << norm_1[idx_IB]
                                 << "\n dx: " << Real(dx[0])
                                 << "\n dx_inv: " << dx_inv
-                                << "\n x_ip_LBK: " << x_ip_LBK
-                                << "\n y_ip_LBK: " << y_ip_LBK);
+                                << "\n x_ip_1_LBK: " << x_ip_1_LBK
+                                << "\n y_ip_1_LBK: " << y_ip_1_LBK);
                         }
                         
-                        if (mask[idx_ip_IB_RTF] != int(IB_MASK::FLUID))
+                        if (mask[idx_ip_1_IB_RTF] != int(IB_MASK::FLUID))
                         {
-                            TBOX_ERROR("Error: Right-top-front cell is not FLUID at index: " << idx_ip_IB_RTF 
-                                << "\n with mask value: " << mask[idx_ip_IB_RTF]
-                                << "\n x_ip: " << x_ip
-                                << "\n y_ip: " << y_ip
+                            TBOX_ERROR("Error: Right-top-front cell is not FLUID at index: " << idx_ip_1_IB_RTF 
+                                << "\n with mask value: " << mask[idx_ip_1_IB_RTF]
+                                << "\n x_ip_1: " << x_ip_1
+                                << "\n y_ip_1: " << y_ip_1
                                 << "\n x: " << x[0]
                                 << "\n y: " << x[1]
-                                << "\n d_ip: " << d_ip/Real(dx[0])
+                                << "\n d_ip_1: " << d_ip_1/Real(dx[0])
                                 << "\n d_gc: " << dist[idx_IB]
                                 << "\n norm_0: " << norm_0[idx_IB]
                                 << "\n norm_1: " << norm_1[idx_IB]
                                 << "\n dx: " << Real(dx[0])
                                 << "\n dx_inv: " << dx_inv
-                                << "\n x_ip_LBK: " << x_ip_LBK
-                                << "\n y_ip_LBK: " << y_ip_LBK);
+                                << "\n x_ip_1_LBK: " << x_ip_1_LBK
+                                << "\n y_ip_1_LBK: " << y_ip_1_LBK);
                         }
-
+                        
                         // Get indices of the cells in interpolation for image point 2.
-                        int idx_ip2_cons_var_LBK, idx_ip2_cons_var_RBK, idx_ip2_cons_var_LTK, idx_ip2_cons_var_RTK,
-                            idx_ip2_cons_var_LBF, idx_ip2_cons_var_RBF, idx_ip2_cons_var_LTF, idx_ip2_cons_var_RTF;
-                        int idx_ip2_IB_LBK, idx_ip2_IB_RBK, idx_ip2_IB_LTK, idx_ip2_IB_RTK,
-                            idx_ip2_IB_LBF, idx_ip2_IB_RBF, idx_ip2_IB_LTF, idx_ip2_IB_RTF;
-                        Real x_ip2_LBK, y_ip2_LBK, z_ip2_LBK;
+                        int idx_ip_2_cons_var_LBK, idx_ip_2_cons_var_RBK, idx_ip_2_cons_var_LTK, idx_ip_2_cons_var_RTK,
+                            idx_ip_2_cons_var_LBF, idx_ip_2_cons_var_RBF, idx_ip_2_cons_var_LTF, idx_ip_2_cons_var_RTF;
+                        int idx_ip_2_IB_LBK, idx_ip_2_IB_RBK, idx_ip_2_IB_LTK, idx_ip_2_IB_RTK,
+                            idx_ip_2_IB_LBF, idx_ip_2_IB_RBF, idx_ip_2_IB_LTF, idx_ip_2_IB_RTF;
+                        Real x_ip_2_LBK, y_ip_2_LBK, z_ip_2_LBK;
                         getTrilinearInterpolationIndices3D(
-                            idx_ip2_cons_var_LBK,
-                            idx_ip2_cons_var_RBK,
-                            idx_ip2_cons_var_LTK,
-                            idx_ip2_cons_var_RTK,
-                            idx_ip2_cons_var_LBF,
-                            idx_ip2_cons_var_RBF,
-                            idx_ip2_cons_var_LTF,
-                            idx_ip2_cons_var_RTF,
-                            idx_ip2_IB_LBK,
-                            idx_ip2_IB_RBK,
-                            idx_ip2_IB_LTK,
-                            idx_ip2_IB_RTK,
-                            idx_ip2_IB_LBF,
-                            idx_ip2_IB_RBF,
-                            idx_ip2_IB_LTF,
-                            idx_ip2_IB_RTF,
-                            x_ip2_LBK,
-                            y_ip2_LBK,
-                            z_ip2_LBK,
-                            x_ip2,
-                            y_ip2,
-                            z_ip2,
+                            idx_ip_2_cons_var_LBK,
+                            idx_ip_2_cons_var_RBK,
+                            idx_ip_2_cons_var_LTK,
+                            idx_ip_2_cons_var_RTK,
+                            idx_ip_2_cons_var_LBF,
+                            idx_ip_2_cons_var_RBF,
+                            idx_ip_2_cons_var_LTF,
+                            idx_ip_2_cons_var_RTF,
+                            idx_ip_2_IB_LBK,
+                            idx_ip_2_IB_RBK,
+                            idx_ip_2_IB_LTK,
+                            idx_ip_2_IB_RTK,
+                            idx_ip_2_IB_LBF,
+                            idx_ip_2_IB_RBF,
+                            idx_ip_2_IB_LTF,
+                            idx_ip_2_IB_RTF,
+                            x_ip_2_LBK,
+                            y_ip_2_LBK,
+                            z_ip_2_LBK,
+                            x_ip_2,
+                            y_ip_2,
+                            z_ip_2,
                             Real(patch_xlo[0]),
                             Real(patch_xlo[1]),
                             Real(patch_xlo[2]),
@@ -1116,111 +1109,111 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                             dx_inv);
                         
                         // Bilinear interpolation to find image point x-component of velocity values.
-                        const Real u_ip_LBK = rho_u[idx_ip_cons_var_LBK]/rho[idx_ip_cons_var_LBK];
-                        const Real u_ip_RBK = rho_u[idx_ip_cons_var_RBK]/rho[idx_ip_cons_var_RBK];
-                        const Real u_ip_LTK = rho_u[idx_ip_cons_var_LTK]/rho[idx_ip_cons_var_LTK];
-                        const Real u_ip_RTK = rho_u[idx_ip_cons_var_RTK]/rho[idx_ip_cons_var_RTK];
-                        const Real u_ip_LBF = rho_u[idx_ip_cons_var_LBF]/rho[idx_ip_cons_var_LBF];
-                        const Real u_ip_RBF = rho_u[idx_ip_cons_var_RBF]/rho[idx_ip_cons_var_RBF];
-                        const Real u_ip_LTF = rho_u[idx_ip_cons_var_LTF]/rho[idx_ip_cons_var_LTF];
-                        const Real u_ip_RTF = rho_u[idx_ip_cons_var_RTF]/rho[idx_ip_cons_var_RTF];
+                        const Real u_ip_1_LBK = rho_u[idx_ip_1_cons_var_LBK]/rho[idx_ip_1_cons_var_LBK];
+                        const Real u_ip_1_RBK = rho_u[idx_ip_1_cons_var_RBK]/rho[idx_ip_1_cons_var_RBK];
+                        const Real u_ip_1_LTK = rho_u[idx_ip_1_cons_var_LTK]/rho[idx_ip_1_cons_var_LTK];
+                        const Real u_ip_1_RTK = rho_u[idx_ip_1_cons_var_RTK]/rho[idx_ip_1_cons_var_RTK];
+                        const Real u_ip_1_LBF = rho_u[idx_ip_1_cons_var_LBF]/rho[idx_ip_1_cons_var_LBF];
+                        const Real u_ip_1_RBF = rho_u[idx_ip_1_cons_var_RBF]/rho[idx_ip_1_cons_var_RBF];
+                        const Real u_ip_1_LTF = rho_u[idx_ip_1_cons_var_LTF]/rho[idx_ip_1_cons_var_LTF];
+                        const Real u_ip_1_RTF = rho_u[idx_ip_1_cons_var_RTF]/rho[idx_ip_1_cons_var_RTF];
                         
-                        const Real u_ip2_LBK = rho_u[idx_ip2_cons_var_LBK]/rho[idx_ip2_cons_var_LBK];
-                        const Real u_ip2_RBK = rho_u[idx_ip2_cons_var_RBK]/rho[idx_ip2_cons_var_RBK];
-                        const Real u_ip2_LTK = rho_u[idx_ip2_cons_var_LTK]/rho[idx_ip2_cons_var_LTK];
-                        const Real u_ip2_RTK = rho_u[idx_ip2_cons_var_RTK]/rho[idx_ip2_cons_var_RTK];
-                        const Real u_ip2_LBF = rho_u[idx_ip2_cons_var_LBF]/rho[idx_ip2_cons_var_LBF];
-                        const Real u_ip2_RBF = rho_u[idx_ip2_cons_var_RBF]/rho[idx_ip2_cons_var_RBF];
-                        const Real u_ip2_LTF = rho_u[idx_ip2_cons_var_LTF]/rho[idx_ip2_cons_var_LTF];
-                        const Real u_ip2_RTF = rho_u[idx_ip2_cons_var_RTF]/rho[idx_ip2_cons_var_RTF];
+                        const Real u_ip_2_LBK = rho_u[idx_ip_2_cons_var_LBK]/rho[idx_ip_2_cons_var_LBK];
+                        const Real u_ip_2_RBK = rho_u[idx_ip_2_cons_var_RBK]/rho[idx_ip_2_cons_var_RBK];
+                        const Real u_ip_2_LTK = rho_u[idx_ip_2_cons_var_LTK]/rho[idx_ip_2_cons_var_LTK];
+                        const Real u_ip_2_RTK = rho_u[idx_ip_2_cons_var_RTK]/rho[idx_ip_2_cons_var_RTK];
+                        const Real u_ip_2_LBF = rho_u[idx_ip_2_cons_var_LBF]/rho[idx_ip_2_cons_var_LBF];
+                        const Real u_ip_2_RBF = rho_u[idx_ip_2_cons_var_RBF]/rho[idx_ip_2_cons_var_RBF];
+                        const Real u_ip_2_LTF = rho_u[idx_ip_2_cons_var_LTF]/rho[idx_ip_2_cons_var_LTF];
+                        const Real u_ip_2_RTF = rho_u[idx_ip_2_cons_var_RTF]/rho[idx_ip_2_cons_var_RTF];
                         
-                        const Real u_ip = trilinearInterpolate3D(
-                            u_ip_LBK,
-                            u_ip_RBK,
-                            u_ip_LTK,
-                            u_ip_RTK,
-                            u_ip_LBF,
-                            u_ip_RBF,
-                            u_ip_LTF,
-                            u_ip_RTF,
-                            x_ip,
-                            y_ip,
-                            z_ip,
-                            x_ip_LBK,
-                            y_ip_LBK,
-                            z_ip_LBK,
+                        const Real u_ip_1 = trilinearInterpolate3D(
+                            u_ip_1_LBK,
+                            u_ip_1_RBK,
+                            u_ip_1_LTK,
+                            u_ip_1_RTK,
+                            u_ip_1_LBF,
+                            u_ip_1_RBF,
+                            u_ip_1_LTF,
+                            u_ip_1_RTF,
+                            x_ip_1,
+                            y_ip_1,
+                            z_ip_1,
+                            x_ip_1_LBK,
+                            y_ip_1_LBK,
+                            z_ip_1_LBK,
                             dx_inv);
                         
                         // Bilinear interpolation to find image point y-component of velocity values.
-                        const Real v_ip_LBK = rho_v[idx_ip_cons_var_LBK]/rho[idx_ip_cons_var_LBK];
-                        const Real v_ip_RBK = rho_v[idx_ip_cons_var_RBK]/rho[idx_ip_cons_var_RBK];
-                        const Real v_ip_LTK = rho_v[idx_ip_cons_var_LTK]/rho[idx_ip_cons_var_LTK];
-                        const Real v_ip_RTK = rho_v[idx_ip_cons_var_RTK]/rho[idx_ip_cons_var_RTK];
-                        const Real v_ip_LBF = rho_v[idx_ip_cons_var_LBF]/rho[idx_ip_cons_var_LBF];
-                        const Real v_ip_RBF = rho_v[idx_ip_cons_var_RBF]/rho[idx_ip_cons_var_RBF];
-                        const Real v_ip_LTF = rho_v[idx_ip_cons_var_LTF]/rho[idx_ip_cons_var_LTF];
-                        const Real v_ip_RTF = rho_v[idx_ip_cons_var_RTF]/rho[idx_ip_cons_var_RTF];
+                        const Real v_ip_1_LBK = rho_v[idx_ip_1_cons_var_LBK]/rho[idx_ip_1_cons_var_LBK];
+                        const Real v_ip_1_RBK = rho_v[idx_ip_1_cons_var_RBK]/rho[idx_ip_1_cons_var_RBK];
+                        const Real v_ip_1_LTK = rho_v[idx_ip_1_cons_var_LTK]/rho[idx_ip_1_cons_var_LTK];
+                        const Real v_ip_1_RTK = rho_v[idx_ip_1_cons_var_RTK]/rho[idx_ip_1_cons_var_RTK];
+                        const Real v_ip_1_LBF = rho_v[idx_ip_1_cons_var_LBF]/rho[idx_ip_1_cons_var_LBF];
+                        const Real v_ip_1_RBF = rho_v[idx_ip_1_cons_var_RBF]/rho[idx_ip_1_cons_var_RBF];
+                        const Real v_ip_1_LTF = rho_v[idx_ip_1_cons_var_LTF]/rho[idx_ip_1_cons_var_LTF];
+                        const Real v_ip_1_RTF = rho_v[idx_ip_1_cons_var_RTF]/rho[idx_ip_1_cons_var_RTF];
                         
-                        const Real v_ip2_LBK = rho_v[idx_ip2_cons_var_LBK]/rho[idx_ip2_cons_var_LBK];
-                        const Real v_ip2_RBK = rho_v[idx_ip2_cons_var_RBK]/rho[idx_ip2_cons_var_RBK];
-                        const Real v_ip2_LTK = rho_v[idx_ip2_cons_var_LTK]/rho[idx_ip2_cons_var_LTK];
-                        const Real v_ip2_RTK = rho_v[idx_ip2_cons_var_RTK]/rho[idx_ip2_cons_var_RTK];
-                        const Real v_ip2_LBF = rho_v[idx_ip2_cons_var_LBF]/rho[idx_ip2_cons_var_LBF];
-                        const Real v_ip2_RBF = rho_v[idx_ip2_cons_var_RBF]/rho[idx_ip2_cons_var_RBF];
-                        const Real v_ip2_LTF = rho_v[idx_ip2_cons_var_LTF]/rho[idx_ip2_cons_var_LTF];
-                        const Real v_ip2_RTF = rho_v[idx_ip2_cons_var_RTF]/rho[idx_ip2_cons_var_RTF];
+                        const Real v_ip_2_LBK = rho_v[idx_ip_2_cons_var_LBK]/rho[idx_ip_2_cons_var_LBK];
+                        const Real v_ip_2_RBK = rho_v[idx_ip_2_cons_var_RBK]/rho[idx_ip_2_cons_var_RBK];
+                        const Real v_ip_2_LTK = rho_v[idx_ip_2_cons_var_LTK]/rho[idx_ip_2_cons_var_LTK];
+                        const Real v_ip_2_RTK = rho_v[idx_ip_2_cons_var_RTK]/rho[idx_ip_2_cons_var_RTK];
+                        const Real v_ip_2_LBF = rho_v[idx_ip_2_cons_var_LBF]/rho[idx_ip_2_cons_var_LBF];
+                        const Real v_ip_2_RBF = rho_v[idx_ip_2_cons_var_RBF]/rho[idx_ip_2_cons_var_RBF];
+                        const Real v_ip_2_LTF = rho_v[idx_ip_2_cons_var_LTF]/rho[idx_ip_2_cons_var_LTF];
+                        const Real v_ip_2_RTF = rho_v[idx_ip_2_cons_var_RTF]/rho[idx_ip_2_cons_var_RTF];
                         
-                        const Real v_ip = trilinearInterpolate3D(
-                            v_ip_LBK,
-                            v_ip_RBK,
-                            v_ip_LTK,
-                            v_ip_RTK,
-                            v_ip_LBF,
-                            v_ip_RBF,
-                            v_ip_LTF,
-                            v_ip_RTF,
-                            x_ip,
-                            y_ip,
-                            z_ip,
-                            x_ip_LBK,
-                            y_ip_LBK,
-                            z_ip_LBK,
+                        const Real v_ip_1 = trilinearInterpolate3D(
+                            v_ip_1_LBK,
+                            v_ip_1_RBK,
+                            v_ip_1_LTK,
+                            v_ip_1_RTK,
+                            v_ip_1_LBF,
+                            v_ip_1_RBF,
+                            v_ip_1_LTF,
+                            v_ip_1_RTF,
+                            x_ip_1,
+                            y_ip_1,
+                            z_ip_1,
+                            x_ip_1_LBK,
+                            y_ip_1_LBK,
+                            z_ip_1_LBK,
                             dx_inv);
                         
                         // Bilinear interpolation to find image point z-component of velocity values.
-                        const Real w_ip_LBK = rho_w[idx_ip_cons_var_LBK]/rho[idx_ip_cons_var_LBK];
-                        const Real w_ip_RBK = rho_w[idx_ip_cons_var_RBK]/rho[idx_ip_cons_var_RBK];
-                        const Real w_ip_LTK = rho_w[idx_ip_cons_var_LTK]/rho[idx_ip_cons_var_LTK];
-                        const Real w_ip_RTK = rho_w[idx_ip_cons_var_RTK]/rho[idx_ip_cons_var_RTK];
-                        const Real w_ip_LBF = rho_w[idx_ip_cons_var_LBF]/rho[idx_ip_cons_var_LBF];
-                        const Real w_ip_RBF = rho_w[idx_ip_cons_var_RBF]/rho[idx_ip_cons_var_RBF];
-                        const Real w_ip_LTF = rho_w[idx_ip_cons_var_LTF]/rho[idx_ip_cons_var_LTF];
-                        const Real w_ip_RTF = rho_w[idx_ip_cons_var_RTF]/rho[idx_ip_cons_var_RTF];
+                        const Real w_ip_1_LBK = rho_w[idx_ip_1_cons_var_LBK]/rho[idx_ip_1_cons_var_LBK];
+                        const Real w_ip_1_RBK = rho_w[idx_ip_1_cons_var_RBK]/rho[idx_ip_1_cons_var_RBK];
+                        const Real w_ip_1_LTK = rho_w[idx_ip_1_cons_var_LTK]/rho[idx_ip_1_cons_var_LTK];
+                        const Real w_ip_1_RTK = rho_w[idx_ip_1_cons_var_RTK]/rho[idx_ip_1_cons_var_RTK];
+                        const Real w_ip_1_LBF = rho_w[idx_ip_1_cons_var_LBF]/rho[idx_ip_1_cons_var_LBF];
+                        const Real w_ip_1_RBF = rho_w[idx_ip_1_cons_var_RBF]/rho[idx_ip_1_cons_var_RBF];
+                        const Real w_ip_1_LTF = rho_w[idx_ip_1_cons_var_LTF]/rho[idx_ip_1_cons_var_LTF];
+                        const Real w_ip_1_RTF = rho_w[idx_ip_1_cons_var_RTF]/rho[idx_ip_1_cons_var_RTF];
                         
-                        const Real w_ip2_LBK = rho_w[idx_ip2_cons_var_LBK]/rho[idx_ip2_cons_var_LBK];
-                        const Real w_ip2_RBK = rho_w[idx_ip2_cons_var_RBK]/rho[idx_ip2_cons_var_RBK];
-                        const Real w_ip2_LTK = rho_w[idx_ip2_cons_var_LTK]/rho[idx_ip2_cons_var_LTK];
-                        const Real w_ip2_RTK = rho_w[idx_ip2_cons_var_RTK]/rho[idx_ip2_cons_var_RTK];
-                        const Real w_ip2_LBF = rho_w[idx_ip2_cons_var_LBF]/rho[idx_ip2_cons_var_LBF];
-                        const Real w_ip2_RBF = rho_w[idx_ip2_cons_var_RBF]/rho[idx_ip2_cons_var_RBF];
-                        const Real w_ip2_LTF = rho_w[idx_ip2_cons_var_LTF]/rho[idx_ip2_cons_var_LTF];
-                        const Real w_ip2_RTF = rho_w[idx_ip2_cons_var_RTF]/rho[idx_ip2_cons_var_RTF];
+                        const Real w_ip_2_LBK = rho_w[idx_ip_2_cons_var_LBK]/rho[idx_ip_2_cons_var_LBK];
+                        const Real w_ip_2_RBK = rho_w[idx_ip_2_cons_var_RBK]/rho[idx_ip_2_cons_var_RBK];
+                        const Real w_ip_2_LTK = rho_w[idx_ip_2_cons_var_LTK]/rho[idx_ip_2_cons_var_LTK];
+                        const Real w_ip_2_RTK = rho_w[idx_ip_2_cons_var_RTK]/rho[idx_ip_2_cons_var_RTK];
+                        const Real w_ip_2_LBF = rho_w[idx_ip_2_cons_var_LBF]/rho[idx_ip_2_cons_var_LBF];
+                        const Real w_ip_2_RBF = rho_w[idx_ip_2_cons_var_RBF]/rho[idx_ip_2_cons_var_RBF];
+                        const Real w_ip_2_LTF = rho_w[idx_ip_2_cons_var_LTF]/rho[idx_ip_2_cons_var_LTF];
+                        const Real w_ip_2_RTF = rho_w[idx_ip_2_cons_var_RTF]/rho[idx_ip_2_cons_var_RTF];
                         
-                        const Real w_ip = trilinearInterpolate3D(
-                            w_ip_LBK,
-                            w_ip_RBK,
-                            w_ip_LTK,
-                            w_ip_RTK,
-                            w_ip_LBF,
-                            w_ip_RBF,
-                            w_ip_LTF,
-                            w_ip_RTF,
-                            x_ip,
-                            y_ip,
-                            z_ip,
-                            x_ip_LBK,
-                            y_ip_LBK,
-                            z_ip_LBK,
+                        const Real w_ip_1 = trilinearInterpolate3D(
+                            w_ip_1_LBK,
+                            w_ip_1_RBK,
+                            w_ip_1_LTK,
+                            w_ip_1_RTK,
+                            w_ip_1_LBF,
+                            w_ip_1_RBF,
+                            w_ip_1_LTF,
+                            w_ip_1_RTF,
+                            x_ip_1,
+                            y_ip_1,
+                            z_ip_1,
+                            x_ip_1_LBK,
+                            y_ip_1_LBK,
+                            z_ip_1_LBK,
                             dx_inv);
                         
                         // Compute velocity components at the ghost cell depending on the type of immersed boundary condition.
@@ -1230,69 +1223,69 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         
                         if (d_bc_type_velocity == VELOCITY_IBC::SLIP)
                         {
-                            const Real u_ip2 = trilinearInterpolate3D(
-                                u_ip2_LBK,
-                                u_ip2_RBK,
-                                u_ip2_LTK,
-                                u_ip2_RTK,
-                                u_ip2_LBF,
-                                u_ip2_RBF,
-                                u_ip2_LTF,
-                                u_ip2_RTF,
-                                x_ip2,
-                                y_ip2,
-                                z_ip2,
-                                x_ip2_LBK,
-                                y_ip2_LBK,
-                                z_ip2_LBK,
+                            const Real u_ip_2 = trilinearInterpolate3D(
+                                u_ip_2_LBK,
+                                u_ip_2_RBK,
+                                u_ip_2_LTK,
+                                u_ip_2_RTK,
+                                u_ip_2_LBF,
+                                u_ip_2_RBF,
+                                u_ip_2_LTF,
+                                u_ip_2_RTF,
+                                x_ip_2,
+                                y_ip_2,
+                                z_ip_2,
+                                x_ip_2_LBK,
+                                y_ip_2_LBK,
+                                z_ip_2_LBK,
                                 dx_inv);
                             
-                            const Real v_ip2 = trilinearInterpolate3D(
-                                v_ip2_LBK,
-                                v_ip2_RBK,
-                                v_ip2_LTK,
-                                v_ip2_RTK,
-                                v_ip2_LBF,
-                                v_ip2_RBF,
-                                v_ip2_LTF,
-                                v_ip2_RTF,
-                                x_ip2,
-                                y_ip2,
-                                z_ip2,
-                                x_ip2_LBK,
-                                y_ip2_LBK,
-                                z_ip2_LBK,
+                            const Real v_ip_2 = trilinearInterpolate3D(
+                                v_ip_2_LBK,
+                                v_ip_2_RBK,
+                                v_ip_2_LTK,
+                                v_ip_2_RTK,
+                                v_ip_2_LBF,
+                                v_ip_2_RBF,
+                                v_ip_2_LTF,
+                                v_ip_2_RTF,
+                                x_ip_2,
+                                y_ip_2,
+                                z_ip_2,
+                                x_ip_2_LBK,
+                                y_ip_2_LBK,
+                                z_ip_2_LBK,
                                 dx_inv);
                             
-                            const Real w_ip2 = trilinearInterpolate3D(
-                                w_ip2_LBK,
-                                w_ip2_RBK,
-                                w_ip2_LTK,
-                                w_ip2_RTK,
-                                w_ip2_LBF,
-                                w_ip2_RBF,
-                                w_ip2_LTF,
-                                w_ip2_RTF,
-                                x_ip2,
-                                y_ip2,
-                                z_ip2,
-                                x_ip2_LBK,
-                                y_ip2_LBK,
-                                z_ip2_LBK,
+                            const Real w_ip_2 = trilinearInterpolate3D(
+                                w_ip_2_LBK,
+                                w_ip_2_RBK,
+                                w_ip_2_LTK,
+                                w_ip_2_RTK,
+                                w_ip_2_LBF,
+                                w_ip_2_RBF,
+                                w_ip_2_LTF,
+                                w_ip_2_RTF,
+                                x_ip_2,
+                                y_ip_2,
+                                z_ip_2,
+                                x_ip_2_LBK,
+                                y_ip_2_LBK,
+                                z_ip_2_LBK,
                                 dx_inv);
                             
-                            // Given d_ip and d_ip2, interpolate to the velocity components (u_mirror and v_mirror)
+                            // Given d_ip_1 and d_ip_2, interpolate to the velocity components (u_mirror and v_mirror)
                             // at the mirror image point at dist[idx_IB].
-                            const Real diff_ip2_ip = d_ip2 - d_ip;
-                            const Real diff_mirror_ip  = dist[idx_IB] - d_ip;
-                            const Real diff_ip2_mirror = d_ip2 - dist[idx_IB];
+                            const Real diff_ip_2_ip_1 = d_ip_2 - d_ip_1;
+                            const Real diff_mirror_ip_1  = dist[idx_IB] - d_ip_1;
+                            const Real diff_ip_2_mirror = d_ip_2 - dist[idx_IB];
                             
                             // x-component of velocity at the mirror image point.
-                            const Real u_mirror = (diff_ip2_mirror*u_ip + diff_mirror_ip*u_ip2)/diff_ip2_ip;
+                            const Real u_mirror = (diff_ip_2_mirror*u_ip_1 + diff_mirror_ip_1*u_ip_2)/diff_ip_2_ip_1;
                             // y-component of velocity at the mirror image point.
-                            const Real v_mirror = (diff_ip2_mirror*v_ip + diff_mirror_ip*v_ip2)/diff_ip2_ip;
+                            const Real v_mirror = (diff_ip_2_mirror*v_ip_1 + diff_mirror_ip_1*v_ip_2)/diff_ip_2_ip_1;
                             // z-component of velocity at the mirror image point.
-                            const Real w_mirror = (diff_ip2_mirror*w_ip + diff_mirror_ip*w_ip2)/diff_ip2_ip;
+                            const Real w_mirror = (diff_ip_2_mirror*w_ip_1 + diff_mirror_ip_1*w_ip_2)/diff_ip_2_ip_1;
                             
                             // Velocity component normal to the boundary at the mirror image point.
                             const Real vel_mirror_n = dotProduct3D(u_mirror, v_mirror, w_mirror, norm_0[idx_IB], norm_1[idx_IB], norm_2[idx_IB]);
@@ -1306,20 +1299,20 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         {
                             u_gc = getGhostValueDirichletBC(
                                 Real(0),
-                                u_ip,
-                                d_ip,
+                                u_ip_1,
+                                d_ip_1,
                                 dist[idx_IB]);
                             
                             v_gc = getGhostValueDirichletBC(
                                 Real(0),
-                                v_ip,
-                                d_ip,
+                                v_ip_1,
+                                d_ip_1,
                                 dist[idx_IB]);
                             
                             w_gc = getGhostValueDirichletBC(
                                 Real(0),
-                                w_ip,
-                                d_ip,
+                                w_ip_1,
+                                d_ip_1,
                                 dist[idx_IB]);
                             
                             if (fabs(u_gc) <= HAMERS_REAL_EPSILON)
@@ -1337,166 +1330,167 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         }
                         
                         // Bilinear interpolation to find specific internal energy for image point 1.
-                        const Real epsilon_ip_LBK = E[idx_ip_cons_var_LBK]/rho[idx_ip_cons_var_LBK] - half*(u_ip_LBK*u_ip_LBK + v_ip_LBK*v_ip_LBK + w_ip_LBK*w_ip_LBK);
-                        const Real epsilon_ip_RBK = E[idx_ip_cons_var_RBK]/rho[idx_ip_cons_var_RBK] - half*(u_ip_RBK*u_ip_RBK + v_ip_RBK*v_ip_RBK + w_ip_RBK*w_ip_RBK);
-                        const Real epsilon_ip_LTK = E[idx_ip_cons_var_LTK]/rho[idx_ip_cons_var_LTK] - half*(u_ip_LTK*u_ip_LTK + v_ip_LTK*v_ip_LTK + w_ip_LTK*w_ip_LTK);
-                        const Real epsilon_ip_RTK = E[idx_ip_cons_var_RTK]/rho[idx_ip_cons_var_RTK] - half*(u_ip_RTK*u_ip_RTK + v_ip_RTK*v_ip_RTK + w_ip_RTK*w_ip_RTK);
-                        const Real epsilon_ip_LBF = E[idx_ip_cons_var_LBF]/rho[idx_ip_cons_var_LBF] - half*(u_ip_LBF*u_ip_LBF + v_ip_LBF*v_ip_LBF + w_ip_LBF*w_ip_LBF);
-                        const Real epsilon_ip_RBF = E[idx_ip_cons_var_RBF]/rho[idx_ip_cons_var_RBF] - half*(u_ip_RBF*u_ip_RBF + v_ip_RBF*v_ip_RBF + w_ip_RBF*w_ip_RBF);
-                        const Real epsilon_ip_LTF = E[idx_ip_cons_var_LTF]/rho[idx_ip_cons_var_LTF] - half*(u_ip_LTF*u_ip_LTF + v_ip_LTF*v_ip_LTF + w_ip_LTF*w_ip_LTF);
-                        const Real epsilon_ip_RTF = E[idx_ip_cons_var_RTF]/rho[idx_ip_cons_var_RTF] - half*(u_ip_RTF*u_ip_RTF + v_ip_RTF*v_ip_RTF + w_ip_RTF*w_ip_RTF);
+                        const Real epsilon_ip_1_LBK = E[idx_ip_1_cons_var_LBK]/rho[idx_ip_1_cons_var_LBK] - half*(u_ip_1_LBK*u_ip_1_LBK + v_ip_1_LBK*v_ip_1_LBK + w_ip_1_LBK*w_ip_1_LBK);
+                        const Real epsilon_ip_1_RBK = E[idx_ip_1_cons_var_RBK]/rho[idx_ip_1_cons_var_RBK] - half*(u_ip_1_RBK*u_ip_1_RBK + v_ip_1_RBK*v_ip_1_RBK + w_ip_1_RBK*w_ip_1_RBK);
+                        const Real epsilon_ip_1_LTK = E[idx_ip_1_cons_var_LTK]/rho[idx_ip_1_cons_var_LTK] - half*(u_ip_1_LTK*u_ip_1_LTK + v_ip_1_LTK*v_ip_1_LTK + w_ip_1_LTK*w_ip_1_LTK);
+                        const Real epsilon_ip_1_RTK = E[idx_ip_1_cons_var_RTK]/rho[idx_ip_1_cons_var_RTK] - half*(u_ip_1_RTK*u_ip_1_RTK + v_ip_1_RTK*v_ip_1_RTK + w_ip_1_RTK*w_ip_1_RTK);
+                        const Real epsilon_ip_1_LBF = E[idx_ip_1_cons_var_LBF]/rho[idx_ip_1_cons_var_LBF] - half*(u_ip_1_LBF*u_ip_1_LBF + v_ip_1_LBF*v_ip_1_LBF + w_ip_1_LBF*w_ip_1_LBF);
+                        const Real epsilon_ip_1_RBF = E[idx_ip_1_cons_var_RBF]/rho[idx_ip_1_cons_var_RBF] - half*(u_ip_1_RBF*u_ip_1_RBF + v_ip_1_RBF*v_ip_1_RBF + w_ip_1_RBF*w_ip_1_RBF);
+                        const Real epsilon_ip_1_LTF = E[idx_ip_1_cons_var_LTF]/rho[idx_ip_1_cons_var_LTF] - half*(u_ip_1_LTF*u_ip_1_LTF + v_ip_1_LTF*v_ip_1_LTF + w_ip_1_LTF*w_ip_1_LTF);
+                        const Real epsilon_ip_1_RTF = E[idx_ip_1_cons_var_RTF]/rho[idx_ip_1_cons_var_RTF] - half*(u_ip_1_RTF*u_ip_1_RTF + v_ip_1_RTF*v_ip_1_RTF + w_ip_1_RTF*w_ip_1_RTF);
                         
                         // Bilinear interpolation to find specific internal energy for image point 2.
-                        const Real epsilon_ip2_LBK = E[idx_ip2_cons_var_LBK]/rho[idx_ip2_cons_var_LBK] - half*(u_ip2_LBK*u_ip2_LBK + v_ip2_LBK*v_ip2_LBK + w_ip2_LBK*w_ip2_LBK);
-                        const Real epsilon_ip2_RBK = E[idx_ip2_cons_var_RBK]/rho[idx_ip2_cons_var_RBK] - half*(u_ip2_RBK*u_ip2_RBK + v_ip2_RBK*v_ip2_RBK + w_ip2_RBK*w_ip2_RBK);
-                        const Real epsilon_ip2_LTK = E[idx_ip2_cons_var_LTK]/rho[idx_ip2_cons_var_LTK] - half*(u_ip2_LTK*u_ip2_LTK + v_ip2_LTK*v_ip2_LTK + w_ip2_LTK*w_ip2_LTK);
-                        const Real epsilon_ip2_RTK = E[idx_ip2_cons_var_RTK]/rho[idx_ip2_cons_var_RTK] - half*(u_ip2_RTK*u_ip2_RTK + v_ip2_RTK*v_ip2_RTK + w_ip2_RTK*w_ip2_RTK);
-                        const Real epsilon_ip2_LBF = E[idx_ip2_cons_var_LBF]/rho[idx_ip2_cons_var_LBF] - half*(u_ip2_LBF*u_ip2_LBF + v_ip2_LBF*v_ip2_LBF + w_ip2_LBF*w_ip2_LBF);
-                        const Real epsilon_ip2_RBF = E[idx_ip2_cons_var_RBF]/rho[idx_ip2_cons_var_RBF] - half*(u_ip2_RBF*u_ip2_RBF + v_ip2_RBF*v_ip2_RBF + w_ip2_RBF*w_ip2_RBF);
-                        const Real epsilon_ip2_LTF = E[idx_ip2_cons_var_LTF]/rho[idx_ip2_cons_var_LTF] - half*(u_ip2_LTF*u_ip2_LTF + v_ip2_LTF*v_ip2_LTF + w_ip2_LTF*w_ip2_LTF);
-                        const Real epsilon_ip2_RTF = E[idx_ip2_cons_var_RTF]/rho[idx_ip2_cons_var_RTF] - half*(u_ip2_RTF*u_ip2_RTF + v_ip2_RTF*v_ip2_RTF + w_ip2_RTF*w_ip2_RTF);
+                        const Real epsilon_ip_2_LBK = E[idx_ip_2_cons_var_LBK]/rho[idx_ip_2_cons_var_LBK] - half*(u_ip_2_LBK*u_ip_2_LBK + v_ip_2_LBK*v_ip_2_LBK + w_ip_2_LBK*w_ip_2_LBK);
+                        const Real epsilon_ip_2_RBK = E[idx_ip_2_cons_var_RBK]/rho[idx_ip_2_cons_var_RBK] - half*(u_ip_2_RBK*u_ip_2_RBK + v_ip_2_RBK*v_ip_2_RBK + w_ip_2_RBK*w_ip_2_RBK);
+                        const Real epsilon_ip_2_LTK = E[idx_ip_2_cons_var_LTK]/rho[idx_ip_2_cons_var_LTK] - half*(u_ip_2_LTK*u_ip_2_LTK + v_ip_2_LTK*v_ip_2_LTK + w_ip_2_LTK*w_ip_2_LTK);
+                        const Real epsilon_ip_2_RTK = E[idx_ip_2_cons_var_RTK]/rho[idx_ip_2_cons_var_RTK] - half*(u_ip_2_RTK*u_ip_2_RTK + v_ip_2_RTK*v_ip_2_RTK + w_ip_2_RTK*w_ip_2_RTK);
+                        const Real epsilon_ip_2_LBF = E[idx_ip_2_cons_var_LBF]/rho[idx_ip_2_cons_var_LBF] - half*(u_ip_2_LBF*u_ip_2_LBF + v_ip_2_LBF*v_ip_2_LBF + w_ip_2_LBF*w_ip_2_LBF);
+                        const Real epsilon_ip_2_RBF = E[idx_ip_2_cons_var_RBF]/rho[idx_ip_2_cons_var_RBF] - half*(u_ip_2_RBF*u_ip_2_RBF + v_ip_2_RBF*v_ip_2_RBF + w_ip_2_RBF*w_ip_2_RBF);
+                        const Real epsilon_ip_2_LTF = E[idx_ip_2_cons_var_LTF]/rho[idx_ip_2_cons_var_LTF] - half*(u_ip_2_LTF*u_ip_2_LTF + v_ip_2_LTF*v_ip_2_LTF + w_ip_2_LTF*w_ip_2_LTF);
+                        const Real epsilon_ip_2_RTF = E[idx_ip_2_cons_var_RTF]/rho[idx_ip_2_cons_var_RTF] - half*(u_ip_2_RTF*u_ip_2_RTF + v_ip_2_RTF*v_ip_2_RTF + w_ip_2_RTF*w_ip_2_RTF);
                         
                         // Compute the pressure values in the stencils for image point 1.
-                        const Real p_ip_LBK = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_cons_var_LBK], &epsilon_ip_LBK, thermo_properties_ptr);
-                        const Real p_ip_RBK = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_cons_var_RBK], &epsilon_ip_RBK, thermo_properties_ptr);
-                        const Real p_ip_LTK = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_cons_var_LTK], &epsilon_ip_LTK, thermo_properties_ptr);
-                        const Real p_ip_RTK = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_cons_var_RTK], &epsilon_ip_RTK, thermo_properties_ptr);
-                        const Real p_ip_LBF = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_cons_var_LBF], &epsilon_ip_LBF, thermo_properties_ptr);
-                        const Real p_ip_RBF = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_cons_var_RBF], &epsilon_ip_RBF, thermo_properties_ptr);
-                        const Real p_ip_LTF = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_cons_var_LTF], &epsilon_ip_LTF, thermo_properties_ptr);
-                        const Real p_ip_RTF = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_cons_var_RTF], &epsilon_ip_RTF, thermo_properties_ptr);
+                        const Real p_ip_1_LBK = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_1_cons_var_LBK], &epsilon_ip_1_LBK, thermo_properties_ptr);
+                        const Real p_ip_1_RBK = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_1_cons_var_RBK], &epsilon_ip_1_RBK, thermo_properties_ptr);
+                        const Real p_ip_1_LTK = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_1_cons_var_LTK], &epsilon_ip_1_LTK, thermo_properties_ptr);
+                        const Real p_ip_1_RTK = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_1_cons_var_RTK], &epsilon_ip_1_RTK, thermo_properties_ptr);
+                        const Real p_ip_1_LBF = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_1_cons_var_LBF], &epsilon_ip_1_LBF, thermo_properties_ptr);
+                        const Real p_ip_1_RBF = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_1_cons_var_RBF], &epsilon_ip_1_RBF, thermo_properties_ptr);
+                        const Real p_ip_1_LTF = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_1_cons_var_LTF], &epsilon_ip_1_LTF, thermo_properties_ptr);
+                        const Real p_ip_1_RTF = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_1_cons_var_RTF], &epsilon_ip_1_RTF, thermo_properties_ptr);
                         
                         // Compute the pressure values in the stencils for image point 2.
-                        const Real p_ip2_LBK = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip2_cons_var_LBK], &epsilon_ip2_LBK, thermo_properties_ptr);
-                        const Real p_ip2_RBK = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip2_cons_var_RBK], &epsilon_ip2_RBK, thermo_properties_ptr);
-                        const Real p_ip2_LTK = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip2_cons_var_LTK], &epsilon_ip2_LTK, thermo_properties_ptr);
-                        const Real p_ip2_RTK = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip2_cons_var_RTK], &epsilon_ip2_RTK, thermo_properties_ptr);
-                        const Real p_ip2_LBF = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip2_cons_var_LBF], &epsilon_ip2_LBF, thermo_properties_ptr);
-                        const Real p_ip2_RBF = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip2_cons_var_RBF], &epsilon_ip2_RBF, thermo_properties_ptr);
-                        const Real p_ip2_LTF = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip2_cons_var_LTF], &epsilon_ip2_LTF, thermo_properties_ptr);
-                        const Real p_ip2_RTF = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip2_cons_var_RTF], &epsilon_ip2_RTF, thermo_properties_ptr);
+                        const Real p_ip_2_LBK = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_2_cons_var_LBK], &epsilon_ip_2_LBK, thermo_properties_ptr);
+                        const Real p_ip_2_RBK = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_2_cons_var_RBK], &epsilon_ip_2_RBK, thermo_properties_ptr);
+                        const Real p_ip_2_LTK = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_2_cons_var_LTK], &epsilon_ip_2_LTK, thermo_properties_ptr);
+                        const Real p_ip_2_RTK = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_2_cons_var_RTK], &epsilon_ip_2_RTK, thermo_properties_ptr);
+                        const Real p_ip_2_LBF = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_2_cons_var_LBF], &epsilon_ip_2_LBF, thermo_properties_ptr);
+                        const Real p_ip_2_RBF = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_2_cons_var_RBF], &epsilon_ip_2_RBF, thermo_properties_ptr);
+                        const Real p_ip_2_LTF = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_2_cons_var_LTF], &epsilon_ip_2_LTF, thermo_properties_ptr);
+                        const Real p_ip_2_RTF = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(&rho[idx_ip_2_cons_var_RTF], &epsilon_ip_2_RTF, thermo_properties_ptr);
                         
                         // Compute the temperature values in the stencils for image point 1.
-                        const Real T_ip_LBK = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_cons_var_LBK], &p_ip_LBK, thermo_properties_ptr);
-                        const Real T_ip_RBK = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_cons_var_RBK], &p_ip_RBK, thermo_properties_ptr);
-                        const Real T_ip_LTK = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_cons_var_LTK], &p_ip_LTK, thermo_properties_ptr);
-                        const Real T_ip_RTK = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_cons_var_RTK], &p_ip_RTK, thermo_properties_ptr);
-                        const Real T_ip_LBF = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_cons_var_LBF], &p_ip_LBF, thermo_properties_ptr);
-                        const Real T_ip_RBF = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_cons_var_RBF], &p_ip_RBF, thermo_properties_ptr);
-                        const Real T_ip_LTF = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_cons_var_LTF], &p_ip_LTF, thermo_properties_ptr);
-                        const Real T_ip_RTF = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_cons_var_RTF], &p_ip_RTF, thermo_properties_ptr);
+                        const Real T_ip_1_LBK = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_1_cons_var_LBK], &p_ip_1_LBK, thermo_properties_ptr);
+                        const Real T_ip_1_RBK = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_1_cons_var_RBK], &p_ip_1_RBK, thermo_properties_ptr);
+                        const Real T_ip_1_LTK = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_1_cons_var_LTK], &p_ip_1_LTK, thermo_properties_ptr);
+                        const Real T_ip_1_RTK = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_1_cons_var_RTK], &p_ip_1_RTK, thermo_properties_ptr);
+                        const Real T_ip_1_LBF = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_1_cons_var_LBF], &p_ip_1_LBF, thermo_properties_ptr);
+                        const Real T_ip_1_RBF = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_1_cons_var_RBF], &p_ip_1_RBF, thermo_properties_ptr);
+                        const Real T_ip_1_LTF = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_1_cons_var_LTF], &p_ip_1_LTF, thermo_properties_ptr);
+                        const Real T_ip_1_RTF = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_1_cons_var_RTF], &p_ip_1_RTF, thermo_properties_ptr);
                         
                         // Compute the temperature values in the stencils for image point 2.
-                        const Real T_ip2_LBK = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip2_cons_var_LBK], &p_ip2_LBK, thermo_properties_ptr);
-                        const Real T_ip2_RBK = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip2_cons_var_RBK], &p_ip2_RBK, thermo_properties_ptr);
-                        const Real T_ip2_LTK = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip2_cons_var_LTK], &p_ip2_LTK, thermo_properties_ptr);
-                        const Real T_ip2_RTK = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip2_cons_var_RTK], &p_ip2_RTK, thermo_properties_ptr);
-                        const Real T_ip2_LBF = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip2_cons_var_LBF], &p_ip2_LBF, thermo_properties_ptr);
-                        const Real T_ip2_RBF = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip2_cons_var_RBF], &p_ip2_RBF, thermo_properties_ptr);
-                        const Real T_ip2_LTF = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip2_cons_var_LTF], &p_ip2_LTF, thermo_properties_ptr);
-                        const Real T_ip2_RTF = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip2_cons_var_RTF], &p_ip2_RTF, thermo_properties_ptr);
+                        const Real T_ip_2_LBK = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_2_cons_var_LBK], &p_ip_2_LBK, thermo_properties_ptr);
+                        const Real T_ip_2_RBK = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_2_cons_var_RBK], &p_ip_2_RBK, thermo_properties_ptr);
+                        const Real T_ip_2_LTK = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_2_cons_var_LTK], &p_ip_2_LTK, thermo_properties_ptr);
+                        const Real T_ip_2_RTK = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_2_cons_var_RTK], &p_ip_2_RTK, thermo_properties_ptr);
+                        const Real T_ip_2_LBF = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_2_cons_var_LBF], &p_ip_2_LBF, thermo_properties_ptr);
+                        const Real T_ip_2_RBF = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_2_cons_var_RBF], &p_ip_2_RBF, thermo_properties_ptr);
+                        const Real T_ip_2_LTF = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_2_cons_var_LTF], &p_ip_2_LTF, thermo_properties_ptr);
+                        const Real T_ip_2_RTF = d_equation_of_state_mixing_rules->getEquationOfState()->getTemperature(&rho[idx_ip_2_cons_var_RTF], &p_ip_2_RTF, thermo_properties_ptr);
                         
                         // Trilinear interpolation to find temperature of image point 1.
-                        const Real T_ip = trilinearInterpolate3D(
-                            T_ip_LBK,
-                            T_ip_RBK,
-                            T_ip_LTK,
-                            T_ip_RTK,
-                            T_ip_LBF,
-                            T_ip_RBF,
-                            T_ip_LTF,
-                            T_ip_RTF,
-                            x_ip,
-                            y_ip,
-                            z_ip,
-                            x_ip_LBK,
-                            y_ip_LBK,
-                            z_ip_LBK,
+                        const Real T_ip_1 = trilinearInterpolate3D(
+                            T_ip_1_LBK,
+                            T_ip_1_RBK,
+                            T_ip_1_LTK,
+                            T_ip_1_RTK,
+                            T_ip_1_LBF,
+                            T_ip_1_RBF,
+                            T_ip_1_LTF,
+                            T_ip_1_RTF,
+                            x_ip_1,
+                            y_ip_1,
+                            z_ip_1,
+                            x_ip_1_LBK,
+                            y_ip_1_LBK,
+                            z_ip_1_LBK,
                             dx_inv);
                         
                         // Trilinear interpolation to find temperature of image point 2.
-                        const Real T_ip2 = trilinearInterpolate3D(
-                            T_ip2_LBK,
-                            T_ip2_RBK,
-                            T_ip2_LTK,
-                            T_ip2_RTK,
-                            T_ip2_LBF,
-                            T_ip2_RBF,
-                            T_ip2_LTF,
-                            T_ip2_RTF,
-                            x_ip2,
-                            y_ip2,
-                            z_ip2,
-                            x_ip2_LBK,
-                            y_ip2_LBK,
-                            z_ip2_LBK,
+                        const Real T_ip_2 = trilinearInterpolate3D(
+                            T_ip_2_LBK,
+                            T_ip_2_RBK,
+                            T_ip_2_LTK,
+                            T_ip_2_RTK,
+                            T_ip_2_LBF,
+                            T_ip_2_RBF,
+                            T_ip_2_LTF,
+                            T_ip_2_RTF,
+                            x_ip_2,
+                            y_ip_2,
+                            z_ip_2,
+                            x_ip_2_LBK,
+                            y_ip_2_LBK,
+                            z_ip_2_LBK,
                             dx_inv);
                         
                         // Trilinear interpolation to find density of image point 1.
-                        const Real rho_ip = trilinearInterpolate3D(
-                            rho[idx_ip_cons_var_LBK],
-                            rho[idx_ip_cons_var_RBK],
-                            rho[idx_ip_cons_var_LTK],
-                            rho[idx_ip_cons_var_RTK],
-                            rho[idx_ip_cons_var_LBF],
-                            rho[idx_ip_cons_var_RBF],
-                            rho[idx_ip_cons_var_LTF],
-                            rho[idx_ip_cons_var_RTF],
-                            x_ip,
-                            y_ip,
-                            z_ip,
-                            x_ip_LBK,
-                            y_ip_LBK,
-                            z_ip_LBK,
-                            dx_inv);
-                        // Trilinear interpolation to find density of image point 2.
-                        const Real rho_ip2 = trilinearInterpolate3D(
-                            rho[idx_ip2_cons_var_LBK],
-                            rho[idx_ip2_cons_var_RBK],
-                            rho[idx_ip2_cons_var_LTK],
-                            rho[idx_ip2_cons_var_RTK],
-                            rho[idx_ip2_cons_var_LBF],
-                            rho[idx_ip2_cons_var_RBF],
-                            rho[idx_ip2_cons_var_LTF],
-                            rho[idx_ip2_cons_var_RTF],
-                            x_ip2,
-                            y_ip2,
-                            z_ip2,
-                            x_ip2_LBK,
-                            y_ip2_LBK,
-                            z_ip2_LBK,
+                        const Real rho_ip_1 = trilinearInterpolate3D(
+                            rho[idx_ip_1_cons_var_LBK],
+                            rho[idx_ip_1_cons_var_RBK],
+                            rho[idx_ip_1_cons_var_LTK],
+                            rho[idx_ip_1_cons_var_RTK],
+                            rho[idx_ip_1_cons_var_LBF],
+                            rho[idx_ip_1_cons_var_RBF],
+                            rho[idx_ip_1_cons_var_LTF],
+                            rho[idx_ip_1_cons_var_RTF],
+                            x_ip_1,
+                            y_ip_1,
+                            z_ip_1,
+                            x_ip_1_LBK,
+                            y_ip_1_LBK,
+                            z_ip_1_LBK,
                             dx_inv);
                         
-                        const Real epsilon_ip = d_equation_of_state_mixing_rules->getEquationOfState()->
+                        // Trilinear interpolation to find density of image point 2.
+                        const Real rho_ip_2 = trilinearInterpolate3D(
+                            rho[idx_ip_2_cons_var_LBK],
+                            rho[idx_ip_2_cons_var_RBK],
+                            rho[idx_ip_2_cons_var_LTK],
+                            rho[idx_ip_2_cons_var_RTK],
+                            rho[idx_ip_2_cons_var_LBF],
+                            rho[idx_ip_2_cons_var_RBF],
+                            rho[idx_ip_2_cons_var_LTF],
+                            rho[idx_ip_2_cons_var_RTF],
+                            x_ip_2,
+                            y_ip_2,
+                            z_ip_2,
+                            x_ip_2_LBK,
+                            y_ip_2_LBK,
+                            z_ip_2_LBK,
+                            dx_inv);
+                        
+                        const Real epsilon_ip_1 = d_equation_of_state_mixing_rules->getEquationOfState()->
                             getInternalEnergyFromTemperature(
-                                &rho_ip,
-                                &T_ip,
+                                &rho_ip_1,
+                                &T_ip_1,
                                 thermo_properties_ptr);
                             
-                        const Real epsilon_ip2 = d_equation_of_state_mixing_rules->getEquationOfState()->
+                        const Real epsilon_ip_2 = d_equation_of_state_mixing_rules->getEquationOfState()->
                             getInternalEnergyFromTemperature(
-                                &rho_ip2,
-                                &T_ip2,
+                                &rho_ip_2,
+                                &T_ip_2,
                                 thermo_properties_ptr);
                         
-                        const Real p_ip = d_equation_of_state_mixing_rules->getEquationOfState()->
+                        const Real p_ip_1 = d_equation_of_state_mixing_rules->getEquationOfState()->
                             getPressure(
-                                &rho_ip,
-                                &epsilon_ip,
+                                &rho_ip_1,
+                                &epsilon_ip_1,
                                 thermo_properties_ptr);
                         
-                        const Real p_ip2 = d_equation_of_state_mixing_rules->getEquationOfState()->
+                        const Real p_ip_2 = d_equation_of_state_mixing_rules->getEquationOfState()->
                             getPressure(
-                                &rho_ip2,
-                                &epsilon_ip2,
+                                &rho_ip_2,
+                                &epsilon_ip_2,
                                 thermo_properties_ptr);
                         
                         // dP/dn = 0
                         const Real p_gc = getGhostValueNeumannBC(
-                            p_ip,
-                            p_ip2,
-                            d_ip,
-                            d_ip2,
+                            p_ip_1,
+                            p_ip_2,
+                            d_ip_1,
+                            d_ip_2,
                             dist[idx_IB]);
                         
                         Real T_gc = Real(0);
@@ -1504,10 +1498,10 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         {   
                             // dT/dn = 0
                             T_gc = getGhostValueNeumannBC(
-                                T_ip,
-                                T_ip2,
-                                d_ip,
-                                d_ip2,
+                                T_ip_1,
+                                T_ip_2,
+                                d_ip_1,
+                                d_ip_2,
                                 dist[idx_IB]);
                         }
                         else if (d_bc_type_temperature == TEMPERATURE_IBC::ISOTHERMAL)
@@ -1515,8 +1509,8 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                             // Iso-thermal boundary condition.
                             T_gc = getGhostValueDirichletBC(
                                 T_body,
-                                T_ip,
-                                d_ip,
+                                T_ip_1,
+                                d_ip_1,
                                 dist[idx_IB]);
                         }
                         
@@ -1862,7 +1856,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
 
             if (d_bc_type_velocity == VELOCITY_IBC::SLIP)
             {
-                // Given d_ip and d_ip2, interpolate to the velocity components (u_mirror and v_mirror)
+                // Given d_ip_1 and d_ip_2, interpolate to the velocity components (u_mirror and v_mirror)
                 // at the mirror image point at the surface.
                 const Real diff_ip_2_ip_1 = d_ip_2 - d_ip_1;
                 const Real diff_mirror_ip_1  = - d_ip_1;
