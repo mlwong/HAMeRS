@@ -40,7 +40,7 @@ EquationOfThermalConductivityMixingRulesManager::EquationOfThermalConductivityMi
             << "Unknown equation_of_thermal_conductivity/d_equation_of_thermal_conductivity string = '"
             << equation_of_thermal_conductivity_str
             << "' found in input/restart file."
-            << std::endl);        
+            << std::endl);
     }
 }
 

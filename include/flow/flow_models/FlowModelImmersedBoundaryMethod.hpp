@@ -13,6 +13,8 @@
 #include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/pdat/CellVariable.h"
 
+// #define HAMERS_DEBUG_IMMERSED_BOUNDARY_METHOD
+
 namespace VELOCITY_IBC
 {
     enum TYPE { NONE,
@@ -26,6 +28,16 @@ namespace TEMPERATURE_IBC
                 ADIABATIC,
                 ISOTHERMAL };
 }
+
+// 3D neighbor indices for the surface triangulation.
+#define INDEX_LBK 0
+#define INDEX_RBK 1
+#define INDEX_LTK 2
+#define INDEX_RTK 3
+#define INDEX_LBF 4
+#define INDEX_RBF 5
+#define INDEX_LTF 6
+#define INDEX_RTF 7
 
 class FlowModel;
 
@@ -134,7 +146,316 @@ class FlowModelImmersedBoundaryMethod
         getCellDataOfImmersedBoundaryMask(
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
+        /*
+         * Output the surface triangulation with surface data.
+         */
+        virtual void writeSurfaceTriangulationWithData(const std::string& file_name) const = 0;
+        
+        /*
+         * Output names of monitoring statistical quantities to output to a file.
+         */
+        virtual void outputMonitoringStatisticalQuantitiesNames(std::ofstream& f_out) const = 0;
+        
+        /*
+         * Output monitoring statistics to screen.
+         */
+        virtual void outputMonitoringStatistics(std::ofstream& f_out) const = 0;
+        
+        /*
+         * Compute the data on the surface triangulation.
+         */
+        virtual void computeSurfaceTriangulationData(
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) = 0;
+        
     protected:
+        /*
+         * Output the surface triangulation with surface data.
+         */
+        void writeSurfaceTriangulationWithDataBase(
+            const std::string& file_name,
+            const std::vector<std::string>& variable_names,
+            const std::vector<HAMERS_SHARED_PTR<std::vector<double> > >& variable_data) const;
+        
+        /*
+         * Compute the data on the surface triangulation.
+         */
+         void computeSurfaceTriangulationDataBase(
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Dot product of two 2D vectors.
+         */
+        static inline __attribute__((always_inline)) Real dotProduct2D(
+            const Real& a0,
+            const Real& a1,
+            const Real& b0,
+            const Real& b1)
+        {
+            return a0*b0 + a1*b1;
+        }
+        
+        /*
+         * Dot product of two 3D vectors.
+         */
+        static inline __attribute__((always_inline)) Real dotProduct3D(
+            const Real& a0,
+            const Real& a1,
+            const Real& a2,
+            const Real& b0,
+            const Real& b1,
+            const Real& b2)
+        {
+            return a0*b0 + a1*b1 + a2*b2;
+        }
+        
+        /*
+         * Dirichlet boundary condition with second order of accuracy.
+         */
+        static inline __attribute__((always_inline)) Real getGhostValueDirichletBC(
+            const Real& u_body,
+            const Real& u_ip,
+            const Real& d_ip,
+            const Real& d_gc)
+        {
+            const Real u_gc = u_ip - ((d_ip + d_gc)/d_ip)*(u_ip - u_body);
+            return u_gc;
+        }
+        
+        /*
+         * Neumann boundary condition with second order of accuracy (zero gradient).
+         */
+        static inline __attribute__((always_inline)) Real getGhostValueNeumannBC(
+            const Real& u_ip1,
+            const Real& u_ip2,
+            const Real& d_ip1,
+            const Real& d_ip2,
+            const Real& d_gc)
+        {
+            const Real u_gc = (u_ip1*(d_ip2*d_ip2 - d_gc*d_gc) - u_ip2*(d_ip1*d_ip1 - d_gc*d_gc))/
+                (d_ip2*d_ip2 - d_ip1*d_ip1);
+            return u_gc;
+        }
+        
+        /*
+         * Neumann boundary condition with second order of accuracy (non-zero gradient).
+         */
+        static inline __attribute__((always_inline)) Real getGhostValueNeumannBC(
+            const Real& dudn_body,
+            const Real& u_ip1,
+            const Real& u_ip2,
+            const Real& d_ip1,
+            const Real& d_ip2,
+            const Real& d_gc)
+        {
+            const Real u_gc = (u_ip1*(d_ip2*d_ip2 - d_gc*d_gc) - u_ip2*(d_ip1*d_ip1 - d_gc*d_gc))/
+                (d_ip2*d_ip2 - d_ip1*d_ip1) -
+                (d_ip1*d_ip2 + d_gc*d_gc + d_gc*d_ip1 + d_gc*d_ip2)/(d_ip1 + d_ip2)*dudn_body;
+            return u_gc;
+        }
+        
+        /*
+         * Compute gradient with second order of accuracy.
+         */
+         static inline __attribute__((always_inline)) Real getGradientBC(
+            const Real& u_body,
+            const Real& u_ip1,
+            const Real& u_ip2,
+            const Real& d_ip1,
+            const Real& d_ip2)
+        {
+            const Real dudn_body = ((u_ip1*d_ip2*d_ip2 - u_ip2*d_ip1*d_ip1)/
+                (d_ip2*d_ip2 - d_ip1*d_ip1) - u_body)*
+                (d_ip1 + d_ip2)/(d_ip1*d_ip2);
+            
+            return dudn_body;
+        }
+        
+        /*
+         * Get the indices for the 2D bilinear interpolation.
+         */
+        static inline __attribute__((always_inline)) void getBilinearInterpolationIndices2D(
+            int& idx_BL,
+            int& idx_BR,
+            int& idx_TL,
+            int& idx_TR,
+            int& idx_IB_BL,
+            int& idx_IB_BR,
+            int& idx_IB_TL,
+            int& idx_IB_TR,
+            Real& x_ip_BL,
+            Real& y_ip_BL,
+            const Real& x_ip,
+            const Real& y_ip,
+            const Real& patch_xlo_0,
+            const Real& patch_xlo_1,
+            const int& offset_0,
+            const int& offset_1,
+            const int& ghostcell_dim_0,
+            const int& offset_0_IB,
+            const int& offset_1_IB,
+            const int& ghostcell_dim_0_IB,
+            const Real& dx,
+            const Real& dx_inv)
+        {
+            constexpr Real half = Real(1)/Real(2);
+            
+            const int ip_i = int(floor((x_ip - patch_xlo_0 - half * dx)*dx_inv));
+            const int ip_j = int(floor((y_ip - patch_xlo_1 - half * dx)*dx_inv));
+            
+            idx_IB_BL  = (ip_i     + offset_0_IB) + (ip_j     + offset_1_IB)*ghostcell_dim_0_IB;
+            idx_IB_BR  = (ip_i + 1 + offset_0_IB) + (ip_j     + offset_1_IB)*ghostcell_dim_0_IB;
+            idx_IB_TL  = (ip_i     + offset_0_IB) + (ip_j + 1 + offset_1_IB)*ghostcell_dim_0_IB;
+            idx_IB_TR  = (ip_i + 1 + offset_0_IB) + (ip_j + 1 + offset_1_IB)*ghostcell_dim_0_IB;
+            
+            idx_BL  = (ip_i     + offset_0) + (ip_j     + offset_1)*ghostcell_dim_0;
+            idx_BR  = (ip_i + 1 + offset_0) + (ip_j     + offset_1)*ghostcell_dim_0;
+            idx_TL  = (ip_i     + offset_0) + (ip_j + 1 + offset_1)*ghostcell_dim_0;
+            idx_TR  = (ip_i + 1 + offset_0) + (ip_j + 1 + offset_1)*ghostcell_dim_0;
+            
+            x_ip_BL = patch_xlo_0 + (Real(ip_i) + half)*dx;
+            y_ip_BL = patch_xlo_1 + (Real(ip_j) + half)*dx;
+        }
+        
+        /*
+         * 2D bilinear interpolation.
+         */
+        static inline __attribute__((always_inline)) Real bilinearInterpolate2D(
+            const Real& u_BL,
+            const Real& u_BR,
+            const Real& u_TL,
+            const Real& u_TR,
+            const Real& x_ip,
+            const Real& y_ip,
+            const Real& x_ip_BL,
+            const Real& y_ip_BL,
+            const Real& dx_inv)
+        {
+            constexpr Real one = Real(1);
+            
+            const Real ip_ratio_0 = (x_ip - x_ip_BL)*dx_inv;
+            const Real ip_ratio_1 = (y_ip - y_ip_BL)*dx_inv;
+            
+            const Real u_f1 = (one - ip_ratio_0)*u_BL + ip_ratio_0*u_BR;
+            const Real u_f2 = (one - ip_ratio_0)*u_TL + ip_ratio_0*u_TR;
+            const Real u_ip = (one - ip_ratio_1)*u_f1 + ip_ratio_1*u_f2;
+            
+            return u_ip;
+        }
+        
+        /*
+         * Get the indices for the 3D trilinear interpolation.
+         */
+        static inline __attribute__((always_inline)) void getTrilinearInterpolationIndices3D(
+            int& idx_cons_var_LBK,
+            int& idx_cons_var_RBK,
+            int& idx_cons_var_LTK,
+            int& idx_cons_var_RTK,
+            int& idx_cons_var_LBF,
+            int& idx_cons_var_RBF,
+            int& idx_cons_var_LTF,
+            int& idx_cons_var_RTF,
+            int& idx_IB_LBK,
+            int& idx_IB_RBK,
+            int& idx_IB_LTK,
+            int& idx_IB_RTK,
+            int& idx_IB_LBF,
+            int& idx_IB_RBF,
+            int& idx_IB_LTF,
+            int& idx_IB_RTF,
+            Real& x_ip_LBK,
+            Real& y_ip_LBK,
+            Real& z_ip_LBK,
+            const Real& x_ip,
+            const Real& y_ip,
+            const Real& z_ip,
+            const Real& patch_xlo_0,
+            const Real& patch_xlo_1,
+            const Real& patch_xlo_2,
+            const int& offset_0,
+            const int& offset_1,
+            const int& offset_2,
+            const int& ghostcell_dim_0,
+            const int& ghostcell_dim_1,
+            const int& offset_0_IB,
+            const int& offset_1_IB,
+            const int& offset_2_IB,
+            const int& ghostcell_dim_0_IB,
+            const int& ghostcell_dim_1_IB,
+            const Real& dx,
+            const Real& dx_inv)
+        {
+            constexpr Real half = Real(1)/Real(2);
+            
+            const int ip_i = int(floor((x_ip - patch_xlo_0 - half * dx)*dx_inv));
+            const int ip_j = int(floor((y_ip - patch_xlo_1 - half * dx)*dx_inv));
+            const int ip_k = int(floor((z_ip - patch_xlo_2 - half * dx)*dx_inv));
+            
+            idx_IB_LBK = (ip_i     + offset_0_IB) + (ip_j     + offset_1_IB)*ghostcell_dim_0_IB + (ip_k     + offset_2_IB)*ghostcell_dim_0_IB*ghostcell_dim_1_IB;
+            idx_IB_RBK = (ip_i + 1 + offset_0_IB) + (ip_j     + offset_1_IB)*ghostcell_dim_0_IB + (ip_k     + offset_2_IB)*ghostcell_dim_0_IB*ghostcell_dim_1_IB;
+            idx_IB_LTK = (ip_i     + offset_0_IB) + (ip_j + 1 + offset_1_IB)*ghostcell_dim_0_IB + (ip_k     + offset_2_IB)*ghostcell_dim_0_IB*ghostcell_dim_1_IB;
+            idx_IB_RTK = (ip_i + 1 + offset_0_IB) + (ip_j + 1 + offset_1_IB)*ghostcell_dim_0_IB + (ip_k     + offset_2_IB)*ghostcell_dim_0_IB*ghostcell_dim_1_IB;
+            idx_IB_LBF = (ip_i     + offset_0_IB) + (ip_j     + offset_1_IB)*ghostcell_dim_0_IB + (ip_k + 1 + offset_2_IB)*ghostcell_dim_0_IB*ghostcell_dim_1_IB;
+            idx_IB_RBF = (ip_i + 1 + offset_0_IB) + (ip_j     + offset_1_IB)*ghostcell_dim_0_IB + (ip_k + 1 + offset_2_IB)*ghostcell_dim_0_IB*ghostcell_dim_1_IB;
+            idx_IB_LTF = (ip_i     + offset_0_IB) + (ip_j + 1 + offset_1_IB)*ghostcell_dim_0_IB + (ip_k + 1 + offset_2_IB)*ghostcell_dim_0_IB*ghostcell_dim_1_IB;
+            idx_IB_RTF = (ip_i + 1 + offset_0_IB) + (ip_j + 1 + offset_1_IB)*ghostcell_dim_0_IB + (ip_k + 1 + offset_2_IB)*ghostcell_dim_0_IB*ghostcell_dim_1_IB;
+            
+            idx_cons_var_LBK = (ip_i     + offset_0) + (ip_j     + offset_1)*ghostcell_dim_0 + (ip_k     + offset_2)*ghostcell_dim_0*ghostcell_dim_1;
+            idx_cons_var_RBK = (ip_i + 1 + offset_0) + (ip_j     + offset_1)*ghostcell_dim_0 + (ip_k     + offset_2)*ghostcell_dim_0*ghostcell_dim_1;
+            idx_cons_var_LTK = (ip_i     + offset_0) + (ip_j + 1 + offset_1)*ghostcell_dim_0 + (ip_k     + offset_2)*ghostcell_dim_0*ghostcell_dim_1;
+            idx_cons_var_RTK = (ip_i + 1 + offset_0) + (ip_j + 1 + offset_1)*ghostcell_dim_0 + (ip_k     + offset_2)*ghostcell_dim_0*ghostcell_dim_1;
+            idx_cons_var_LBF = (ip_i     + offset_0) + (ip_j     + offset_1)*ghostcell_dim_0 + (ip_k + 1 + offset_2)*ghostcell_dim_0*ghostcell_dim_1;
+            idx_cons_var_RBF = (ip_i + 1 + offset_0) + (ip_j     + offset_1)*ghostcell_dim_0 + (ip_k + 1 + offset_2)*ghostcell_dim_0*ghostcell_dim_1;
+            idx_cons_var_LTF = (ip_i     + offset_0) + (ip_j + 1 + offset_1)*ghostcell_dim_0 + (ip_k + 1 + offset_2)*ghostcell_dim_0*ghostcell_dim_1;
+            idx_cons_var_RTF = (ip_i + 1 + offset_0) + (ip_j + 1 + offset_1)*ghostcell_dim_0 + (ip_k + 1 + offset_2)*ghostcell_dim_0*ghostcell_dim_1;
+            
+            x_ip_LBK = patch_xlo_0 + (Real(ip_i) + half)*dx;
+            y_ip_LBK = patch_xlo_1 + (Real(ip_j) + half)*dx;
+            z_ip_LBK = patch_xlo_2 + (Real(ip_k) + half)*dx;
+        }
+        
+        /*
+         * 3D trilinear interpolation.
+         */
+        static inline __attribute__((always_inline)) Real trilinearInterpolate3D(
+            const Real& u_ip_LBK,
+            const Real& u_ip_RBK,
+            const Real& u_ip_LTK,
+            const Real& u_ip_RTK,
+            const Real& u_ip_LBF,
+            const Real& u_ip_RBF,
+            const Real& u_ip_LTF,
+            const Real& u_ip_RTF,
+            const Real& x_ip,
+            const Real& y_ip,
+            const Real& z_ip,
+            const Real& x_ip_LBK,
+            const Real& y_ip_LBK,
+            const Real& z_ip_LBK,
+            const Real& dx_inv)
+        {
+            constexpr Real one = Real(1);
+            
+            const Real ip_ratio_0 = (x_ip - x_ip_LBK)*dx_inv;
+            const Real ip_ratio_1 = (y_ip - y_ip_LBK)*dx_inv;
+            const Real ip_ratio_2 = (z_ip - z_ip_LBK)*dx_inv;
+            
+            const Real u_ip_BK = (one - ip_ratio_0)*u_ip_LBK + ip_ratio_0*u_ip_RBK;
+            const Real u_ip_TK = (one - ip_ratio_0)*u_ip_LTK + ip_ratio_0*u_ip_RTK;
+            const Real u_ip_BF = (one - ip_ratio_0)*u_ip_LBF + ip_ratio_0*u_ip_RBF;
+            const Real u_ip_TF = (one - ip_ratio_0)*u_ip_LTF + ip_ratio_0*u_ip_RTF;
+            
+            const Real u_ip_F = (one - ip_ratio_1)*u_ip_BF + ip_ratio_1*u_ip_TF;
+            const Real u_ip_K = (one - ip_ratio_1)*u_ip_BK + ip_ratio_1*u_ip_TK;
+            
+            const Real u_ip = (one - ip_ratio_2)*u_ip_K + ip_ratio_2*u_ip_F;
+            
+            return u_ip;
+        }
+        
         /*
          * The object name is used for error/warning reporting.
          */
@@ -197,6 +518,26 @@ class FlowModelImmersedBoundaryMethod
         static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_wall_distance;
         static HAMERS_SHARED_PTR<pdat::CellVariable<Real> > s_variable_surface_normal;
         
+        const double d_surface_triangulation_coeff_ip_1;
+        const double d_surface_triangulation_coeff_ip_2;
+        
+        /*
+         * Data for the surface triangulation if needed.
+         */
+        
+        std::vector<double> d_surface_triangulation_dx_grid;
+        
+        std::vector<std::array<double, 3> > d_surface_triangulation_coor_ip_1;
+        std::vector<std::array<double, 3> > d_surface_triangulation_coor_ip_2;
+        std::vector<std::array<double, 3> > d_surface_triangulation_coor_bi;
+        
+        std::vector<double> d_surface_triangulation_weight_ip_1;
+        std::vector<double> d_surface_triangulation_weight_ip_2;
+        std::vector<double> d_surface_triangulation_weight_bi;
+        
+        std::vector<std::vector<double> > d_surface_triangulation_cons_var_ip_1;
+        std::vector<std::vector<double> > d_surface_triangulation_cons_var_ip_2;
+        std::vector<std::vector<double> > d_surface_triangulation_cons_var_bi;
 };
 
 #endif /* FLOW_MODEL_BASIC_UTILITIES_HPP */

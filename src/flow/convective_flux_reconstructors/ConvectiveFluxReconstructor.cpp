@@ -541,10 +541,10 @@ ConvectiveFluxReconstructor::putToRestartBase(
     restart_db->putReal("d_threshold_sensor_interface", d_threshold_sensor_interface);
     
     if (d_weno_interp == WENO_INTERP::WENO5Z) {
-        restart_db->putString("d_weno_interp", "WENO5Z");
+        restart_db->putString("d_weno_interp", "WENO_5Z");
     }
     else if (d_weno_interp == WENO_INTERP::WENO6LD) {
-        restart_db->putString("d_weno_interp", "WENO6LD");
+        restart_db->putString("d_weno_interp", "WENO6_LD");
     }
 }
 

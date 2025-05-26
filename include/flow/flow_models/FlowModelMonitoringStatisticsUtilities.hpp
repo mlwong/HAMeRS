@@ -80,10 +80,10 @@ class FlowModelMonitoringStatisticsUtilities
             const int step_num,
             const double time) = 0;
         
-        bool hasMonitoringStatistics() const
-        {
-            return (!d_monitoring_statistics_names.empty());
-        }
+        /*
+         * Whether the object has monitoring statistics.
+         */
+        bool hasMonitoringStatistics() const;
         
         /*
          * Get names of monitoring statistical quantities to output.
@@ -147,6 +147,11 @@ class FlowModelMonitoringStatisticsUtilities
          * The monitoring time step interval.
          */
         int d_monitoring_time_step_interval;
+        
+        /*
+         * Whether to monitor the immersed boundary.
+         */
+        bool d_monitor_immersed_boundary;
 };
 
 #endif /* FLOW_MODEL_MONITORING_STATISTICS_UTILITIES_HPP */

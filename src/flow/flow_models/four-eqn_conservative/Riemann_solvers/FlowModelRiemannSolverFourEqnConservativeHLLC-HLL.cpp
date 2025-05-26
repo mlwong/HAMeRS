@@ -2375,7 +2375,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         }
         
         for (int si = 0; si < d_num_species; si++)
-        {   
+        {
             HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
@@ -5166,7 +5166,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         }
         
         for (int si = 0; si < d_num_species; si++)
-        {   
+        {
             HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {

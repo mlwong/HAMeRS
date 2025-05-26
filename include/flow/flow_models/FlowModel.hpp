@@ -188,6 +188,18 @@ class FlowModel:
         }
         
         /*
+         * Return whether immersed boundary method object is already set up.
+         */
+        bool useImmersedBoundary() const
+        {
+            if (d_flow_model_immersed_boundary_method == nullptr)
+            {
+                return false;
+            }
+            return true;
+        }
+        
+        /*
          * Return the HAMERS_SHARED_PTR to the immersed boundary method object.
          */
         const HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod>&

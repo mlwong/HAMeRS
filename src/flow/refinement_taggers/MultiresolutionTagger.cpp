@@ -2175,7 +2175,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
     }
     
     // Declare pointer to the Lipschitz's exponent.
-    Real* alpha = NULL;    
+    Real* alpha = NULL;
     
     if (uses_alpha_tol)
     {

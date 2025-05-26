@@ -239,6 +239,16 @@ void
 FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::outputMonitoringStatisticalQuantitiesNames(
     const std::string& monitoring_stat_dump_filename) const
 {
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     if (mpi.getRank() == 0)
@@ -257,16 +267,17 @@ FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::outputMonitoringStati
         for (int si = 0; si < static_cast<int>(d_monitoring_statistics_names.size()); si++)
         {
             // Get the key of the current variable.
-            std::string statistical_quantity_key = d_monitoring_statistics_names[si];
+            const std::string& statistical_quantity_key = d_monitoring_statistics_names[si];
+            f_out << std::setw(25) << statistical_quantity_key;
+        }
+        
+        if (flow_model_tmp->useImmersedBoundary() && d_monitor_immersed_boundary)
+        {
+            HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+                flow_model_tmp->getFlowModelImmersedBoundaryMethod();
             
-            if (statistical_quantity_key == "KINETIC_ENERGY_AVG")
-            {
-                f_out << "\t" << "KINETIC_ENERGY_AVG   ";
-            }
-            else if (statistical_quantity_key == "MACH_NUM_MAX")
-            {
-                f_out << "\t" << "MACH_NUM_MAX         ";
-            }
+            flow_model_immersed_boundary_method->outputMonitoringStatisticalQuantitiesNames(
+                f_out);
         }
         
         f_out.close();
@@ -286,6 +297,16 @@ FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::outputMonitoringStati
 {
     NULL_USE(step_num);
     
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     std::ofstream f_out;
@@ -301,7 +322,7 @@ FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::outputMonitoringStati
                 << std::endl);
         }
         
-        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10) << time;
+        f_out << std::scientific << std::setprecision(16) << std::setw(25) << time;
     }
     
     for (int si = 0; si < static_cast<int>(d_monitoring_statistics_names.size()); si++)
@@ -314,8 +335,7 @@ FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::outputMonitoringStati
             os << "Avg kinetic energy: " << d_kinetic_energy_avg << std::endl;
             if (mpi.getRank() == 0)
             {
-                f_out << std::scientific << std::setprecision(std::numeric_limits<Real>::digits10)
-                  << "\t" << d_kinetic_energy_avg;
+                f_out << std::scientific << std::setprecision(16) << std::setw(25) << d_kinetic_energy_avg;
             }
         }
         else if (statistical_quantity_key == "MACH_NUM_MAX")
@@ -323,14 +343,22 @@ FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::outputMonitoringStati
             os << "Max Mach number: " << d_Mach_num_max << std::endl;
             if (mpi.getRank() == 0)
             {
-                f_out << std::scientific << std::setprecision(std::numeric_limits<Real>::digits10)
-                  << "\t" << d_Mach_num_max;
+                f_out << std::scientific << std::setprecision(16) << std::setw(25) << d_Mach_num_max;
             }
         }
     }
     
     if (mpi.getRank() == 0)
     {
+        if (flow_model_tmp->useImmersedBoundary() && d_monitor_immersed_boundary)
+        {
+            HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+                flow_model_tmp->getFlowModelImmersedBoundaryMethod();
+            
+            flow_model_immersed_boundary_method->outputMonitoringStatistics(
+                f_out);
+        }
+        
         f_out << std::endl;
         f_out.close();
     }

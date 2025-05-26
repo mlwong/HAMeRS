@@ -143,6 +143,7 @@ NavierStokes::NavierStokes(
             "d_immersed_boundaries",
             d_project_name,
             d_dim,
+            d_Navier_Stokes_initial_conditions_db,
             d_grid_geometry));
         
         d_flow_model->initializeImmersedBoundaryMethod(
@@ -4982,7 +4983,7 @@ NavierStokes::outputHeaderMonitoringStatistics()
                     << std::endl);
             }
             
-            f_out << "# TIME               ";
+            f_out << "#" << std::setw(24) << "TIME";
             f_out.close();
         }
         
@@ -5033,7 +5034,7 @@ NavierStokes::outputHeaderStatistics()
                     << std::endl);
             }
             
-            f_out << "# TIME               ";
+            f_out << "#" << std::setw(24) << "TIME";
             f_out.close();
         }
         
@@ -5108,7 +5109,7 @@ NavierStokes::outputDataStatistics(
                     << std::endl);
             }
             
-            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10) << output_time;
+            f_out << std::scientific << std::setprecision(16) << std::setw(25) << output_time;
             f_out.close();
         }
         
@@ -5554,5 +5555,53 @@ void NavierStokes::getFromRestart()
     if (db->keyExists("d_multiresolution_tagger_db"))
     {
         d_multiresolution_tagger_db = db->getDatabase("d_multiresolution_tagger_db");
+    }
+}
+
+
+/**
+ * Output the surface data.
+ */
+void NavierStokes::writePlotSurfaceData(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const std::string& dump_directory_name,
+    const int step_num,
+    const double time)
+{
+    NULL_USE(time);
+    
+    if (d_use_immersed_boundaries)
+    {
+        d_flow_model->setupImmersedBoundaryMethod();
+        
+        HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+            d_flow_model->getFlowModelImmersedBoundaryMethod();
+        
+        flow_model_immersed_boundary_method->computeSurfaceTriangulationData(
+            d_grid_geometry,
+            patch_hierarchy,
+            d_plot_context);
+        
+#ifdef HAMERS_USE_TECIO
+        constexpr int zero_padding_length = 5;
+        char temp_buf[128];
+        sprintf(temp_buf, "%0*d", zero_padding_length, step_num);
+        std::string name_prefix = "tecio_dump.";
+        name_prefix += temp_buf;
+        
+        std::string dump_dirname;
+        if (!dump_directory_name.empty() &&
+        dump_directory_name[dump_directory_name.length() - 1] == '/')
+        {
+            dump_dirname = dump_directory_name;
+        }
+        else
+        {
+            dump_dirname = dump_directory_name + "/";
+        }
+        SAMRAI::tbox::Utilities::recursiveMkdir(dump_dirname);
+        
+        flow_model_immersed_boundary_method->writeSurfaceTriangulationWithData(dump_dirname + name_prefix);
+#endif
     }
 }

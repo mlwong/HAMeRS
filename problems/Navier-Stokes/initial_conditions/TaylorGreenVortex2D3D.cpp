@@ -55,7 +55,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         const double* const patch_xlo = patch_geom->getXLower();
         
         if (d_project_name == "3D Taylor-Green vortex")
-        {        
+        {
             // Get the dimensions of box that covers the interior of Patch.
             hier::Box patch_box = patch.getBox();
             const hier::IntVector patch_dims = patch_box.numberCells();
