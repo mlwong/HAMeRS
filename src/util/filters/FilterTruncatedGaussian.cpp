@@ -202,7 +202,7 @@ FilterTruncatedGaussian::applyFilter(
             {
                 HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                {        
+                {
                     // Compute the linear indices.
                     const int idx = (i + offset_0_filtered_cell_data) +
                         (j + offset_1_filtered_cell_data)*ghostcell_dim_0_filtered_cell_data;
@@ -362,7 +362,7 @@ FilterTruncatedGaussian::applyFilter(
             {
                 HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                {        
+                {
                     // Compute the linear indices.
                     const int idx = (i + offset_0_filtered_cell_data) +
                         (j + offset_1_filtered_cell_data)*ghostcell_dim_0_filtered_cell_data;

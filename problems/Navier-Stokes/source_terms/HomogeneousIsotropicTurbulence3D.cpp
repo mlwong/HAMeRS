@@ -97,9 +97,6 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     double* rho_u = momentum->getPointer(0);
     double* rho_v = momentum->getPointer(1);
     double* rho_w = momentum->getPointer(2);
-    // double* E     = total_energy->getPointer(0);
-    
-    // double gamma = double(5)/double(3);
     
     TBOX_ASSERT(d_source_terms_db != nullptr);
     
@@ -107,7 +104,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     // eps_0 has the unit of kinetic energy per unit time.
     const double Q_force = dt*eps_0/TKE_avg; // multiply  dt for time integration.
     // const double Q_force = dt*eps_0/(TKE_avg*double(3));
-
+    
     if (d_project_name == "3D HIT")
     {
         for (int k = 0; k < patch_dims[2]; k++)
@@ -115,16 +112,16 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             for (int j = 0; j < patch_dims[1]; j++)
             {
                 for (int i = 0; i < patch_dims[0]; i++)
-                {   
+                {
                     // Compute the linear indices.
                     const int idx_source = (i + num_ghosts_source[0]) +
                         (j + num_ghosts_source[1])*ghostcell_dims_source[0] + 
                         (k + num_ghosts_source[2])*ghostcell_dims_source[0]*ghostcell_dims_source[1];
-
+                    
                     const int idx_cons_var = (i + num_ghosts_cons_var[0]) +
                         (j + num_ghosts_cons_var[1])*ghostcell_dims_cons_var[0] +
                         (k + num_ghosts_cons_var[2])*ghostcell_dims_cons_var[0]*ghostcell_dims_cons_var[1];
-
+                    
                     S[1][idx_source] += Q_force*rho_u[idx_cons_var];
                     S[2][idx_source] += Q_force*rho_v[idx_cons_var];
                     S[3][idx_source] += Q_force*rho_w[idx_cons_var];
@@ -133,6 +130,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
         }
     }
 }
+
 
 void
 FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database>& restart_source_terms_db)

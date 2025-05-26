@@ -13,7 +13,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     const double dt,
     const int RK_step_number)
 {
-    if ((d_project_name != "3D uniform flow") ) 
+    if (d_project_name != "3D uniform flow")
     {
         TBOX_ERROR(d_object_name
             << ": "
@@ -99,8 +99,8 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << "No key 'v_inf' found in data for source terms."
             << std::endl);
     }
-
-    TBOX_ASSERT(d_source_terms_db->keyExists("w_inf")); 
+    
+    TBOX_ASSERT(d_source_terms_db->keyExists("w_inf"));
     
     Real w_inf = Real(0);
     if (d_source_terms_db->keyExists("w_inf"))
@@ -129,7 +129,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << "No key 'p_inf' found in data for source terms."
             << std::endl);
     }
-
+    
     TBOX_ASSERT(d_source_terms_db->keyExists("D"));
     
     Real D = Real(1);
@@ -146,8 +146,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << std::endl);
     }
     
-    Real gamma = Real(7)/Real(5);
-    
+    Real gamma;
     if (d_source_terms_db->keyExists("gamma"))
     {
         gamma = d_source_terms_db->getReal("gamma");
@@ -159,7 +158,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << "No key 'gamma' found in data for source terms."
             << std::endl);
     }
-
+    
     const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
         HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
@@ -224,16 +223,15 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                         (k + num_ghosts_cons_var[2]) * ghostcell_dims_cons_var[1] * ghostcell_dims_cons_var[0];
                     
                     // Compute the coordinates.
-                    
                     Real x[3];
-                    x[0] = patch_xlo[0] + (Real(i) + Real(1)/Real(2))*Real(dx[0]);
-                    x[1] = patch_xlo[1] + (Real(j) + Real(1)/Real(2))*Real(dx[1]);
-                    x[2] = patch_xlo[2] + (Real(k) + Real(1)/Real(2))*Real(dx[2]);
+                    x[0] = Real(patch_xlo[0]) + (Real(i) + Real(1)/Real(2))*Real(dx[0]);
+                    x[1] = Real(patch_xlo[1]) + (Real(j) + Real(1)/Real(2))*Real(dx[1]);
+                    x[2] = Real(patch_xlo[2]) + (Real(k) + Real(1)/Real(2))*Real(dx[2]);
                     
                     const Real half  = Real(1)/Real(2);
-		            const Real two_third = Real(2)/Real(3);
-
-                    //Left sponge region
+                    const Real two_third = Real(2)/Real(3);
+                    
+                    // Left sponge region.
                     if (x[0] <= d_special_source_box_lo[0])
                     {
                         const Real u_ref = u_inf;
@@ -253,80 +251,78 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                         const Real rho_v_p = rho_v[idx_cons_var] - rho_v_ref;
                         const Real rho_w_p = rho_w[idx_cons_var] - rho_w_ref;
                         const Real E_p     = E[idx_cons_var]     - E_ref;
-
-                        // 0927 AFK Sponge Update
-                        const Real erf_start_lo  = half*(domain_xlo[0] - d_special_source_box_lo[0]) + d_special_source_box_lo[0];   //c enter of erf is half of the way into sponge
-                        const Real erf_offset_lo = -half * erf((d_special_source_box_lo[0]-erf_start_lo)/(D*half)) + half;           // value of erf at start of sponge 
-                        Real xi_b                = -half * erf((x[0]-erf_start_lo)/(D*half)) + half - erf_offset_lo;  // subtract value of erf at start of sponge to start xi_b at zero
-                        xi_b                     *= sponge_rate; 
                         
-                        // Double check this, for 3D cylinder
-                        // Edges LB, LT. don't include LK, LF
-                        if (x[1] <= d_special_source_box_lo[1] || x[1] >= d_special_source_box_hi[1])  //  ||  x[2] <= d_special_source_box_lo[2] || x[2] >= d_special_source_box_hi[2]
+                        const Real erf_start_lo  = half*(domain_xlo[0] - d_special_source_box_lo[0]) + d_special_source_box_lo[0]; // center of erf is half of the way into sponge
+                        const Real erf_offset_lo = -half * erf((d_special_source_box_lo[0]-erf_start_lo)/(D*half)) + half;         // value of erf at start of sponge 
+                        Real xi_b                = -half * erf((x[0]-erf_start_lo)/(D*half)) + half - erf_offset_lo;               // subtract value of erf at start of sponge to start xi_b at zero
+                        xi_b                     *= sponge_rate;
+                        
+                        // Double check this, for 3D cylinder.
+                        // Edges LB, LT. don't include LK, LF.
+                        if (x[1] <= d_special_source_box_lo[1] || x[1] >= d_special_source_box_hi[1]) // || x[2] <= d_special_source_box_lo[2] || x[2] >= d_special_source_box_hi[2]
                         {
                             xi_b = xi_b * half;
                         }
                         
-                        // Corners LBK, LBF, LTK, LTF 
-                        //if ((x[1] <= d_special_source_box_lo[1] || x[1] >= d_special_source_box_hi[1]) && (x[2] <= d_special_source_box_lo[2] || x[2] >= d_special_source_box_hi[2]))
-                        //{
-                        //    xi_b = xi_b ; // * two_third; 
-                        //}
-
-                        S[0][idx_source] -= dt*xi_b*rho_p;
-                        S[1][idx_source] -= dt*xi_b*rho_u_p;
-                        S[2][idx_source] -= dt*xi_b*rho_v_p;
-                        S[3][idx_source] -= dt*xi_b*rho_w_p;
-                        S[4][idx_source] -= dt*xi_b*E_p;
+                        // Corners LBK, LBF, LTK, LTF.
+                        // if ((x[1] <= d_special_source_box_lo[1] || x[1] >= d_special_source_box_hi[1]) && (x[2] <= d_special_source_box_lo[2] || x[2] >= d_special_source_box_hi[2]))
+                        // {
+                        //     xi_b = xi_b ; // * two_third;
+                        // }
                         
+                        S[0][idx_source] -= Real(dt*double(xi_b*rho_p));
+                        S[1][idx_source] -= Real(dt*double(xi_b*rho_u_p));
+                        S[2][idx_source] -= Real(dt*double(xi_b*rho_v_p));
+                        S[3][idx_source] -= Real(dt*double(xi_b*rho_w_p));
+                        S[4][idx_source] -= Real(dt*double(xi_b*E_p));
                     }
-                    // Right sponge region
+                    
+                    // Right sponge region.
                     if (x[0] >= d_special_source_box_hi[0])
-                    {                    
+                    {
                         const Real u_ref = u_inf;
                         const Real v_ref = v_inf;
                         const Real w_ref = w_inf;
                         
                         const Real rho_ref = rho_inf;
                         const Real p_ref   = p_inf;
-
+                        
                         const Real rho_u_ref = rho_ref * u_ref;
                         const Real rho_v_ref = rho_ref * v_ref;
                         const Real rho_w_ref = rho_ref * w_ref;
                         const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref + w_ref*w_ref);
-
+                        
                         const Real rho_p   = rho[idx_cons_var]   - rho_ref;
                         const Real rho_u_p = rho_u[idx_cons_var] - rho_u_ref;
                         const Real rho_v_p = rho_v[idx_cons_var] - rho_v_ref;
                         const Real rho_w_p = rho_w[idx_cons_var] - rho_w_ref;
                         const Real E_p     = E[idx_cons_var]     - E_ref;
                         
-                        // 0927 AFK Sponge Update
-                        const Real erf_start_hi  = half*(domain_xhi[0]-d_special_source_box_hi[0]) + d_special_source_box_hi[0]; //center of erf is half of the way into sponge
-                        const Real erf_offset_hi = half * erf((d_special_source_box_hi[0]-erf_start_hi)/(D*half)) + half; //value of erf at start of sponge
-                        Real xi_b                = half * erf((x[0]-erf_start_hi)/(D*half)) + half - erf_offset_hi; //subtract value of erf at start of sponge to start xi_b at zero
-                        xi_b                     *= sponge_rate; 
+                        const Real erf_start_hi  = half*(domain_xhi[0]-d_special_source_box_hi[0]) + d_special_source_box_hi[0]; // center of erf is half of the way into sponge
+                        const Real erf_offset_hi = half * erf((d_special_source_box_hi[0]-erf_start_hi)/(D*half)) + half;        // value of erf at start of sponge
+                        Real xi_b                = half * erf((x[0]-erf_start_hi)/(D*half)) + half - erf_offset_hi;              // subtract value of erf at start of sponge to start xi_b at zero
+                        xi_b                     *= sponge_rate;
                         
-                        // Double check this, for 3D cylinder
-                        // Edges RB, RT. don't include RK, RF
-                        if (x[1] <= d_special_source_box_lo[1] || x[1] >= d_special_source_box_hi[1] ) // || x[2] <= d_special_source_box_lo[2] || x[2] >= d_special_source_box_hi[2]
+                        // Double check this, for 3D cylinder.
+                        // Edges RB, RT. don't include RK, RF.
+                        if (x[1] <= d_special_source_box_lo[1] || x[1] >= d_special_source_box_hi[1]) // || x[2] <= d_special_source_box_lo[2] || x[2] >= d_special_source_box_hi[2]
                         {
                             xi_b = xi_b * half;
                         }
-                        // Corners RBK, RBF, RTK, RTF  
-                        //if ((x[1] <= d_special_source_box_lo[1] || x[1] >= d_special_source_box_hi[1]) && (x[2] <= d_special_source_box_lo[2] || x[2] >= d_special_source_box_hi[2]))
-                        //{
-                        //    xi_b = xi_b; //* two_third; 
-                        //}
-
-                        S[0][idx_source] -= dt*xi_b*rho_p;
-                        S[1][idx_source] -= dt*xi_b*rho_u_p;
-                        S[2][idx_source] -= dt*xi_b*rho_v_p;
-                        S[3][idx_source] -= dt*xi_b*rho_w_p;
-                        S[4][idx_source] -= dt*xi_b*E_p;
+                        // Corners RBK, RBF, RTK, RTF.
+                        // if ((x[1] <= d_special_source_box_lo[1] || x[1] >= d_special_source_box_hi[1]) && (x[2] <= d_special_source_box_lo[2] || x[2] >= d_special_source_box_hi[2]))
+                        // {
+                        //     xi_b = xi_b; // * two_third;
+                        // }
                         
+                        S[0][idx_source] -= Real(dt*double(xi_b*rho_p));
+                        S[1][idx_source] -= Real(dt*double(xi_b*rho_u_p));
+                        S[2][idx_source] -= Real(dt*double(xi_b*rho_v_p));
+                        S[3][idx_source] -= Real(dt*double(xi_b*rho_w_p));
+                        S[4][idx_source] -= Real(dt*double(xi_b*E_p));
                     }
-                    // Bottom sponge region
+                    
+                    // Bottom sponge region.
                     if (x[1] <= d_special_source_box_lo[1])
                     {
                         const Real u_ref = u_inf;
@@ -346,121 +342,103 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                         const Real rho_v_p = rho_v[idx_cons_var] - rho_v_ref;
                         const Real rho_w_p = rho_w[idx_cons_var] - rho_w_ref;
                         const Real E_p     = E[idx_cons_var]     - E_ref;
-
-                        // 0927 AFK Sponge Update
-                        const Real erf_start_lo  = half*(domain_xlo[1] - d_special_source_box_lo[1]) + d_special_source_box_lo[1]; //center of erf is 3/4 of the way into sponge
-                        const Real erf_offset_lo = -half * erf((d_special_source_box_lo[1]-erf_start_lo)/(D*half)) + half; //value of erf at start of sponge 
-                        Real yi_b                = -half * erf((x[1]-erf_start_lo)/(D*half)) + half - erf_offset_lo; //subtract value of erf at start of sponge to start xi_b at zero
-                        yi_b                     *= sponge_rate; 
                         
-                        // Double check this, for 3D cylinder
-                        // Edges LB, RB. don't include BK, BF. 
-                        if (x[0] <= d_special_source_box_lo[0] || x[0] >= d_special_source_box_hi[0] ) // || x[2] <= d_special_source_box_lo[2] || x[2] >= d_special_source_box_hi[2]
+                        const Real erf_start_lo  = half*(domain_xlo[1] - d_special_source_box_lo[1]) + d_special_source_box_lo[1]; // center of erf is 3/4 of the way into sponge
+                        const Real erf_offset_lo = -half * erf((d_special_source_box_lo[1]-erf_start_lo)/(D*half)) + half;         // value of erf at start of sponge 
+                        Real yi_b                = -half * erf((x[1]-erf_start_lo)/(D*half)) + half - erf_offset_lo;               // subtract value of erf at start of sponge to start xi_b at zero
+                        yi_b                     *= sponge_rate;
+                        
+                        // Double check this, for 3D cylinder.
+                        // Edges LB, RB. don't include BK, BF.
+                        if (x[0] <= d_special_source_box_lo[0] || x[0] >= d_special_source_box_hi[0]) // || x[2] <= d_special_source_box_lo[2] || x[2] >= d_special_source_box_hi[2]
                         {
                             yi_b = yi_b * half;
                         }
-
-                        // Corners LBK, LBF, RBK, RBF
-                        //if ((x[0] <= d_special_source_box_lo[0] || x[0] >= d_special_source_box_hi[0]) && (x[2] <= d_special_source_box_lo[2] || x[2] >= d_special_source_box_hi[2]))
-                        //{
-                        //    yi_b = yi_b; //* two_third;
-                        //}
-                        S[0][idx_source] -= dt*yi_b*rho_p;
-                        S[1][idx_source] -= dt*yi_b*rho_u_p;
-                        S[2][idx_source] -= dt*yi_b*rho_v_p;
-                        S[3][idx_source] -= dt*yi_b*rho_w_p;
-                        S[4][idx_source] -= dt*yi_b*E_p;
                         
+                        // Corners LBK, LBF, RBK, RBF.
+                        // if ((x[0] <= d_special_source_box_lo[0] || x[0] >= d_special_source_box_hi[0]) && (x[2] <= d_special_source_box_lo[2] || x[2] >= d_special_source_box_hi[2]))
+                        // {
+                        //     yi_b = yi_b; // * two_third;
+                        // }
+                        S[0][idx_source] -= Real(dt*double(yi_b*rho_p));
+                        S[1][idx_source] -= Real(dt*double(yi_b*rho_u_p));
+                        S[2][idx_source] -= Real(dt*double(yi_b*rho_v_p));
+                        S[3][idx_source] -= Real(dt*double(yi_b*rho_w_p));
+                        S[4][idx_source] -= Real(dt*double(yi_b*E_p));
                     }
-                    // Top sponge region
+                    
+                    // Top sponge region.
                     if (x[1] >= d_special_source_box_hi[1])
-                    {                    
+                    {
                         const Real u_ref = u_inf;
                         const Real v_ref = v_inf;
                         const Real w_ref = w_inf;
                         
                         const Real rho_ref = rho_inf;
                         const Real p_ref   = p_inf;
-
+                        
                         const Real rho_u_ref = rho_ref * u_ref;
                         const Real rho_v_ref = rho_ref * v_ref;
                         const Real rho_w_ref = rho_ref * w_ref;
                         const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref + w_ref*w_ref);
-
+                        
                         const Real rho_p   = rho[idx_cons_var]   - rho_ref;
                         const Real rho_u_p = rho_u[idx_cons_var] - rho_u_ref;
                         const Real rho_v_p = rho_v[idx_cons_var] - rho_v_ref;
                         const Real rho_w_p = rho_w[idx_cons_var] - rho_w_ref;
                         const Real E_p     = E[idx_cons_var]     - E_ref;
-
-                        // 0927 AFK Sponge Update
-                        const Real erf_start_hi  = half*(domain_xhi[1]-d_special_source_box_hi[1]) + d_special_source_box_hi[1]; //center of erf is half of the way into sponge
-                        const Real erf_offset_hi = half * erf((d_special_source_box_hi[1]-erf_start_hi)/(D*half)) + half; //value of erf at start of sponge
-                        Real yi_b                = half * erf((x[1]-erf_start_hi)/(D*half)) + half - erf_offset_hi; //subtract value of erf at start of sponge to start xi_b at zero
-                        yi_b                     *= sponge_rate; 
                         
-                        // Double check this, for 3D cylinder
+                        const Real erf_start_hi  = half*(domain_xhi[1]-d_special_source_box_hi[1]) + d_special_source_box_hi[1]; // center of erf is half of the way into sponge
+                        const Real erf_offset_hi = half * erf((d_special_source_box_hi[1]-erf_start_hi)/(D*half)) + half;        // value of erf at start of sponge
+                        Real yi_b                = half * erf((x[1]-erf_start_hi)/(D*half)) + half - erf_offset_hi;              // subtract value of erf at start of sponge to start xi_b at zero
+                        yi_b                     *= sponge_rate;
+                        
+                        // Double check this, for 3D cylinder.
                         // Edges LT, RT. Don't include TK, TF.
                         if (x[0] <= d_special_source_box_lo[0] || x[0] >= d_special_source_box_hi[0])   //  || x[2] <= d_special_source_box_lo[2] || x[2] >= d_special_source_box_hi[2]
                         {
                             yi_b = yi_b * half;
                         }
-
+                        
                         // Corners LTK, LTF, RTK, RTF.
-                        //if ((x[0] <= d_special_source_box_lo[0] || x[0] >= d_special_source_box_hi[0]) && (x[2] <= d_special_source_box_lo[2] || x[2] >= d_special_source_box_hi[2]))
-                        //{
-                        //    yi_b = yi_b; //* two_third;
-                        //}
-
-                        S[0][idx_source] -= dt*yi_b*rho_p;
-                        S[1][idx_source] -= dt*yi_b*rho_u_p;
-                        S[2][idx_source] -= dt*yi_b*rho_v_p;
-                        S[3][idx_source] -= dt*yi_b*rho_w_p;
-                        S[4][idx_source] -= dt*yi_b*E_p;
-                        // Below was for 2d Cylinder
-                        // // Top left or top right sponge region
-                        // if (x[0] <= d_special_source_box_lo[0] || x[0] >= d_special_source_box_hi[0])
+                        // if ((x[0] <= d_special_source_box_lo[0] || x[0] >= d_special_source_box_hi[0]) && (x[2] <= d_special_source_box_lo[2] || x[2] >= d_special_source_box_hi[2]))
                         // {
-                        //     S[0][idx_source] -= half*dt*yi_b*rho_p;
-                        //     S[1][idx_source] -= half*dt*yi_b*rho_u_p;
-                        //     S[2][idx_source] -= half*dt*yi_b*rho_v_p;
-                        //     S[3][idx_source] -= half*dt*yi_b*E_p;
+                        //     yi_b = yi_b; // * two_third;
                         // }
-                        // else
-                        // {
-                        //     S[0][idx_source] -= dt*yi_b*rho_p;
-                        //     S[1][idx_source] -= dt*yi_b*rho_u_p;
-                        //     S[2][idx_source] -= dt*yi_b*rho_v_p;
-                        //     S[3][idx_source] -= dt*yi_b*E_p;
-                        // }
+                        
+                        S[0][idx_source] -= Real(dt*double(yi_b*rho_p));
+                        S[1][idx_source] -= Real(dt*double(yi_b*rho_u_p));
+                        S[2][idx_source] -= Real(dt*double(yi_b*rho_v_p));
+                        S[3][idx_source] -= Real(dt*double(yi_b*rho_w_p));
+                        S[4][idx_source] -= Real(dt*double(yi_b*E_p));
                     }
-
-                    // Added Front and back sponges for 3D cylinder
+                    
+                    // Added Front and back sponges for 3D cylinder.
                     // Front sponge region
                     /* if (x[2] >= d_special_source_box_hi[2])
-                    {                    
+                    {
                         const Real u_ref = u_inf;
                         const Real v_ref = v_inf;
                         const Real w_ref = w_inf;
                         
                         const Real rho_ref = rho_inf;
                         const Real p_ref   = p_inf;
-
+                    
                         const Real rho_u_ref = rho_ref * u_ref;
                         const Real rho_v_ref = rho_ref * v_ref;
                         const Real rho_w_ref = rho_ref * w_ref;
                         const Real E_ref     = p_ref/(gamma - Real(1)) + rho_ref*half*(u_ref*u_ref + v_ref*v_ref + w_ref*w_ref);
-
+                        
                         const Real rho_p   = rho[idx_cons_var]   - rho_ref;
                         const Real rho_u_p = rho_u[idx_cons_var] - rho_u_ref;
                         const Real rho_v_p = rho_v[idx_cons_var] - rho_v_ref;
                         const Real rho_w_p = rho_w[idx_cons_var] - rho_w_ref;
                         const Real E_p     = E[idx_cons_var]     - E_ref;
-
-                        const Real erf_start_hi  = half*(domain_xhi[2]-d_special_source_box_hi[2]) + d_special_source_box_hi[2];    // center of erf is half of the way into sponge
-                        const Real erf_offset_hi = half * erf((d_special_source_box_hi[2]-erf_start_hi)/(D*half)) + half;           // value of erf at start of sponge
-                        Real zi_b                = half * erf((x[2]-erf_start_hi)/(D*half)) + half - erf_offset_hi;                 // subtract value of erf at start of sponge to start xi_b at zero
-                        zi_b                     *= sponge_rate; 
+                        
+                        const Real erf_start_hi  = half*(domain_xhi[2]-d_special_source_box_hi[2]) + d_special_source_box_hi[2]; // center of erf is half of the way into sponge
+                        const Real erf_offset_hi = half * erf((d_special_source_box_hi[2]-erf_start_hi)/(D*half)) + half;        // value of erf at start of sponge
+                        Real zi_b                = half * erf((x[2]-erf_start_hi)/(D*half)) + half - erf_offset_hi;              // subtract value of erf at start of sponge to start xi_b at zero
+                        zi_b                     *= sponge_rate;
                         
                         // Edges LF, RF, BF, TF.
                         if (x[0] <= d_special_source_box_lo[0] || x[0] >= d_special_source_box_hi[0] || x[1] <= d_special_source_box_lo[1]  || x[1] >= d_special_source_box_hi[1])
@@ -472,37 +450,37 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                         {
                             zi_b = zi_b * two_third;
                         }
-                        S[0][idx_source] -= dt*zi_b*rho_p;
-                        S[1][idx_source] -= dt*zi_b*rho_u_p;
-                        S[2][idx_source] -= dt*zi_b*rho_v_p;
-                        S[3][idx_source] -= dt*zi_b*rho_w_p;
-                        S[4][idx_source] -= dt*zi_b*E_p;
+                        S[0][idx_source] -= Real(dt*double(zi_b*rho_p));
+                        S[1][idx_source] -= Real(dt*double(zi_b*rho_u_p));
+                        S[2][idx_source] -= Real(dt*double(zi_b*rho_v_p));
+                        S[3][idx_source] -= Real(dt*double(zi_b*rho_w_p));
+                        S[4][idx_source] -= Real(dt*double(zi_b*E_p));
                     }
-                    // Back Sponge Region
+                    // Back sponge region.
                     if (x[2] <= d_special_source_box_lo[2])
-                    {                    
+                    {
                         const Real u_ref = u_inf;
                         const Real v_ref = v_inf;
                         const Real w_ref = w_inf;
                         
                         const Real rho_ref = rho_inf;
                         const Real p_ref   = p_inf;
-
+                        
                         const Real rho_u_ref = rho_ref * u_ref;
                         const Real rho_v_ref = rho_ref * v_ref;
                         const Real rho_w_ref = rho_ref * w_ref;
                         const Real E_ref     = p_ref/(gamma - Real(1)) + rho_ref*half*(u_ref*u_ref + v_ref*v_ref + w_ref*w_ref);
-
+                        
                         const Real rho_p   = rho[idx_cons_var]   - rho_ref;
                         const Real rho_u_p = rho_u[idx_cons_var] - rho_u_ref;
                         const Real rho_v_p = rho_v[idx_cons_var] - rho_v_ref;
                         const Real rho_w_p = rho_w[idx_cons_var] - rho_w_ref;
                         const Real E_p     = E[idx_cons_var]     - E_ref;
-
-                        const Real erf_start_lo  = half*(domain_xlo[2]-d_special_source_box_lo[2]) + d_special_source_box_lo[2];            // center of erf is half of the way into sponge
-                        const Real erf_offset_lo = -half * erf((d_special_source_box_lo[2]-erf_start_lo)/(D*half)) + half;                  // value of erf at start of sponge
-                        Real zi_b                = -half * erf((x[2]-erf_start_lo)/(D*half)) + half - erf_offset_lo;                        // subtract value of erf at start of sponge to start xi_b at zero
-                        zi_b                     *= sponge_rate; 
+                        
+                        const Real erf_start_lo  = half*(domain_xlo[2]-d_special_source_box_lo[2]) + d_special_source_box_lo[2]; // center of erf is half of the way into sponge
+                        const Real erf_offset_lo = -half * erf((d_special_source_box_lo[2]-erf_start_lo)/(D*half)) + half;       // value of erf at start of sponge
+                        Real zi_b                = -half * erf((x[2]-erf_start_lo)/(D*half)) + half - erf_offset_lo;             // subtract value of erf at start of sponge to start xi_b at zero
+                        zi_b                     *= sponge_rate;
                         
                         // Edges LK, RK, BK, TK.
                         if (x[0] <= d_special_source_box_lo[0]   || x[0] >= d_special_source_box_hi[0]  || x[1] <= d_special_source_box_lo[1]  || x[1] >= d_special_source_box_hi[1])
@@ -514,11 +492,11 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                         {
                             zi_b = zi_b * two_third;
                         }
-                        S[0][idx_source] -= dt*zi_b*rho_p;
-                        S[1][idx_source] -= dt*zi_b*rho_u_p;
-                        S[2][idx_source] -= dt*zi_b*rho_v_p;
-                        S[3][idx_source] -= dt*zi_b*rho_w_p;
-                        S[4][idx_source] -= dt*zi_b*E_p;
+                        S[0][idx_source] -= Real(dt*double(zi_b*rho_p));
+                        S[1][idx_source] -= Real(dt*double(zi_b*rho_u_p));
+                        S[2][idx_source] -= Real(dt*double(zi_b*rho_v_p));
+                        S[3][idx_source] -= Real(dt*double(zi_b*rho_w_p));
+                        S[4][idx_source] -= Real(dt*double(zi_b*E_p));
                     } */
                 }
             }
@@ -546,7 +524,7 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
     }
     
     restart_source_terms_db->putReal("sponge_rate", sponge_rate);
-
+    
     Real rho_inf = Real(0);
     if (d_source_terms_db->keyExists("rho_inf"))
     {
@@ -576,7 +554,7 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
     }
     
     restart_source_terms_db->putReal("u_inf", u_inf);
-
+    
     Real v_inf = Real(0);
     if (d_source_terms_db->keyExists("v_inf"))
     {
@@ -591,7 +569,7 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
     }
     
     restart_source_terms_db->putReal("v_inf", v_inf);
-
+    
     Real w_inf = Real(0);
     if (d_source_terms_db->keyExists("w_inf"))
     {
@@ -606,7 +584,7 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
     }
     
     restart_source_terms_db->putReal("w_inf", w_inf);
-
+    
     Real p_inf = Real(0);
     if (d_source_terms_db->keyExists("p_inf"))
     {
@@ -636,8 +614,8 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
     }
     
     restart_source_terms_db->putReal("D", D);
-
-    Real gamma = Real(7)/Real(5);
+    
+    Real gamma;
     if (d_source_terms_db->keyExists("gamma"))
     {
         gamma = d_source_terms_db->getReal("gamma");
@@ -651,5 +629,4 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
     }
     
     restart_source_terms_db->putReal("gamma", gamma);
-
 }

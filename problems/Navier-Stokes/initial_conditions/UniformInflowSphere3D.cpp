@@ -1,4 +1,5 @@
 #include "apps/Navier-Stokes/NavierStokesInitialConditions.hpp"
+
 /*
  * Set the data on the patch interior to some initial values.
  */
@@ -144,9 +145,9 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         (k + num_ghosts_cons_var[2]) * ghostcell_dims_cons_var[1] * ghostcell_dims_cons_var[0];
                     
                     Real x[3];
-                    x[0] = patch_xlo[0] + (Real(i) + half)*Real(dx[0]); // x coordinates of the point
-                    x[1] = patch_xlo[1] + (Real(j) + half)*Real(dx[1]); // y coordinates of the point
-                    x[2] = patch_xlo[2] + (Real(k) + half)*Real(dx[2]); // z coordinates of the point
+                    x[0] = patch_xlo[0] + (Real(i) + half)*Real(dx[0]); // x-coordinate of the point
+                    x[1] = patch_xlo[1] + (Real(j) + half)*Real(dx[1]); // y-coordinate of the point
+                    x[2] = patch_xlo[2] + (Real(k) + half)*Real(dx[2]); // z-coordinate of the point
                     
                     rho[idx_cell] = rho_inf;
                     
@@ -169,7 +170,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     
                     p_ic = p_inf + half*rho_inf*(u_inf*u_inf - (u_ic*u_ic + v_ic*v_ic + w_ic*w_ic));
                     
-                    if(x[0] < x_c)
+                    if (x[0] < x_c)
                     {
                         u = half * (u_inf + u_ic) + half * (u_ic - u_inf)*erf((x[0]-spongeL)/(D/Real(5)));
                         v = half * (v_inf + v_ic) + half * (v_ic - v_inf)*erf((x[0]-spongeL)/(D/Real(5)));

@@ -1495,7 +1495,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         
                         Real T_gc = Real(0);
                         if (d_bc_type_temperature == TEMPERATURE_IBC::ADIABATIC)
-                        {   
+                        {
                             // dT/dn = 0
                             T_gc = getGhostValueNeumannBC(
                                 T_ip_1,
