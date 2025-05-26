@@ -81,7 +81,7 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
     {
         TBOX_ASSERT(d_initial_conditions_db->keyExists("x_c"));
         TBOX_ASSERT(d_initial_conditions_db->keyExists("y_c"));
-        TBOX_ASSERT(d_initial_conditions_db->keyExists("z_c")); 
+        TBOX_ASSERT(d_initial_conditions_db->keyExists("z_c"));
         
         x_c = d_initial_conditions_db->getReal("x_c");
         y_c = d_initial_conditions_db->getReal("y_c");
@@ -157,7 +157,7 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                         if ((fabs(x_p - Real(x[0])) < (Real(gx))*Real(dx[0])) || (fabs(y_p - Real(x[1])) < (Real(gx))*Real(dx[1]))) // Ghost cells excluding corner ghost cells.
                         {
                             is_ghost_cell = true;
-                            break; 
+                            break;
                         }
                         
                         x_d[0] = patch_xlo[0] + (Real(i + gx) + half) * Real(dx[0]);

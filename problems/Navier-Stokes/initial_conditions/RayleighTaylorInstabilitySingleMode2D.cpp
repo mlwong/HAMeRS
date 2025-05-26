@@ -521,7 +521,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
                     x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
                     
-                    double eta = 0.0;        
+                    double eta = 0.0;
                     for (int m = waven - 4; m <= waven + 4; m++)
                     {
                         eta += eta_0/3.0*cos(2.0*M_PI*m/width*x[1] + rmod[m-waven+4]);

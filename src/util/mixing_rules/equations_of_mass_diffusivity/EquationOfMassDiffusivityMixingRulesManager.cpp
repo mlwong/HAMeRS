@@ -40,7 +40,7 @@ EquationOfMassDiffusivityMixingRulesManager::EquationOfMassDiffusivityMixingRule
             << "Unknown equation_of_mass_diffusivity/d_equation_of_mass_diffusivity string = '"
             << equation_of_mass_diffusivity_str
             << "' found in input/restart file."
-            << std::endl);        
+            << std::endl);
     }
 }
 

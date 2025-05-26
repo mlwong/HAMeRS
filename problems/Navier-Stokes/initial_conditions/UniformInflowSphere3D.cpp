@@ -163,9 +163,9 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     }
                     else 
                     {
-                        u_ic = u_inf;   //*(Real(1) - (Real(3) * std::pow(D, 3)*std::pow(x[0],2))/(Real(16)*std::pow(r, 5)) + (std::pow(D, 3)/(Real(16)*std::pow(r, 3))));
-                        v_ic = Real(0); //-u_inf*((Real(3) * std::pow(D,3) * x[0] * x[1])/(Real(16) * std::pow(r,5)));
-                        w_ic = Real(0); //-u_inf*((Real(3) * std::pow(D,3) * x[0] * x[2])/(Real(16) * std::pow(r,5)));
+                        u_ic = u_inf;   // *(Real(1) - (Real(3) * std::pow(D, 3)*std::pow(x[0],2))/(Real(16)*std::pow(r, 5)) + (std::pow(D, 3)/(Real(16)*std::pow(r, 3))));
+                        v_ic = Real(0); // -u_inf*((Real(3) * std::pow(D,3) * x[0] * x[1])/(Real(16) * std::pow(r,5)));
+                        w_ic = Real(0); // -u_inf*((Real(3) * std::pow(D,3) * x[0] * x[2])/(Real(16) * std::pow(r,5)));
                     }
                     
                     p_ic = p_inf + half*rho_inf*(u_inf*u_inf - (u_ic*u_ic + v_ic*v_ic + w_ic*w_ic));

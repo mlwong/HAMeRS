@@ -292,7 +292,7 @@ EquationOfStateMixingRules::getMixtureDensity(
         rho += Z_rho;
     }
     
-    return rho;            
+    return rho;
 }
 
 

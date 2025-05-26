@@ -40,7 +40,7 @@ EquationOfStateMixingRulesManager::EquationOfStateMixingRulesManager(
             << "Unknown equation_of_state/d_equation_of_state string = '"
             << equation_of_state_str
             << "' found in input/restart file."
-            << std::endl);        
+            << std::endl);
     }
 }
 
