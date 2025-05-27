@@ -841,9 +841,9 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                 
                 for (int ni = 0; ni < num_nodes; ni++)
                 {
-                    const std::array<Real, 3>& coor_ip_1 = d_surface_triangulation_coor_ip_1[ni];
-                    const std::array<Real, 3>& coor_ip_2 = d_surface_triangulation_coor_ip_2[ni];
-                    const std::array<Real, 3>& coor_bi = d_surface_triangulation_coor_bi[ni];
+                    const std::array<double, 3>& coor_ip_1 = d_surface_triangulation_coor_ip_1[ni];
+                    const std::array<double, 3>& coor_ip_2 = d_surface_triangulation_coor_ip_2[ni];
+                    const std::array<double, 3>& coor_bi = d_surface_triangulation_coor_bi[ni];
                     
                     if ((coor_ip_1[0] >= patch_xlo[0] && coor_ip_1[0] <= patch_xhi[0]) &&
                         (coor_ip_1[1] >= patch_xlo[1] && coor_ip_1[1] <= patch_xhi[1]) &&

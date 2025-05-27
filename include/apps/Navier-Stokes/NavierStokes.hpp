@@ -779,22 +779,22 @@ class NavierStokes:
         /*
          * HAMERS_SHARED_PTR to side variable of convective flux.
          */
-        HAMERS_SHARED_PTR<pdat::SideVariable<double> > d_variable_convective_flux;
+        HAMERS_SHARED_PTR<pdat::SideVariable<Real> > d_variable_convective_flux;
         
         /*
          * HAMERS_SHARED_PTR to side variable of diffusive flux.
          */
-        HAMERS_SHARED_PTR<pdat::SideVariable<double> > d_variable_diffusive_flux;
+        HAMERS_SHARED_PTR<pdat::SideVariable<Real> > d_variable_diffusive_flux;
         
         /*
          * HAMERS_SHARED_PTR to cell variable of diffusive flux divergence.
          */
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_variable_diffusive_flux_divergence;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_variable_diffusive_flux_divergence;
         
         /*
          * HAMERS_SHARED_PTR to cell variable of source terms.
          */
-        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_variable_source;
+        HAMERS_SHARED_PTR<pdat::CellVariable<Real> > d_variable_source;
         
         /*
          * HAMERS_SHARED_PTR to the plotting context.

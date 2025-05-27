@@ -85,7 +85,7 @@ class EulerBoundaryConditions:
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
     private:
-        std::vector<double>
+        std::vector<Real>
         readPrimitiveDataEntry(
             HAMERS_SHARED_PTR<tbox::Database> db,
             const std::string& db_name);
@@ -157,9 +157,9 @@ class EulerBoundaryConditions:
         /*
          * Vectors of node (1D), edge (2D) or face (3D) boundary values for DIRICHLET case.
          */
-        std::vector<std::vector<double> > d_bdry_node_conservative_var;
-        std::vector<std::vector<double> > d_bdry_edge_conservative_var;
-        std::vector<std::vector<double> > d_bdry_face_conservative_var;
+        std::vector<std::vector<Real> > d_bdry_node_conservative_var;
+        std::vector<std::vector<Real> > d_bdry_edge_conservative_var;
+        std::vector<std::vector<Real> > d_bdry_face_conservative_var;
         
         /*
          * HAMERS_SHARED_PTR to the special boundary conditions.

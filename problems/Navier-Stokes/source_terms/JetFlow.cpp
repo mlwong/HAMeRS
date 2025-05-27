@@ -5,10 +5,10 @@
  */
 void
 FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& source,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& source,
     const hier::Patch& patch,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
-    const std::unordered_map<std::string, double>& monitoring_statistics_map,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
+    const std::unordered_map<std::string, Real>& monitoring_statistics_map,
     const double time,
     const double dt,
     const int RK_step_number)
@@ -23,7 +23,6 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             << "' is given."
             << std::endl);
     }
-    
     
     if (d_dim != tbox::Dimension(2) && d_dim != tbox::Dimension(3) )
     {
@@ -43,10 +42,10 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     
     TBOX_ASSERT(d_source_terms_db->keyExists("sponge_rate"));
     
-    double sponge_rate = double(0);
+    Real sponge_rate = Real(0);
     if (d_source_terms_db->keyExists("sponge_rate"))
     {
-        sponge_rate = d_source_terms_db->getDouble("sponge_rate");
+        sponge_rate = d_source_terms_db->getReal("sponge_rate");
     }
     else
     {
@@ -58,10 +57,10 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
 
     TBOX_ASSERT(d_source_terms_db->keyExists("U_jet"));
     
-    double U_jet = double(0);
+    Real U_jet = Real(0);
     if (d_source_terms_db->keyExists("U_jet"))
     {
-        U_jet = d_source_terms_db->getDouble("U_jet");
+        U_jet = d_source_terms_db->getReal("U_jet");
     }
     else
     {
@@ -73,10 +72,10 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     
     TBOX_ASSERT(d_source_terms_db->keyExists("theta_0"));
     
-    double theta_0 = double(0);
+    Real theta_0 = Real(0);
     if (d_source_terms_db->keyExists("theta_0"))
     {
-        theta_0 = d_source_terms_db->getDouble("theta_0");
+        theta_0 = d_source_terms_db->getReal("theta_0");
     }
     else
     {
@@ -88,10 +87,10 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
 
     TBOX_ASSERT(d_source_terms_db->keyExists("D_jet"));
     
-    double D_jet = double(0);
+    Real D_jet = Real(0);
     if (d_source_terms_db->keyExists("D_jet"))
     {
-        D_jet = d_source_terms_db->getDouble("D_jet");
+        D_jet = d_source_terms_db->getReal("D_jet");
     }
     else
     {
@@ -109,7 +108,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     TBOX_ASSERT(patch_geom);
 #endif
     
-    std::vector<double*> S;
+    std::vector<Real*> S;
     S.reserve(d_num_eqn);
     for (int si = 0; si < d_num_eqn; si++)
     {
@@ -136,35 +135,35 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
      * Initialize data for a 2D Rayleigh-Taylor instability problem (At = 0.04, M = 0.3).
      */
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > density         = conservative_variables[0];
-    HAMERS_SHARED_PTR<pdat::CellData<double> > momentum        = conservative_variables[1];
-    HAMERS_SHARED_PTR<pdat::CellData<double> > total_energy    = conservative_variables[2];
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > density         = conservative_variables[0];
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > momentum        = conservative_variables[1];
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > total_energy    = conservative_variables[2];
     
-    double* rho     = density->getPointer(0);
-    double* rho_u   = momentum->getPointer(0);
-    double* rho_v   = momentum->getPointer(1);
-    double* rho_w   = momentum->getPointer(2);
-    double* E       = total_energy->getPointer(0);
+    Real* rho     = density->getPointer(0);
+    Real* rho_u   = momentum->getPointer(0);
+    Real* rho_v   = momentum->getPointer(1);
+    Real* rho_w   = momentum->getPointer(2);
+    Real* E       = total_energy->getPointer(0);
     
-    const double gamma = double(7)/double(5); // assume both gases have the same ratio of specific heat ratios
+    const Real gamma = Real(7)/Real(5); // assume both gases have the same ratio of specific heat ratios
     
-    const double W_0 = 1.0000; // molecular weight of heavier gas
-    //const double W_1 = 0.0290; // molecular weight of lighter gas
+    const Real W_0 = Real(1.0000); // molecular weight of heavier gas
+    //const Real W_1 = 0.0290; // molecular weight of lighter gas
     
-    const double p_ref = 100000.0; // interface pressure
-    const double T_ref = 300.0;    // background temperature
+    const Real p_ref = Real(100000.0); // interface pressure
+    const Real T_ref = Real(300.0);    // background temperature
     
     TBOX_ASSERT(d_source_terms_db != nullptr);
     
-    const double R_u = 8.31446261815324; // universal gas constant
-    const double R_0 = R_u/W_0;          // gas constant
+    const Real R_u = Real(8.31446261815324); // universal gas constant
+    const Real R_0 = R_u/W_0;          // gas constant
     
     const double* const domain_xlo = d_grid_geometry->getXLower();
     const double* const domain_xhi = d_grid_geometry->getXUpper();
     
     if (d_project_name == "2D jet")
     {
-        const double r_0 = D_jet/2.0;
+        const Real r_0 = D_jet/Real(2);
         for (int j = 0; j < patch_dims[1]; j++)
         {
             for (int i = 0; i < patch_dims[0]; i++)
@@ -177,111 +176,111 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                     (j + num_ghosts_cons_var[1])*ghostcell_dims_cons_var[0];
                 
                 // Compute the coordinates.
-                double x[2];
-                x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
-                x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
+                Real x[2];
+                x[0] = Real(patch_xlo[0]) + (Real(i) + Real(1)/Real(2))*Real(dx[0]);
+                x[1] = Real(patch_xlo[1]) + (Real(j) + Real(1)/Real(2))*Real(dx[1]);
                 
-                const double r = fabs(x[1]); //distance from jet center in y-direction
+                const Real r = std::abs(x[1]); //distance from jet center in y-direction
                 
                 // Check whether it is outside the special source box.
                 if (x[0] <= d_special_source_box_lo[0])
                 {
-                    const double u_ref = U_jet*0.5*(1.0-tanh(r_0/(4.0*theta_0)*(r/r_0-r_0/r)));
-                    const double v_ref = 0.0;
+                    const Real u_ref = U_jet*Real(0.5)*(Real(1)-std::tanh(r_0/(Real(4)*theta_0)*(r/r_0-r_0/r)));
+                    const Real v_ref = Real(0);
                     
-                    const double rho_ref = p_ref/(R_0*T_ref);
+                    const Real rho_ref = p_ref/(R_0*T_ref);
                     
-                    const double rho_u_ref = rho_ref * u_ref;
-                    const double rho_v_ref = rho_ref * v_ref;
-                    const double E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
+                    const Real rho_u_ref = rho_ref * u_ref;
+                    const Real rho_v_ref = rho_ref * v_ref;
+                    const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
                     
-                    const double xi_b      = (1.0-(x[0]-domain_xlo[0])/(d_special_source_box_lo[0]-domain_xlo[0]))*sponge_rate; // mask value needs to be improved 
+                    const Real xi_b      = (Real(1)-(x[0]-Real(domain_xlo[0]))/(d_special_source_box_lo[0]-Real(domain_xlo[0])))*sponge_rate; // mask value needs to be improved 
                     
-                    const double rho_p     = rho[idx_cons_var]   - rho_ref;
-                    const double rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
-                    const double rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
-                    const double E_p       = E[idx_cons_var]     - E_ref;
+                    const Real rho_p     = rho[idx_cons_var]   - rho_ref;
+                    const Real rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
+                    const Real rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
+                    const Real E_p       = E[idx_cons_var]     - E_ref;
                     
-                    S[0][idx_source] -= dt*xi_b*rho_p;
-                    S[1][idx_source] -= dt*xi_b*rho_u_p;
-                    S[2][idx_source] -= dt*xi_b*rho_v_p;
-                    S[3][idx_source] -= dt*xi_b*E_p;
+                    S[0][idx_source] -= Real(dt*double(xi_b*rho_p));
+                    S[1][idx_source] -= Real(dt*double(xi_b*rho_u_p));
+                    S[2][idx_source] -= Real(dt*double(xi_b*rho_v_p));
+                    S[3][idx_source] -= Real(dt*double(xi_b*E_p));
                 }
                 if (x[0] >= d_special_source_box_hi[0])
                 {
-                    const double u_ref = 0.0;
-                    const double v_ref = 0.0;
+                    const Real u_ref = Real(0);
+                    const Real v_ref = Real(0);
                     
-                    const double rho_ref   = p_ref/(R_0*T_ref);
+                    const Real rho_ref   = p_ref/(R_0*T_ref);
                     
-                    const double rho_u_ref = rho_ref * u_ref;
-                    const double rho_v_ref = rho_ref * v_ref;
-                    const double E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
+                    const Real rho_u_ref = rho_ref * u_ref;
+                    const Real rho_v_ref = rho_ref * v_ref;
+                    const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
                     
-                    const double xi_b      = (x[0]-d_special_source_box_hi[0])/(domain_xhi[0]-d_special_source_box_hi[0])*sponge_rate/1.0; // mask value needs to be improved 
+                    const Real xi_b      = (x[0]-d_special_source_box_hi[0])/(Real(domain_xhi[0])-d_special_source_box_hi[0])*sponge_rate/Real(1); // mask value needs to be improved 
                     
-                    const double rho_p     = rho[idx_cons_var] - rho_ref;
-                    const double rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
-                    const double rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
-                    const double E_p       = E[idx_cons_var]     - E_ref;
+                    const Real rho_p     = rho[idx_cons_var] - rho_ref;
+                    const Real rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
+                    const Real rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
+                    const Real E_p       = E[idx_cons_var]     - E_ref;
                     
-                    S[0][idx_source] -= dt*xi_b*rho_p;
-                    S[1][idx_source] -= dt*xi_b*rho_u_p;
-                    S[2][idx_source] -= dt*xi_b*rho_v_p;
-                    S[3][idx_source] -= dt*xi_b*E_p;
+                    S[0][idx_source] -= Real(dt*double(xi_b*rho_p));
+                    S[1][idx_source] -= Real(dt*double(xi_b*rho_u_p));
+                    S[2][idx_source] -= Real(dt*double(xi_b*rho_v_p));
+                    S[3][idx_source] -= Real(dt*double(xi_b*E_p));
                 }
                 if (x[1] <= d_special_source_box_lo[1])
                 {
-                    const double u_ref = 0.0;
-                    const double v_ref = 0.0;
+                    const Real u_ref = Real(0);
+                    const Real v_ref = Real(0);
                     
-                    const double rho_ref = p_ref/(R_0*T_ref);
+                    const Real rho_ref = p_ref/(R_0*T_ref);
                     
-                    const double rho_u_ref = rho_ref * u_ref;
-                    const double rho_v_ref = rho_ref * v_ref;
-                    const double E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
+                    const Real rho_u_ref = rho_ref * u_ref;
+                    const Real rho_v_ref = rho_ref * v_ref;
+                    const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
                     
-                    const double xi_b      = (1.0-(x[1]-domain_xlo[1])/(d_special_source_box_lo[1]-domain_xlo[1]))*sponge_rate/1.0; // mask value needs to be improved 
+                    const Real xi_b      = (Real(1)-(x[1]-Real(domain_xlo[1]))/(d_special_source_box_lo[1]-Real(domain_xlo[1])))*sponge_rate/Real(1); // mask value needs to be improved 
                     
-                    const double rho_p     = rho[idx_cons_var] - rho_ref;
-                    const double rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
-                    const double rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
-                    const double E_p       = E[idx_cons_var]     - E_ref;
+                    const Real rho_p     = rho[idx_cons_var] - rho_ref;
+                    const Real rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
+                    const Real rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
+                    const Real E_p       = E[idx_cons_var]     - E_ref;
                     
-                    S[0][idx_source] -= dt*xi_b*rho_p;
-                    S[1][idx_source] -= dt*xi_b*rho_u_p;
-                    S[2][idx_source] -= dt*xi_b*rho_v_p;
-                    S[3][idx_source] -= dt*xi_b*E_p;
+                    S[0][idx_source] -= Real(dt*double(xi_b*rho_p));
+                    S[1][idx_source] -= Real(dt*double(xi_b*rho_u_p));
+                    S[2][idx_source] -= Real(dt*double(xi_b*rho_v_p));
+                    S[3][idx_source] -= Real(dt*double(xi_b*E_p));
                 }
                 if (x[1] >= d_special_source_box_hi[1])
                 {
-                    const double u_ref = 0.0;
-                    const double v_ref = 0.0;
+                    const Real u_ref = Real(0);
+                    const Real v_ref = Real(0);
                     
-                    const double rho_ref = p_ref/(R_0*T_ref);
+                    const Real rho_ref = p_ref/(R_0*T_ref);
                     
-                    const double rho_u_ref = rho_ref * u_ref;
-                    const double rho_v_ref = rho_ref * v_ref;
-                    const double E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
+                    const Real rho_u_ref = rho_ref * u_ref;
+                    const Real rho_v_ref = rho_ref * v_ref;
+                    const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
                     
-                    const double xi_b      = (x[1]-d_special_source_box_hi[1])/(domain_xhi[1]-d_special_source_box_hi[1])*sponge_rate/1.0; // mask value needs to be improved
+                    const Real xi_b      = (x[1]-d_special_source_box_hi[1])/(Real(domain_xhi[1])-d_special_source_box_hi[1])*sponge_rate/Real(1); // mask value needs to be improved
                     
-                    const double rho_p     = rho[idx_cons_var]   - rho_ref;
-                    const double rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
-                    const double rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
-                    const double E_p       = E[idx_cons_var]     - E_ref;
+                    const Real rho_p     = rho[idx_cons_var]   - rho_ref;
+                    const Real rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
+                    const Real rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
+                    const Real E_p       = E[idx_cons_var]     - E_ref;
                     
-                    S[0][idx_source] -= dt*xi_b*rho_p;
-                    S[1][idx_source] -= dt*xi_b*rho_u_p;
-                    S[2][idx_source] -= dt*xi_b*rho_v_p;
-                    S[3][idx_source] -= dt*xi_b*E_p;
+                    S[0][idx_source] -= Real(dt*double(xi_b*rho_p));
+                    S[1][idx_source] -= Real(dt*double(xi_b*rho_u_p));
+                    S[2][idx_source] -= Real(dt*double(xi_b*rho_v_p));
+                    S[3][idx_source] -= Real(dt*double(xi_b*E_p));
                 }
             }
         }
     }
     else if (d_project_name == "3D jet")
     {
-        const double r_0 = D_jet/2.0;
+        const Real r_0 = D_jet/Real(2);
         
         for (int k = 0; k < patch_dims[2]; k++)
         {
@@ -299,174 +298,174 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
                         (k + num_ghosts_cons_var[2])*ghostcell_dims_cons_var[0]*ghostcell_dims_cons_var[1];
                     
                     // Compute the coordinates.
-                    double x[3];
-                    x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
-                    x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
-                    x[2] = patch_xlo[2] + (double(k) + double(1)/double(2))*dx[2];
+                    Real x[3];
+                    x[0] = Real(patch_xlo[0]) + (Real(i) + Real(1)/Real(2))*Real(dx[0]);
+                    x[1] = Real(patch_xlo[1]) + (Real(j) + Real(1)/Real(2))*Real(dx[1]);
+                    x[2] = Real(patch_xlo[2]) + (Real(k) + Real(1)/Real(2))*Real(dx[2]);
                     
-                    const double r = sqrt(fabs(x[1])*fabs(x[1])+fabs(x[2])*fabs(x[2]));
+                    const Real r = std::sqrt(std::abs(x[1])*std::abs(x[1])+std::abs(x[2])*std::abs(x[2]));
                     
                     if (x[0] <= d_special_source_box_lo[0])
                     {
-                        const double u_ref = U_jet*0.5*(1.0-tanh(r_0/(4.0*theta_0)*(r/r_0-r_0/r)));
-                        const double v_ref = 0.0;
-                        const double w_ref = 0.0;
+                        const Real u_ref = U_jet*Real(0.5)*(Real(1)-std::tanh(r_0/(Real(4)*theta_0)*(r/r_0-r_0/r)));
+                        const Real v_ref = Real(0);
+                        const Real w_ref = Real(0);
                         
-                        const double rho_ref = p_ref/(R_0*T_ref);
+                        const Real rho_ref = p_ref/(R_0*T_ref);
                         
-                        const double rho_u_ref = rho_ref * u_ref;
-                        const double rho_v_ref = rho_ref * v_ref;
-                        const double rho_w_ref = rho_ref * w_ref;
-                        const double E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref + w_ref*w_ref);
+                        const Real rho_u_ref = rho_ref * u_ref;
+                        const Real rho_v_ref = rho_ref * v_ref;
+                        const Real rho_w_ref = rho_ref * w_ref;
+                        const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref + w_ref*w_ref);
                         
-                        const double xi_b      = (1.0-(x[0]-domain_xlo[0])/(d_special_source_box_lo[0]-domain_xlo[0]))*sponge_rate; // mask value needs to be improved
+                        const Real xi_b      = (Real(1)-(x[0]-Real(domain_xlo[0]))/(d_special_source_box_lo[0]-Real(domain_xlo[0])))*sponge_rate; // mask value needs to be improved
                         
-                        const double rho_p     = rho[idx_cons_var]   - rho_ref;
-                        const double rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
-                        const double rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
-                        const double rho_w_p   = rho_w[idx_cons_var] - rho_w_ref;
-                        const double E_p       = E[idx_cons_var]     - E_ref;
+                        const Real rho_p     = rho[idx_cons_var]   - rho_ref;
+                        const Real rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
+                        const Real rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
+                        const Real rho_w_p   = rho_w[idx_cons_var] - rho_w_ref;
+                        const Real E_p       = E[idx_cons_var]     - E_ref;
                         
-                        S[0][idx_source] -= dt*xi_b*rho_p;
-                        S[1][idx_source] -= dt*xi_b*rho_u_p;
-                        S[2][idx_source] -= dt*xi_b*rho_v_p;
-                        S[3][idx_source] -= dt*xi_b*rho_w_p;
-                        S[4][idx_source] -= dt*xi_b*E_p;
+                        S[0][idx_source] -= Real(dt*double(xi_b*rho_p));
+                        S[1][idx_source] -= Real(dt*double(xi_b*rho_u_p));
+                        S[2][idx_source] -= Real(dt*double(xi_b*rho_v_p));
+                        S[3][idx_source] -= Real(dt*double(xi_b*rho_w_p));
+                        S[4][idx_source] -= Real(dt*double(xi_b*E_p));
                     }
                     if (x[0] >= d_special_source_box_hi[0])
                     {
-                        const double u_ref = 0.0;
-                        const double v_ref = 0.0;
-                        const double w_ref = 0.0;
+                        const Real u_ref = Real(0);
+                        const Real v_ref = Real(0);
+                        const Real w_ref = Real(0);
                         
-                        const double rho_ref   = p_ref/(R_0*T_ref);
+                        const Real rho_ref   = p_ref/(R_0*T_ref);
                         
-                        const double rho_u_ref = rho_ref * u_ref;
-                        const double rho_v_ref = rho_ref * v_ref;
-                        const double rho_w_ref = rho_ref * w_ref;
-                        const double E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref + w_ref*w_ref);
+                        const Real rho_u_ref = rho_ref * u_ref;
+                        const Real rho_v_ref = rho_ref * v_ref;
+                        const Real rho_w_ref = rho_ref * w_ref;
+                        const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref + w_ref*w_ref);
                         
-                        const double xi_b      = (x[0]-d_special_source_box_hi[0])/(domain_xhi[0]-d_special_source_box_hi[0])*sponge_rate/1.0; // mask value needs to be improved
+                        const Real xi_b      = (x[0]-d_special_source_box_hi[0])/(Real(domain_xhi[0])-d_special_source_box_hi[0])*sponge_rate/Real(1); // mask value needs to be improved
                         
-                        const double rho_p     = rho[idx_cons_var]   - rho_ref;
-                        const double rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
-                        const double rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
-                        const double rho_w_p   = rho_w[idx_cons_var] - rho_w_ref;
-                        const double E_p       = E[idx_cons_var]     - E_ref;
+                        const Real rho_p     = rho[idx_cons_var]   - rho_ref;
+                        const Real rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
+                        const Real rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
+                        const Real rho_w_p   = rho_w[idx_cons_var] - rho_w_ref;
+                        const Real E_p       = E[idx_cons_var]     - E_ref;
                         
-                        S[0][idx_source] -= dt*xi_b*rho_p;
-                        S[1][idx_source] -= dt*xi_b*rho_u_p;
-                        S[2][idx_source] -= dt*xi_b*rho_v_p;
-                        S[3][idx_source] -= dt*xi_b*rho_w_p;
-                        S[4][idx_source] -= dt*xi_b*E_p;
+                        S[0][idx_source] -= Real(dt*double(xi_b*rho_p));
+                        S[1][idx_source] -= Real(dt*double(xi_b*rho_u_p));
+                        S[2][idx_source] -= Real(dt*double(xi_b*rho_v_p));
+                        S[3][idx_source] -= Real(dt*double(xi_b*rho_w_p));
+                        S[4][idx_source] -= Real(dt*double(xi_b*E_p));
                     }
                     if (x[1] <= d_special_source_box_lo[1])
                     {
-                        const double u_ref = 0.0;
-                        const double v_ref = 0.0;
-                        const double w_ref = 0.0;
+                        const Real u_ref = Real(0);
+                        const Real v_ref = Real(0);
+                        const Real w_ref = Real(0);
                         
-                        const double rho_ref = p_ref/(R_0*T_ref);
+                        const Real rho_ref = p_ref/(R_0*T_ref);
                         
-                        const double rho_u_ref = rho_ref * u_ref;
-                        const double rho_v_ref = rho_ref * v_ref;
-                        const double rho_w_ref = rho_ref * w_ref;
-                        const double E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref + w_ref*w_ref);
+                        const Real rho_u_ref = rho_ref * u_ref;
+                        const Real rho_v_ref = rho_ref * v_ref;
+                        const Real rho_w_ref = rho_ref * w_ref;
+                        const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref + w_ref*w_ref);
                         
-                        const double xi_b      = (1.0-(x[1]-domain_xlo[1])/(d_special_source_box_lo[1]-domain_xlo[1]))*sponge_rate/1.0; // mask value needs to be improved
+                        const Real xi_b      = (Real(1)-(x[1]-Real(domain_xlo[1]))/(d_special_source_box_lo[1]-Real(domain_xlo[1])))*sponge_rate/Real(1); // mask value needs to be improved
                         
-                        const double rho_p     = rho[idx_cons_var]   - rho_ref;
-                        const double rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
-                        const double rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
-                        const double rho_w_p   = rho_w[idx_cons_var] - rho_w_ref;
-                        const double E_p       = E[idx_cons_var]     - E_ref;
+                        const Real rho_p     = rho[idx_cons_var]   - rho_ref;
+                        const Real rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
+                        const Real rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
+                        const Real rho_w_p   = rho_w[idx_cons_var] - rho_w_ref;
+                        const Real E_p       = E[idx_cons_var]     - E_ref;
                         
-                        S[0][idx_source] -= dt*xi_b*rho_p;
-                        S[1][idx_source] -= dt*xi_b*rho_u_p;
-                        S[2][idx_source] -= dt*xi_b*rho_v_p;
-                        S[3][idx_source] -= dt*xi_b*rho_w_p;
-                        S[4][idx_source] -= dt*xi_b*E_p;
+                        S[0][idx_source] -= Real(dt*double(xi_b*rho_p));
+                        S[1][idx_source] -= Real(dt*double(xi_b*rho_u_p));
+                        S[2][idx_source] -= Real(dt*double(xi_b*rho_v_p));
+                        S[3][idx_source] -= Real(dt*double(xi_b*rho_w_p));
+                        S[4][idx_source] -= Real(dt*double(xi_b*E_p));
                     }
                     if (x[1] >= d_special_source_box_hi[1])
                     {
-                        const double u_ref = 0.0;
-                        const double v_ref = 0.0;
-                        const double w_ref = 0.0;
+                        const Real u_ref = Real(0);
+                        const Real v_ref = Real(0);
+                        const Real w_ref = Real(0);
                         
-                        const double rho_ref = p_ref/(R_0*T_ref);
+                        const Real rho_ref = p_ref/(R_0*T_ref);
                         
-                        const double rho_u_ref = rho_ref * u_ref;
-                        const double rho_v_ref = rho_ref * v_ref;
-                        const double rho_w_ref = rho_ref * w_ref;
-                        const double E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref + w_ref*w_ref);
+                        const Real rho_u_ref = rho_ref * u_ref;
+                        const Real rho_v_ref = rho_ref * v_ref;
+                        const Real rho_w_ref = rho_ref * w_ref;
+                        const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref + w_ref*w_ref);
                         
-                        const double xi_b      = (x[1]-d_special_source_box_hi[1])/(domain_xhi[1]-d_special_source_box_hi[1])*sponge_rate/1.0; // mask value needs to be improved
+                        const Real xi_b      = (x[1]-d_special_source_box_hi[1])/(Real(domain_xhi[1])-d_special_source_box_hi[1])*sponge_rate/Real(1); // mask value needs to be improved
                         
-                        const double rho_p     = rho[idx_cons_var]   - rho_ref;
-                        const double rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
-                        const double rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
-                        const double rho_w_p   = rho_w[idx_cons_var] - rho_w_ref;
-                        const double E_p       = E[idx_cons_var]     - E_ref;
+                        const Real rho_p     = rho[idx_cons_var]   - rho_ref;
+                        const Real rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
+                        const Real rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
+                        const Real rho_w_p   = rho_w[idx_cons_var] - rho_w_ref;
+                        const Real E_p       = E[idx_cons_var]     - E_ref;
                         
-                        S[0][idx_source] -= dt*xi_b*rho_p;
-                        S[1][idx_source] -= dt*xi_b*rho_u_p;
-                        S[2][idx_source] -= dt*xi_b*rho_v_p;
-                        S[3][idx_source] -= dt*xi_b*rho_w_p;
-                        S[4][idx_source] -= dt*xi_b*E_p;
+                        S[0][idx_source] -= Real(dt*double(xi_b*rho_p));
+                        S[1][idx_source] -= Real(dt*double(xi_b*rho_u_p));
+                        S[2][idx_source] -= Real(dt*double(xi_b*rho_v_p));
+                        S[3][idx_source] -= Real(dt*double(xi_b*rho_w_p));
+                        S[4][idx_source] -= Real(dt*double(xi_b*E_p));
                     } 
                     if (x[2] <= d_special_source_box_lo[2])
                     {
-                        const double u_ref = 0.0;
-                        const double v_ref = 0.0;
-                        const double w_ref = 0.0;
+                        const Real u_ref = Real(0);
+                        const Real v_ref = Real(0);
+                        const Real w_ref = Real(0);
                         
-                        const double rho_ref = p_ref/(R_0*T_ref);
+                        const Real rho_ref = p_ref/(R_0*T_ref);
                         
-                        const double rho_u_ref = rho_ref * u_ref;
-                        const double rho_v_ref = rho_ref * v_ref;
-                        const double rho_w_ref = rho_ref * w_ref;
-                        const double E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref +w_ref*w_ref);
+                        const Real rho_u_ref = rho_ref * u_ref;
+                        const Real rho_v_ref = rho_ref * v_ref;
+                        const Real rho_w_ref = rho_ref * w_ref;
+                        const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref +w_ref*w_ref);
                         
-                        const double xi_b      = (1.0-(x[2]-domain_xlo[2])/(d_special_source_box_lo[2]-domain_xlo[2]))*sponge_rate/1.0; // mask value needs to be improved
+                        const Real xi_b      = (Real(1)-(x[2]-Real(domain_xlo[2]))/(d_special_source_box_lo[2]-Real(domain_xlo[2])))*sponge_rate/Real(1); // mask value needs to be improved
                         
-                        const double rho_p     = rho[idx_cons_var]   - rho_ref;
-                        const double rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
-                        const double rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
-                        const double rho_w_p   = rho_w[idx_cons_var] - rho_w_ref;
-                        const double E_p       = E[idx_cons_var]     - E_ref;
+                        const Real rho_p     = rho[idx_cons_var]   - rho_ref;
+                        const Real rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
+                        const Real rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
+                        const Real rho_w_p   = rho_w[idx_cons_var] - rho_w_ref;
+                        const Real E_p       = E[idx_cons_var]     - E_ref;
                         
-                        S[0][idx_source] -= dt*xi_b*rho_p;
-                        S[1][idx_source] -= dt*xi_b*rho_u_p;
-                        S[2][idx_source] -= dt*xi_b*rho_v_p;
-                        S[3][idx_source] -= dt*xi_b*rho_w_p;
-                        S[4][idx_source] -= dt*xi_b*E_p;
+                        S[0][idx_source] -= Real(dt*double(xi_b*rho_p));
+                        S[1][idx_source] -= Real(dt*double(xi_b*rho_u_p));
+                        S[2][idx_source] -= Real(dt*double(xi_b*rho_v_p));
+                        S[3][idx_source] -= Real(dt*double(xi_b*rho_w_p));
+                        S[4][idx_source] -= Real(dt*double(xi_b*E_p));
                     }
-                    if (x[1] >= d_special_source_box_hi[1])
+                    if (x[2] >= d_special_source_box_hi[2])
                     {
-                        const double u_ref = 0.0;
-                        const double v_ref = 0.0;
-                        const double w_ref = 0.0;
+                        const Real u_ref = Real(0);
+                        const Real v_ref = Real(0);
+                        const Real w_ref = Real(0);
                         
-                        const double rho_ref = p_ref/(R_0*T_ref);
+                        const Real rho_ref = p_ref/(R_0*T_ref);
                         
-                        const double rho_u_ref = rho_ref * u_ref;
-                        const double rho_v_ref = rho_ref * v_ref;
-                        const double rho_w_ref = rho_ref * w_ref;
-                        const double E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref + w_ref*w_ref);
+                        const Real rho_u_ref = rho_ref * u_ref;
+                        const Real rho_v_ref = rho_ref * v_ref;
+                        const Real rho_w_ref = rho_ref * w_ref;
+                        const Real E_ref     = p_ref/(gamma - Real(1)) + Real(1)/Real(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref + w_ref*w_ref);
                         
-                        const double xi_b      = (x[2]-d_special_source_box_hi[2])/(domain_xhi[2]-d_special_source_box_hi[2])*sponge_rate/1.0; // mask value needs to be improved
+                        const Real xi_b      = (x[2]-d_special_source_box_hi[2])/(Real(domain_xhi[2])-d_special_source_box_hi[2])*sponge_rate/Real(1); // mask value needs to be improved
                         
-                        const double rho_p     = rho[idx_cons_var]   - rho_ref;
-                        const double rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
-                        const double rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
-                        const double rho_w_p   = rho_w[idx_cons_var] - rho_w_ref;
-                        const double E_p       = E[idx_cons_var]     - E_ref;
+                        const Real rho_p     = rho[idx_cons_var]   - rho_ref;
+                        const Real rho_u_p   = rho_u[idx_cons_var] - rho_u_ref;
+                        const Real rho_v_p   = rho_v[idx_cons_var] - rho_v_ref;
+                        const Real rho_w_p   = rho_w[idx_cons_var] - rho_w_ref;
+                        const Real E_p       = E[idx_cons_var]     - E_ref;
                         
-                        S[0][idx_source] -= dt*xi_b*rho_p;
-                        S[1][idx_source] -= dt*xi_b*rho_u_p;
-                        S[2][idx_source] -= dt*xi_b*rho_v_p;
-                        S[3][idx_source] -= dt*xi_b*rho_w_p;
-                        S[4][idx_source] -= dt*xi_b*E_p;
+                        S[0][idx_source] -= Real(dt*double(xi_b*rho_p));
+                        S[1][idx_source] -= Real(dt*double(xi_b*rho_u_p));
+                        S[2][idx_source] -= Real(dt*double(xi_b*rho_v_p));
+                        S[3][idx_source] -= Real(dt*double(xi_b*rho_w_p));
+                        S[4][idx_source] -= Real(dt*double(xi_b*E_p));
                     }
                 }
             }
@@ -480,10 +479,10 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
 {
     putToRestartBase(restart_source_terms_db);
     
-    double sponge_rate = double(0);
+    Real sponge_rate = Real(0);
     if (d_source_terms_db->keyExists("sponge_rate"))
     {
-        sponge_rate = d_source_terms_db->getDouble("sponge_rate");
+        sponge_rate = d_source_terms_db->getReal("sponge_rate");
     }
     else
     {
@@ -493,12 +492,12 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
             << std::endl);
     }
     
-    restart_source_terms_db->putDouble("sponge_rate", sponge_rate);
+    restart_source_terms_db->putReal("sponge_rate", sponge_rate);
     
-    double U_jet = double(0);
+    Real U_jet = Real(0);
     if (d_source_terms_db->keyExists("U_jet"))
     {
-        U_jet = d_source_terms_db->getDouble("U_jet");
+        U_jet = d_source_terms_db->getReal("U_jet");
     }
     else
     {
@@ -508,12 +507,12 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
             << std::endl);
     }
     
-    restart_source_terms_db->putDouble("U_jet", U_jet);
+    restart_source_terms_db->putReal("U_jet", U_jet);
     
-    double theta_0 = double(0);
+    Real theta_0 = Real(0);
     if (d_source_terms_db->keyExists("theta_0"))
     {
-        theta_0 = d_source_terms_db->getDouble("theta_0");
+        theta_0 = d_source_terms_db->getReal("theta_0");
     }
     else
     {
@@ -523,12 +522,12 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
             << std::endl);
     }
     
-    restart_source_terms_db->putDouble("theta_0", theta_0);
+    restart_source_terms_db->putReal("theta_0", theta_0);
     
-    double D_jet = double(0);
+    Real D_jet = Real(0);
     if (d_source_terms_db->keyExists("D_jet"))
     {
-        D_jet = d_source_terms_db->getDouble("D_jet");
+        D_jet = d_source_terms_db->getReal("D_jet");
     }
     else
     {
@@ -538,5 +537,5 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
             << std::endl);
     }
     
-    restart_source_terms_db->putDouble("D_jet", D_jet);
+    restart_source_terms_db->putReal("D_jet", D_jet);
 }

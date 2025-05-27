@@ -1752,6 +1752,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
     }
     else if (d_dim == tbox::Dimension(3))
     {
+        const Real half = Real(1)/Real(2);
         for (int ni = 0; ni < num_nodes; ni++)
         {
             const double dx_grid   = d_surface_triangulation_dx_grid[ni];
@@ -1773,10 +1774,10 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
             const Real E_ip_2     = Real(d_surface_triangulation_cons_var_ip_2[4][ni]);
             
             const Real epsilon_ip_1 = (E_ip_1 -
-                0.5*(rho_u_ip_1*rho_u_ip_1 + rho_v_ip_1*rho_v_ip_1 + rho_w_ip_1*rho_w_ip_1)/rho_ip_1)/rho_ip_1;
+                half*(rho_u_ip_1*rho_u_ip_1 + rho_v_ip_1*rho_v_ip_1 + rho_w_ip_1*rho_w_ip_1)/rho_ip_1)/rho_ip_1;
             
             const Real epsilon_ip_2 = (E_ip_2 -
-                0.5*(rho_u_ip_2*rho_u_ip_2 + rho_v_ip_2*rho_v_ip_2 + rho_w_ip_2*rho_w_ip_2)/rho_ip_2)/rho_ip_2;
+                half*(rho_u_ip_2*rho_u_ip_2 + rho_v_ip_2*rho_v_ip_2 + rho_w_ip_2*rho_w_ip_2)/rho_ip_2)/rho_ip_2;
             
             const Real p_ip_1 = d_equation_of_state_mixing_rules->getEquationOfState()->getPressure(
                 &rho_ip_1,
@@ -1870,12 +1871,12 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
                 const Real w_mirror = (diff_ip_2_mirror*w_ip_1 + diff_mirror_ip_1*w_ip_2)/diff_ip_2_ip_1;
                 
                 // Velocity component normal to the boundary at the mirror image point.
-                const Real vel_mirror_n = dotProduct3D(u_mirror, v_mirror, w_mirror, normal_nodes[ni][0], normal_nodes[ni][1], normal_nodes[ni][2]);
+                const Real vel_mirror_n = dotProduct3D(u_mirror, v_mirror, w_mirror, Real(normal_nodes[ni][0]), Real(normal_nodes[ni][1]), Real(normal_nodes[ni][2]));
                 
                 // No-penetration boundary condition.
-                u_surf = u_mirror - Real(2)*vel_mirror_n*normal_nodes[ni][0];
-                v_surf = v_mirror - Real(2)*vel_mirror_n*normal_nodes[ni][1];
-                w_surf = w_mirror - Real(2)*vel_mirror_n*normal_nodes[ni][2];
+                u_surf = u_mirror - Real(2)*vel_mirror_n*Real(normal_nodes[ni][0]);
+                v_surf = v_mirror - Real(2)*vel_mirror_n*Real(normal_nodes[ni][1]);
+                w_surf = w_mirror - Real(2)*vel_mirror_n*Real(normal_nodes[ni][2]);
 
             }
             else if (d_bc_type_velocity == VELOCITY_IBC::NO_SLIP)
@@ -1905,8 +1906,8 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
             // Another tangential vector is (-ac, -bc, a^2 + b^2).
             Real vec_tan_1[3] = {-vec_norm[1],             vec_norm[0],              Real(0)};
             Real vec_tan_2[3] = {-vec_norm[0]*vec_norm[2], -vec_norm[1]*vec_norm[2], vec_norm[0]*vec_norm[0] + vec_norm[1]*vec_norm[1]};
-            const Real vec_tan_1_mag = sqrt(vec_tan_1[0]*vec_tan_1[0] + vec_tan_1[1]*vec_tan_1[1] + vec_tan_1[2]*vec_tan_1[2]);
-            const Real vec_tan_2_mag = sqrt(vec_tan_2[0]*vec_tan_2[0] + vec_tan_2[1]*vec_tan_2[1] + vec_tan_2[2]*vec_tan_2[2]);
+            const Real vec_tan_1_mag = std::sqrt(vec_tan_1[0]*vec_tan_1[0] + vec_tan_1[1]*vec_tan_1[1] + vec_tan_1[2]*vec_tan_1[2]);
+            const Real vec_tan_2_mag = std::sqrt(vec_tan_2[0]*vec_tan_2[0] + vec_tan_2[1]*vec_tan_2[1] + vec_tan_2[2]*vec_tan_2[2]);
             for (int di = 0; di < 3; di++)
             {
                 vec_tan_1[di] /= vec_tan_1_mag;
@@ -1926,8 +1927,8 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::computeSurfaceTriangulationDa
             }
             
             // Normalize the tangent vectors.
-            const Real norm_tan_1 = sqrt(vec_tan_1[0]*vec_tan_1[0] + vec_tan_1[1]*vec_tan_1[1] + vec_tan_1[2]*vec_tan_1[2]);
-            const Real norm_tan_2 = sqrt(vec_tan_2[0]*vec_tan_2[0] + vec_tan_2[1]*vec_tan_2[1] + vec_tan_2[2]*vec_tan_2[2]);
+            const Real norm_tan_1 = std::sqrt(vec_tan_1[0]*vec_tan_1[0] + vec_tan_1[1]*vec_tan_1[1] + vec_tan_1[2]*vec_tan_1[2]);
+            const Real norm_tan_2 = std::sqrt(vec_tan_2[0]*vec_tan_2[0] + vec_tan_2[1]*vec_tan_2[1] + vec_tan_2[2]*vec_tan_2[2]);
             
             vec_tan_1[0] /= norm_tan_1;
             vec_tan_1[1] /= norm_tan_1;

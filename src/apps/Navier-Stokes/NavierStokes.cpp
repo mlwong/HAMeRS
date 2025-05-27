@@ -408,8 +408,8 @@ NavierStokes::NavierStokes(
      * Initialize the side variable of convective flux.
      */
     
-    d_variable_convective_flux = HAMERS_SHARED_PTR<pdat::SideVariable<double> > (
-        new pdat::SideVariable<double>(dim, "convective flux", d_flow_model->getNumberOfEquations()));
+    d_variable_convective_flux = HAMERS_SHARED_PTR<pdat::SideVariable<Real> > (
+        new pdat::SideVariable<Real>(dim, "convective flux", d_flow_model->getNumberOfEquations()));
     
     if (d_use_conservative_form_diffusive_flux)
     {
@@ -417,8 +417,8 @@ NavierStokes::NavierStokes(
          * Initialize the side variable of diffusive flux.
          */
         
-        d_variable_diffusive_flux = HAMERS_SHARED_PTR<pdat::SideVariable<double> > (
-            new pdat::SideVariable<double>(dim, "diffusive flux", d_flow_model->getNumberOfEquations()));
+        d_variable_diffusive_flux = HAMERS_SHARED_PTR<pdat::SideVariable<Real> > (
+            new pdat::SideVariable<Real>(dim, "diffusive flux", d_flow_model->getNumberOfEquations()));
     }
     else
     {
@@ -426,16 +426,16 @@ NavierStokes::NavierStokes(
          * Initialize the cell variable of diffusive flux divergence.
          */
         
-        d_variable_diffusive_flux_divergence = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
-            new pdat::CellVariable<double>(dim, "diffusive flux divergence", d_flow_model->getNumberOfEquations()));
+        d_variable_diffusive_flux_divergence = HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
+            new pdat::CellVariable<Real>(dim, "diffusive flux divergence", d_flow_model->getNumberOfEquations()));
     }
     
     /*
      * Initialize the cell variable of source.
      */
     
-    d_variable_source = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(dim, "source", d_flow_model->getNumberOfEquations()));
+    d_variable_source = HAMERS_SHARED_PTR<pdat::CellVariable<Real> > (
+        new pdat::CellVariable<Real>(dim, "source", d_flow_model->getNumberOfEquations()));
 }
 
 
@@ -766,7 +766,7 @@ NavierStokes::initializeDataOnPatch(
     
     d_flow_model->registerPatchWithDataContext(patch, getDataContext());
     
-    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_var_data =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_var_data =
         d_flow_model->getCellDataOfConservativeVariables();
     
     if (d_use_ghost_cell_immersed_boundary_method && set_immersed_boundary_method_ghosts)
@@ -996,8 +996,8 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
-        HAMERS_SHARED_PTR<pdat::CellData<double> > max_diffusivity = d_flow_model->getCellData("MAX_DIFFUSIVITY");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > max_diffusivity = d_flow_model->getCellData("MAX_DIFFUSIVITY");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         hier::IntVector num_subghosts_max_diffusivity = max_diffusivity->getGhostCellWidth();
@@ -1007,8 +1007,8 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         
         const int num_ghosts_0 = num_ghosts[0];
         
-        double* max_lambda_x = max_wave_speed_x->getPointer(0);
-        double* max_D = max_diffusivity->getPointer(0);
+        Real* max_lambda_x = max_wave_speed_x->getPointer(0);
+        Real* max_D = max_diffusivity->getPointer(0);
         
         double spectral_radiuses_and_dt_0 = double(0);
         double spectral_radiuses_and_dt_1 = double(0);
@@ -1028,7 +1028,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                 
                 if (IB_mask[idx_IB_mask] == fluid)
                 {
-                    const double spectral_radius_acoustic_x = max_lambda_x[idx]/dx_0;
+                    const double spectral_radius_acoustic_x = double(max_lambda_x[idx])/dx_0;
                     
                     spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
                     
@@ -1046,7 +1046,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                 // Compute the linear index.
                 const int idx = i + num_ghosts_0;
                 
-                const double spectral_radius_acoustic_x = max_lambda_x[idx]/dx_0;
+                const double spectral_radius_acoustic_x = double(max_lambda_x[idx])/dx_0;
                 
                 spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
                 
@@ -1074,7 +1074,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                 
                 if (IB_mask[idx_IB_mask] == fluid)
                 {
-                    const double spectral_radius_diffusive = double(2)*max_D[idx]/(dx_0*dx_0);
+                    const double spectral_radius_diffusive = double(2)*double(max_D[idx])/(dx_0*dx_0);
                     
                     spectral_radius_tmp = fmax(spectral_radius_tmp, spectral_radius_diffusive);
                 }
@@ -1090,7 +1090,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                 // Compute the linear index.
                 const int idx = i + num_ghosts_0;
                 
-                const double spectral_radius_diffusive = double(2)*max_D[idx]/(dx_0*dx_0);
+                const double spectral_radius_diffusive = double(2)*double(max_D[idx])/(dx_0*dx_0);
                 
                 spectral_radius_tmp = fmax(spectral_radius_tmp, spectral_radius_diffusive);
             }
@@ -1126,9 +1126,9 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
-        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
-        HAMERS_SHARED_PTR<pdat::CellData<double> > max_diffusivity = d_flow_model->getCellData("MAX_DIFFUSIVITY");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > max_diffusivity = d_flow_model->getCellData("MAX_DIFFUSIVITY");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         hier::IntVector num_subghosts_max_wave_speed_y = max_wave_speed_y->getGhostCellWidth();
@@ -1142,9 +1142,9 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         const int num_ghosts_1 = num_ghosts[1];
         const int ghostcell_dim_0 = ghostcell_dims[0];
         
-        double* max_lambda_x = max_wave_speed_x->getPointer(0);
-        double* max_lambda_y = max_wave_speed_y->getPointer(0);
-        double* max_D = max_diffusivity->getPointer(0);
+        Real* max_lambda_x = max_wave_speed_x->getPointer(0);
+        Real* max_lambda_y = max_wave_speed_y->getPointer(0);
+        Real* max_D = max_diffusivity->getPointer(0);
         
         double spectral_radiuses_and_dt_0 = double(0);
         double spectral_radiuses_and_dt_1 = double(0);
@@ -1174,8 +1174,8 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                     
                     if (IB_mask[idx_IB_mask] == fluid)
                     {
-                        const double spectral_radius_acoustic_x = max_lambda_x[idx]/dx_0;
-                        const double spectral_radius_acoustic_y = max_lambda_y[idx]/dx_1;
+                        const double spectral_radius_acoustic_x = double(max_lambda_x[idx])/dx_0;
+                        const double spectral_radius_acoustic_y = double(max_lambda_y[idx])/dx_1;
                         
                         spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
                         spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_acoustic_y);
@@ -1201,8 +1201,8 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                     const int idx = (i + num_ghosts_0) +
                         (j + num_ghosts_1)*ghostcell_dim_0;
                     
-                    const double spectral_radius_acoustic_x = max_lambda_x[idx]/dx_0;
-                    const double spectral_radius_acoustic_y = max_lambda_y[idx]/dx_1;
+                    const double spectral_radius_acoustic_x = double(max_lambda_x[idx])/dx_0;
+                    const double spectral_radius_acoustic_y = double(max_lambda_y[idx])/dx_1;
                     
                     spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
                     spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_acoustic_y);
@@ -1244,8 +1244,8 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                     if (IB_mask[idx_IB_mask] == fluid)
                     {
                         const double spectral_radius_diffusive = double(2)*fmax(
-                            max_D[idx]/(dx_0*dx_0),
-                            max_D[idx]/(dx_1*dx_1));
+                            double(max_D[idx])/(dx_0*dx_0),
+                            double(max_D[idx])/(dx_1*dx_1));
                         
                         spectral_radius_tmp = fmax(spectral_radius_tmp, spectral_radius_diffusive);
                     }
@@ -1268,8 +1268,8 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                         (j + num_ghosts_1)*ghostcell_dim_0;
                     
                     const double spectral_radius_diffusive = double(2)*fmax(
-                        max_D[idx]/(dx_0*dx_0),
-                        max_D[idx]/(dx_1*dx_1));
+                        double(max_D[idx])/(dx_0*dx_0),
+                        double(max_D[idx])/(dx_1*dx_1));
                     
                     spectral_radius_tmp = fmax(spectral_radius_tmp, spectral_radius_diffusive);
                 }
@@ -1308,10 +1308,10 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
-        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
-        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_z = d_flow_model->getCellData("MAX_WAVE_SPEED_Z");
-        HAMERS_SHARED_PTR<pdat::CellData<double> > max_diffusivity = d_flow_model->getCellData("MAX_DIFFUSIVITY");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > max_wave_speed_z = d_flow_model->getCellData("MAX_WAVE_SPEED_Z");
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > max_diffusivity = d_flow_model->getCellData("MAX_DIFFUSIVITY");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         hier::IntVector num_subghosts_max_wave_speed_y = max_wave_speed_y->getGhostCellWidth();
@@ -1329,10 +1329,10 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         const int ghostcell_dim_0 = ghostcell_dims[0];
         const int ghostcell_dim_1 = ghostcell_dims[1];
         
-        double* max_lambda_x = max_wave_speed_x->getPointer(0);
-        double* max_lambda_y = max_wave_speed_y->getPointer(0);
-        double* max_lambda_z = max_wave_speed_z->getPointer(0);
-        double* max_D = max_diffusivity->getPointer(0);
+        Real* max_lambda_x = max_wave_speed_x->getPointer(0);
+        Real* max_lambda_y = max_wave_speed_y->getPointer(0);
+        Real* max_lambda_z = max_wave_speed_z->getPointer(0);
+        Real* max_D = max_diffusivity->getPointer(0);
         
         double spectral_radiuses_and_dt_0 = double(0);
         double spectral_radiuses_and_dt_1 = double(0);
@@ -1373,9 +1373,9 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                         
                         if (IB_mask[idx_IB_mask] == fluid)
                         {
-                            const double spectral_radius_acoustic_x = max_lambda_x[idx]/dx_0;
-                            const double spectral_radius_acoustic_y = max_lambda_y[idx]/dx_1;
-                            const double spectral_radius_acoustic_z = max_lambda_z[idx]/dx_2;
+                            const double spectral_radius_acoustic_x = double(max_lambda_x[idx])/dx_0;
+                            const double spectral_radius_acoustic_y = double(max_lambda_y[idx])/dx_1;
+                            const double spectral_radius_acoustic_z = double(max_lambda_z[idx])/dx_2;
                             
                             spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
                             spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_acoustic_y);
@@ -1409,9 +1409,9 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                             (k + num_ghosts_2)*ghostcell_dim_0*
                                 ghostcell_dim_1;
                         
-                        const double spectral_radius_acoustic_x = max_lambda_x[idx]/dx_0;
-                        const double spectral_radius_acoustic_y = max_lambda_y[idx]/dx_1;
-                        const double spectral_radius_acoustic_z = max_lambda_z[idx]/dx_2;
+                        const double spectral_radius_acoustic_x = double(max_lambda_x[idx])/dx_0;
+                        const double spectral_radius_acoustic_y = double(max_lambda_y[idx])/dx_1;
+                        const double spectral_radius_acoustic_z = double(max_lambda_z[idx])/dx_2;
                         
                         spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
                         spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_acoustic_y);
@@ -1466,9 +1466,9 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                         if (IB_mask[idx_IB_mask] == fluid)
                         {
                             const double spectral_radius_diffusive = double(2)*fmax(
-                                max_D[idx]/(dx_0*dx_0),
-                                fmax(max_D[idx]/(dx_1*dx_1),
-                                    max_D[idx]/(dx_2*dx_2)));
+                                double(max_D[idx])/(dx_0*dx_0),
+                                fmax(double(max_D[idx])/(dx_1*dx_1),
+                                     double(max_D[idx])/(dx_2*dx_2)));
                             
                             spectral_radius_tmp = fmax(spectral_radius_tmp, spectral_radius_diffusive);
                         }
@@ -1498,9 +1498,9 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                                 ghostcell_dim_1;
                         
                         const double spectral_radius_diffusive = double(2)*fmax(
-                            max_D[idx]/(dx_0*dx_0),
-                            fmax(max_D[idx]/(dx_1*dx_1),
-                                max_D[idx]/(dx_2*dx_2)));
+                            double(max_D[idx])/(dx_0*dx_0),
+                            fmax(double(max_D[idx])/(dx_1*dx_1),
+                                 double(max_D[idx])/(dx_2*dx_2)));
                         
                         spectral_radius_tmp = fmax(spectral_radius_tmp, spectral_radius_diffusive);
                     }
@@ -1611,16 +1611,16 @@ NavierStokes::computeFluxesAndSourcesOnPatch(
     
     if (data_context)
     {
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_source(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_source(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(d_variable_source, data_context)));
         
         data_source->fillAll(0.0);
     }
     else
     {
-        HAMERS_SHARED_PTR<pdat::CellData<double> > data_source(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > data_source(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(d_variable_source, getDataContext())));
         
         data_source->fillAll(0.0);
@@ -1812,7 +1812,7 @@ NavierStokes::advanceSingleStepOnPatch(
     
     d_flow_model->registerPatchWithDataContext(patch, getDataContext());
     
-    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_variables =
         d_flow_model->getCellDataOfConservativeVariables();
     
     std::vector<hier::IntVector> num_ghosts_conservative_var;
@@ -1821,7 +1821,7 @@ NavierStokes::advanceSingleStepOnPatch(
     std::vector<hier::IntVector> ghostcell_dims_conservative_var;
     ghostcell_dims_conservative_var.reserve(d_flow_model->getNumberOfEquations());
     
-    std::vector<double*> Q;
+    std::vector<Real*> Q;
     Q.reserve(d_flow_model->getNumberOfEquations());
     
     int count_eqn = 0;
@@ -1890,28 +1890,28 @@ NavierStokes::advanceSingleStepOnPatch(
      * flux and source
      */
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux(
-        HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux(
+        HAMERS_SHARED_PTR_CAST<pdat::SideData<Real>, hier::PatchData>(
             patch.getPatchData(d_variable_convective_flux, getDataContext())));
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > diffusive_flux;
-    HAMERS_SHARED_PTR<pdat::CellData<double> > diffusive_flux_divergence;
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > diffusive_flux;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > diffusive_flux_divergence;
     
     if (d_use_conservative_form_diffusive_flux)
     {
         diffusive_flux =
-            HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
+            HAMERS_SHARED_PTR_CAST<pdat::SideData<Real>, hier::PatchData>(
                 patch.getPatchData(d_variable_diffusive_flux, getDataContext()));
     }
     else
     {
         diffusive_flux_divergence =
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(d_variable_diffusive_flux_divergence, getDataContext()));
     }
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > source(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > source(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(d_variable_source, getDataContext())));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -1942,28 +1942,28 @@ NavierStokes::advanceSingleStepOnPatch(
     
     for (int n = 0; n < num_coeffs; n++)
     {
-        HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux_intermediate(
-            HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux_intermediate(
+            HAMERS_SHARED_PTR_CAST<pdat::SideData<Real>, hier::PatchData>(
                     patch.getPatchData(d_variable_convective_flux, intermediate_context[n])));
         
-        HAMERS_SHARED_PTR<pdat::SideData<double> > diffusive_flux_intermediate;
-        HAMERS_SHARED_PTR<pdat::CellData<double> > diffusive_flux_divergence_intermediate;
+        HAMERS_SHARED_PTR<pdat::SideData<Real> > diffusive_flux_intermediate;
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > diffusive_flux_divergence_intermediate;
         
         if (d_use_conservative_form_diffusive_flux)
         {
             diffusive_flux_intermediate =
-                HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR_CAST<pdat::SideData<Real>, hier::PatchData>(
                         patch.getPatchData(d_variable_diffusive_flux, intermediate_context[n]));
         }
         else
         {
             diffusive_flux_divergence_intermediate =
-                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                     patch.getPatchData(d_variable_diffusive_flux_divergence, intermediate_context[n]));
         }
         
-        HAMERS_SHARED_PTR<pdat::CellData<double> > source_intermediate(
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<Real> > source_intermediate(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(d_variable_source, intermediate_context[n])));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -1997,7 +1997,7 @@ NavierStokes::advanceSingleStepOnPatch(
         
         d_flow_model->registerPatchWithDataContext(patch, intermediate_context[n]);
         
-        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables_intermediate =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_variables_intermediate =
             d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_ghosts_conservative_var_intermediate;
@@ -2006,7 +2006,7 @@ NavierStokes::advanceSingleStepOnPatch(
         std::vector<hier::IntVector> ghostcell_dims_conservative_var_intermediate;
         ghostcell_dims_conservative_var_intermediate.reserve(d_flow_model->getNumberOfEquations());
         
-        std::vector<double*> Q_intermediate;
+        std::vector<Real*> Q_intermediate;
         Q_intermediate.reserve(d_flow_model->getNumberOfEquations());
         
         count_eqn = 0;
@@ -2044,6 +2044,7 @@ NavierStokes::advanceSingleStepOnPatch(
             const int interior_dim_0 = interior_dims[0];
             
             const double dx_0 = dx[0];
+            const Real dx_inv_0 = Real(1.0/dx_0);
             
             if (alpha[n] != 0.0)
             {
@@ -2067,7 +2068,7 @@ NavierStokes::advanceSingleStepOnPatch(
                             
                             if (IB_mask[idx_IB_mask] == fluid)
                             {
-                                Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                                Q[ei][idx] += Real(alpha[n])*Q_intermediate[ei][idx_intermediate];
                             }
                             else
                             {
@@ -2084,7 +2085,7 @@ NavierStokes::advanceSingleStepOnPatch(
                             const int idx = i + num_ghosts_0_conservative_var;
                             const int idx_intermediate = i + num_ghosts_0_conservative_var_intermediate;
                             
-                            Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                            Q[ei][idx] += Real(alpha[n])*Q_intermediate[ei][idx_intermediate];
                         }
                     }
                 }
@@ -2096,9 +2097,9 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
-                        double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
-                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        Real* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        Real* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
+                        Real* S_intermediate = source_intermediate->getPointer(ei);
                         
                         const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                         
@@ -2117,9 +2118,9 @@ NavierStokes::advanceSingleStepOnPatch(
                                 
                                 if (IB_mask[idx_IB_mask] == fluid)
                                 {
-                                    Q[ei][idx] += beta[n]*
+                                    Q[ei][idx] += Real(beta[n])*
                                         (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1] +
-                                           F_d_x_intermediate[idx_flux_x] - F_d_x_intermediate[idx_flux_x - 1])/dx_0 +
+                                           F_d_x_intermediate[idx_flux_x] - F_d_x_intermediate[idx_flux_x - 1])*dx_inv_0 +
                                          S_intermediate[idx_source]);
                                 }
                             }
@@ -2134,9 +2135,9 @@ NavierStokes::advanceSingleStepOnPatch(
                                 const int idx_flux_x = i + 1;
                                 const int idx_source = i;
                                 
-                                Q[ei][idx] += beta[n]*
+                                Q[ei][idx] += Real(beta[n])*
                                     (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1] +
-                                       F_d_x_intermediate[idx_flux_x] - F_d_x_intermediate[idx_flux_x - 1])/dx_0 +
+                                       F_d_x_intermediate[idx_flux_x] - F_d_x_intermediate[idx_flux_x - 1])*dx_inv_0 +
                                      S_intermediate[idx_source]);
                             }
                         }
@@ -2146,9 +2147,9 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
-                        double* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
-                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        Real* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        Real* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
+                        Real* S_intermediate = source_intermediate->getPointer(ei);
                         
                         const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                         
@@ -2167,8 +2168,8 @@ NavierStokes::advanceSingleStepOnPatch(
                                 
                                 if (IB_mask[idx_IB_mask] == fluid)
                                 {
-                                    Q[ei][idx] += beta[n]*
-                                        (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1])/dx_0 -
+                                    Q[ei][idx] += Real(beta[n])*
+                                        (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1])*dx_inv_0-
                                          nabla_F_d_intermediate[idx_cell] +
                                          S_intermediate[idx_cell]);
                                 }
@@ -2184,8 +2185,8 @@ NavierStokes::advanceSingleStepOnPatch(
                                 const int idx_flux_x = i + 1;
                                 const int idx_cell = i;
                                 
-                                Q[ei][idx] += beta[n]*
-                                    (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1])/dx_0 -
+                                Q[ei][idx] += Real(beta[n])*
+                                    (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1])*dx_inv_0 -
                                      nabla_F_d_intermediate[idx_cell] +
                                      S_intermediate[idx_cell]);
                             }
@@ -2201,11 +2202,11 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_x = convective_flux->getPointer(0, ei);
-                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        Real* F_c_x = convective_flux->getPointer(0, ei);
+                        Real* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
                         
-                        double* F_d_x = diffusive_flux->getPointer(0, ei);
-                        double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
+                        Real* F_d_x = diffusive_flux->getPointer(0, ei);
+                        Real* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
                         
                         HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0 + 1; i++)
@@ -2213,8 +2214,8 @@ NavierStokes::advanceSingleStepOnPatch(
                             // Compute linear index.
                             const int idx_flux_x = i;
                             
-                            F_c_x[idx_flux_x] += gamma[n]*F_c_x_intermediate[idx_flux_x];
-                            F_d_x[idx_flux_x] += gamma[n]*F_d_x_intermediate[idx_flux_x];
+                            F_c_x[idx_flux_x] += Real(gamma[n])*F_c_x_intermediate[idx_flux_x];
+                            F_d_x[idx_flux_x] += Real(gamma[n])*F_d_x_intermediate[idx_flux_x];
                         }
                     }
                 }
@@ -2222,8 +2223,8 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_x = convective_flux->getPointer(0, ei);
-                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        Real* F_c_x = convective_flux->getPointer(0, ei);
+                        Real* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
                         
                         HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0 + 1; i++)
@@ -2231,7 +2232,7 @@ NavierStokes::advanceSingleStepOnPatch(
                             // Compute linear index.
                             const int idx_flux_x = i;
                             
-                            F_c_x[idx_flux_x] += gamma[n]*F_c_x_intermediate[idx_flux_x];
+                            F_c_x[idx_flux_x] += Real(gamma[n])*F_c_x_intermediate[idx_flux_x];
                         }
                     }
                 }
@@ -2241,8 +2242,8 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* S = source->getPointer(ei);
-                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        Real* S = source->getPointer(ei);
+                        Real* S_intermediate = source_intermediate->getPointer(ei);
                         
                         HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
@@ -2250,7 +2251,7 @@ NavierStokes::advanceSingleStepOnPatch(
                             // Compute linear index.
                             const int idx = i;
                             
-                            S[idx] += gamma[n]*S_intermediate[idx];
+                            S[idx] += Real(gamma[n])*S_intermediate[idx];
                         }
                     }
                 }
@@ -2258,11 +2259,11 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
-                        double* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
+                        Real* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
+                        Real* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
                         
-                        double* S = source->getPointer(ei);
-                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        Real* S = source->getPointer(ei);
+                        Real* S_intermediate = source_intermediate->getPointer(ei);
                         
                         HAMERS_PRAGMA_SIMD
                         for (int i = 0; i < interior_dim_0; i++)
@@ -2270,8 +2271,8 @@ NavierStokes::advanceSingleStepOnPatch(
                             // Compute linear index.
                             const int idx = i;
                             
-                            nabla_F_d[idx] += gamma[n]*nabla_F_d_intermediate[idx];
-                            S[idx] += gamma[n]*S_intermediate[idx];
+                            nabla_F_d[idx] += Real(gamma[n])*nabla_F_d_intermediate[idx];
+                            S[idx] += Real(gamma[n])*S_intermediate[idx];
                         }
                     }
                 }
@@ -2288,6 +2289,8 @@ NavierStokes::advanceSingleStepOnPatch(
             
             const double dx_0 = dx[0];
             const double dx_1 = dx[1];
+            const Real dx_inv_0 = Real(1.0/dx_0);
+            const Real dx_inv_1 = Real(1.0/dx_1);
             
             if (alpha[n] != 0.0)
             {
@@ -2328,7 +2331,7 @@ NavierStokes::advanceSingleStepOnPatch(
                                 
                                 if (IB_mask[idx_IB_mask] == fluid)
                                 {
-                                    Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                                    Q[ei][idx] += Real(alpha[n])*Q_intermediate[ei][idx_intermediate];
                                 }
                                 else
                                 {
@@ -2352,7 +2355,7 @@ NavierStokes::advanceSingleStepOnPatch(
                                     (j + num_ghosts_1_conservative_var_intermediate)*
                                         ghostcell_dim_0_conservative_var_intermediate;
                                 
-                                Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                                Q[ei][idx] += Real(alpha[n])*Q_intermediate[ei][idx_intermediate];
                             }
                         }
                     }
@@ -2365,11 +2368,11 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
-                        double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
-                        double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
-                        double* F_d_y_intermediate = diffusive_flux_intermediate->getPointer(1, ei);
-                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        Real* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        Real* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                        Real* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
+                        Real* F_d_y_intermediate = diffusive_flux_intermediate->getPointer(1, ei);
+                        Real* S_intermediate = source_intermediate->getPointer(ei);
                         
                         const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                         const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
@@ -2410,11 +2413,11 @@ NavierStokes::advanceSingleStepOnPatch(
                                     
                                     if (IB_mask[idx_IB_mask] == fluid)
                                     {
-                                        Q[ei][idx] += beta[n]*
+                                        Q[ei][idx] += Real(beta[n])*
                                             (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L] +
-                                               F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])/dx_0 -
+                                               F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])*dx_inv_0 -
                                               (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B] +
-                                               F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])/dx_1 +
+                                               F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])*dx_inv_1 +
                                               S_intermediate[idx_source]);
                                     }
                                 }
@@ -2446,11 +2449,11 @@ NavierStokes::advanceSingleStepOnPatch(
                                     const int idx_source = i +
                                         j*interior_dim_0;
                                     
-                                    Q[ei][idx] += beta[n]*
+                                    Q[ei][idx] += Real(beta[n])*
                                         (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L] +
-                                           F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])/dx_0 -
+                                           F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])*dx_inv_0 -
                                           (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B] +
-                                           F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])/dx_1 +
+                                           F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])*dx_inv_1 +
                                           S_intermediate[idx_source]);
                                 }
                             }
@@ -2461,10 +2464,10 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
-                        double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
-                        double* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
-                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        Real* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        Real* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                        Real* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
+                        Real* S_intermediate = source_intermediate->getPointer(ei);
                         
                         const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                         const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
@@ -2505,9 +2508,9 @@ NavierStokes::advanceSingleStepOnPatch(
                                     
                                     if (IB_mask[idx_IB_mask] == fluid)
                                     {
-                                        Q[ei][idx] += beta[n]*
-                                            (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L])/dx_0 -
-                                              (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B])/dx_1 -
+                                        Q[ei][idx] += Real(beta[n])*
+                                            (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L])*dx_inv_0 -
+                                              (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B])*dx_inv_1 -
                                               nabla_F_d_intermediate[idx_cell] +
                                               S_intermediate[idx_cell]);
                                     }
@@ -2540,9 +2543,9 @@ NavierStokes::advanceSingleStepOnPatch(
                                     const int idx_cell = i +
                                         j*interior_dim_0;
                                     
-                                    Q[ei][idx] += beta[n]*
-                                        (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L])/dx_0 -
-                                          (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B])/dx_1 -
+                                    Q[ei][idx] += Real(beta[n])*
+                                        (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L])*dx_inv_0 -
+                                          (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B])*dx_inv_1 -
                                           nabla_F_d_intermediate[idx_cell] +
                                           S_intermediate[idx_cell]);
                                 }
@@ -2559,11 +2562,11 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_x = convective_flux->getPointer(0, ei);
-                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        Real* F_c_x = convective_flux->getPointer(0, ei);
+                        Real* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
                         
-                        double* F_d_x = diffusive_flux->getPointer(0, ei);
-                        double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
+                        Real* F_d_x = diffusive_flux->getPointer(0, ei);
+                        Real* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
                         
                         for (int j = 0; j < interior_dim_1; j++)
                         {
@@ -2574,20 +2577,20 @@ NavierStokes::advanceSingleStepOnPatch(
                                 const int idx_flux_x = i +
                                     j*(interior_dim_0 + 1);
                                 
-                                F_c_x[idx_flux_x] += gamma[n]*F_c_x_intermediate[idx_flux_x];
-                                F_d_x[idx_flux_x] += gamma[n]*F_d_x_intermediate[idx_flux_x];
-                            }                        
+                                F_c_x[idx_flux_x] += Real(gamma[n])*F_c_x_intermediate[idx_flux_x];
+                                F_d_x[idx_flux_x] += Real(gamma[n])*F_d_x_intermediate[idx_flux_x];
+                            }
                         }
                     }
                     
                     // Accumulate the flux in the y direction.
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_y = convective_flux->getPointer(1, ei);
-                        double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                        Real* F_c_y = convective_flux->getPointer(1, ei);
+                        Real* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
                         
-                        double* F_d_y = diffusive_flux->getPointer(1, ei);
-                        double* F_d_y_intermediate = diffusive_flux_intermediate->getPointer(1, ei);
+                        Real* F_d_y = diffusive_flux->getPointer(1, ei);
+                        Real* F_d_y_intermediate = diffusive_flux_intermediate->getPointer(1, ei);
                         
                         for (int j = 0; j < interior_dim_1 + 1; j++)
                         {
@@ -2598,8 +2601,8 @@ NavierStokes::advanceSingleStepOnPatch(
                                 const int idx_flux_y = i +
                                     j*interior_dim_0;
                                 
-                                F_c_y[idx_flux_y] += gamma[n]*F_c_y_intermediate[idx_flux_y];
-                                F_d_y[idx_flux_y] += gamma[n]*F_d_y_intermediate[idx_flux_y];
+                                F_c_y[idx_flux_y] += Real(gamma[n])*F_c_y_intermediate[idx_flux_y];
+                                F_d_y[idx_flux_y] += Real(gamma[n])*F_d_y_intermediate[idx_flux_y];
                             }
                         }
                     }
@@ -2608,8 +2611,8 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_x = convective_flux->getPointer(0, ei);
-                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        Real* F_c_x = convective_flux->getPointer(0, ei);
+                        Real* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
                         
                         for (int j = 0; j < interior_dim_1; j++)
                         {
@@ -2620,16 +2623,16 @@ NavierStokes::advanceSingleStepOnPatch(
                                 const int idx_flux_x = i +
                                     j*(interior_dim_0 + 1);
                                 
-                                F_c_x[idx_flux_x] += gamma[n]*F_c_x_intermediate[idx_flux_x];
-                            }                        
+                                F_c_x[idx_flux_x] += Real(gamma[n])*F_c_x_intermediate[idx_flux_x];
+                            }
                         }
                     }
                     
                     // Accumulate the flux in the y direction.
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_y = convective_flux->getPointer(1, ei);
-                        double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                        Real* F_c_y = convective_flux->getPointer(1, ei);
+                        Real* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
                         
                         for (int j = 0; j < interior_dim_1 + 1; j++)
                         {
@@ -2640,7 +2643,7 @@ NavierStokes::advanceSingleStepOnPatch(
                                 const int idx_flux_y = i +
                                     j*interior_dim_0;
                                 
-                                F_c_y[idx_flux_y] += gamma[n]*F_c_y_intermediate[idx_flux_y];
+                                F_c_y[idx_flux_y] += Real(gamma[n])*F_c_y_intermediate[idx_flux_y];
                             }
                         }
                     }
@@ -2651,8 +2654,8 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* S = source->getPointer(ei);
-                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        Real* S = source->getPointer(ei);
+                        Real* S_intermediate = source_intermediate->getPointer(ei);
                         
                         for (int j = 0; j < interior_dim_1; j++)
                         {
@@ -2663,7 +2666,7 @@ NavierStokes::advanceSingleStepOnPatch(
                                 const int idx = i +
                                     j*interior_dim_0;
                                 
-                                S[idx] += gamma[n]*S_intermediate[idx];
+                                S[idx] += Real(gamma[n])*S_intermediate[idx];
                             }
                         }
                     }
@@ -2672,11 +2675,11 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
-                        double* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
+                        Real* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
+                        Real* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
                         
-                        double* S = source->getPointer(ei);
-                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        Real* S = source->getPointer(ei);
+                        Real* S_intermediate = source_intermediate->getPointer(ei);
                         
                         for (int j = 0; j < interior_dim_1; j++)
                         {
@@ -2687,8 +2690,8 @@ NavierStokes::advanceSingleStepOnPatch(
                                 const int idx = i +
                                     j*interior_dim_0;
                                 
-                                nabla_F_d[idx] += gamma[n]*nabla_F_d_intermediate[idx];
-                                S[idx] += gamma[n]*S_intermediate[idx];
+                                nabla_F_d[idx] += Real(gamma[n])*nabla_F_d_intermediate[idx];
+                                S[idx] += Real(gamma[n])*S_intermediate[idx];
                             }
                         }
                     }
@@ -2708,6 +2711,9 @@ NavierStokes::advanceSingleStepOnPatch(
             const double dx_0 = dx[0];
             const double dx_1 = dx[1];
             const double dx_2 = dx[2];
+            const Real dx_inv_0 = Real(1.0/dx_0);
+            const Real dx_inv_1 = Real(1.0/dx_1);
+            const Real dx_inv_2 = Real(1.0/dx_2);
             
             if (alpha[n] != 0.0)
             {
@@ -2765,7 +2771,7 @@ NavierStokes::advanceSingleStepOnPatch(
                                     
                                     if (IB_mask[idx_IB_mask] == fluid)
                                     {
-                                        Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                                        Q[ei][idx] += Real(alpha[n])*Q_intermediate[ei][idx_intermediate];
                                     }
                                     else
                                     {
@@ -2797,7 +2803,7 @@ NavierStokes::advanceSingleStepOnPatch(
                                             ghostcell_dim_0_conservative_var_intermediate*
                                                 ghostcell_dim_1_conservative_var_intermediate;
                                     
-                                    Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
+                                    Q[ei][idx] += Real(alpha[n])*Q_intermediate[ei][idx_intermediate];
                                 }
                             }
                         }
@@ -2811,13 +2817,13 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
-                        double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
-                        double* F_c_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
-                        double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
-                        double* F_d_y_intermediate = diffusive_flux_intermediate->getPointer(1, ei);
-                        double* F_d_z_intermediate = diffusive_flux_intermediate->getPointer(2, ei);
-                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        Real* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        Real* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                        Real* F_c_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
+                        Real* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
+                        Real* F_d_y_intermediate = diffusive_flux_intermediate->getPointer(1, ei);
+                        Real* F_d_z_intermediate = diffusive_flux_intermediate->getPointer(2, ei);
+                        Real* S_intermediate = source_intermediate->getPointer(ei);
                         
                         const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                         const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
@@ -2881,13 +2887,13 @@ NavierStokes::advanceSingleStepOnPatch(
                                         
                                         if (IB_mask[idx_IB_mask] == fluid)
                                         {
-                                            Q[ei][idx] += beta[n]*
+                                            Q[ei][idx] += Real(beta[n])*
                                                 (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L] +
-                                                   F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])/dx_0 -
+                                                   F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])*dx_inv_0 -
                                                   (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B] +
-                                                   F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])/dx_1 -
+                                                   F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])*dx_inv_1 -
                                                   (F_c_z_intermediate[idx_flux_z_F] - F_c_z_intermediate[idx_flux_z_B] +
-                                                   F_d_z_intermediate[idx_flux_z_F] - F_d_z_intermediate[idx_flux_z_B])/dx_2 +
+                                                   F_d_z_intermediate[idx_flux_z_F] - F_d_z_intermediate[idx_flux_z_B])*dx_inv_2 +
                                                   S_intermediate[idx_source]);
                                         }
                                     }
@@ -2937,13 +2943,13 @@ NavierStokes::advanceSingleStepOnPatch(
                                             j*interior_dim_0 +
                                             k*interior_dim_0*interior_dim_1;
                                         
-                                        Q[ei][idx] += beta[n]*
+                                        Q[ei][idx] += Real(beta[n])*
                                             (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L] +
-                                               F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])/dx_0 -
+                                               F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])*dx_inv_0 -
                                               (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B] +
-                                               F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])/dx_1 -
+                                               F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])*dx_inv_1 -
                                               (F_c_z_intermediate[idx_flux_z_F] - F_c_z_intermediate[idx_flux_z_B] +
-                                               F_d_z_intermediate[idx_flux_z_F] - F_d_z_intermediate[idx_flux_z_B])/dx_2 +
+                                               F_d_z_intermediate[idx_flux_z_F] - F_d_z_intermediate[idx_flux_z_B])*dx_inv_2 +
                                               S_intermediate[idx_source]);
                                     }
                                 }
@@ -2955,11 +2961,11 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
-                        double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
-                        double* F_c_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
-                        double* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
-                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        Real* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        Real* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                        Real* F_c_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
+                        Real* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
+                        Real* S_intermediate = source_intermediate->getPointer(ei);
                         
                         const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                         const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
@@ -3023,10 +3029,10 @@ NavierStokes::advanceSingleStepOnPatch(
                                         
                                         if (IB_mask[idx_IB_mask] == fluid)
                                         {
-                                            Q[ei][idx] += beta[n]*
-                                                (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L])/dx_0 -
-                                                  (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B])/dx_1 -
-                                                  (F_c_z_intermediate[idx_flux_z_F] - F_c_z_intermediate[idx_flux_z_B])/dx_2 -
+                                            Q[ei][idx] += Real(beta[n])*
+                                                (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L])*dx_inv_0 -
+                                                  (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B])*dx_inv_1 -
+                                                  (F_c_z_intermediate[idx_flux_z_F] - F_c_z_intermediate[idx_flux_z_B])*dx_inv_2 -
                                                   nabla_F_d_intermediate[idx_cell] +
                                                   S_intermediate[idx_cell]);
                                         }
@@ -3077,10 +3083,10 @@ NavierStokes::advanceSingleStepOnPatch(
                                             j*interior_dim_0 +
                                             k*interior_dim_0*interior_dim_1;
                                         
-                                        Q[ei][idx] += beta[n]*
-                                            (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L])/dx_0 -
-                                              (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B])/dx_1 -
-                                              (F_c_z_intermediate[idx_flux_z_F] - F_c_z_intermediate[idx_flux_z_B])/dx_2 -
+                                        Q[ei][idx] += Real(beta[n])*
+                                            (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L])*dx_inv_0 -
+                                              (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B])*dx_inv_1 -
+                                              (F_c_z_intermediate[idx_flux_z_F] - F_c_z_intermediate[idx_flux_z_B])*dx_inv_2 -
                                               nabla_F_d_intermediate[idx_cell] +
                                               S_intermediate[idx_cell]);
                                     }
@@ -3098,11 +3104,11 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_x = convective_flux->getPointer(0, ei);
-                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        Real* F_c_x = convective_flux->getPointer(0, ei);
+                        Real* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
                         
-                        double* F_d_x = diffusive_flux->getPointer(0, ei);
-                        double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
+                        Real* F_d_x = diffusive_flux->getPointer(0, ei);
+                        Real* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
                         
                         for (int k = 0; k < interior_dim_2; k++)
                         {
@@ -3116,9 +3122,9 @@ NavierStokes::advanceSingleStepOnPatch(
                                         j*(interior_dim_0 + 1) +
                                         k*(interior_dim_0 + 1)*interior_dim_1;
                                     
-                                    F_c_x[idx_flux_x] += gamma[n]*F_c_x_intermediate[idx_flux_x];
-                                    F_d_x[idx_flux_x] += gamma[n]*F_d_x_intermediate[idx_flux_x];
-                                }                        
+                                    F_c_x[idx_flux_x] += Real(gamma[n])*F_c_x_intermediate[idx_flux_x];
+                                    F_d_x[idx_flux_x] += Real(gamma[n])*F_d_x_intermediate[idx_flux_x];
+                                }
                             }
                         }
                     }
@@ -3126,11 +3132,11 @@ NavierStokes::advanceSingleStepOnPatch(
                     // Accumulate the flux in the y direction.
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_y = convective_flux->getPointer(1, ei);
-                        double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                        Real* F_c_y = convective_flux->getPointer(1, ei);
+                        Real* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
                         
-                        double* F_d_y = diffusive_flux->getPointer(1, ei);
-                        double* F_d_y_intermediate = diffusive_flux_intermediate->getPointer(1, ei);
+                        Real* F_d_y = diffusive_flux->getPointer(1, ei);
+                        Real* F_d_y_intermediate = diffusive_flux_intermediate->getPointer(1, ei);
                         
                         for (int k = 0; k < interior_dim_2; k++)
                         {
@@ -3144,8 +3150,8 @@ NavierStokes::advanceSingleStepOnPatch(
                                         j*interior_dim_0 +
                                         k*interior_dim_0*(interior_dim_1 + 1);
                                     
-                                    F_c_y[idx_flux_y] += gamma[n]*F_c_y_intermediate[idx_flux_y];
-                                    F_d_y[idx_flux_y] += gamma[n]*F_d_y_intermediate[idx_flux_y];
+                                    F_c_y[idx_flux_y] += Real(gamma[n])*F_c_y_intermediate[idx_flux_y];
+                                    F_d_y[idx_flux_y] += Real(gamma[n])*F_d_y_intermediate[idx_flux_y];
                                 }
                             }
                         }
@@ -3154,11 +3160,11 @@ NavierStokes::advanceSingleStepOnPatch(
                     // Accumulate the flux in the z direction.
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_z = convective_flux->getPointer(2, ei);
-                        double* F_c_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
+                        Real* F_c_z = convective_flux->getPointer(2, ei);
+                        Real* F_c_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
                         
-                        double* F_d_z = diffusive_flux->getPointer(2, ei);
-                        double* F_d_z_intermediate = diffusive_flux_intermediate->getPointer(2, ei);
+                        Real* F_d_z = diffusive_flux->getPointer(2, ei);
+                        Real* F_d_z_intermediate = diffusive_flux_intermediate->getPointer(2, ei);
                         
                         for (int k = 0; k < interior_dim_2 + 1; k++)
                         {
@@ -3172,8 +3178,8 @@ NavierStokes::advanceSingleStepOnPatch(
                                         j*interior_dim_0 +
                                         k*interior_dim_0*interior_dim_1;
                                     
-                                    F_c_z[idx_flux_z] += gamma[n]*F_c_z_intermediate[idx_flux_z];
-                                    F_d_z[idx_flux_z] += gamma[n]*F_d_z_intermediate[idx_flux_z];
+                                    F_c_z[idx_flux_z] += Real(gamma[n])*F_c_z_intermediate[idx_flux_z];
+                                    F_d_z[idx_flux_z] += Real(gamma[n])*F_d_z_intermediate[idx_flux_z];
                                 }
                             }
                         }
@@ -3183,8 +3189,8 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_x = convective_flux->getPointer(0, ei);
-                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        Real* F_c_x = convective_flux->getPointer(0, ei);
+                        Real* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
                         
                         for (int k = 0; k < interior_dim_2; k++)
                         {
@@ -3198,8 +3204,8 @@ NavierStokes::advanceSingleStepOnPatch(
                                         j*(interior_dim_0 + 1) +
                                         k*(interior_dim_0 + 1)*interior_dim_1;
                                     
-                                    F_c_x[idx_flux_x] += gamma[n]*F_c_x_intermediate[idx_flux_x];
-                                }                        
+                                    F_c_x[idx_flux_x] += Real(gamma[n])*F_c_x_intermediate[idx_flux_x];
+                                }
                             }
                         }
                     }
@@ -3207,8 +3213,8 @@ NavierStokes::advanceSingleStepOnPatch(
                     // Accumulate the flux in the y direction.
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_y = convective_flux->getPointer(1, ei);
-                        double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                        Real* F_c_y = convective_flux->getPointer(1, ei);
+                        Real* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
                         
                         for (int k = 0; k < interior_dim_2; k++)
                         {
@@ -3222,7 +3228,7 @@ NavierStokes::advanceSingleStepOnPatch(
                                         j*interior_dim_0 +
                                         k*interior_dim_0*(interior_dim_1 + 1);
                                     
-                                    F_c_y[idx_flux_y] += gamma[n]*F_c_y_intermediate[idx_flux_y];
+                                    F_c_y[idx_flux_y] += Real(gamma[n])*F_c_y_intermediate[idx_flux_y];
                                 }
                             }
                         }
@@ -3231,8 +3237,8 @@ NavierStokes::advanceSingleStepOnPatch(
                     // Accumulate the flux in the z direction.
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* F_c_z = convective_flux->getPointer(2, ei);
-                        double* F_c_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
+                        Real* F_c_z = convective_flux->getPointer(2, ei);
+                        Real* F_c_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
                         
                         for (int k = 0; k < interior_dim_2 + 1; k++)
                         {
@@ -3246,7 +3252,7 @@ NavierStokes::advanceSingleStepOnPatch(
                                         j*interior_dim_0 +
                                         k*interior_dim_0*interior_dim_1;
                                     
-                                    F_c_z[idx_flux_z] += gamma[n]*F_c_z_intermediate[idx_flux_z];
+                                    F_c_z[idx_flux_z] += Real(gamma[n])*F_c_z_intermediate[idx_flux_z];
                                 }
                             }
                         }
@@ -3258,8 +3264,8 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* S = source->getPointer(ei);
-                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        Real* S = source->getPointer(ei);
+                        Real* S_intermediate = source_intermediate->getPointer(ei);
                         
                         for (int k = 0; k < interior_dim_2; k++)
                         {
@@ -3273,7 +3279,7 @@ NavierStokes::advanceSingleStepOnPatch(
                                         j*interior_dim_0 +
                                         k*interior_dim_0*interior_dim_1;
                                     
-                                    S[idx] += gamma[n]*S_intermediate[idx];
+                                    S[idx] += Real(gamma[n])*S_intermediate[idx];
                                 }
                             }
                         }
@@ -3283,11 +3289,11 @@ NavierStokes::advanceSingleStepOnPatch(
                 {
                     for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        double* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
-                        double* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
+                        Real* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
+                        Real* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
                         
-                        double* S = source->getPointer(ei);
-                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        Real* S = source->getPointer(ei);
+                        Real* S_intermediate = source_intermediate->getPointer(ei);
                         
                         for (int k = 0; k < interior_dim_2; k++)
                         {
@@ -3301,8 +3307,8 @@ NavierStokes::advanceSingleStepOnPatch(
                                         j*interior_dim_0 +
                                         k*interior_dim_0*interior_dim_1;
                                     
-                                    nabla_F_d[idx] += gamma[n]*nabla_F_d_intermediate[idx];
-                                    S[idx] += gamma[n]*S_intermediate[idx];
+                                    nabla_F_d[idx] += Real(gamma[n])*nabla_F_d_intermediate[idx];
+                                    S[idx] += Real(gamma[n])*S_intermediate[idx];
                                 }
                             }
                         }
@@ -3370,7 +3376,7 @@ NavierStokes::synchronizeFluxes(
     
     d_flow_model->registerPatchWithDataContext(patch, getDataContext());
     
-    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_variables =
         d_flow_model->getCellDataOfConservativeVariables();
     
     std::vector<hier::IntVector> num_ghosts_conservative_var;
@@ -3379,7 +3385,7 @@ NavierStokes::synchronizeFluxes(
     std::vector<hier::IntVector> ghostcell_dims_conservative_var;
     ghostcell_dims_conservative_var.reserve(d_flow_model->getNumberOfEquations());
     
-    std::vector<double*> Q;
+    std::vector<Real*> Q;
     Q.reserve(d_flow_model->getNumberOfEquations());
     
     int count_eqn = 0;
@@ -3431,28 +3437,28 @@ NavierStokes::synchronizeFluxes(
     // Unregister the patch.
     d_flow_model->unregisterPatch();
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux(
-        HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > convective_flux(
+        HAMERS_SHARED_PTR_CAST<pdat::SideData<Real>, hier::PatchData>(
             patch.getPatchData(d_variable_convective_flux, getDataContext())));
     
-    HAMERS_SHARED_PTR<pdat::SideData<double> > diffusive_flux;
-    HAMERS_SHARED_PTR<pdat::CellData<double> > diffusive_flux_divergence;
+    HAMERS_SHARED_PTR<pdat::SideData<Real> > diffusive_flux;
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > diffusive_flux_divergence;
     
     if (d_use_conservative_form_diffusive_flux)
     {
         diffusive_flux =
-            HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
+            HAMERS_SHARED_PTR_CAST<pdat::SideData<Real>, hier::PatchData>(
                 patch.getPatchData(d_variable_diffusive_flux, getDataContext()));
     }
     else
     {
         diffusive_flux_divergence =
-            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
                 patch.getPatchData(d_variable_diffusive_flux_divergence, getDataContext()));
     }
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > source(
-        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > source(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<Real>, hier::PatchData>(
             patch.getPatchData(d_variable_source, getDataContext())));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3488,14 +3494,15 @@ NavierStokes::synchronizeFluxes(
         const int interior_dim_0 = interior_dims[0];
         
         const double dx_0 = dx[0];
+        const Real dx_inv_0 = Real(1.0/dx_0);
         
         if (d_use_conservative_form_diffusive_flux)
         {
             for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
             {
-                double* F_c_x = convective_flux->getPointer(0, ei);
-                double* F_d_x = diffusive_flux->getPointer(0, ei);
-                double* S = source->getPointer(ei);
+                Real* F_c_x = convective_flux->getPointer(0, ei);
+                Real* F_d_x = diffusive_flux->getPointer(0, ei);
+                Real* S = source->getPointer(ei);
                 
                 const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                 
@@ -3516,7 +3523,7 @@ NavierStokes::synchronizeFluxes(
                         if (IB_mask[idx_IB_mask] == fluid)
                         {
                             Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
-                                             F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 +
+                                             F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])*dx_inv_0 +
                                             S[idx_source]);
                         }
                     }
@@ -3533,7 +3540,7 @@ NavierStokes::synchronizeFluxes(
                         const int idx_source = i;
                         
                         Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
-                                         F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 +
+                                         F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])*dx_inv_0 +
                                         S[idx_source]);
                     }
                 }
@@ -3543,9 +3550,9 @@ NavierStokes::synchronizeFluxes(
         {
             for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
             {
-                double* F_c_x = convective_flux->getPointer(0, ei);
-                double* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
-                double* S = source->getPointer(ei);
+                Real* F_c_x = convective_flux->getPointer(0, ei);
+                Real* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
+                Real* S = source->getPointer(ei);
                 
                 const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                 
@@ -3565,7 +3572,7 @@ NavierStokes::synchronizeFluxes(
                         
                         if (IB_mask[idx_IB_mask] == fluid)
                         {
-                            Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
+                            Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])*dx_inv_0 -
                                             nabla_F_d[idx_cell] +
                                             S[idx_cell]);
                         }
@@ -3582,7 +3589,7 @@ NavierStokes::synchronizeFluxes(
                         const int idx_flux_x_R = i + 1;
                         const int idx_cell = i;
                         
-                        Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
+                        Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])*dx_inv_0 -
                                         nabla_F_d[idx_cell] +
                                         S[idx_cell]);
                     }
@@ -3602,16 +3609,18 @@ NavierStokes::synchronizeFluxes(
         
         const double dx_0 = dx[0];
         const double dx_1 = dx[1];
+        const Real dx_inv_0 = Real(1.0/dx_0);
+        const Real dx_inv_1 = Real(1.0/dx_1);
         
         if (d_use_conservative_form_diffusive_flux)
         {
             for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
             {
-                double* F_c_x = convective_flux->getPointer(0, ei);
-                double* F_c_y = convective_flux->getPointer(1, ei);
-                double* F_d_x = diffusive_flux->getPointer(0, ei);
-                double* F_d_y = diffusive_flux->getPointer(1, ei);
-                double* S = source->getPointer(ei);
+                Real* F_c_x = convective_flux->getPointer(0, ei);
+                Real* F_c_y = convective_flux->getPointer(1, ei);
+                Real* F_d_x = diffusive_flux->getPointer(0, ei);
+                Real* F_d_y = diffusive_flux->getPointer(1, ei);
+                Real* S = source->getPointer(ei);
                 
                 const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                 const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
@@ -3653,9 +3662,9 @@ NavierStokes::synchronizeFluxes(
                             if (IB_mask[idx_IB_mask] == fluid)
                             {
                                 Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
-                                                 F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 -
+                                                 F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])*dx_inv_0 -
                                                 (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B] +
-                                                 F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])/dx_1 +
+                                                 F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])*dx_inv_1 +
                                                 S[idx_source]);
                             }
                         }
@@ -3688,9 +3697,9 @@ NavierStokes::synchronizeFluxes(
                                 j*interior_dim_0;
                             
                             Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
-                                             F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 -
+                                             F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])*dx_inv_0 -
                                             (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B] +
-                                             F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])/dx_1 +
+                                             F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])*dx_inv_1 +
                                             S[idx_source]);
                         }
                     }
@@ -3701,10 +3710,10 @@ NavierStokes::synchronizeFluxes(
         {
             for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
             {
-                double* F_c_x = convective_flux->getPointer(0, ei);
-                double* F_c_y = convective_flux->getPointer(1, ei);
-                double* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
-                double* S = source->getPointer(ei);
+                Real* F_c_x = convective_flux->getPointer(0, ei);
+                Real* F_c_y = convective_flux->getPointer(1, ei);
+                Real* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
+                Real* S = source->getPointer(ei);
                 
                 const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                 const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
@@ -3745,8 +3754,8 @@ NavierStokes::synchronizeFluxes(
                             
                             if (IB_mask[idx_IB_mask] == fluid)
                             {
-                                Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
-                                                (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B])/dx_1 -
+                                Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])*dx_inv_0 -
+                                                (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B])*dx_inv_1 -
                                                 nabla_F_d[idx_cell] +
                                                 S[idx_cell]);
                             }   
@@ -3779,8 +3788,8 @@ NavierStokes::synchronizeFluxes(
                             const int idx_cell = i +
                                 j*interior_dim_0;
                             
-                            Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
-                                            (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B])/dx_1 -
+                            Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])*dx_inv_0 -
+                                            (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B])*dx_inv_1 -
                                             nabla_F_d[idx_cell] +
                                             S[idx_cell]);
                         }
@@ -3802,18 +3811,21 @@ NavierStokes::synchronizeFluxes(
         const double dx_0 = dx[0];
         const double dx_1 = dx[1];
         const double dx_2 = dx[2];
+        const Real dx_inv_0 = Real(1.0/dx_0);
+        const Real dx_inv_1 = Real(1.0/dx_1);
+        const Real dx_inv_2 = Real(1.0/dx_2);
         
         if (d_use_conservative_form_diffusive_flux)
         {
             for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
             {
-                double* F_c_x = convective_flux->getPointer(0, ei);
-                double* F_c_y = convective_flux->getPointer(1, ei);
-                double* F_c_z = convective_flux->getPointer(2, ei);
-                double* F_d_x = diffusive_flux->getPointer(0, ei);
-                double* F_d_y = diffusive_flux->getPointer(1, ei);
-                double* F_d_z = diffusive_flux->getPointer(2, ei);
-                double* S = source->getPointer(ei);
+                Real* F_c_x = convective_flux->getPointer(0, ei);
+                Real* F_c_y = convective_flux->getPointer(1, ei);
+                Real* F_c_z = convective_flux->getPointer(2, ei);
+                Real* F_d_x = diffusive_flux->getPointer(0, ei);
+                Real* F_d_y = diffusive_flux->getPointer(1, ei);
+                Real* F_d_z = diffusive_flux->getPointer(2, ei);
+                Real* S = source->getPointer(ei);
                 
                 const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                 const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
@@ -3878,11 +3890,11 @@ NavierStokes::synchronizeFluxes(
                                 if (IB_mask[idx_IB_mask] == fluid)
                                 {
                                     Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
-                                                     F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 -
+                                                     F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])*dx_inv_0 -
                                                     (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B] +
-                                                     F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])/dx_1 -
+                                                     F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])*dx_inv_1 -
                                                     (F_c_z[idx_flux_z_F] - F_c_z[idx_flux_z_B] +
-                                                     F_d_z[idx_flux_z_F] - F_d_z[idx_flux_z_B])/dx_2 +
+                                                     F_d_z[idx_flux_z_F] - F_d_z[idx_flux_z_B])*dx_inv_2 +
                                                     S[idx_source]);
                                 }
                             }
@@ -3933,11 +3945,11 @@ NavierStokes::synchronizeFluxes(
                                     k*interior_dim_0*interior_dim_1;
                                 
                                 Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
-                                                 F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 -
+                                                 F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])*dx_inv_0 -
                                                 (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B] +
-                                                 F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])/dx_1 -
+                                                 F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])*dx_inv_1 -
                                                 (F_c_z[idx_flux_z_F] - F_c_z[idx_flux_z_B] +
-                                                 F_d_z[idx_flux_z_F] - F_d_z[idx_flux_z_B])/dx_2 +
+                                                 F_d_z[idx_flux_z_F] - F_d_z[idx_flux_z_B])*dx_inv_2 +
                                                 S[idx_source]);
                             }
                         }
@@ -3949,11 +3961,11 @@ NavierStokes::synchronizeFluxes(
         {
             for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
             {
-                double* F_c_x = convective_flux->getPointer(0, ei);
-                double* F_c_y = convective_flux->getPointer(1, ei);
-                double* F_c_z = convective_flux->getPointer(2, ei);
-                double* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
-                double* S = source->getPointer(ei);
+                Real* F_c_x = convective_flux->getPointer(0, ei);
+                Real* F_c_y = convective_flux->getPointer(1, ei);
+                Real* F_c_z = convective_flux->getPointer(2, ei);
+                Real* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
+                Real* S = source->getPointer(ei);
                 
                 const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                 const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
@@ -4017,9 +4029,9 @@ NavierStokes::synchronizeFluxes(
                                 
                                 if (IB_mask[idx_IB_mask] == fluid)
                                 {
-                                    Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
-                                                    (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B])/dx_1 -
-                                                    (F_c_z[idx_flux_z_F] - F_c_z[idx_flux_z_B])/dx_2 -
+                                    Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])*dx_inv_0 -
+                                                    (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B])*dx_inv_1 -
+                                                    (F_c_z[idx_flux_z_F] - F_c_z[idx_flux_z_B])*dx_inv_2 -
                                                     nabla_F_d[idx_cell] +
                                                     S[idx_cell]);
                                 }
@@ -4070,9 +4082,9 @@ NavierStokes::synchronizeFluxes(
                                     j*interior_dim_0 +
                                     k*interior_dim_0*interior_dim_1;
                                 
-                                Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
-                                                (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B])/dx_1 -
-                                                (F_c_z[idx_flux_z_F] - F_c_z[idx_flux_z_B])/dx_2 -
+                                Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])*dx_inv_0 -
+                                                (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B])*dx_inv_1 -
+                                                (F_c_z[idx_flux_z_F] - F_c_z[idx_flux_z_B])*dx_inv_2 -
                                                 nabla_F_d[idx_cell] +
                                                 S[idx_cell]);
                             }
@@ -4846,13 +4858,13 @@ NavierStokes::computeAndOutputMonitoringDataStatistics(
 {
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    math::HierarchyCellDataOpsReal<double> cell_double_operator(patch_hierarchy, 0, 0);
+    math::HierarchyCellDataOpsReal<Real> cell_real_operator(patch_hierarchy, 0, 0);
     
     hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
     
     std::vector<std::string> variable_names = d_flow_model->getNamesOfConservativeVariables();
     
-    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > variables =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > variables =
         d_flow_model->getConservativeVariables();
     
     for (int vi = 0; vi < static_cast<int>(variables.size()); vi++)
@@ -4862,24 +4874,24 @@ NavierStokes::computeAndOutputMonitoringDataStatistics(
             variables[vi],
             d_plot_context);
         
-        double var_max_local = cell_double_operator.max(var_id);
-        double var_min_local = cell_double_operator.min(var_id);
+        Real var_max_local = cell_real_operator.max(var_id);
+        Real var_min_local = cell_real_operator.min(var_id);
         
-        double var_max_global = 0.0;
-        double var_min_global = 0.0;
+        Real var_max_global = Real(0);
+        Real var_min_global = Real(0);
         
         mpi.Allreduce(
             &var_max_local,
             &var_max_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         mpi.Allreduce(
             &var_min_local,
             &var_min_global,
             1,
-            MPI_DOUBLE,
+            HAMERS_MPI_REAL,
             MPI_MAX);
         
         if (var_depth > 1)
