@@ -716,7 +716,6 @@ FlowModelImmersedBoundaryMethod::computeSurfaceTriangulationDataBase(
                 // Make sure dx is isotropic.
                 const double dx_min = std::min(dx[0], std::min(dx[1], dx[2]));
                 const double dx_max = std::max(dx[0], std::max(dx[1], dx[2]));
-                const double dx_ratio = dx_max/dx_min;
                 if (std::abs(dx_max - dx_min) > 10.0*std::numeric_limits<double>::epsilon())
                 {
                     TBOX_ERROR(d_object_name

@@ -11,6 +11,7 @@
 #include "SAMRAI/pdat/CellData.h"
 
 #include <string>
+#include <array>
 
 #define IB_EPSILON HAMERS_EPSILON
 
@@ -48,8 +49,8 @@ class ImmersedBoundaries
                 d_object_name(object_name),
                 d_project_name(project_name),
                 d_dim(dim),
-                d_initial_conditions_db(initial_conditions_db),
                 d_grid_geometry(grid_geometry),
+                d_initial_conditions_db(initial_conditions_db),
                 d_num_immersed_boundary_ghosts(-hier::IntVector::getOne(dim))
         {
             generateSurfaceTriangulation(d_surface_triangulation.nodes,
@@ -57,7 +58,6 @@ class ImmersedBoundaries
                                          d_surface_triangulation.normal_nodes,
                                          d_surface_triangulation.component_ids);
             
-            const int num_nodes = static_cast<int>(d_surface_triangulation.nodes.size());
             const int num_centroid = static_cast<int>(d_surface_triangulation.connectivities.size());
             
             // Check to make sure that the number of centroids and number of component ids are the same.
