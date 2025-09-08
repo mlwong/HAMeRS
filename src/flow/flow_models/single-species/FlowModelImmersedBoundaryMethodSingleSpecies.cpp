@@ -921,9 +921,9 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                             // Iteratively adjust until stencil uses only FLUID
                             bool all_fluid = false;
                             int  iter      = 0;
-                            const int max_iter = 50; // safety limit
+                            const int max_iter = 5; // safety limit
 
-                            while (!all_fluid && iter < max_iter)
+                            while (!all_fluid && iter <= max_iter)
                             {
                                 // Check if all stencil points are FLUID
                                 all_fluid =
@@ -992,6 +992,56 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                                         std::cerr << "Warning: Corner ghost cell d_ip_1 incremented more than two times"
                                                   << "\n iteration number: " << iter
                                                   << "\n current mask value: " << mask[idx_IB] << std::endl;
+                                        
+                                        if (iter >= max_iter)
+                                        {
+                                            d_ip_1  = (std::sqrt(Real(3)) * Real(dx[0])) / Real(2);
+                                            d_ip_2  =  d_ip_1 + Real(0.25) * Real(dx[0]);
+
+                                            // Coordinates of the image point 1.
+                                            x_ip_1 = x[0] + (dist[idx_IB] + d_ip_1)*norm_0[idx_IB];
+                                            y_ip_1 = x[1] + (dist[idx_IB] + d_ip_1)*norm_1[idx_IB];
+                                            z_ip_1 = x[2] + (dist[idx_IB] + d_ip_1)*norm_2[idx_IB];
+                                            
+                                            getTrilinearInterpolationIndices3D(
+                                                idx_ip_1_cons_var_LBK,
+                                                idx_ip_1_cons_var_RBK,
+                                                idx_ip_1_cons_var_LTK,
+                                                idx_ip_1_cons_var_RTK,
+                                                idx_ip_1_cons_var_LBF,
+                                                idx_ip_1_cons_var_RBF,
+                                                idx_ip_1_cons_var_LTF,
+                                                idx_ip_1_cons_var_RTF,
+                                                idx_ip_1_IB_LBK,
+                                                idx_ip_1_IB_RBK,
+                                                idx_ip_1_IB_LTK,
+                                                idx_ip_1_IB_RTK,
+                                                idx_ip_1_IB_LBF,
+                                                idx_ip_1_IB_RBF,
+                                                idx_ip_1_IB_LTF,
+                                                idx_ip_1_IB_RTF,
+                                                x_ip_1_LBK,
+                                                y_ip_1_LBK,
+                                                z_ip_1_LBK,
+                                                x_ip_1,
+                                                y_ip_1,
+                                                z_ip_1,
+                                                Real(patch_xlo[0]),
+                                                Real(patch_xlo[1]),
+                                                Real(patch_xlo[2]),
+                                                offset_0_cons_var,
+                                                offset_1_cons_var,
+                                                offset_2_cons_var,
+                                                ghostcell_dim_0_cons_var,
+                                                ghostcell_dim_1_cons_var,
+                                                offset_0_IB,
+                                                offset_1_IB,
+                                                offset_2_IB,
+                                                ghostcell_dim_0_IB,
+                                                ghostcell_dim_1_IB,
+                                                Real(dx[0]),
+                                                dx_inv);
+                                        }
                                     }
                                     
                                 }
