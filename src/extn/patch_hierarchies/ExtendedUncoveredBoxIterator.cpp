@@ -94,7 +94,7 @@ ExtendedUncoveredBoxIterator::ExtendedUncoveredBoxIterator(
             const SAMRAI::hier::BoxContainer& visible_boxes =
                d_extended_flattened_hierarchy->getVisibleBoxes(patch_box, d_level_num);
             
-            SAMRAI::hier::BoxContainer::const_iterator itr = visible_boxes.begin(); 
+            SAMRAI::hier::BoxContainer::const_iterator itr = visible_boxes.begin();
                for( ; itr != visible_boxes.end(); ++itr)
             {
                 if (itr->getBoxId() == d_item->second.getBoxId() &&
@@ -139,7 +139,7 @@ ExtendedUncoveredBoxIterator::operator = (
         d_level_num = rhs.d_level_num;
         d_uncovered_boxes_itr = rhs.d_uncovered_boxes_itr;
         d_uncovered_boxes_itr_end = rhs.d_uncovered_boxes_itr_end;
-        d_current_patch_id = rhs.d_current_patch_id; 
+        d_current_patch_id = rhs.d_current_patch_id;
         if (d_item)
         {
             delete d_item;
@@ -365,7 +365,7 @@ ExtendedUncoveredBoxIterator::incrementIterator()
             if (d_item)
             {
                 delete d_item;
-                d_item = 0; 
+                d_item = 0;
             }
         }
     }
@@ -399,7 +399,7 @@ ExtendedUncoveredBoxIterator::findFirstUncoveredBox()
             {
                 d_uncovered_boxes_itr = uncovered_boxes.begin();
                 d_uncovered_boxes_itr_end = uncovered_boxes.end();
-                d_current_patch_id = this_itr->getBoxId(); 
+                d_current_patch_id = this_itr->getBoxId();
                 id_found = true;
                 break;
             }

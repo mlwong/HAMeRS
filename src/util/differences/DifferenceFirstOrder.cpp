@@ -227,7 +227,7 @@ DifferenceFirstOrder::computeDifferenceWithVariableLocalMean(
         {
             HAMERS_PRAGMA_SIMD
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-            {        
+            {
                 // Compute the linear indices.
                 const int idx = (i + offset_0_difference) +
                     (j + offset_1_difference)*ghostcell_dim_0_difference;

@@ -183,7 +183,7 @@ RefineRegionsTagger::RefineRegionsTagger(
                 
                 if (refine_circle_db->keyExists("radius"))
                 {
-                    radius = refine_circle_db->getDouble("radius");
+                    radius = refine_circle_db->getReal("radius");
                 }
                 else
                 {
@@ -637,7 +637,7 @@ RefineRegionsTagger::getFromRestart(const HAMERS_SHARED_PTR<tbox::Database>& res
         // Get the coordinates of the center of the refine circle.
         std::vector<Real> center_coord;
         center_coord = refine_circle_db->getRealVector("center_coord");
-        const Real radius = refine_circle_db->getDouble("radius");
+        const Real radius = refine_circle_db->getReal("radius");
         
         // Get the direction of the refine circle.
         std::string direction_str = refine_circle_db->getString("direction");

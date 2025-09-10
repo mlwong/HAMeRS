@@ -572,6 +572,31 @@ void runSimulation(
             patch_hierarchy,
             time_integrator->getIntegratorStep(),
             time_integrator->getIntegratorTime());
+        
+        const std::string dump_directory_name = base_name + ".surface_data";
+        switch (app_label)
+        {
+            case EULER:
+            {
+                Euler_app->writePlotSurfaceData(
+                    patch_hierarchy,
+                    dump_directory_name,
+                    time_integrator->getIntegratorStep(),
+                    time_integrator->getIntegratorTime());
+                
+                break;
+            }
+            case NAVIER_STOKES:
+            {
+                Navier_Stokes_app->writePlotSurfaceData(
+                    patch_hierarchy,
+                    dump_directory_name,
+                    time_integrator->getIntegratorStep(),
+                    time_integrator->getIntegratorTime());
+                
+                break;
+            }
+        }
     }
 #endif
     t_write_viz->stop();
@@ -740,6 +765,30 @@ void runSimulation(
                         iteration_num,
                         loop_time);
                     
+                    const std::string dump_directory_name = base_name + ".surface_data";
+                    switch (app_label)
+                    {
+                        case EULER:
+                        {
+                            Euler_app->writePlotSurfaceData(
+                                patch_hierarchy,
+                                dump_directory_name,
+                                iteration_num,
+                                loop_time);
+                            
+                            break;
+                        }
+                        case NAVIER_STOKES:
+                        {
+                            Navier_Stokes_app->writePlotSurfaceData(
+                                patch_hierarchy,
+                                dump_directory_name,
+                                iteration_num,loop_time);
+                            
+                            break;
+                        }
+                    }
+                    
                     t_write_viz->stop();
                     
                     last_viz_dump_time = loop_time;
@@ -779,6 +828,31 @@ void runSimulation(
                         patch_hierarchy,
                         iteration_num,
                         loop_time);
+                    
+                    const std::string dump_directory_name = base_name + ".surface_data";
+                    switch (app_label)
+                    {
+                        case EULER:
+                        {
+                            Euler_app->writePlotSurfaceData(
+                                patch_hierarchy,
+                                dump_directory_name,
+                                iteration_num,
+                                loop_time);
+                            
+                            break;
+                        }
+                        case NAVIER_STOKES:
+                        {
+                            Navier_Stokes_app->writePlotSurfaceData(
+                                patch_hierarchy,
+                                dump_directory_name,
+                                iteration_num,
+                                loop_time);
+                            
+                            break;
+                        }
+                    }
                     
                     t_write_viz->stop();
                     
@@ -869,9 +943,9 @@ void runSimulation(
                     iteration_num);
                 
                 t_write_restart->stop();
+                
+                tbox::pout << "Files for restart are written." << std::endl;
             }
-            
-            tbox::pout << "Files for restart are written." << std::endl;
         }
         
         tbox::pout << "--------------------------------------------------------------------------------";
@@ -889,6 +963,31 @@ void runSimulation(
                 patch_hierarchy,
                 iteration_num,
                 loop_time);
+            
+            const std::string dump_directory_name = base_name + ".surface_data";
+            switch (app_label)
+            {
+                case EULER:
+                {
+                    Euler_app->writePlotSurfaceData(
+                        patch_hierarchy,
+                        dump_directory_name,
+                        iteration_num,
+                        loop_time);
+                    
+                    break;
+                }
+                case NAVIER_STOKES:
+                {
+                    Navier_Stokes_app->writePlotSurfaceData(
+                        patch_hierarchy,
+                        dump_directory_name,
+                        iteration_num,
+                        loop_time);
+                    
+                    break;
+                }
+            }
             
             t_write_viz->stop();
             

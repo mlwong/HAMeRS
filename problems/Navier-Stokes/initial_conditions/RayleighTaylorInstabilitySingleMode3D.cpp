@@ -81,16 +81,13 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         double* rho_Y_1 = partial_density->getPointer(1);
         double* rho_u   = momentum->getPointer(0);
         double* rho_v   = momentum->getPointer(1);
-	double* rho_w   = momentum->getPointer(2);
+        double* rho_w   = momentum->getPointer(2);
         double* E       = total_energy->getPointer(0);
         
         const double gamma = double(7)/double(5); // assume both gases have the same ratio of specific heat ratios
-        // const double gamma_0 = double(7)/double(5);
-        // const double gamma_1 = double(7)/double(5);
         
-              double lambda = 701.53278340668; // wavelength of single-mode perturbation
-              double eta_0  = 0.01*lambda;      // 1% perturbation
-        // const double eta_0  = 0.0*lambda;      // no perturbation
+        double lambda = 701.53278340668; // wavelength of single-mode perturbation
+        double eta_0  = 0.01*lambda;      // 1% perturbation
         
         const double W_1 = 0.04000; // molecular weight of heavier gas
         const double W_2 = 0.02400; // molecular weight of lighter gas
@@ -108,8 +105,6 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         const double R_1 = R_u/W_1;          // gas constant of heavier gas
         const double R_2 = R_u/W_2;          // gas constant of lighter gas
         
-        // const double rho_i = p_i/(R_u*T_0)*(W_1 + W_2)/2.0;
-        
         if (d_project_name == "3D smooth Rayleigh-Taylor instability")
         {
             const double delta = 0.01*lambda; // characteristic length of interface.
@@ -118,8 +113,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             {
                 for (int j = 0; j < patch_dims[1]; j++)
                 {
-		    for (int i = 0; i < patch_dims[0]; i++)
-		    {
+                    for (int i = 0; i < patch_dims[0]; i++)
+                    {
                         // Compute index into linear data array.
                         int idx_cell = i + j*patch_dims[0] +  k*patch_dims[0]*patch_dims[1];
                         
@@ -127,7 +122,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         double x[3];
                         x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
                         x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
-		        x[2] = patch_xlo[2] + (double(k) + double(1)/double(2))*dx[2];
+                        x[2] = patch_xlo[2] + (double(k) + double(1)/double(2))*dx[2];
                         
                         const double eta = eta_0*cos(2.0*M_PI/lambda*x[1])*cos(2.0*M_PI/lambda*x[2]);
                         
@@ -147,18 +142,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         const double p_H = p_i*exp(g/T_0*integral);
                         const double rho_H = p_H/(R_H*T_0);
                         
-                        // Scott's implementation
-                        // const double dX_2_H_dx = 1.0/(delta*sqrt(M_PI))*exp(-(x[0]/delta)*(x[0]/delta));
-                        // const double dlnR_H_dx = (R_2 - R_1)*dX_2_H_dx;
-                        // const double p_H = p_i*exp(g/(R_H*T_0)*(x[0] - 0.5*delta*delta*dlnR_H_dx));
-                        // const double rho_H = p_H/(R_H*T_0);
-                        
-                        // const double X_2 = 0.5*(1.0 + erf((x[0] - eta)/delta)); // mass fraction of second species (Y_2)
-                        
-                        double rho, p;
-                        
-                        rho = rho_H;
-                        p   = p_H;
+                        const double rho = rho_H;
+                        const double p   = p_H;
                         
                         // if (x[0] < eta)
                         // {
@@ -190,15 +175,14 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         
                         const double u = 0.0;
                         const double v = 0.0;
-		        const double w = 0.0;
+                        const double w = 0.0;
                         
                         rho_u[idx_cell] = rho*u;
                         rho_v[idx_cell] = rho*v;
-		        rho_w[idx_cell] = rho*w;
+                        rho_w[idx_cell] = rho*w;
                         E[idx_cell]     = p/(gamma - double(1)) + double(1)/double(2)*rho*(u*u + v*v + w*w);
- 
-     		    }
-		}
+                    }
+                }
             }
         }
     }

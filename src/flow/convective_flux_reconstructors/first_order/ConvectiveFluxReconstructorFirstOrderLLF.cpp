@@ -1134,7 +1134,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
                         
                         convective_flux->getPointer(2, ei)[idx_midpoint_z] = Real(1)/Real(2)*Real(dt)*(
                             F_z_node[ei][idx_B_convective_flux_z] + F_z_node[ei][idx_F_convective_flux_z] -
-                                alpha_z*(Q[ei][idx_F_conservative_var] - Q[ei][idx_B_conservative_var]));       
+                                alpha_z*(Q[ei][idx_F_conservative_var] - Q[ei][idx_B_conservative_var]));
                     }
                     
                     if (has_advection_eqn)

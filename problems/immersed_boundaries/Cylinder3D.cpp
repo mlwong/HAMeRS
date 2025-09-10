@@ -1,0 +1,238 @@
+#include "util/immersed_boundaries/ImmersedBoundaries.hpp"
+
+void
+ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
+    const hier::Patch& patch,
+    const double data_time,
+    const bool initial_time,
+    const hier::IntVector& domain_lo,
+    const hier::IntVector& domain_dims,
+    const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal)
+{
+    NULL_USE(data_time);
+    
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+            patch.getPatchGeometry()));
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(patch_geom);
+#endif
+    
+    const double* const dx = patch_geom->getDx();
+    const double* const patch_xlo = patch_geom->getXLower();
+    
+    const hier::IntVector num_ghosts = data_mask->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims = data_mask->getGhostBox().numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(num_ghosts == data_wall_distance->getGhostCellWidth());
+    TBOX_ASSERT(num_ghosts == data_surface_normal->getGhostCellWidth());
+#endif
+    
+    /*
+     * Get the pointers to the data.
+     */
+    int* mask = data_mask->getPointer(0);
+    Real* dist = data_wall_distance->getPointer(0);
+    Real* norm_0 = data_surface_normal->getPointer(0);
+    Real* norm_1 = data_surface_normal->getPointer(1);
+    Real* norm_2 = data_surface_normal->getPointer(2);
+    
+    /*
+     * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+     */
+    
+    const int domain_lo_0 = domain_lo[0];
+    const int domain_lo_1 = domain_lo[1];
+    const int domain_lo_2 = domain_lo[2];
+    const int domain_dim_0 = domain_dims[0];
+    const int domain_dim_1 = domain_dims[1];
+    const int domain_dim_2 = domain_dims[2];
+    
+    const int num_ghosts_0 = num_ghosts[0];
+    const int num_ghosts_1 = num_ghosts[1];
+    const int num_ghosts_2 = num_ghosts[2];
+    const int ghostcell_dim_0 = ghostcell_dims[0];
+    const int ghostcell_dim_1 = ghostcell_dims[1];
+    
+    /************************************************
+     * Set the immersed boundary variables from here.
+     ************************************************/
+    
+    /*
+     * Set the parameters of the 3D cylinder here.
+     */
+    
+    const Real half = Real(1)/Real(2);
+    
+    /*
+     * These will be read from the input file.
+     */
+    
+    Real radius_c = half;
+    Real x_c = Real(1);
+    Real y_c = Real(1);
+    Real z_c = Real(1);
+    
+    if (d_initial_conditions_db != nullptr)
+    {
+        TBOX_ASSERT(d_initial_conditions_db->keyExists("x_c"));
+        TBOX_ASSERT(d_initial_conditions_db->keyExists("y_c"));
+        TBOX_ASSERT(d_initial_conditions_db->keyExists("z_c"));
+        
+        x_c = d_initial_conditions_db->getReal("x_c");
+        y_c = d_initial_conditions_db->getReal("y_c");
+        z_c = d_initial_conditions_db->getReal("z_c");
+        
+        radius_c = d_initial_conditions_db->getReal("radius");
+    }
+    
+    for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+    {
+       for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+            HAMERS_PRAGMA_SIMD
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx = (i + num_ghosts_0) +
+                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                    (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
+                
+                // Compute the coordinates.
+                double x[3];
+                x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0]; // x coordinates of the point.
+                x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1]; // y coordinates of the point.
+                x[2] = patch_xlo[2] + (double(k) + double(1)/double(2))*dx[2]; // z coordinates of the point.
+                
+                // Distance from the cylinder center.
+                const Real radius = sqrt(pow(Real(x[0]) - x_c, 2) + pow(Real(x[1]) - y_c, 2));
+                // Angle between x axis and a line passing through center and current cell.
+                const Real theta  = atan2(Real(x[1]) - y_c, Real(x[0]) - x_c);
+                
+                if (radius < radius_c) // Condition that should be satisfied to be in cylinder.
+                {
+                    Real x_p = Real(0); // x coordinates on the cylinder where y = x[1], z = x[2].
+                    Real y_p = Real(0); // y coordinates on the cylinder where x = x[0], z = x[2].
+                    
+                    // For checking ghost cell for convective flux.
+                    if (Real(x[0]) > x_c)
+                    {
+                        x_p = x_c + sqrt(pow(radius_c, 2) - pow(radius*sin(theta), 2));
+                    }
+                    else
+                    {
+                        x_p = x_c - sqrt(pow(radius_c, 2) - pow(radius*sin(theta), 2));
+                    }
+                    
+                    if (Real(x[1]) > y_c)
+                    {
+                        y_p = y_c + sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));
+                    }
+                    else
+                    {
+                        y_p = y_c - sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));
+                    }
+                    
+                    // Determine maximum ghost layers in x, y, and z directions
+                    const int max_ghost_x = d_num_immersed_boundary_ghosts[0];
+                    const int max_ghost_y = d_num_immersed_boundary_ghosts[1];
+                    const int max_ghost_z = d_num_immersed_boundary_ghosts[2];
+                    
+                    if ((max_ghost_x != max_ghost_y) || (max_ghost_x != max_ghost_z) || (max_ghost_y != max_ghost_z))
+                    {
+                    TBOX_ERROR("d_num_immersed_boundary_ghosts should have the same value in x, y, and z directions\n");
+                    }
+                    
+                    bool is_ghost_cell   = false;
+                    bool is_corner_ghost = false;
+                    
+                    Real x_d[2];
+                    
+                    for (int gx = 1; gx <= max_ghost_x; gx++)
+                    {
+                        if ((fabs(x_p - Real(x[0])) < (Real(gx))*Real(dx[0])) || (fabs(y_p - Real(x[1])) < (Real(gx))*Real(dx[1]))) // Ghost cells excluding corner ghost cells.
+                        {
+                            is_ghost_cell = true;
+                            break;
+                        }
+                        
+                        x_d[0] = patch_xlo[0] + (Real(i + gx) + half) * Real(dx[0]);
+                        x_d[1] = patch_xlo[1] + (Real(j + gx) + half) * Real(dx[1]);
+                        Real radius_d_TR = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+                        
+                        x_d[0] = patch_xlo[0] + (Real(i + gx) + half) * Real(dx[0]);
+                        x_d[1] = patch_xlo[1] + (Real(j - gx) + half) * Real(dx[1]);
+                        Real radius_d_BR = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+                        
+                        x_d[0] = patch_xlo[0] + (Real(i - gx) + half) * (dx[0]);
+                        x_d[1] = patch_xlo[1] + (Real(j - gx) + half) * (dx[1]);
+                        Real radius_d_BL = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+                        
+                        x_d[0] = patch_xlo[0] + (Real(i - gx) + half) * (dx[0]);
+                        x_d[1] = patch_xlo[1] + (Real(j + gx) + half) * (dx[1]);
+                        Real radius_d_TL = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+                        
+                        if ((radius_d_TR > radius_c) || (radius_d_BR > radius_c) || (radius_d_BL > radius_c) || (radius_d_TL > radius_c))
+                        {
+                            is_corner_ghost = true;
+                            break;
+                        }
+                    }
+                    
+                    if (is_ghost_cell || is_corner_ghost)
+                    {
+                        dist[idx]   = radius_c - radius;
+                        norm_0[idx] = (Real(x[0]) - x_c)/radius;
+                        norm_1[idx] = (Real(x[1]) - y_c)/radius;
+                        norm_2[idx] = Real(0);
+                        
+                        if (is_corner_ghost)
+                        {
+                            // Corner ghost cells required for viscous fluxes.
+                            mask[idx] = int(IB_MASK::IB_GHOST_CORNER);
+                        }
+                        else
+                        {
+                            // Ghost cells required for convective fluxes.
+                            mask[idx] = int(IB_MASK::IB_GHOST);
+                        }
+                    }
+                    else
+                    {
+                        mask[idx]   = int(IB_MASK::BODY);
+                        dist[idx]   = Real(0);
+                        norm_0[idx] = Real(0);
+                        norm_1[idx] = Real(0);
+                        norm_2[idx] = Real(0);
+                    }
+                }
+                else
+                {
+                    mask[idx]   = int(IB_MASK::FLUID);
+                    dist[idx]   = Real(0);
+                    norm_0[idx] = Real(0);
+                    norm_1[idx] = Real(0);
+                    norm_2[idx] = Real(0);
+                 }
+            }
+        }
+    }
+}
+
+
+void
+ImmersedBoundaries::generateSurfaceTriangulation(
+    std::vector<std::array<double, 3> >& nodes,
+    std::vector<std::array<int, 3> >& connectivities,
+    std::vector<std::array<double, 3> >& normal_nodes,
+    std::vector<int>& component_ids)
+{
+    NULL_USE(nodes);
+    NULL_USE(connectivities);
+    NULL_USE(normal_nodes);
+    NULL_USE(component_ids);
+}

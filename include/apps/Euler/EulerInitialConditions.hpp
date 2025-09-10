@@ -46,7 +46,7 @@ class EulerInitialConditions
         void
         initializeDataOnPatch(
             hier::Patch& patch,
-            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
             const double data_time,
             const bool initial_time);
         

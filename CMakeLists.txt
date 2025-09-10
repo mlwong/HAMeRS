@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 
 project(HAMeRS C CXX Fortran)
 
@@ -11,6 +11,20 @@ if (MPI_FOUND)
   include_directories(${MPI_INCLUDE_PATH})
 endif()
 
+option(HAMERS_USE_TECIO "HAMERS_USE_TECIO" OFF)
+
+if("${HAMERS_USE_TECIO}")
+    # tecio needs Boost
+    find_package(Boost 1.59 REQUIRED)
+    if (Boost_FOUND)
+        include_directories(${Boost_INCLUDE_DIR})
+    else()
+        Set (Boost_INCLUDE_DIR /3rdpartylibs/boost/1.59.0/build/linux64-centos6.5/include)
+        message ("Warning:  Cannot find boost include directories.  Hardcoding to ${Boost_INCLUDE_DIR}")
+        include_directories(SYSTEM ${Boost_INCLUDE_DIR})
+    endif()
+endif()
+
 option(HAMERS_USE_BOOST "HAMERS_USE_BOOST" ON)
 
 if("${HAMERS_USE_BOOST}")
@@ -21,7 +35,7 @@ if("${HAMERS_USE_BOOST}")
 endif()
 
 # Find the hdf5 package
-find_package(HDF5 1.8.4 REQUIRED)
+find_package(HDF5 1.14 REQUIRED)
 include_directories(${HDF5_INCLUDE_DIR})
 link_directories(${HDF5_LIBRARY_DIRS})
 
@@ -120,6 +134,8 @@ link_directories(${HAMeRS_BINARY_DIR}/algs/patch_strategy
                  ${HAMeRS_BINARY_DIR}/util/wavelet_transform
                  ${HAMeRS_BINARY_DIR}/util/MPI_helpers)
 
+include_directories(${HAMeRS_SOURCE_DIR}/third_party/teciosrc)
+
 add_subdirectory(src/algs/patch_strategy)
 add_subdirectory(src/algs/integrator)
 add_subdirectory(src/apps/Euler)
@@ -146,3 +162,5 @@ add_subdirectory(src/util/mixing_rules/equations_of_state)
 add_subdirectory(src/util/refinement_regions_taggers)
 add_subdirectory(src/util/wavelet_transform)
 add_subdirectory(src/util/MPI_helpers)
+
+add_subdirectory(third_party/teciosrc)

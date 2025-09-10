@@ -8,8 +8,8 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims,
     const HAMERS_SHARED_PTR<pdat::CellData<int> >& data_mask,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_wall_distance,
-    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_surface_normal)
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_wall_distance,
+    const HAMERS_SHARED_PTR<pdat::CellData<Real> >& data_surface_normal)
 {
     NULL_USE(data_time);
     
@@ -35,10 +35,10 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
     /*
      * Get the pointers to the data.
      */
-    int* mask      = data_mask->getPointer(0);
-    double* dist   = data_wall_distance->getPointer(0);
-    double* norm_0 = data_surface_normal->getPointer(0);
-    double* norm_1 = data_surface_normal->getPointer(1);
+    int* mask = data_mask->getPointer(0);
+    Real* dist = data_wall_distance->getPointer(0);
+    Real* norm_0 = data_surface_normal->getPointer(0);
+    Real* norm_1 = data_surface_normal->getPointer(1);
     
     /*
      * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
@@ -61,15 +61,26 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
      * Set the parameters of the cylinder here.
      */
     
-    const double half = double(1)/double(2);
+    const Real half = Real(1)/Real(2);
     
     /*
      * These will be read from the input file.
      */
     
-    const double radius_c = half; //double(20); AFK 
-    const double x_c = double(5); //half;  AFK
-    const double y_c = double(5); //half;  AFK
+    Real radius_c = half;
+    Real x_c = Real(1);
+    Real y_c = Real(1);
+
+    if (d_initial_conditions_db != nullptr)
+    {
+        TBOX_ASSERT(d_initial_conditions_db->keyExists("x_c"));
+        TBOX_ASSERT(d_initial_conditions_db->keyExists("y_c"));
+        
+        x_c = d_initial_conditions_db->getReal("x_c");
+        y_c = d_initial_conditions_db->getReal("y_c");
+        
+        radius_c = d_initial_conditions_db->getReal("radius");
+    }
     
     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
     {
@@ -86,16 +97,17 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
             x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1]; // y coordinates of the point.
             
             // Distance from the cylinder center.
-            const double radius = sqrt(pow(x[0] - x_c, 2) + pow(x[1] - y_c, 2));
+            const Real radius = Real(sqrt(pow(Real(x[0]) - x_c, 2) + pow(Real(x[1]) - y_c, 2)));
             // Angle between x axis and a line passing through center and current cell.
-            const double theta  = atan2(x[1] - y_c, x[0] - x_c);
+            const Real theta = Real(atan2(Real(x[1]) - y_c, Real(x[0]) - x_c));
             
             if (radius < radius_c) // Condition that should be satisfied to be in cylinder.
             {
-                double x_p = double(0); // x coordinates on the cylinder where y = x[1].
-                double y_p = double(0); // y coordinates on the cylinder where x = x[0].
+                Real x_p = Real(0); // x coordinates on the cylinder where y = x[1].
+                Real y_p = Real(0); // y coordinates on the cylinder where x = x[0].
                 
-                if (x[0] > x_c)
+                // For checking ghost cell for convective flux.
+                if (Real(x[0]) > x_c)
                 {
                     x_p = x_c + sqrt(pow(radius_c, 2) - pow(radius*sin(theta), 2));
                 }
@@ -104,7 +116,7 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                     x_p = x_c - sqrt(pow(radius_c, 2) - pow(radius*sin(theta), 2));
                 }
                 
-                if (x[1] > y_c)
+                if (Real(x[1]) > y_c)
                 {
                     y_p = y_c + sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));
                 }
@@ -113,29 +125,97 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                     y_p = y_c - sqrt(pow(radius_c, 2) - pow(radius*cos(theta), 2));
                 }
                 
-                if ((fabs(x_p - x[0]) < (double(d_num_immersed_boundary_ghosts[0]))*dx[0]) ||
-                    (fabs(y_p - x[1]) < (double(d_num_immersed_boundary_ghosts[1]))*dx[1]))
+                // Determine maximum ghost layers in x and y directions.
+                const int max_ghost_x = d_num_immersed_boundary_ghosts[0];
+                const int max_ghost_y = d_num_immersed_boundary_ghosts[1];
+                
+                if ((max_ghost_x != max_ghost_y ))
                 {
-                    mask[idx]   = int(IB_MASK::IB_GHOST);
+                    TBOX_ERROR("d_num_immersed_boundary_ghosts should have the same value in x and y directions\n");
+                }
+                
+                bool is_ghost_cell   = false;
+                bool is_corner_ghost = false;
+                
+                Real x_d[2];
+                
+                for (int gx = 1; gx <= max_ghost_x; gx++) 
+                {
+                    if ((fabs(x_p - Real(x[0])) < (Real(gx))*Real(dx[0])) || (fabs(y_p - x[1]) < (Real(gx))*Real(dx[1]))) // Ghost cells excluding corner ghost cells.
+                    {
+                        is_ghost_cell = true;
+                        break;
+                    }
+                    
+                    x_d[0] = patch_xlo[0] + (Real(i + gx) + half) * Real(dx[0]);
+                    x_d[1] = patch_xlo[1] + (Real(j + gx) + half) * Real(dx[1]);
+                    Real radius_d_TR = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+                    
+                    x_d[0] = patch_xlo[0] + (Real(i + gx) + half) * Real(dx[0]);
+                    x_d[1] = patch_xlo[1] + (Real(j - gx) + half) * Real(dx[1]);
+                    Real radius_d_BR = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+                    
+                    x_d[0] = patch_xlo[0] + (Real(i - gx) + half) * Real(dx[0]);
+                    x_d[1] = patch_xlo[1] + (Real(j - gx) + half) * Real(dx[1]);
+                    Real radius_d_BL = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+                    
+                    x_d[0] = patch_xlo[0] + (Real(i - gx) + half) * Real(dx[0]);
+                    x_d[1] = patch_xlo[1] + (Real(j + gx) + half) * Real(dx[1]);
+                    Real radius_d_TL = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2));
+                    
+                    if ((radius_d_TR > radius_c) || (radius_d_BR > radius_c) || (radius_d_BL > radius_c) || (radius_d_TL > radius_c))
+                    {
+                        is_corner_ghost = true;
+                        break;
+                    }
+                }
+                
+                if (is_ghost_cell || is_corner_ghost)
+                {
                     dist[idx]   = radius_c - radius;
-                    norm_0[idx] = (x[0] - x_c)/radius;
-                    norm_1[idx] = (x[1] - y_c)/radius;
+                    norm_0[idx] = (Real(x[0]) - x_c)/radius;
+                    norm_1[idx] = (Real(x[1]) - y_c)/radius;
+                    
+                    if (is_corner_ghost)  
+                    {
+                        // Corner ghost cells required for viscous fluxes.
+                        mask[idx] = int(IB_MASK::IB_GHOST_CORNER);
+                    }
+                    else
+                    {
+                        // Ghost cells required for convective fluxes.
+                        mask[idx] = int(IB_MASK::IB_GHOST);
+                    }
                 }
                 else
                 {
                     mask[idx]   = int(IB_MASK::BODY);
-                    dist[idx]   = double(0);
-                    norm_0[idx] = double(0);
-                    norm_1[idx] = double(0);
+                    dist[idx]   = Real(0);
+                    norm_0[idx] = Real(0);
+                    norm_1[idx] = Real(0);
                 }
             }
             else
             {
                 mask[idx]   = int(IB_MASK::FLUID);
-                dist[idx]   = double(0);
-                norm_0[idx] = double(0);
-                norm_1[idx] = double(0);
+                dist[idx]   = Real(0);
+                norm_0[idx] = Real(0);
+                norm_1[idx] = Real(0);
             }
         }
     }
+}
+
+
+void
+ImmersedBoundaries::generateSurfaceTriangulation(
+    std::vector<std::array<double, 3> >& nodes,
+    std::vector<std::array<int, 3> >& connectivities,
+    std::vector<std::array<double, 3> >& normal_nodes,
+    std::vector<int>& component_ids)
+{
+    NULL_USE(nodes);
+    NULL_USE(connectivities);
+    NULL_USE(normal_nodes);
+    NULL_USE(component_ids);
 }

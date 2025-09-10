@@ -7,7 +7,7 @@
 void
 EulerSpecialBoundaryConditions::setSpecialBoundaryConditions(
     hier::Patch& patch,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
     const double fill_time,
     const hier::IntVector& ghost_width_to_fill)
 {

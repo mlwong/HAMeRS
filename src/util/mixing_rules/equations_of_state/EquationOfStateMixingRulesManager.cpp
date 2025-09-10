@@ -23,9 +23,9 @@ EquationOfStateMixingRulesManager::EquationOfStateMixingRulesManager(
                 equation_of_state_mixing_rules_db));
     }
     else if (equation_of_state_str == "STIFFENED_GAS")
-    {   
+    {
         d_equation_of_state_type = EQN_STATE::STIFFENED_GAS;
-     
+        
         d_equation_of_state_mixing_rules.reset(new EquationOfStateMixingRulesStiffenedGas(
                 "d_equation_of_state_mixing_rules",
                 dim,
@@ -40,7 +40,7 @@ EquationOfStateMixingRulesManager::EquationOfStateMixingRulesManager(
             << "Unknown equation_of_state/d_equation_of_state string = '"
             << equation_of_state_str
             << "' found in input/restart file."
-            << std::endl);        
+            << std::endl);
     }
 }
 

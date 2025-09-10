@@ -49,7 +49,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
     {
         if (boundary_conditions_db_is_from_restart)
         {
-            std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > conservative_var =
+            std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > conservative_var =
                 d_flow_model->getConservativeVariables();
             
             d_master_bdry_node_conds = boundary_conditions_db->getIntegerVector("d_master_bdry_node_conds");
@@ -58,7 +58,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
             {
                 for (int vi = 0; vi < static_cast<int>(conservative_var.size()); vi++)
                 {
-                    d_bdry_node_conservative_var[vi] = boundary_conditions_db->getDoubleVector(
+                    d_bdry_node_conservative_var[vi] = boundary_conditions_db->getRealVector(
                         "d_bdry_node_conservative_var[" + tbox::Utilities::intToString(vi) + "]");
                 }
             }
@@ -68,7 +68,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
                 
                 for (int vi = 0; vi < static_cast<int>(conservative_var.size()); vi++)
                 {
-                    d_bdry_edge_conservative_var[vi] = boundary_conditions_db->getDoubleVector(
+                    d_bdry_edge_conservative_var[vi] = boundary_conditions_db->getRealVector(
                         "d_bdry_edge_conservative_var[" + tbox::Utilities::intToString(vi) + "]");
                 }
             }
@@ -79,7 +79,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
                 
                 for (int vi = 0; vi < static_cast<int>(conservative_var.size()); vi++)
                 {
-                    d_bdry_face_conservative_var[vi] = boundary_conditions_db->getDoubleVector(
+                    d_bdry_face_conservative_var[vi] = boundary_conditions_db->getRealVector(
                         "d_bdry_face_conservative_var[" + tbox::Utilities::intToString(vi) + "]");
                 }
             }
@@ -408,7 +408,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
 void
 EulerBoundaryConditions::printClassData(std::ostream& os) const
 {
-    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > conservative_var =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > conservative_var =
         d_flow_model->getConservativeVariables();
     
     os << "\nPrint EulerBoundaryConditions object..."
@@ -613,7 +613,7 @@ void
 EulerBoundaryConditions::putToRestart(
     const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
-    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > conservative_var =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > conservative_var =
         d_flow_model->getConservativeVariables();
     
     restart_db->putIntegerVector("d_master_bdry_node_conds", d_master_bdry_node_conds);
@@ -622,7 +622,7 @@ EulerBoundaryConditions::putToRestart(
     {
         for (int vi = 0; vi < static_cast<int>(conservative_var.size()); vi++)
         {
-            restart_db->putDoubleVector(
+            restart_db->putRealVector(
                 "d_bdry_node_conservative_var[" + tbox::Utilities::intToString(vi) + "]",
                 d_bdry_node_conservative_var[vi]);
         }
@@ -633,7 +633,7 @@ EulerBoundaryConditions::putToRestart(
         
         for (int vi = 0; vi < static_cast<int>(conservative_var.size()); vi++)
         {
-            restart_db->putDoubleVector(
+            restart_db->putRealVector(
                 "d_bdry_edge_conservative_var[" + tbox::Utilities::intToString(vi) + "]",
                 d_bdry_edge_conservative_var[vi]);
         }
@@ -648,7 +648,7 @@ EulerBoundaryConditions::putToRestart(
         
         for (int vi = 0; vi < static_cast<int>(conservative_var.size()); vi++)
         {
-            restart_db->putDoubleVector(
+            restart_db->putRealVector(
                 "d_bdry_face_conservative_var[" + tbox::Utilities::intToString(vi) + "]",
                 d_bdry_face_conservative_var[vi]);
         }
@@ -682,10 +682,10 @@ EulerBoundaryConditions::readDirichletBoundaryDataEntry(
     TBOX_ASSERT(!db_name.empty());
     
     // Get the primitve data at the boundaries.
-    std::vector<double> V = readPrimitiveDataEntry(db, db_name);
+    std::vector<Real> V = readPrimitiveDataEntry(db, db_name);
     
     // Get a vector pointers to the primitive data.
-    std::vector<const double*> V_ptr;
+    std::vector<const Real*> V_ptr;
     V_ptr.reserve(V.size());
     for (int ei = 0; ei < static_cast<int>(V.size()); ei++)
     {
@@ -694,8 +694,8 @@ EulerBoundaryConditions::readDirichletBoundaryDataEntry(
     
     // Create an uninitialized vector of conservative data at the boundaries and get a vector
     // of pointers to the data.
-    std::vector<double> Q(V.size());
-    std::vector<double*> Q_ptr;
+    std::vector<Real> Q(V.size());
+    std::vector<Real*> Q_ptr;
     Q_ptr.reserve(Q.size());
     for (int ei = 0; ei < static_cast<int>(Q.size()); ei++)
     {
@@ -707,7 +707,7 @@ EulerBoundaryConditions::readDirichletBoundaryDataEntry(
     HAMERS_SHARED_PTR<FlowModelBasicUtilities> basic_utilities = d_flow_model->getFlowModelBasicUtilities();
     basic_utilities->convertPrimitiveVariablesToConservativeVariables(V_ptr, Q_ptr);
     
-    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > conservative_var =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > conservative_var =
         d_flow_model->getConservativeVariables();
         
     if (d_dim == tbox::Dimension(1))
@@ -789,7 +789,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
 {
     NULL_USE(fill_time);
     
-    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > conservative_var =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > conservative_var =
         d_flow_model->getConservativeVariables();
     
     std::vector<std::string> conservative_var_types =
@@ -800,7 +800,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
     
     d_flow_model->registerPatchWithDataContext(patch, data_context);
     
-    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_var_data =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > > conservative_var_data =
         d_flow_model->getCellDataOfConservativeVariables();
     
     /*
@@ -1164,7 +1164,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
 }
 
 
-std::vector<double>
+std::vector<Real>
 EulerBoundaryConditions::readPrimitiveDataEntry(
     HAMERS_SHARED_PTR<tbox::Database> db,
     const std::string& db_name)
@@ -1172,7 +1172,7 @@ EulerBoundaryConditions::readPrimitiveDataEntry(
     TBOX_ASSERT(db);
     TBOX_ASSERT(!db_name.empty());
     
-    std::vector<double> data_primitive_var;
+    std::vector<Real> data_primitive_var;
     
     std::vector<std::string> primitive_var_names = d_flow_model->getNamesOfPrimitiveVariables(true);
     
@@ -1180,7 +1180,7 @@ EulerBoundaryConditions::readPrimitiveDataEntry(
     {
         if (db->keyExists(primitive_var_names[vi]))
         {
-            std::vector<double> vector_primitive_var_data = db->getDoubleVector(primitive_var_names[vi]);
+            std::vector<Real> vector_primitive_var_data = db->getRealVector(primitive_var_names[vi]);
             
             const int var_depth = static_cast<int>(vector_primitive_var_data.size());
             
@@ -1212,7 +1212,7 @@ EulerBoundaryConditions::readPrimitiveDataEntry(
 void
 EulerBoundaryConditions::setDefaultBoundaryConditions()
 {
-    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > conservative_var =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<Real> > > conservative_var =
         d_flow_model->getConservativeVariables();
     
     if (d_dim == tbox::Dimension(1))
@@ -1233,7 +1233,7 @@ EulerBoundaryConditions::setDefaultBoundaryConditions()
         {
             d_bdry_node_conservative_var[vi].resize(NUM_1D_NODES*conservative_var[vi]->getDepth());
             
-            tbox::MathUtilities<double>::setVectorToSignalingNaN(d_bdry_node_conservative_var[vi]);
+            tbox::MathUtilities<Real>::setVectorToSignalingNaN(d_bdry_node_conservative_var[vi]);
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -1266,7 +1266,7 @@ EulerBoundaryConditions::setDefaultBoundaryConditions()
         {
             d_bdry_edge_conservative_var[vi].resize(NUM_2D_EDGES*conservative_var[vi]->getDepth());
             
-            tbox::MathUtilities<double>::setVectorToSignalingNaN(d_bdry_edge_conservative_var[vi]);
+            tbox::MathUtilities<Real>::setVectorToSignalingNaN(d_bdry_edge_conservative_var[vi]);
         }
     }
     else if (d_dim == tbox::Dimension(3))
@@ -1310,7 +1310,7 @@ EulerBoundaryConditions::setDefaultBoundaryConditions()
         {
             d_bdry_face_conservative_var[vi].resize(NUM_3D_FACES*conservative_var[vi]->getDepth());
             
-            tbox::MathUtilities<double>::setVectorToSignalingNaN(d_bdry_face_conservative_var[vi]);
+            tbox::MathUtilities<Real>::setVectorToSignalingNaN(d_bdry_face_conservative_var[vi]);
         }
     }
 }

@@ -2,6 +2,9 @@
 #define FLOW_MODEL_IMMERSED_BOUNDARY_METHOD_SINGLE_SPECIES_HPP
 
 #include "flow/flow_models/FlowModelImmersedBoundaryMethod.hpp"
+#include "util/mixing_rules/equations_of_bulk_viscosity/EquationOfBulkViscosityMixingRulesManager.hpp"
+#include "util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.hpp"
+#include "util/mixing_rules/equations_of_thermal_conductivity/EquationOfThermalConductivityMixingRulesManager.hpp"
 
 class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoundaryMethod
 {
@@ -14,7 +17,10 @@ class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoun
             const int& num_eqn,
             const HAMERS_SHARED_PTR<ImmersedBoundaries>& immersed_boundaries,
             const HAMERS_SHARED_PTR<tbox::Database>& immersed_boundary_method_db,
-            const HAMERS_SHARED_PTR<EquationOfStateMixingRules>& equation_of_state_mixing_rules);
+            const HAMERS_SHARED_PTR<EquationOfStateMixingRules>& equation_of_state_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules);
         
         ~FlowModelImmersedBoundaryMethodSingleSpecies() {}
         
@@ -36,12 +42,53 @@ class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoun
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims);
         
+        /*
+         * Output the surface triangulation with surface data.
+         */
+        void writeSurfaceTriangulationWithData(const std::string& file_name) const;
+        
+        /*
+         * Output names of monitoring statistical quantities to output to a file.
+         */
+        void outputMonitoringStatisticalQuantitiesNames(std::ofstream& f_out) const;
+        
+        /*
+         * Output monitoring statistics to screen.
+         */
+        void outputMonitoringStatistics(std::ofstream& f_out) const;
+        
+        /*
+         * Compute the data on the surface triangulation.
+         */
+        void computeSurfaceTriangulationData(
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
     private:
+        /*
+         * HAMERS_SHARED_PTR to EquationOfShearViscosityMixingRules.
+         */
+        const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules>
+            d_equation_of_shear_viscosity_mixing_rules;
+        
+        /*
+         * HAMERS_SHARED_PTR to EquationOfBulkViscosityMixingRules.
+         */
+        const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules>
+            d_equation_of_bulk_viscosity_mixing_rules;
+        
+        /*
+         * HAMERS_SHARED_PTR to EquationOfThermalConductivityMixingRules.
+         */
+        const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules>
+            d_equation_of_thermal_conductivity_mixing_rules;
+        
         /* 
          * Values of primitive variables inside the body.
          */
         Real d_rho_body;
-        Real d_temp_body;
+        Real d_T_body;
         std::vector<Real> d_vel_body;
         Real d_p_body;
         
@@ -56,6 +103,28 @@ class FlowModelImmersedBoundaryMethodSingleSpecies: public FlowModelImmersedBoun
          */
         std::vector<Real> d_thermo_properties;
         
+        /*
+         * Data for the surface triangulation if needed.
+         */
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_p;
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_u;
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_v;
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_w;
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_T;
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_rho;
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_tx_v;
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_ty_v;
+        HAMERS_SHARED_PTR<std::vector<double> > d_surface_triangulation_tz_v;
+        
+        /*
+         * Data integrated on the surface triangulation if needed.
+         */
+        double d_surface_triangulation_integrated_F_p_x;
+        double d_surface_triangulation_integrated_F_p_y;
+        double d_surface_triangulation_integrated_F_p_z;
+        double d_surface_triangulation_integrated_F_v_x;
+        double d_surface_triangulation_integrated_F_v_y;
+        double d_surface_triangulation_integrated_F_v_z;
 };
 
 #endif /* FLOW_MODEL_IMMERSED_BOUNDARY_METHOD_SINGLE_SPECIES_HPP */

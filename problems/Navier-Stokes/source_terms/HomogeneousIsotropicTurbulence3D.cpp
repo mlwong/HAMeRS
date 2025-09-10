@@ -5,10 +5,10 @@
  */
 void
 FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
-    HAMERS_SHARED_PTR<pdat::CellData<double> >& source,
+    HAMERS_SHARED_PTR<pdat::CellData<Real> >& source,
     const hier::Patch& patch,
-    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
-    const std::unordered_map<std::string, double>& monitoring_statistics_map,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<Real> > >& conservative_variables,
+    const std::unordered_map<std::string, Real>& monitoring_statistics_map,
     const double time,
     const double dt,
     const int RK_step_number)
@@ -36,10 +36,10 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     
     TBOX_ASSERT(d_source_terms_db->keyExists("forcing_rate"));
     
-    double eps_0 = double(0);
+    Real eps_0 = Real(0);
     if (d_source_terms_db->keyExists("forcing_rate"))
     {
-        eps_0 = d_source_terms_db->getDouble("forcing_rate");
+        eps_0 = d_source_terms_db->getReal("forcing_rate");
     }
     else
     {
@@ -65,7 +65,7 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     TBOX_ASSERT(patch_geom);
 #endif
     
-    std::vector<double*> S;
+    std::vector<Real*> S;
     S.reserve(d_num_eqn);
     for (int si = 0; si < d_num_eqn; si++)
     {
@@ -89,25 +89,22 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
      * Initialize data for a 2D Rayleigh-Taylor instability problem (At = 0.04, M = 0.3).
      */
     
-    HAMERS_SHARED_PTR<pdat::CellData<double> > density      = conservative_variables[0];
-    HAMERS_SHARED_PTR<pdat::CellData<double> > momentum     = conservative_variables[1];
-    HAMERS_SHARED_PTR<pdat::CellData<double> > total_energy = conservative_variables[2];
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > density      = conservative_variables[0];
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > momentum     = conservative_variables[1];
+    HAMERS_SHARED_PTR<pdat::CellData<Real> > total_energy = conservative_variables[2];
     
-    // double* rho   = density->getPointer(0);
-    double* rho_u = momentum->getPointer(0);
-    double* rho_v = momentum->getPointer(1);
-    double* rho_w = momentum->getPointer(2);
-    // double* E     = total_energy->getPointer(0);
-    
-    // double gamma = double(5)/double(3);
+    // Real* rho   = density->getPointer(0);
+    Real* rho_u = momentum->getPointer(0);
+    Real* rho_v = momentum->getPointer(1);
+    Real* rho_w = momentum->getPointer(2);
     
     TBOX_ASSERT(d_source_terms_db != nullptr);
     
-    const double TKE_avg = monitoring_statistics_map.at("KINETIC_ENERGY_AVG");
+    const Real TKE_avg = monitoring_statistics_map.at("KINETIC_ENERGY_AVG");
     // eps_0 has the unit of kinetic energy per unit time.
-    const double Q_force = dt*eps_0/TKE_avg; // multiply  dt for time integration.
-    // const double Q_force = dt*eps_0/(TKE_avg*double(3));
-
+    const double Q_force = dt*double(eps_0/TKE_avg); // multiply dt for time integration.
+    // const double Q_force = dt*double(eps_0/(TKE_avg*Real(3)));
+    
     if (d_project_name == "3D HIT")
     {
         for (int k = 0; k < patch_dims[2]; k++)
@@ -115,34 +112,35 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
             for (int j = 0; j < patch_dims[1]; j++)
             {
                 for (int i = 0; i < patch_dims[0]; i++)
-                {   
+                {
                     // Compute the linear indices.
                     const int idx_source = (i + num_ghosts_source[0]) +
                         (j + num_ghosts_source[1])*ghostcell_dims_source[0] + 
                         (k + num_ghosts_source[2])*ghostcell_dims_source[0]*ghostcell_dims_source[1];
-
+                    
                     const int idx_cons_var = (i + num_ghosts_cons_var[0]) +
                         (j + num_ghosts_cons_var[1])*ghostcell_dims_cons_var[0] +
                         (k + num_ghosts_cons_var[2])*ghostcell_dims_cons_var[0]*ghostcell_dims_cons_var[1];
-
-                    S[1][idx_source] += Q_force*rho_u[idx_cons_var];
-                    S[2][idx_source] += Q_force*rho_v[idx_cons_var];
-                    S[3][idx_source] += Q_force*rho_w[idx_cons_var];
+                    
+                    S[1][idx_source] += Real(Q_force*double(rho_u[idx_cons_var]));
+                    S[2][idx_source] += Real(Q_force*double(rho_v[idx_cons_var]));
+                    S[3][idx_source] += Real(Q_force*double(rho_w[idx_cons_var]));
                 }
             }
         }
     }
 }
 
+
 void
 FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database>& restart_source_terms_db)
 {
     putToRestartBase(restart_source_terms_db);
     
-    double eps_0 = double(0);
+    Real eps_0 = Real(0);
     if (d_source_terms_db->keyExists("forcing_rate"))
     {
-        eps_0 = d_source_terms_db->getDouble("forcing_rate");
+        eps_0 = d_source_terms_db->getReal("forcing_rate");
     }
     else
     {
@@ -152,5 +150,5 @@ FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database
             << std::endl);
     }
     
-    restart_source_terms_db->putDouble("forcing_rate", eps_0);
+    restart_source_terms_db->putReal("forcing_rate", eps_0);
 }

@@ -21,6 +21,12 @@
 
 using namespace SAMRAI;
 
+namespace WENO_INTERP
+{
+    enum TYPE { WENO5Z,
+                WENO6LD };
+}
+
 class ConvectiveFluxReconstructor
 {
     public:
@@ -104,7 +110,7 @@ class ConvectiveFluxReconstructor
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& variables_minus,
             std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > >& variables_plus,
             const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<Real> > > >& variables,
-            const hier::Box& domain) const;
+            const std::vector<hier::Box>& domains) const;
         
         /*
          * The object name is used for error/warning reporting.
@@ -159,7 +165,9 @@ class ConvectiveFluxReconstructor
         Real d_threshold_sensor_shock;
         Real d_threshold_sensor_interface;
         
-        const int d_num_ghosts_shock_interface_capturing;
+        int d_num_ghosts_shock_interface_capturing;
+        
+        WENO_INTERP::TYPE d_weno_interp;
         
 };
 

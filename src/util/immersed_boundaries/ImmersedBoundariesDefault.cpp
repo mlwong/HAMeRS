@@ -21,3 +21,15 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
     NULL_USE(data_surface_normal);
 }
 
+void
+ImmersedBoundaries::generateSurfaceTriangulation(
+    std::vector<std::array<double, 3> >& nodes,
+    std::vector<std::array<int, 3> >& connectivities,
+    std::vector<std::array<double, 3> >& normal_nodes,
+    std::vector<int>& component_id)
+{
+    NULL_USE(nodes);
+    NULL_USE(connectivities);
+    NULL_USE(normal_nodes);
+    NULL_USE(component_id);
+}

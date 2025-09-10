@@ -136,7 +136,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 for (int j = 0; j < patch_dims[1]; j++)
                 {
                     for (int i = 0; i < patch_dims[0]; i++)
-                    {   
+                    {
                         // Compute index into linear data array.
                         int idx_cell = i +
                             j*patch_dims[0] +

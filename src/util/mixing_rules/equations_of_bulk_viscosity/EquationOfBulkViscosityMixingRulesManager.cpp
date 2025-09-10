@@ -40,7 +40,7 @@ EquationOfBulkViscosityMixingRulesManager::EquationOfBulkViscosityMixingRulesMan
             << "Unknown equation_of_bulk_viscosity/d_equation_of_bulk_viscosity string = '"
             << equation_of_bulk_viscosity_str
             << "' found in input/restart file."
-            << std::endl);        
+            << std::endl);
     }
 }
 
