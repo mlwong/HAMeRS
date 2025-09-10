@@ -321,7 +321,7 @@ MPIHelperGrid::getWeightedNumberOfCells() const
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                weighted_num_cells_local += Real(interior_dims[0])*Real(interior_dims[1])*
+                weighted_num_cells_local += Real(interior_dims[0])*Real(interior_dims[1])*Real(interior_dims[2])*
                     Real(ratioCurrentLevelToCoarsestLevel[0]);
             }
         }
