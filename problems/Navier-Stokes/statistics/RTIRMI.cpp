@@ -8,6 +8,15 @@
 
 #include <fstream>
 
+/*
+ * Interger based power function.
+ */
+static inline __attribute__((always_inline)) bool isInMixingRegion(double& Y_mean)
+{
+    const double d_mixing_metric_threshold = double(9)/double(10);
+    return (double(4)*Y_mean*(double(1) - Y_mean) > d_mixing_metric_threshold);
+}
+
 class RTIRMIStatisticsUtilities
 {
     public:
@@ -1482,8 +1491,7 @@ RTIRMIStatisticsUtilities::outputTurbMassFluxVelocityXWithInhomogeneousXDirectio
         
         for (int i = 0; i < finest_level_dims[0]; i++)
         {
-            const double mixing_metric = double(4)*Y_mean[i]*(double(1) - Y_mean[i]);
-            if (mixing_metric > double(9)/double(10))
+            if (isInMixingRegion(Y_mean[i]))
             {
                 a_sum += rho_p_u_p[i]/rho_mean[i];
                 count++;
@@ -1608,8 +1616,7 @@ RTIRMIStatisticsUtilities::outputDensitySpecificVolumeCovarianceWithInhomogeneou
         
         for (int i = 0; i < finest_level_dims[0]; i++)
         {
-            const double mixing_metric = double(4)*Y_mean[i]*(double(1) - Y_mean[i]);
-            if (mixing_metric > double(9)/double(10))
+            if (isInMixingRegion(Y_mean[i]))
             {
                 b_sum += (-rho_p_v_p[i]);
                 count++;
@@ -1756,8 +1763,7 @@ RTIRMIStatisticsUtilities::outputBoussinesqDeviationWithInhomogeneousXDirection(
         
         for (int i = 0; i < finest_level_dims[0]; i++)
         {
-            const double mixing_metric = double(4)*Y_mean[i]*(double(1) - Y_mean[i]);
-            if (mixing_metric > double(9)/double(10))
+            if (isInMixingRegion(Y_mean[i]))
             {
                 Boussinesq_dev_sum += (-rho_mean[i]*rho_mean[i]*rho_p_v_p[i]/rho_p_rho_p[i]);
                 count++;
@@ -1909,8 +1915,7 @@ RTIRMIStatisticsUtilities::outputReynoldsNormalStressXWithInhomogeneousXDirectio
         
         for (int i = 0; i < finest_level_dims[0]; i++)
         {
-            const double mixing_metric = double(4)*Y_mean[i]*(double(1) - Y_mean[i]);
-            if (mixing_metric > double(9)/double(10))
+            if (isInMixingRegion(Y_mean[i]))
             {
                 R_11_sum += R_11[i];
                 count++;
@@ -2062,8 +2067,7 @@ RTIRMIStatisticsUtilities::outputReynoldsNormalStressYWithInhomogeneousXDirectio
         
         for (int i = 0; i < finest_level_dims[0]; i++)
         {
-            const double mixing_metric = double(4)*Y_mean[i]*(double(1) - Y_mean[i]);
-            if (mixing_metric > double(9)/double(10))
+            if (isInMixingRegion(Y_mean[i]))
             {
                 R_22_sum += R_22[i];
                 count++;
