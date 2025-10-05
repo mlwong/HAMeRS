@@ -41,10 +41,20 @@ class FlowModelMonitoringStatisticsUtilities
             const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
         /*
+         * Base function to compute monitoring statistics.
+         */
+        void
+        computeMonitoringStatistics(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const int step_num,
+            const double time);
+        
+        /*
          * Compute monitoring statistics.
          */
         virtual void
-        computeMonitoringStatistics(
+        computeMonitoringStatisticsDerived(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const int step_num,
@@ -66,19 +76,27 @@ class FlowModelMonitoringStatisticsUtilities
         /*
          * Output names of monitoring statistical quantities to output to a file.
          */
-        virtual void
+        void
         outputMonitoringStatisticalQuantitiesNames(
-            const std::string& monitoring_stat_dump_filename) const = 0;
+            const std::string& monitoring_stat_dump_filename) const;
         
         /*
-         * Output monitoring statistics to screen.
+         * Base function to output monitoring statistics.
          */
-        virtual void
+        void
         outputMonitoringStatistics(
             std::ostream& os,
             const std::string& monitoring_stat_dump_filename,
             const int step_num,
-            const double time) = 0;
+            const double time) const;
+        
+        /*
+         * Output monitoring statistics.
+         */
+        virtual void
+        outputMonitoringStatisticsDerived(
+            std::ostream& os,
+            std::ofstream& f_out) const = 0;
         
         /*
          * Whether the object has monitoring statistics.

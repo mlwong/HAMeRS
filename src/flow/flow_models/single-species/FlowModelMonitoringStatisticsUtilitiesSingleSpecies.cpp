@@ -41,7 +41,7 @@ FlowModelMonitoringStatisticsUtilitiesSingleSpecies::FlowModelMonitoringStatisti
  * Compute monitoring statistics.
  */
 void
-FlowModelMonitoringStatisticsUtilitiesSingleSpecies::computeMonitoringStatistics(
+FlowModelMonitoringStatisticsUtilitiesSingleSpecies::computeMonitoringStatisticsDerived(
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const int step_num,
@@ -233,97 +233,14 @@ FlowModelMonitoringStatisticsUtilitiesSingleSpecies::computeMonitoringStatistics
 
 
 /*
- * Output names of monitoring statistical quantities to output to a file.
+ * Output monitoring statistics.
  */
 void
-FlowModelMonitoringStatisticsUtilitiesSingleSpecies::outputMonitoringStatisticalQuantitiesNames(
-    const std::string& monitoring_stat_dump_filename) const
-{
-    if (d_flow_model.expired())
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "The object is not setup yet!"
-            << std::endl);
-    }
-    
-    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
-    
-    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
-    
-    if (mpi.getRank() == 0)
-    {
-        std::ofstream f_out;
-        f_out.open(monitoring_stat_dump_filename.c_str(), std::ios::app);
-        
-        if (!f_out.is_open())
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Failed to open file to output statistics!"
-                << std::endl);
-        }
-        
-        for (int si = 0; si < static_cast<int>(d_monitoring_statistics_names.size()); si++)
-        {
-            // Get the key of the current variable.
-            const std::string& statistical_quantity_key = d_monitoring_statistics_names[si];
-            f_out << std::setw(25) << statistical_quantity_key;
-        }
-        
-        if (flow_model_tmp->useImmersedBoundary() && d_monitor_immersed_boundary)
-        {
-            HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
-                flow_model_tmp->getFlowModelImmersedBoundaryMethod();
-            
-            flow_model_immersed_boundary_method->outputMonitoringStatisticalQuantitiesNames(
-                f_out);
-        }
-        
-        f_out.close();
-    }
-}
-
-
-/*
- * Output monitoring statistics to screen.
- */
-void
-FlowModelMonitoringStatisticsUtilitiesSingleSpecies::outputMonitoringStatistics(
+FlowModelMonitoringStatisticsUtilitiesSingleSpecies::outputMonitoringStatisticsDerived(
     std::ostream& os,
-    const std::string& monitoring_stat_dump_filename,
-    const int step_num,
-    const double time)
+    std::ofstream& f_out) const
 {
-    NULL_USE(step_num);
-    
-    if (d_flow_model.expired())
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "The object is not setup yet!"
-            << std::endl);
-    }
-    
-    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
-    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
-    
-    std::ofstream f_out;
-    
-    if (mpi.getRank() == 0)
-    {
-        f_out.open(monitoring_stat_dump_filename.c_str(), std::ios::app);
-        if (!f_out.is_open())
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Failed to open file to output monitoring statistics!"
-                << std::endl);
-        }
-        
-        f_out << std::scientific << std::setprecision(16) << std::setw(25) << time;
-    }
     
     for (int si = 0; si < static_cast<int>(d_monitoring_statistics_names.size()); si++)
     {
@@ -346,21 +263,6 @@ FlowModelMonitoringStatisticsUtilitiesSingleSpecies::outputMonitoringStatistics(
                 f_out << std::scientific << std::setprecision(16) << std::setw(25) << d_Mach_num_max;
             }
         }
-    }
-    
-    if (mpi.getRank() == 0)
-    {
-        if (flow_model_tmp->useImmersedBoundary() && d_monitor_immersed_boundary)
-        {
-            HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
-                flow_model_tmp->getFlowModelImmersedBoundaryMethod();
-            
-            flow_model_immersed_boundary_method->outputMonitoringStatistics(
-                f_out);
-        }
-        
-        f_out << std::endl;
-        f_out.close();
     }
 }
 

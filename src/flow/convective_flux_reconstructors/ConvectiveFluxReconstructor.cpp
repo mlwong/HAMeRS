@@ -816,11 +816,10 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             const int ghostcell_dim_0_density = ghostcell_dims_density[0];
             
             /*
-             * Get the interior dimensions.
+             * Get the interior dimension.
              */
             
             const int interior_dim_0 = interior_dims[0];
-            const int interior_dim_1 = interior_dims[1];
             
             /*
              * Compute the derivatives of velocity, dilatation and vorticity magnitude.
@@ -1051,7 +1050,7 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
         else if (d_dim == tbox::Dimension(3))
         {
             Real* rho_s_z = density_sensors[2]->getPointer(0);
-            Real* s_z = discontinuity_sensor_side->getPointer(2);
+            s_z = discontinuity_sensor_side->getPointer(2);
             
             /*
              * Get the local lower indices and the number of cells in each dimension.
@@ -1064,19 +1063,12 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             const int domain_dim_1 = domain_dims[1];
             const int domain_dim_2 = domain_dims[2];
             
-            const int num_ghosts_0_density = num_ghosts_density[0];
-            const int num_ghosts_1_density = num_ghosts_density[1];
-            const int num_ghosts_2_density = num_ghosts_density[2];
-            const int ghostcell_dim_0_density = ghostcell_dims_density[0];
-            const int ghostcell_dim_1_density = ghostcell_dims_density[1];
-            
             /*
              * Get the interior dimensions.
              */
             
             const int interior_dim_0 = interior_dims[0];
             const int interior_dim_1 = interior_dims[1];
-            const int interior_dim_2 = interior_dims[2];
             
             /*
              * Compute the derivatives of velocity, dilatation and vorticity magnitude.
@@ -1619,10 +1611,8 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             hier::IntVector subghostcell_dims_convective_flux_x = convective_flux_node[0]->getGhostBox().numberCells();
             
             const int num_subghosts_0_convective_flux_x = num_subghosts_convective_flux_x[0];
-            const int subghostcell_dim_0_convective_flux_x = subghostcell_dims_convective_flux_x[0];
             
             const int num_subghosts_0_velocity = num_subghosts_velocity[0];
-            const int subghostcell_dim_0_velocity = subghostcell_dims_velocity[0];
             
             Real* u = velocity->getPointer(0);
             
@@ -1657,8 +1647,6 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
                 const int num_subghosts_0_primitive_var = num_subghosts_primitive_var[ei][0];
-                const int num_subghosts_1_primitive_var = num_subghosts_primitive_var[ei][1];
-                const int subghostcell_dim_0_primitive_var = subghostcell_dims_primitive_var[ei][0];
                 
                 HAMERS_PRAGMA_SIMD
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
@@ -2692,7 +2680,7 @@ ConvectiveFluxReconstructor::computeConvectiveFluxAndSourceOnPatchShockCapturing
                                 j*interior_dim_0 +
                                 k*interior_dim_0*interior_dim_1;
                             
-                            if (s_y[idx_face_z] > Real(0))
+                            if (s_z[idx_face_z] > Real(0))
                             {
                                 const int idx_midpoint_z =  i +
                                     j*interior_dim_0 +
