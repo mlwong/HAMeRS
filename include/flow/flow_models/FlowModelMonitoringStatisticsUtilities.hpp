@@ -34,6 +34,34 @@ class FlowModelMonitoringStatisticsUtilities
         }
         
         /*
+         * Whether it is the step to output the monitoring statistics.
+         */
+        bool isStepToOutputMonitoringStatistics(const int step_num) const
+        {
+            if (d_monitoring_time_step_interval > 0 && step_num%d_monitoring_time_step_interval == 0)
+            {
+                return true;
+            }
+            return false;
+        }
+        
+        /*
+         * Get names of monitoring statistical quantities to output.
+         */
+        const std::vector<std::string>& getMonitoringStatisticsNames() const
+        {
+            return d_monitoring_statistics_names;
+        }
+        
+        /*
+         * Get monitoring time step interval.
+         */
+        int getMonitoringTimeStepInterval() const
+        {
+            return d_monitoring_time_step_interval;
+        }
+        
+        /*
          * Put the characteristics of the class into the restart database.
          */
         void
@@ -51,27 +79,9 @@ class FlowModelMonitoringStatisticsUtilities
             const double time);
         
         /*
-         * Compute monitoring statistics.
+         * Whether the object has monitoring statistics.
          */
-        virtual void
-        computeMonitoringStatisticsDerived(
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const int step_num,
-            const double time) = 0;
-        
-        /*
-         * Whether it is the step to output the monitoring statistics.
-         */
-        bool isStepToOutputMonitoringStatistics(
-            const int step_num) const
-        {
-            if (d_monitoring_time_step_interval > 0 && step_num%d_monitoring_time_step_interval == 0)
-            {
-                return true;
-            }
-            return false;
-        }
+        bool hasMonitoringStatistics() const;
         
         /*
          * Output names of monitoring statistical quantities to output to a file.
@@ -91,46 +101,56 @@ class FlowModelMonitoringStatisticsUtilities
             const double time) const;
         
         /*
+         * Base function to get monitoring statistical quantities.
+         */
+        Real getMonitoringStatistics(std::string statistics_name) const;
+        
+        /*
+         * Base function to get map of monitoring statistical quantities.
+         */
+        std::unordered_map<std::string, Real> getMonitoringStatisticsMap() const;
+        
+    protected:
+        /*
+         * Compute monitoring statistics.
+         */
+        virtual void computeMonitoringStatisticsDerived(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const int step_num,
+            const double time) = 0;
+        
+        /*
          * Output monitoring statistics.
          */
-        virtual void
-        outputMonitoringStatisticsDerived(
+        virtual void outputMonitoringStatisticsDerived(
             std::ostream& os,
             std::ofstream& f_out) const = 0;
         
         /*
-         * Whether the object has monitoring statistics.
-         */
-        bool hasMonitoringStatistics() const;
-        
-        /*
-         * Get names of monitoring statistical quantities to output.
-         */
-        const std::vector<std::string>& getMonitoringStatisticsNames() const
-        {
-            return d_monitoring_statistics_names;
-        }
-        
-        /*
-         * Get monitoring time step interval.
-         */
-        int getMonitoringTimeStepInterval() const
-        {
-            return d_monitoring_time_step_interval;
-        }
-        
-        /*
          * Get monitoring statistical quantities.
          */
-        virtual Real getMonitoringStatistics(
-            std::string statistics_name) const = 0;
+        virtual Real getMonitoringStatisticsDerived(std::string statistics_name) const = 0;
         
         /*
          * Get map of monitoring statistical quantities.
          */
-        virtual std::unordered_map<std::string, Real> getMonitoringStatisticsMap() const = 0;
+        virtual void getMonitoringStatisticsMapDerived(
+            std::unordered_map<std::string, Real>& monitoring_statistics_map) const = 0;
         
-    protected:
+        /*
+         * Whether the statistics name is valid (base class).
+         */
+        bool isStatisticsNameValidBase(const std::string& statistics_name) const
+        {
+            if (statistics_name == "NUM_CELLS" ||
+                statistics_name == "WEIGHTED_NUM_CELLS")
+            {
+                return true;
+            }
+            return false;
+        }
+        
         /*
          * The object name is used for error/warning reporting.
          */
@@ -170,6 +190,13 @@ class FlowModelMonitoringStatisticsUtilities
          * Whether to monitor the immersed boundary.
          */
         bool d_monitor_immersed_boundary;
+        
+        /*
+         * Monitoring statistical quantities.
+         */
+         
+        Real d_num_cells;
+        Real d_weighted_num_cells;
 };
 
 #endif /* FLOW_MODEL_MONITORING_STATISTICS_UTILITIES_HPP */
