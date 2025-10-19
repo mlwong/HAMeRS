@@ -161,7 +161,7 @@ MPIHelperGrid::getWeightedNumberOfCells() const
     if (d_dim == tbox::Dimension(1))
     {
         Real weighted_num_cells_local = Real(0);
-        weighted_num_cells_global       = Real(0);
+        weighted_num_cells_global     = Real(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -220,7 +220,7 @@ MPIHelperGrid::getWeightedNumberOfCells() const
     else if (d_dim == tbox::Dimension(2))
     {
         Real weighted_num_cells_local = Real(0);
-        weighted_num_cells_global       = Real(0);
+        weighted_num_cells_global     = Real(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -280,7 +280,7 @@ MPIHelperGrid::getWeightedNumberOfCells() const
     else if (d_dim == tbox::Dimension(3))
     {
         Real weighted_num_cells_local = Real(0);
-        weighted_num_cells_global       = Real(0);
+        weighted_num_cells_global     = Real(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -337,6 +337,8 @@ MPIHelperGrid::getWeightedNumberOfCells() const
             HAMERS_MPI_REAL,
             MPI_SUM);
     }
+    
+    weighted_num_cells_global /= Real(d_ratio_finest_level_to_coarsest_level[0]);
     
     return weighted_num_cells_global;
 }

@@ -26,22 +26,25 @@ FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::FlowModelMonitoringSt
         if ((statistical_quantity_key != "KINETIC_ENERGY_AVG") &&
             (statistical_quantity_key != "MACH_NUM_MAX"))
         {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::"
-                << "FlowModelMonitoringStatisticsUtilitiesFourEqnConservative()\n"
-                << "Unknown monitoring statistics with variable_key = '" << statistical_quantity_key
-                << "' requested."
-                << std::endl);
+            if (!isStatisticsNameValidBase(statistical_quantity_key))
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::"
+                    << "FlowModelMonitoringStatisticsUtilitiesFourEqnConservative()\n"
+                    << "Unknown monitoring statistics with variable_key = '" << statistical_quantity_key
+                    << "' requested."
+                    << std::endl);
+            }
         }
     }
 }
 
 
 /*
- * Output monitoring statistics to screen.
+ * Compute monitoring statistics.
  */
 void
-FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::computeMonitoringStatistics(
+FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::computeMonitoringStatisticsDerived(
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const int step_num,
@@ -233,97 +236,14 @@ FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::computeMonitoringStat
 
 
 /*
- * Output names of monitoring statistical quantities to output to a file.
+ * Output monitoring statistics.
  */
 void
-FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::outputMonitoringStatisticalQuantitiesNames(
-    const std::string& monitoring_stat_dump_filename) const
-{
-    if (d_flow_model.expired())
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "The object is not setup yet!"
-            << std::endl);
-    }
-    
-    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
-    
-    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
-    
-    if (mpi.getRank() == 0)
-    {
-        std::ofstream f_out;
-        f_out.open(monitoring_stat_dump_filename.c_str(), std::ios::app);
-        
-        if (!f_out.is_open())
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Failed to open file to output statistics!"
-                << std::endl);
-        }
-        
-        for (int si = 0; si < static_cast<int>(d_monitoring_statistics_names.size()); si++)
-        {
-            // Get the key of the current variable.
-            const std::string& statistical_quantity_key = d_monitoring_statistics_names[si];
-            f_out << std::setw(25) << statistical_quantity_key;
-        }
-        
-        if (flow_model_tmp->useImmersedBoundary() && d_monitor_immersed_boundary)
-        {
-            HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
-                flow_model_tmp->getFlowModelImmersedBoundaryMethod();
-            
-            flow_model_immersed_boundary_method->outputMonitoringStatisticalQuantitiesNames(
-                f_out);
-        }
-        
-        f_out.close();
-    }
-}
-
-
-/*
- * Output monitoring statistics to screen.
- */
-void
-FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::outputMonitoringStatistics(
+FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::outputMonitoringStatisticsDerived(
     std::ostream& os,
-    const std::string& monitoring_stat_dump_filename,
-    const int step_num,
-    const double time)
+    std::ofstream& f_out) const
 {
-    NULL_USE(step_num);
-    
-    if (d_flow_model.expired())
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "The object is not setup yet!"
-            << std::endl);
-    }
-    
-    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
-    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
-    
-    std::ofstream f_out;
-    
-    if (mpi.getRank() == 0)
-    {
-        f_out.open(monitoring_stat_dump_filename.c_str(), std::ios::app);
-        if (!f_out.is_open())
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Failed to open file to output monitoring statistics!"
-                << std::endl);
-        }
-        
-        f_out << std::scientific << std::setprecision(16) << std::setw(25) << time;
-    }
     
     for (int si = 0; si < static_cast<int>(d_monitoring_statistics_names.size()); si++)
     {
@@ -347,21 +267,6 @@ FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::outputMonitoringStati
             }
         }
     }
-    
-    if (mpi.getRank() == 0)
-    {
-        if (flow_model_tmp->useImmersedBoundary() && d_monitor_immersed_boundary)
-        {
-            HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
-                flow_model_tmp->getFlowModelImmersedBoundaryMethod();
-            
-            flow_model_immersed_boundary_method->outputMonitoringStatistics(
-                f_out);
-        }
-        
-        f_out << std::endl;
-        f_out.close();
-    }
 }
 
 
@@ -369,26 +274,18 @@ FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::outputMonitoringStati
  * Get monitoring statistical quantities.
  */
 Real
-FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::getMonitoringStatistics(
+FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::getMonitoringStatisticsDerived(
     std::string statistics_name) const
 {
-    Real statistical_quantity = 0;
+    Real statistical_quantity = Real(0);
     
-    for (int si = 0; si < static_cast<int>(d_monitoring_statistics_names.size()); si++)
+    if (statistics_name == "KINETIC_ENERGY_AVG")
     {
-        // Get the key of the current variable.
-        std::string statistical_quantity_key = d_monitoring_statistics_names[si];
-        
-        if (statistics_name == "KINETIC_ENERGY_AVG")
-        {
-            statistical_quantity = d_kinetic_energy_avg;
-            break;
-        }
-        else if (statistics_name == "MACH_NUM_MAX")
-        {
-            statistical_quantity = d_Mach_num_max;
-            break;
-        }
+        statistical_quantity = d_kinetic_energy_avg;
+    }
+    else if (statistics_name == "MACH_NUM_MAX")
+    {
+        statistical_quantity = d_Mach_num_max;
     }
     
     return statistical_quantity;
@@ -398,13 +295,9 @@ FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::getMonitoringStatisti
 /*
  * Get map of monitoring statistical quantities.
  */
-std::unordered_map<std::string, Real>
-FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::getMonitoringStatisticsMap() const
+void
+FlowModelMonitoringStatisticsUtilitiesFourEqnConservative::getMonitoringStatisticsMapDerived(std::unordered_map<std::string, Real>& monitoring_statistics_map) const
 {
-    std::unordered_map<std::string, Real> monitoring_statistics_map;
-    
     monitoring_statistics_map.insert(std::pair<std::string, Real>("KINETIC_ENERGY_AVG", d_kinetic_energy_avg));
     monitoring_statistics_map.insert(std::pair<std::string, Real>("MACH_NUM_MAX", d_Mach_num_max));
-    
-    return monitoring_statistics_map;
 }
