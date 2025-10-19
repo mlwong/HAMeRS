@@ -6536,7 +6536,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         }
         else if (statistical_quantity_key == "u1dpu1dp")
         {
-            rti_rmi_spatial_profiles_utilities->outputR11WithHomogeneityInYDirectionOrInYZPlane(
+            rti_rmi_spatial_profiles_utilities->outputU1DoublePrimeU1DoublePrimeWithHomogeneityInYDirectionOrInYZPlane(
                 "u1dpu1dp.dat",
                 patch_hierarchy,
                 data_context,
@@ -6544,7 +6544,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         }
         else if (statistical_quantity_key == "u2dpu2dp")
         {
-            rti_rmi_spatial_profiles_utilities->outputR22WithHomogeneityInYDirectionOrInYZPlane(
+            rti_rmi_spatial_profiles_utilities->outputU2DoublePrimeU2DoublePrimeWithHomogeneityInYDirectionOrInYZPlane(
                 "u2dpu2dp.dat",
                 patch_hierarchy,
                 data_context,
@@ -6552,7 +6552,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         }
         else if (statistical_quantity_key == "u3dpu3dp")
         {
-            rti_rmi_spatial_profiles_utilities->outputR33WithHomogeneityInYDirectionOrInYZPlane(
+            rti_rmi_spatial_profiles_utilities->outputU3DoublePrimeU3DoublePrimeWithHomogeneityInYDirectionOrInYZPlane(
                 "u3dpu3dp.dat",
                 patch_hierarchy,
                 data_context,
