@@ -12,22 +12,22 @@ EulerInitialConditions::initializeDataOnPatch(
 {
     NULL_USE(data_time);
     
-    if (d_project_name != "2D uniform flow")
+    if (d_project_name != "3D uniform flow")
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "Can only initialize data for 'project_name' = '2D uniform flow'!\n"
+            << "Can only initialize data for 'project_name' = '3D uniform flow'!\n"
             << "'project_name' = '"
             << d_project_name
             << "' is given."
             << std::endl);
     }
     
-    if (d_dim != tbox::Dimension(2))
+    if (d_dim != tbox::Dimension(3))
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "Dimension of problem should be 2!"
+            << "Dimension of problem should be 3!"
             << std::endl);
     }
     
@@ -72,7 +72,7 @@ EulerInitialConditions::initializeDataOnPatch(
         const hier::IntVector ghostcell_dims_cons_var = ghost_box_cons_var.numberCells();
         
         /*
-         * Initialize data for a 2D uniform flow problem.
+         * Initialize data for a 3D uniform flow problem.
          */
         
         if (d_flow_model_type == FLOW_MODEL::SINGLE_SPECIES)
@@ -84,6 +84,7 @@ EulerInitialConditions::initializeDataOnPatch(
             Real* rho   = density->getPointer(0);
             Real* rho_u = momentum->getPointer(0);
             Real* rho_v = momentum->getPointer(1);
+            Real* rho_w = momentum->getPointer(2);
             Real* E     = total_energy->getPointer(0);
             
             Real gamma = Real(7)/Real(5);
@@ -92,6 +93,7 @@ EulerInitialConditions::initializeDataOnPatch(
             Real rho_inf = Real(1);
             Real u_inf   = Real(1);
             Real v_inf   = Real(1);
+            Real w_inf   = Real(1);
             Real p_inf   = Real(1);
             
             if (d_initial_conditions_db != nullptr)
@@ -99,27 +101,34 @@ EulerInitialConditions::initializeDataOnPatch(
                 TBOX_ASSERT(d_initial_conditions_db->keyExists("rho_inf"));
                 TBOX_ASSERT(d_initial_conditions_db->keyExists("u_inf"));
                 TBOX_ASSERT(d_initial_conditions_db->keyExists("v_inf"));
+                TBOX_ASSERT(d_initial_conditions_db->keyExists("w_inf"));
                 TBOX_ASSERT(d_initial_conditions_db->keyExists("p_inf"));
                 
                 rho_inf = d_initial_conditions_db->getReal("rho_inf");
                 u_inf   = d_initial_conditions_db->getReal("u_inf");
                 v_inf   = d_initial_conditions_db->getReal("v_inf");
+                w_inf   = d_initial_conditions_db->getReal("w_inf");
                 p_inf   = d_initial_conditions_db->getReal("p_inf");
             }
             
-            for (int j = -num_ghosts_cons_var[1]; j < patch_dims[1] + num_ghosts_cons_var[1]; j++)
+            for (int k = -num_ghosts_cons_var[2]; k < patch_dims[2] + num_ghosts_cons_var[2]; k++)
             {
-                for (int i = -num_ghosts_cons_var[0]; i < patch_dims[0] + num_ghosts_cons_var[0]; i++)
+                for (int j = -num_ghosts_cons_var[1]; j < patch_dims[1] + num_ghosts_cons_var[1]; j++)
                 {
-                    // Compute index into linear data array.
-                    int idx_cell = (i + num_ghosts_cons_var[0]) +
-                        (j + num_ghosts_cons_var[1])*ghostcell_dims_cons_var[0];
-                    
-                    rho[idx_cell]   = rho_inf;
-                    rho_u[idx_cell] = rho_inf*u_inf;
-                    rho_v[idx_cell] = rho_inf*v_inf;
-                    E[idx_cell]     = p_inf/(gamma - Real(1)) + Real(1)/Real(2)*rho_inf*
-                        (u_inf*u_inf + v_inf*v_inf);
+                    for (int i = -num_ghosts_cons_var[0]; i < patch_dims[0] + num_ghosts_cons_var[0]; i++)
+                    {
+                        // Compute index into linear data array.
+                        int idx_cell = (i + num_ghosts_cons_var[0]) +
+                            (j + num_ghosts_cons_var[1]) * ghostcell_dims_cons_var[0] + 
+                            (k + num_ghosts_cons_var[2]) * ghostcell_dims_cons_var[1] * ghostcell_dims_cons_var[0];
+                        
+                        rho[idx_cell]   = rho_inf;
+                        rho_u[idx_cell] = rho_inf*u_inf;
+                        rho_v[idx_cell] = rho_inf*v_inf;
+                        rho_w[idx_cell] = rho_inf*w_inf;
+                        E[idx_cell]     = p_inf/(gamma - Real(1)) + Real(1)/Real(2)*rho_inf*
+                            (u_inf*u_inf + v_inf*v_inf + w_inf*w_inf);
+                    }
                 }
             }
         }
@@ -134,6 +143,7 @@ EulerInitialConditions::initializeDataOnPatch(
             Real* Z_rho_2 = partial_density->getPointer(1);
             Real* rho_u   = momentum->getPointer(0);
             Real* rho_v   = momentum->getPointer(1);
+            Real* rho_w   = momentum->getPointer(2);
             Real* E       = total_energy->getPointer(0);
             Real* Z_1     = volume_fraction->getPointer(0);
             Real* Z_2     = volume_fraction->getPointer(1);
@@ -149,6 +159,7 @@ EulerInitialConditions::initializeDataOnPatch(
             Real Z_rho_2_inf = Real(1);
             Real u_inf       = Real(1);
             Real v_inf       = Real(1);
+            Real w_inf       = Real(1);
             Real p_inf       = Real(1);
             Real Z_1_inf     = Real(1)/Real(2);
             Real Z_2_inf     = Real(1)/Real(2);
@@ -159,6 +170,7 @@ EulerInitialConditions::initializeDataOnPatch(
                 TBOX_ASSERT(d_initial_conditions_db->keyExists("Z_rho_2_inf"));
                 TBOX_ASSERT(d_initial_conditions_db->keyExists("u_inf"));
                 TBOX_ASSERT(d_initial_conditions_db->keyExists("v_inf"));
+                TBOX_ASSERT(d_initial_conditions_db->keyExists("w_inf"));
                 TBOX_ASSERT(d_initial_conditions_db->keyExists("p_inf"));
                 TBOX_ASSERT(d_initial_conditions_db->keyExists("Z_1_inf"));
                 TBOX_ASSERT(d_initial_conditions_db->keyExists("Z_2_inf"));
@@ -167,6 +179,7 @@ EulerInitialConditions::initializeDataOnPatch(
                 Z_rho_2_inf = d_initial_conditions_db->getReal("Z_rho_2_inf");
                 u_inf       = d_initial_conditions_db->getReal("u_inf");
                 v_inf       = d_initial_conditions_db->getReal("v_inf");
+                w_inf       = d_initial_conditions_db->getReal("w_inf");
                 p_inf       = d_initial_conditions_db->getReal("p_inf");
                 Z_1_inf     = d_initial_conditions_db->getReal("Z_1_inf");
                 Z_2_inf     = d_initial_conditions_db->getReal("Z_2_inf");
@@ -175,22 +188,27 @@ EulerInitialConditions::initializeDataOnPatch(
             const Real rho_inf = Z_rho_1_inf + Z_rho_2_inf;
             const Real gamma_m = Real(1)/(Z_1_inf/(gamma_1 - Real(1)) + Z_2_inf/(gamma_2 - Real(1))) + Real(1);
             
-            for (int j = -num_ghosts_cons_var[1]; j < patch_dims[1] + num_ghosts_cons_var[1]; j++)
+            for (int k = -num_ghosts_cons_var[2]; k < patch_dims[2] + num_ghosts_cons_var[2]; k++)
             {
-                for (int i = -num_ghosts_cons_var[0]; i < patch_dims[0] + num_ghosts_cons_var[0]; i++)
+                for (int j = -num_ghosts_cons_var[1]; j < patch_dims[1] + num_ghosts_cons_var[1]; j++)
                 {
-                    // Compute index into linear data array.
-                    int idx_cell = (i + num_ghosts_cons_var[0]) +
-                        (j + num_ghosts_cons_var[1])*ghostcell_dims_cons_var[0];
-                    
-                    Z_rho_1[idx_cell] = Z_rho_1_inf;
-                    Z_rho_2[idx_cell] = Z_rho_2_inf;
-                    rho_u[idx_cell]   = rho_inf*u_inf;
-                    rho_v[idx_cell]   = rho_inf*v_inf;
-                    E[idx_cell]       = p_inf/(gamma_m - Real(1)) + Real(1)/Real(2)*rho_inf*
-                        (u_inf*u_inf + v_inf*v_inf);
-                    Z_1[idx_cell]     = Z_1_inf;
-                    Z_2[idx_cell]     = Z_2_inf;
+                    for (int i = -num_ghosts_cons_var[0]; i < patch_dims[0] + num_ghosts_cons_var[0]; i++)
+                    {
+                        // Compute index into linear data array.
+                        int idx_cell = (i + num_ghosts_cons_var[0]) +
+                            (j + num_ghosts_cons_var[1]) * ghostcell_dims_cons_var[0] + 
+                            (k + num_ghosts_cons_var[2]) * ghostcell_dims_cons_var[1] * ghostcell_dims_cons_var[0];
+                        
+                        Z_rho_1[idx_cell] = Z_rho_1_inf;
+                        Z_rho_2[idx_cell] = Z_rho_2_inf;
+                        rho_u[idx_cell]   = rho_inf*u_inf;
+                        rho_v[idx_cell]   = rho_inf*v_inf;
+                        rho_w[idx_cell]   = rho_inf*w_inf;
+                        E[idx_cell]       = p_inf/(gamma_m - Real(1)) + Real(1)/Real(2)*rho_inf*
+                            (u_inf*u_inf + v_inf*v_inf + w_inf*w_inf);
+                        Z_1[idx_cell]     = Z_1_inf;
+                        Z_2[idx_cell]     = Z_2_inf;
+                    }
                 }
             }
         }

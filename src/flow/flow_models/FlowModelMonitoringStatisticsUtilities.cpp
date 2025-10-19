@@ -1,5 +1,7 @@
 #include "flow/flow_models/FlowModelMonitoringStatisticsUtilities.hpp"
 
+#include "util/MPI_helpers/MPIHelperGrid.hpp"
+
 FlowModelMonitoringStatisticsUtilities::FlowModelMonitoringStatisticsUtilities(
     const std::string& object_name,
     const tbox::Dimension& dim,
@@ -11,7 +13,9 @@ FlowModelMonitoringStatisticsUtilities::FlowModelMonitoringStatisticsUtilities(
         d_grid_geometry(grid_geometry),
         d_num_species(num_species),
         d_monitoring_time_step_interval(-1),
-        d_monitor_immersed_boundary(false)
+        d_monitor_immersed_boundary(false),
+        d_num_cells(Real(0)),
+        d_weighted_num_cells(Real(0))
 {
     /*
      * Get the monitoring statistics database.
@@ -71,6 +75,45 @@ FlowModelMonitoringStatisticsUtilities::putToRestart(
 
 
 /*
+ * Base function to compute monitoring statistics.
+ */
+void
+FlowModelMonitoringStatisticsUtilities::computeMonitoringStatistics(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const int step_num,
+    const double time)
+{
+    MPIHelperGrid MPI_helper_grid = MPIHelperGrid(
+        "MPI_helper_grid",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    for (int si = 0; si < static_cast<int>(d_monitoring_statistics_names.size()); si++)
+    {
+        // Get the key of the current variable.
+        std::string statistical_quantity_key = d_monitoring_statistics_names[si];
+        
+        if (statistical_quantity_key == "NUM_CELLS")
+        {
+            d_num_cells = MPI_helper_grid.getNumberOfCells();
+        }
+        else if (statistical_quantity_key == "WEIGHTED_NUM_CELLS")
+        {
+            d_weighted_num_cells = MPI_helper_grid.getWeightedNumberOfCells();
+        }
+    }
+    
+    computeMonitoringStatisticsDerived(
+        patch_hierarchy,
+        data_context,
+        step_num,
+        time);
+}
+
+
+/*
  * Whether the object has monitoring statistics.
  */
 bool
@@ -99,4 +142,198 @@ FlowModelMonitoringStatisticsUtilities::hasMonitoringStatistics() const
     }
     
     return hasMonitoringStatistics;
+}
+
+
+/*
+ * Output names of monitoring statistical quantities to output to a file.
+ */
+void
+FlowModelMonitoringStatisticsUtilities::outputMonitoringStatisticalQuantitiesNames(
+    const std::string& monitoring_stat_dump_filename) const
+{
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        f_out.open(monitoring_stat_dump_filename.c_str(), std::ios::app);
+        
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+
+        // Output the names of the monitoring statistical quantities of the base class.
+        for (int si = 0; si < static_cast<int>(d_monitoring_statistics_names.size()); si++)
+        {
+            // Get the key of the current variable.
+            const std::string& statistical_quantity_key = d_monitoring_statistics_names[si];
+            if (statistical_quantity_key == "NUM_CELLS" ||
+                statistical_quantity_key == "WEIGHTED_NUM_CELLS")
+            {
+                f_out << std::setw(25) << statistical_quantity_key;
+            }
+        }
+        
+        // Output the names of the monitoring statistical quantities of the derived class.
+        for (int si = 0; si < static_cast<int>(d_monitoring_statistics_names.size()); si++)
+        {
+            // Get the key of the current variable.
+            const std::string& statistical_quantity_key = d_monitoring_statistics_names[si];
+            if (statistical_quantity_key != "NUM_CELLS" &&
+                statistical_quantity_key != "WEIGHTED_NUM_CELLS")
+            {
+                f_out << std::setw(25) << statistical_quantity_key;
+            }
+        }
+        
+        if (flow_model_tmp->useImmersedBoundary() && d_monitor_immersed_boundary)
+        {
+            HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+                flow_model_tmp->getFlowModelImmersedBoundaryMethod();
+            
+            flow_model_immersed_boundary_method->outputMonitoringStatisticalQuantitiesNames(
+                f_out);
+        }
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Base function to output monitoring statistics.
+ */
+void
+FlowModelMonitoringStatisticsUtilities::outputMonitoringStatistics(
+    std::ostream& os,
+    const std::string& monitoring_stat_dump_filename,
+    const int step_num,
+    const double time) const
+{
+    NULL_USE(step_num);
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(monitoring_stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output monitoring statistics!"
+                << std::endl);
+        }
+        
+        f_out << std::scientific << std::setprecision(16) << std::setw(25) << time;
+    }
+    
+    for (int si = 0; si < static_cast<int>(d_monitoring_statistics_names.size()); si++)
+    {
+        // Get the key of the current variable.
+        std::string statistical_quantity_key = d_monitoring_statistics_names[si];
+        
+        if (statistical_quantity_key == "NUM_CELLS")
+        {
+            os << "Number of cells: " << d_num_cells << std::endl;
+            if (mpi.getRank() == 0)
+            {
+                f_out << std::scientific << std::setprecision(16) << std::setw(25) << d_num_cells;
+            }
+        }
+        else if (statistical_quantity_key == "WEIGHTED_NUM_CELLS")
+        {
+            os << "Weighted number of cells: " << d_weighted_num_cells << std::endl;
+            if (mpi.getRank() == 0)
+            {
+                f_out << std::scientific << std::setprecision(16) << std::setw(25) << d_weighted_num_cells;
+            }
+        }
+    }
+    
+    outputMonitoringStatisticsDerived(os, f_out);
+    
+    if (mpi.getRank() == 0)
+    {
+        if (flow_model_tmp->useImmersedBoundary() && d_monitor_immersed_boundary)
+        {
+            HAMERS_SHARED_PTR<FlowModelImmersedBoundaryMethod> flow_model_immersed_boundary_method =
+                flow_model_tmp->getFlowModelImmersedBoundaryMethod();
+            
+            flow_model_immersed_boundary_method->outputMonitoringStatistics(
+                f_out);
+        }
+        
+        f_out << std::endl;
+        f_out.close();
+    }
+}
+
+
+/*
+ * Base function to get monitoring statistical quantities.
+ */
+Real
+FlowModelMonitoringStatisticsUtilities::getMonitoringStatistics(std::string statistics_name) const
+{
+    Real statistical_quantity = Real(0);
+    
+    if (statistics_name == "NUM_CELLS")
+    {
+        statistical_quantity = d_num_cells;
+    }
+    else if (statistics_name == "WEIGHTED_NUM_CELLS")
+    {
+        statistical_quantity = d_weighted_num_cells;
+    }
+    else
+    {
+        statistical_quantity = getMonitoringStatisticsDerived(statistics_name);
+    }
+    
+    return statistical_quantity;
+}
+
+
+/*
+ * Base function to get map of monitoring statistical quantities.
+ */
+std::unordered_map<std::string, Real>
+FlowModelMonitoringStatisticsUtilities::getMonitoringStatisticsMap() const
+{
+    std::unordered_map<std::string, Real> monitoring_statistics_map;
+
+    monitoring_statistics_map.insert(std::pair<std::string, Real>("NUM_CELLS", d_num_cells));
+    monitoring_statistics_map.insert(std::pair<std::string, Real>("WEIGHTED_NUM_CELLS", d_weighted_num_cells));
+    
+    getMonitoringStatisticsMapDerived(monitoring_statistics_map);
+
+    return monitoring_statistics_map;
 }

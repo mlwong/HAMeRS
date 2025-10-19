@@ -15,45 +15,34 @@ class FlowModelMonitoringStatisticsUtilitiesFiveEqnAllaire: public FlowModelMoni
         
         ~FlowModelMonitoringStatisticsUtilitiesFiveEqnAllaire() {}
         
+    private:
         /*
          * Compute monitoring statistics.
          */
-        void
-        computeMonitoringStatistics(
+        void computeMonitoringStatisticsDerived(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const int step_num,
             const double time);
         
         /*
-         * Output names of monitoring statistical quantities to output to a file.
+         * Output monitoring statistics.
          */
-        void
-        outputMonitoringStatisticalQuantitiesNames(
-            const std::string& monitoring_stat_dump_filename) const;
-        
-        /*
-         * Output monitoring statistics to screen.
-         */
-        void
-        outputMonitoringStatistics(
+        void outputMonitoringStatisticsDerived(
             std::ostream& os,
-            const std::string& monitoring_stat_dump_filename,
-            const int step_num,
-            const double time);
+            std::ofstream& f_out) const;
         
         /*
          * Get monitoring statistical quantities.
          */
-        Real getMonitoringStatistics(
-            std::string statistics_name) const;
+        Real getMonitoringStatisticsDerived(std::string statistics_name) const;
         
         /*
          * Get map of monitoring statistical quantities.
          */
-        std::unordered_map<std::string, Real> getMonitoringStatisticsMap() const;
+        void getMonitoringStatisticsMapDerived(
+            std::unordered_map<std::string, Real>& monitoring_statistics_map) const;
         
-    private:
         /*
          * Monitoring statistical quantities.
          */
