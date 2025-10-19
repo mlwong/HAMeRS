@@ -132,7 +132,7 @@ class RTIRMISpatialProfilesUtilities
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
-
+        
         /*
          *Output R22 with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
          */
@@ -142,6 +142,7 @@ class RTIRMISpatialProfilesUtilities
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
+        
         /*
          *Output R33 with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
          */
@@ -151,7 +152,7 @@ class RTIRMISpatialProfilesUtilities
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
-
+        
         /*
          *Output u_1''u_1'' with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
          */
@@ -181,7 +182,7 @@ class RTIRMISpatialProfilesUtilities
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
-
+        
         /*
          * Output TKE dissipation rate with assumed homogeneity in y-direction (2D) or yz-plane (3D)
          * to a file.
@@ -1251,11 +1252,11 @@ RTIRMISpatialProfilesUtilities::outputR11WithHomogeneityInYDirectionOrInYZPlane(
     }  
 }
 
+
 /*
  * Output R22 with assumed homogeneity in y-direction (2D) or yz-plane (3D)
  * to a file.
  */ 
-
 void
 RTIRMISpatialProfilesUtilities::outputR22WithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
@@ -1378,6 +1379,7 @@ RTIRMISpatialProfilesUtilities::outputR22WithHomogeneityInYDirectionOrInYZPlane(
     }
 }
 
+
 /*
  * Output R33 with assumed homogeneity in y-direction (2D) or yz-plane (3D)
  * to a file.
@@ -1491,6 +1493,7 @@ RTIRMISpatialProfilesUtilities::outputR33WithHomogeneityInYDirectionOrInYZPlane(
         f_out.close();
     }
 }
+
 
 /*
  * Output u1''u1'' with assumed homogeneity in y-direction (2D) or yz-plane (3D)
@@ -1614,6 +1617,7 @@ RTIRMISpatialProfilesUtilities::outputU1DoublePrimeU1DoublePrimeWithHomogeneityI
         f_out.close();
     }  
 }
+
 
 /*
     * Output u2''u2'' with assumed homogeneity in y-direction (2D) or yz-plane (3D)
