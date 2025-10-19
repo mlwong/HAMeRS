@@ -1733,11 +1733,11 @@ RTIRMISpatialProfilesUtilities::outputU2DoublePrimeU2DoublePrimeWithHomogeneityI
     }  
 }
 
+
 /*
  * Output u3''u3'' with assumed homogeneity in y-direction (2D) or yz-plane (3D)
  * to a file.
  */
-
 void
 RTIRMISpatialProfilesUtilities::outputU3DoublePrimeU3DoublePrimeWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
