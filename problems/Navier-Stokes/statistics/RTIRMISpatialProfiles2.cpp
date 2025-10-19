@@ -302,7 +302,6 @@ RTIRMISpatialProfilesUtilities::outputAveragedDensityWithHomogeneityInYDirection
 }
 
 
-
 /*
  * Output variance of density with assumed homogeneity in y-direction (2D) or yz-plane (3D)
  * to a file.
@@ -920,12 +919,14 @@ RTIRMISpatialProfilesUtilities::outputScalarDissipationRateWithHomogeneityInYDir
     
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
+    const bool use_diffusive_flux_utilities = true;
     FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
         "MPI_helper_average",
         d_dim,
         d_grid_geometry,
         patch_hierarchy,
-        flow_model_tmp);
+        flow_model_tmp,
+        use_diffusive_flux_utilities);
     
     const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
     const int num_cells = finest_level_dims[0];
@@ -1103,12 +1104,14 @@ RTIRMISpatialProfilesUtilities::outputTKEDissipationRateWithHomogeneityInYDirect
     
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
+    const bool use_diffusive_flux_utilities = true;
     FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
         "MPI_helper_average",
         d_dim,
         d_grid_geometry,
         patch_hierarchy,
-        flow_model_tmp);
+        flow_model_tmp,
+        use_diffusive_flux_utilities);
     
     const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
     const int num_cells = finest_level_dims[0];
