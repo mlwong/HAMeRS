@@ -124,7 +124,7 @@ class RTIRMISpatialProfilesUtilities
             const double output_time) const;
         
         /*
-         *Output R11 with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+         * Output R11 with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
          */
         void
         outputR11WithHomogeneityInYDirectionOrInYZPlane(
@@ -134,7 +134,7 @@ class RTIRMISpatialProfilesUtilities
             const double output_time) const;
         
         /*
-         *Output R22 with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+         * Output R22 with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
          */
         void
         outputR22WithHomogeneityInYDirectionOrInYZPlane(
@@ -144,7 +144,7 @@ class RTIRMISpatialProfilesUtilities
             const double output_time) const;
         
         /*
-         *Output R33 with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+         * Output R33 with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
          */
         void
         outputR33WithHomogeneityInYDirectionOrInYZPlane(
@@ -154,7 +154,7 @@ class RTIRMISpatialProfilesUtilities
             const double output_time) const;
         
         /*
-         *Output u_1''u_1'' with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+         * Output u_1''u_1'' with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
          */
         void
         outputU1DoublePrimeU1DoublePrimeWithHomogeneityInYDirectionOrInYZPlane(
@@ -164,7 +164,7 @@ class RTIRMISpatialProfilesUtilities
             const double output_time) const;
         
         /*
-         *Output u_2''u_2'' with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+         * Output u_2''u_2'' with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
          */
         void
         outputU2DoublePrimeU2DoublePrimeWithHomogeneityInYDirectionOrInYZPlane(
@@ -174,10 +174,43 @@ class RTIRMISpatialProfilesUtilities
             const double output_time) const;
         
         /*
-         *Output u_3''u_3'' with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+         * Output u_3''u_3'' with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
          */
         void
         outputU3DoublePrimeU3DoublePrimeWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output lambda_xx (Taylor length scale) with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+         * to a file.
+         */
+        void
+        outputLambdaXXWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output lambda_yy (Taylor length scale) with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+         * to a file.
+         */
+        void
+        outputLambdaYYWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output lambda_zz (Taylor length scale) with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+         * to a file.
+         */
+        void
+        outputLambdaZZWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -1153,6 +1186,7 @@ RTIRMISpatialProfilesUtilities::outputR11WithHomogeneityInYDirectionOrInYZPlane(
                 << std::endl);
         }
     }
+    
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
@@ -1249,7 +1283,7 @@ RTIRMISpatialProfilesUtilities::outputR11WithHomogeneityInYDirectionOrInYZPlane(
         f_out.write((char*)&output_time, sizeof(double));
         f_out.write((char*)&R_11[0], sizeof(double)*R_11.size());
         f_out.close();
-    }  
+    }
 }
 
 
@@ -1267,6 +1301,7 @@ RTIRMISpatialProfilesUtilities::outputR22WithHomogeneityInYDirectionOrInYZPlane(
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
 #endif
+    
     if (d_flow_model.expired())
     {
         TBOX_ERROR(d_object_name
@@ -1290,6 +1325,7 @@ RTIRMISpatialProfilesUtilities::outputR22WithHomogeneityInYDirectionOrInYZPlane(
                 << std::endl);
         }
     }
+    
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
@@ -1343,9 +1379,12 @@ RTIRMISpatialProfilesUtilities::outputR22WithHomogeneityInYDirectionOrInYZPlane(
     {
         v_tilde[i] /= rho_mean[i];
     }
+    
     // Compute R_22.
+    
     std::vector<double> zeros(finest_level_dims[0], double(0));
     std::vector<std::vector<double> > averaged_quantities;
+    
     quantity_names.push_back("DENSITY");
     component_indices.push_back(0);
     averaged_quantities.push_back(zeros);
@@ -1355,14 +1394,17 @@ RTIRMISpatialProfilesUtilities::outputR22WithHomogeneityInYDirectionOrInYZPlane(
     quantity_names.push_back("VELOCITY");
     component_indices.push_back(1);
     averaged_quantities.push_back(v_tilde);
+    
     std::vector<double> R_22 = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
         quantity_names,
         component_indices,
         averaged_quantities,
         data_context);
+    
     quantity_names.clear();
     component_indices.clear();
     averaged_quantities.clear();
+    
     for (int i = 0; i < finest_level_dims[0]; i++)
     {
         R_22[i] /= rho_mean[i];
@@ -1371,6 +1413,7 @@ RTIRMISpatialProfilesUtilities::outputR22WithHomogeneityInYDirectionOrInYZPlane(
     /*
      * Output the spatial profile (only done by process 0).
      */
+    
     if (mpi.getRank() == 0)
     {
         f_out.write((char*)&output_time, sizeof(double));
@@ -1394,6 +1437,7 @@ RTIRMISpatialProfilesUtilities::outputR33WithHomogeneityInYDirectionOrInYZPlane(
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
 #endif
+    
     if (d_flow_model.expired())
     {
         TBOX_ERROR(d_object_name
@@ -1417,6 +1461,7 @@ RTIRMISpatialProfilesUtilities::outputR33WithHomogeneityInYDirectionOrInYZPlane(
                 << std::endl);
         }
     }
+    
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
 
     FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
@@ -1425,42 +1470,54 @@ RTIRMISpatialProfilesUtilities::outputR33WithHomogeneityInYDirectionOrInYZPlane(
         d_grid_geometry,
         patch_hierarchy,
         flow_model_tmp);
+    
     FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
         "MPI_helper_average",
         d_dim,
         d_grid_geometry,
         patch_hierarchy,
         flow_model_tmp);
+    
     const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
     std::vector<double> Y_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
         "MASS_FRACTIONS",
         0,
         data_context);
+    
     std::vector<double> rho_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
         "DENSITY",
         0,
         data_context);
+    
     // Compute w_tilde.
+    
     std::vector<std::string> quantity_names;
     std::vector<int> component_indices;
+    
     quantity_names.push_back("DENSITY");
     component_indices.push_back(0);
     quantity_names.push_back("VELOCITY");
     component_indices.push_back(2);
+    
     std::vector<double> rho_w_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
         quantity_names,
         component_indices,
         data_context);
+    
     quantity_names.clear();
     component_indices.clear();
+    
     std::vector<double> w_tilde(rho_w_mean);
     for (int i = 0; i < finest_level_dims[0]; i++)
     {
         w_tilde[i] /= rho_mean[i];
     }
+    
     // Compute R_33.
+    
     std::vector<double> zeros(finest_level_dims[0], double(0));
     std::vector<std::vector<double> > averaged_quantities;
+    
     quantity_names.push_back("DENSITY");
     component_indices.push_back(0);
     averaged_quantities.push_back(zeros);
@@ -1470,14 +1527,17 @@ RTIRMISpatialProfilesUtilities::outputR33WithHomogeneityInYDirectionOrInYZPlane(
     quantity_names.push_back("VELOCITY");
     component_indices.push_back(2);
     averaged_quantities.push_back(w_tilde);
+    
     std::vector<double> R_33 = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
         quantity_names,
         component_indices,
         averaged_quantities,
         data_context);
+    
     quantity_names.clear();
     component_indices.clear();
     averaged_quantities.clear();
+    
     for (int i = 0; i < finest_level_dims[0]; i++)
     {
         R_33[i] /= rho_mean[i];
@@ -1486,6 +1546,7 @@ RTIRMISpatialProfilesUtilities::outputR33WithHomogeneityInYDirectionOrInYZPlane(
     /*
      * Output the spatial profile (only done by process 0).
      */
+    
     if (mpi.getRank() == 0)
     {
         f_out.write((char*)&output_time, sizeof(double));
@@ -1533,6 +1594,7 @@ RTIRMISpatialProfilesUtilities::outputU1DoublePrimeU1DoublePrimeWithHomogeneityI
                 << std::endl);
         }
     }
+    
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
@@ -1585,7 +1647,6 @@ RTIRMISpatialProfilesUtilities::outputU1DoublePrimeU1DoublePrimeWithHomogeneityI
     // Compute u1''u1''.
     
     std::vector<double> zeros(finest_level_dims[0], double(0));
-    
     std::vector<std::vector<double> > averaged_quantities;
     
     quantity_names.push_back("VELOCITY");
@@ -1605,7 +1666,7 @@ RTIRMISpatialProfilesUtilities::outputU1DoublePrimeU1DoublePrimeWithHomogeneityI
     quantity_names.clear();
     component_indices.clear();
     averaged_quantities.clear();
-        
+    
     /*
      * Output the spatial profile (only done by process 0).
      */
@@ -1615,14 +1676,14 @@ RTIRMISpatialProfilesUtilities::outputU1DoublePrimeU1DoublePrimeWithHomogeneityI
         f_out.write((char*)&output_time, sizeof(double));
         f_out.write((char*)&u_1dpu_1dp[0], sizeof(double)*u_1dpu_1dp.size());
         f_out.close();
-    }  
+    }
 }
 
 
 /*
-    * Output u2''u2'' with assumed homogeneity in y-direction (2D) or yz-plane (3D)
-    * to a file.
-    */
+ * Output u2''u2'' with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+ * to a file.
+ */
 void
 RTIRMISpatialProfilesUtilities::outputU2DoublePrimeU2DoublePrimeWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
@@ -1633,6 +1694,7 @@ RTIRMISpatialProfilesUtilities::outputU2DoublePrimeU2DoublePrimeWithHomogeneityI
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
 #endif
+    
     if (d_flow_model.expired())
     {
         TBOX_ERROR(d_object_name
@@ -1656,6 +1718,7 @@ RTIRMISpatialProfilesUtilities::outputU2DoublePrimeU2DoublePrimeWithHomogeneityI
                 << std::endl);
         }
     }
+    
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
@@ -1706,31 +1769,37 @@ RTIRMISpatialProfilesUtilities::outputU2DoublePrimeU2DoublePrimeWithHomogeneityI
     }
     
     // Compute u2''u2''.
+    
     std::vector<double> zeros(finest_level_dims[0], double(0));
     std::vector<std::vector<double> > averaged_quantities;
+    
     quantity_names.push_back("VELOCITY");
     component_indices.push_back(1);
     averaged_quantities.push_back(v_tilde);
     quantity_names.push_back("VELOCITY");
     component_indices.push_back(1);
     averaged_quantities.push_back(v_tilde);
+    
     std::vector<double> u_2dpu_2dp = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
         quantity_names,
         component_indices,
         averaged_quantities,
         data_context);
+    
     quantity_names.clear();
     component_indices.clear();
     averaged_quantities.clear();
+    
     /*
      * Output the spatial profile (only done by process 0).
      */
+    
     if (mpi.getRank() == 0)
     {
         f_out.write((char*)&output_time, sizeof(double));
         f_out.write((char*)&u_2dpu_2dp[0], sizeof(double)*u_2dpu_2dp.size());
         f_out.close();
-    }  
+    }
 }
 
 
@@ -1748,6 +1817,7 @@ RTIRMISpatialProfilesUtilities::outputU3DoublePrimeU3DoublePrimeWithHomogeneityI
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
 #endif
+    
     if (d_flow_model.expired())
     {
         TBOX_ERROR(d_object_name
@@ -1755,8 +1825,11 @@ RTIRMISpatialProfilesUtilities::outputU3DoublePrimeU3DoublePrimeWithHomogeneityI
             << "The object is not setup yet!"
             << std::endl);
     }
+    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
     std::ofstream f_out;
+    
     if (mpi.getRank() == 0)
     {
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
@@ -1768,69 +1841,556 @@ RTIRMISpatialProfilesUtilities::outputU3DoublePrimeU3DoublePrimeWithHomogeneityI
                 << std::endl);
         }
     }
+    
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
     FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
         "MPI_helper_average",
         d_dim,
         d_grid_geometry,
         patch_hierarchy,
         flow_model_tmp);
+    
+    FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
+        "MPI_helper_correlation",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+    
+    std::vector<double> rho_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        data_context);
+    
+    // Compute w_tilde.
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    
+    std::vector<double> rho_w_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<double> w_tilde(rho_w_mean);
+    for (int i = 0; i < finest_level_dims[0]; i++)
+    {
+        w_tilde[i] /= rho_mean[i];
+    }
+    
+    // Compute u3''u3''.
+    
+    std::vector<double> zeros(finest_level_dims[0], double(0));
+    std::vector<std::vector<double> > averaged_quantities;
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    averaged_quantities.push_back(w_tilde);
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    averaged_quantities.push_back(w_tilde);
+    
+    std::vector<double> u_3dpu_3dp = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&u_3dpu_3dp[0], sizeof(double)*u_3dpu_3dp.size());
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output lambda_xx (Taylor length scale) with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+ * to a file.
+ */
+void
+RTIRMISpatialProfilesUtilities::outputLambdaXXWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    
     FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
         "MPI_helper_average",
         d_dim,
         d_grid_geometry,
         patch_hierarchy,
         flow_model_tmp);
+    
     const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
-    std::vector<double> rho_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
-        "DENSITY",
+    
+    std::vector<double> u_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
         0,
         data_context);
-    // Compute w_tilde.
+    
     std::vector<std::string> quantity_names;
     std::vector<int> component_indices;
-    quantity_names.push_back("DENSITY");
-    component_indices.push_back(0);
+    std::vector<bool> use_derivative;
+    std::vector<int> derivative_directions;
+    
     quantity_names.push_back("VELOCITY");
-    component_indices.push_back(2);
-    std::vector<double> rho_w_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    
+    std::vector<double> dudx_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
         quantity_names,
         component_indices,
+        use_derivative,
+        derivative_directions,
+        d_num_ghosts_derivative,
         data_context);
+    
     quantity_names.clear();
     component_indices.clear();
-    std::vector<double> w_tilde(rho_w_mean);
-    for (int i = 0; i < finest_level_dims[0]; i++)
-    {
-        w_tilde[i] /= rho_mean[i];
-    }
-    // Compute u3''u3''.
-    std::vector<double> zeros(finest_level_dims[0], double(0));
+    use_derivative.clear();
+    derivative_directions.clear();
+    
+    // Compute u'u'.
+    
     std::vector<std::vector<double> > averaged_quantities;
+    
     quantity_names.push_back("VELOCITY");
-    component_indices.push_back(2);
-    averaged_quantities.push_back(w_tilde);
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_mean);
     quantity_names.push_back("VELOCITY");
-    component_indices.push_back(2);
-    averaged_quantities.push_back(w_tilde);
-    std::vector<double> u_3dpu_3dp = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_mean);
+    
+    std::vector<double> up_up = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
         quantity_names,
         component_indices,
         averaged_quantities,
         data_context);
+    
     quantity_names.clear();
     component_indices.clear();
     averaged_quantities.clear();
+    
+    // Compute ddxu'ddxu'.
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    averaged_quantities.push_back(dudx_mean);
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    averaged_quantities.push_back(dudx_mean);
+    
+    std::vector<double> ddxup_ddxup = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        averaged_quantities,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    averaged_quantities.clear();
+    
+    // Compute lambda_xx.
+    
+    std::vector<double> lambda_xx(finest_level_dims[0], double(0));
+    for (int i = 0; i < finest_level_dims[0]; i++)
+    {
+        lambda_xx[i] = std::sqrt(up_up[i]/(ddxup_ddxup[i] + HAMERS_EPSILON));
+    }
+    
     /*
      * Output the spatial profile (only done by process 0).
      */
+    
     if (mpi.getRank() == 0)
     {
         f_out.write((char*)&output_time, sizeof(double));
-        f_out.write((char*)&u_3dpu_3dp[0], sizeof(double)*u_3dpu_3dp.size());
+        f_out.write((char*)&lambda_xx[0], sizeof(double)*lambda_xx.size());
         f_out.close();
-    }  
+    }
 }
+
+
+/*
+ * Output lambda_yy (Taylor length scale) with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+ * to a file.
+ */
+void
+RTIRMISpatialProfilesUtilities::outputLambdaYYWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    
+    FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+    
+    std::vector<double> v_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        1,
+        data_context);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<bool> use_derivative;
+    std::vector<int> derivative_directions;
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(1);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
+    
+    std::vector<double> dvdy_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    
+    // Compute v'v'.
+    
+    std::vector<std::vector<double> > averaged_quantities;
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(1);
+    averaged_quantities.push_back(v_mean);
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(1);
+    averaged_quantities.push_back(v_mean);
+    
+    std::vector<double> vp_vp = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    // Compute ddyv'ddyv'.
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(1);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
+    averaged_quantities.push_back(dvdy_mean);
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(1);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
+    averaged_quantities.push_back(dvdy_mean);
+    
+    std::vector<double> ddyvp_ddyvp = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        averaged_quantities,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    averaged_quantities.clear();
+    
+    // Compute lambda_yy.
+    
+    std::vector<double> lambda_yy(finest_level_dims[0], double(0));
+    for (int i = 0; i < finest_level_dims[0]; i++)
+    {
+        lambda_yy[i] = std::sqrt(vp_vp[i]/(ddyvp_ddyvp[i] + HAMERS_EPSILON));
+    }
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&lambda_yy[0], sizeof(double)*lambda_yy.size());
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output lambda_zz (Taylor length scale) with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+ * to a file.
+ */
+void
+RTIRMISpatialProfilesUtilities::outputLambdaZZWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    
+    FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+    
+    std::vector<double> w_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        2,
+        data_context);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<bool> use_derivative;
+    std::vector<int> derivative_directions;
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(2);
+    
+    std::vector<double> dwdz_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    
+    // Compute w'w'.
+    
+    std::vector<std::vector<double> > averaged_quantities;
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    averaged_quantities.push_back(w_mean);
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    averaged_quantities.push_back(w_mean);
+    
+    std::vector<double> wp_wp = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    // Compute ddzw'ddzw'.
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(2);
+    averaged_quantities.push_back(dwdz_mean);
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(2);
+    averaged_quantities.push_back(dwdz_mean);
+    
+    std::vector<double> ddzwp_dzwp = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        averaged_quantities,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    averaged_quantities.clear();
+    
+    // Compute lambda_zz.
+    
+    std::vector<double> lambda_zz(finest_level_dims[0], double(0));
+    for (int i = 0; i < finest_level_dims[0]; i++)
+    {
+        lambda_zz[i] = std::sqrt(wp_wp[i]/(ddzwp_dzwp[i] + HAMERS_EPSILON));
+    }
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&lambda_zz[0], sizeof(double)*lambda_zz.size());
+        f_out.close();
+    }
+}
+
 
 /*
  * Output TKE dissipation rate with assumed homogeneity in y-direction (2D) or yz-plane (3D)
@@ -6561,6 +7121,30 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         {
             rti_rmi_spatial_profiles_utilities->outputU3DoublePrimeU3DoublePrimeWithHomogeneityInYDirectionOrInYZPlane(
                 "u3dpu3dp.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
+        }
+        else if (statistical_quantity_key == "LAMBDA_XX")
+        {
+            rti_rmi_spatial_profiles_utilities->outputLambdaXXWithHomogeneityInYDirectionOrInYZPlane(
+                "lambda_xx.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
+        }
+        else if (statistical_quantity_key == "LAMBDA_YY")
+        {
+            rti_rmi_spatial_profiles_utilities->outputLambdaYYWithHomogeneityInYDirectionOrInYZPlane(
+                "lambda_yy.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
+        }
+        else if (statistical_quantity_key == "LAMBDA_ZZ")
+        {
+            rti_rmi_spatial_profiles_utilities->outputLambdaZZWithHomogeneityInYDirectionOrInYZPlane(
+                "lambda_zz.dat",
                 patch_hierarchy,
                 data_context,
                 output_time);
