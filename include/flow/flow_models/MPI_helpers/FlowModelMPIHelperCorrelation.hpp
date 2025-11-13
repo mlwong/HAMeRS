@@ -46,6 +46,31 @@ class FlowModelMPIHelperCorrelation: public FlowModelMPIHelper
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
+         * Compute correlation (on product of variable derivatives) with only x direction as inhomogeneous direction.
+         */
+        std::vector<Real> getQuantityCorrelationWithInhomogeneousXDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_derivative,
+            const std::vector<int>& derivative_directions,
+            const std::vector<std::vector<Real> >& averaged_quantities,
+            const int num_ghosts_derivative,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute correlation (on product of variable derivatives) with only x direction as inhomogeneous direction.
+         */
+        std::vector<Real> getQuantityCorrelationWithInhomogeneousXDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_derivative,
+            const std::vector<int>& derivative_directions,
+            const std::vector<bool>& use_reciprocal,
+            const std::vector<std::vector<Real> >& averaged_quantities,
+            const int num_ghosts_derivative,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
          * Compute correlation with only y-direction as inhomogeneous direction.
          */
         std::vector<Real> getQuantityCorrelationWithInhomogeneousYDirection(
@@ -65,6 +90,31 @@ class FlowModelMPIHelperCorrelation: public FlowModelMPIHelper
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
+         * Compute correlation (on product of variable derivatives) with only y-direction as inhomogeneous direction.
+         */
+        std::vector<Real> getQuantityCorrelationWithInhomogeneousYDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_derivative,
+            const std::vector<int>& derivative_directions,
+            const std::vector<std::vector<Real> >& averaged_quantities,
+            const int num_ghosts_derivative,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute correlation (on product of variable derivatives) with only y-direction as inhomogeneous direction.
+         */
+        std::vector<Real> getQuantityCorrelationWithInhomogeneousYDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_derivative,
+            const std::vector<int>& derivative_directions,
+            const std::vector<bool>& use_reciprocal,
+            const std::vector<std::vector<Real> >& averaged_quantities,
+            const int num_ghosts_derivative,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
          * Compute correlation with only z-direction as inhomogeneous direction.
          */
         std::vector<Real> getQuantityCorrelationWithInhomogeneousZDirection(
@@ -81,6 +131,31 @@ class FlowModelMPIHelperCorrelation: public FlowModelMPIHelper
             const std::vector<int>& component_indices,
             const std::vector<bool>& use_reciprocal,
             const std::vector<std::vector<Real> >& averaged_quantities,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute correlation (on product of variable derivatives) with only z-direction as inhomogeneous direction.
+         */
+        std::vector<Real> getQuantityCorrelationWithInhomogeneousZDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_derivative,
+            const std::vector<int>& derivative_directions,
+            const std::vector<std::vector<Real> >& averaged_quantities,
+            const int num_ghosts_derivative,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute correlation (on product of variable derivatives) with only z-direction as inhomogeneous direction.
+         */
+        std::vector<Real> getQuantityCorrelationWithInhomogeneousZDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_derivative,
+            const std::vector<int>& derivative_directions,
+            const std::vector<bool>& use_reciprocal,
+            const std::vector<std::vector<Real> >& averaged_quantities,
+            const int num_ghosts_derivative,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
     private:
