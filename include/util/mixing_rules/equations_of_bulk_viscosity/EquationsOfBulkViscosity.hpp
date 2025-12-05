@@ -2,6 +2,7 @@
 #define EQUATIONS_OF_BULK_VISCOSITY_HPP
 
 #include "util/mixing_rules/equations_of_bulk_viscosity/constant/EquationOfBulkViscosityMixingRulesConstant.hpp"
+#include "util/mixing_rules/equations_of_bulk_viscosity/constant_ratio_to_shear_viscosity/EquationOfBulkViscosityMixingRulesConstantRatioToShearViscosity.hpp"
 #include "util/mixing_rules/equations_of_bulk_viscosity/Cramer/EquationOfBulkViscosityMixingRulesCramer.hpp"
 
 #include <map>
@@ -10,6 +11,7 @@
 namespace EQN_BULK_VISCOSITY
 {
     enum TYPE { CONSTANT,
+                CONSTANT_RATIO_TO_SHEAR_VISCOSITY,
                 CRAMER };
 }
 
@@ -24,6 +26,7 @@ inline std::ostream& operator<<(std::ostream& os, const EQN_BULK_VISCOSITY::TYPE
     {
 #define INSERT_ELEMENT(p) strings[p] = #p
         INSERT_ELEMENT(EQN_BULK_VISCOSITY::CONSTANT);
+        INSERT_ELEMENT(EQN_BULK_VISCOSITY::CONSTANT_RATIO_TO_SHEAR_VISCOSITY);
         INSERT_ELEMENT(EQN_BULK_VISCOSITY::CRAMER);
 #undef INSERT_ELEMENT
     }
