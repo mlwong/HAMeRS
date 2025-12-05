@@ -17,13 +17,13 @@ class EquationOfBulkViscosityConstant: public EquationOfBulkViscosity
         ~EquationOfBulkViscosityConstant() {}
         
         /*
-         * Print all characteristics of the equation of thermal conductivity class.
+         * Print all characteristics of the equation of bulk viscosity class.
          */
         void
         printClassData(std::ostream& os) const;
         
         /*
-         * Compute the thermal conductivity.
+         * Compute the bulk viscosity.
          */
         Real
         getBulkViscosity(
