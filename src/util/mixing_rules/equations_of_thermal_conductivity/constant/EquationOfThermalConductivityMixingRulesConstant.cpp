@@ -56,7 +56,7 @@ EquationOfThermalConductivityMixingRulesConstant::EquationOfThermalConductivityM
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_kappa'/'d_species_kappa'"
-            << "not found in data for equation of thermal conductivity mixing rules."
+            << " not found in data for equation of thermal conductivity mixing rules."
             << std::endl);
     }
     
@@ -103,7 +103,7 @@ EquationOfThermalConductivityMixingRulesConstant::EquationOfThermalConductivityM
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_M'/'d_species_M'"
-            << "not found in data for equation of thermal conductivity mixing rules."
+            << " not found in data for equation of thermal conductivity mixing rules."
             << std::endl);
     }
 }

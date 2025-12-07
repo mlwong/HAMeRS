@@ -56,7 +56,7 @@ EquationOfBulkViscosityMixingRulesConstantRatioToShearViscosity::EquationOfBulkV
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_ratio_of_bulk_viscosity_to_shear_viscosity'/'d_species_ratio_of_bulk_viscosity_to_shear_viscosity'"
-            << "not found in data for equation of bulk viscosity mixing rules."
+            << " not found in data for equation of bulk viscosity mixing rules."
             << std::endl);
     }
      
@@ -103,7 +103,7 @@ EquationOfBulkViscosityMixingRulesConstantRatioToShearViscosity::EquationOfBulkV
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_M'/'d_species_M'"
-            << "not found in data for equation of bulk viscosity mixing rules."
+            << " not found in data for equation of bulk viscosity mixing rules."
             << std::endl);
     }
     

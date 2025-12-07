@@ -56,7 +56,7 @@ EquationOfShearViscosityMixingRulesPowerLaw::EquationOfShearViscosityMixingRules
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_mu_ref'/'d_species_mu_ref'"
-            << "not found in data for equation of shear viscosity mixing rules."
+            << " not found in data for equation of shear viscosity mixing rules."
             << std::endl);
     }
     
@@ -103,7 +103,7 @@ EquationOfShearViscosityMixingRulesPowerLaw::EquationOfShearViscosityMixingRules
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_T_ref'/'d_species_T_ref'"
-            << "not found in data for equation of shear viscosity mixing rules."
+            << " not found in data for equation of shear viscosity mixing rules."
             << std::endl);
     }
     
@@ -150,7 +150,7 @@ EquationOfShearViscosityMixingRulesPowerLaw::EquationOfShearViscosityMixingRules
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_power'/'d_species_power'"
-            << "not found in data for equation of shear viscosity mixing rules."
+            << " not found in data for equation of shear viscosity mixing rules."
             << std::endl);
     }
     

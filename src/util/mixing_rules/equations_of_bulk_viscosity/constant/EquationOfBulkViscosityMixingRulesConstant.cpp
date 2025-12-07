@@ -60,7 +60,7 @@ EquationOfBulkViscosityMixingRulesConstant::EquationOfBulkViscosityMixingRulesCo
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_mu_v'/'d_species_mu_v'"
-            << "not found in data for equation of bulk viscosity mixing rules."
+            << " not found in data for equation of bulk viscosity mixing rules."
             << std::endl);
     }
     
@@ -107,7 +107,7 @@ EquationOfBulkViscosityMixingRulesConstant::EquationOfBulkViscosityMixingRulesCo
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_M'/'d_species_M'"
-            << "not found in data for equation of bulk viscosity mixing rules."
+            << " not found in data for equation of bulk viscosity mixing rules."
             << std::endl);
     }
 }

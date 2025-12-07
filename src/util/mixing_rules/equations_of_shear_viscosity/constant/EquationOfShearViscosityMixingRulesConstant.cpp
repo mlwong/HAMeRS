@@ -67,7 +67,7 @@ EquationOfShearViscosityMixingRulesConstant::EquationOfShearViscosityMixingRules
             TBOX_ERROR(d_object_name
                 << ": "
                 << "Key data 'species_nu'/'d_species_nu'"
-                << "not found in data for equation of shear viscosity mixing rules."
+                << " not found in data for equation of shear viscosity mixing rules."
                 << std::endl);
         }
     }
@@ -113,7 +113,7 @@ EquationOfShearViscosityMixingRulesConstant::EquationOfShearViscosityMixingRules
             TBOX_ERROR(d_object_name
                 << ": "
                 << "Key data 'species_mu'/'d_species_mu'"
-                << "not found in data for equation of shear viscosity mixing rules."
+                << " not found in data for equation of shear viscosity mixing rules."
                 << std::endl);
         }
     }
@@ -161,7 +161,7 @@ EquationOfShearViscosityMixingRulesConstant::EquationOfShearViscosityMixingRules
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_M'/'d_species_M'"
-            << "not found in data for equation of shear viscosity mixing rules."
+            << " not found in data for equation of shear viscosity mixing rules."
             << std::endl);
     }
     

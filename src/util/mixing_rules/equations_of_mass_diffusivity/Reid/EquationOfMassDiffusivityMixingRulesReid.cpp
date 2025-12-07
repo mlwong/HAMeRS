@@ -60,7 +60,7 @@ EquationOfMassDiffusivityMixingRulesReid::EquationOfMassDiffusivityMixingRulesRe
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_epsilon_by_k'/'d_species_epsilon_by_k'"
-            << "not found in data for equation of mass diffusivity mixing rules."
+            << " not found in data for equation of mass diffusivity mixing rules."
             << std::endl);
     }
     
@@ -107,7 +107,7 @@ EquationOfMassDiffusivityMixingRulesReid::EquationOfMassDiffusivityMixingRulesRe
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_sigma'/'d_species_sigma'"
-            << "not found in data for equation of mass diffusivity mixing rules."
+            << " not found in data for equation of mass diffusivity mixing rules."
             << std::endl);
     }
     
@@ -154,7 +154,7 @@ EquationOfMassDiffusivityMixingRulesReid::EquationOfMassDiffusivityMixingRulesRe
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_M'/'d_species_M'"
-            << "not found in data for equation of mass diffusivity mixing rules."
+            << " not found in data for equation of mass diffusivity mixing rules."
             << std::endl);
     }
 }
