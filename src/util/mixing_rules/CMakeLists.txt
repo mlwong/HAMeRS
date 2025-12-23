@@ -11,6 +11,8 @@ set(mixing_rules_source_files
     ./equations_of_bulk_viscosity/EquationOfBulkViscosityMixingRulesManager.cpp
     ./equations_of_bulk_viscosity/constant/EquationOfBulkViscosityConstant.cpp
     ./equations_of_bulk_viscosity/constant/EquationOfBulkViscosityMixingRulesConstant.cpp
+    ./equations_of_bulk_viscosity/constant_ratio_to_shear_viscosity/EquationOfBulkViscosityConstantRatioToShearViscosity.cpp
+    ./equations_of_bulk_viscosity/constant_ratio_to_shear_viscosity/EquationOfBulkViscosityMixingRulesConstantRatioToShearViscosity.cpp
     ./equations_of_bulk_viscosity/Cramer/EquationOfBulkViscosityCramer.cpp
     ./equations_of_bulk_viscosity/Cramer/EquationOfBulkViscosityMixingRulesCramer.cpp
     ./equations_of_thermal_conductivity/EquationOfThermalConductivityMixingRulesManager.cpp

@@ -1,20 +1,24 @@
-#ifndef EQUATION_OF_BULK_VISCOSITY_CONSTANT_HPP
-#define EQUATION_OF_BULK_VISCOSITY_CONSTANT_HPP
+#ifndef EQUATION_OF_BULK_VISCOSITY_CONSTANT_RATIO_TO_SHEAR_VISCOSITY_HPP
+#define EQUATION_OF_BULK_VISCOSITY_CONSTANT_RATIO_TO_SHEAR_VISCOSITY_HPP
 
 #include "util/mixing_rules/equations_of_bulk_viscosity/EquationOfBulkViscosity.hpp"
 
-class EquationOfBulkViscosityConstant: public EquationOfBulkViscosity
+#include "util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.hpp"
+
+class EquationOfBulkViscosityConstantRatioToShearViscosity: public EquationOfBulkViscosity
 {
     public:
-        EquationOfBulkViscosityConstant(
+        EquationOfBulkViscosityConstantRatioToShearViscosity(
             const std::string& object_name,
-            const tbox::Dimension& dim):
+            const tbox::Dimension& dim,
+            const HAMERS_SHARED_PTR<EquationOfShearViscosity>& equation_of_shear_viscosity):
                 EquationOfBulkViscosity(
                     object_name,
-                    dim)
+                    dim),
+                d_equation_of_shear_viscosity(equation_of_shear_viscosity)
         {}
         
-        ~EquationOfBulkViscosityConstant() {}
+        ~EquationOfBulkViscosityConstantRatioToShearViscosity() {}
         
         /*
          * Print all characteristics of the equation of bulk viscosity class.
@@ -54,7 +58,11 @@ class EquationOfBulkViscosityConstant: public EquationOfBulkViscosity
             const hier::Box& domain) const;
         
     private:
+        /*
+         * Boost shared pointer to equation of shear viscosity.
+         */
+        const HAMERS_SHARED_PTR<EquationOfShearViscosity> d_equation_of_shear_viscosity;
         
 };
 
-#endif /* EQUATION_OF_BULK_VISCOSITY_CONSTANT_HPP */
+#endif /* EQUATION_OF_BULK_VISCOSITY_CONSTANT_RATIO_TO_SHEAR_VISCOSITY_HPP */

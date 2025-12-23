@@ -22,6 +22,17 @@ EquationOfBulkViscosityMixingRulesManager::EquationOfBulkViscosityMixingRulesMan
                 mixing_closure_model,
                 equation_of_bulk_viscosity_mixing_rules_db));
     }
+    else if (equation_of_bulk_viscosity_str == "CONSTANT_RATIO_TO_SHEAR_VISCOSITY")
+    {
+        d_equation_of_bulk_viscosity_type = EQN_BULK_VISCOSITY::CONSTANT_RATIO_TO_SHEAR_VISCOSITY;
+        
+        d_equation_of_bulk_viscosity_mixing_rules.reset(new EquationOfBulkViscosityMixingRulesConstantRatioToShearViscosity(
+                "d_equation_of_bulk_viscosity_mixing_rules",
+                dim,
+                num_species,
+                mixing_closure_model,
+                equation_of_bulk_viscosity_mixing_rules_db));
+    }
     else if (equation_of_bulk_viscosity_str == "CRAMER")
     {
         d_equation_of_bulk_viscosity_type = EQN_BULK_VISCOSITY::CRAMER;

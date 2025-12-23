@@ -56,7 +56,7 @@ EquationOfStateMixingRulesStiffenedGas::EquationOfStateMixingRulesStiffenedGas(
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_gamma'/'d_species_gamma'"
-            << "not found in data for Equation_of_state_mixing_rules."
+            << " not found in data for Equation_of_state_mixing_rules."
             << std::endl);
     }
     
@@ -99,7 +99,7 @@ EquationOfStateMixingRulesStiffenedGas::EquationOfStateMixingRulesStiffenedGas(
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_p_inf'/'d_species_p_inf'"
-            << "not found in data for Equation_of_state_mixing_rules."
+            << " not found in data for Equation_of_state_mixing_rules."
             << std::endl);
     }
     
@@ -142,7 +142,7 @@ EquationOfStateMixingRulesStiffenedGas::EquationOfStateMixingRulesStiffenedGas(
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_c_v'/'d_species_c_v'"
-            << "not found in data for Equation_of_state_mixing_rules."
+            << " not found in data for Equation_of_state_mixing_rules."
             << std::endl);
     }
     
@@ -185,7 +185,7 @@ EquationOfStateMixingRulesStiffenedGas::EquationOfStateMixingRulesStiffenedGas(
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_M'/'d_species_M'"
-            << "not found in data for Equation_of_state_mixing_rules."
+            << " not found in data for Equation_of_state_mixing_rules."
             << std::endl);
     }
     

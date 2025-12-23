@@ -60,7 +60,7 @@ EquationOfMassDiffusivityMixingRulesConstant::EquationOfMassDiffusivityMixingRul
             TBOX_ERROR(d_object_name
                 << ": "
                 << "Key data 'D_ij'/'d_D_ij'"
-                << "not found in data for equation of mass diffusivity mixing rules."
+                << " not found in data for equation of mass diffusivity mixing rules."
                 << std::endl);
         }
         
@@ -107,7 +107,7 @@ EquationOfMassDiffusivityMixingRulesConstant::EquationOfMassDiffusivityMixingRul
             TBOX_ERROR(d_object_name
                 << ": "
                 << "Key data 'species_M'/'d_species_M'"
-                << "not found in data for equation of mass diffusivity mixing rules."
+                << " not found in data for equation of mass diffusivity mixing rules."
                 << std::endl);
         }
     }
@@ -156,7 +156,7 @@ EquationOfMassDiffusivityMixingRulesConstant::EquationOfMassDiffusivityMixingRul
             TBOX_ERROR(d_object_name
                 << ": "
                 << "Key data 'species_D'/'d_species_D'"
-                << "not found in data for equation of mass diffusivity mixing rules."
+                << " not found in data for equation of mass diffusivity mixing rules."
                 << std::endl);
         }
     }

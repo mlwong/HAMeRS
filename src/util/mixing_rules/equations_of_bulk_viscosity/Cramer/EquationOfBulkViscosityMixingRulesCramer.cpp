@@ -60,7 +60,7 @@ EquationOfBulkViscosityMixingRulesCramer::EquationOfBulkViscosityMixingRulesCram
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_gamma'/'d_species_gamma'"
-            << "not found in data for equation of bulk viscosity mixing rules."
+            << " not found in data for equation of bulk viscosity mixing rules."
             << std::endl);
     }
     
@@ -107,7 +107,7 @@ EquationOfBulkViscosityMixingRulesCramer::EquationOfBulkViscosityMixingRulesCram
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_A_r'/'d_species_A_r'"
-            << "not found in data for equation of bulk viscosity mixing rules."
+            << " not found in data for equation of bulk viscosity mixing rules."
             << std::endl);
     }
     
@@ -150,7 +150,7 @@ EquationOfBulkViscosityMixingRulesCramer::EquationOfBulkViscosityMixingRulesCram
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_B_r'/'d_species_B_r'"
-            << "not found in data for equation of bulk viscosity mixing rules."
+            << " not found in data for equation of bulk viscosity mixing rules."
             << std::endl);
     }
     
@@ -197,7 +197,7 @@ EquationOfBulkViscosityMixingRulesCramer::EquationOfBulkViscosityMixingRulesCram
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_c_v_v'/'d_species_c_v_v'"
-            << "not found in data for equation of bulk viscosity mixing rules."
+            << " not found in data for equation of bulk viscosity mixing rules."
             << std::endl);
     }
     
@@ -240,7 +240,7 @@ EquationOfBulkViscosityMixingRulesCramer::EquationOfBulkViscosityMixingRulesCram
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_A_v'/'d_species_A_v'"
-            << "not found in data for equation of bulk viscosity mixing rules."
+            << " not found in data for equation of bulk viscosity mixing rules."
             << std::endl);
     }
     
@@ -283,7 +283,7 @@ EquationOfBulkViscosityMixingRulesCramer::EquationOfBulkViscosityMixingRulesCram
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_B_v'/'d_species_B_v'"
-            << "not found in data for equation of bulk viscosity mixing rules."
+            << " not found in data for equation of bulk viscosity mixing rules."
             << std::endl);
     }
     
@@ -326,7 +326,7 @@ EquationOfBulkViscosityMixingRulesCramer::EquationOfBulkViscosityMixingRulesCram
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_C_v'/'d_species_C_v'"
-            << "not found in data for equation of bulk viscosity mixing rules."
+            << " not found in data for equation of bulk viscosity mixing rules."
             << std::endl);
     }
     
@@ -373,7 +373,7 @@ EquationOfBulkViscosityMixingRulesCramer::EquationOfBulkViscosityMixingRulesCram
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_M'/'d_species_M'"
-            << "not found in data for equation of bulk viscosity mixing rules."
+            << " not found in data for equation of bulk viscosity mixing rules."
             << std::endl);
     }
 }

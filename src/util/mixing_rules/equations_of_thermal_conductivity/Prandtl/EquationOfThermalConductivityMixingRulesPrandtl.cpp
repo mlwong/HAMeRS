@@ -56,7 +56,7 @@ EquationOfThermalConductivityMixingRulesPrandtl::EquationOfThermalConductivityMi
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_c_p'/'d_species_c_p'"
-            << "not found in data for equation of thermal conductivity mixing rules."
+            << " not found in data for equation of thermal conductivity mixing rules."
             << std::endl);
     }
     
@@ -103,7 +103,7 @@ EquationOfThermalConductivityMixingRulesPrandtl::EquationOfThermalConductivityMi
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_Pr'/'d_species_Pr'"
-            << "not found in data for equation of thermal conductivity mixing rules."
+            << " not found in data for equation of thermal conductivity mixing rules."
             << std::endl);
     }
     
@@ -150,7 +150,7 @@ EquationOfThermalConductivityMixingRulesPrandtl::EquationOfThermalConductivityMi
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_M'/'d_species_M'"
-            << "not found in data for equation of thermal conductivity mixing rules."
+            << " not found in data for equation of thermal conductivity mixing rules."
             << std::endl);
     }
     

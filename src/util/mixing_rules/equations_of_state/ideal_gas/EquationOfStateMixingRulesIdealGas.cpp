@@ -56,7 +56,7 @@ EquationOfStateMixingRulesIdealGas::EquationOfStateMixingRulesIdealGas(
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_gamma'/'d_species_gamma'"
-            << "not found in data for Equation_of_state_mixing_rules."
+            << " not found in data for Equation_of_state_mixing_rules."
             << std::endl);
     }
     
@@ -99,7 +99,7 @@ EquationOfStateMixingRulesIdealGas::EquationOfStateMixingRulesIdealGas(
         TBOX_ERROR(d_object_name
             << ": "
             << "Key data 'species_R'/'d_species_R'"
-            << "not found in data for Equation_of_state_mixing_rules."
+            << " not found in data for Equation_of_state_mixing_rules."
             << std::endl);
     }
     
