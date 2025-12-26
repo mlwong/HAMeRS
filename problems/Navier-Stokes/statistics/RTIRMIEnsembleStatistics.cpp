@@ -20066,7 +20066,7 @@ RTIRMIStatisticsUtilities::computeDerivativeOfVector1D(
 {
     TBOX_ASSERT(d_num_ghosts_derivative == 3);
     
-    const int vector_length = quantity_vector.size();
+    const size_t vector_length = quantity_vector.size();
     
     std::vector<double> derivative;
     derivative.resize(vector_length);
@@ -20075,7 +20075,7 @@ RTIRMIStatisticsUtilities::computeDerivativeOfVector1D(
     double* dudx = derivative.data();
     
     // HARD CODE TO BE SIXTH ORDER CENTRAL SCHEME FOR DIFFERENTIATION.
-    for (int i = 3; i < vector_length - 3; i++)
+    for (int i = 3; i < static_cast<int>(vector_length) - 3; i++)
     {
         // Compute linear indices.
         const int idx     = i;
