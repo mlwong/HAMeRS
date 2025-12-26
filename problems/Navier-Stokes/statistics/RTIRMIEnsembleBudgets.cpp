@@ -1977,7 +1977,7 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
         quantity_names.push_back("VELOCITY");
         component_indices.push_back(2);
         use_reciprocal.push_back(false);
-    
+        
         std::vector<double> ddy_w_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
             quantity_names,
             component_indices,
