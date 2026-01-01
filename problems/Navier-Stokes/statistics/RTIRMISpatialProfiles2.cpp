@@ -124,6 +124,38 @@ class RTIRMISpatialProfilesUtilities
             const double output_time) const;
         
         /*
+         * Output turbulent mass flux in x-direction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+         * to a file.
+         */
+        void
+        outputTurbulentMassFluxXWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output velocity associated with turbulent mass flux in x-direction with assumed homogeneity in y-direction (2D)
+         * or yz-plane (3D) to a file.
+         */
+        void
+        outputTurbulentMassFluxVelocityXWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output density-specific-volume covariance with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+         */
+        void
+        outputDensitySpecificVolumeCovarianceWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
          * Output R11 with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
          */
         void
@@ -1142,6 +1174,332 @@ RTIRMISpatialProfilesUtilities::outputScalarDissipationRateWithHomogeneityInYDir
         
         f_out.write((char*)&output_time, sizeof(double));
         f_out.write((char*)&scalar_dissipation_rate_global[0], sizeof(double)*scalar_dissipation_rate_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+
+/*
+ * Output turbulent mass flux in x-direction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+ * to a file.
+ */
+void
+RTIRMISpatialProfilesUtilities::outputTurbulentMassFluxXWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
+        "MPI_helper_correlation",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<double> rho_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        data_context);
+    
+    std::vector<double> u_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        0,
+        data_context);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<std::vector<double> > averaged_quantities;
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(rho_mean);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_mean);
+    
+    std::vector<double> rho_p_u_p = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&rho_p_u_p[0], sizeof(double)*rho_p_u_p.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output velocity associated with turbulent mass flux in x-direction with assumed homogeneity in y-direction (2D)
+ * or yz-plane (3D) to a file.
+ */
+void
+RTIRMISpatialProfilesUtilities::outputTurbulentMassFluxVelocityXWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
+        "MPI_helper_correlation",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+    
+    std::vector<double> rho_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        data_context);
+    
+    std::vector<double> u_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        0,
+        data_context);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<std::vector<double> > averaged_quantities;
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(rho_mean);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_mean);
+    
+    std::vector<double> rho_p_u_p = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::vector<double> a(rho_p_u_p);
+        
+        for (int i = 0; i < finest_level_dims[0]; i++)
+        {
+            a[i] /= rho_mean[i];
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&a[0], sizeof(double)*a.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output density-specific-volume covariance with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+ */
+void
+RTIRMISpatialProfilesUtilities::outputDensitySpecificVolumeCovarianceWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
+        "MPI_helper_correlation",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+    
+    std::vector<double> rho_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        data_context);
+    
+    std::vector<double> v_mean = MPI_helper_average.getAveragedReciprocalOfQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        data_context);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<bool> use_reciprocal;
+    std::vector<std::vector<double> > averaged_quantities;
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    averaged_quantities.push_back(rho_mean);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(true);
+    averaged_quantities.push_back(v_mean);
+    
+    std::vector<double> rho_p_v_p = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_reciprocal,
+        averaged_quantities,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_reciprocal.clear();
+    averaged_quantities.clear();
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::vector<double> b(rho_p_v_p);
+        
+        for (int i = 0; i < finest_level_dims[0]; i++)
+        {
+            b[i] *= -double(1);
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&b[0], sizeof(double)*b.size());
         
         f_out.close();
     }
@@ -7073,6 +7431,30 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         {
             rti_rmi_spatial_profiles_utilities->outputScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
                 "chi_avg.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
+        }
+        else if (statistical_quantity_key == "TURB_MASS_FLUX_X")
+        {
+            rti_rmi_spatial_profiles_utilities->outputTurbulentMassFluxXWithHomogeneityInYDirectionOrInYZPlane(
+                "rho_a1.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
+        }
+        else if (statistical_quantity_key == "TURB_MASS_FLUX_VEL_X")
+        {
+            rti_rmi_spatial_profiles_utilities->outputTurbulentMassFluxVelocityXWithHomogeneityInYDirectionOrInYZPlane(
+                "a1.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
+        }
+        else if (statistical_quantity_key == "DENSITY_SPEC_VOL_COV")
+        {
+            rti_rmi_spatial_profiles_utilities->outputDensitySpecificVolumeCovarianceWithHomogeneityInYDirectionOrInYZPlane(
+                "b.dat",
                 patch_hierarchy,
                 data_context,
                 output_time);
