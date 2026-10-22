@@ -923,7 +923,7 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                             int  iter      = 0;
                             const int max_iter = 5; // safety limit
 
-                            while (!all_fluid && iter <= max_iter)
+                            while (!all_fluid && iter < max_iter)
                             {
                                 // Check if all stencil points are FLUID
                                 all_fluid =
