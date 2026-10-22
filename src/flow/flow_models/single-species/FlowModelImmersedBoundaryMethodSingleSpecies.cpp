@@ -1049,7 +1049,10 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                                 }
                             }
                         }
-                        // Ghost cells for convective fluxes. 
+                        // Ghost-cell treatment for convective fluxes using the hybrid image-point
+                        // construction. Both regular ghost cells (IB_GHOST) and corner ghost cells
+                        // (IB_GHOST_CORNER) use this same formulation; their distinction is handled
+                        // in the mask/index selection logic above.
                         else
                         {
                             Real norm_max = std::max(std::max(std::abs(norm_0[idx_IB]), std::abs(norm_1[idx_IB])), std::abs(norm_2[idx_IB]));
