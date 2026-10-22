@@ -846,223 +846,159 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                     
                     if (mask[idx_IB] == int(IB_MASK::IB_GHOST) || mask[idx_IB] == int(IB_MASK::IB_GHOST_CORNER))
                     {
-                        
                         Real d_ip_1;
-                        // First image point distance is set to sqrt(3)*dx + epsilon for corner ghost cells.
+                        Real d_ip_2;
+                        
+                        Real x_ip_1;
+                        Real y_ip_1;
+                        Real z_ip_1;
+                        
+                        Real x_ip_1_LBK, y_ip_1_LBK, z_ip_1_LBK;
+                        
+                        // Get indices of the cells in interpolation for image point 1.
+                        int idx_ip_1_cons_var_LBK, idx_ip_1_cons_var_RBK, idx_ip_1_cons_var_LTK, idx_ip_1_cons_var_RTK,
+                            idx_ip_1_cons_var_LBF, idx_ip_1_cons_var_RBF, idx_ip_1_cons_var_LTF, idx_ip_1_cons_var_RTF;
+                        
+                        int idx_ip_1_IB_LBK, idx_ip_1_IB_RBK, idx_ip_1_IB_LTK, idx_ip_1_IB_RTK,
+                            idx_ip_1_IB_LBF, idx_ip_1_IB_RBF, idx_ip_1_IB_LTF, idx_ip_1_IB_RTF;
+                        
+                        // Starting distance of the first image point (used for both regular and corner ghost cells).
+                        const Real sqrt_3   = std::sqrt(Real(3));
+                        const Real norm_max = std::max({std::abs(norm_0[idx_IB]),
+                                                        std::abs(norm_1[idx_IB]),
+                                                        std::abs(norm_2[idx_IB])});
+                        
+                        d_ip_1 = half*(sqrt_3 + Real(1)/norm_max)*Real(dx[0]) + HAMERS_REAL_EPSILON;
+                        
+                        // Compute the coordinates of image point 1 at the current d_ip_1 and the indices of its
+                        // trilinear interpolation stencil.
+                        auto computeImagePoint1Stencil = [&]()
+                        {
+                            x_ip_1 = x[0] + (dist[idx_IB] + d_ip_1)*norm_0[idx_IB];
+                            y_ip_1 = x[1] + (dist[idx_IB] + d_ip_1)*norm_1[idx_IB];
+                            z_ip_1 = x[2] + (dist[idx_IB] + d_ip_1)*norm_2[idx_IB];
+                            
+                            getTrilinearInterpolationIndices3D(
+                                idx_ip_1_cons_var_LBK,
+                                idx_ip_1_cons_var_RBK,
+                                idx_ip_1_cons_var_LTK,
+                                idx_ip_1_cons_var_RTK,
+                                idx_ip_1_cons_var_LBF,
+                                idx_ip_1_cons_var_RBF,
+                                idx_ip_1_cons_var_LTF,
+                                idx_ip_1_cons_var_RTF,
+                                idx_ip_1_IB_LBK,
+                                idx_ip_1_IB_RBK,
+                                idx_ip_1_IB_LTK,
+                                idx_ip_1_IB_RTK,
+                                idx_ip_1_IB_LBF,
+                                idx_ip_1_IB_RBF,
+                                idx_ip_1_IB_LTF,
+                                idx_ip_1_IB_RTF,
+                                x_ip_1_LBK,
+                                y_ip_1_LBK,
+                                z_ip_1_LBK,
+                                x_ip_1,
+                                y_ip_1,
+                                z_ip_1,
+                                Real(patch_xlo[0]),
+                                Real(patch_xlo[1]),
+                                Real(patch_xlo[2]),
+                                offset_0_cons_var,
+                                offset_1_cons_var,
+                                offset_2_cons_var,
+                                ghostcell_dim_0_cons_var,
+                                ghostcell_dim_1_cons_var,
+                                offset_0_IB,
+                                offset_1_IB,
+                                offset_2_IB,
+                                ghostcell_dim_0_IB,
+                                ghostcell_dim_1_IB,
+                                Real(dx[0]),
+                                dx_inv);
+                        };
+                        
+                        // Check that the interpolation stencil of image point 1 only contains FLUID cells.
+                        auto isImagePoint1StencilFluid = [&]() -> bool
+                        {
+                            return
+                                mask[idx_ip_1_IB_LBK] == int(IB_MASK::FLUID) &&
+                                mask[idx_ip_1_IB_RBK] == int(IB_MASK::FLUID) &&
+                                mask[idx_ip_1_IB_LTK] == int(IB_MASK::FLUID) &&
+                                mask[idx_ip_1_IB_RTK] == int(IB_MASK::FLUID) &&
+                                mask[idx_ip_1_IB_LBF] == int(IB_MASK::FLUID) &&
+                                mask[idx_ip_1_IB_RBF] == int(IB_MASK::FLUID) &&
+                                mask[idx_ip_1_IB_LTF] == int(IB_MASK::FLUID) &&
+                                mask[idx_ip_1_IB_RTF] == int(IB_MASK::FLUID);
+                        };
+                        
+                        computeImagePoint1Stencil();
+                        bool all_fluid = isImagePoint1StencilFluid();
+                        int  iter      = 0;
+                        
+                        // For corner ghost cells, move image point 1 away from the wall until its stencil only
+                        // contains FLUID cells: d_ip_1 approaches sqrt(3)*dx by bisection, and the last attempt
+                        // uses sqrt(3)*dx + epsilon.
                         if (mask[idx_IB] == int(IB_MASK::IB_GHOST_CORNER))
                         {
-                            d_ip_1 = std::sqrt(Real(3))*Real(dx[0]) + HAMERS_REAL_EPSILON;
+                            const int max_iter = 5; // safety limit
+                            
+                            while (!all_fluid && iter < max_iter)
+                            {
+                                iter++;
+                                
+                                if (iter < max_iter)
+                                {
+                                    d_ip_1 = half*(d_ip_1 + sqrt_3*Real(dx[0]));
+                                }
+                                else
+                                {
+                                    d_ip_1 = sqrt_3*Real(dx[0]) + HAMERS_REAL_EPSILON;
+                                }
+                                
+                                computeImagePoint1Stencil();
+                                all_fluid = isImagePoint1StencilFluid();
+                                
+                                if (iter > 2)
+                                {
+                                    std::cerr << "Warning: Corner ghost cell d_ip_1 incremented more than two times"
+                                              << "\n iteration number: " << iter
+                                              << "\n current mask value: " << mask[idx_IB] << std::endl;
+                                }
+                            }
                         }
-                        // First image point distance is set to dx/maximum(norm) for ghost cells for convective fluxes.
-                        else
+                        
+                        // Stop if no FLUID-only interpolation stencil was found for image point 1.
+                        if (!all_fluid)
                         {
-                            Real norm_max = std::max(std::max(std::abs(norm_0[idx_IB]), std::abs(norm_1[idx_IB])), std::abs(norm_2[idx_IB]));
-                            d_ip_1 = Real(dx[0]) / norm_max + HAMERS_REAL_EPSILON;
+                            TBOX_ERROR(d_object_name
+                                << ": FlowModelImmersedBoundaryMethodSingleSpecies::"
+                                << "setConservativeVariablesCellDataImmersedBoundaries()\n"
+                                << "Interpolation stencil of image point 1 contains non-FLUID cells."
+                                << "\n ghost cell index (i, j, k): (" << i << ", " << j << ", " << k << ")"
+                                << "\n ghost cell mask value: " << mask[idx_IB]
+                                << "\n number of d_ip_1 adjustments: " << iter
+                                << "\n x, y, z: " << x[0] << ", " << x[1] << ", " << x[2]
+                                << "\n x_ip_1, y_ip_1, z_ip_1: " << x_ip_1 << ", " << y_ip_1 << ", " << z_ip_1
+                                << "\n d_ip_1/dx: " << d_ip_1/Real(dx[0])
+                                << "\n d_gc: " << dist[idx_IB]
+                                << "\n norm_0, norm_1, norm_2: " << norm_0[idx_IB] << ", " << norm_1[idx_IB] << ", " << norm_2[idx_IB]
+                                << "\n stencil mask values (LBK, RBK, LTK, RTK, LBF, RBF, LTF, RTF): "
+                                << mask[idx_ip_1_IB_LBK] << ", " << mask[idx_ip_1_IB_RBK] << ", "
+                                << mask[idx_ip_1_IB_LTK] << ", " << mask[idx_ip_1_IB_RTK] << ", "
+                                << mask[idx_ip_1_IB_LBF] << ", " << mask[idx_ip_1_IB_RBF] << ", "
+                                << mask[idx_ip_1_IB_LTF] << ", " << mask[idx_ip_1_IB_RTF]
+                                << std::endl);
                         }
                         
                         // Second image point distance is set to d_ip_1 + 0.25*dx.
-                        Real d_ip_2 = d_ip_1 + Real(0.25)*Real(dx[0]);
-                        // Coordinates of the image point 1.
-                        const Real x_ip_1 = x[0] + (dist[idx_IB] + d_ip_1)*norm_0[idx_IB];
-                        const Real y_ip_1 = x[1] + (dist[idx_IB] + d_ip_1)*norm_1[idx_IB];
-                        const Real z_ip_1 = x[2] + (dist[idx_IB] + d_ip_1)*norm_2[idx_IB];
+                        d_ip_2 = d_ip_1 + Real(0.25)*Real(dx[0]);
                         
                         // Coordinates of the image point 2.
                         const Real x_ip_2 = x[0] + (dist[idx_IB] + d_ip_2)*norm_0[idx_IB];
                         const Real y_ip_2 = x[1] + (dist[idx_IB] + d_ip_2)*norm_1[idx_IB];
                         const Real z_ip_2 = x[2] + (dist[idx_IB] + d_ip_2)*norm_2[idx_IB];
-                        
-                        // Get indices of the cells in interpolation for image point 1.
-                        int idx_ip_1_cons_var_LBK, idx_ip_1_cons_var_RBK, idx_ip_1_cons_var_LTK, idx_ip_1_cons_var_RTK,
-                            idx_ip_1_cons_var_LBF, idx_ip_1_cons_var_RBF, idx_ip_1_cons_var_LTF, idx_ip_1_cons_var_RTF;
-                        int idx_ip_1_IB_LBK, idx_ip_1_IB_RBK, idx_ip_1_IB_LTK, idx_ip_1_IB_RTK,
-                            idx_ip_1_IB_LBF, idx_ip_1_IB_RBF, idx_ip_1_IB_LTF, idx_ip_1_IB_RTF;
-                        Real x_ip_1_LBK, y_ip_1_LBK, z_ip_1_LBK;
-                        getTrilinearInterpolationIndices3D(
-                            idx_ip_1_cons_var_LBK,
-                            idx_ip_1_cons_var_RBK,
-                            idx_ip_1_cons_var_LTK,
-                            idx_ip_1_cons_var_RTK,
-                            idx_ip_1_cons_var_LBF,
-                            idx_ip_1_cons_var_RBF,
-                            idx_ip_1_cons_var_LTF,
-                            idx_ip_1_cons_var_RTF,
-                            idx_ip_1_IB_LBK,
-                            idx_ip_1_IB_RBK,
-                            idx_ip_1_IB_LTK,
-                            idx_ip_1_IB_RTK,
-                            idx_ip_1_IB_LBF,
-                            idx_ip_1_IB_RBF,
-                            idx_ip_1_IB_LTF,
-                            idx_ip_1_IB_RTF,
-                            x_ip_1_LBK,
-                            y_ip_1_LBK,
-                            z_ip_1_LBK,
-                            x_ip_1,
-                            y_ip_1,
-                            z_ip_1,
-                            Real(patch_xlo[0]),
-                            Real(patch_xlo[1]),
-                            Real(patch_xlo[2]),
-                            offset_0_cons_var,
-                            offset_1_cons_var,
-                            offset_2_cons_var,
-                            ghostcell_dim_0_cons_var,
-                            ghostcell_dim_1_cons_var,
-                            offset_0_IB,
-                            offset_1_IB,
-                            offset_2_IB,
-                            ghostcell_dim_0_IB,
-                            ghostcell_dim_1_IB,
-                            Real(dx[0]),
-                            dx_inv);
-                        
-                        // Checking first image point interpolation stencil to ensure only fluid cell values are used
-                        if (mask[idx_ip_1_IB_LBK] != int(IB_MASK::FLUID))
-                        {
-                            TBOX_ERROR("Error: Left-bottom-back cell is not FLUID at index: " << idx_ip_1_IB_LBK 
-                                << "\n with mask value: " << mask[idx_ip_1_IB_LBK]
-                                << "\n x_ip_1: " << x_ip_1
-                                << "\n y_ip_1: " << y_ip_1
-                                << "\n x: " << x[0]
-                                << "\n y: " << x[1]
-                                << "\n d_ip_1: " << d_ip_1/Real(dx[0])
-                                << "\n d_gc: " << dist[idx_IB]
-                                << "\n norm_0: " << norm_0[idx_IB]
-                                << "\n norm_1: " << norm_1[idx_IB]
-                                << "\n dx: " << Real(dx[0])
-                                << "\n dx_inv: " << dx_inv
-                                << "\n x_ip_1_LBK: " << x_ip_1_LBK
-                                << "\n y_ip_1_LBK: " << y_ip_1_LBK);
-                        }
-                        
-                        if (mask[idx_ip_1_IB_RBK] != int(IB_MASK::FLUID))
-                        {
-                            TBOX_ERROR("Error: Right-bottom-back cell is not FLUID at index: " << idx_ip_1_IB_RBK 
-                                << "\n with mask value: " << mask[idx_ip_1_IB_RBK]
-                                << "\n x_ip_1: " << x_ip_1
-                                << "\n y_ip_1: " << y_ip_1
-                                << "\n x: " << x[0]
-                                << "\n y: " << x[1]
-                                << "\n d_ip_1: " << d_ip_1/Real(dx[0])
-                                << "\n d_gc: " << dist[idx_IB]
-                                << "\n norm_0: " << norm_0[idx_IB]
-                                << "\n norm_1: " << norm_1[idx_IB]
-                                << "\n dx: " << Real(dx[0])
-                                << "\n dx_inv: " << dx_inv
-                                << "\n x_ip_1_LBK: " << x_ip_1_LBK
-                                << "\n y_ip_1_LBK: " << y_ip_1_LBK);
-                        }
-                        
-                        if (mask[idx_ip_1_IB_LTK] != int(IB_MASK::FLUID))
-                        {
-                            TBOX_ERROR("Error: Left-top-back cell is not FLUID at index: " << idx_ip_1_IB_LTK 
-                                << "\n with mask value: " << mask[idx_ip_1_IB_LTK]
-                                << "\n x_ip_1: " << x_ip_1
-                                << "\n y_ip_1: " << y_ip_1
-                                << "\n x: " << x[0]
-                                << "\n y: " << x[1]
-                                << "\n d_ip_1: " << d_ip_1/Real(dx[0])
-                                << "\n d_gc: " << dist[idx_IB]
-                                << "\n norm_0: " << norm_0[idx_IB]
-                                << "\n norm_1: " << norm_1[idx_IB]
-                                << "\n dx: " << Real(dx[0])
-                                << "\n dx_inv: " << dx_inv
-                                << "\n x_ip_1_LBK: " << x_ip_1_LBK
-                                << "\n y_ip_1_LBK: " << y_ip_1_LBK);
-                        }
-                        
-                        if (mask[idx_ip_1_IB_RTK] != int(IB_MASK::FLUID))
-                        {
-                            TBOX_ERROR("Error: Right-top-back cell is not FLUID at index: " << idx_ip_1_IB_RTK 
-                                << "\n with mask value: " << mask[idx_ip_1_IB_RTK]
-                                << "\n x_ip_1: " << x_ip_1
-                                << "\n y_ip_1: " << y_ip_1
-                                << "\n x: " << x[0]
-                                << "\n y: " << x[1]
-                                << "\n d_ip_1: " << d_ip_1/Real(dx[0])
-                                << "\n d_gc: " << dist[idx_IB]
-                                << "\n norm_0: " << norm_0[idx_IB]
-                                << "\n norm_1: " << norm_1[idx_IB]
-                                << "\n dx: " << Real(dx[0])
-                                << "\n dx_inv: " << dx_inv
-                                << "\n x_ip_1_LBK: " << x_ip_1_LBK
-                                << "\n y_ip_1_LBK: " << y_ip_1_LBK);
-                        }
-                        
-                        // Checking first image point interpolation stencil to ensure only fluid cell values are used
-                        if (mask[idx_ip_1_IB_LBF] != int(IB_MASK::FLUID))
-                        {
-                            TBOX_ERROR("Error: Left-bottom-front cell is not FLUID at index: " << idx_ip_1_IB_LBF 
-                                << "\n with mask value: " << mask[idx_ip_1_IB_LBF]
-                                << "\n x_ip_1: " << x_ip_1
-                                << "\n y_ip_1: " << y_ip_1
-                                << "\n x: " << x[0]
-                                << "\n y: " << x[1]
-                                << "\n d_ip_1: " << d_ip_1/Real(dx[0])
-                                << "\n d_gc: " << dist[idx_IB]
-                                << "\n norm_0: " << norm_0[idx_IB]
-                                << "\n norm_1: " << norm_1[idx_IB]
-                                << "\n dx: " << Real(dx[0])
-                                << "\n dx_inv: " << dx_inv
-                                << "\n x_ip_1_LBK: " << x_ip_1_LBK
-                                << "\n y_ip_1_LBK: " << y_ip_1_LBK);
-                        }
-                        
-                        if (mask[idx_ip_1_IB_RBF] != int(IB_MASK::FLUID))
-                        {
-                            TBOX_ERROR("Error: Right-bottom-front cell is not FLUID at index: " << idx_ip_1_IB_RBF 
-                                << "\n with mask value: " << mask[idx_ip_1_IB_RBF]
-                                << "\n x_ip_1: " << x_ip_1
-                                << "\n y_ip_1: " << y_ip_1
-                                << "\n x: " << x[0]
-                                << "\n y: " << x[1]
-                                << "\n d_ip_1: " << d_ip_1/Real(dx[0])
-                                << "\n d_gc: " << dist[idx_IB]
-                                << "\n norm_0: " << norm_0[idx_IB]
-                                << "\n norm_1: " << norm_1[idx_IB]
-                                << "\n dx: " << Real(dx[0])
-                                << "\n dx_inv: " << dx_inv
-                                << "\n x_ip_1_LBK: " << x_ip_1_LBK
-                                << "\n y_ip_1_LBK: " << y_ip_1_LBK);
-                        }
-                        
-                        if (mask[idx_ip_1_IB_LTF] != int(IB_MASK::FLUID))
-                        {
-                            TBOX_ERROR("Error: Left-top-front cell is not FLUID at index: " << idx_ip_1_IB_LTF 
-                                << "\n with mask value: " << mask[idx_ip_1_IB_LTF]
-                                << "\n x_ip_1: " << x_ip_1
-                                << "\n y_ip_1: " << y_ip_1
-                                << "\n x: " << x[0]
-                                << "\n y: " << x[1]
-                                << "\n d_ip_1: " << d_ip_1/Real(dx[0])
-                                << "\n d_gc: " << dist[idx_IB]
-                                << "\n norm_0: " << norm_0[idx_IB]
-                                << "\n norm_1: " << norm_1[idx_IB]
-                                << "\n dx: " << Real(dx[0])
-                                << "\n dx_inv: " << dx_inv
-                                << "\n x_ip_1_LBK: " << x_ip_1_LBK
-                                << "\n y_ip_1_LBK: " << y_ip_1_LBK);
-                        }
-                        
-                        if (mask[idx_ip_1_IB_RTF] != int(IB_MASK::FLUID))
-                        {
-                            TBOX_ERROR("Error: Right-top-front cell is not FLUID at index: " << idx_ip_1_IB_RTF 
-                                << "\n with mask value: " << mask[idx_ip_1_IB_RTF]
-                                << "\n x_ip_1: " << x_ip_1
-                                << "\n y_ip_1: " << y_ip_1
-                                << "\n x: " << x[0]
-                                << "\n y: " << x[1]
-                                << "\n d_ip_1: " << d_ip_1/Real(dx[0])
-                                << "\n d_gc: " << dist[idx_IB]
-                                << "\n norm_0: " << norm_0[idx_IB]
-                                << "\n norm_1: " << norm_1[idx_IB]
-                                << "\n dx: " << Real(dx[0])
-                                << "\n dx_inv: " << dx_inv
-                                << "\n x_ip_1_LBK: " << x_ip_1_LBK
-                                << "\n y_ip_1_LBK: " << y_ip_1_LBK);
-                        }
-                        
+                                                
                         // Get indices of the cells in interpolation for image point 2.
                         int idx_ip_2_cons_var_LBK, idx_ip_2_cons_var_RBK, idx_ip_2_cons_var_LTK, idx_ip_2_cons_var_RTK,
                             idx_ip_2_cons_var_LBF, idx_ip_2_cons_var_RBF, idx_ip_2_cons_var_LTF, idx_ip_2_cons_var_RTF;

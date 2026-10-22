@@ -204,6 +204,7 @@ ImmersedBoundaries::setImmersedBoundaryVariablesOnPatch(
                         x_d[2] = patch_xlo[2] + (Real(k - gx) + half) * Real(dx[2]);
                         Real radius_d_LBK = sqrt(pow(x_d[0] - x_c, 2) + pow(x_d[1] - y_c, 2) + pow(x_d[2] - z_c, 2));
                         
+                        // Checking only body diagonals are enough for sphere; however, checking face diagonals may be needed for other geometries (airfoil etc.)
                         if ((radius_d_RTF > radius_c) || (radius_d_LTF > radius_c) ||
                             (radius_d_RBF > radius_c) || (radius_d_LBF > radius_c) ||
                             (radius_d_RTK > radius_c) || (radius_d_LTK > radius_c) ||
@@ -266,7 +267,7 @@ ImmersedBoundaries::generateSurfaceTriangulation(
     double y_cen         = 1.0;
     double z_cen         = 1.0;
     double radius_sphere = 0.5;
-    double edge_length   = 0.008;
+    double edge_length   = 0.03125;
     
     if (d_initial_conditions_db != nullptr)
     {
