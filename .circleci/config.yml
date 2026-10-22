@@ -94,7 +94,7 @@ jobs:
   #           echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
   #     - run:
   #         name: install_HAMeRS_with_Boost
-  #         command: sh circleci/install-SAMRAI_with_Boost.sh; sh circleci/install-HAMeRS_with_Boost.sh
+  #         command: sh circleci/install-SAMRAI_with_Boost.sh && sh circleci/install-HAMeRS_with_Boost.sh
 
   build_HAMeRS:
     docker:
@@ -126,7 +126,7 @@ jobs:
             echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
       - run:
           name: install_HAMeRS
-          command: sh circleci/install-SAMRAI.sh; sh circleci/install-HAMeRS_convergence_test_single_species.sh; sh circleci/install-HAMeRS_convergence_test_five_eqn_allaire.sh
+          command: sh circleci/install-SAMRAI.sh && sh circleci/install-HAMeRS_convergence_test_single_species.sh && sh circleci/install-HAMeRS_convergence_test_five_eqn_allaire.sh
       - save_cache:
           key: HAMeRS_cache-{{ .Environment.CIRCLE_SHA1 }}
           paths:

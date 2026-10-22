@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 cd ${HOME}
 wget https://github.com/LLNL/SAMRAI/releases/download/v-4-1-0/SAMRAI-v4.1.0.tar.gz
