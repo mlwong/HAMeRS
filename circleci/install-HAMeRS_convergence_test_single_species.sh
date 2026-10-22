@@ -1,3 +1,6 @@
+#!/bin/sh
+set -e
+
 cd src/apps/Euler
 ln -sf ${HAMERS_ROOT}/problems/Euler/initial_conditions/ConvergenceSingleSpecies.cpp EulerInitialConditions.cpp 
 ln -sf ${HAMERS_ROOT}/problems/Euler/error_statistics/ConvergenceSingleSpecies.cpp EulerErrorStatistics.cpp

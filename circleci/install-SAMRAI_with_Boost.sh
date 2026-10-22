@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 cd ${HOME}
 wget https://github.com/LLNL/SAMRAI/archive/refs/tags/v-3-11-2.tar.gz

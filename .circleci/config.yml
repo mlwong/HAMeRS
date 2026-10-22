@@ -41,10 +41,10 @@ jobs:
       - checkout
       - run:
           name: "Install libraries"
-          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+          command: sudo apt-get update && sudo apt-get install -y gfortran openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
       - run:
           name: "Check compiler"
-          command: which mpicc; which mpicxx; which mpif77
+          command: which mpicc; which mpicxx; which mpif77; mpif77 --version
       - run:
           name: "Setup environment variables"
           command: >-
@@ -77,10 +77,10 @@ jobs:
   #         command: >-
   #           sudo apt-get update &&
   #           sudo apt install libboost1.67-dev libboost-thread1.67-dev libboost-program-options1.67-dev libboost-system1.67-dev libboost-math1.67-dev libboost-test1.67-dev libboost-python1.67-dev &&
-  #           sudo apt install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+  #           sudo apt install -y gfortran openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
   #     - run:
   #         name: "Check compiler"
-  #         command: which mpicc; which mpicxx; which mpif77
+  #         command: which mpicc; which mpicxx; which mpif77; mpif77 --version
   #     - restore_cache:
   #         name: "Restore HDF5 cache"
   #         keys:
@@ -94,7 +94,7 @@ jobs:
   #           echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
   #     - run:
   #         name: install_HAMeRS_with_Boost
-  #         command: sh circleci/install-SAMRAI_with_Boost.sh; sh circleci/install-HAMeRS_with_Boost.sh
+  #         command: sh circleci/install-SAMRAI_with_Boost.sh && sh circleci/install-HAMeRS_with_Boost.sh
 
   build_HAMeRS:
     docker:
@@ -109,10 +109,10 @@ jobs:
       - checkout
       - run:
           name: "Install libraries"
-          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+          command: sudo apt-get update && sudo apt-get install -y gfortran openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
       - run:
           name: "Check compiler"
-          command: which mpicc; which mpicxx; which mpif77
+          command: which mpicc; which mpicxx; which mpif77; mpif77 --version
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
@@ -126,7 +126,7 @@ jobs:
             echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
       - run:
           name: install_HAMeRS
-          command: sh circleci/install-SAMRAI.sh; sh circleci/install-HAMeRS_convergence_test_single_species.sh; sh circleci/install-HAMeRS_convergence_test_five_eqn_allaire.sh
+          command: sh circleci/install-SAMRAI.sh && sh circleci/install-HAMeRS_convergence_test_single_species.sh && sh circleci/install-HAMeRS_convergence_test_five_eqn_allaire.sh
       - save_cache:
           key: HAMeRS_cache-{{ .Environment.CIRCLE_SHA1 }}
           paths:
@@ -147,10 +147,10 @@ jobs:
       - checkout
       - run:
           name: "Install libraries"
-          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+          command: sudo apt-get update && sudo apt-get install -y gfortran openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
       - run:
           name: "Check compiler"
-          command: which mpicc; which mpicxx; which mpif77
+          command: which mpicc; which mpicxx; which mpif77; mpif77 --version
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
@@ -183,10 +183,10 @@ jobs:
       - checkout
       - run:
           name: "Install libraries"
-          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev python3 python3-numpy
+          command: sudo apt-get update && sudo apt-get install -y gfortran openmpi-bin openmpi-common openmpi-doc libopenmpi-dev python3 python3-numpy
       - run:
           name: "Check compiler"
-          command: which mpicc; which mpicxx; which mpif77
+          command: which mpicc; which mpicxx; which mpif77; mpif77 --version
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
@@ -222,10 +222,10 @@ jobs:
       - checkout
       - run:
           name: "Install libraries"
-          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev python3 python3-numpy
+          command: sudo apt-get update && sudo apt-get install -y gfortran openmpi-bin openmpi-common openmpi-doc libopenmpi-dev python3 python3-numpy
       - run:
           name: "Check compiler"
-          command: which mpicc; which mpicxx; which mpif77
+          command: which mpicc; which mpicxx; which mpif77; mpif77 --version
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
@@ -261,10 +261,10 @@ jobs:
       - checkout
       - run:
           name: "Install libraries"
-          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev python3 python3-numpy
+          command: sudo apt-get update && sudo apt-get install -y gfortran openmpi-bin openmpi-common openmpi-doc libopenmpi-dev python3 python3-numpy
       - run:
           name: "Check compiler"
-          command: which mpicc; which mpicxx; which mpif77
+          command: which mpicc; which mpicxx; which mpif77; mpif77 --version
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
@@ -300,10 +300,10 @@ jobs:
       - checkout
       - run:
           name: "Install libraries"
-          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev python3 python3-numpy
+          command: sudo apt-get update && sudo apt-get install -y gfortran openmpi-bin openmpi-common openmpi-doc libopenmpi-dev python3 python3-numpy
       - run:
           name: "Check compiler"
-          command: which mpicc; which mpicxx; which mpif77
+          command: which mpicc; which mpicxx; which mpif77; mpif77 --version
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
