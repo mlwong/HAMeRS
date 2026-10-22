@@ -862,7 +862,9 @@ void FlowModelImmersedBoundaryMethodSingleSpecies::setConservativeVariablesCellD
                         int idx_ip_1_IB_LBK, idx_ip_1_IB_RBK, idx_ip_1_IB_LTK, idx_ip_1_IB_RTK,
                             idx_ip_1_IB_LBF, idx_ip_1_IB_RBF, idx_ip_1_IB_LTF, idx_ip_1_IB_RTF;
                         
-                        // First image point distance is set to sqrt(3)*dx + epsilon for corner ghost cells.
+                        // For corner ghost cells, the first image point distance is computed as
+                        // 0.5 * (sqrt(3) + 1 / max(|n_i|)) * dx + epsilon, where max(|n_i|) is the
+                        // maximum absolute component of the outward normal at the immersed boundary.
                         if (mask[idx_IB] == int(IB_MASK::IB_GHOST_CORNER))
                         {
                             Real norm_max   = std::max({std::abs(norm_0[idx_IB]),
